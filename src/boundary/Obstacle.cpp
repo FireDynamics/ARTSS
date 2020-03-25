@@ -11,7 +11,7 @@
 #include "../utility/Utility.h"
 
 Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
-    std::cout << "################ OBSTACLE ################" << std::endl;
+    //std::cout << "################ OBSTACLE ################" << std::endl;
     Domain *domain = Domain::getInstance();
 
     real dx = domain->Getdx();
@@ -48,14 +48,14 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
     m_k1 = ((oz1 - Z1) * rdz) + 1;
 
     init(0);
-    std::cout << "---------------- END OBSTACLE ----------------" << std::endl;
+    //std::cout << "---------------- END OBSTACLE ----------------" << std::endl;
 }
 
 
 Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level) {
-    std::cout << "################ OBSTACLE coarse ################" << std::endl;
+    //std::cout << "################ OBSTACLE coarse ################" << std::endl;
+    //std::cout << "LEVEL: " << level << std::endl;
     m_level = level;
-    std::cout << "LEVEL: " << m_level << std::endl;
     m_strideX = coords_i2 - coords_i1 + 1;
     m_strideY = coords_j2 - coords_j1 + 1;
     m_strideZ = coords_k2 - coords_k1 + 1;
@@ -66,7 +66,7 @@ Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t 
     m_k1 = coords_k1;
 
     init(level);
-    std::cout << "---------------- END OBSTACLE coarse ----------------" << std::endl;
+    //std::cout << "---------------- END OBSTACLE coarse ----------------" << std::endl;
 }
 
 
@@ -80,7 +80,6 @@ void Obstacle::init(size_t level) {
     size_t Nx = domain->GetNx(level);
     size_t Ny = domain->GetNy(level);
     m_size_obstacleList = m_strideX * m_strideY * m_strideZ;
-    std::cout << "list size of oList: " << m_size_obstacleList << std::endl;
     m_obstacleList = new size_t[m_size_obstacleList];
 
     m_size_obstacleFront = m_strideY * m_strideX;
@@ -105,7 +104,7 @@ void Obstacle::init(size_t level) {
     createObstacle(Nx, Ny);
 
     control();
-    printDetails();
+    //printDetails();
 }
 
 Obstacle::~Obstacle() {

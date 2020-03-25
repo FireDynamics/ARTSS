@@ -834,12 +834,12 @@ void Multigrid::sendListsToGPU() {
                 }
             }
         }
-        std::cout << "control sendMGListsToGPU obstacle Front " << counter_oFront + 1 << "|" << size_oFront << std::endl;
-        std::cout << "control sendMGListsToGPU obstacle Back " << counter_oBack + 1 << "|" << size_oBack << std::endl;
-        std::cout << "control sendMGListsToGPU obstacle Bottom " << counter_oBottom + 1 << "|" << size_oBottom << std::endl;
-        std::cout << "control sendMGListsToGPU obstacle Top " << counter_oTop + 1 << "|" << size_oTop << std::endl;
-        std::cout << "control sendMGListsToGPU obstacle Left " << counter_oLeft + 1 << "|" << size_oLeft << std::endl;
-        std::cout << "control sendMGListsToGPU obstacle Right " << counter_oRight + 1 << "|" << size_oRight << std::endl;
+        //std::cout << "control sendMGListsToGPU obstacle Front " << counter_oFront + 1 << "|" << size_oFront << std::endl;
+        //std::cout << "control sendMGListsToGPU obstacle Back " << counter_oBack + 1 << "|" << size_oBack << std::endl;
+        //std::cout << "control sendMGListsToGPU obstacle Bottom " << counter_oBottom + 1 << "|" << size_oBottom << std::endl;
+        //std::cout << "control sendMGListsToGPU obstacle Top " << counter_oTop + 1 << "|" << size_oTop << std::endl;
+        //std::cout << "control sendMGListsToGPU obstacle Left " << counter_oLeft + 1 << "|" << size_oLeft << std::endl;
+        //std::cout << "control sendMGListsToGPU obstacle Right " << counter_oRight + 1 << "|" << size_oRight << std::endl;
 #pragma acc enter data copyin(m_data_MG_oFront_level_joined[:size_oFront])
 #pragma acc enter data copyin(m_data_MG_oBack_level_joined[:size_oBack])
 #pragma acc enter data copyin(m_data_MG_oTop_level_joined[:size_oTop])

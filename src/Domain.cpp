@@ -39,7 +39,7 @@ Domain::Domain() {
 
     calcMGValues();
 #ifndef PROFILING
-    printDetails();
+    //printDetails();
 #endif
 }
 
