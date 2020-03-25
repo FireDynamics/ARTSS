@@ -5,6 +5,7 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "PressureSolver.h"
 #include "../pressure/VCycleMG.h"
@@ -32,8 +33,7 @@ PressureSolver::~PressureSolver() {
 void PressureSolver::DoStep(real t, bool sync) {
 
 #ifndef PROFILING
-    std::cout << "Pressure ..." << std::endl;
-    //TODO Logger
+    spdlog::info("Pressure ...");
 #endif
 
 // 1. Solve pressure Poisson equation
@@ -59,9 +59,8 @@ void PressureSolver::DoStep(real t, bool sync) {
 void PressureSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }

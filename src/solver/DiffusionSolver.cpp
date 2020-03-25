@@ -5,6 +5,7 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "DiffusionSolver.h"
 #include "../interfaces/DiffusionI.h"
@@ -76,9 +77,8 @@ void DiffusionSolver::DoStep(real t, bool sync) {
 void DiffusionSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling + Loggers
+        //TODO Error handling
     }
 }

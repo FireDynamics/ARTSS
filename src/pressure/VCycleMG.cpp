@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <spdlog/spdlog.h>
 
 #include "VCycleMG.h"
 #include "../diffusion/JacobiDiffuse.h"
@@ -678,10 +679,9 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
             }
         } //end data region
     } else {
-        std::cout << "Diffusion method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Diffusion method not yet implemented! Simulation stopped!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 
     if (sync) {
@@ -779,8 +779,9 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     size_t start_i = boundary->get_innerList_level_joined_start(level + 1);
     size_t end_i = boundary->get_innerList_level_joined_end(level + 1) + 1;
 
-    if (end_i == start_i) std::cout << "Be cautious: Obstacle might fill up inner cells completely in level " << level << " with nx= " << domain->Getnx(out->GetLevel()) << "!" << std::endl;
-    //TODO Error handling + Logger
+    if (end_i == start_i)
+        spdlog::warn("Be cautious: Obstacle might fill up inner cells completely in level {} with nx= {}!", level, domain->Getnx(out->GetLevel()));
+    //TODO Error handling
 
     // average from eight neighboring cells
     // obstacles not used in fine grid, since coarse grid only obstacle if one of 8 fine grids was an obstacle,
@@ -906,16 +907,16 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
     const size_t Nz = domain->GetNz(out->GetLevel());
 
     if (level < levels - 1) {
-        std::cout << "Wrong level =" << level << std::endl;
+        spdlog::warn("Wrong level = {}", level);
         return;
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 
     if (Nx <= 4 && Ny <= 4) {
-        std::cout << " Grid is too coarse with Nx = " << Nx << " and Ny = " << Ny << ". Just smooth here" << std::endl;
+        spdlog::warn(" Grid is too coarse with Nx={} and Ny={}. Just smooth here", Nx, Ny);
         Smooth(out, tmp, b, level, sync);
         return;
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 
     const real dx = domain->Getdx(out->GetLevel());
@@ -1072,10 +1073,9 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             }// end while
         } //end data region
     } else {
-        std::cout << "Diffusion method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Diffusion method not yet implemented! Simulation stopped!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 
     if (sync) {

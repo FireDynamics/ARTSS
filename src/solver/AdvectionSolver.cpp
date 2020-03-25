@@ -5,6 +5,7 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "AdvectionSolver.h"
 #include "../interfaces/AdvectionI.h"
@@ -92,8 +93,7 @@ void AdvectionSolver::DoStep(real t, bool sync) {
     {
 // 1. Solve advection equation
 #ifndef PROFILING
-        std::cout << "Advect ..." << std::endl;
-        //TODO Logger
+        spdlog::info("Advect ...");
 #endif
         adv->advect(u, u0, u_lin, v_lin, w_lin, sync);
         adv->advect(v, v0, u_lin, v_lin, w_lin, sync);
@@ -108,9 +108,8 @@ void AdvectionSolver::DoStep(real t, bool sync) {
 void AdvectionSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/advection/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }

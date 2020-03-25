@@ -5,8 +5,10 @@
 /// \author       lgewuerz
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <cmath>
 #include <iostream>
-#include<cmath>
+#include <spdlog/spdlog.h>
+
 
 #include "ColoredGaussSeidelDiffuse.h"
 #include "../boundary/BoundaryController.h"
@@ -119,9 +121,8 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
     }
 
 #ifndef PROFILING
-    std::cout << "Number of iterations:" << it << std::endl;
-    std::cout << "Colored Gauss-Seidel ||res|| = " << res << "\n";
-    //TODO Logger
+    spdlog::info("Number of iterations: {}", it);
+    spdlog::info("Colored Gauss-Seidel ||res||={}", res);
 #endif
 } //end data region
 };
@@ -216,9 +217,8 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
     }
 
 #ifndef PROFILING
-    std::cout << "Number of iterations:" << it << std::endl;
-    std::cout << "Colored Gauss-Seidel ||res|| = " << res << "\n";
-    //TODO Logger
+    spdlog::info("Number of iterations: {}", it);
+    spdlog::info("Colored Gauss-Seidel ||res||={}", res);
 #endif
 } //end data region
 };
