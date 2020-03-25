@@ -1,0 +1,11 @@
+*.dat
+*.ods
+/Debug/
+.idea/
+build/
+*.source
+.project
+.cproject
+.settings
+*.tmp
+.DS_Store
