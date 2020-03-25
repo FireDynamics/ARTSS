@@ -6,18 +6,16 @@
 
 #include <chrono>
 #include <vector>
-#include <fstream>
 #include <iostream>
 
 #include "TimeIntegration.h"
-#include "Utility/Parameters.h"
-#include "Analysis/Analysis.h"
-#include "Adaption/Adaption.h"
+#include "utility/Parameters.h"
+#include "analysis/Analysis.h"
+#include "adaption/Adaption.h"
 #include "Domain.h"
 
 #ifndef PROFILING
-#include "Utility/Visual.h"
-
+#include "utility/Visual.h"
 #endif
 
 // ==================================== Constructor ====================================

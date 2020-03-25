@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- Test Diffusion: Exp-Sinus (Hypothesis: Velocity decrease)-->
+
+<JuROr>
+	<xml_filename>Test_Diffusion.xml</xml_filename>
+
+	<physical_parameters>
+		<t_end> 1.0 </t_end>			<!-- simulation end time -->
+		<dt> 0.0125 </dt>				<!-- time stepping -->
+		<nu> 0.001 </nu>				<!-- kinematic viscosity -->
+	</physical_parameters>
+
+	<solver description = "DiffusionSolver" >
+       	<diffusion type = "Jacobi" field = "u,v,w">
+			<max_iter> 100 </max_iter> 	<!-- max number of iterations -->
+			<tol_res> 1e-07 </tol_res> 	<!-- tolerance for residuum/ convergence -->
+			<w> 1 </w>				   	<!-- relaxation parameter -->
+		</diffusion>
+		<solution available = "Yes">
+			<tol> 1e-03 </tol>			<!-- tolerance for further tests -->
+		</solution>
+	</solver>
+
+	<domain_parameters>
+		<X1> 0. </X1>					<!-- physical domain -->
+		<X2> 2.0 </X2>
+		<Y1> 0. </Y1>
+		<Y2> 2.0 </Y2>
+		<Z1> 0. </Z1>
+		<Z2> 1.0 </Z2>
+		<x1> 0. </x1>					<!-- computational domain -->
+		<x2> 2.0 </x2>
+		<y1> 0. </y1>
+		<y2> 2.0 </y2>
+		<z1> 0. </z1>
+		<z2> 1.0 </z2>
+		<nx> 40 </nx>					<!-- computational grid resolution (number of cells incl. ghost cells) -->
+		<ny> 40 </ny>
+		<nz> 1  </nz>
+	</domain_parameters>
+
+  <adaption dynamic="No" data_extraction="No">
+  </adaption>
+	<boundaries>
+		<boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+	</boundaries>
+
+  <obstacles enabled="No" />
+  <surfaces enabled="No" />
+
+	<initial_conditions usr_fct = "ExpSinusProd" >     	<!-- product of exponential and sinuses exp*sin*sin*sin -->
+		<l> 2.5 </l>									<!-- wavelength -->
+	</initial_conditions>
+
+    <visualization save_csv="No">
+		<n_plots> 10 </n_plots>
+	</visualization>
+</JuROr>

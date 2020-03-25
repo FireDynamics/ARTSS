@@ -10,10 +10,10 @@
 #include <iostream>
 
 #include "Functions.h"
-#include "Utility/Parameters.h"
+#include "utility/Parameters.h"
 #include "Domain.h"
-#include "Utility/Utility.h"
-#include "Boundary/BoundaryController.h"
+#include "utility/Utility.h"
+#include "boundary/BoundaryController.h"
 
 const std::string FunctionNames::Beltrami = "Beltrami";
 const std::string FunctionNames::BuoyancyMMS = "BuoyancyMMS";

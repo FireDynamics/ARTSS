@@ -5,7 +5,7 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Domain.h"
-#include "Utility/Parameters.h"
+#include "utility/Parameters.h"
 #include <iostream>
 
 Domain *Domain::single = nullptr; //Singleton

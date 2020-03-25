@@ -5,26 +5,25 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
-#include "Interfaces/SolverI.h"
-#include "Solver/DiffusionTurbSolver.h"
-#include "Solver/DiffusionSolver.h"
-#include "Solver/AdvectionSolver.h"
-#include "Solver/AdvectionDiffusionSolver.h"
-#include "Solver/NSSolver.h"
-#include "Solver/NSTurbSolver.h"
-#include "Solver/NSTempSolver.h"
-#include "Solver/NSTempTurbSolver.h"
-#include "Solver/NSTempConSolver.h"
-#include "Solver/NSTempTurbConSolver.h"
-#include "Solver/PressureSolver.h"
+#include "interfaces/SolverI.h"
+#include "solver/DiffusionTurbSolver.h"
+#include "solver/DiffusionSolver.h"
+#include "solver/AdvectionSolver.h"
+#include "solver/AdvectionDiffusionSolver.h"
+#include "solver/NSSolver.h"
+#include "solver/NSTurbSolver.h"
+#include "solver/NSTempSolver.h"
+#include "solver/NSTempTurbSolver.h"
+#include "solver/NSTempConSolver.h"
+#include "solver/NSTempTurbConSolver.h"
+#include "solver/PressureSolver.h"
 #include "TimeIntegration.h"
-#include "Utility/tinyxml2.h"
-#include "Utility/Parameters.h"
+#include "utility/tinyxml2.h"
+#include "utility/Parameters.h"
 
 #ifndef PROFILING
-#include "Analysis/Analysis.h"
-#include "Utility/Visual.h"
-
+#include "analysis/Analysis.h"
+#include "utility/Visual.h"
 #endif
 
 #ifdef _OPENACC

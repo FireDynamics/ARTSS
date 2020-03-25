@@ -7,10 +7,10 @@
 #ifndef ARTSS_TIMEINTEGRATION_H_
 #define ARTSS_TIMEINTEGRATION_H_
 
-#include "Interfaces/SolverI.h"
-#include "Interfaces/SourceI.h"
-#include "Utility/GlobalMacrosTypes.h"
-#include "Analysis/Analysis.h"
+#include "interfaces/SolverI.h"
+#include "interfaces/SourceI.h"
+#include "utility/GlobalMacrosTypes.h"
+#include "analysis/Analysis.h"
 
 class TimeIntegration {
 public:

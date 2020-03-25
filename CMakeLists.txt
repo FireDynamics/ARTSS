@@ -159,133 +159,133 @@ set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 # add sources and headers
 set(SOURCE_FILES
-        "Src/Adaption/Adaption.cpp"
-        "Src/Adaption/Layers.cpp"
-        "Src/Adaption/Vortex.cpp"
+        "src/adaption/Adaption.cpp"
+        "src/adaption/Layers.cpp"
+        "src/adaption/Vortex.cpp"
 
-        "Src/Advection/ExplicitAdvect.cpp"
-        "Src/Advection/SLAdvect.cpp"
+        "src/advection/ExplicitAdvect.cpp"
+        "src/advection/SLAdvect.cpp"
 
-        "Src/Analysis/Analysis.cpp"
-        "Src/Analysis/Solution.cpp"
+        "src/analysis/Analysis.cpp"
+        "src/analysis/Solution.cpp"
 
-        "Src/Boundary/Boundary.cpp"
-        "Src/Boundary/BoundaryController.cpp"
-        "Src/Boundary/BoundaryData.cpp"
-        "Src/Boundary/BoundaryDataController.cpp"
-        "Src/Boundary/Multigrid.cpp"
-        "Src/Boundary/Obstacle.cpp"
-        "Src/Boundary/Surface.cpp"
+        "src/boundary/Boundary.cpp"
+        "src/boundary/BoundaryController.cpp"
+        "src/boundary/BoundaryData.cpp"
+        "src/boundary/BoundaryDataController.cpp"
+        "src/boundary/Multigrid.cpp"
+        "src/boundary/Obstacle.cpp"
+        "src/boundary/Surface.cpp"
 
-        "Src/BoundaryCondition/DomainBoundary.cpp"
-        "Src/BoundaryCondition/ObstacleBoundary.cpp"
+        "src/boundaryCondition/DomainBoundary.cpp"
+        "src/boundaryCondition/ObstacleBoundary.cpp"
 
-        "Src/Diffusion/ColoredGaussSeidelDiffuse.cpp"
-        "Src/Diffusion/ExplicitDiffuse.cpp"
-        "Src/Diffusion/JacobiDiffuse.cpp"
+        "src/diffusion/ColoredGaussSeidelDiffuse.cpp"
+        "src/diffusion/ExplicitDiffuse.cpp"
+        "src/diffusion/JacobiDiffuse.cpp"
 
-        "Src/Interfaces/PressureI.cpp"
-        "Src/Interfaces/SolverI.cpp"
-        "Src/Interfaces/SourceI.cpp"
+        "src/interfaces/PressureI.cpp"
+        "src/interfaces/SolverI.cpp"
+        "src/interfaces/SourceI.cpp"
 
-        "Src/Pressure/VCycleMG.cpp"
+        "src/pressure/VCycleMG.cpp"
 
-        "Src/Solver/AdvectionSolver.cpp"
-        "Src/Solver/AdvectionDiffusionSolver.cpp"
-        "Src/Solver/DiffusionSolver.cpp"
-        "Src/Solver/DiffusionTurbSolver.cpp"
-        "Src/Solver/NSSolver.cpp"
-        "Src/Solver/NSTurbSolver.cpp"
-        "Src/Solver/NSTempSolver.cpp"
-        "Src/Solver/NSTempConSolver.cpp"
-        "Src/Solver/NSTempTurbSolver.cpp"
-        "Src/Solver/NSTempTurbConSolver.cpp"
-        "Src/Solver/PressureSolver.cpp"
-        "Src/Solver/SolverSelection.cpp"
+        "src/solver/AdvectionSolver.cpp"
+        "src/solver/AdvectionDiffusionSolver.cpp"
+        "src/solver/DiffusionSolver.cpp"
+        "src/solver/DiffusionTurbSolver.cpp"
+        "src/solver/NSSolver.cpp"
+        "src/solver/NSTurbSolver.cpp"
+        "src/solver/NSTempSolver.cpp"
+        "src/solver/NSTempConSolver.cpp"
+        "src/solver/NSTempTurbSolver.cpp"
+        "src/solver/NSTempTurbConSolver.cpp"
+        "src/solver/PressureSolver.cpp"
+        "src/solver/SolverSelection.cpp"
 
-        "Src/Source/ExplicitEulerSource.cpp"
+        "src/source/ExplicitEulerSource.cpp"
 
-        "Src/Turbulence/ConstSmagorinsky.cpp"
-        "Src/Turbulence/DynamicSmagorinsky.cpp"
+        "src/turbulence/ConstSmagorinsky.cpp"
+        "src/turbulence/DynamicSmagorinsky.cpp"
 
-        "Src/Utility/Parameters.cpp"
-        "Src/Utility/tinyxml2.cpp"
-        "Src/Utility/Utility.cpp"
-        "Src/Utility/visit_writer.cpp"
-        "Src/Utility/Visual.cpp"
+        "src/utility/Parameters.cpp"
+        "src/utility/tinyxml2.cpp"
+        "src/utility/Utility.cpp"
+        "src/utility/visit_writer.cpp"
+        "src/utility/Visual.cpp"
 
-        "Src/Domain.cpp"
-        "Src/Field.cpp"
-        "Src/Functions.cpp"
-        "Src/TimeIntegration.cpp"
+        "src/Domain.cpp"
+        "src/Field.cpp"
+        "src/Functions.cpp"
+        "src/TimeIntegration.cpp"
         )
 
 set(HEADER_FILES
-        "Src/Analysis/Analysis.h"
-        "Src/Analysis/Solution.h"
+        "src/analysis/Analysis.h"
+        "src/analysis/Solution.h"
 
-        "Src/Adaption/Adaption.h"
-        "Src/Adaption/Layers.h"
-        "Src/Adaption/Vortex.h"
+        "src/adaption/Adaption.h"
+        "src/adaption/Layers.h"
+        "src/adaption/Vortex.h"
 
-        "Src/Advection/ExplicitAdvect.h"
-        "Src/Advection/SLAdvect.h"
+        "src/advection/ExplicitAdvect.h"
+        "src/advection/SLAdvect.h"
 
-        "Src/Boundary/Boundary.h"
-        "Src/Boundary/BoundaryController.h"
-        "Src/Boundary/BoundaryData.h"
-        "Src/Boundary/BoundaryDataController.cpp"
-        "Src/Boundary/Multigrid.h"
-        "Src/Boundary/Obstacle.h"
-        "Src/Boundary/Surface.h"
+        "src/boundary/Boundary.h"
+        "src/boundary/BoundaryController.h"
+        "src/boundary/BoundaryData.h"
+        "src/boundary/BoundaryDataController.cpp"
+        "src/boundary/Multigrid.h"
+        "src/boundary/Obstacle.h"
+        "src/boundary/Surface.h"
 
-        "Src/BoundaryCondition/DomainBoundary.h"
-        "Src/BoundaryCondition/ObstacleBoundary.h"
+        "src/boundaryCondition/DomainBoundary.h"
+        "src/boundaryCondition/ObstacleBoundary.h"
 
-        "Src/Diffusion/ColoredGaussSeidelDiffuse.h"
-        "Src/Diffusion/ExplicitDiffuse.h"
-        "Src/Diffusion/JacobiDiffuse.h"
+        "src/diffusion/ColoredGaussSeidelDiffuse.h"
+        "src/diffusion/ExplicitDiffuse.h"
+        "src/diffusion/JacobiDiffuse.h"
 
-        "Src/Interfaces/AdaptionFunctionI.h"
-        "Src/Interfaces/AdvectionI.h"
-        "Src/Interfaces/DiffusionI.h"
-        "Src/Interfaces/PressureI.h"
-        "Src/Interfaces/SolverI.h"
-        "Src/Interfaces/SourceI.h"
-        "Src/Interfaces/TurbulenceI.h"
+        "src/interfaces/AdaptionFunctionI.h"
+        "src/interfaces/advectionI.h"
+        "src/interfaces/diffusionI.h"
+        "src/interfaces/PressureI.h"
+        "src/interfaces/SolverI.h"
+        "src/interfaces/SourceI.h"
+        "src/interfaces/TurbulenceI.h"
 
-        "Src/Pressure/VCycleMG.h"
+        "src/pressure/VCycleMG.h"
 
-        "Src/Solver/AdvectionSolver.h"
-        "Src/Solver/AdvectionDiffusionSolver.h"
-        "Src/Solver/DiffusionSolver.h"
-        "Src/Solver/DiffusionTurbSolver.h"
-        "Src/Solver/NSSolver.h"
-        "Src/Solver/NSTurbSolver.h"
-        "Src/Solver/NSTempSolver.h"
-        "Src/Solver/NSTempConSolver.h"
-        "Src/Solver/NSTempTurbSolver.h"
-        "Src/Solver/NSTempTurbConSolver.h"
-        "Src/Solver/PressureSolver.h"
-        "Src/Solver/SolverSelection.h"
+        "src/solver/AdvectionSolver.h"
+        "src/solver/AdvectionDiffusionSolver.h"
+        "src/solver/DiffusionSolver.h"
+        "src/solver/DiffusionTurbSolver.h"
+        "src/solver/NSSolver.h"
+        "src/solver/NSTurbSolver.h"
+        "src/solver/NSTempSolver.h"
+        "src/solver/NSTempConSolver.h"
+        "src/solver/NSTempTurbSolver.h"
+        "src/solver/NSTempTurbConSolver.h"
+        "src/solver/PressureSolver.h"
+        "src/solver/SolverSelection.h"
 
-        "Src/Source/ExplicitEulerSource.h"
+        "src/source/ExplicitEulerSource.h"
 
-        "Src/Turbulence/ConstSmagorinsky.h"
-        "Src/Turbulence/DynamicSmagorinsky.h"
+        "src/turbulence/ConstSmagorinsky.h"
+        "src/turbulence/DynamicSmagorinsky.h"
 
-        "Src/Utility/Parameters.h"
-        "Src/Utility/tinyxml2.h"
-        "Src/Utility/Tracer.h"
-        "Src/Utility/Utility.h"
-        "Src/Utility/visit_writer.h"
-        "Src/Utility/Visual.h"
+        "src/utility/Parameters.h"
+        "src/utility/tinyxml2.h"
+        "src/utility/Tracer.h"
+        "src/utility/Utility.h"
+        "src/utility/visit_writer.h"
+        "src/utility/Visual.h"
 
-        "Src/Domain.h"
-        "Src/Field.h"
-        "Src/Functions.h"
-        "Src/GlobalMacrosTyper.h"
-        "Src/TimeIntegration.h"
+        "src/Domain.h"
+        "src/Field.h"
+        "src/Functions.h"
+        "src/GlobalMacrosTyper.h"
+        "src/TimeIntegration.h"
         )
 
 # link cuda library for cuda features
@@ -293,119 +293,119 @@ link_directories( $ENV{CUDA_LIB} )
 include_directories( $ENV{CUDA_INC} )
 
 #Targets
-add_executable( artss_serial ${SOURCE_FILES} Src/main.cpp)
+add_executable( artss_serial ${SOURCE_FILES} src/main.cpp)
 
-add_executable( artss_serial_profile ${SOURCE_FILES} Src/main.cpp  )
+add_executable( artss_serial_profile ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_serial_profile PROPERTIES COMPILE_FLAGS "-DPROFILING -DUSE_NVTX" )
 target_link_libraries( artss_serial_profile  )
 
-add_executable( artss_multicore_cpu ${SOURCE_FILES} Src/main.cpp  )
+add_executable( artss_multicore_cpu ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=multicore" LINK_FLAGS "-acc -ta=multicore" )
 
-add_executable( artss_multicore_cpu_profile ${SOURCE_FILES} Src/main.cpp  )
+add_executable( artss_multicore_cpu_profile ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_multicore_cpu_profile PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DPROFILING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore" )
 target_link_libraries( artss_multicore_cpu_profile  )
 
-add_executable( artss_gpu ${SOURCE_FILES} Src/main.cpp  )
+add_executable( artss_gpu ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_MODEL_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_MODEL_TA},lineinfo,${CUDA_VERSION_TA}" )
 
-add_executable( artss_gpu_profile ${SOURCE_FILES} Src/main.cpp  )
+add_executable( artss_gpu_profile ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_gpu_profile PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DPROFILING -DUSE_NVTX -ta=${GPU_MODEL_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_MODEL_TA},lineinfo,${CUDA_VERSION_TA}" )
 target_link_libraries( artss_gpu_profile  )
 
 enable_testing()
-file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/Test DESTINATION ${CMAKE_BINARY_DIR} )
+file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests DESTINATION ${CMAKE_BINARY_DIR} )
 
 add_test( NAME AdvectionTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Advection )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/advection )
 add_test( NAME BurgersTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Burgers )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/burgers )
 add_test( NAME DiffusionTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Diffusion )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/diffusion )
 add_test( NAME DiffusionHatTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Diffusion/Hat )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/diffusion/hat )
 add_test( NAME DiffusionTurbTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/DiffusionTurb )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/diffusionTurb )
 add_test( NAME DissipationTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Dissipation )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/dissipation )
 add_test( NAME PressureTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Pressure )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/pressure )
 add_test( NAME NSMcDermottTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/McDermott)
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/mcDermott)
 add_test( NAME NSVortexTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/Vortex )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/vortex )
 add_test( NAME NSCavityFlowTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/CavityFlow )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/cavityFlow )
 add_test( NAME NSChannelFlowTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/ChannelFlow )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/channelFlow )
 add_test( NAME NSTurbVortexTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTurb/Vortex )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTurb/vortex )
 add_test( NAME NSTurbMcDermottTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTurb/McDermott )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTurb/mcDermott )
 add_test( NAME NSTempBuoyancyMMSTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTemp/MMS )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTemp/mms )
 add_test( NAME NSTempTurbBuoyancyMMSTest COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_serial
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTempTurb/MMS )
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTempTurb/mms )
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "PGI" OR CMAKE_C_COMPILER_ID STREQUAL "PGI")
   add_test( NAME AdvectionTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Advection )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/advection )
   add_test( NAME BurgersTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Burgers )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/burgers )
   add_test( NAME DiffusionTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Diffusion )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/diffusion )
   add_test( NAME DiffusionHatTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Diffusion/Hat )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/diffusion/hat )
   add_test( NAME DiffusionTurbTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/DiffusionTurb )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/diffusionTurb )
   add_test( NAME DissipationTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Dissipation )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/dissipation )
   add_test( NAME PressureTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Pressure )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/pressure )
   add_test( NAME NSMcDermottTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/McDermott)
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/mcDermott)
   add_test( NAME NSVortexTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/Vortex )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/vortex )
   add_test( NAME NSCavityFlowTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/CavityFlow )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/cavityFlow )
   add_test( NAME NSChannelFlowTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/ChannelFlow )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/channelFlow )
   add_test( NAME NSTurbVortexTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTurb/Vortex )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTurb/vortex )
   add_test( NAME NSTurbMcDermottTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTurb/McDermott )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTurb/mcDermott )
   add_test( NAME NSTempBuoyancyMMSTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTemp/MMS )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTemp/mms )
   add_test( NAME NSTempTurbBuoyancyMMSTest_mc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_multicore_cpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTempTurb/MMS )
-  add_test( NAME AdvectionTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Advection )
-  add_test( NAME BurgersTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Burgers )
-  add_test( NAME DiffusionTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Diffusion )
-  add_test( NAME DiffusionHatTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Diffusion/Hat )
-  add_test( NAME DiffusionTurbTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/DiffusionTurb )
-  add_test( NAME DissipationTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Dissipation )
-  add_test( NAME PressureTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/Pressure )
-  add_test( NAME NSMcDermottTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/McDermott)
-  add_test( NAME NSVortexTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/Vortex )
-  add_test( NAME NSCavityFlowTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/CavityFlow )
-  add_test( NAME NSChannelFlowTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokes/ChannelFlow )
-  add_test( NAME NSTurbVortexTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTurb/Vortex )
-  add_test( NAME NSTurbMcDermottTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTurb/McDermott )
-  add_test( NAME NSTempBuoyancyMMSTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTemp/MMS )
-  add_test( NAME NSTempTurbBuoyancyMMSTest_acc COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Test/NavierStokesTempTurb/MMS )
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTempTurb/mms )
+  add_test( NAME AdvectionTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/advection )
+  add_test( NAME BurgersTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/burgers )
+  add_test( NAME DiffusionTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/diffusion )
+  add_test( NAME DiffusionHatTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/diffusion/hat )
+  add_test( NAME DiffusionTurbTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/diffusionTurb )
+  add_test( NAME DissipationTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/dissipation )
+  add_test( NAME PressureTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/pressure )
+  add_test( NAME NSMcDermottTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/mcDermott)
+  add_test( NAME NSVortexTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/vortex )
+  add_test( NAME NSCavityFlowTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/cavityFlow )
+  add_test( NAME NSChannelFlowTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokes/channelFlow )
+  add_test( NAME NSTurbVortexTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTurb/vortex )
+  add_test( NAME NSTurbMcDermottTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTurb/mcDermott )
+  add_test( NAME NSTempBuoyancyMMSTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTemp/mms )
+  add_test( NAME NSTempTurbBuoyancyMMSTest_gpu COMMAND sh ./run.sh ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/artss_gpu
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests/navierStokesTempTurb/mms )
 endif()

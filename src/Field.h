@@ -8,7 +8,7 @@
 #define ARTSS_FIELD_H_
 
 #include <array>
-#include "Utility/GlobalMacrosTypes.h"
+#include "utility/GlobalMacrosTypes.h"
 class Adaption;
 
 #ifndef ENUM_TYPES

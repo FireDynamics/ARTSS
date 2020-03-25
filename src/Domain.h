@@ -10,7 +10,7 @@
 
 #include <cstddef>
 #include <cmath>
-#include "Utility/GlobalMacrosTypes.h"
+#include "utility/GlobalMacrosTypes.h"
 
 class Domain {
 public:

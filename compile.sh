@@ -2,7 +2,6 @@
 COMPILE=""
 GPU=1
 JURECA=1
-JUHYDRA=1
 P100=1
 GPU_MODEL="K40"
 BUILDTYPE=Release
@@ -16,7 +15,6 @@ OPTIONS="
 Available Options:
 
 Load modules:
-  ${YELLOW}--juhydra${NC}               \t load modules for JuHYDRA
   ${YELLOW}--jureca${NC}                \t load modules for JURECA
   ${YELLOW}--p100${NC}                  \t load modules for P100
 
@@ -141,10 +139,6 @@ do
       COMPILE="$COMPILE artss_serial_profile"
       shift
       ;;
-    --juhydra)
-      JUHYDRA=0
-      shift
-      ;;
     --jureca)
       JURECA=0
       shift
@@ -161,11 +155,10 @@ do
   esac
 done
 
-if [[ $JURECA -eq 1 && $JUHYDRA -eq 1 && $P100 -eq 1 ]]
+if [[ $JURECA -eq 1 && $P100 -eq 1 ]]
 then
   HOSTNAME=$(hostname)
   if [[ $HOSTNAME = jrl* ]]; then JURECA=0; fi
-  if [ "$HOSTNAME" = "zam449" ]; then JUHYDRA=0; fi
   if [ "$HOSTNAME" = "ias7139" ]; then P100=0; fi
 fi
 
@@ -189,15 +182,6 @@ then
   export CUDA_INC=/usr/local/software/jureca/Stages/2017a/software/CUDA/8.0.61/include/
   CUDA_VERSION=8.0
   GPU_MODEL=K80
-  GPU=0
-fi
-if [ $JUHYDRA -eq 0 ]
-then
-  module load pgi/16.3
-  export CUDA_LIB=/usr/local/cuda/lib64
-  export CUDA_INC=/usr/local/cuda/include
-  GPU_MODEL=K40
-  CUDA_VERSION=8.0
   GPU=0
 fi
 
