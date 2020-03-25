@@ -602,9 +602,12 @@ bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCe
     }
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
-        std::cerr << "Trying to reduce and expand at the same time (x): " << expansion_counter_start << ","
-                  << reduction_counter_start << "|" << expansion_counter_end << "," << reduction_counter_end
-                  << std::endl;
+        spdlog::error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
+                expansion_counter_start,
+                reduction_counter_start,
+                expansion_counter_end,
+                reduction_counter_end);
+        //TODO Error Handling
         //throw std::exception();
     }
     if (expansion_counter_start > 0) {

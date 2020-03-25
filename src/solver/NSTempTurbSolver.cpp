@@ -242,7 +242,7 @@ void NSTempTurbSolver::DoStep(real t, bool sync) {
         if (m_tempFct != SourceMethods::Zero) {
 
 #ifndef PROFILING
-            std::cout << "Add temperature source ..." << std::endl;
+            spdlog::info("Add temperature source ...");
 #endif
             sou_temp->addSource(T, S_T, sync);
 
