@@ -4,8 +4,9 @@
 /// \author 	Arnold
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include <vector>
+#include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "Parameters.h"
 #include "Utility.h"
@@ -27,10 +28,10 @@ Parameters *Parameters::getInstance() {
 // ***************************************************************************************
 void Parameters::parse(const std::string& filename) {
     if (filename.empty()) {
-        std::cout << "no XML file specified, skip reading parameter" << std::endl;
+        spdlog::error("no XML file specified, skip reading parameter");
         return;
     } else {
-        std::cout << "read in XML file: " << filename << std::endl;
+        spdlog::info("read in XML file: ");
     }
 
     tinyxml2::XMLError eResult = this->doc->LoadFile(filename.c_str());
