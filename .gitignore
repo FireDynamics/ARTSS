@@ -1,4 +1,5 @@
 *.dat
+*.vtk
 *.ods
 /Debug/
 .idea/

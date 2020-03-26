@@ -7,6 +7,7 @@
 #include <chrono>
 #include <vector>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "TimeIntegration.h"
 #include "utility/Parameters.h"
@@ -30,7 +31,7 @@ TimeIntegration::TimeIntegration(SolverI *isolv, const char *fname) {
 
 	m_dt 	= params->getReal("physical_parameters/dt");
 	m_t_end = params->getReal("physical_parameters/t_end");
-	m_t_cur = m_dt; 									// since t=0 already handled in setup
+	m_t_cur = m_dt; // since t=0 already handled in setup
 
 	m_size = domain->GetSize();
 
@@ -42,8 +43,7 @@ TimeIntegration::TimeIntegration(SolverI *isolv, const char *fname) {
 void TimeIntegration::run(){
 	Field** vector_fields;
 	Adaption* adaption;
-	std::cout<<"Start calculating and timing...\n"<<std::endl;
-	//TODO Logger
+    spdlog::info("Start calculating and timing...");
 
 	std::chrono::time_point<std::chrono::system_clock> start, end;
 	start = std::chrono::system_clock::now();
@@ -169,8 +169,7 @@ void TimeIntegration::run(){
 
 		//iter_start = std::chrono::system_clock::now();
 #ifndef PROFILING
-		std::cout<<"\nt_cur="<<t_cur<<std::endl;
-		//TODO Logger
+        spdlog::info("t_cur={}", t_cur);
 #endif
 
 		// Calculate
@@ -229,7 +228,7 @@ void TimeIntegration::run(){
 	//file.close();
 	// Sum up RMS error
 #ifndef PROFILING
-	ana.CalcRMSError(Sum[0], Sum[1], Sum[2]);
+    ana.CalcRMSError(Sum[0], Sum[1], Sum[2]);
 #endif
 
 #pragma acc wait
@@ -239,21 +238,20 @@ void TimeIntegration::run(){
 
 } //end RANGE
 
-	std::cout<<"\nDone calculating and timing ...\n"<<std::endl;
-	//TODO Logger
+    spdlog::info("Done calculating and timing ...");
 
-	// stop timer
-	end = std::chrono::system_clock::now();
-	long ms = std::chrono::duration_cast < std::chrono::milliseconds > (end - start).count();
-  std::cout << "Global Time: " << ms << "ms" <<std::endl;
-	//TODO Logger
-	if (adaption->isDataExtractionEndresultEnabled()) {
+    // stop timer
+    end = std::chrono::system_clock::now();
+    long ms = std::chrono::duration_cast < std::chrono::milliseconds > (end - start).count();
+    spdlog::info("Global Time: {}ms", ms);
+
+    if (adaption->isDataExtractionEndresultEnabled()) {
         adaption->extractData(adaption->getEndresultName());
     }
 #ifndef PROFILING
 	//testing correct output (when changing implementation/ calculating on GPU)
-	ana.SaveVariablesInFile(m_solver);
+    ana.SaveVariablesInFile(m_solver);
 #endif
-	delete(adaption);
-	delete[] vector_fields;
+    delete(adaption);
+    delete[] vector_fields;
 }

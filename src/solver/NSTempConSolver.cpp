@@ -5,6 +5,7 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "NSTempConSolver.h"
 #include "../pressure/VCycleMG.h"
@@ -144,8 +145,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
     {
 // 1. Solve advection equation
 #ifndef PROFILING
-        std::cout << "Advect ..." << std::endl;
-        //TODO Logger
+        spdlog::info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
         adv_vel->advect(v, v0, u0, v0, w0, sync);
@@ -157,8 +157,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 // 2. Solve diffusion equation
         if (nu != 0.) {
 #ifndef PROFILING
-            std::cout << "Diffuse ..." << std::endl;
-            //TODO Logger
+            spdlog::info("Diffuse ...");
 #endif
             dif_vel->diffuse(u, u0, u_tmp, nu, sync);
             dif_vel->diffuse(v, v0, v_tmp, nu, sync);
@@ -171,8 +170,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
 #ifndef PROFILING
-            std::cout << "Add momentum source ..." << std::endl;
-            //TODO Logger
+            spdlog::info("Add momentum source ...");
 #endif
             sou_vel->addSource(u, v, w, f_x, f_y, f_z, sync);
 
@@ -186,8 +184,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 
         // Solve pressure equation
 #ifndef PROFILING
-        std::cout << "Pressure ..." << std::endl;
-        //TODO Logger
+        spdlog::info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);        //only multigrid cycle, divergence and velocity update (in case of NS) need to be added
 
@@ -197,8 +194,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 // 5. Solve Temperature and link back to force
         // Solve advection equation
 #ifndef PROFILING
-        std::cout << "Advect Temperature ..." << std::endl;
-        //TODO Logger
+        spdlog::info("Advect Temperature ...");
 #endif
         adv_temp->advect(T, T0, u, v, w, sync);
 
@@ -208,8 +204,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
         // Solve diffusion equation
         if (kappa != 0.) {
 #ifndef PROFILING
-            std::cout << "Diffuse Temperature ..." << std::endl;
-            //TODO Logger
+            spdlog::info("Diffuse Temperature ...");
 #endif
             dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
 
@@ -220,8 +215,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
         // Add dissipation
         if (m_hasDissipation) {
 #ifndef PROFILING
-            std::cout << "Add dissipation ..." << std::endl;
-            //TODO Logger
+            spdlog::info("Add dissipation ...");
 #endif
             sou_temp->Dissipate(T, u, v, w, sync);
 
@@ -232,8 +226,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
         // Add source
         if (m_tempFct != SourceMethods::Zero) {
 #ifndef PROFILING
-            std::cout << "Add temperature source ..." << std::endl;
-            //TODO Logger
+            spdlog::info("Add temperature source ...");
 #endif
             sou_temp->addSource(T, S_T, sync);
 
@@ -244,8 +237,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 // 6. Solve for concentration
         // Solve advection equation
 #ifndef PROFILING
-        std::cout << "Advect Concentration ..." << std::endl;
-        //TODO Logger
+        spdlog::info("Advect Concentration ...");
 #endif
         adv_con->advect(C, C0, u, v, w, sync);
 
@@ -255,8 +247,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
         // Solve diffusion equation
         if (gamma != 0.) {
 #ifndef PROFILING
-            std::cout << "Diffuse Concentration ..." << std::endl;
-            //TODO Logger
+            spdlog::info("Diffuse Concentration ...");
 #endif
             dif_con->diffuse(C, C0, C_tmp, gamma, sync);
 
@@ -267,8 +258,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
         // Add source
         if (m_conFct != SourceMethods::Zero) {
 #ifndef PROFILING
-            std::cout << "Add concentration source ..." << std::endl;
-            //TODO Logger
+            spdlog::info("Add concentration source ...");
 #endif
             sou_con->addSource(C, S_C, sync);
 
@@ -292,46 +282,39 @@ void NSTempConSolver::control() {
     auto params = Parameters::getInstance();
 
     if (params->get("solver/advection/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
     if (params->get("solver/temperature/advection/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
     if (params->get("solver/temperature/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
     if (params->get("solver/concentration/advection/field") != BoundaryData::getFieldTypeName(FieldType::RHO)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
     if (params->get("solver/concentration/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::RHO)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }

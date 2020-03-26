@@ -5,6 +5,7 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
+#include <spdlog/spdlog.h>
 #include "ExplicitEulerSource.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
@@ -18,10 +19,9 @@ ExplicitEulerSource::ExplicitEulerSource() {
     m_dir_vel = params->get("solver/source/dir");
 
     if (m_dir_vel.find('x') == std::string::npos && m_dir_vel.find('y') == std::string::npos && m_dir_vel.find('z') == std::string::npos) {
-        std::cout << "unknown direction -> exit" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("unknown direction -> exit");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }
 

@@ -292,8 +292,16 @@ set(HEADER_FILES
 link_directories( $ENV{CUDA_LIB} )
 include_directories( $ENV{CUDA_INC} )
 
+# find spdlog lib
+if(NOT TARGET spdlog)
+    # Stand-alone build
+    find_package(spdlog REQUIRED)
+endif()
+#spdlog_enable_warnings(artss_serial)
+
 #Targets
 add_executable( artss_serial ${SOURCE_FILES} src/main.cpp)
+target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
 
 add_executable( artss_serial_profile ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_serial_profile PROPERTIES COMPILE_FLAGS "-DPROFILING -DUSE_NVTX" )

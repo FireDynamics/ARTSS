@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "SolverI.h"
 #include "../utility/Parameters.h"
@@ -77,10 +78,9 @@ SolverI::SolverI() {
         if (params->get("solver/source/type") == SourceMethods::ExplicitEuler) {
             this->sou_vel = new ExplicitEulerSource();
         } else {
-            std::cout << "Source method not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+            spdlog::error("Source method not yet implemented! Simulation stopped!");
             std::exit(1);
-            //TODO Error handling + Logger
+            //TODO Error handling
         }
     }
     if (m_string_solver == SolverTypes::NSTempSolver or \
@@ -92,10 +92,9 @@ SolverI::SolverI() {
         if (params->get("solver/temperature/source/type") == SourceMethods::ExplicitEuler) {
             this->sou_temp = new ExplicitEulerSource();
         } else {
-            std::cout << "Source method not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+            spdlog::error("Source method not yet implemented! Simulation stopped!");
             std::exit(1);
-            //TODO Error handling + Logger
+            //TODO Error handling
         }
     }
     if (m_string_solver == SolverTypes::NSTempConSolver or \
@@ -105,10 +104,9 @@ SolverI::SolverI() {
         if (params->get("solver/concentration/source/type") == SourceMethods::ExplicitEuler) {
             this->sou_con = new ExplicitEulerSource();
         } else {
-            std::cout << "Source method not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+            spdlog::error("Source method not yet implemented! Simulation stopped!");
             std::exit(1);
-            //TODO Error handling + Logger
+            //TODO Error handling
         }
     }
 
@@ -176,8 +174,7 @@ SolverI::~SolverI() {
 /// \brief  initializes numerical and temporary solution
 // ***************************************************************************************
 void SolverI::SetUp() {
-    std::cout << "Start initializing....\n" << std::endl;
-    //TODO Logger
+    spdlog::info("Start initializing....");
 
     // Initialization of variables at time t=0
     Init();
@@ -412,8 +409,7 @@ void SolverI::Init() {
             }
         } else {
 #ifndef PROFILING
-            std::cout << "Initial values all set to zero!" << std::endl;
-            //TODO Logger
+            spdlog::info("Initial values all set to zero!");
 #endif
         }
     }
@@ -792,15 +788,13 @@ void SolverI::UpdateSources(real t, bool sync) {
 
         } else if (forceFct == SourceMethods::Buoyancy) {
 #ifndef PROFILING
-            std::cout << "Update f(T) ..." << std::endl;
-            //TODO Logger
+            spdlog::info("Update f(T) ...");
 #endif
             MomentumSource();
         } else {
-            std::cout << "Source function not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+            spdlog::error("Source function not yet implemented! Simulation stopped!");
             std::exit(1);
-            //TODO Error handling + Logger
+            //TODO Error handling
         }
     }
 
@@ -846,10 +840,9 @@ void SolverI::UpdateSources(real t, bool sync) {
                 d_S_T[idx] *= t_ramp;
             }
         } else {
-            std::cout << "Source function not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+            spdlog::error("Source function not yet implemented! Simulation stopped!");
             std::exit(1);
-            //TODO Error handling + Logger
+            //TODO Error handling
         }
     }
 
@@ -890,10 +883,9 @@ void SolverI::UpdateSources(real t, bool sync) {
                 d_S_C[idx] *= t_ramp;
             }
         } else {
-            std::cout << "Source function not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+            spdlog::error("Source function not yet implemented! Simulation stopped!");
             std::exit(1);
-            //TODO Error handling + Logger
+            //TODO Error handling
         }
     }
 }
