@@ -5,7 +5,11 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
+#include <unistd.h>
+#include <getopt.h>
+
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 #include "interfaces/SolverI.h"
 #include "solver/DiffusionTurbSolver.h"
@@ -32,15 +36,91 @@
 	#include <openacc.h>
 #endif
 
-int main(int argc, const char** argv) {
+
+//======================================= parse_params ===================================
+// ***************************************************************************************
+/// \brief parses arguments provided to the program for logging
+/// \param argc         number of arguments
+/// \param argv         argument vector with strings
+// ***************************************************************************************
+void parse_params(int argc, char **argv)
+{
+    char parm;
+	std::string log_file, log_level, XMLfilename;
+    auto params = Parameters::getInstance();
+
+    while ((parm = getopt(argc, argv, "o:l:")) != -1)
+        switch (parm)
+        {
+            case 'l': // loglevel
+                log_level.assign(optarg);
+                break;
+
+            case 'o': // output for logging
+                log_file.assign(optarg);
+                break;
+
+            case '?':
+                if (optopt == 'l') // if -l is provided an loglevel is expected
+                    spdlog::error("Option -{} requires an argument", (char) optopt);
+
+                else if (optopt == 'o') // if -o is provided an path is expected
+                    spdlog::error("Option -{} requires an argument", (char) optopt);
+
+                else // yet unknown option requested (if you are reading this you may want to make it an issue)
+                    spdlog::error("Unknown option {}", (char) optopt);
+
+                break;
+
+            default: // we should never reach this point
+                spdlog::error("Error in argument parsing");
+        }
+
+    // get xml path as last free argument
+    if (optind == argc-1) XMLfilename.assign(argv[optind]);
+    else spdlog::error("Filepath is missing");
+
+    spdlog::info("Provided XML-path: {}", XMLfilename);
+    spdlog::info("Provided logging level: {}", log_level);
+    spdlog::info("Provided logging output: {}", log_file);
+
+    // setting up logging level
+    if (log_level != "")
+    {
+        auto level = spdlog::level::from_str(log_level);
+        spdlog::default_logger()->set_level(level);
+    }
+    spdlog::info("We are at log-level: {}", spdlog::level::to_string_view(spdlog::default_logger()->level()));
+
+    // setting up loger output
+    if (log_file == "-"); // ouptut on stdout
+    else // output in file
+    {
+        if (log_file == "") // default file if not otherwise specified
+            log_file = "./log.txt";
+
+        auto file_logger = spdlog::basic_logger_mt("basic_logger", log_file);
+        spdlog::set_default_logger(file_logger);
+        // make sure we see the last message
+        spdlog::default_logger()->flush_on(spdlog::level::err);
+    }
+
+    params->parse(XMLfilename);
+}
+
+int main(int argc, char **argv) {
 
 // 0. Initialization
 	// Parameters
 	std::string XMLfilename;
-	if (argc > 1) XMLfilename.assign(argv[1]);
-    else spdlog::error("Filepath is missing");
     auto params = Parameters::getInstance();
+
+#ifndef PROFILING
+    parse_params(argc, argv);
+#else
+    if (argc > 1) XMLfilename.assign(argv[1]);
     params->parse(XMLfilename);
+#endif
 
     // Solver
 	SolverI* solver;
@@ -76,7 +156,7 @@ int main(int argc, const char** argv) {
 #ifdef _OPENACC
 	// Initialize GPU
 	acc_device_t dev_type = acc_get_device_type();
-	acc_init( dev_type );
+	acc_init(dev_type);
 #endif
 
 // 2. Integrate over time and solve numerically
