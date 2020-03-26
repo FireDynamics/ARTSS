@@ -24,3 +24,42 @@ Detailed requirements are listed in the table below (general requirements for se
 |          | Testing for consistency of output while developing  | python   |   >= 2.7      |
 | Specific | Compiler fully supporting C++-11 and OpenACC        | PGI      |   >=17.3/17.4 |
 |          | Profiling (using NVTX)                              | CUDA     |   >= 8.0      |
+
+
+### Arguments
+The non PROFILING-version accepts folling parameter provided via command line
+
+| Flag |                                      Purpose                                               | Argument |
+| :--: | :----------------------------------------------------------------------------------------- | :------- |
+|  -l  | determins the minmal loglevel you will only see messages greater that                      | loglevel |
+|  -o  | determins the path for the logfile if not provided it uses './log.txt'. Use '-' for stdout | path     |
+
+
+loglevel can have following arguments.
+
+| Loglevel | Default |
+| :------- | :-----: |
+| trace    |         |
+| debug    |         |
+| info     |    X    |
+| warning  |         |
+| error    |         |
+| critical |         |
+
+
+#### Examples
+
+Creates `log.txt` if not existing or appends on it. Shows only messages on level info or above
+```
+../build/bin/artss_serial XML.xml
+```
+
+Creates `myfile.txt` if not existing or appends on it. Shows only messages on level info or above
+```
+../build/bin/artss_serial -o myfile.txt XML.xml
+```
+
+Shows even debug messages on stdout
+```
+../build/bin/artss_serial -l debug -o - XML.xml
+```
