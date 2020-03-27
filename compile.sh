@@ -173,14 +173,10 @@ fi
 
 if [ $JURECA -eq 0 ]
 then
-  module use /usr/local/software/jureca/OtherStages
-  module load Stages/2017a
-  module load CMake/3.7.2
-  module load PGI
-  module load CUDA/8.0.61
-  export CUDA_LIB=/usr/local/software/jureca/Stages/2017a/software/CUDA/8.0.61/lib64/
-  export CUDA_INC=/usr/local/software/jureca/Stages/2017a/software/CUDA/8.0.61/include/
-  CUDA_VERSION=8.0
+  module load CMake
+  module load PGI/19.3-GCC-8.3.0
+  module load CUDA/10.1.105
+  CUDA_VERSION=10.1
   GPU_MODEL=K80
   GPU=0
 fi
@@ -195,15 +191,13 @@ then
   then
     CUDA_VERSION=10.1
   fi
-  if [ $GPU -eq 0 ]
-  then
-#    module load pgi/${PGI_VERSION}
-#    module load cuda/${CUDA_VERSION}
-    export CUDA_LIB=$CUDA_ROOT/lib64
-    export CUDA_INC=$CUDA_ROOT/include
-  fi
-#  module list
   GPU_MODEL=P100
+fi
+
+if [ $GPU -eq 0 ]
+then
+  export CUDA_LIB=$CUDA_ROOT/lib64
+  export CUDA_INC=$CUDA_ROOT/include
 fi
 
 rm -rf build/
