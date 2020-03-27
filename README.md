@@ -26,6 +26,11 @@ Detailed requirements are listed in the table below (general requirements for se
 |          | Profiling (using NVTX)                              | CUDA     |   >= 8.0      |
 
 
+### cloning
+```
+git clone --recurse-submodules  https://github.com/FireDynamics/ARTSS
+```
+
 ### Arguments
 The non PROFILING-version accepts folling parameter provided via command line
 
@@ -63,3 +68,20 @@ Shows even debug messages on stdout
 ```
 ../build/bin/artss_serial -l debug -o - XML.xml
 ```
+
+
+## Development
+If you want to participitate in this project, this section is for you.
+
+### Codingstyle
+https://google.github.io/styleguide/cppguide.html
+
+### Development Requirements
+These additionals tools can make your live a lot easier.
+
+|     Tool   | Version |                Ref                 |
+| :--------- | :-----: | :--------------------------------- |
+| cpplint    |         | https://github.com/cpplint/cpplint |
+| pre-commit |         | https://pre-commit.com/            |
+| spdlog     |         | https://github.com/gabime/spdlog   |
+
