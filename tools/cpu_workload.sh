@@ -1,4 +1,18 @@
 #!/bin/bash
+HELP="
+Print out the current cpu workload and the current time as seconds since 1970-01-01 (date +%s)
+"
+COMPILE="serial"
+while [[ $# -gt 0 ]]
+do
+  key="$1"
+  case $key in
+    -h|--help)
+      echo -e "$HELP"
+      exit
+      ;;
+  esac
+done
 
 # readout number of cpu cores
 CPUCORES=$(grep ^processor /proc/cpuinfo | wc -l)

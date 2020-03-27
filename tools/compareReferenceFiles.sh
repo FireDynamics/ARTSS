@@ -1,3 +1,18 @@
+HELP="
+Compare u.dat, v.dat, w.dat, T.dat, p.dat with their reference file, if available
+"
+COMPILE="serial"
+while [[ $# -gt 0 ]]
+do
+  key="$1"
+  case $key in
+    -h|--help)
+      echo -e "$HELP"
+      exit
+      ;;
+  esac
+done
+
 if [ -f u_ref.dat ]
 then
   echo "number of lines of u.dat $(cat u.dat | wc -l) | $(cat u_ref.dat | wc -l)"

@@ -1,4 +1,15 @@
 #!/bin/bash
+HELP="
+rename xml file according to its parameter. current available options:
+
+ -f            \t xml files to be renamed
+--buffer       \t parameter buffer size of adaption
+--checkvalue   \t parameter checkvalue of adaption
+--expansionsize\t parameter expansionsize of adaption
+--name         \t basic name for each xml file, parameters will be attached
+--tend         \t parameter t_end
+--timestep     \t parameter dat
+"
 FILES=$(ls *.xml)
 BUFFER=1
 CHECKVALUE=1
@@ -26,6 +37,10 @@ do
     --expansionsize)
       EXPANSIONSIZE=0
       shift
+      ;;
+    -h|--help)
+      echo -e "${HELP}"
+      exit
       ;;
     --name)
       EXTRA="_$2"

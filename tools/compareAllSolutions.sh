@@ -1,6 +1,36 @@
+HELP="
+Run and compile all test files in tests folder and compare it with their corresponding reference files.
+
+-g|--gpu\trun gpu version
+-m|--multicore\trun multicore version
+-s|--serial\trun serial version
+"
+COMPILE="serial"
+while [[ $# -gt 0 ]]
+do
+  key="$1"
+  case $key in
+    -h|--help)
+      echo -e "$HELP"
+      exit
+      ;;
+    -g|--gpu)
+      COMPILE="gpu"
+      shift
+      ;;
+    -m|--multicore)
+      COMPILE="multicore_cpu"
+      shift
+      ;;
+    -s|--serial)
+      COMPILE="serial"
+      shift
+      ;;
+  esac
+done
 cd ..
 p=$(pwd)
-build="$(pwd)/build/bin/artss_serial"
+build="$(pwd)/build/bin/artss_$COMPILE"
 execRef=$(pwd)/tools/compareReferenceFiles.sh
 
 array=(advection burgers diffusion diffusion/hat diffusionTurb dissipation navierStokes/channelFlow navierStokes/cavityFlow navierStokes/mcDermott navierStokes/vortex navierStokesTemp/mms navierStokesTempTurb/mms navierStokesTurb/mcDermott navierStokesTurb/vortex pressure)
