@@ -50,7 +50,7 @@ void parse_params(int argc, char **argv) {
     std::string log_file, log_level, XMLfilename;
     auto params = Parameters::getInstance();
 
-    while ((parm = getopt(argc, argv, "o:l:")) != -1)
+    while ((parm = static_cast<char>(getopt(argc, argv, "o:l:"))) != -1)
         switch (parm) {
             case 'l':  // loglevel
                 log_level.assign(optarg);
@@ -94,8 +94,8 @@ void parse_params(int argc, char **argv) {
         auto level = spdlog::level::from_str(log_level);
         spdlog::default_logger()->set_level(level);
     }
-    auto def_logger = spdlog::default_logger()
-    auto log_level_str = spdlog::level::to_string_view(default_logger->level());
+    auto def_logger = spdlog::default_logger();
+    auto log_level_str = spdlog::level::to_string_view(def_logger->level());
     spdlog::info("We are at log-level: {}", log_level_str);
 
     // setting up loger output
@@ -110,7 +110,9 @@ void parse_params(int argc, char **argv) {
         spdlog::default_logger()->flush_on(spdlog::level::err);
     }
 
+    spdlog::info("Parsing of {}", XMLfilename);
     params->parse(XMLfilename);
+    spdlog::info("Parsing of {} completed", XMLfilename);
 }
 
 int main(int argc, char **argv) {
@@ -129,27 +131,27 @@ int main(int argc, char **argv) {
     // Solver
     SolverI* solver;
     std::string string_solver = params->get("solver/description");
-    if (string_solver == SolverTypes::DiffusionSolver)
+    if (string_solver == SolverTypes::DiffusionSolver) {
         solver = new DiffusionSolver();
-    else if (string_solver == SolverTypes::AdvectionSolver)
+    } else if (string_solver == SolverTypes::AdvectionSolver) {
         solver = new AdvectionSolver();
-    else if (string_solver == SolverTypes::AdvectionDiffusionSolver)
+    } else if (string_solver == SolverTypes::AdvectionDiffusionSolver) {
         solver = new AdvectionDiffusionSolver();
-    else if (string_solver == SolverTypes::PressureSolver)
+    } else if (string_solver == SolverTypes::PressureSolver) {
         solver = new PressureSolver();
-    else if (string_solver == SolverTypes::DiffusionTurbSolver)
+    } else if (string_solver == SolverTypes::DiffusionTurbSolver) {
         solver = new DiffusionTurbSolver();
-    else if (string_solver == SolverTypes::NSSolver)
+    } else if (string_solver == SolverTypes::NSSolver) {
         solver = new NSSolver();
-    else if (string_solver == SolverTypes::NSTurbSolver)
+    } else if (string_solver == SolverTypes::NSTurbSolver) {
         solver = new NSTurbSolver();
-    else if (string_solver == SolverTypes::NSTempSolver)
+    } else if (string_solver == SolverTypes::NSTempSolver) {
         solver = new NSTempSolver();
-    else if (string_solver == SolverTypes::NSTempTurbSolver)
+    } else if (string_solver == SolverTypes::NSTempTurbSolver) {
         solver = new NSTempTurbSolver();
-    else if (string_solver == SolverTypes::NSTempConSolver)
+    } else if (string_solver == SolverTypes::NSTempConSolver) {
         solver = new NSTempConSolver();
-    else if (string_solver == SolverTypes::NSTempTurbConSolver)
+    } else if (string_solver == SolverTypes::NSTempTurbConSolver) {
         solver = new NSTempTurbConSolver();
     } else {
         spdlog::error("Solver not yet implemented! Simulation stopped!");
