@@ -1,15 +1,17 @@
-/// \file 		main.cpp
-/// \brief 		Hybrid (CPU and GPU) Version for solving Navier-Stokes equations in 3D
-/// \date 		May 20, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       main.cpp
+/// \brief      Hybrid (CPU and GPU) Version for solving Navier-Stokes equations
+///             in 3D
+/// \date       May 20, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include <unistd.h>
 #include <getopt.h>
 
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
+#include <iostream>
+
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
 
 #include "interfaces/SolverI.h"
 #include "solver/DiffusionTurbSolver.h"
@@ -33,70 +35,73 @@
 #endif
 
 #ifdef _OPENACC
-	#include <openacc.h>
+    #include <openacc.h>
 #endif
 
 
-//======================================= parse_params ===================================
-// ***************************************************************************************
+//================================= parse_params =============================
+// ***************************************************************************
 /// \brief parses arguments provided to the program for logging
 /// \param argc         number of arguments
 /// \param argv         argument vector with strings
-// ***************************************************************************************
-void parse_params(int argc, char **argv)
-{
+// ***************************************************************************
+void parse_params(int argc, char **argv) {
     char parm;
-	std::string log_file, log_level, XMLfilename;
+    std::string log_file, log_level, XMLfilename;
     auto params = Parameters::getInstance();
 
     while ((parm = getopt(argc, argv, "o:l:")) != -1)
-        switch (parm)
-        {
-            case 'l': // loglevel
+        switch (parm) {
+            case 'l':  // loglevel
                 log_level.assign(optarg);
                 break;
 
-            case 'o': // output for logging
+            case 'o':  // output for logging
                 log_file.assign(optarg);
                 break;
 
             case '?':
-                if (optopt == 'l') // if -l is provided an loglevel is expected
-                    spdlog::error("Option -{} requires an argument", (char) optopt);
+                if (optopt == 'l')  // if -l expects a loglevel
+                    spdlog::error("Option -{} requires an argument",
+                                  static_cast<char>(optopt));
 
-                else if (optopt == 'o') // if -o is provided an path is expected
-                    spdlog::error("Option -{} requires an argument", (char) optopt);
+                else if (optopt == 'o')  // if -o expects a path
+                    spdlog::error("Option -{} requires an argument",
+                                  static_cast<char>(optopt));
 
-                else // yet unknown option requested (if you are reading this you may want to make it an issue)
-                    spdlog::error("Unknown option {}", (char) optopt);
+                else  // yet unknown option requested
+                    spdlog::error("Unknown option {}",
+                                  static_cast<char>(optopt));
 
                 break;
 
-            default: // we should never reach this point
+            default:  // we should never reach this point
                 spdlog::error("Error in argument parsing");
         }
 
     // get xml path as last free argument
-    if (optind == argc-1) XMLfilename.assign(argv[optind]);
-    else spdlog::error("Filepath is missing");
+    if (optind == argc-1)
+        XMLfilename.assign(argv[optind]);
+    else
+        spdlog::error("Filepath is missing");
 
     spdlog::info("Provided XML-path: {}", XMLfilename);
     spdlog::info("Provided logging level: {}", log_level);
     spdlog::info("Provided logging output: {}", log_file);
 
     // setting up logging level
-    if (log_level != "")
-    {
+    if (log_level != "") {
         auto level = spdlog::level::from_str(log_level);
         spdlog::default_logger()->set_level(level);
     }
-    spdlog::info("We are at log-level: {}", spdlog::level::to_string_view(spdlog::default_logger()->level()));
+    auto def_logger = spdlog::default_logger()
+    auto log_level_str = spdlog::level::to_string_view(default_logger->level());
+    spdlog::info("We are at log-level: {}", log_level_str);
 
     // setting up loger output
-    if (log_file == "-"); // ouptut on stdout
-    else // output in file
-    {
-        if (log_file == "") // default file if not otherwise specified
+    if (log_file == "-") {  // ouptut on stdout
+    } else {  // output in file
+        if (log_file == "")  // default file if not otherwise specified
             log_file = "./log.txt";
 
         auto file_logger = spdlog::basic_logger_mt("basic_logger", log_file);
@@ -109,10 +114,9 @@ void parse_params(int argc, char **argv)
 }
 
 int main(int argc, char **argv) {
-
-// 0. Initialization
-	// Parameters
-	std::string XMLfilename;
+    // 0. Initialization
+    // Parameters
+    std::string XMLfilename;
     auto params = Parameters::getInstance();
 
 #ifndef PROFILING
@@ -123,54 +127,64 @@ int main(int argc, char **argv) {
 #endif
 
     // Solver
-	SolverI* solver;
+    SolverI* solver;
     std::string string_solver = params->get("solver/description");
-	if      (string_solver == SolverTypes::DiffusionSolver)             solver=new DiffusionSolver();
-	else if (string_solver == SolverTypes::AdvectionSolver)             solver=new AdvectionSolver();
-	else if (string_solver == SolverTypes::AdvectionDiffusionSolver)    solver=new AdvectionDiffusionSolver();
-	else if (string_solver == SolverTypes::PressureSolver)              solver=new PressureSolver();
-	else if (string_solver == SolverTypes::DiffusionTurbSolver) 		solver=new DiffusionTurbSolver();
-	else if (string_solver == SolverTypes::NSSolver)                    solver=new NSSolver();
-	else if (string_solver == SolverTypes::NSTurbSolver)                solver=new NSTurbSolver();
-	else if (string_solver == SolverTypes::NSTempSolver)                solver=new NSTempSolver();
-	else if (string_solver == SolverTypes::NSTempTurbSolver)            solver=new NSTempTurbSolver();
-	else if (string_solver == SolverTypes::NSTempConSolver)             solver=new NSTempConSolver();
-	else if (string_solver == SolverTypes::NSTempTurbConSolver)         solver=new NSTempTurbConSolver();
+    if (string_solver == SolverTypes::DiffusionSolver)
+        solver = new DiffusionSolver();
+    else if (string_solver == SolverTypes::AdvectionSolver)
+        solver = new AdvectionSolver();
+    else if (string_solver == SolverTypes::AdvectionDiffusionSolver)
+        solver = new AdvectionDiffusionSolver();
+    else if (string_solver == SolverTypes::PressureSolver)
+        solver = new PressureSolver();
+    else if (string_solver == SolverTypes::DiffusionTurbSolver)
+        solver = new DiffusionTurbSolver();
+    else if (string_solver == SolverTypes::NSSolver)
+        solver = new NSSolver();
+    else if (string_solver == SolverTypes::NSTurbSolver)
+        solver = new NSTurbSolver();
+    else if (string_solver == SolverTypes::NSTempSolver)
+        solver = new NSTempSolver();
+    else if (string_solver == SolverTypes::NSTempTurbSolver)
+        solver = new NSTempTurbSolver();
+    else if (string_solver == SolverTypes::NSTempConSolver)
+        solver = new NSTempConSolver();
+    else if (string_solver == SolverTypes::NSTempTurbConSolver)
+        solver = new NSTempTurbConSolver();
+    } else {
+        spdlog::error("Solver not yet implemented! Simulation stopped!");
+        std::exit(1);
+    }
 
-	else {
-		spdlog::error("Solver not yet implemented! Simulation stopped!");
-		std::exit(1);
-	}
-
-// 1. Visualize and test initial conditions
+    // 1. Visualize and test initial conditions
 #ifndef PROFILING
-	// Solution
-	Analysis ana;
-	ana.Analyse(solver, 0.);
+    // Solution
+    Analysis ana;
+    ana.Analyse(solver, 0.);
 
-	// Visualize
-	Visual vis;
-	vis.Visualize(solver, 0., argv[1]);
+    // Visualize
+    Visual vis;
+    vis.Visualize(solver, 0., argv[1]);
 #endif
 
 #ifdef _OPENACC
-	// Initialize GPU
-	acc_device_t dev_type = acc_get_device_type();
-	acc_init(dev_type);
+    // Initialize GPU
+    acc_device_t dev_type = acc_get_device_type();
+    acc_init(dev_type);
 #endif
 
-// 2. Integrate over time and solve numerically
-	// Time integration
-	TimeIntegration ti(solver, argv[1]);
-	ti.run();
+    // 2. Integrate over time and solve numerically
+    // Time integration
+    TimeIntegration ti(solver, argv[1]);
+    ti.run();
 
-// 3. Compute analytical solution and compare
+    // 3. Compute analytical solution and compare
 #ifndef PROFILING
-	real t_end = params->getReal("physical_parameters/t_end");
-	ana.Analyse(solver, t_end);
+    real t_end = params->getReal("physical_parameters/t_end");
+    ana.Analyse(solver, t_end);
 #endif
 
-//4. Clean up
-	delete solver;
-	return 0;
+    // 4. Clean up
+    delete solver;
+    return 0;
 }
