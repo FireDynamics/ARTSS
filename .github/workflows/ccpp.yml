@@ -14,4 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: compile
-      run: ./compile.sh --jobs 4 --gcc -s
+      run: |
+        git submodule update --init
+        ./compile.sh --jobs 4 --gcc -s
