@@ -54,6 +54,7 @@ EXAMPLE:
 ```
 
 ### Code structure
+```
 ARTSS
 │   compile.sh
 │   README
@@ -70,7 +71,7 @@ ARTSS
 │   # files to test individual modules of ARTSS
 │  
 └───tools
-│   # different tools that make your life easier 
+│   # different tools that make your life easier
 ```
 
 ## Authors
