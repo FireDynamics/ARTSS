@@ -53,6 +53,26 @@ EXAMPLE:
 './compile.sh -m'
 ```
 
+### Code structure
+ARTSS
+│   compile.sh
+│   README
+│   CMakeLists.txt
+│   LICENSE   
+│
+└───examples
+│   # simple examples to demonstrate the capabilities of ARTSS
+|
+└───src
+│   # source code
+│
+└───tests
+│   # files to test individual modules of ARTSS
+│  
+└───tools
+│   # different tools that make your life easier 
+```
+
 ## Authors
 * [**Anne Küsters**](https://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/kuesters_a.html?nn=361682): *Initial work*
 * [**Lukas Arnold**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Arnold_Lukas/main.html): *Contributor* and *Supervisor*
