@@ -4,31 +4,31 @@
 
 - Linux
 - Docker-CE 19.03 or later
-- [nvidia-docker](https://github.com/NVIDIA/nvidia-docker)
+- [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) (Can be neglected for serial or multicore versions)
 
-*it might work with older versions of Docker and nvidia-docker2 but it was not tested*
 
 ## Building the Docker image
 
-In the directory where the Dockerfile is located run: `docker build .`
-
-output should look like this:
-
-![example build output][docker-build-output]
+In the directory where the Dockerfile is located run: `docker build -t artss_docker .`
 
 ## Building ARTSS inside the container
 
-navigate to the ARTSS main directory (where `compile.sh` is located).
+Navigate to the ARTSS main directory (where `compile.sh` is located).
 
-Then run: `docker run --gpus all -it --rm -v $(pwd):/host_pwd -w /host_pwd {DOCKERIMAGEID}`
-
-`{DOCKERIMAGEID}` has to be replaced by the image id from the docker build, in this example it would be `8a7bf3be21d0`
-
-*for easier usage the Image should be tagged with a name, see [tagging](https://docs.docker.com/engine/reference/commandline/tag/)*
+Then run: `docker run --gpus all -it --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker`
 
 inside the container run: `nvidia-smi` to make sure you have access to all the GPUs needed
 
-then run `compile.sh {params}` as you normally would, `{params}` could be for example `-c 10 -d -g`
+then run `compile.sh [OPTIONS]` as you normally would. `[OPTIONS]` could be for example `-c 10 -d -g`
+
+## Building ARTSS inside the container without a GPU (serial, multicore)
+
+Navigate to the ARTSS main directory (where `compile.sh` is located).
+
+Then run: `docker run -it --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker`
+
+then run `compile.sh [OPTIONS]`. Don't use any GPU flags, since they will not work here.
+
 
 ## Running ARTSS on the GPU
 
