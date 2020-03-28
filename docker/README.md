@@ -30,10 +30,17 @@ Then run: `docker run -it --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker`
 then run `compile.sh [OPTIONS]`. Don't use any GPU flags, since they will not work here.
 
 
-## Running ARTSS on the GPU
+## Running ARTSS
+After compiling, ARTSS can be used as usual.
 
-after compiling the binaries should be able to run on all GPUs visible in `nvidia-smi`
 
-example: `cd tests/burgers && bash run.sh ../../build/bin/artss_gpu`
+### Important Docker commands
 
-[docker-build-output]:docker-build-output.png
+- `exit` -> Leave container
+- `docker container ls` -> List all running Docker containers
+- `docker ps -a` -> List all Docker containers
+- `docker image ls` -> List all Docker images
+- `docker container rm [tag]` -> Removes Docker container with tag [tag]
+- `docker image rm [tag]` -> Removes Docker image with tag [tag]
+
+More Docker commands: https://docs.docker.com/engine/reference/commandline/cli/
