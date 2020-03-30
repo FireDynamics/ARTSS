@@ -3,7 +3,7 @@ COMPILE=""
 GPU=1
 JURECA=1
 P100=1
-GPU_MODEL="K40"
+GPU_CC="cc30"
 BUILDTYPE=Release
 
 YELLOW='\033[1;33m'
@@ -15,47 +15,48 @@ OPTIONS="
 Available Options:
 
 Load modules:
-  ${YELLOW}--jureca${NC}                \t load modules for JURECA
-  ${YELLOW}--p100${NC}                  \t load modules for P100
+  ${YELLOW}--jureca${NC}                       \t load modules for JURECA
+  ${YELLOW}--p100${NC}                         \t load modules for P100
 
 Executables:
   Production (with data output, visualization and analysis):
    ${YELLOW}-s${NC}
   ${YELLOW}--serial${NC} 
-  ${YELLOW}--artss_serial${NC}        \t Executable: artss
+  ${YELLOW}--artss_serial${NC}                  \t Executable: artss
 
   ${YELLOW} -m${NC}
   ${YELLOW}--multicore${NC}
-  ${YELLOW}--artss_multicore_cpu${NC} \t Executable: artss_multicore_cpu
+  ${YELLOW}--artss_multicore_cpu${NC}           \t Executable: artss_multicore_cpu
 
    ${YELLOW}-g${NC}
   ${YELLOW}--gpu${NC}
-  ${YELLOW}--artss_gpu${NC}           \t Executable: artss_gpu
+  ${YELLOW}--artss_gpu${NC}                      \t Executable: artss_gpu
 ----  
   Benchmarking (without output, visualization, analysis but with tracing for profiling):
   ${YELLOW}--sp${NC}
   ${YELLOW}--serial_profile${NC}
-  ${YELLOW}--artss_profile${NC}           \t Executable artss_serial_profile
+  ${YELLOW}--artss_profile${NC}                  \t Executable artss_serial_profile
 
   ${YELLOW}--mp${NC}
   ${YELLOW}--multicore_profile${NC}
-  ${YELLOW}--artss_multicore_cpu_profile${NC} \t Executable artss_multicore_cpu_profile
+  ${YELLOW}--artss_multicore_cpu_profile${NC}    \t Executable artss_multicore_cpu_profile
 
   ${YELLOW}--gp${NC}
   ${YELLOW}--gpu_profile${NC}
-  ${YELLOW}--artss_gpu_profile${NC}        \t Executable artss_gpu_profile
+  ${YELLOW}--artss_gpu_profile${NC}               \t Executable artss_gpu_profile
 
 Other:
    ${YELLOW}-c${NC}
-  ${YELLOW}--cudaversion${NC}             \t set CUDA Version
+  ${YELLOW}--cudaversion${NC}                     \t set CUDA Version
+  ${YELLOW}--cc${NC}
+  ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (30|35|50|60|70|75)
    ${YELLOW}-d${NC}
-   ${YELLOW}--debugmode${NC}              \t set debug flag for build type (default: release)
-  ${YELLOW}--gpumodel${NC}                \t set GPU model (K40, K80, P100)
+   ${YELLOW}--debugmode${NC}                      \t set debug flag for build type (default: ${BUILDTYPE})
 
-  ${YELLOW}--jobs${NC}                    \t set the number of recipes to execute at once (-j/--jobs flag in make)
+  ${YELLOW}--jobs${NC}                            \t set the number of recipes to execute at once (-j/--jobs flag in make)
 
-  ${YELLOW}--gcc${NC}                     \t use gcc as compiler (optional: specify version)
-  ${YELLOW}--pgi${NC}                     \t use pgcc ac compiler (optional: specify version)
+  ${YELLOW}--gcc${NC}                             \t use gcc as compiler (optional: specify version)
+  ${YELLOW}--pgi${NC}                             \t use pgcc ac compiler (optional: specify version)
 "
 
 HELP="$DESCRIPTION$OPTIONS"
@@ -75,6 +76,11 @@ do
       shift
       shift
       ;;
+    --cc|--computecompatibility)
+      GPU_CC="cc$2"
+      shift
+      shift
+      ;;
     -d|--debug|--debugmode)
       BUILDTYPE=Debug 
       shift
@@ -91,11 +97,6 @@ do
         GCC_VERSION="$2"
         shift
       fi
-      shift
-      ;;
-    --gpumodel)
-      GPU_MODEL="$2"
-      shift
       shift
       ;;
     -h|--help)
@@ -174,10 +175,12 @@ fi
 if [ $JURECA -eq 0 ]
 then
   module load CMake
-  module load PGI/19.3-GCC-8.3.0
+  module load PGI/19.10-GCC-8.3.0
   module load CUDA/10.1.105
+  export CUDA_LIB=${CUDA_ROOT}/lib64/
+  export CUDA_INC=${CUDA_ROOT}/include/
   CUDA_VERSION=10.1
-  GPU_MODEL=K80
+  GPU_CC=cc35
   GPU=0
 fi
 
@@ -191,7 +194,7 @@ then
   then
     CUDA_VERSION=10.1
   fi
-  GPU_MODEL=P100
+  GPU_CC=cc60
 fi
 
 if [ $GPU -eq 0 ]
@@ -217,7 +220,7 @@ if [ -z ${CUDA_VERSION} ]
 then
   cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=${BUILDTYPE} -DCMAKE_C_COMPILER=${CCOMPILER} -DCMAKE_CXX_COMPILER=${CXXCOMPILER} ..
 else
-  cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=${BUILDTYPE} -DCMAKE_C_COMPILER=${CCOMPILER} -DCMAKE_CXX_COMPILER=${CXXCOMPILER} -DGPU_MODEL=${GPU_MODEL} -DCUDA_VERSION=${CUDA_VERSION} ..
+  cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=${BUILDTYPE} -DCMAKE_C_COMPILER=${CCOMPILER} -DCMAKE_CXX_COMPILER=${CXXCOMPILER} -DGPU_CC=${GPU_CC} -DCUDA_VERSION=${CUDA_VERSION} ..
 fi
 
 if [ "$PROCS" -le 0 ]
