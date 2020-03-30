@@ -86,20 +86,20 @@ bool Layers::update() {
         m_pAdaption->m_shift_x2 = (m_minimal * getExpansionSize());
 
         // boundary check
-        long len_x1 = domain->GetIndexx1();
+        long len_x1 = domain->GetIndexx1()-1;
         long len_x2 = static_cast<long> (std::round((domain->GetX2() - domain->Getx2())/domain->Getdx()));
         if (len_x1 < -m_pAdaption->m_shift_x1 || len_x2 < m_pAdaption->m_shift_x2) {
             if (len_x1 < -m_pAdaption->m_shift_x1) {
                 m_pAdaption->m_shift_x2 = (m_pAdaption->m_shift_x2 - m_pAdaption->m_shift_x1 - len_x1);
                 m_pAdaption->m_shift_x1 = (-len_x1);
-            	if (len_x2 < m_pAdaption->m_shift_x2) {
+                if (len_x2 < m_pAdaption->m_shift_x2) {
                     m_pAdaption->m_shift_x2 = len_x2;
-		}
+                }
             }
             if (len_x2 < m_pAdaption->m_shift_x2) {
                 m_pAdaption->m_shift_x1 = m_pAdaption->m_shift_x1 - (m_pAdaption->m_shift_x2 - len_x2);
                 m_pAdaption->m_shift_x2 = len_x2;
-            	if (len_x1 < -m_pAdaption->m_shift_x1) {
+                if (len_x1 < -m_pAdaption->m_shift_x1) {
                     m_pAdaption->m_shift_x1 = (-len_x1);
                 }
             }
@@ -130,9 +130,9 @@ void Layers::setXValues(bool start) {
     size_t Ny = domain->GetNy();
 
     size_t j_start = static_cast<size_t> (std::round((m_y1 - domain->GetY1()) / domain->Getdy()));
-    size_t j_end = j_start + m_ny - 1;
+    size_t j_end = j_start + m_ny;
     size_t k_start = static_cast<size_t> (std::round((m_z1 - domain->GetZ1()) / domain->Getdz()));
-    size_t k_end = k_start + m_nz - 1;
+    size_t k_end = k_start + m_nz;
 
     real *data_nu = m_Nu->data;
     real *data_gamma = m_gamma->data;
