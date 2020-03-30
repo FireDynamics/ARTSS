@@ -18,7 +18,7 @@ Detailed requirements are listed in the table below (general requirements for se
 |--------- | --------------------------------------------------- | -------- | --------------|
 | General  | Version control system to obtain the source code    | git      |   >= 2.0      |
 |          | Build processor using a compiler-independent method | CMake    |   >= 2.8      |
-|          | Compiler fully supporting C++-17                    | gcc      |   >= 5.0      |
+|          | Compiler fully supporting C++-17                    | gcc      |   >= 7.0      |
 |          |                                                     | clang    |   >= 8.0      |
 |          | Visualization of output                             | vtk      |   >= 5.8      |
 |          |                                                     | Paraview/|   VisIT       |
