@@ -53,22 +53,13 @@ set(warning_flags "-g -Wall -Wextra")
 set(CMAKE_CXX_COMPILER		"${CMAKE_CXX_COMPILER}")
 set(CMAKE_CC_COMPILER		"${CMAKE_CC_COMPILER}")
 # Set GPU Flag
-set(GPU_MODEL "${GPU_MODEL}")
+set(GPU_CC "${GPU_CC}")
 # Set CUDA Flag
 set(CUDA_VERSION "${CUDA_VERSION}")
 
 if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  if (NOT GPU_MODEL)
-    message(STATUS "Setting GPU Model to default: P100")
-    set(GPU_MODEL "P100")
-  endif()
-
-  if( ${GPU_MODEL} STREQUAL "K40" OR ${GPU_MODEL} STREQUAL "K80" )
-    set(GPU_MODEL_TA "tesla:cc35")
-  else( ${GPU_MODEL} STREQUAL "P100")
-    set(GPU_MODEL_TA "tesla:cc60")
-  endif()
-  message(STATUS "GPU Model: ${GPU_MODEL}")
+  set(GPU_CC_TA "tesla:${GPU_CC}")
+  message(STATUS "GPU Compute Compatiblity: ${GPU_CC}")
 
   if (NOT CUDA_VERSION)
     message(STATUS "Setting CUDA Version to default: 8.0")
@@ -307,10 +298,10 @@ set_target_properties( artss_multicore_cpu_profile PROPERTIES COMPILE_FLAGS "-ac
 target_link_libraries( artss_multicore_cpu_profile  )
 
 add_executable( artss_gpu ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_MODEL_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_MODEL_TA},lineinfo,${CUDA_VERSION_TA}" )
+set_target_properties( artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
 
 add_executable( artss_gpu_profile ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_gpu_profile PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DPROFILING -DUSE_NVTX -ta=${GPU_MODEL_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_MODEL_TA},lineinfo,${CUDA_VERSION_TA}" )
+set_target_properties( artss_gpu_profile PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DPROFILING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
 target_link_libraries( artss_gpu_profile  )
 
 enable_testing()

@@ -4,9 +4,12 @@
 /// \author 	My Linh Würzburger
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-#include <math.h>
+#ifdef _OPENACC
+#include <accelmath.h>
+#else
 #include <cmath>
+#endif
+#include <iostream>
 #include <chrono>
 #include <fstream>
 #include "Adaption.h"
@@ -471,29 +474,29 @@ bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noB
         for (size_t k = k_start; k < k_end && check; k++) {
             // check innermost plane of the buffer zone on the left side
             size_t idx_s1 = IX(i_start + noBufferCell - 1, j, k, Nx, Ny);
-            if (expansion_start == ADTypes::UNKNOWN && fabs(*(f + idx_s1) - checkValue) > threshold) {
+            if (expansion_start == ADTypes::UNKNOWN && std::fabs(*(f + idx_s1) - checkValue) > threshold) {
                 m_shift_x1 = -1;
                 expansion_start = ADTypes::YES;
             } else {
                 // check innermost plane of the minimal zone to reduce on the left side
                 size_t idx = IX(i_start + m_minimal - 1, j, k, Nx, Ny);
                 size_t idx2 = IX(i_start + m_minimal - 1 + noBufferCell, j, k, Nx, Ny);
-                if (reduction_start == ADTypes::UNKNOWN && (fabs(*(f + idx2) - checkValue) > threshold ||
-                                                            fabs(*(f + idx) - checkValue) > threshold)) {
+                if (reduction_start == ADTypes::UNKNOWN && (std::fabs(*(f + idx2) - checkValue) > threshold ||
+                                                            std::fabs(*(f + idx) - checkValue) > threshold)) {
                     reduction_start = ADTypes::NO;
                 }
             }
             // check innermost plane of the buffer zone on the right side
             size_t idx_s2 = IX(i_end - noBufferCell + 1, j, k, Nx, Ny);
-            if (expansion_end == ADTypes::UNKNOWN && fabs(*(f + idx_s2) - checkValue) > threshold) {
+            if (expansion_end == ADTypes::UNKNOWN && std::fabs(*(f + idx_s2) - checkValue) > threshold) {
                 m_shift_x2 = 1;
                 expansion_end = ADTypes::YES;
             } else {
                 // check innermost plane of the minimal zone to reduce on the right side
                 size_t idx = IX(i_end - m_minimal + 1, j, k, Nx, Ny);
                 size_t idx2 = IX(i_end - m_minimal + 1 - noBufferCell, j, k, Nx, Ny);
-                if (reduction_end == ADTypes::UNKNOWN && (fabs(*(f + idx2) - checkValue) > threshold ||
-                                                          fabs(*(f + idx) - checkValue) > threshold)) {
+                if (reduction_end == ADTypes::UNKNOWN && (std::fabs(*(f + idx2) - checkValue) > threshold ||
+                                                          std::fabs(*(f + idx) - checkValue) > threshold)) {
                     reduction_end = ADTypes::NO;
                 }
             }
@@ -571,24 +574,24 @@ bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCe
             for (size_t k = k_start; k < k_end; k++) {
                 // check innermost plane of the buffer zone on the left side
                 size_t idx_s1 = IX(i_start + noBufferCell - 1, j, k, Nx, Ny);
-                if (fabs(*(f + idx_s1) - checkValue) > threshold) {
+                if (std::fabs(*(f + idx_s1) - checkValue) > threshold) {
                     expansion_counter_start++;
                 } else {
                     size_t idx = IX(i_start + minimal - 1, j, k, Nx, Ny);
                     size_t idx2 = IX(i_start + minimal - 1 + noBufferCell, j, k, Nx, Ny);
-                    if ((fabs(*(f + idx2) - checkValue) > threshold ||
-                         fabs(*(f + idx) - checkValue) > threshold)) {
+                    if ((std::fabs(*(f + idx2) - checkValue) > threshold ||
+                         std::fabs(*(f + idx) - checkValue) > threshold)) {
                         reduction_counter_start++;
                     }
                 }
                 size_t idx_s2 = IX(i_end - noBufferCell + 1, j, k, Nx, Ny);
-                if (fabs(*(f + idx_s2) - checkValue) > threshold) {
+                if (std::fabs(*(f + idx_s2) - checkValue) > threshold) {
                     expansion_counter_end++;
                 } else {
                     size_t idx = IX(i_end - minimal + 1, j, k, Nx, Ny);
                     size_t idx2 = IX(i_end - minimal + 1 - noBufferCell, j, k, Nx, Ny);
-                    if ((fabs(*(f + idx2) - checkValue) > threshold ||
-                         fabs(*(f + idx) - checkValue) > threshold)) {
+                    if ((std::fabs(*(f + idx2) - checkValue) > threshold ||
+                         std::fabs(*(f + idx) - checkValue) > threshold)) {
                         reduction_counter_end++;
                     }
                 }
@@ -672,29 +675,29 @@ bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noB
         for (size_t k = k_start; k < k_end && check; k++) {
             // check innermost plane of the buffer zone on the lower side
             size_t idx_s1 = IX(i, j_start + noBufferCell - 1, k, Nx, Ny);
-            if (expansion_start == ADTypes::UNKNOWN && fabs(*(f + idx_s1) - checkValue) > threshold) {
+            if (expansion_start == ADTypes::UNKNOWN && std::fabs(*(f + idx_s1) - checkValue) > threshold) {
                 m_shift_y1 = -1;
                 expansion_start = ADTypes::YES;
             } else {
                 // check innermost plane of the minimal zone to reduce on the lower side
                 size_t idx = IX(i, j_start + m_minimal - 1, k, Nx, Ny);
                 size_t idx2 = IX(i, j_start + m_minimal - 1 + noBufferCell, k, Nx, Ny);
-                if (reduction_start == ADTypes::UNKNOWN && (fabs(*(f + idx2) - checkValue) > threshold ||
-                                                            fabs(*(f + idx) - checkValue) > threshold)) {
+                if (reduction_start == ADTypes::UNKNOWN && (std::fabs(*(f + idx2) - checkValue) > threshold ||
+                                                            std::fabs(*(f + idx) - checkValue) > threshold)) {
                     reduction_start = ADTypes::NO;
                 }
             }
             // check innermost plane of the buffer zone on the upper side
             size_t idx_s2 = IX(i, j_end - noBufferCell + 1, k, Nx, Ny);
-            if (expansion_end == ADTypes::UNKNOWN && fabs(*(f + idx_s2) - checkValue) > threshold) {
+            if (expansion_end == ADTypes::UNKNOWN && std::fabs(*(f + idx_s2) - checkValue) > threshold) {
                 m_shift_y2 = 1;
                 expansion_end = ADTypes::YES;
             } else {
                 // check innermost plane of the minimal zone to reduce on the upper side
                 size_t idx = IX(i, j_end - m_minimal + 1, k, Nx, Ny);
                 size_t idx2 = IX(i, j_end - m_minimal + 1 - noBufferCell, k, Nx, Ny);
-                if (reduction_end == ADTypes::UNKNOWN && (fabs(*(f + idx2) - checkValue) > threshold ||
-                                                          fabs(*(f + idx) - checkValue) > threshold)) {
+                if (reduction_end == ADTypes::UNKNOWN && (std::fabs(*(f + idx2) - checkValue) > threshold ||
+                                                          std::fabs(*(f + idx) - checkValue) > threshold)) {
                     reduction_end = ADTypes::NO;
                 }
             }
@@ -773,24 +776,24 @@ bool Adaption::adaptYDirection(const real *f, real checkValue, size_t noBufferCe
             for (size_t k = k_start; k < k_end; k++) {
                 // check innermost plane of the buffer zone on the lower side
                 size_t idx_s1 = IX(i, j_start + noBufferCell - 1, k, Nx, Ny);
-                if (fabs(*(f + idx_s1) - checkValue) > threshold) {
+                if (std::fabs(*(f + idx_s1) - checkValue) > threshold) {
                     expansion_counter_start++;
                 } else {
                     size_t idx = IX(i, j_start + minimal - 1, k, Nx, Ny);
                     size_t idx2 = IX(i, j_start + minimal - 1 + noBufferCell, k, Nx, Ny);
-                    if ((fabs(*(f + idx2) - checkValue) > threshold ||
-                         fabs(*(f + idx) - checkValue) > threshold)) {
+                    if ((std::fabs(*(f + idx2) - checkValue) > threshold ||
+                         std::fabs(*(f + idx) - checkValue) > threshold)) {
                         reduction_counter_start++;
                     }
                 }
                 size_t idx_s2 = IX(i, j_end - noBufferCell + 1, k, Nx, Ny);
-                if (fabs(*(f + idx_s2) - checkValue) > threshold) {
+                if (std::fabs(*(f + idx_s2) - checkValue) > threshold) {
                     expansion_counter_end++;
                 } else {
                     size_t idx = IX(i, j_end - minimal + 1, k, Nx, Ny);
                     size_t idx2 = IX(i, j_end - minimal + 1 - noBufferCell, k, Nx, Ny);
-                    if ((fabs(*(f + idx2) - checkValue) > threshold ||
-                         fabs(*(f + idx) - checkValue) > threshold)) {
+                    if ((std::fabs(*(f + idx2) - checkValue) > threshold ||
+                         std::fabs(*(f + idx) - checkValue) > threshold)) {
                         reduction_counter_end++;
                     }
                 }

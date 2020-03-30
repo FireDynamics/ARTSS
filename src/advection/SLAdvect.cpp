@@ -10,7 +10,11 @@
 ///			stable semi-Langrangian approach (backtrace and linear interpolation)
 // ***************************************************************************************
 
-#include <math.h>
+#ifdef _OPENACC
+#include <accelmath.h>
+#else
+#include <cmath>
+#endif
 #include "SLAdvect.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
