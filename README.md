@@ -2,9 +2,8 @@
 Accelerated Based Real Time Smoke Simulation
 
 ARTSS is a real-time and prognosis capable CFD code basis simulating buoyancy-driven turbulent smoke spread
-based on finite differences and a large eddy simulation turbulence model, being performance portable on CPU
-and GPU contained in one expandable, open source code, successfully verified using unit, analytical and
-semi-analytical tests, and successfully validated with scenarios relevant for fire protection.
+based on finite differences and a large eddy simulation turbulence model. The open source code is portable on CPU and GPU and successfully verified using unit, analytical and
+semi-analytical tests. It is also successfully validated with scenarios relevant for fire protection.
 ARTSS is based on JuROr, which was originally developed within the [ORPHEUS](http://www.orpheus-projekt.de) project
 (funded through the [BMBF](https://www.bmbf.de/)) by Dr. Anne Küsters.
 
@@ -43,7 +42,7 @@ OPTIONS (selection; show all by using --help flag):
 - '-s' -> Compile serial ARTSS version
 - '-m' -> Compile multicore ARTSS version
 - '-g' -> Compile GPU ARTSS version
-- '--jobs [cores]' -> How many cores should be used for compilation (default $(nproc))
+- '--jobs [tasks]' -> Specifies  the  number of tasks to run simultaneously (default $(nproc))
 - '--gcc' Use GCC as compiler
 
 EXAMPLE:
@@ -51,6 +50,9 @@ EXAMPLE:
 './compile.sh -s --jobs 4 --gcc'
 - Compile multicore version of ARTSS
 './compile.sh -m'
+
+Extra:
+It is also possible to compile ARTSS using a docker file. Instructions and further information can be found in the folder `docker`.
 ```
 
 ### Code structure
