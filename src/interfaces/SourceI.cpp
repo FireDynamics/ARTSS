@@ -4,7 +4,11 @@
 /// \author 	Severt
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <math.h>
+#ifdef _OPENACC
+#include <accelmath.h>
+#else
+#include <cmath>
+#endif
 
 #include "SourceI.h"
 #include "../utility/Parameters.h"
@@ -122,7 +126,7 @@ void SourceI::BuoyancyST_MMS(Field *out, real t, bool sync) {
             k = idx / (Nx * Ny);
             j = (idx - k * Nx * Ny) / Nx;
             i = idx - k * Nx * Ny - j * Nx;
-            d_out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
+            d_out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
         }
 
         // boundary cells
@@ -133,7 +137,7 @@ void SourceI::BuoyancyST_MMS(Field *out, real t, bool sync) {
             k = idx / (Nx * Ny);
             j = (idx - k * Nx * Ny) / Nx;
             i = idx - k * Nx * Ny - j * Nx;
-            d_out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
+            d_out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
         }
         if (sync) {
 #pragma acc wait
@@ -199,7 +203,7 @@ void SourceI::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, re
             j = (idx - k * Nx * Ny) / Nx;
             i = idx - k * Nx * Ny - j * Nx;
 
-            real expr = exp(-(rsigmax2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))\
+            real expr = std::exp(-(rsigmax2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))\
  + rsigmay2 * ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0))\
  + rsigmaz2 * ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0))));
             V += expr * dx * dy * dz;
@@ -218,7 +222,7 @@ void SourceI::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, re
             j = (idx - k * Nx * Ny) / Nx;
             i = idx - k * Nx * Ny - j * Nx;
 
-            real expr = exp(-(rsigmax2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))\
+            real expr = std::exp(-(rsigmax2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))\
  + rsigmay2 * ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0))\
  + rsigmaz2 * ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0))));
             d_out[idx] = HRRrV * rcp * expr;

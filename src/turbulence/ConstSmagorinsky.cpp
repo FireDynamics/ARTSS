@@ -4,7 +4,11 @@
 /// \author       Suryanarayana Maddu
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <math.h>
+#ifdef _OPENACC
+#include <accelmath.h>
+#else
+#include <cmath>
+#endif
 
 #include "ConstSmagorinsky.h"
 #include "../utility/Parameters.h"
