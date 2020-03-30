@@ -357,13 +357,37 @@ void Boundary::innerCells() {
 /// \param  obstacleList List of all obstacles of each multigrid level
 /// \param  numberOfObstacles Number of obstacles
 // ***************************************************************************************
-void Boundary::updateLists(Obstacle** obstacleList, size_t numberOfObstacles) {
+void Boundary::updateLists(Obstacle** obstacleList, size_t numberOfObstacles, size_t size_obstacles) {
     //TODO update for GPU -- delete old data + enter new data
     //TODO write to joined list directly?
-    boundaryCells();
-    if (numberOfObstacles > 0) {
-        innerCells(obstacleList, numberOfObstacles);
-    } else {
-        innerCells();
-    }
+    clearLists();
+    init(size_obstacles);
+    innerCells(obstacleList, numberOfObstacles);
+}
+
+//======================================== Update lists ====================================
+// ***************************************************************************************
+/// \brief  Updates lists of indices
+// ***************************************************************************************
+void Boundary::updateLists() {
+    //TODO update for GPU -- delete old data + enter new data
+    //TODO write to joined list directly?
+    clearLists();
+    init(0);
+    innerCells();
+}
+
+//======================================== Update lists ====================================
+// ***************************************************************************************
+/// \brief  removes all allocated arrays
+// ***************************************************************************************
+void Boundary::clearLists(){
+    delete[] m_innerList;
+    delete[] m_boundaryList;
+    delete[] m_boundaryFront;
+    delete[] m_boundaryBack;
+    delete[] m_boundaryTop;
+    delete[] m_boundaryBottom;
+    delete[] m_boundaryLeft;
+    delete[] m_boundaryRight;
 }

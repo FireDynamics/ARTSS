@@ -38,7 +38,8 @@ public:
     size_t getSize_boundaryLeft() {return   m_size_boundaryLeft;};
     size_t getSize_boundaryRight() { return m_size_boundaryRight;};
 
-    void updateLists(Obstacle** obstacleList, size_t numberOfObstacles);
+    void updateLists(Obstacle** obstacleList, size_t numberOfObstacles, size_t size_obstacles);
+    void updateLists();
     void control(size_t size_obstacles);
 private:
     size_t m_level;
@@ -66,6 +67,7 @@ private:
     void innerCells(Obstacle** obstacleList, size_t numberOfObstacles);
     void innerCells();
     void print(size_t size_obstacles);
+    void clearLists();
 };
 
 

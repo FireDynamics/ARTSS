@@ -716,6 +716,16 @@ Obstacle **Multigrid::obstacleDominantRestriction(size_t level) {
 /// \brief  create joined list and send them to GPU
 // ***************************************************************************************
 void Multigrid::sendListsToGPU() {
+    sendSurfaceListsToGPU();
+    sendBoundaryListsToGPU();
+    sendObstacleListsToGPU();
+}
+
+// ================================= Send boundary lists to GPU ====================================
+// ***************************************************************************************
+/// \brief  create boundary joined list and send them to GPU
+// ***************************************************************************************
+void Multigrid::sendBoundaryListsToGPU() {
     size_t size_iList = getLen_iList_joined();
     size_t size_bList = getLen_bList_joined();
     size_t size_bSliceZ = getLen_bSliceZ_joined();
@@ -731,20 +741,12 @@ void Multigrid::sendListsToGPU() {
     m_data_MG_bLeft_level_joined = new size_t[size_bSliceX];
     m_data_MG_bRight_level_joined = new size_t[size_bSliceX];
 
-    size_t size_sList = 0;
-    if (m_numberOfSurfaces > 0) {
-        size_sList = getLen_sList_joined();
-        m_data_MG_sList_level_joined = new size_t[size_sList];
-        std::cout << "control sendMGListsToGPU size surface  " << size_sList << std::endl;
-    }
     size_t counter_iList = 0;
     size_t counter_bList = 0;
 
     size_t counter_bSliceZ = 0;
     size_t counter_bSliceY = 0;
     size_t counter_bSliceX = 0;
-
-    size_t counter_sList = 0;
 
     for (size_t level = 0; level < m_levels + 1; level++) {
         Boundary *boundary = *(m_MG_boundaryList + level);
@@ -780,8 +782,40 @@ void Multigrid::sendListsToGPU() {
 #pragma acc enter data copyin(m_data_MG_bBottom_level_joined[:size_bSliceY])
 #pragma acc enter data copyin(m_data_MG_bLeft_level_joined[:size_bSliceX])
 #pragma acc enter data copyin(m_data_MG_bRight_level_joined[:size_bSliceX])
+}
 
+// ================================= Send surface list to GPU ==========================================
+// ***************************************************************************************
+/// \brief  create surface joined list and send it to GPU
+// ***************************************************************************************
+void Multigrid::sendSurfaceListsToGPU() {
+    size_t counter_sList = 0;
 
+    size_t size_sList = 0;
+    if (m_numberOfSurfaces > 0) {
+        size_sList = getLen_sList_joined();
+        m_data_MG_sList_level_joined = new size_t[size_sList];
+        std::cout << "control sendMGListsToGPU size surface  " << size_sList << std::endl;
+        for (size_t level = 0; level < m_levels + 1; level++) {
+            Surface **surfaceList = *(m_MG_surfaceList + level);
+            for (size_t s = 0; s < m_numberOfSurfaces; s++) {
+                Surface *surface = *(surfaceList + s);
+                for (size_t i = 0; i < surface->getSize_surfaceList(); i++) {
+                    *(m_data_MG_sList_level_joined + counter_sList) = surface->getSurfaceList()[i];
+                    counter_sList++;
+                }
+            }
+        }
+        std::cout << "control sendMGListsToGPU surface  " << counter_sList << "|" << size_sList << std::endl;
+#pragma acc enter data copyin(m_data_MG_sList_level_joined[:size_sList])
+    }
+}
+
+// ================================= Send obstacle lists to GPU ==========================================
+// ***************************************************************************************
+/// \brief  create obstacle joined list and send them to GPU
+// ***************************************************************************************
+void Multigrid::sendObstacleListsToGPU() {
     if (m_numberOfObstacles > 0) {
         size_t size_oFront = getLen_oFront_joined();
         size_t size_oBack = getLen_oBack_joined();
@@ -847,22 +881,8 @@ void Multigrid::sendListsToGPU() {
 #pragma acc enter data copyin(m_data_MG_oLeft_level_joined[:size_oLeft])
 #pragma acc enter data copyin(m_data_MG_oRight_level_joined[:size_oRight])
     }
-
-    if (m_numberOfSurfaces > 0) {
-        for (size_t level = 0; level < m_levels + 1; level++) {
-            Surface **surfaceList = *(m_MG_surfaceList + level);
-            for (size_t s = 0; s < m_numberOfSurfaces; s++) {
-                Surface *surface = *(surfaceList + s);
-                for (size_t i = 0; i < surface->getSize_surfaceList(); i++) {
-                    *(m_data_MG_sList_level_joined + counter_sList) = surface->getSurfaceList()[i];
-                    counter_sList++;
-                }
-            }
-        }
-        std::cout << "control sendMGListsToGPU surface  " << counter_sList << "|" << size_sList << std::endl;
-#pragma acc enter data copyin(m_data_MG_sList_level_joined[:size_sList])
-    }
 }
+
 // ================================= Apply boundary condition ==========================================
 // ***************************************************************************************
 /// \brief  Apply boundary condition for obstacles, surfaces and domain
@@ -897,9 +917,68 @@ void Multigrid::applyBoundaryCondition(real *d, size_t level, FieldType f, bool 
 /// \brief  Updates lists of indices
 // ***************************************************************************************
 void Multigrid::updateLists() {
-    for (size_t level = 0; level < m_levels + 1; level++) {
-        ((Boundary *) *(m_MG_boundaryList + level))->updateLists(*(m_MG_obstacleList + level), m_numberOfObstacles);
+    removeBoundaryListsFromGPU();
+
+    *(m_size_MG_iList_level) = 0;
+    *(m_size_MG_bList_level) = 0;
+
+    *(m_size_MG_bSliceZ_level) = 0;
+    *(m_size_MG_bSliceY_level) = 0;
+    *(m_size_MG_bSliceX_level) = 0;
+
+    if (m_numberOfObstacles > 0) {
+        for (size_t level = 0; level < m_levels + 1; level++) {
+            Boundary * boundary =  *(m_MG_boundaryList + level);
+            boundary->updateLists(*(m_MG_obstacleList + level), m_numberOfObstacles, getSize_oList(level));
+            m_size_MG_iList_level[level + 1] = m_size_MG_iList_level[level] + boundary->getSize_innerList();
+            m_size_MG_bList_level[level + 1] = m_size_MG_bList_level[level] + boundary->getSize_boundaryList();
+            m_size_MG_bSliceZ_level[level + 1] = m_size_MG_bSliceZ_level[level] + boundary->getSize_boundaryFront();
+            m_size_MG_bSliceY_level[level + 1] = m_size_MG_bSliceY_level[level] + boundary->getSize_boundaryTop();
+            m_size_MG_bSliceX_level[level + 1] = m_size_MG_bSliceX_level[level] + boundary->getSize_boundaryLeft();
+        }
+    }else{
+        for (size_t level = 0; level < m_levels + 1; level++) {
+            Boundary * boundary =  *(m_MG_boundaryList + level);
+            boundary->updateLists();
+            m_size_MG_iList_level[level + 1] = m_size_MG_iList_level[level] + boundary->getSize_innerList();
+            m_size_MG_bList_level[level + 1] = m_size_MG_bList_level[level] + boundary->getSize_boundaryList();
+            m_size_MG_bSliceZ_level[level + 1] = m_size_MG_bSliceZ_level[level] + boundary->getSize_boundaryFront();
+            m_size_MG_bSliceY_level[level + 1] = m_size_MG_bSliceY_level[level] + boundary->getSize_boundaryTop();
+            m_size_MG_bSliceX_level[level + 1] = m_size_MG_bSliceX_level[level] + boundary->getSize_boundaryLeft();
+        }
     }
+    sendBoundaryListsToGPU();
+    m_data_boundary_patches_joined[Patch::FRONT] = m_data_MG_bFront_level_joined;
+    m_data_boundary_patches_joined[Patch::BACK] = m_data_MG_bBack_level_joined;
+    m_data_boundary_patches_joined[Patch::BOTTOM] = m_data_MG_bBottom_level_joined;
+    m_data_boundary_patches_joined[Patch::TOP] = m_data_MG_bTop_level_joined;
+    m_data_boundary_patches_joined[Patch::LEFT] = m_data_MG_bLeft_level_joined;
+    m_data_boundary_patches_joined[Patch::RIGHT] = m_data_MG_bRight_level_joined;
+}
+
+void Multigrid::removeBoundaryListsFromGPU(){
+    size_t size_iList = getLen_iList_joined();
+    size_t size_bList = getLen_bList_joined();
+#pragma acc exit data delete(m_data_MG_iList_level_joined[:size_iList])
+#pragma acc exit data delete(m_data_MG_bList_level_joined[:size_bList])
+    delete[] m_data_MG_iList_level_joined;
+    delete[] m_data_MG_bList_level_joined;
+
+    size_t size_bSliceZ = getLen_bSliceZ_joined();
+    size_t size_bSliceY = getLen_bSliceY_joined();
+    size_t size_bSliceX = getLen_bSliceX_joined();
+#pragma acc exit data delete(m_data_MG_bFront_level_joined[:size_bSliceZ])
+#pragma acc exit data delete(m_data_MG_bBack_level_joined[:size_bSliceZ])
+#pragma acc exit data delete(m_data_MG_bTop_level_joined[:size_bSliceY])
+#pragma acc exit data delete(m_data_MG_bBottom_level_joined[:size_bSliceY])
+#pragma acc exit data delete(m_data_MG_bLeft_level_joined[:size_bSliceX])
+#pragma acc exit data delete(m_data_MG_bRight_level_joined[:size_bSliceX])
+    delete[] m_data_MG_bFront_level_joined;
+    delete[] m_data_MG_bBack_level_joined;
+    delete[] m_data_MG_bTop_level_joined;
+    delete[] m_data_MG_bBottom_level_joined;
+    delete[] m_data_MG_bLeft_level_joined;
+    delete[] m_data_MG_bRight_level_joined;
 }
 
 //======================================== Private getter ====================================

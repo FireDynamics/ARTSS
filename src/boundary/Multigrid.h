@@ -163,6 +163,9 @@ private:
     void calcObstacles(Obstacle** obstacleList);
     void calcSurfaces(Surface** surfaceList);
     void sendListsToGPU();
+    void sendBoundaryListsToGPU();
+    void sendSurfaceListsToGPU();
+    void sendObstacleListsToGPU();
 
     void surfaceDominantRestriction(size_t level);
     Obstacle** obstacleDominantRestriction(size_t level);
@@ -175,6 +178,8 @@ private:
     size_t** m_data_obstacles_patches_joined;
     BoundaryDataController* m_bdc_boundary;
     BoundaryDataController** m_bdc_obstacle;
+
+    void removeBoundaryListsFromGPU();
 };
 
 
