@@ -391,3 +391,4 @@ void Boundary::clearLists(){
     delete[] m_boundaryLeft;
     delete[] m_boundaryRight;
 }
+
