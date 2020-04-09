@@ -32,7 +32,7 @@ running make. The steps are summarized below.
 
 ```
 # 1. Clone
-git clone https://github.com/FireDynamics/ARTSS.git
+git clone --recurse-submodules  https://github.com/FireDynamics/ARTSS
 cd ARTSS
 
 # 2. Compiling the code
@@ -55,6 +55,61 @@ Extra:
 It is also possible to compile ARTSS using a docker file. Instructions and further information can be found in the folder `docker`.
 ```
 
+### Arguments
+The non PROFILING-version accepts folling parameter provided via command line
+
+| Flag |                                      Purpose                                               | Argument |
+| :--: | :----------------------------------------------------------------------------------------- | :------- |
+|  -l  | determins the minmal loglevel you will only see messages greater that                      | loglevel |
+|  -o  | determins the path for the logfile if not provided it uses './log.txt'. Use '-' for stdout | path     |
+
+
+loglevel can have following arguments.
+
+| Loglevel | Default |
+| :------- | :-----: |
+| trace    |         |
+| debug    |         |
+| info     |    X    |
+| warning  |         |
+| error    |         |
+| critical |         |
+
+
+#### Examples
+
+Creates `log.txt` if not existing or appends on it. Shows only messages on level info or above
+```
+../build/bin/artss_serial XML.xml
+```
+
+Creates `myfile.txt` if not existing or appends on it. Shows only messages on level info or above
+```
+../build/bin/artss_serial -o myfile.txt XML.xml
+```
+
+Shows even debug messages on stdout
+```
+../build/bin/artss_serial -l debug -o - XML.xml
+```
+
+
+## Development
+If you want to participitate in this project, this section is for you.
+
+
+### Codingstyle
+https://google.github.io/styleguide/cppguide.html
+
+### Development Requirements
+These additionals tools can make your live a lot easier.
+
+|     Tool   | Version |                Ref                 |
+| :--------- | :-----: | :--------------------------------- |
+| cpplint    |         | https://github.com/cpplint/cpplint |
+| pre-commit |         | https://pre-commit.com/            |
+| spdlog     |         | https://github.com/gabime/spdlog   |
+
 ### Code structure
 ```
 ARTSS
@@ -76,7 +131,7 @@ ARTSS
 │   # different tools that make your life easier
 ```
 
-## Authors
+### Authors
 * [**Anne Küsters**](https://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/kuesters_a.html?nn=361682): *Initial work*
 * [**Lukas Arnold**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Arnold_Lukas/main.html): *Contributor* and *Supervisor*
 * [**My Linh Würzburger**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Wuerzburger_My_Linh/main.html?nn=2302136): *Contributor*

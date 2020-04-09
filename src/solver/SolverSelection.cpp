@@ -5,6 +5,8 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
+#include <spdlog/spdlog.h>
+
 #include "SolverSelection.h"
 #include "../advection/SLAdvect.h"
 #include "../advection/ExplicitAdvect.h"
@@ -29,10 +31,9 @@ void SolverSelection::SetAdvectionSolver(AdvectionI **advectionSolver, const std
     } else if (advectionType == AdvectionMethods::Explicit) {
         *advectionSolver = new ExplicitAdvect();
     } else {
-        std::cout << "Advection method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Advection method not yet implemented! Simulation stopped!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }
 
@@ -50,10 +51,9 @@ void SolverSelection::SetDiffusionSolver(DiffusionI **diffusionSolver, const std
     } else if (diffusionType == DiffusionMethods::Explicit) {
         *diffusionSolver = new ExplicitDiffuse();
     } else {
-        std::cout << "Diffusion method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Diffusion method not yet implemented! Simulation stopped!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }
 
@@ -67,10 +67,9 @@ void SolverSelection::SetPressureSolver(PressureI **pressureSolver, const std::s
     if (pressureType == PressureMethods::VCycleMG) {
         *pressureSolver = new VCycleMG(p, rhs);
     } else {
-        std::cout << "Pressure method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Pressure method not yet implemented! Simulation stopped!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }
 
@@ -84,10 +83,9 @@ void SolverSelection::SetSourceSolver(SourceI **sourceSolver, const std::string&
     if (sourceType == SourceMethods::ExplicitEuler) {
         *sourceSolver = new ExplicitEulerSource();
     } else {
-        std::cout << "Source method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Source method not yet implemented! Simulation stopped!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }
 
@@ -103,9 +101,8 @@ void SolverSelection::SetTurbulenceSolver(TurbulenceI **turbulenceSolver, const 
     } else if (turbulenceType == TurbulenceMethods::DynamicSmagorinsky) {
         *turbulenceSolver = new DynamicSmagorinsky();
     } else {
-        std::cout << "Turbulence model is not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Turbulence model is not yet implemented! Simulation stopped!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }

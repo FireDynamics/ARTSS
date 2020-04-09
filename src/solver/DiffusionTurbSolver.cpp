@@ -5,6 +5,7 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "DiffusionTurbSolver.h"
 #include "../utility/Parameters.h"
@@ -72,13 +73,11 @@ void DiffusionTurbSolver::DoStep(real t, bool sync) {
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_nu_t[:bsize]) //EV
     {
 #ifndef PROFILING
-        std::cout << "Calculating Turbulent viscosity ..." << std::endl;
-        //TODO Logger
+        spdlog::info("Calculating Turbulent viscosity ...");
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 #ifndef PROFILING
-        std::cout << "Diffuse ..." << std::endl;
-        //TODO Logger
+        spdlog::info("Diffuse ...");
 #endif
         dif->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif->diffuse(v, v0, v_tmp, nu, nu_t, sync);
@@ -93,9 +92,8 @@ void DiffusionTurbSolver::DoStep(real t, bool sync) {
 void DiffusionTurbSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }

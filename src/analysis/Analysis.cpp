@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <spdlog/spdlog.h>
 
 #include "Analysis.h"
 #include "../boundary/BoundaryController.h"
@@ -21,12 +22,8 @@
 Analysis::Analysis() {
     auto params = Parameters::getInstance();
     hasAnalyticSolution = params->get("solver/solution/available") == "Yes";
-    if (hasAnalyticSolution) {
-        m_tol = params->getReal("solver/solution/tol");
-    } else {
-        std::cout << "No analytical solution available!\n" << std::endl;
-        //TODO Logger
-    }
+    if (hasAnalyticSolution) m_tol = params->getReal("solver/solution/tol");
+    else spdlog::info("No analytical solution available!\n");
 }
 
 // ===================================== Start analysis ==================================
@@ -51,8 +48,7 @@ void Analysis::Analyse(SolverI *solver, const real t) {
         auto curElem = xmlParameter->FirstChildElement();
 
         solution.CalcAnalyticalSolution(t);
-        std::cout << "\nCompare to analytical solution:" << std::endl;
-        //TODO Logger
+        spdlog::info("Compare to analytical solution:");
 
         while (curElem) {
             std::string nodeName(curElem->Value());
@@ -118,13 +114,13 @@ bool Analysis::CompareSolutions(read_ptr num, read_ptr ana, const FieldType type
     //res = CalcRelativeSpatialError(num, ana);
 
     if (res <= m_tol) {
-        std::cout << BoundaryData::getFieldTypeName(type) << " PASSED Test at time " << t << " with error e=" << res << std::endl;
-        //TODO Logger
+        spdlog::info("{} PASSED Test at time {} with error e={}",
+                BoundaryData::getFieldTypeName(type), t, res);
         verification = true;
     } else {
-        std::cout << BoundaryData::getFieldTypeName(type) << " FAILED Test at time " << t << " with error e=" << res << std::endl;
-        //TODO Logger
-      }
+        spdlog::error("{} FAILED Test at time {} with error e={}",
+                BoundaryData::getFieldTypeName(type), t, res);
+    }
     return verification;
 }
 
@@ -156,8 +152,7 @@ real Analysis::CalcAbsoluteSpatialError(read_ptr num, read_ptr ana) {
 
     real eps = sqrt(1. / nr * sum);
 
-    std::cout << std::scientific << "\nAbsolute error ||e|| =" << eps << std::endl;
-    //TODO Logger
+    spdlog::info("Absolute error ||e||={}", eps);
     //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
     //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
     //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]	<< std::endl;
@@ -216,8 +211,7 @@ real Analysis::CalcRelativeSpatialError(read_ptr num, read_ptr ana) {
         eps = epsa / adenom;
     }
 
-    std::cout << std::scientific << "\nRelative error ||e|| =" << eps << std::endl;
-    //TODO Logger
+    spdlog::info("Relative error ||e||={}", eps);
     /*std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
     std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
     std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]	<< std::endl;
@@ -288,10 +282,9 @@ void Analysis::CalcRMSError(real sumu, real sump, real sumT) {
         real epsp = sqrt(rNt * sump);
         real epsT = sqrt(rNt * sumT);
 
-        std::cout << "\nRMS error of u at domain center is e_RMS=" << epsu << std::endl;
-        std::cout << "RMS error of p at domain center is e_RMS=" << epsp << std::endl;
-        std::cout << "RMS error of T at domain center is e_RMS=" << epsT << std::endl;
-        //TODO Logger
+        spdlog::info("RMS error of u at domain center is e_RMS={}", epsu);
+        spdlog::info("RMS error of p at domain center is e_RMS={}", epsp);
+        spdlog::info("RMS error of T at domain center is e_RMS={}", epsT);
     }
 }
 
@@ -373,8 +366,7 @@ bool Analysis::CheckTimeStepCFL(Field *u, Field *v, Field *w, real dt) {
 
     CFL_check = CFL < 1.;
 
-    std::cout << "CFL = " << CFL << std::endl;
-    //TODO Logger
+    spdlog::info("CFL = {}", CFL);
 
     return CFL_check;
 }

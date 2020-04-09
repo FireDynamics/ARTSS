@@ -5,6 +5,7 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "NSSolver.h"
 #include "../pressure/VCycleMG.h"
@@ -95,8 +96,7 @@ void NSSolver::DoStep(real t, bool sync) {
     {
 // 1. Solve advection equation
 #ifndef PROFILING
-        std::cout << "Advect ..." << std::endl;
-        //TODO Logger
+        spdlog::info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
         adv_vel->advect(v, v0, u0, v0, w0, sync);
@@ -109,8 +109,7 @@ void NSSolver::DoStep(real t, bool sync) {
 // 2. Solve diffusion equation
         if (nu != 0.) {
 #ifndef PROFILING
-            std::cout << "Diffuse ..." << std::endl;
-            //TODO Logger
+            spdlog::info("Diffuse ...");
 #endif
             dif_vel->diffuse(u, u0, u_tmp, nu, sync);
             dif_vel->diffuse(v, v0, v_tmp, nu, sync);
@@ -123,8 +122,7 @@ void NSSolver::DoStep(real t, bool sync) {
 // 3. Add force
         if (m_sourceFct != SourceMethods::Zero) {
 #ifndef PROFILING
-            std::cout << "Add source ..." << std::endl;
-            //TODO Logger
+            spdlog::info("Add source ...");
 #endif
             sou->addSource(u, v, w, f_x, f_y, f_z, sync);
             // Couple data
@@ -137,8 +135,7 @@ void NSSolver::DoStep(real t, bool sync) {
 
         // Solve pressure equation
 #ifndef PROFILING
-        std::cout << "Pressure ..." << std::endl;
-        //TODO Logger
+        spdlog::info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);
 
@@ -161,21 +158,18 @@ void NSSolver::control() {
     auto params = Parameters::getInstance();
 
     if (params->get("solver/advection/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Eroor Handling + Logger
+        //TODO Eroor Handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Eroor Handling + Logger
+        //TODO Eroor Handling
     }
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+        spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Eroor Handling + Logger
+        //TODO Eroor Handling
     }
 }

@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "Functions.h"
 #include "utility/Parameters.h"
@@ -861,8 +862,8 @@ namespace Functions {
             real z2 = domain->Getz2();
             bord[0] = z1;
             bord[n_layers] = z2;
-        } else std::cout << "No distance for layers specified!" << std::endl;
-        //TODO Error handling + Logger
+        } else spdlog::error("No distance for layers specified!");
+        //TODO Error handling
 
         // get values in layers
         // layer values
@@ -920,8 +921,8 @@ namespace Functions {
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
-                } else std::cout << "No distance for layers specified!" << std::endl;
-                //TODO Error handling + Logger
+                } else spdlog::error("No distance for layers specified!");
+                //TODO Error handling
             }
 
             //boundary
@@ -944,8 +945,8 @@ namespace Functions {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
                     if (z < bord[0]) out->data[idx] = val[0];
-                } else std::cout << "No distance for layers specified!" << std::endl;
-                //TODO Error handling + Logger
+                } else spdlog::error("No distance for layers specified!");
+                //TODO Error handling
             }
             //obstacles
             for (size_t i = 0; i < size_oList; i++) {
@@ -967,8 +968,8 @@ namespace Functions {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
                     if (z < bord[0]) out->data[idx] = val[0];
-                } else std::cout << "No distance for layers specified!" << std::endl;
-                //TODO Error handling + Logger
+                } else spdlog::error("No distance for layers specified!");
+                //TODO Error handling
             }
 
         } //end layer loop

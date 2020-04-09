@@ -5,8 +5,9 @@
 /// \author 	Severt
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "JacobiDiffuse.h"
 #include "../utility/Parameters.h"
@@ -133,9 +134,8 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
         }
 
 #ifndef PROFILING
-        std::cout << "Number of iterations:" << it << std::endl;
-        std::cout << "Jacobi ||res|| = " << res << "\n";
-        //TODO Logger
+        spdlog::info("Number of iterations: {}", it);
+        spdlog::info("Jacobi ||res||=", res);
 #endif
 
     }//end data region
@@ -251,9 +251,8 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 #pragma acc wait
         }
 #ifndef PROFILING
-        std::cout << "Number of iterations:" << it << std::endl;
-        std::cout << "Jacobi ||res|| = " << res << "\n";
-        //TODO Logger
+        spdlog::info("Number of iterations: {}", it);
+        spdlog::info("Jacobi ||res||={}", res);
 #endif
     }//end data region
 }
