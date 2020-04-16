@@ -7,6 +7,7 @@
 #ifndef ARTSS_UTILITY_UTILITY_H_
 #define ARTSS_UTILITY_UTILITY_H_
 
+#include <spdlog/logger.h>
 #include <string>
 #include <vector>
 
@@ -18,8 +19,12 @@ public:
 //    static size_t getCoordinateK(size_t idx, size_t Nx, size_t Ny);
     static std::vector<std::string> split(const char* text, char delimiter);
     static std::vector<std::string> split(const std::string& text, char delimiter);
+
+    static spdlog::logger createLogger(std::string loggerName);
+
 private:
     Utility() = default;
+
 };
 
 

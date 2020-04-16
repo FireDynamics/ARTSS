@@ -5,10 +5,12 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cstring>
-#include <iterator>
 #include <sstream>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/basic_file_sink.h>
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
+#include "Parameters.h"
 
 // ================================= Calc i,j,k ==========================================
 // ***************************************************************************************
@@ -90,4 +92,30 @@ std::vector<std::string> Utility::split(const char *text, char delimiter) {
         tokens.push_back(token);
     }
     return tokens;
+}
+
+// ================================= Split string at character ==========================================
+// ***************************************************************************************
+/// \brief  Splits a string at a defined char
+/// \param  loggerName  name of logger, represented in log file
+// ***************************************************************************************
+spdlog::logger Utility::createLogger(std::string loggerName){
+    auto params = Parameters::getInstance();
+    std::string logLevel = params->get("logging/level");
+    std::string logFile = params->get("logging/file");
+
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    console_sink->set_level(spdlog::level::warn);
+
+    auto file_sink2 = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFile, false);
+    file_sink2->set_level(spdlog::level::info);
+
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("error.log", true);
+    file_sink->set_level(spdlog::level::trace);
+
+    spdlog::logger logger(loggerName, {console_sink, file_sink, file_sink2});
+
+    logger.flush_on(spdlog::level::err);
+
+    return logger;
 }

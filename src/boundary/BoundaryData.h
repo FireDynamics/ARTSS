@@ -7,6 +7,9 @@
 #ifndef ARTSS_BOUNDARY_BOUNDARYDATA_H_
 #define ARTSS_BOUNDARY_BOUNDARYDATA_H_
 
+#ifndef PROFILING
+#include <spdlog/logger.h>
+#endif
 #include <string>
 #include <vector>
 #include "../utility/tinyxml2.h"
@@ -41,11 +44,12 @@ public:
     bool isEmpty(){ return !m_hasValues; };
 private:
 
+#ifndef PROFILING
+    spdlog::logger m_logger = spdlog::logger("");
+#endif
     BoundaryCondition* m_boundaryConditions;
     real* m_values;
 
     bool m_hasValues = false;
 };
-
-
 #endif /* ARTSS_BOUNDARY_BOUNDARYDATA_H_ */

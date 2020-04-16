@@ -5,17 +5,22 @@
 /// \author       lgewuerz
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-#include<cmath>
+#include <cmath>
+#ifndef PROFILING
+#include <spdlog/spdlog.h>
+#endif
 
 #include "ColoredGaussSeidelDiffuse.h"
 #include "../boundary/BoundaryController.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
+#include "../utility/Utility.h"
 
 //=============================== Constructor ======================================
 ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
-
+#ifndef PROFILING
+    m_logger = Utility::createLogger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
 
     m_dt = params->getReal("physical_parameters/dt");
@@ -119,9 +124,8 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
     }
 
 #ifndef PROFILING
-    std::cout << "Number of iterations:" << it << std::endl;
-    std::cout << "Colored Gauss-Seidel ||res|| = " << res << "\n";
-    //TODO Logger
+    m_logger.info("Number of iterations: {}", it);
+    m_logger.info("Colored Gauss-Seidel ||res|| = {}", res);
 #endif
 } //end data region
 };
@@ -216,9 +220,8 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
     }
 
 #ifndef PROFILING
-    std::cout << "Number of iterations:" << it << std::endl;
-    std::cout << "Colored Gauss-Seidel ||res|| = " << res << "\n";
-    //TODO Logger
+    m_logger.info("Number of iterations: {}", it);
+    m_logger.info("Colored Gauss-Seidel ||res|| = {}", res);
 #endif
 } //end data region
 };

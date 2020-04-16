@@ -3,17 +3,18 @@
 /// \date 		Oct 08, 2020
 /// \author 	My Linh Würzburger
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
-#include <iostream>
 #include "BoundaryData.h"
 #include "../Domain.h"
 #include "../utility/Utility.h"
-#include "../utility/GlobalMacrosTypes.h"
 
 inline static const std::vector<std::string> FieldTypeNames = {"rho", "u", "v", "w", "p", "T"};
 inline static const std::vector<std::string> PatchNames = {"front", "back", "bottom", "top", "left", "right"};
 inline static const std::vector<std::string> BoundaryConditionNames = {"neumann", "dirichlet", "periodic"};
 
 BoundaryData::BoundaryData() {
+#ifndef PROFILING
+    m_logger = Utility::createLogger(typeid(this).name());
+#endif
     m_values = new real[numberOfPatches];
     m_boundaryConditions = new BoundaryCondition[numberOfPatches];
 }
@@ -29,9 +30,11 @@ BoundaryData::~BoundaryData() {
 // *******************************************************************************
 void BoundaryData::print() {
     for (size_t i = 0; i < numberOfPatches; i++) {
-        std::cout << "\t Patch " << getPatchName(static_cast<Patch>(i)) << " with " << getBoundaryConditionName(m_boundaryConditions[i]) << " " << m_values[i] << std::endl;
+        std::string p = getPatchName(static_cast<Patch>(i));
+        std::string bc = getBoundaryConditionName(m_boundaryConditions[i]);
+        real val = m_values[i];
+        m_logger.info("\t Patch {} with {} {}", p , bc, val);
     }
-    //TODO print boundaries
 }
 
 //====================================== Matches =================================
@@ -41,13 +44,11 @@ void BoundaryData::print() {
 // *******************************************************************************
 FieldType BoundaryData::matchField(const std::string &s) {
 
-    for (auto fn = 0; fn < FieldTypeNames.size(); fn++) {
+    for (size_t fn = 0; fn < FieldTypeNames.size(); fn++) {
         if (FieldTypeNames[fn] == s) return (FieldType) fn;
     }
 
-    std::cout << "unknown field found -> exit" << std::endl;
-    std::flush(std::cout);
-    std::exit(1);
+    //TODO logger->warn("unknown field {} found", s);
 }
 
 // *******************************************************************************
@@ -55,13 +56,11 @@ FieldType BoundaryData::matchField(const std::string &s) {
 /// \param	s			string to be matched
 // *******************************************************************************
 Patch BoundaryData::matchPatch(const std::string &s) {
-    for (auto pn = 0; pn < PatchNames.size(); pn++) {
+    for (size_t pn = 0; pn < PatchNames.size(); pn++) {
         if (PatchNames[pn] == s) return (Patch) pn;
     }
 
-    std::cout << "unknown patch found -> exit" << std::endl;
-    std::flush(std::cout);
-    std::exit(1);
+    //TODO logger->warn("unknown patch {} found", s);
 }
 
 // *******************************************************************************
@@ -69,13 +68,11 @@ Patch BoundaryData::matchPatch(const std::string &s) {
 /// \param	s			string to be matched
 // *******************************************************************************
 BoundaryCondition BoundaryData::matchBoundaryCondition(const std::string &s) {
-    for (auto tn = 0; tn < BoundaryConditionNames.size(); tn++) {
+    for (size_t tn = 0; tn < BoundaryConditionNames.size(); tn++) {
         if (BoundaryConditionNames[tn] == s) return (BoundaryCondition) tn;
     }
 
-    std::cout << "unknown BC type found -> exit" << std::endl;
-    std::flush(std::cout);
-    std::exit(1);
+    //TODO logger->warn("unknown boundary condition {} found", s);
 }
 
 std::string BoundaryData::getFieldTypeName(FieldType f) {

@@ -11,6 +11,9 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "SourceI.h"
 
+#ifndef PROFILING
+#include <spdlog/logger.h>
+#endif
 struct SolverTypes {
     inline static const std::string AdvectionSolver = "AdvectionSolver";
     inline static const std::string AdvectionDiffusionSolver = "AdvectionDiffusionSolver";
@@ -143,6 +146,9 @@ protected:
 	static void CoupleScalar(const Field* a, Field* a0, Field* a_tmp, bool sync);
 
 private:
+#ifndef PROFILING
+    spdlog::logger m_logger = spdlog::logger("");
+#endif
 	std::string m_string_solver;
 	void ForceSource();
 	void TemperatureSource();

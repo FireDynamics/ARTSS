@@ -32,7 +32,7 @@ running make. The steps are summarized below.
 
 ```
 # 1. Clone
-git clone https://github.com/FireDynamics/ARTSS.git
+git clone --recurse-submodules  https://github.com/FireDynamics/ARTSS.git
 cd ARTSS
 
 # 2. Compiling the code
@@ -82,3 +82,58 @@ ARTSS
 * [**My Linh Würzburger**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Wuerzburger_My_Linh/main.html?nn=2302136): *Contributor*
 * [**Max Böhler**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Boehler_Max/_node.html)
 * Suryanarayana Maddu Kondaiah
+
+<!--
+### Arguments
+The non PROFILING-version accepts following parameter provided via command line
+
+| Flag  |                                      Purpose                                                | Argument |
+| :---: | :------------------------------------------------------------------------------------------ | :------- |
+|  -l   | determines the minimal loglevel you will only see messages greater that                     | loglevel |
+|  -o   | determines the path for the logfile if not provided it uses './log.txt'. Use '-' for stdout | path     |
+
+
+loglevel can have following arguments.
+
+| Loglevel | Default |
+| :------- | :-----: |
+| trace    |         |
+| debug    |         |
+| info     |    X    |
+| warning  |         |
+| error    |         |
+| critical |         |
+
+
+#### Examples
+
+Creates `log.txt` if not existing or appends on it. Shows only messages on level info or above
+```
+../build/bin/artss_serial XML.xml
+```
+
+Creates `myfile.txt` if not existing or appends on it. Shows only messages on level info or above
+```
+../build/bin/artss_serial -o myfile.txt XML.xml
+```
+
+Shows even debug messages on stdout
+```
+../build/bin/artss_serial -l debug -o - XML.xml
+```
+-->
+
+## Development
+If you want to participate in this project, this section is for you.
+
+### Coding style
+https://google.github.io/styleguide/cppguide.html
+
+### Development Requirements
+These additional tools can make your live a lot easier.
+
+|     Tool   | Version |                Ref                 |
+| :--------- | :-----: | :--------------------------------- |
+| cpplint    |         | https://github.com/cpplint/cpplint |
+| pre-commit |         | https://pre-commit.com/            |
+| spdlog     |         | https://github.com/gabime/spdlog   |

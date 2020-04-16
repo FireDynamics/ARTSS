@@ -9,21 +9,25 @@
 #else
 #include <cmath>
 #endif
-#include <iostream>
+
 #include <chrono>
 #include <fstream>
+#include <iostream>
+
 #include "Adaption.h"
 #include "Layers.h"
 #include "Vortex.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
+#include "../utility/Utility.h"
 
 class Vortex;
 
 class Layers;
 
 Adaption::Adaption(Field **fields) {
+    m_logger = Utility::createLogger(typeid(this).name());
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
     m_dynamic = (params->get("adaption/dynamic") == "Yes");
@@ -48,8 +52,9 @@ Adaption::Adaption(Field **fields) {
         } else if (init == "Vortex" || init == "VortexY") {
             func = new Vortex(this, fields);
         } else {
-            std::cout << "Type " << init << " is not defined" << std::endl;
-            throw std::exception();
+            m_logger.critical("Type {} is not defined", init);
+            std::exit(1);
+            ///TODO Error Handling
         }
 
         m_reduction = func->hasReduction();
@@ -203,22 +208,24 @@ void Adaption::applyChanges() {
 // ***************************************************************************************
 bool Adaption::isUpdateNecessary() {
 #ifndef PROFILING
-  std::ofstream file;
-    file.open(getTimeMeasuringName(), std::ios::app);
+    std::ofstream file;
     std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
+    if (m_hasTimeMeasuring) {
+        file.open(getTimeMeasuringName(), std::ios::app);
+        start = std::chrono::system_clock::now();
+    }
 #endif
     bool update = false;
     if (!m_dynamic_end) {
         update = func->update();
     }
 #ifndef PROFILING
-    end = std::chrono::system_clock::now();
-    long ms = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     if(m_hasTimeMeasuring) {
+        end = std::chrono::system_clock::now();
+        long ms = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         file << "update: " << ms << " microsec\n";
+        file.close();
     }
-    file.close();
 #endif
     return update;
 }
@@ -511,10 +518,12 @@ bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noB
     }
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
-         std::cout << "Exception in x-Adaption: " << size_t(expansion_start) << size_t(reduction_start)
-                   << size_t(expansion_end) << size_t(reduction_end) << std::endl;
-        //TODO Error handling + Logger
-        throw std::exception();
+        m_logger.error("Exception in x-Adaption: {} {} {} {}", size_t(expansion_start),
+                                                              size_t(reduction_start),
+                                                              size_t(expansion_end),
+                                                              size_t(reduction_end));
+        //TODO Error handling
+        //throw std::exception();
     }
     if (reduction_start == ADTypes::UNKNOWN && expansion_start != ADTypes::YES) {
         reduction_start = ADTypes::YES;
@@ -600,9 +609,12 @@ bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCe
     }
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
-        std::cerr << "Trying to reduce and expand at the same time (x): " << expansion_counter_start << ","
-                  << reduction_counter_start << "|" << expansion_counter_end << "," << reduction_counter_end
-                  << std::endl;
+        m_logger.error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
+                expansion_counter_start,
+                reduction_counter_start,
+                expansion_counter_end,
+                reduction_counter_end);
+        //TODO Error Handling
         //throw std::exception();
     }
     if (expansion_counter_start > 0) {
@@ -712,10 +724,12 @@ bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noB
     }
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
-        std::cout << "Exception in y-Adaption: " << size_t(expansion_start) << size_t(reduction_start)
-                  << size_t(expansion_end) << size_t(reduction_end) << std::endl;
-                  //TODO Error handling + Logger
-        throw std::exception();
+        m_logger.error("Exception in y-Adaption: {} {} {} {}", size_t(expansion_start),
+                                                              size_t(reduction_start),
+                                                              size_t(expansion_end),
+                                                              size_t(reduction_end));
+        //TODO Error handling
+        //throw std::exception();
     }
     if (reduction_start == ADTypes::UNKNOWN && expansion_start != ADTypes::YES) {
         reduction_start = ADTypes::YES;
@@ -802,10 +816,12 @@ bool Adaption::adaptYDirection(const real *f, real checkValue, size_t noBufferCe
     }
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
-        std::cerr << "Trying to reduce and expand at the same time (y): " << expansion_counter_start << ","
-                  << reduction_counter_start << "|" << expansion_counter_end << "," << reduction_counter_end
-                  << std::endl;
-                  //TODO Error handling + Logger
+        m_logger.error("Trying to reduce and expand at the same time (y): {}, {} | {}, {}",
+            expansion_counter_start,
+            reduction_counter_start,
+            expansion_counter_end,
+            reduction_counter_end);
+        //TODO Error handling
         //throw std::exception();
     }
     if (expansion_counter_start > 0) {
