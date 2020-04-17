@@ -124,8 +124,8 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
     }
 
 #ifndef PROFILING
-    m_logger.info("Number of iterations: {}", it);
-    m_logger.info("Colored Gauss-Seidel ||res|| = {:.5e}", res);
+    m_logger->info("Number of iterations: {}", it);
+    m_logger->info("Colored Gauss-Seidel ||res|| = {:.5e}", res);
 #endif
 } //end data region
 };
@@ -220,8 +220,8 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
     }
 
 #ifndef PROFILING
-    m_logger.info("Number of iterations: {}", it);
-    m_logger.info("Colored Gauss-Seidel ||res|| = {.5e}", res);
+    m_logger->info("Number of iterations: {}", it);
+    m_logger->info("Colored Gauss-Seidel ||res|| = {.5e}", res);
 #endif
 } //end data region
 };

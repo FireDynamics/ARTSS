@@ -48,7 +48,7 @@ public:
 
 private:
 #ifndef PROFILING
-    spdlog::logger m_logger = spdlog::logger("");
+    std::shared_ptr<spdlog::logger> m_logger;
 #endif
     std::vector<BoundaryData*> m_boundaryData;
     size_t m_levels;

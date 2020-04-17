@@ -681,7 +681,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
             }
         } //end data region
     } else {
-        m_logger.critical("Diffusion method not yet implemented! Simulation stopped!");
+        m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
         std::exit(1);
         //TODO Error handling
     }
@@ -782,7 +782,7 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     size_t end_i = boundary->get_innerList_level_joined_end(level + 1) + 1;
 
     if (end_i == start_i)
-        m_logger.warn("Be cautious: Obstacle might fill up inner cells completely in level {} with nx= {}!", level, domain->Getnx(out->GetLevel()));
+        m_logger->warn("Be cautious: Obstacle might fill up inner cells completely in level {} with nx= {}!", level, domain->Getnx(out->GetLevel()));
     //TODO Error handling
 
     // average from eight neighboring cells
@@ -909,13 +909,13 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
     const size_t Nz = domain->GetNz(out->GetLevel());
 
     if (level < levels - 1) {
-        m_logger.warn("Wrong level = {}", level);
+        m_logger->warn("Wrong level = {}", level);
         return;
         //TODO Error handling
     }
 
     if (Nx <= 4 && Ny <= 4) {
-        m_logger.warn(" Grid is too coarse with Nx={} and Ny={}. Just smooth here", Nx, Ny);
+        m_logger->warn(" Grid is too coarse with Nx={} and Ny={}. Just smooth here", Nx, Ny);
         Smooth(out, tmp, b, level, sync);
         return;
         //TODO Error handling
@@ -1075,7 +1075,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             }// end while
         } //end data region
     } else {
-        m_logger.critical("Diffusion method not yet implemented! Simulation stopped!");
+        m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
         std::exit(1);
         //TODO Error handling
     }

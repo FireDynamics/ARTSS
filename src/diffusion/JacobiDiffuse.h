@@ -27,7 +27,7 @@ public:
 
 private:
 #ifndef PROFILING
-    spdlog::logger m_logger = spdlog::logger("");
+    std::shared_ptr<spdlog::logger> m_logger;
 #endif
 
 	real m_dt;

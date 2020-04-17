@@ -52,7 +52,7 @@ public:
     size_t getObstacleStrideZ(size_t id, size_t level);
 private:
 #ifndef PROFILING
-    spdlog::logger m_logger = spdlog::logger("");
+    std::shared_ptr<spdlog::logger> m_logger;
 #endif
     static BoundaryController* singleton;
 

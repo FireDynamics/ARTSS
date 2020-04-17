@@ -52,7 +52,7 @@ public:
 
 private:
 #ifndef PROFILING
-    spdlog::logger m_logger = spdlog::logger("");
+    std::shared_ptr<spdlog::logger> m_logger;
 #endif
     size_t m_i1, m_j1, m_k1;
 

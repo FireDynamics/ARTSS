@@ -45,7 +45,7 @@ TimeIntegration::TimeIntegration(SolverI *isolv, const char *fname) {
 void TimeIntegration::run(){
 	Field** vector_fields;
 	Adaption* adaption;
-    m_logger.info("Start calculating and timing...");
+    m_logger->info("Start calculating and timing...");
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
 	start = std::chrono::system_clock::now();
@@ -171,7 +171,7 @@ void TimeIntegration::run(){
 
 		//iter_start = std::chrono::system_clock::now();
 #ifndef PROFILING
-        m_logger.info("t_cur = {:.5f}", t_cur);
+        m_logger->info("t_cur = {:.5f}", t_cur);
 #endif
 
 		// Calculate
@@ -240,12 +240,12 @@ void TimeIntegration::run(){
 
 } //end RANGE
 
-    m_logger.info("Done calculating and timing ...");
+    m_logger->info("Done calculating and timing ...");
 
     // stop timer
     end = std::chrono::system_clock::now();
     long ms = std::chrono::duration_cast < std::chrono::milliseconds > (end - start).count();
-    m_logger.info("Global Time: {}ms", ms);
+    m_logger->info("Global Time: {}ms", ms);
 
     if (adaption->isDataExtractionEndresultEnabled()) {
         adaption->extractData(adaption->getEndresultName());

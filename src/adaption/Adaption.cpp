@@ -52,7 +52,7 @@ Adaption::Adaption(Field **fields) {
         } else if (init == "Vortex" || init == "VortexY") {
             func = new Vortex(this, fields);
         } else {
-            m_logger.critical("Type {} is not defined", init);
+            m_logger->critical("Type {} is not defined", init);
             std::exit(1);
             ///TODO Error Handling
         }
@@ -518,7 +518,7 @@ bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noB
     }
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
-        m_logger.error("Exception in x-Adaption: {} {} {} {}", size_t(expansion_start),
+        m_logger->error("Exception in x-Adaption: {} {} {} {}", size_t(expansion_start),
                                                               size_t(reduction_start),
                                                               size_t(expansion_end),
                                                               size_t(reduction_end));
@@ -609,7 +609,7 @@ bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCe
     }
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
-        m_logger.error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
+        m_logger->error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
                 expansion_counter_start,
                 reduction_counter_start,
                 expansion_counter_end,
@@ -724,7 +724,7 @@ bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noB
     }
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
-        m_logger.error("Exception in y-Adaption: {} {} {} {}", size_t(expansion_start),
+        m_logger->error("Exception in y-Adaption: {} {} {} {}", size_t(expansion_start),
                                                               size_t(reduction_start),
                                                               size_t(expansion_end),
                                                               size_t(reduction_end));
@@ -816,7 +816,7 @@ bool Adaption::adaptYDirection(const real *f, real checkValue, size_t noBufferCe
     }
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
-        m_logger.error("Trying to reduce and expand at the same time (y): {}, {} | {}, {}",
+        m_logger->error("Trying to reduce and expand at the same time (y): {}, {} | {}, {}",
             expansion_counter_start,
             reduction_counter_start,
             expansion_counter_end,

@@ -44,7 +44,7 @@ private:
 	std::vector<Field*> error1;
 	std::vector<Field*> mg_temporal_solution;
 #ifndef PROFILING
-    spdlog::logger m_logger = spdlog::logger("");
+    std::shared_ptr<spdlog::logger> m_logger;
 #endif
 };
 

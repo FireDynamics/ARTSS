@@ -59,7 +59,7 @@ void BoundaryDataController::print() {
     for (size_t i = 0; i < numberOfFieldTypes; i++) {
         auto boundary = *(m_boundaryData + i);
         if (!boundary->isEmpty()) {
-            m_logger.info("--- found boundary conditions for field {} ({}): ", BoundaryData::getFieldTypeName(static_cast<FieldType>(i)), i);
+            m_logger->info("--- found boundary conditions for field {} ({}): ", BoundaryData::getFieldTypeName(static_cast<FieldType>(i)), i);
             boundary->print();
         }
     }

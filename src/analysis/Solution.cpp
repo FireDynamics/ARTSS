@@ -97,7 +97,7 @@ void Solution::CalcAnalyticalSolution(const real t) {
         } else if (initialCondition == FunctionNames::BuoyancyMMS) {
             Functions::BuoyancyMMS(ua, va, wa, pa, Ta, t);
         } else {
-            m_logger.info("Analytical solution set to zero!");
+            m_logger->info("Analytical solution set to zero!");
         }
     }
 

@@ -135,8 +135,8 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
         }
 
 #ifndef PROFILING
-        m_logger.info("Number of iterations: {}", it);
-        m_logger.info("Jacobi ||res|| = {:.5e}", res);
+        m_logger->info("Number of iterations: {}", it);
+        m_logger->info("Jacobi ||res|| = {:.5e}", res);
 #endif
 
     }//end data region
@@ -252,8 +252,8 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 #pragma acc wait
         }
 #ifndef PROFILING
-        m_logger.info("Number of iterations: {}", it);
-        m_logger.info("Jacobi ||res|| = {.5e}", res);
+        m_logger->info("Number of iterations: {}", it);
+        m_logger->info("Jacobi ||res|| = {.5e}", res);
 #endif
     }//end data region
 }

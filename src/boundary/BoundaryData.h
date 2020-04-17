@@ -45,7 +45,7 @@ public:
 private:
 
 #ifndef PROFILING
-    spdlog::logger m_logger = spdlog::logger("");
+    std::shared_ptr<spdlog::logger> m_logger;
 #endif
     BoundaryCondition* m_boundaryConditions;
     real* m_values;

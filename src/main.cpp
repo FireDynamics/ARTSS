@@ -40,16 +40,16 @@
 /// \brief parses arguments provided to the program for logging
 /// \param XMLfilename       filename of provided xml file
 // ***************************************************************************
-spdlog::logger installLogger(std::string XMLfilename) {
+std::shared_ptr<spdlog::logger> installLogger(std::string XMLfilename) {
     auto params = Parameters::getInstance();
-    spdlog::logger logger = Utility::createLogger("basic");
+    auto logger = Utility::createLogger("basic");
 
     std::string logLevel = params->get("logging/level");
     std::string logFile = params->get("logging/file");
 
-    logger.info("Provided XML file: {}", XMLfilename);
-    logger.info("Provided logging level: {}", logLevel);
-    logger.info("Provided logging output: {}", logFile);
+    logger->info("Provided XML file: {}", XMLfilename);
+    logger->info("Provided logging level: {}", logLevel);
+    logger->info("Provided logging output: {}", logFile);
     return logger;
 }
 
@@ -67,11 +67,11 @@ int main(int argc, char **argv) {
 
     auto params = Parameters::getInstance();
     params->parse(XMLfilename);
-    spdlog::logger logger = installLogger(XMLfilename);
-    logger.debug("test mit debug");
-    logger.warn("test mit warn");
-    logger.info("test mit info");
-    logger.critical("test mit critical");
+    auto logger = installLogger(XMLfilename);
+    logger->debug("test mit debug");
+    logger->warn("test mit warn");
+    logger->info("test mit info");
+    logger->critical("test mit critical");
 
     // Solver
     SolverI* solver;
@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
     } else if (string_solver == SolverTypes::NSTempTurbConSolver) {
         solver = new NSTempTurbConSolver();
     } else {
-        logger.critical("Solver not yet implemented! Simulation stopped!");
+        logger->critical("Solver not yet implemented! Simulation stopped!");
         std::exit(1);
     }
 

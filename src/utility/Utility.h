@@ -1,30 +1,39 @@
-/// \file 		Utility.h
-/// \brief 		Offers some tools
-/// \date 		October 01, 2019
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       Utility.h
+/// \brief      Offers some tools
+/// \date       October 01, 2019
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_UTILITY_UTILITY_H_
 #define ARTSS_UTILITY_UTILITY_H_
 
-#include <spdlog/logger.h>
 #include <string>
 #include <vector>
 
+#include "spdlog/logger.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+
 class Utility {
-public:
-    static std::vector<size_t> coordinateFromLinearIndex(size_t idx, size_t Nx, size_t Ny);
-//    static size_t getCoordinateI(size_t idx, size_t Nx, size_t Ny, size_t j, size_t k);
-//    static size_t getCoordinateJ(size_t idx, size_t Nx, size_t Ny, size_t k);
-//    static size_t getCoordinateK(size_t idx, size_t Nx, size_t Ny);
+ public:
+    static std::vector<size_t> coordinateFromLinearIndex(size_t idx,
+                                                         size_t Nx,
+                                                         size_t Ny);
+//  static size_t getCoordinateI(size_t idx,
+//                               size_t Nx,
+//                               size_t Ny,
+//                               size_t j,
+//                               size_t k);
+//  static size_t getCoordinateJ(size_t idx, size_t Nx, size_t Ny, size_t k);
+//  static size_t getCoordinateK(size_t idx, size_t Nx, size_t Ny);
     static std::vector<std::string> split(const char* text, char delimiter);
-    static std::vector<std::string> split(const std::string& text, char delimiter);
+    static std::vector<std::string> split(const std::string& text,
+                                          char delimiter);
 
-    static spdlog::logger createLogger(std::string loggerName);
+    static std::shared_ptr<spdlog::logger> createLogger(std::string loggerName);
 
-private:
+ private:
     Utility() = default;
-
 };
 
 

@@ -365,7 +365,7 @@ void Multigrid::control() {
 
     if (!message.empty()) {
         message = "################ MULTIGRID CONTROL ################\n" + message + "---------------- MULTIGRID CONTROL END ----------------";
-        m_logger.warn(message);
+        m_logger->warn(message);
     }
 }
 
@@ -690,13 +690,13 @@ Obstacle **Multigrid::obstacleDominantRestriction(size_t level) {
 
         //TODO exit?
         if (i2_fine - i1_fine + 1< domain->Getnx(level-1)-2 && i2_coarse - i1_coarse +1>= domain->Getnx(level)-2){
-            m_logger.warn("Be cautious! Obstacle fills up inner cells in x-direction at level {}", level);
+            m_logger->warn("Be cautious! Obstacle fills up inner cells in x-direction at level {}", level);
         }
         if (j2_fine - j1_fine +1< domain->Getny(level-1)-2 && j2_coarse - j1_coarse +1>= domain->Getny(level)-2){
-            m_logger.warn("Be cautious! Obstacle fills up inner cells in y-direction at level {}", level);
+            m_logger->warn("Be cautious! Obstacle fills up inner cells in y-direction at level {}", level);
         }
         if (k2_fine - k1_fine +1< domain->Getnz(level-1)-2 && k2_coarse - k1_coarse +1>= domain->Getnz(level)-2){
-            m_logger.warn("Be cautious! Obstacle fills up inner cells in z-direction at level {}", level);
+            m_logger->warn("Be cautious! Obstacle fills up inner cells in z-direction at level {}", level);
         }
 
         Obstacle *obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse, i2_coarse, j2_coarse, k2_coarse, level);

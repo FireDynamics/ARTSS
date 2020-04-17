@@ -24,7 +24,7 @@ Analysis::Analysis() {
     if (hasAnalyticSolution) {
         m_tol = params->getReal("solver/solution/tol");
     } else {
-        m_logger.info("No analytical solution available!\n");
+        m_logger->info("No analytical solution available!\n");
     }
 }
 
@@ -49,7 +49,7 @@ void Analysis::Analyse(SolverI *solver, const real t) {
         auto curElem = xmlParameter->FirstChildElement();
 
         solution.CalcAnalyticalSolution(t);
-        m_logger.info("Compare to analytical solution:");
+        m_logger->info("Compare to analytical solution:");
 
         while (curElem) {
             std::string nodeName(curElem->Value());
@@ -115,11 +115,11 @@ bool Analysis::CompareSolutions(read_ptr num, read_ptr ana, const FieldType type
     //res = CalcRelativeSpatialError(num, ana);
 
     if (res <= m_tol) {
-        m_logger.info("{} PASSED Test at time {} with error e = {}",
+        m_logger->info("{} PASSED Test at time {} with error e = {}",
                 BoundaryData::getFieldTypeName(type), t, res);
         verification = true;
     } else {
-        m_logger.warn("{} FAILED Test at time {} with error e = {}",
+        m_logger->warn("{} FAILED Test at time {} with error e = {}",
                 BoundaryData::getFieldTypeName(type), t, res);
     }
     return verification;
@@ -153,7 +153,7 @@ real Analysis::CalcAbsoluteSpatialError(read_ptr num, read_ptr ana) {
 
     real eps = sqrt(1. / nr * sum);
 
-    m_logger.info("Absolute error ||e|| = {}", eps);
+    m_logger->info("Absolute error ||e|| = {}", eps);
     //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
     //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
     //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]	<< std::endl;
@@ -212,7 +212,7 @@ real Analysis::CalcRelativeSpatialError(read_ptr num, read_ptr ana) {
         eps = epsa / adenom;
     }
 
-    m_logger.info("Relative error ||e|| = {}", eps);
+    m_logger->info("Relative error ||e|| = {}", eps);
     /*std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
     std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
     std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]	<< std::endl;
@@ -283,9 +283,9 @@ void Analysis::CalcRMSError(real sumu, real sump, real sumT) {
         real epsp = sqrt(rNt * sump);
         real epsT = sqrt(rNt * sumT);
 
-        m_logger.info("RMS error of u at domain center is e_RMS = {}", epsu);
-        m_logger.info("RMS error of p at domain center is e_RMS = {}", epsp);
-        m_logger.info("RMS error of T at domain center is e_RMS = {}", epsT);
+        m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
+        m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
+        m_logger->info("RMS error of T at domain center is e_RMS = {}", epsT);
     }
 }
 
@@ -367,7 +367,7 @@ bool Analysis::CheckTimeStepCFL(Field *u, Field *v, Field *w, real dt) {
 
     CFL_check = CFL < 1.;
 
-    m_logger.info("CFL = {}", CFL);
+    m_logger->info("CFL = {}", CFL);
 
     return CFL_check;
 }

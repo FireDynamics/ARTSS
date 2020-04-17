@@ -59,7 +59,7 @@ private:
 	Field* pa, *p0a;
 	Field* Ta, *T0a;
 
-    spdlog::logger m_logger = spdlog::logger("");
+    std::shared_ptr<spdlog::logger> m_logger;
     void SetUp();
 };
 

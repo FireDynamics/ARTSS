@@ -78,7 +78,7 @@ SolverI::SolverI() {
         if (params->get("solver/source/type") == SourceMethods::ExplicitEuler) {
             this->sou_vel = new ExplicitEulerSource();
         } else {
-            m_logger.critical("Source method not yet implemented! Simulation stopped!");
+            m_logger->critical("Source method not yet implemented! Simulation stopped!");
             std::exit(1);
             //TODO Error handling
         }
@@ -92,7 +92,7 @@ SolverI::SolverI() {
         if (params->get("solver/temperature/source/type") == SourceMethods::ExplicitEuler) {
             this->sou_temp = new ExplicitEulerSource();
         } else {
-            m_logger.critical("Source method not yet implemented! Simulation stopped!");
+            m_logger->critical("Source method not yet implemented! Simulation stopped!");
             std::exit(1);
             //TODO Error handling
         }
@@ -104,7 +104,7 @@ SolverI::SolverI() {
         if (params->get("solver/concentration/source/type") == SourceMethods::ExplicitEuler) {
             this->sou_con = new ExplicitEulerSource();
         } else {
-            m_logger.critical("Source method not yet implemented! Simulation stopped!");
+            m_logger->critical("Source method not yet implemented! Simulation stopped!");
             std::exit(1);
             //TODO Error handling
         }
@@ -174,7 +174,7 @@ SolverI::~SolverI() {
 /// \brief  initializes numerical and temporary solution
 // ***************************************************************************************
 void SolverI::SetUp() {
-    m_logger.info("Start initializing....");
+    m_logger->info("Start initializing....");
 
     // Initialization of variables at time t=0
     Init();
@@ -409,7 +409,7 @@ void SolverI::Init() {
             }
         } else {
 #ifndef PROFILING
-            m_logger.info("Initial values all set to zero!");
+            m_logger->info("Initial values all set to zero!");
 #endif
         }
     }
@@ -788,11 +788,11 @@ void SolverI::UpdateSources(real t, bool sync) {
 
         } else if (forceFct == SourceMethods::Buoyancy) {
 #ifndef PROFILING
-            m_logger.info("Update f(T) ...");
+            m_logger->info("Update f(T) ...");
 #endif
             MomentumSource();
         } else {
-            m_logger.critical("Source function not yet implemented! Simulation stopped!");
+            m_logger->critical("Source function not yet implemented! Simulation stopped!");
             std::exit(1);
             //TODO Error handling
         }
@@ -840,7 +840,7 @@ void SolverI::UpdateSources(real t, bool sync) {
                 d_S_T[idx] *= t_ramp;
             }
         } else {
-            m_logger.critical("Source function not yet implemented! Simulation stopped!");
+            m_logger->critical("Source function not yet implemented! Simulation stopped!");
             std::exit(1);
             //TODO Error handling
         }
@@ -883,7 +883,7 @@ void SolverI::UpdateSources(real t, bool sync) {
                 d_S_C[idx] *= t_ramp;
             }
         } else {
-            m_logger.critical("Source function not yet implemented! Simulation stopped!");
+            m_logger->critical("Source function not yet implemented! Simulation stopped!");
             std::exit(1);
             //TODO Error handling
         }

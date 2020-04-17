@@ -219,11 +219,11 @@ void Obstacle::print() {
     size_t i2 = getCoordinates_i2();
     size_t j2 = getCoordinates_j2();
     size_t k2 = getCoordinates_k2();
-    m_logger.info("-- Obstacle");
-    m_logger.info("\t strides (x y z): {} {} {}", m_strideX, m_strideY, m_strideZ);
-    m_logger.info("\t size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}", m_size_obstacleFront, m_size_obstacleBack, m_size_obstacleBottom, m_size_obstacleTop, m_size_obstacleLeft, m_size_obstacleRight);
-    m_logger.info("\t size of Obstacle: {}", m_size_obstacleList);
-    m_logger.info("\t coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, i2, m_j1, j2, m_k1, k2);
+    m_logger->info("-- Obstacle");
+    m_logger->info("\t strides (x y z): {} {} {}", m_strideX, m_strideY, m_strideZ);
+    m_logger->info("\t size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}", m_size_obstacleFront, m_size_obstacleBack, m_size_obstacleBottom, m_size_obstacleTop, m_size_obstacleLeft, m_size_obstacleRight);
+    m_logger->info("\t size of Obstacle: {}", m_size_obstacleList);
+    m_logger->info("\t coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, i2, m_j1, j2, m_k1, k2);
 }
 
 //======================================== Print ====================================

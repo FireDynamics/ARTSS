@@ -117,7 +117,7 @@ public:
 
     long m_shift_x1, m_shift_x2, m_shift_y1, m_shift_y2, m_shift_z1, m_shift_z2;
 private:
-    spdlog::logger m_logger = spdlog::logger("");
+    std::shared_ptr<spdlog::logger> m_logger;
     bool isUpdateNecessary();
 
     void applyChanges();

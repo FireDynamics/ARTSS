@@ -33,7 +33,7 @@ void BoundaryData::print() {
         std::string p = getPatchName(static_cast<Patch>(i));
         std::string bc = getBoundaryConditionName(m_boundaryConditions[i]);
         real val = m_values[i];
-        m_logger.info("\t Patch {} with {} {}", p , bc, val);
+        m_logger->info("\t Patch {} with {} {}", p , bc, val);
     }
 }
 

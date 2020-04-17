@@ -147,7 +147,7 @@ protected:
 
 private:
 #ifndef PROFILING
-    spdlog::logger m_logger = spdlog::logger("");
+    std::shared_ptr<spdlog::logger> m_logger;
 #endif
 	std::string m_string_solver;
 	void ForceSource();

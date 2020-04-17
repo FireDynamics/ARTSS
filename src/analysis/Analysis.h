@@ -28,7 +28,7 @@ public:
 
 private:
 	real m_tol = 1e-7;
-    spdlog::logger m_logger = spdlog::logger("");
+    std::shared_ptr<spdlog::logger> m_logger;
 	bool CompareSolutions(read_ptr num, read_ptr ana, FieldType type, real t);
 	real CalcAbsoluteSpatialError(read_ptr num, read_ptr ana);
 	real CalcRelativeSpatialError(read_ptr num, read_ptr ana);
