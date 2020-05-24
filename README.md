@@ -16,13 +16,13 @@ Detailed requirements are listed in the table below (general requirements for se
 
 |          | Purpose                                             | Tool     | Version       |
 |--------- | --------------------------------------------------- | -------- | --------------|
-| General  | Version control system to obtain the source code    | git      |   >= 2.0      |
+| General  | Version control system (optional)                   | git      |   >= 2.0      |
 |          | Build processor using a compiler-independent method | CMake    |   >= 2.8      |
 |          | Compiler fully supporting C++-17                    | gcc      |   >= 7.0      |
-|          |                                                     | clang    |   >= 8.0      |
+|          |                                                     | or clang |   >= 8.0      |
 |          | Visualization of output                             | vtk      |   >= 5.8      |
-|          |                                                     | Paraview |   VisIT       |
-|          | Testing for consistency of output while developing  | python   |   >= 3.6      |
+|          |                                                     | Paraview |   >= 5.50     |
+|          | Testing for consistency of output while developing  | Python   |   >= 3.6      |
 | Specific | Compiler fully supporting C++-17 and OpenACC        | PGI      |   >= 19.10    |
 
 ### Compiling the Code
@@ -40,6 +40,7 @@ cd ARTSS
 ```
 ./compile.sh [OPTIONS]
 ```
+*Note: Without options all executables will be compiled using the PGI compiler and CUDA 8.0.*
 
 OPTIONS (selection; show all by using --help flag):
 - '-s' -> Compile serial ARTSS version
