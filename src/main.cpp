@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
 
     if (argc > 1) {
         XMLfilename.assign(argv[1]);
-    } else{
+    } else {
         std::cerr << "XML file missing" << std::endl;
         std::exit(1);
     }
