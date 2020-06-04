@@ -16,10 +16,23 @@
 #include "../Field.h"
 
 const size_t numberOfPatches = 6;
-enum Patch : size_t {FRONT = 0, BACK = 1, BOTTOM = 2, TOP = 3, LEFT = 4, RIGHT = 5};
+enum Patch : int {
+    UNKOWN_PATCH = -1,
+    FRONT = 0,
+    BACK = 1,
+    BOTTOM = 2,
+    TOP = 3,
+    LEFT = 4,
+    RIGHT = 5
+};
 
 const size_t numberOfBoundaryConditions = 3;
-enum BoundaryCondition : size_t {NEUMANN = 0, DIRICHLET = 1, PERIODIC = 2};
+enum BoundaryCondition : int {
+    UNKOWN_CONDITION = -1,
+    NEUMANN = 0,
+    DIRICHLET = 1,
+    PERIODIC = 2
+};
 
 class BoundaryData {
 public:

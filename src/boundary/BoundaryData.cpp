@@ -1,8 +1,8 @@
-/// \file 		BoundaryData.cpp
-/// \brief 		Data class for boundary data
-/// \date 		Oct 08, 2020
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       BoundaryData.cpp
+/// \brief      Data class for boundary data
+/// \date       Oct 08, 2020
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 #include "BoundaryData.h"
 #include "../Domain.h"
 #include "../utility/Utility.h"
@@ -40,39 +40,39 @@ void BoundaryData::print() {
 //====================================== Matches =================================
 // *******************************************************************************
 /// \brief  matches string to FieldTypeNames
-/// \param	s			string to be matched
+/// \param  s           string to be matched
 // *******************************************************************************
 FieldType BoundaryData::matchField(const std::string &s) {
-
     for (size_t fn = 0; fn < FieldTypeNames.size(); fn++) {
         if (FieldTypeNames[fn] == s) return (FieldType) fn;
     }
 
-    //TODO logger->warn("unknown field {} found", s);
+    // unknown fieldtype => die
+    return UNKOWN_FIELD;
 }
 
 // *******************************************************************************
 /// \brief  matches string to PatchNames
-/// \param	s			string to be matched
+/// \param  s           string to be matched
 // *******************************************************************************
 Patch BoundaryData::matchPatch(const std::string &s) {
     for (size_t pn = 0; pn < PatchNames.size(); pn++) {
         if (PatchNames[pn] == s) return (Patch) pn;
     }
 
-    //TODO logger->warn("unknown patch {} found", s);
+    return UNKOWN_PATCH;
 }
 
 // *******************************************************************************
 /// \brief  matches string to BoundaryConditionNames
-/// \param	s			string to be matched
+/// \param  s           string to be matched
 // *******************************************************************************
 BoundaryCondition BoundaryData::matchBoundaryCondition(const std::string &s) {
     for (size_t tn = 0; tn < BoundaryConditionNames.size(); tn++) {
         if (BoundaryConditionNames[tn] == s) return (BoundaryCondition) tn;
     }
 
-    //TODO logger->warn("unknown boundary condition {} found", s);
+    return UNKOWN_CONDITION;
 }
 
 std::string BoundaryData::getFieldTypeName(FieldType f) {
@@ -90,7 +90,7 @@ std::string BoundaryData::getPatchName(Patch p) {
 //=============================== Add boundary condition=========================
 // *******************************************************************************
 /// \brief  Add boundary condition
-/// \param	patches Corresponding patches of boundary condition
+/// \param  patches Corresponding patches of boundary condition
 /// \param value boundary condition value
 /// \param boudnaryCondition boundary condition
 // *******************************************************************************
