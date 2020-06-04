@@ -92,11 +92,21 @@
 
 typedef double real;								// data type for solver (float, double, ...)
 
-typedef const real* __restrict const read_ptr;		//readable for for GPU version
-typedef real* __restrict const write_ptr;			//writable ptr for GPU version
-typedef const real* __restrict return_ptr;			//for returning data by class functions.
+// looks like PGI uses __restrict
+// https://www.auburn.edu/cosam/departments/physics/department/comp-resources/files/pgi/pgicdkrn.pdf
+// p. 14
+// nontheless this only a c99 keyword and should not be used
+#ifdef __PGI
+    typedef const real* __restrict const read_ptr;		//readable for for GPU version
+    typedef real* __restrict const write_ptr;			//writable ptr for GPU version
+    typedef const real* __restrict return_ptr;			//for returning data by class functions.
                                                     //const pointer is superfluous, because non-class type
                                                     //return values are not modifiable anyway.
+#else
+    typedef const real* const read_ptr;  //readable
+    typedef real* const write_ptr;       //writable
+    typedef const real* return_ptr;      //for returning data by class functions.
+#endif
 
 typedef const real* const aliased_read_ptr;
 
