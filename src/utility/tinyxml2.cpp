@@ -384,45 +384,31 @@ void XMLUtil::ConvertUTF32ToUTF8( unsigned long input, char* output, int* length
     const unsigned long BYTE_MARK = 0x80;
     const unsigned long FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
-    if (input < 0x80) {
+    if (input < 0x80)
         *length = 1;
-    }
-    else if ( input < 0x800 ) {
+    else if ( input < 0x800 )
         *length = 2;
-    }
-    else if ( input < 0x10000 ) {
+    else if ( input < 0x10000 )
         *length = 3;
-    }
-    else if ( input < 0x200000 ) {
+    else if ( input < 0x200000 )
         *length = 4;
-    }
-    else {
+    else
         *length = 0;    // This code won't convert this correctly anyway.
-        return;
-    }
 
+    int i = 0;
     output += *length;
 
-    // Scary scary fall throughs.
-    switch (*length) {
-        case 4:
-            --output;
-            *output = (char)((input | BYTE_MARK) & BYTE_MASK);
-            input >>= 6;
-        case 3:
-            --output;
-            *output = (char)((input | BYTE_MARK) & BYTE_MASK);
-            input >>= 6;
-        case 2:
-            --output;
-            *output = (char)((input | BYTE_MARK) & BYTE_MASK);
-            input >>= 6;
-        case 1:
-            --output;
-            *output = (char)(input | FIRST_BYTE_MARK[*length]);
-            break;
-        default:
-            TIXMLASSERT( false );
+    for (i=*length; i > 1; i--) {
+        --output;
+        *output = static_cast<char>((input | BYTE_MARK) & BYTE_MASK);
+        input >>= 6;
+    }
+
+    if (i == 1) {
+        --output;
+        *output = static_cast<char>(input | FIRST_BYTE_MARK[*length]);
+    } else {
+        TIXMLASSERT(false);
     }
 }
 
