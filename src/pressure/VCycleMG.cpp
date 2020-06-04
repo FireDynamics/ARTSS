@@ -297,7 +297,9 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
         auto bsize_i = boundary->getSize_innerList();
         size_t *d_iList = boundary->get_innerList_level_joined();
 
-        while (r > tol_res && act_cycles < max_cycles && relaxs < max_relaxs) {
+        while (r > tol_res &&
+                static_cast<int>(act_cycles) < max_cycles &&
+                static_cast<int>(relaxs) < max_relaxs) {
             for (size_t i = 0; i < cycles; i++) {
                 VCycleMultigrid(out, sync);
                 act_cycles++;
