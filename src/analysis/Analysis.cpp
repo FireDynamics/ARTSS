@@ -149,8 +149,7 @@ real Analysis::CalcAbsoluteSpatialError(read_ptr num, read_ptr ana) {
     }
 
     //weight
-    real nr = size_iList;
-
+    real nr = static_cast<real>(size_iList);
     real eps = sqrt(1. / nr * sum);
 
     m_logger->info("Absolute error ||e|| = {}", eps);
@@ -183,7 +182,7 @@ real Analysis::CalcRelativeSpatialError(read_ptr num, read_ptr ana) {
     }
 
     //weight
-    real nr = size_iList;
+    real nr = static_cast<real>(size_iList);
     real adenom = sqrt(1. / nr * sumr);
 
     real eps;
@@ -278,7 +277,7 @@ void Analysis::CalcRMSError(real sumu, real sump, real sumT) {
         real dt = params->getReal("physical_parameters/dt");
         real t_end = params->getReal("physical_parameters/t_end");
         auto Nt = static_cast<size_t>(std::round(t_end / dt));
-        real rNt = 1. / Nt;
+        real rNt = 1. / static_cast<real>(Nt);
         real epsu = sqrt(rNt * sumu);
         real epsp = sqrt(rNt * sump);
         real epsT = sqrt(rNt * sumT);
@@ -348,7 +347,7 @@ bool Analysis::CheckTimeStepCFL(Field *u, Field *v, Field *w, real dt) {
     auto d_v = v->data;
     auto d_w = w->data;
 
-    real max_vel[sizei];
+    real *max_vel = new real[sizei];
     real uvrdx, uvwrdx, maxvelrdx;
 
     //TODO correct?
@@ -396,7 +395,7 @@ real Analysis::SetDTwithCFL(Field *u, Field *v, Field *w) {
     auto d_v = v->data;
     auto d_w = w->data;
 
-    real max_vel[sizei];
+    real *max_vel = new real[sizei];
     real uvrdx, uvwrdx, maxvelrdx;
 
     //TODO correct?
