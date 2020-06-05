@@ -8,6 +8,9 @@
 #ifndef ARTSS_ANALYSIS_SOLUTION_H_
 #define ARTSS_ANALYSIS_SOLUTION_H_
 
+#ifndef PROFILING
+#include <spdlog/logger.h>
+#endif
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 
@@ -56,7 +59,8 @@ private:
 	Field* pa, *p0a;
 	Field* Ta, *T0a;
 
-	void SetUp();
+    std::shared_ptr<spdlog::logger> m_logger;
+    void SetUp();
 };
 
 #endif /* ARTSS_ANALYSIS_SOLUTION_H_ */

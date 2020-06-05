@@ -7,6 +7,9 @@
 #ifndef ARTSS_ANALYSIS_ANALYSIS_H_
 #define ARTSS_ANALYSIS_ANALYSIS_H_
 
+#ifndef PROFILING
+#include <spdlog/logger.h>
+#endif
 #include "../interfaces/SolverI.h"
 #include "../utility/GlobalMacrosTypes.h"
 
@@ -25,7 +28,7 @@ public:
 
 private:
 	real m_tol = 1e-7;
-
+    std::shared_ptr<spdlog::logger> m_logger;
 	bool CompareSolutions(read_ptr num, read_ptr ana, FieldType type, real t);
 	real CalcAbsoluteSpatialError(read_ptr num, read_ptr ana);
 	real CalcRelativeSpatialError(read_ptr num, read_ptr ana);

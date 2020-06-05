@@ -51,6 +51,9 @@ public:
     size_t getStrideZ() {return m_strideZ;};
 
 private:
+#ifndef PROFILING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     size_t m_i1, m_j1, m_k1;
 
     size_t m_level = 0;

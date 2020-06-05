@@ -8,6 +8,7 @@
 #define ARTSS_BOUNDARY_BOUNDARYCONTROLLER_H_
 
 
+#include <spdlog/logger.h>
 #include "../Field.h"
 #include "Multigrid.h"
 #include "Surface.h"
@@ -50,6 +51,9 @@ public:
     size_t getObstacleStrideY(size_t id, size_t level);
     size_t getObstacleStrideZ(size_t id, size_t level);
 private:
+#ifndef PROFILING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     static BoundaryController* singleton;
 
     BoundaryDataController *m_bdc_boundary;

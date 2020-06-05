@@ -11,7 +11,9 @@
 #include "../boundaryCondition/ObstacleBoundary.h"
 
 BoundaryDataController::BoundaryDataController() {
-    //BoundaryController* bc = BoundaryController::getInstance();
+#ifndef PROFILING
+    m_logger = Utility::createLogger(typeid(this).name());
+#endif
     m_boundaryData = new BoundaryData *[numberOfFieldTypes];
     for (size_t i = 0; i < numberOfFieldTypes; i++) {
         *(m_boundaryData + i) = new BoundaryData();
@@ -57,7 +59,7 @@ void BoundaryDataController::print() {
     for (size_t i = 0; i < numberOfFieldTypes; i++) {
         auto boundary = *(m_boundaryData + i);
         if (!boundary->isEmpty()) {
-            std::cout << "--- found boundary conditions for field " << BoundaryData::getFieldTypeName(static_cast<FieldType>(i)) << " (" << i << "): " << std::endl;
+            m_logger->info("--- found boundary conditions for field {} ({}): ", BoundaryData::getFieldTypeName(static_cast<FieldType>(i)), i);
             boundary->print();
         }
     }

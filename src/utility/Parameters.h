@@ -30,6 +30,8 @@ public:
     real getReal(const std::string& raw_path);
     double getDouble(const std::string& raw_path);
     int getInt(const std::string& raw_path);
+
+    tinyxml2::XMLElement *getRootElement() {return doc->RootElement();};
 };
 
 #endif /* ARTSS_UTILITY_PARAMETERS_H */

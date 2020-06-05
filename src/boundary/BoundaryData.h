@@ -7,16 +7,32 @@
 #ifndef ARTSS_BOUNDARY_BOUNDARYDATA_H_
 #define ARTSS_BOUNDARY_BOUNDARYDATA_H_
 
+#ifndef PROFILING
+#include <spdlog/logger.h>
+#endif
 #include <string>
 #include <vector>
 #include "../utility/tinyxml2.h"
 #include "../Field.h"
 
 const size_t numberOfPatches = 6;
-enum Patch : size_t {FRONT = 0, BACK = 1, BOTTOM = 2, TOP = 3, LEFT = 4, RIGHT = 5};
+enum Patch : int {
+    UNKOWN_PATCH = -1,
+    FRONT = 0,
+    BACK = 1,
+    BOTTOM = 2,
+    TOP = 3,
+    LEFT = 4,
+    RIGHT = 5
+};
 
 const size_t numberOfBoundaryConditions = 3;
-enum BoundaryCondition : size_t {NEUMANN = 0, DIRICHLET = 1, PERIODIC = 2};
+enum BoundaryCondition : int {
+    UNKOWN_CONDITION = -1,
+    NEUMANN = 0,
+    DIRICHLET = 1,
+    PERIODIC = 2
+};
 
 class BoundaryData {
 public:
@@ -41,11 +57,12 @@ public:
     bool isEmpty(){ return !m_hasValues; };
 private:
 
+#ifndef PROFILING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     BoundaryCondition* m_boundaryConditions;
     real* m_values;
 
     bool m_hasValues = false;
 };
-
-
 #endif /* ARTSS_BOUNDARY_BOUNDARYDATA_H_ */

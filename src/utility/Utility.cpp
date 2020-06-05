@@ -5,10 +5,10 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cstring>
-#include <iterator>
 #include <sstream>
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
+#include "Parameters.h"
 
 // ================================= Calc i,j,k ==========================================
 // ***************************************************************************************
@@ -90,4 +90,50 @@ std::vector<std::string> Utility::split(const char *text, char delimiter) {
         tokens.push_back(token);
     }
     return tokens;
+}
+
+// ==================== Split string at character ==============================
+// *****************************************************************************
+/// \brief  Splits a string at a defined char
+/// \param  loggerName  name of logger, represented in log file
+//          make sure you dont call this function twice with the same loggerName
+// *****************************************************************************
+std::shared_ptr<spdlog::logger> Utility::createLogger(std::string loggerName) {
+    static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
+    static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> stderr_sink;
+    static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
+
+    auto params = Parameters::getInstance();
+    std::string logLevel = params->get("logging/level");
+    std::string logFile = params->get("logging/file");
+
+    if (!stdout_sink) {
+        stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        stdout_sink->set_level(spdlog::level::warn);
+    }
+
+    if (!stderr_sink) {
+        stderr_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+            "error.log",
+            true);
+        stderr_sink->set_level(spdlog::level::trace);
+    }
+
+    if (!file_sink) {
+        file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+            logFile,
+            false);
+        file_sink->set_level(spdlog::level::info);
+    }
+
+    std::vector<spdlog::sink_ptr> sinks;
+    sinks.push_back(stdout_sink);
+    sinks.push_back(stderr_sink);
+    sinks.push_back(file_sink);
+    auto logger = std::make_shared<spdlog::logger>(loggerName,
+                                                   begin(sinks),
+                                                   end(sinks));
+    logger->flush_on(spdlog::level::err);
+
+    return logger;
 }

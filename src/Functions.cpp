@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "Functions.h"
 #include "utility/Parameters.h"
@@ -834,7 +835,7 @@ namespace Functions {
         size_t n_layers = static_cast<size_t> (params->getInt("initial_conditions/n_layers"));
 
         // layer border
-        real bord[n_layers + 1];
+        real *bord = new real[n_layers + 1];
         real val_bord;
 
         for (size_t l = 1; l < n_layers; ++l) {
@@ -861,12 +862,12 @@ namespace Functions {
             real z2 = domain->Getz2();
             bord[0] = z1;
             bord[n_layers] = z2;
-        } else std::cout << "No distance for layers specified!" << std::endl;
-        //TODO Error handling + Logger
+        } else spdlog::error("No distance for layers specified!");
+        //TODO Error handling
 
         // get values in layers
         // layer values
-        real val[n_layers];
+        real *val = new real[n_layers];
         real val_out;
 
         for (size_t l = 0; l < n_layers; ++l) {
@@ -920,8 +921,8 @@ namespace Functions {
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
-                } else std::cout << "No distance for layers specified!" << std::endl;
-                //TODO Error handling + Logger
+                } else spdlog::error("No distance for layers specified!");
+                //TODO Error handling
             }
 
             //boundary
@@ -944,8 +945,8 @@ namespace Functions {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
                     if (z < bord[0]) out->data[idx] = val[0];
-                } else std::cout << "No distance for layers specified!" << std::endl;
-                //TODO Error handling + Logger
+                } else spdlog::error("No distance for layers specified!");
+                //TODO Error handling
             }
             //obstacles
             for (size_t i = 0; i < size_oList; i++) {
@@ -967,8 +968,8 @@ namespace Functions {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
                     if (z < bord[0]) out->data[idx] = val[0];
-                } else std::cout << "No distance for layers specified!" << std::endl;
-                //TODO Error handling + Logger
+                } else spdlog::error("No distance for layers specified!");
+                //TODO Error handling
             }
 
         } //end layer loop
@@ -1146,21 +1147,21 @@ namespace Functions {
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va * (1 + A * randnr);
         }
         //boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va * (1 + A * randnr);
         }
         //obstacle cells
         for (size_t i = 0; i < size_oList; i++) {
             size_t idx = oList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va * (1 + A * randnr);
         }
     }
@@ -1189,21 +1190,21 @@ namespace Functions {
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va->data[idx] * (1 + A * randnr);
         }
         //boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va->data[idx] * (1 + A * randnr);
         }
         // obstacles
         for (size_t i = 0; i < size_oList; i++) {
             size_t idx = oList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va->data[idx] * (1 + A * randnr);
         }
     }

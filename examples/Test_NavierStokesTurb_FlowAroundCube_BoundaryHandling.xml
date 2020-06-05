@@ -86,3 +86,5 @@
       <n_plots> 1000 </n_plots>
     </visualization>
 </JuROr>
+[2020-03-27 09:57:53.872] [basic_logger] [info] Parsing of 
+[2020-03-27 09:57:53.872] [basic_logger] [error] no XML file specified, skip reading parameter

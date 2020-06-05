@@ -11,7 +11,6 @@
 #include "../utility/Utility.h"
 
 Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
-    //std::cout << "################ OBSTACLE ################" << std::endl;
     Domain *domain = Domain::getInstance();
 
     real dx = domain->Getdx();
@@ -26,10 +25,6 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
     real Y1 = domain->GetY1();
     real Z1 = domain->GetZ1();
 
-//    std::cout << "obstacle ID ";
-//    m_obstacleID = element->IntAttribute("ID");
-//    std::cout << m_obstacleID << std::endl;
-
     real ox1 = matchGrid(x1, dx, X1);
     real ox2 = matchGrid(x2, dx, X1);
     real oy1 = matchGrid(y1, dy, Y1);
@@ -39,22 +34,19 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
     real lox = fabs(ox2 - ox1);
     real loy = fabs(oy2 - oy1);
     real loz = fabs(oz2 - oz1);
-    m_strideX = round(lox * rdx);
-    m_strideY = round(loy * rdy);
-    m_strideZ = round(loz * rdz);
+    m_strideX = static_cast<size_t>(round(lox * rdx));
+    m_strideY = static_cast<size_t>(round(loy * rdy));
+    m_strideZ = static_cast<size_t>(round(loz * rdz));
 
-    m_i1 = ((ox1 - X1) * rdx) + 1; //plus 1 for ghost cell
-    m_j1 = ((oy1 - Y1) * rdy) + 1;
-    m_k1 = ((oz1 - Z1) * rdz) + 1;
+    m_i1 = static_cast<size_t>((ox1 - X1) * rdx + 1);  // plus 1 for ghost cell
+    m_j1 = static_cast<size_t>((oy1 - Y1) * rdy + 1);
+    m_k1 = static_cast<size_t>((oz1 - Z1) * rdz + 1);
 
     init(0);
-    //std::cout << "---------------- END OBSTACLE ----------------" << std::endl;
 }
 
 
 Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level) {
-    //std::cout << "################ OBSTACLE coarse ################" << std::endl;
-    //std::cout << "LEVEL: " << level << std::endl;
     m_level = level;
     m_strideX = coords_i2 - coords_i1 + 1;
     m_strideY = coords_j2 - coords_j1 + 1;
@@ -66,7 +58,6 @@ Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t 
     m_k1 = coords_k1;
 
     init(level);
-    //std::cout << "---------------- END OBSTACLE coarse ----------------" << std::endl;
 }
 
 
@@ -76,6 +67,9 @@ Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t 
 /// \param  level Multigrid level
 // ***************************************************************************************
 void Obstacle::init(size_t level) {
+#ifndef PROFILING
+    m_logger = Utility::createLogger(typeid(this).name());
+#endif
     Domain *domain = Domain::getInstance();
     size_t Nx = domain->GetNx(level);
     size_t Ny = domain->GetNy(level);
@@ -225,13 +219,11 @@ void Obstacle::print() {
     size_t i2 = getCoordinates_i2();
     size_t j2 = getCoordinates_j2();
     size_t k2 = getCoordinates_k2();
-    std::cout << "-- Obstacle" << std::endl;
-    std::cout << "\t strides (x y z): " << m_strideX << " " << m_strideY << " " << m_strideZ << std::endl;
-    std::cout << "\t size of slices  (Front|Back Bottom|Top Left|Right): " << m_size_obstacleFront << "|" << m_size_obstacleBack << " " << m_size_obstacleBottom << "|" <<m_size_obstacleTop << " " << m_size_obstacleLeft
-     << "|" << m_size_obstacleRight << std::endl;
-    std::cout << "\t size of Obstacle: " << m_size_obstacleList << std::endl;
-    //std::cout << "\t size of inner cells: " << m_size_obstacleInner << std::endl;
-    std::cout << "\t coords (x y z): (" << m_i1 << "|" << i2 << ")(" << m_j1 << "|" << j2 << ")(" << m_k1 << "|" << k2 << ")" << std::endl;
+    m_logger->info("-- Obstacle");
+    m_logger->info("\t strides (x y z): {} {} {}", m_strideX, m_strideY, m_strideZ);
+    m_logger->info("\t size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}", m_size_obstacleFront, m_size_obstacleBack, m_size_obstacleBottom, m_size_obstacleTop, m_size_obstacleLeft, m_size_obstacleRight);
+    m_logger->info("\t size of Obstacle: {}", m_size_obstacleList);
+    m_logger->info("\t coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, i2, m_j1, j2, m_k1, k2);
 }
 
 //======================================== Print ====================================

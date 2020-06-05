@@ -55,6 +55,8 @@
 	</initial_conditions>
 
    <visualization save_csv="No">
-		<n_plots> 10 </n_plots>
-	</visualization>
+		<n_plots> 1 </n_plots>
+  </visualization>
+
+  <logging level="info" file="burgers.log"/>
 </JuROr>

@@ -823,17 +823,17 @@ void write_unstructured_mesh(const char *filename, int ub, int npts,
     new_section();
     for (i = 0 ; i < ncells ; i++)
     {
-        int npts = num_points_for_cell(celltypes[i]);
+        int npts2 = num_points_for_cell(celltypes[i]);
 
-        conn_size += npts+1;
+        conn_size += npts2+1;
     }
     sprintf(str, "CELLS %d %d\n", ncells, conn_size);
     write_string(str);
     for (i = 0 ; i < ncells ; i++)
     {
-        int npts = num_points_for_cell(celltypes[i]);
+        int npts2 = num_points_for_cell(celltypes[i]);
         write_int(npts);
-        for (j = 0 ; j < npts ; j++)
+        for (j = 0 ; j < npts2 ; j++)
             write_int(*curr_conn++);
         end_line();
     }

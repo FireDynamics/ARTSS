@@ -4,7 +4,6 @@
 /// \author 	Severt
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include <cmath>
 
 #include "VCycleMG.h"
@@ -14,6 +13,7 @@
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 #include "../solver/SolverSelection.h"
+#include "../utility/Utility.h"
 
 // ==================================== Constructor ====================================
 // ***************************************************************************************
@@ -22,6 +22,9 @@
 /// \param  b		rhs
 // ***************************************************************************************
 VCycleMG::VCycleMG(Field *out, Field *b) {
+#ifndef PROFILING
+    m_logger = Utility::createLogger(typeid(this).name());
+#endif
 
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
@@ -294,7 +297,9 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
         auto bsize_i = boundary->getSize_innerList();
         size_t *d_iList = boundary->get_innerList_level_joined();
 
-        while (r > tol_res && act_cycles < max_cycles && relaxs < max_relaxs) {
+        while (r > tol_res &&
+                static_cast<int>(act_cycles) < max_cycles &&
+                static_cast<int>(relaxs) < max_relaxs) {
             for (size_t i = 0; i < cycles; i++) {
                 VCycleMultigrid(out, sync);
                 act_cycles++;
@@ -678,10 +683,9 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
             }
         } //end data region
     } else {
-        std::cout << "Diffusion method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+        m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 
     if (sync) {
@@ -779,8 +783,9 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     size_t start_i = boundary->get_innerList_level_joined_start(level + 1);
     size_t end_i = boundary->get_innerList_level_joined_end(level + 1) + 1;
 
-    if (end_i == start_i) std::cout << "Be cautious: Obstacle might fill up inner cells completely in level " << level << " with nx= " << domain->Getnx(out->GetLevel()) << "!" << std::endl;
-    //TODO Error handling + Logger
+    if (end_i == start_i)
+        m_logger->warn("Be cautious: Obstacle might fill up inner cells completely in level {} with nx= {}!", level, domain->Getnx(out->GetLevel()));
+    //TODO Error handling
 
     // average from eight neighboring cells
     // obstacles not used in fine grid, since coarse grid only obstacle if one of 8 fine grids was an obstacle,
@@ -906,16 +911,16 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
     const size_t Nz = domain->GetNz(out->GetLevel());
 
     if (level < levels - 1) {
-        std::cout << "Wrong level =" << level << std::endl;
+        m_logger->warn("Wrong level = {}", level);
         return;
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 
     if (Nx <= 4 && Ny <= 4) {
-        std::cout << " Grid is too coarse with Nx = " << Nx << " and Ny = " << Ny << ". Just smooth here" << std::endl;
+        m_logger->warn(" Grid is too coarse with Nx={} and Ny={}. Just smooth here", Nx, Ny);
         Smooth(out, tmp, b, level, sync);
         return;
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 
     const real dx = domain->Getdx(out->GetLevel());
@@ -1072,10 +1077,9 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             }// end while
         } //end data region
     } else {
-        std::cout << "Diffusion method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+        m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 
     if (sync) {

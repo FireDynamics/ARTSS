@@ -11,6 +11,9 @@
 #include "../interfaces/AdvectionI.h"
 #include "../interfaces/DiffusionI.h"
 #include "../utility/GlobalMacrosTypes.h"
+#ifndef PROFILING
+#include <spdlog/logger.h>
+#endif
 
 class AdvectionDiffusionSolver : public SolverI {
 public:
@@ -26,6 +29,9 @@ private:
 	real m_nu;
 
     static void control();
+#ifndef PROFILING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_SOLVER_ADVECTIONDIFFUSIONSOLVER_H_ */

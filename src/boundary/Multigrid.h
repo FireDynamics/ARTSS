@@ -13,6 +13,9 @@
 #include "../Field.h"
 #include "BoundaryDataController.h"
 #include <vector>
+#ifndef PROFILING
+#include <spdlog/logger.h>
+#endif
 
 class Multigrid {
 public:
@@ -44,6 +47,9 @@ public:
     size_t getObstacleStrideZ(size_t id, size_t level);
 
 private:
+#ifndef PROFILING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     std::vector<BoundaryData*> m_boundaryData;
     size_t m_levels;
     // all surfaces divided by level

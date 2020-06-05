@@ -11,6 +11,9 @@
 #include "../interfaces/PressureI.h"
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
+#ifndef PROFILING
+#include <spdlog/logger.h>
+#endif
 
 class VCycleMG: public PressureI{
 public:
@@ -40,6 +43,9 @@ private:
 	std::vector<Field*> err0;
 	std::vector<Field*> error1;
 	std::vector<Field*> mg_temporal_solution;
+#ifndef PROFILING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_PRESSURE_VCYCLEMG_H_ */

@@ -4,12 +4,14 @@
 /// \author 	My Linh Würzburger
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <cmath>
+#include <iostream>
+#include <spdlog/spdlog.h>
+
 #include "Boundary.h"
 #include "../Field.h"
 #include "../Domain.h"
 #include "../utility/GlobalMacrosTypes.h"
-#include <cmath>
-#include <iostream>
 
 Boundary::Boundary(size_t level) {
     m_level = level;
@@ -76,22 +78,30 @@ void Boundary::init(size_t size_obstacles){
 /// \param  size_obstacles Amount of obstacle cells
 // ***************************************************************************************
 void Boundary::print(size_t size_obstacles) {
-    std::cout << "################ BOUNDARY ################" << std::endl;
-    std::cout << "list size of bList: " << m_size_boundaryList << std::endl;
-    std::cout << "Boundary starts with " << *(m_boundaryList + 0) << " and ends with " <<  *(m_boundaryList + m_size_boundaryList - 1) << std::endl;
-    std::cout << "list size of size_z: " << m_size_boundaryFront << std::endl;
-    std::cout << "Front starts with " << *(m_boundaryFront + 0) << " and ends with " <<  *(m_boundaryList + m_size_boundaryList - 1) << std::endl;
-    std::cout << "Back starts with " << *(m_boundaryBack + 0) << " and ends with " <<  *(m_boundaryList + m_size_boundaryList - 1) << std::endl;
-    std::cout << "list size of size_y: " << m_size_boundaryBottom << std::endl;
-    std::cout << "Bottom starts with " << *(m_boundaryBottom + 0) << " and ends with " <<  *(m_boundaryBottom + m_size_boundaryBottom - 1) << std::endl;
-    std::cout << "Top starts with " << *(m_boundaryTop + 0) << " and ends with " <<  *(m_boundaryTop + m_size_boundaryTop - 1) << std::endl;
-    std::cout << "list size of size_x: " << m_size_boundaryLeft << std::endl;
-    std::cout << "Left starts with " << *(m_boundaryLeft + 0) << " and ends with " <<  *(m_boundaryLeft + m_size_boundaryLeft - 1) << std::endl;
-    std::cout << "Right starts with " << *(m_boundaryRight + 0) << " and ends with " <<  *(m_boundaryRight + m_size_boundaryRight - 1) << std::endl;
-    std::cout << "list size of innerList: " << m_size_innerList << " obstacle size: " << size_obstacles <<std::endl;
-    std::cout << "Inner starts with " << *(m_innerList + 0) << " and ends with " <<  *(m_innerList + m_size_innerList - 1) << std::endl;
-    std::cout << "--------------- END BOUNDARY ---------------" << std::endl;
-    //TODO Logger
+    spdlog::info("################ BOUNDARY ################");
+    spdlog::info("list size of bList: {}", m_size_boundaryList);
+    spdlog::info("Boundary starts with {} and ends with {}", *(m_boundaryList + 0),
+                                                             *(m_boundaryList + m_size_boundaryList - 1));
+    spdlog::info("list size of size_z: {}", m_size_boundaryFront);
+    spdlog::info("Front starts with {} and ends with {}", *(m_boundaryFront + 0),
+                                                          *(m_boundaryList + m_size_boundaryList - 1));
+    spdlog::info("Back starts with {} and ends with {}", *(m_boundaryBack + 0),
+                                                         *(m_boundaryList + m_size_boundaryList - 1));
+    spdlog::info("list size of size_y: ", m_size_boundaryBottom);
+    spdlog::info("Bottom starts with {} and ends with {}", *(m_boundaryBottom + 0),
+                                                           *(m_boundaryBottom + m_size_boundaryBottom - 1));
+    spdlog::info("Top starts with {} and ends with {}", *(m_boundaryTop + 0),
+                                                        *(m_boundaryTop + m_size_boundaryTop - 1));
+    spdlog::info("list size of size_x: ", m_size_boundaryLeft);
+    spdlog::info("Left starts with {} and ends with {}", *(m_boundaryLeft + 0),
+                                                         *(m_boundaryLeft + m_size_boundaryLeft - 1));
+    spdlog::info("Right starts with {} and ends with {}", *(m_boundaryRight + 0),
+                                                          *(m_boundaryRight + m_size_boundaryRight - 1));
+    spdlog::info("list size of innerList: {} obstacle size: {}", m_size_innerList,
+                                                                 size_obstacles);
+    spdlog::info("Inner starts with {} and ends with {}", *(m_innerList + 0),
+                                                          *(m_innerList + m_size_innerList - 1));
+    spdlog::info("--------------- END BOUNDARY ---------------");
 }
 
 //======================================== Control ====================================

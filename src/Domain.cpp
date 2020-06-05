@@ -1,12 +1,14 @@
-/// \file 		Domain.cpp
-/// \brief 		XML Domain parameters to variables
-/// \date 		July 16, 2018
+/// \file       Domain.cpp
+/// \brief      XML Domain parameters to variables
+/// \date       July 16, 2018
 /// \author   My Linh Wuerzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+
+#include <iostream>
+#include <spdlog/spdlog.h>
 
 #include "Domain.h"
 #include "utility/Parameters.h"
-#include <iostream>
 
 Domain *Domain::single = nullptr; //Singleton
 
@@ -108,10 +110,9 @@ bool Domain::Resize(long shift_x1, long shift_x2, long shift_y1, long shift_y2, 
 #pragma acc wait
     if (update) {
 #ifndef PROFILING
-      std::cout << "Resize domain: " << shift_x1 << "|" << shift_x2 << " " << shift_y1 << "|" << shift_y2 << " " << shift_z1 << "|" << shift_z2 << std::endl;
-      //std::cout << "RESIZE: (" << m_x1 << "|" << m_x2 << ") (" << m_y1 << "|" << m_y2 << ") (" << m_z1 << "|" << m_z2
-      //          << ")" << std::endl;
-      //TODO Logger
+        spdlog::info("Resize domain: {}|{} {}|{} {}|{}", shift_x1, shift_x2,
+                                                         shift_y1, shift_y2,
+                                                         shift_z1, shift_z2);
 #endif
       m_nx[0] = static_cast<size_t> (std::round(Getlx() / dx + 2));
       m_ny[0] = static_cast<size_t> (std::round(Getly() / dy + 2));
@@ -131,7 +132,7 @@ bool Domain::Resize(long shift_x1, long shift_x2, long shift_y1, long shift_y2, 
 /// \return coordinate of new computational domain
 // ***************************************************************************************
 real Domain::calcNewCoord(real oldCoord, long shift, real cellwidth) {
-    return oldCoord + shift * cellwidth;
+    return oldCoord + static_cast<real>(shift) * cellwidth;
 }
 
 // =============================== Setting coordinates of new computational domain  ========================

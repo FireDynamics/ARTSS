@@ -5,17 +5,18 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "BoundaryController.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
-#include <tuple>
+#include "../utility/Utility.h"
 #include <algorithm>
-#include <iostream>
 
 BoundaryController *BoundaryController::singleton = nullptr; // Singleton
 
 
 BoundaryController::BoundaryController() {
+#ifndef PROFILING
+    m_logger = Utility::createLogger(typeid(this).name());
+#endif
     m_bdc_boundary = new BoundaryDataController();
     readXML();
     if (m_numberOfObstacles + m_numberOfSurfaces > 0) {
@@ -34,12 +35,10 @@ BoundaryController::BoundaryController() {
 // ***************************************************************************************
 void BoundaryController::readXML() {
     auto params = Parameters::getInstance();
-    std::string filename = params->get("xml_filename");
-    tinyxml2::XMLDocument doc(filename.c_str());
-    tinyxml2::XMLError eResult = doc.LoadFile(filename.c_str());
-    parseBoundaryParameter(doc.RootElement()->FirstChildElement("boundaries"));
-    parseObstacleParameter(doc.FirstChildElement()->FirstChildElement("obstacles"));
-    parseSurfaceParameter(doc.FirstChildElement()->FirstChildElement("surfaces"));
+    tinyxml2::XMLElement* rootElement = params->getRootElement();
+    parseBoundaryParameter(rootElement->FirstChildElement("boundaries"));
+    parseObstacleParameter(rootElement->FirstChildElement("obstacles"));
+    parseSurfaceParameter(rootElement->FirstChildElement("surfaces"));
 }
 
 // ================================= Parser =============================================
@@ -100,10 +99,10 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
             real oz1;
             real oz2;
             while (curElem) {
-                std::string nodename = curElem->Value();
-                if (nodename == "boundary") {
+                std::string nodeName = curElem->Value();
+                if (nodeName == "boundary") {
                     bdc->addBoundaryData(curElem);
-                } else if (nodename == "geometry") {
+                } else if (nodeName == "geometry") {
                     ox1 = curElem->DoubleAttribute("ox1");
                     ox2 = curElem->DoubleAttribute("ox2");
                     oy1 = curElem->DoubleAttribute("oy1");
@@ -111,7 +110,7 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
                     oz1 = curElem->DoubleAttribute("oz1");
                     oz2 = curElem->DoubleAttribute("oz2");
                 } else {
-                    std::cout << "Ignoring unknown node " << nodename << std::endl;
+                    m_logger->warn("Ignoring unknown node {}", nodeName);
                 }
                 curElem = curElem->NextSiblingElement();
             }
@@ -159,7 +158,7 @@ BoundaryController *BoundaryController::getInstance() {
 /// \brief  prints boundaries (outer, inner, surfaces)
 // ***************************************************************************************
 void BoundaryController::printBoundaries() {
-    std::cout << "-- Info summary" << std::endl;
+    m_logger->info("-- Info summary");
     Domain::getInstance()->print();
     m_bdc_boundary->print();
     for (size_t i = 0; i < m_numberOfObstacles; i++) {
