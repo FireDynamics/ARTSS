@@ -34,13 +34,13 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
     real lox = fabs(ox2 - ox1);
     real loy = fabs(oy2 - oy1);
     real loz = fabs(oz2 - oz1);
-    m_strideX = round(lox * rdx);
-    m_strideY = round(loy * rdy);
-    m_strideZ = round(loz * rdz);
+    m_strideX = static_cast<size_t>(round(lox * rdx));
+    m_strideY = static_cast<size_t>(round(loy * rdy));
+    m_strideZ = static_cast<size_t>(round(loz * rdz));
 
-    m_i1 = ((ox1 - X1) * rdx) + 1; //plus 1 for ghost cell
-    m_j1 = ((oy1 - Y1) * rdy) + 1;
-    m_k1 = ((oz1 - Z1) * rdz) + 1;
+    m_i1 = static_cast<size_t>((ox1 - X1) * rdx + 1);  // plus 1 for ghost cell
+    m_j1 = static_cast<size_t>((oy1 - Y1) * rdy + 1);
+    m_k1 = static_cast<size_t>((oz1 - Z1) * rdz + 1);
 
     init(0);
 }
