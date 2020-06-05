@@ -337,9 +337,10 @@ void Adaption::expandYDirection(long shift, bool start, size_t *arr_idxExpansion
 /// \param  arr_idxReduction  Index list of cells to be newly added
 /// \param len_e  size of arr_idxReduction
 // ***************************************************************************************
-void Adaption::reduceXDirection(long shift, bool start, size_t *arr_idxReduction, size_t len_r) {
+void Adaption::reduceXDirection(long shift_inp, bool start, size_t *arr_idxReduction, size_t len_r) {
 
     auto domain = Domain::getInstance();
+    unsigned long shift = shift_inp;
 #pragma acc data present(arr_idxReduction[:len_r])
     {
         size_t j_start = domain->GetIndexy1();//(y1 - Y1) / dy;
@@ -386,10 +387,11 @@ void Adaption::reduceXDirection(long shift, bool start, size_t *arr_idxReduction
 /// \param  arr_idxReduction  Index list of cells to be newly added
 /// \param len_e  size of arr_idxReduction
 // ***************************************************************************************
-void Adaption::reduceYDirection(long shift, bool start, size_t *arr_idxReduction, size_t len_r) {
+void Adaption::reduceYDirection(long shift_inp, bool start, size_t *arr_idxReduction, size_t len_r) {
     // std::cout << "reduceYDirection" << std::endl;
 
     auto domain = Domain::getInstance();
+    unsigned long shift = shift_inp;
 #pragma acc data present(arr_idxReduction[:len_r])
     {
         size_t i_start = domain->GetIndexx1();//(x1 - X1) / dx;
