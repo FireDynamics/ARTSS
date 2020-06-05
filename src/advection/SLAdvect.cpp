@@ -111,7 +111,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
                 if (i1 > i_end + 1) {
                     i1 = i_end + 1;
                 }
-                r = fabs(Ci - (long int) (Ci));
+                r = fabs(fmod(Ci, 1));
             } else {
                 i1 = i - (long int) (Ci);
                 if (i1 < i_start - 1) {
@@ -121,7 +121,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
                 if (i0 > i_end + 1) {
                     i0 = i_end + 1;
                 }
-                r = 1 - fabs(Ci - (long int) (Ci));
+                r = 1 - fabs(fmod(Ci, 1));
             }
 
             i0 = (size_t) i0;
@@ -141,7 +141,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
                 if (j1 > j_end + 1) {
                     j1 = j_end + 1;
                 }
-                s = fabs(Cj - (long int) (Cj));
+                s = fabs(fmod(Cj, 1));
             } else {
                 j1 = j - (long int) (Cj);
                 if (j1 < j_start - 1) {
@@ -151,7 +151,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
                 if (j0 > j_end + 1) {
                     j0 = j_end + 1;
                 }
-                s = 1 - fabs(Cj - (long int) (Cj));
+                s = 1 - fabs(fmod(Cj, 1));
             }
 
             j0 = (size_t) j0;
@@ -171,7 +171,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
                 if (k1 > k_end + 1) {
                     k1 = k_end + 1;
                 }
-                t = fabs(Ck - (long int) (Ck));
+                t = fabs(fmod(Ck, 1));
             } else {
                 k1 = k - (long int) (Ck);
                 if (k1 < k_start - 1) {
@@ -181,7 +181,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
                 if (k0 > k_end + 1) {
                     k0 = k_end + 1;
                 }
-                t = 1 - fabs(Ck - (long int) (Ck));
+                t = 1 - fabs(fmod(Ck, 1));
             }
 
             k0 = (size_t) k0;
