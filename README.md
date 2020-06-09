@@ -134,7 +134,7 @@ If you want to participate in this project, this section is for you.
 https://google.github.io/styleguide/cppguide.html
 
 ### Development Requirements
-These additional tools can make your live a lot easier.
+These additional tools can make your life a lot easier.
 
 |     Tool   | Version |                Ref                 |
 | :--------- | :-----: | :--------------------------------- |
