@@ -1,0 +1,45 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-gcc-serial:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: compile
+      run: |
+        git submodule update --init
+        ./compile.sh --jobs 4 --gcc -s
+        
+  build-pgi-multicore:
+    
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: compile
+        run: |
+          git submodule update --init
+          cd docker
+          docker build -t artss_docker .
+          cd ..
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh -m --jobs 4
+          
+  build-pgi-serial:
+    
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: compile
+        run: |
+          git submodule update --init
+          cd docker
+          docker build -t artss_docker .
+          cd ..
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh --jobs 4 -s
