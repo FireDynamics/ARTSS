@@ -107,6 +107,7 @@ private:
     size_t* m_data_MG_oBottom_level_joined;
     size_t* m_data_MG_oLeft_level_joined;
     size_t* m_data_MG_oRight_level_joined;
+    size_t* m_data_MG_oList_zero_joined;
 
     size_t getSize_oList(size_t level);
     size_t getLastIndex_oFront( size_t level, size_t id);
