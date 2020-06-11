@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 #include "Parameters.h"
 #include "Utility.h"
@@ -86,4 +87,15 @@ double Parameters::getDouble(const std::string &raw_path) {
 int Parameters::getInt(const std::string &raw_path) {
     auto raw_result = this->get(raw_path);
     return std::stoi(raw_result);
+}
+
+// ***************************************************************************************
+/// \brief  gets boolean number (from xml-file)
+/// \param	raw_path		tree path (as string) of xml-file
+// ***************************************************************************************
+bool Parameters::getBool(const std::string &raw_path) {
+    bool out;
+    auto raw_result = this->get(raw_path);
+    std::istringstream(raw_result) >> std::boolalpha >> out;
+    return out;
 }

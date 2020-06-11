@@ -30,6 +30,7 @@ public:
     real getReal(const std::string& raw_path);
     double getDouble(const std::string& raw_path);
     int getInt(const std::string& raw_path);
+    bool getBool(const std::string& raw_path);
 };
 
 #endif /* ARTSS_UTILITY_PARAMETERS_H */
