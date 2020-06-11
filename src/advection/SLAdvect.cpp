@@ -112,7 +112,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
                 i1 = i0 - 1;
                 r = fabs(fmod(Ci, 1));
             } else {
-                i1 = std::min(i_end - 1, i - static_cast<long int>(Ci));
+                i1 = std::min(i_end, i - static_cast<long int>(Ci));
                 i0 = i1 + 1;
                 r = 1 - fabs(fmod(Ci, 1));
             }
@@ -127,7 +127,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
                 j1 = j0 - 1;
                 s = fabs(fmod(Cj, 1));
             } else {
-                j1 = std::min(j_end - 1, j - static_cast<long int>(Cj));
+                j1 = std::min(j_end, j - static_cast<long int>(Cj));
                 j0 = j1 + 1;
                 s = 1 - fabs(fmod(Cj, 1));
             }
@@ -138,11 +138,11 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             real t;
 
             if (Ck > 0) {
-                k0 = std::max(k_start, k - (long int) static_cast<long int>(Ck));
+                k0 = std::max(k_start, k - static_cast<long int>(Ck));
                 k1 = k0 - 1;
                 t = fabs(fmod(Ck, 1));
             } else {
-                k1 = std::min(k_end - 1, k - (long int) static_cast<long int>(Ck));
+                k1 = std::min(k_end, k - static_cast<long int>(Ck));
                 k0 = k1 + 1;
                 t = 1 - fabs(fmod(Ck, 1));
             }
@@ -157,7 +157,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             size_t idx_010 = IX(i0, j1, k0, Nx, Ny);
             auto d_010 = d_in[idx_010];
 
-            size_t idx_110 = IX(i0, j0, k0, Nx, Ny);
+            size_t idx_110 = IX(i1, j1, k0, Nx, Ny);
             auto d_110 = d_in[idx_110];
 
             size_t idx_001 = IX(i0, j0, k1, Nx, Ny);
