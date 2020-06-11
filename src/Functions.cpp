@@ -1122,15 +1122,14 @@ namespace Functions {
         return result;
     }
 
-// ============== Temperature initial condition with random distribution =================
+// ======== Temperature initial condition with random distribution (absolute) ============
 // ***************************************************************************************
 /// \brief  Random function for any field
 /// \param  out		temperature
 /// \param 	Va 		ambient value
-/// \param  A		amplitude of random numbers
 /// \param	range	range of random numbers
 // ***************************************************************************************
-    void Random(Field *out, real Va, real A, size_t range) {
+    void RandomAbsolute(Field *out, real Va, real absRange) {
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -1139,6 +1138,7 @@ namespace Functions {
         size_t size_bList = boundary->getSize_boundaryList();
         size_t *oList = boundary->get_obstacleList();
         size_t size_oList = boundary->getSize_obstacleList();
+        real randFloat;
 
         std::srand((unsigned) time(nullptr));
 
@@ -1146,34 +1146,33 @@ namespace Functions {
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
-            out->data[idx] = Va * (1 + A * randnr);
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va + (randFloat * 2 * absRange - absRange);
         }
         //boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
-            out->data[idx] = Va * (1 + A * randnr);
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va + (randFloat * 2 * absRange - absRange);
         }
         //obstacle cells
         for (size_t i = 0; i < size_oList; i++) {
             size_t idx = oList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
-            out->data[idx] = Va * (1 + A * randnr);
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va + (randFloat * 2 * absRange - absRange);
         }
     }
 
-// === Random function with field as ambient value (e.g. for superposition of temperature layers and random)
+// === Random function (asbolute) with field as ambient value (e.g. for superposition of temperature layers and random values)
 // ***************************************************************************************
 /// \brief  Random function for any field
 /// \param  out		temperature
 /// \param 	Va 		ambient value as pointer
-/// \param  A		amplitude of random numbers
 /// \param	range	range of random numbers
 // ***************************************************************************************
-    void Random(Field *out, Field *Va, real A, size_t range) {
+    void RandomAbsolute(Field *out, Field *Va, real absRange) {
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -1182,29 +1181,116 @@ namespace Functions {
         size_t size_bList = boundary->getSize_boundaryList();
         size_t *oList = boundary->get_obstacleList();
         size_t size_oList = boundary->getSize_obstacleList();
+        real randFloat;
 
-        std::srand((unsigned) time(NULL));
+        std::srand((unsigned) time(nullptr));
 
         //inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
-            out->data[idx] = Va->data[idx] * (1 + A * randnr);
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va->data[idx] + (randFloat * 2 * absRange - absRange);
         }
         //boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
-            out->data[idx] = Va->data[idx] * (1 + A * randnr);
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va->data[idx] + (randFloat * 2 * absRange - absRange);
         }
         // obstacles
         for (size_t i = 0; i < size_oList; i++) {
             size_t idx = oList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
-            out->data[idx] = Va->data[idx] * (1 + A * randnr);
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va->data[idx] + (randFloat * 2 * absRange - absRange);
+        }
+    }
+
+// ========= Temperature initial condition with random distribution (relative) =============
+// ***************************************************************************************
+/// \brief  Random function for any field
+/// \param  out		temperature
+/// \param 	Va 		ambient value
+/// \param	range	range of random numbers
+// ***************************************************************************************
+    void RandomRelative(Field *out, real Va, real relRange) {
+
+        auto boundary = BoundaryController::getInstance();
+        size_t *iList = boundary->get_innerList_level_joined();
+        size_t size_iList = boundary->getSize_innerList();
+        size_t *bList = boundary->get_boundaryList_level_joined();
+        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *oList = boundary->get_obstacleList();
+        size_t size_oList = boundary->getSize_obstacleList();
+        real randFloat;
+
+        std::srand((unsigned) time(nullptr));
+
+        //inner cells
+        for (size_t i = 0; i < size_iList; i++) {
+            size_t idx = iList[i];
+            //generate secret number between 0 and range:
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va * 1 + (randFloat * 2 * relRange - relRange);
+        }
+        //boundary cells
+        for (size_t i = 0; i < size_bList; i++) {
+            size_t idx = bList[i];
+            //generate secret number between 0 and range:
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va * 1 + (randFloat * 2 * relRange - relRange);
+        }
+        //obstacle cells
+        for (size_t i = 0; i < size_oList; i++) {
+            size_t idx = oList[i];
+            //generate secret number between 0 and range:
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va * 1 + (randFloat * 2 * relRange - relRange);
+        }
+    }
+
+// === Random function (relative) with field as ambient value (e.g. for superposition of temperature layers and random absolute values)
+// ***************************************************************************************
+/// \brief  Random function for any field
+/// \param  out		temperature
+/// \param 	Va 		ambient value as pointer
+/// \param	range	range of random numbers
+// ***************************************************************************************
+    void RandomRelative(Field *out, Field *Va, real relRange) {
+
+        auto boundary = BoundaryController::getInstance();
+        size_t *iList = boundary->get_innerList_level_joined();
+        size_t size_iList = boundary->getSize_innerList();
+        size_t *bList = boundary->get_boundaryList_level_joined();
+        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *oList = boundary->get_obstacleList();
+        size_t size_oList = boundary->getSize_obstacleList();
+        real randFloat;
+
+        std::srand((unsigned) time(nullptr));
+
+        //inner cells
+        for (size_t i = 0; i < size_iList; i++) {
+            size_t idx = iList[i];
+            //generate secret number between 0 and range:
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va->data[idx] * 1 + (randFloat * 2 * relRange - relRange);
+        }
+        //boundary cells
+        for (size_t i = 0; i < size_bList; i++) {
+            size_t idx = bList[i];
+            //generate secret number between 0 and range:
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va->data[idx] * 1 + (randFloat * 2 * relRange - relRange);
+        }
+        // obstacles
+        for (size_t i = 0; i < size_oList; i++) {
+            size_t idx = oList[i];
+            //generate secret number between 0 and range:
+            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
+            out->data[idx] = Va->data[idx] * 1 + (randFloat * 2 * relRange - relRange);
         }
     }
 

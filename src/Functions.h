@@ -55,8 +55,11 @@ namespace Functions { //alphabetically ordered
 	void McDermott(Field* outx, Field* outy, Field* outz, Field* outp, real t);
 
 	real RampTanh(real t);
-	void Random(Field* out, real Va, real A, size_t range);
-	void Random(Field* out, Field* Va, real A, size_t range);
+	void RandomAbsolute(Field* out, real Va, real absRange);
+	void RandomAbsolute(Field* out, Field* Va, real absRange);
+
+  void RandomRelative(Field* out, real Va, real relRange);
+	void RandomRelative(Field* out, Field* Va, real relRange);
 
 	void SinSinSin(Field* out);
 

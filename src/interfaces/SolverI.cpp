@@ -346,9 +346,16 @@ void SolverI::Init() {
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             // Random temperature
             real Ta = params->getReal("initial_conditions/Ta");        // ambient temperature in KELVIN!
-            real A = params->getReal("initial_conditions/A");            // amplitude
-            size_t range = static_cast<size_t>(params->getInt("initial_conditions/range")); // range of random numbers (0-range)
-            Functions::Random(T0, Ta, A, range);
+
+            bool absCheck = params->getBool("initial_conditions/absRandom");
+            if (absCheck == true) {
+              real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
+              Functions::RandomAbsolute(T0, Ta, range);
+            }
+            else {
+              real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
+              Functions::RandomRelative(T0, Ta, range);
+            }
         }
         //Random concentration
         if ((m_string_solver == SolverTypes::NSTempConSolver or \
@@ -356,10 +363,16 @@ void SolverI::Init() {
             and params->get("initial_conditions/con_fct") == "RandomC") {
 
             real Ca = params->getReal("initial_conditions/Ca");        //ambient concentration
-            real A_C = params->getReal("initial_conditions/A_C");        //amplitude
-            size_t range_C = static_cast<size_t>(params->getInt("initial_conditions/range_C")); //range of random numbers (0-range)
+            bool absCheck = params->getBool("initial_conditions/absRandom");
+            if (absCheck == true) {
+              real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
+              Functions::RandomAbsolute(C0, Ca, range);
+            }
+            else {
+              real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
+              Functions::RandomRelative(T0, Ca, range);
+            }
 
-            Functions::Random(C0, Ca, A_C, range_C);
         }
         if (m_string_solver == SolverTypes::NSTempSolver or \
             m_string_solver == SolverTypes::NSTempConSolver or \
@@ -383,12 +396,21 @@ void SolverI::Init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             Functions::Layers(T0);
-            real A = params->getReal("initial_conditions/A");        //amplitude
-            size_t range = static_cast<size_t>(params->getReal("initial_conditions/range"));    //range of random numbers (0-range)
-            Functions::Random(T0, T0, A, range);
+
+            bool absCheck = params->getBool("initial_conditions/absRandom");
+            if (absCheck == true) {
+              real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
+              Functions::RandomAbsolute(T0, T0, range);
+            }
+            else {
+              real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
+              Functions::RandomRelative(T0, T0, range);
+            }
+
             ForceSource();
             TemperatureSource();
         }
+
     } else if (string_init_usr_fct == FunctionNames::Zero) {
         // NavierStokes test case: Channel Flow (with uniform force in x-direction)
         if ((m_string_solver == SolverTypes::NSSolver or m_string_solver == SolverTypes::NSTurbSolver)
