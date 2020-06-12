@@ -132,13 +132,13 @@ void ObstacleBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patc
         case BOTTOM:
             referenceIndex = -1;
         case TOP:
-            value *= domain->Getdz(level);
+            value *= domain->Getdy(level);
             referenceIndex *= domain->GetNx(level);
             break;
         case LEFT:
             referenceIndex = -1;
         case RIGHT:
-            value *= domain->Getdz(level);
+            value *= domain->Getdx(level);
             referenceIndex *= 1;
             break;
     }
