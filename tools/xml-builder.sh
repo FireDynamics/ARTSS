@@ -132,7 +132,7 @@ DSURF=1
 POSITIONAL=()
 #----Help text----
 DESCRIPTION="Description:
-Script to build a XML file for the different cases of JuROr. Built in: Advection, Burgers (Advection Diffusion), Diffusion, Diffusion Turbulence, Navier Stokes, Navier Stokes Temperature, Navier Stokes Temperatur Turbulence, Navier Stokes Turbulence, Navier Stokes Temperature Turbulence Concentration, Pressure.
+Script to build a XML file for the different cases of ARTSS. Built in: Advection, Burgers (Advection Diffusion), Diffusion, Diffusion Turbulence, Navier Stokes, Navier Stokes Temperature, Navier Stokes Temperatur Turbulence, Navier Stokes Turbulence, Navier Stokes Temperature Turbulence Concentration, Pressure.
 
 There is no validation of the given parameter.\n"
 OPTIONSTEXT="Available options:
@@ -428,7 +428,7 @@ then
   echo "$NAME already exist. Skipping file"
 else
   WRITETO="<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
-  <JuROr>
+  <ARTSS>
     <xml_filename>$NAME</xml_filename>
 
     <physical_parameters>
@@ -808,7 +808,7 @@ else
     <visualization save_csv=\"No\">
       <n_plots> $NPLOTS </n_plots>
     </visualization>
-</JuROr>"
+</ARTSS>"
   echo -e "$WRITETO" >> $NAME
   fi
 }

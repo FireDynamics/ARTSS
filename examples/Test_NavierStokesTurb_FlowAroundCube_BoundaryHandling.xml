@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-  <JuROr>
+  <ARTSS>
     <xml_filename>Test_NavierStokesTurb_FlowAroundCube_BoundaryHandling.xml</xml_filename>
 
     <physical_parameters>
@@ -85,4 +85,4 @@
     <visualization save_csv="No">
       <n_plots> 1000 </n_plots>
     </visualization>
-</JuROr>
+</ARTSS>
