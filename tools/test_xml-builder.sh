@@ -9,20 +9,18 @@ function create_testcases {
     FPATHVALUES[$INDEX]=advection
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --advection --tend 2.0 --dt 0.001 --advectiontype SemiLagrangian --solavail Yes  --xstart 0. --xend 2.0 --ystart 0. --yend 2.0 --zstart 0. --zend 1.0 --nx 40 --ny 40 --nz 1"
-    echo "
-    <boundaries>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-    </boundaries>" > "${NAME}_${BFILEVAL}"
-    echo "
-    <initial_conditions usr_fct = \"GaussBubble\" >     <!-- Gaussian function  -->
-      <u_lin> 0.5 </u_lin>              <!-- x-velocity in linear case  -->
-      <v_lin> 0.5 </v_lin>              <!-- y-velocity in linear case  -->
-      <w_lin> 0.25 </w_lin>             <!-- z-velocity in linear case  -->
-      <xshift> 1.025 </xshift>          <!-- xshift of Gauss Bubble in domain  -->
-      <yshift> 1.025 </yshift>          <!-- yshift of Gauss Bubble in domain  -->
-      <zshift> 0.5 </zshift>            <!-- zshift of Gauss Bubble in domain  -->
-      <l> 0.03125 </l>                  <!-- sigma in Gaussian -->
-    </initial_conditions>" > "${NAME}_${IFILEVAL}"
+    echo "  <boundaries>
+    <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
+  </boundaries>" > "${NAME}_${BFILEVAL}"
+    echo "  <initial_conditions usr_fct = \"GaussBubble\" >  <!-- Gaussian function  -->
+    <u_lin> 0.5 </u_lin>      <!-- x-velocity in linear case  -->
+    <v_lin> 0.5 </v_lin>      <!-- y-velocity in linear case  -->
+    <w_lin> 0.25 </w_lin>     <!-- z-velocity in linear case  -->
+    <xshift> 1.025 </xshift>  <!-- xshift of Gauss Bubble in domain  -->
+    <yshift> 1.025 </yshift>  <!-- yshift of Gauss Bubble in domain  -->
+    <zshift> 0.5 </zshift>    <!-- zshift of Gauss Bubble in domain  -->
+    <l> 0.03125 </l>          <!-- sigma in Gaussian -->
+  </initial_conditions>" > "${NAME}_${IFILEVAL}"
     ((INDEX++))
   fi
   if [ $BUR -eq 1 ]
@@ -32,13 +30,11 @@ function create_testcases {
     FPATHVALUES[$INDEX]=burgers
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --burgers --tend 1.0 --dt 0.01 --nu 0.1 --diffusiontype Jacobi --advectiontype SemiLagrangian --solavail Yes  --xstart -3.1415926536 --xend 3.1415926536 --ystart -3.1415926536 --yend 3.1415926536 --zstart -3.1415926536 --zend 3.1415926536 --nx 40 --ny 40 --nz 1"
-    echo "
-    <boundaries>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"ExpSinusSum\" >     <!-- product of exponential and sinuses exp*sin*sin*sin -->
-    </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "  <boundaries>
+    <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"ExpSinusSum\" >     <!-- product of exponential and sinuses exp*sin*sin*sin -->
+  </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
   fi
   if [ $DIFF -eq 1 ]
@@ -48,35 +44,31 @@ function create_testcases {
     FPATHVALUES[$INDEX]=diffusion
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --diffusion --tend 1.0 --dt 0.0125 --nu 0.001 --diffusiontype Jacobi --solavail Yes  --xstart 0. --xend 2.0 --ystart 0. --yend 2.0 --zstart 0. --zend 1.0 --nx 40 --ny 40 --nz 1"
-    echo "
-    <boundaries>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"ExpSinusProd\" >     <!-- product of exponential and sinuses exp*sin*sin*sin -->
-      <l> 2.5 </l>                              <!-- wavelength -->
-    </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "  <boundaries>
+    <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"ExpSinusProd\" >     <!-- product of exponential and sinuses exp*sin*sin*sin -->
+    <l> 2.5 </l>                              <!-- wavelength -->
+  </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
     ####################Diffusion Hat####################
     NAMEVALUES[$INDEX]=Diffusion_Hat
     FPATHVALUES[$INDEX]=diffusion/hat
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --diffusion --tend 1.0 --dt 0.02 --nu 0.05 --diffusiontype Jacobi --solavail No  --xstart 0. --xend 2. --ystart 0. --yend 2. --zstart 0. --zend 2. --nx 32 --ny 32 --nz 32"
-    echo "
-    <boundaries>
-      <boundary field=\"u,v,w\" patch=\"front,back,top,bottom,left,right\" type=\"dirichlet\" value=\"1.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"Hat\" >     <!-- 2 in [0.5;1.0]^3, 1 elsewhere -->
-      <x1> 0.5 </x1>
-      <x2> 1.0 </x2>
-      <y1> 0.5 </y1>
-      <y2> 1.0 </y2>
-      <z1> 0.5 </z1>
-      <z2> 1.0 </z2>
-      <val_in> 2.0 </val_in>
-      <val_out> 1.0 </val_out>
-    </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "  <boundaries>
+    <boundary field=\"u,v,w\" patch=\"front,back,top,bottom,left,right\" type=\"dirichlet\" value=\"1.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"Hat\" >     <!-- 2 in [0.5;1.0]^3, 1 elsewhere -->
+    <x1> 0.5 </x1>
+    <x2> 1.0 </x2>
+    <y1> 0.5 </y1>
+    <y2> 1.0 </y2>
+    <z1> 0.5 </z1>
+    <z2> 1.0 </z2>
+    <val_in> 2.0 </val_in>
+    <val_out> 1.0 </val_out>
+  </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
   fi
   if [ $DIFFT -eq 1 ]
@@ -86,14 +78,12 @@ function create_testcases {
     FPATHVALUES[$INDEX]=diffusionTurb
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --diffturb --tend 1.0 --dt 0.0125 --nu 0.001 --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --solavail No  --xstart 0. --xend 2.0 --ystart 0. --yend 2.0 --zstart 0. --zend 1.0 --nx 40 --ny 40 --nz 1"
-    echo "
-    <boundaries>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"ExpSinusProd\" >     <!-- product of exponential and sinuses exp*sin*sin*sin -->
-      <l> 2.5 </l>                              <!-- wavelength -->
-    </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "  <boundaries>
+    <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"ExpSinusProd\" >     <!-- product of exponential and sinuses exp*sin*sin*sin -->
+    <l> 2.5 </l>                              <!-- wavelength -->
+  </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
   fi
   if [ $NS -eq 1 ]
@@ -103,17 +93,15 @@ function create_testcases {
     FPATHVALUES[$INDEX]=navierStokes/cavityFlow
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --ns --tend 0.5 --dt 0.001 --nu 0.1 --advectiontype SemiLagrangian --diffusiontype Jacobi  --sourcetype ExplicitEuler --forcefct Zero --forcedir xyz --pressuretype VCycleMG --nlevel 4 --ncycle 2 --maxiter 50 --pressurediffusiontype Jacobi --solavail No  --xstart 0. --xend 2. --ystart 0. --yend 2. --zstart 0. --zend 2. --nx 40 --ny 40 --nz 1"
-    echo "
-    <boundaries>
-      <boundary field=\"u\" patch=\"top\" type=\"dirichlet\" value=\"1.0\" />
-      <boundary field=\"u\" patch=\"front,back,left,right,bottom\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"p\" patch=\"top\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"p\" patch=\"front,back,left,right,bottom\" type=\"neumann\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"Zero\" >
-    </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "  <boundaries>
+    <boundary field=\"u\" patch=\"top\" type=\"dirichlet\" value=\"1.0\" />
+    <boundary field=\"u\" patch=\"front,back,left,right,bottom\" type=\"dirichlet\" value=\"0.0\" />
+    <boundary field=\"v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"top\" type=\"dirichlet\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"front,back,left,right,bottom\" type=\"neumann\" value=\"0.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"Zero\" >
+  </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
 
     ####################NavierStokes ChannelFlow####################
@@ -121,22 +109,19 @@ function create_testcases {
     FPATHVALUES[$INDEX]=navierStokes/channelFlow
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --ns --tend 10. --dt 0.01 --nu 0.1 --advectiontype SemiLagrangian --diffusiontype Jacobi --pressuretype VCycleMG --nlevel 4 --ncycle 2 --maxiter 100 --pressurediffusiontype Jacobi --solavail No  --xstart 0. --xend 2. --ystart 0. --yend 2. --zstart 0. --zend 2. --nx 40 --ny 40 --nz 1 --nplots 50"
-    echo "
-    <boundaries>
-      <boundary field=\"u,v,w\" patch=\"left,right\" type=\"periodic\" value=\"0.0\" />
-      <boundary field=\"u,v,w\" patch=\"front,back,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"p\" patch=\"left,right\" type=\"periodic\" value=\"0.0\" />
-      <boundary field=\"p\" patch=\"front,back,top,bottom\" type=\"neumann\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"Zero\" >
-    </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "
-    <source type = \"ExplicitEuler\" force_fct=\"Uniform\" dir = \"x\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz)     -->
-      <val_x> 1. </val_x>
-      <val_y> 0. </val_y>
-      <val_z> 0. </val_z>
-    </source>" > ${NAME}_$SFILEVAL
+    echo "  <boundaries>
+    <boundary field=\"u,v,w\" patch=\"left,right\" type=\"periodic\" value=\"0.0\" />
+    <boundary field=\"u,v,w\" patch=\"front,back,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"left,right\" type=\"periodic\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"front,back,top,bottom\" type=\"neumann\" value=\"0.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"Zero\" >
+  </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "  <source type = \"ExplicitEuler\" force_fct=\"Uniform\" dir = \"x\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz)     -->
+    <val_x> 1. </val_x>
+    <val_y> 0. </val_y>
+    <val_z> 0. </val_z>
+  </source>" > ${NAME}_$SFILEVAL
     ((INDEX++))
 
     ####################NavierStokes McDermott####################
@@ -144,15 +129,13 @@ function create_testcases {
     FPATHVALUES[$INDEX]=navierStokes/mcDermott
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --ns --tend 6.2831853072 --dt 0.01 --nu 0.1 --beta 0. --advectiontype SemiLagrangian --diffusiontype Jacobi  --sourcetype ExplicitEuler --forcefct Zero --forcedir xyz --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --solavail Yes  --xstart 0. --xend 6.2831853072 --ystart 0. --yend 6.2831853072 --zstart 0. --zend 6.2831853072 --nx 64 --ny 64 --nz 1"
-    echo "
-    <boundaries>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-      <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"McDermott\" >
-      <A> 2 </A>
-    </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "  <boundaries>
+    <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"McDermott\" >
+    <A> 2 </A>
+  </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
 
     ####################NavierStokes Vortex####################
@@ -160,19 +143,17 @@ function create_testcases {
     FPATHVALUES[$INDEX]=navierStokes/vortex
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --ns --tend 1.0 --dt 0.01 --nu 0. --advectiontype SemiLagrangian --diffusiontype Jacobi  --sourcetype ExplicitEuler --forcefct Zero --forcedir xyz --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --solavail Yes  --xstart -0.1556 --xend 0.1556 --ystart -0.1556 --yend 0.1556 --zstart -0.1556 --zend 0.1556 --nx 64 --ny 64 --nz 1"
-    echo "
-    <boundaries>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-      <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"Vortex\" >
-      <u_lin> 0.1 </u_lin>
-      <v_lin> 0 </v_lin>
-      <w_lin> 0 </w_lin>
-      <pa> 0. </pa>
-      <rhoa> 1. </rhoa>
-    </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "  <boundaries>
+    <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"Vortex\" >
+    <u_lin> 0.1 </u_lin>
+    <v_lin> 0 </v_lin>
+    <w_lin> 0 </w_lin>
+    <pa> 0. </pa>
+    <rhoa> 1. </rhoa>
+  </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
   fi
   if [ $NSTe -eq 1 ]
@@ -182,25 +163,22 @@ function create_testcases {
     FPATHVALUES[$INDEX]=dissipation
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --nstemp --tend 10. --dt 0.001 --nu 0. --beta 0. --kappa 0. --advectiontype SemiLagrangian --diffusiontype Jacobi --pressuretype VCycleMG --nlevel 4 --ncycle 2 --maxcycle 4 --maxsolve 5 --pressurediffusiontype Jacobi --forcefct Zero --forcedir xyz --tempadvtype SemiLagrangian --tempdifftype Jacobi --tempsourcefct Zero --solavail No  --xstart 0. --xend 1. --ystart 0. --yend 1. --zstart 0. --zend 1. --nx 64 --ny 64 --nz 1 --nplots 50"
-    echo "
-    <boundaries>
-      <boundary field=\"w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"u,v\" patch=\"left,right,top,bottom\" type=\"dirichlet\" value=\"2.0\" />
-      <boundary field=\"u,v\" patch=\"front,back\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
-      <boundary field=\"T\" patch=\"left,top\" type=\"dirichlet\" value=\"373.14\" />
-      <boundary field=\"T\" patch=\"right,bottom\" type=\"dirichlet\" value=\"273.14\" />
-      <boundary field=\"T\" patch=\"front,back\" type=\"neumann\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"Drift\" ><!-- Drift function  -->
-      <u_lin> 2. </u_lin>                     <!-- x-velocity in linear case  -->
-      <v_lin> 2. </v_lin>                     <!-- y-velocity in linear case  -->
-      <w_lin> 0. </w_lin>                     <!-- z-velocity in linear case  -->
-      <pa> 0. </pa>
-    </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "
-    <source type = \"ExplicitEuler\" temp_fct = \"Zero\" dissipation=\"No\">
+    echo "  <boundaries>
+    <boundary field=\"w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
+    <boundary field=\"u,v\" patch=\"left,right,top,bottom\" type=\"dirichlet\" value=\"2.0\" />
+    <boundary field=\"u,v\" patch=\"front,back\" type=\"dirichlet\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
+    <boundary field=\"T\" patch=\"left,top\" type=\"dirichlet\" value=\"373.14\" />
+    <boundary field=\"T\" patch=\"right,bottom\" type=\"dirichlet\" value=\"273.14\" />
+    <boundary field=\"T\" patch=\"front,back\" type=\"neumann\" value=\"0.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"Drift\" >  <!-- Drift function  -->
+    <u_lin> 2. </u_lin>  <!-- x-velocity in linear case  -->
+    <v_lin> 2. </v_lin>  <!-- y-velocity in linear case  -->
+    <w_lin> 0. </w_lin>  <!-- z-velocity in linear case  -->
+    <pa> 0. </pa>
+  </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "    <source type = \"ExplicitEuler\" temp_fct = \"Zero\" dissipation=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
 
@@ -209,44 +187,90 @@ function create_testcases {
     FPATHVALUES[$INDEX]=navierStokesTemp/mms
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --nstemp --tend 1.0 --dt 0.005 --nu 0.05 --beta 1. --g -9.81 --kappa 0.05 --advectiontype SemiLagrangian --diffusiontype Jacobi --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --solavail Yes  --xstart -2. --xend 2. --ystart -2. --yend 2. --zstart -2. --zend 2. --nx 64 --ny 64 --nz 1 --forcefct Buoyancy --forcedir y --tempsourcefct BuoyancyST_MMS"
-    echo "
-    <boundaries>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-      <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-      <boundary field=\"T\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"BuoyancyMMS\" >
-      <rhoa> 1. </rhoa>
-    </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "
-    <source type = \"ExplicitEuler\" temp_fct = \"BuoyancyST_MMS\" dissipation=\"No\">
+    echo "  <boundaries>
+    <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
+    <boundary field=\"T\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"BuoyancyMMS\" >
+    <rhoa> 1. </rhoa>
+  </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "    <source type = \"ExplicitEuler\" temp_fct = \"BuoyancyST_MMS\" dissipation=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
   if [ $NSTT -eq 1 ]
   then
+    ####################NavierStokesTempTurb Adaption####################
+    NAMEVALUES[$INDEX]=NavierStokesTempTurbAdaption
+    FPATHVALUES[$INDEX]=navierStokesTempTurb/dynamicBoundaries
+    NAME=${NAMEVALUES[$INDEX]}
+    BUILDER[$INDEX]="./xml-builder.sh --nstempturb --tend 35. --dt 0.1 --nu 2.44139e-05 --beta 3.28e-3 --g -9.81 --kappa 3.31e-5 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 6 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --prt 0.5 --solavail No  --xstartp 0. --xendp 128. --xstartc 26. --xendc 34. --ystart -3. --yend 3. --zstart -4. --zend 4. --nx 64 --ny 16 --nz 32 --nplots 10"
+    echo "  <boundaries>
+    <boundary field=\"u,v,w\" patch=\"front,back,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
+    <boundary field=\"u,v,w\" patch=\"left,right\" type=\"neumann\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"front,back,top,bottom\" type=\"neumann\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"left,right\" type=\"dirichlet\" value=\"0.0\" />
+    <boundary field=\"T\" patch=\"front,back,bottom,top,left,right\" type=\"neumann\" value=\"0.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"LayersT\" dir=\"y\">     <!-- Layers  -->
+    <n_layers> 5 </n_layers>
+    <border_1> -1.8 </border_1>  <!-- at cell face -->
+    <border_2> -0.6 </border_2>  <!-- at cell face -->
+    <border_3>  0.6 </border_3>  <!-- at cell face -->
+    <border_4>  1.8 </border_4>  <!-- at cell face -->
+    <value_1> 303.64 </value_1>
+    <value_2> 304.04 </value_2>
+    <value_3> 305.24 </value_3>
+    <value_4> 308.84 </value_4>
+    <value_5> 310.54 </value_5>
+  </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "   <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir = \"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    </source>" > ${NAME}_$SFILEVAL
+    echo "      <source type = \"ExplicitEuler\" temp_fct = \"GaussST\" ramp_fct=\"RampTanh\" dissipation=\"No\">
+        <HRR> 25000. </HRR>     <!-- Total heat release rate (in kW) -->
+        <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
+        <x0> 30.  </x0>
+        <y0> -3. </y0>
+        <z0> 0. </z0>
+        <sigmax> 1.0 </sigmax>
+        <sigmay> 1.5 </sigmay>
+        <sigmaz> 1.0 </sigmaz>
+        <tau> 5. </tau>
+      </source>" > ${NAME}_$TSFILEVAL
+    echo "  <adaption dynamic=\"Yes\" data_extraction=\"No\">
+    <class name=\"Layers\">
+      <buffer> 14 </buffer>
+      <check_value> 335 </check_value>
+      <timestep> 1 </timestep>
+      <expansion_size> 1 </expansion_size>
+    </class>
+    <data_extraction>
+      <before enabled=\"No\"> 2.7 </before>
+      <after enabled=\"No\"> </after>
+      <endresult enabled=\"No\"> </endresult>
+      <time_measuring enabled=\"No\"> </time_measuring>
+      <write_field enabled=\"No\"> </write_field>
+    </data_extraction>
+  </adaption>" > ${NAME}_$AFILEVAL
+    ((INDEX++))
     ####################NavierStokesTempTurb MMS####################
     NAMEVALUES[$INDEX]=NavierStokesTempTurbBuoyancyMMS
     FPATHVALUES[$INDEX]=navierStokesTempTurb/mms
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --nstempturb --tend 1.0 --dt 0.005 --nu 0.05 --beta 1. --g -9.81 --kappa 0.05 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --prt 0.9 --solavail No  --xstart -2. --xend 2. --ystart -2. --yend 2. --zstart -2. --zend 2. --nx 64 --ny 64 --nz 1 --nplots 10"
-    echo "
-    <boundaries>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-      <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-      <boundary field=\"T\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"BuoyancyMMS\" >
-      <rhoa> 1. </rhoa>
-    </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "
-    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir = \"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "  <boundaries>
+    <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
+    <boundary field=\"T\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"BuoyancyMMS\" >
+    <rhoa> 1. </rhoa>
+  </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir = \"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "
-    <source type = \"ExplicitEuler\" temp_fct = \"BuoyancyST_MMS\" dissipation=\"No\">
-    </source>" > ${NAME}_$TSFILEVAL
+    echo "      <source type = \"ExplicitEuler\" temp_fct = \"BuoyancyST_MMS\" dissipation=\"No\">
+      </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
   if [ $NSTu -eq 1 ]
@@ -256,17 +280,14 @@ function create_testcases {
     FPATHVALUES[$INDEX]=navierStokesTurb/mcDermott
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --nsturb --tend 6.2831853072 --dt 0.01 --nu 0.1 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --solavail No  --xstart 0. --xend 6.2831853072 --ystart 0. --yend 6.2831853072 --zstart 0. --zend 6.2831853072 --nx 64 --ny 64 --nz 1"
-    echo "
-    <boundaries>
+    echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"McDermott\" >
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"McDermott\" >
     <A> 2 </A>
-    </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "
-    <source type = \"ExplicitEuler\" force_fct=\"Zero\" dir = \"xyz\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+  </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "    <source type = \"ExplicitEuler\" force_fct=\"Zero\" dir = \"xyz\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     ((INDEX++))
 
@@ -275,21 +296,18 @@ function create_testcases {
     FPATHVALUES[$INDEX]=navierStokesTurb/vortex
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --nsturb --tend 1.0 --dt 0.01 --nu 0. --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --solavail No  --xstart -0.1556 --xend 0.1556 --ystart -0.1556 --yend 0.1556 --zstart -0.1556 --zend 0.1556 --nx 64 --ny 64 --nz 1"
-    echo "
-    <boundaries>
+    echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"periodic\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"Vortex\" >
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"Vortex\" >
     <u_lin> 0.1 </u_lin>
     <v_lin> 0 </v_lin>
     <w_lin> 0 </w_lin>
     <pa> 0. </pa>
     <rhoa> 1. </rhoa>
-    </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "
-    <source type = \"ExplicitEuler\" force_fct=\"Zero\" dir = \"xyz\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+  </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "    <source type = \"ExplicitEuler\" force_fct=\"Zero\" dir = \"xyz\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     ((INDEX++))
   fi
@@ -300,14 +318,12 @@ function create_testcases {
     FPATHVALUES[$INDEX]=pressure
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --pressure --tend 0.1 --dt 0.1 --pressuretype VCycleMG --nlevel 5 --ncycle 2 --pressurediffusiontype Jacobi --solavail Yes  --xstart 0. --xend 2. --ystart 0. --yend 2. --zstart 0. --zend 2. --nx 64 --ny 64 --nz 64"
-    echo "
-    <boundaries>
+    echo "  <boundaries>
     <boundary field=\"p\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-    </boundaries>" > ${NAME}_$BFILEVAL
-    echo "
-    <initial_conditions usr_fct = \"SinSinSin\" >
+  </boundaries>" > ${NAME}_$BFILEVAL
+    echo "  <initial_conditions usr_fct = \"SinSinSin\" >
     <l> 2. </l>
-    </initial_conditions>" > ${NAME}_$IFILEVAL
+  </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
   fi
 }
