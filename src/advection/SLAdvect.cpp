@@ -1,13 +1,13 @@
-/// \file 		SLAdvect.cpp
-/// \brief 		Solves advection equation via unconditionally stable Semi-Lagrangian approach
-/// \date 		Aug 23, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       SLAdvect.cpp
+/// \brief      Solves advection equation via unconditionally stable Semi-Lagrangian approach
+/// \date       Aug 23, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 //==================================== Semi Lagrangian Advection ======================================
 // ***************************************************************************************
 /// \brief  solves advection \f$ \partial_t \phi_1 = - (u \cdot \nabla) \phi_0 \f$ via unconditionally
-///			stable semi-Lagrangian approach (backtrace and linear interpolation)
+///         stable semi-Lagrangian approach (backtrace and linear interpolation)
 // ***************************************************************************************
 
 #ifdef _OPENACC
@@ -32,13 +32,13 @@ SLAdvect::SLAdvect() {
 
 // ***************************************************************************************
 /// \brief  solves advection \f$ \partial_t \phi_1 = - (u \cdot \nabla) \phi_0 \f$ via unconditionally
-///			stable semi-Lagrangian approach (backtrace and linear interpolation)
-/// \param  out		output pointer
-/// \param	in		input pointer
-/// \param	u_vel	x -velocity
-/// \param	v_vel	y -velocity
-/// \param	w_vel	z -velocity
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+///     stable semi-Lagrangian approach (backtrace and linear interpolation)
+/// \param  out   output pointer
+/// \param  in    input pointer
+/// \param  u_vel x -velocity
+/// \param  v_vel y -velocity
+/// \param  w_vel z -velocity
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_vel, const Field *w_vel, bool sync) {
 
