@@ -2,7 +2,7 @@ $1 ./Test_NavierStokesVortex.xml
 
 rm -rf *.vtk
 
-python ./verify.py
+python3 ./verify.py
 
 if [ $? -eq 0 ]
 then
