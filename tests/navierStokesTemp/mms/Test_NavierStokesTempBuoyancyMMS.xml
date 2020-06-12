@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
   <ARTSS>
-    <xml_filename>Test_NavierStokesBuoyancyMMS.xml</xml_filename>
+    <xml_filename>Test_NavierStokesTempBuoyancyMMS.xml</xml_filename>
 
     <physical_parameters>
       <t_end> 1.0 </t_end>	<!-- simulation end time -->

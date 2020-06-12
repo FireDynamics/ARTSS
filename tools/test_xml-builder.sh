@@ -205,7 +205,7 @@ function create_testcases {
     ((INDEX++))
 
     ####################NavierStokesTemp MMS####################
-    NAMEVALUES[$INDEX]=NavierStokesBuoyancyMMS
+    NAMEVALUES[$INDEX]=NavierStokesTempBuoyancyMMS
     FPATHVALUES[$INDEX]=navierStokesTemp/mms
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --nstemp --tend 1.0 --dt 0.005 --nu 0.05 --beta 1. --g -9.81 --kappa 0.05 --advectiontype SemiLagrangian --diffusiontype Jacobi --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --solavail Yes  --xstart -2. --xend 2. --ystart -2. --yend 2. --zstart -2. --zend 2. --nx 64 --ny 64 --nz 1 --forcefct Buoyancy --forcedir y --tempsourcefct BuoyancyST_MMS"
