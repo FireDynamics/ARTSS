@@ -57,7 +57,7 @@
   <boundaries>
     <boundary field="u" patch="top" type="dirichlet" value="1.0" />
     <boundary field="u" patch="front,back,left,right,bottom" type="dirichlet" value="0.0" />
-    <boundary field="v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+    <boundary field="v,w" patch="front,back,left,right,bottom,top" type="dirichlet" value="0.0" />
     <boundary field="p" patch="top" type="dirichlet" value="0.0" />
     <boundary field="p" patch="front,back,left,right,bottom" type="neumann" value="0.0" />
   </boundaries>

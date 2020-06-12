@@ -83,9 +83,9 @@
 
 
   <boundaries>
-    <boundary field="u,v,w" patch="front,back,top,bottom" type="dirichlet" value="0.0" />
+    <boundary field="u,v,w" patch="front,back,bottom,top" type="dirichlet" value="0.0" />
     <boundary field="u,v,w" patch="left,right" type="neumann" value="0.0" />
-    <boundary field="p" patch="front,back,top,bottom" type="neumann" value="0.0" />
+    <boundary field="p" patch="front,back,bottom,top" type="neumann" value="0.0" />
     <boundary field="p" patch="left,right" type="dirichlet" value="0.0" />
     <boundary field="T" patch="front,back,bottom,top,left,right" type="neumann" value="0.0" />
   </boundaries>

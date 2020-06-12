@@ -39,7 +39,7 @@
   <adaption dynamic="No" data_extraction="No"> </adaption>
 
   <boundaries>
-    <boundary field="u,v,w" patch="front,back,top,bottom,left,right" type="dirichlet" value="1.0" />
+    <boundary field="u,v,w" patch="front,back,bottom,top,left,right" type="dirichlet" value="1.0" />
   </boundaries>
 
   <obstacles enabled="No"/>

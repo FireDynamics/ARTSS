@@ -761,21 +761,20 @@ else
     else
       WRITETO=${WRITETO}${BOUNDARYCONDITIONS}
     fi
-    if [ $OBSTACLE -eq 1 ]
+    if [ $DOBST -eq 0 ]
     then
-      WRITETO="${WRITETO}\n
-  <obstacles enabled=\"No\"/>"
-    else
-      WRITETO="${WRITETO}\n
-  <obstacles enabled=\"Yes\">"
-      if [ $DOBST -eq 0 ]
+      WRITETO="${WRITETO}\n$(cat $DOBSTFILE)"
+    else 
+      if [ $OBSTACLE -eq 1 ]
       then
-        WRITETO="${WRITETO}\n$(cat $DOBSTFILE)"
+        WRITETO="${WRITETO}\n
+  <obstacles enabled=\"No\"/>"
       else
-        WRITETO="${WRITETO}${DOMAINOBSTACLES}"
-      fi
-      WRITETO="${WRITETO}
+        WRITETO="${WRITETO}\n
+  <obstacles enabled=\"Yes\">"
+        WRITETO="${WRITETO}${DOMAINOBSTACLES}
   </obstacles>"
+      fi
     fi
     if [ $SURFACE -eq 1 ]
     then

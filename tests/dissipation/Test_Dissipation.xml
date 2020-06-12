@@ -67,10 +67,10 @@
   <adaption dynamic="No" data_extraction="No"> </adaption>
 
   <boundaries>
-    <boundary field="w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
-    <boundary field="u,v" patch="left,right,top,bottom" type="dirichlet" value="2.0" />
+    <boundary field="w" patch="front,back,left,right,bottom,top" type="dirichlet" value="0.0" />
+    <boundary field="u,v" patch="left,right,bottom,top" type="dirichlet" value="2.0" />
     <boundary field="u,v" patch="front,back" type="dirichlet" value="0.0" />
-    <boundary field="p" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
+    <boundary field="p" patch="front,back,left,right,bottom,top" type="neumann" value="0.0" />
     <boundary field="T" patch="left,top" type="dirichlet" value="373.14" />
     <boundary field="T" patch="right,bottom" type="dirichlet" value="273.14" />
     <boundary field="T" patch="front,back" type="neumann" value="0.0" />
