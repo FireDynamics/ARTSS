@@ -1,5 +1,5 @@
 /// \file 		SLAdvect.cpp
-/// \brief 		Solves advection equation via unconditionally stable Semi-Langrangian approach
+/// \brief 		Solves advection equation via unconditionally stable Semi-Lagrangian approach
 /// \date 		Aug 23, 2016
 /// \author 	Severt
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
@@ -7,19 +7,16 @@
 //==================================== Semi Lagrangian Advection ======================================
 // ***************************************************************************************
 /// \brief  solves advection \f$ \partial_t \phi_1 = - (u \cdot \nabla) \phi_0 \f$ via unconditionally
-///			stable semi-Langrangian approach (backtrace and linear interpolation)
+///			stable semi-Lagrangian approach (backtrace and linear interpolation)
 // ***************************************************************************************
 
 #ifdef _OPENACC
 #include <accelmath.h>
 #else
-
 #include <cmath>
-
 #endif
 
 #include <algorithm>
-#include <search.h>
 #include "SLAdvect.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
@@ -35,7 +32,7 @@ SLAdvect::SLAdvect() {
 
 // ***************************************************************************************
 /// \brief  solves advection \f$ \partial_t \phi_1 = - (u \cdot \nabla) \phi_0 \f$ via unconditionally
-///			stable semi-Langrangian approach (backtrace and linear interpolation)
+///			stable semi-Lagrangian approach (backtrace and linear interpolation)
 /// \param  out		output pointer
 /// \param	in		input pointer
 /// \param	u_vel	x -velocity
@@ -64,14 +61,14 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
 
 #pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize])
     {
-        const size_t Nx = domain->GetNx(out->GetLevel());    //due to unnecessary parameter passing of *this
+        const size_t Nx = domain->GetNx(out->GetLevel());    // due to unnecessary parameter passing of *this
         const size_t Ny = domain->GetNy(out->GetLevel());
 
-        const real dx = domain->Getdx(out->GetLevel());    //due to unnecessary parameter passing of *this
+        const real dx = domain->Getdx(out->GetLevel());    // due to unnecessary parameter passing of *this
         const real dy = domain->Getdy(out->GetLevel());
         const real dz = domain->Getdz(out->GetLevel());
 
-        const real rdx = 1. / dx;        //due to unnecessary parameter passing of *this
+        const real rdx = 1. / dx;        // due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;
         const real rdz = 1. / dz;
 
@@ -81,7 +78,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
         const real dty = dt * rdy;
         const real dtz = dt * rdz;
 
-        //start indices for computational domain of inner cells
+        // start indices for computational domain of inner cells
         long int i_start = static_cast<long int> (domain->GetIndexx1());
         long int j_start = static_cast<long int> (domain->GetIndexy1());
         long int k_start = static_cast<long int> (domain->GetIndexz1());
@@ -96,7 +93,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             const long int j = static_cast<long int> (getCoordinateJ(idx, Nx, Ny, k));
             const long int i = static_cast<long int> (getCoordinateI(idx, Nx, Ny, j, k));
 
-            //TODO: backtracking may be outside the computational region, it is not a reasonable solution to cut the vector; idea: enlarge ghost cell to CFL*dx
+            // TODO: backtracking may be outside the computational region, it is not a reasonable solution to cut the vector; idea: enlarge ghost cell to CFL*dx
             // Linear Trace Back
             real Ci = dtx * d_u_vel[idx];
             real Cj = dty * d_v_vel[idx];
@@ -117,7 +114,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
                 r = 1 - fabs(fmod(Ci, 1));
             }
 
-            //Calculation of vertical indices and interpolation weights
+            // Calculation of vertical indices and interpolation weights
             long int j0;
             long int j1;
             real s;
@@ -132,7 +129,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
                 s = 1 - fabs(fmod(Cj, 1));
             }
 
-            //Calculation of depth indices and interpolation weights
+            // Calculation of depth indices and interpolation weights
             long int k0;
             long int k1;
             real t;
@@ -172,9 +169,9 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             size_t idx_111 = IX(i1, j1, k1, Nx, Ny);
             auto d_111 = d_in[idx_111];
             d_out[idx] = (1. - t) * ((1. - s) * ((1. - r) * d_000 + r * d_100)
-                                     + s * ((1. - r) * d_010 + r * d_110))
-                         + t * ((1. - s) * ((1. - r) * d_001 + r * d_101)
-                                + s * ((1. - r) * d_011 + r * d_111)); //row-major
+                                          + s * ((1. - r) * d_010 + r * d_110))
+                              + t * ((1. - s) * ((1. - r) * d_001 + r * d_101)
+                              + s * ((1. - r) * d_011 + r * d_111)); // row-major
         }
 
         boundary->applyBoundary(d_out, type, sync);
@@ -183,5 +180,5 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
 #pragma acc wait
         }
 
-    }//end data region
+    }// end data region
 }
