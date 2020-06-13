@@ -31,7 +31,7 @@ PressureSolver::~PressureSolver() {
 // ***************************************************************************************
 void PressureSolver::DoStep(real t, bool sync) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
     std::cout << "Pressure ..." << std::endl;
     //TODO Logger
 #endif

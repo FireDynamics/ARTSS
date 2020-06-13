@@ -69,7 +69,7 @@ void AdvectionDiffusionSolver::DoStep(real t, bool sync) {
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize])
     {
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect ..." << std::endl;
         //TODO Logger
 #endif
@@ -82,7 +82,7 @@ void AdvectionDiffusionSolver::DoStep(real t, bool sync) {
 
 // 3. Solve diffusion equation
         if (nu != 0.) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Diffuse ..." << std::endl;
             //TODO Logger
 #endif

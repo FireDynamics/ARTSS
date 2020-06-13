@@ -159,7 +159,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
                             d_nu_t[:bsize], d_kappa_t[:bsize], d_gamma_t[:bsize])
     {
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect ..." << std::endl;
         //TODO Logger
 #endif
@@ -171,13 +171,13 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         SolverI::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve turbulent diffusion equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Calculating Turbulent viscosity ..." << std::endl;
         //TODO Logger
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Diffuse ..." << std::endl;
         //TODO Logger
 #endif
@@ -190,7 +190,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
 
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add momentum source ..." << std::endl;
             //TODO Logger
 #endif
@@ -205,7 +205,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         pres->Divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Pressure ..." << std::endl;
         //TODO Logger
 #endif
@@ -217,7 +217,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
 // 5. Solve Temperature and link back to force
 
         // Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect Temperature ..." << std::endl;
         //TODO Logger
 #endif
@@ -237,7 +237,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
                 d_kappa_t[i] = d_nu_t[i] * rPr_T; // kappa_turb = nu_turb/Pr_turb
             }
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Diffuse turbulent Temperature ..." << std::endl;
             //TODO Logger
 #endif
@@ -249,7 +249,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
             // no turbulence
             if (kappa != 0.) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
                 std::cout << "Diffuse Temperature ..." << std::endl;
                 //TODO Logger
 #endif
@@ -263,7 +263,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         // Add dissipation
         if (m_hasDissipation) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add dissipation ..." << std::endl;
             //TODO Logger
 #endif
@@ -276,7 +276,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
             // Add source
         else if (m_tempFct != SourceMethods::Zero) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add temperature source ..." << std::endl;
             //TODO Logger
 #endif
@@ -289,7 +289,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
 // 6. Solve Concentration
 
         // Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect Concentration ..." << std::endl;
         //TODO Logger
 #endif
@@ -307,7 +307,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
 #pragma acc parallel loop independent present(d_gamma_t[:bsize], d_nu_t[:bsize]) async
             for (size_t i = 0; i < bsize; ++i) d_gamma_t[i] = d_nu_t[i] * rSc_T; // gamma_turb = nu_turb/Sc_turb
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Diffuse turbulent Concentration ..." << std::endl;
             //TODO Logger
 #endif
@@ -318,7 +318,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         } else {
             // no turbulence
             if (gamma != 0.) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
                 std::cout << "Diffuse Concentration ..." << std::endl;
                 //TODO Logger
 #endif
@@ -332,7 +332,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         // Add source
         if (m_conFct != SourceMethods::Zero) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add concentration source ..." << std::endl;
             //TODO Logger
 #endif

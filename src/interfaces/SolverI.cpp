@@ -411,7 +411,7 @@ void SolverI::Init() {
                 Functions::Uniform(f_z, val_z);
             }
         } else {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Initial values all set to zero!" << std::endl;
             //TODO Logger
 #endif
@@ -791,7 +791,7 @@ void SolverI::UpdateSources(real t, bool sync) {
             forceFct == SourceMethods::Uniform) {
 
         } else if (forceFct == SourceMethods::Buoyancy) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Update f(T) ..." << std::endl;
             //TODO Logger
 #endif

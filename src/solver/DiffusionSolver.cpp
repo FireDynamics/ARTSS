@@ -34,7 +34,7 @@ DiffusionSolver::~DiffusionSolver() {
 // ***************************************************************************************
 void DiffusionSolver::DoStep(real t, bool sync) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
     std::cout << "Diffuse ..." << std::endl;
 #endif
 // 1. Solve diffusion equation
