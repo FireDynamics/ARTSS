@@ -58,10 +58,18 @@ Other:
 
   ${YELLOW}--gcc${NC}                             \t use gcc as compiler (optional: specify version)
   ${YELLOW}--pgi${NC}                             \t use pgcc ac compiler (optional: specify version)
+
+Docker - ! cannot be combined with other commands ! (more information about docker commands in docker/README.md):
+  ${YELLOW}--docker-build${NC}                    \t build docker image
+  ${YELLOW}--docker-run${NC}                      \t run docker with gpu support
+  ${YELLOW}--docker-run-cpu${NC}                  \t run docker without gpu support
 "
 
 HELP="$DESCRIPTION$OPTIONS"
 COMPILE=""
+DOCKERRUN=1
+DOCKERBUILD=1
+DOCKERRUNCPU=1
 PROCS=-1
 while [[ $# -gt 0 ]]
 do
@@ -84,6 +92,18 @@ do
       ;;
     -d|--debug|--debugmode)
       BUILDTYPE=Debug 
+      shift
+      ;;
+    --docker-build)
+      DOCKERBUILD=0
+      shift
+      ;;
+    --docker-run)
+      DOCKERRUN=0
+      shift
+      ;;
+    --docker-run-cpu)
+      DOCKERRUNCPU=0
       shift
       ;;
     -g|--gpu|--artss_gpu)
@@ -156,6 +176,28 @@ do
       ;;
   esac
 done
+
+if [ $DOCKERBUILD -eq 0 ]
+then
+  cd docker
+  docker build -t artss_docker .
+  cd ..
+fi
+
+if [ $DOCKERRUN -eq 0 ]
+then
+  docker run -it --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker
+fi
+
+if [ $DOCKERRUNCPU -eq 0 ]
+then
+  docker run --gpus all -it --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker
+fi
+
+if [ $DOCKERRUN -eq 0 -o $DOCKERRUNCPU -eq 0 -o $DOCKERBUILD ]
+then
+  exit
+fi
 
 if [[ $JURECA -eq 1 && $P100 -eq 1 ]]
 then
