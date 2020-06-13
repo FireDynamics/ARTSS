@@ -4,7 +4,7 @@
 /// \author 	Severt
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include "PressureI.h"
+#include "IPressure.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
@@ -18,7 +18,7 @@
 /// \param  in_z	input pointer (z -velocity)
 /// \param  sync	synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void PressureI::Divergence(Field *out, const Field *inx, const Field *iny, const Field *inz, bool sync) {
+void IPressure::Divergence(Field *out, const Field *inx, const Field *iny, const Field *inz, bool sync) {
 
     auto domain = Domain::getInstance();
 
@@ -85,7 +85,7 @@ void PressureI::Divergence(Field *out, const Field *inx, const Field *iny, const
 /// \param  in_p	input pointer (pressure)
 /// \param  sync	synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void PressureI::Project(Field *outu, Field *outv, Field *outw, const Field *inu, const Field *inv, const Field *inw, const Field *inp, bool sync) {
+void IPressure::Project(Field *outu, Field *outv, Field *outw, const Field *inu, const Field *inv, const Field *inw, const Field *inp, bool sync) {
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU

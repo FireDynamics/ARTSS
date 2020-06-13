@@ -39,8 +39,8 @@ void PressureSolver::DoStep(real t, bool sync) {
 // 1. Solve pressure Poisson equation
 
     // local variables and parameters for GPU
-    auto p = SolverI::p;
-    auto rhs = SolverI::rhs;
+    auto p = ISolver::p;
+    auto rhs = ISolver::rhs;
     auto d_p = p->data;
     auto d_rhs = rhs->data;
 

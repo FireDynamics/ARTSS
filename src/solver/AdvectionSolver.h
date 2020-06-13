@@ -7,11 +7,11 @@
 #ifndef ARTSS_SOLVER_ADVECTIONSOLVER_H_
 #define ARTSS_SOLVER_ADVECTIONSOLVER_H_
 
-#include "../interfaces/SolverI.h"
-#include "../interfaces/AdvectionI.h"
+#include "../interfaces/ISolver.h"
+#include "../interfaces/IAdvection.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class AdvectionSolver : public SolverI {
+class AdvectionSolver : public ISolver {
 public:
 	AdvectionSolver();
 	~AdvectionSolver() override;
@@ -19,7 +19,7 @@ public:
 	void DoStep(real t, bool sync) override;
 
 private:
-	AdvectionI* adv;
+	IAdvection* adv;
 	Field* u_linm;
 	Field* v_linm;
 	Field* w_linm;

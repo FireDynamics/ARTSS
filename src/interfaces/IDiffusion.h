@@ -10,11 +10,11 @@
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class DiffusionI {
+class IDiffusion {
 
 public:
-    DiffusionI() = default;
-    virtual ~DiffusionI() = default;
+    IDiffusion() = default;
+    virtual ~IDiffusion() = default;
 
     virtual void diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) = 0;
     virtual void diffuse(Field *out, Field *in, const Field *b, const real D, const Field *ev, bool sync) = 0;
