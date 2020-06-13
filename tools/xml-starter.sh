@@ -122,7 +122,7 @@ do
       shift
       ;;
     --gp|--gpu_profile---artss_gpu_profile)
-      COMPILE="artss_acc_profile "
+      COMPILE="artss_gpu_profile "
       GPU=0
       shift
       ;;
