@@ -186,15 +186,15 @@ fi
 
 if [ $DOCKERRUN -eq 0 ]
 then
-  docker run -it --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker
+  docker run --gpus all -it --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker
 fi
 
 if [ $DOCKERRUNCPU -eq 0 ]
 then
-  docker run --gpus all -it --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker
+  docker run -it --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker # /bin/bash -c "./compile.sh"
 fi
 
-if [ $DOCKERRUN -eq 0 -o $DOCKERRUNCPU -eq 0 -o $DOCKERBUILD ]
+if [ $DOCKERRUN -eq 0 -o $DOCKERRUNCPU -eq 0 -o $DOCKERBUILD -eq 0 ]
 then
   exit
 fi
