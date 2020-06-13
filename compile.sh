@@ -4,12 +4,13 @@ GPU=1
 JURECA=1
 P100=1
 GPU_CC="cc30"
+CUDA_VERSION=10.1
 BUILDTYPE=Release
 
 YELLOW='\033[1;33m'
 NC='\033[0;m'
 
-DESCRIPTION="Script for compiling ARTSS. Select one or multiple executables for compiling (default: all executables). Specify CUDA version (default: $CUDA_VERSION) and GPU model (default: $GPU_MODEL). For a parallel execution choose --jobs, if there is no integer after the --jobs option, the number of processing units available to the current process will be used.
+DESCRIPTION="Script for compiling ARTSS. Select one or multiple executables for compiling (default: all executables). Specify CUDA version (default: $CUDA_VERSION) and GPU model (default: $GPU_CC). For a parallel execution choose --jobs, if there is no integer after the --jobs option, the number of processing units available to the current process will be used.
 "
 OPTIONS="
 Available Options:

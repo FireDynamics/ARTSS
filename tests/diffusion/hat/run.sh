@@ -2,7 +2,7 @@ $1 ./Test_Diffusion_Hat.xml
 
 rm -rf *.vtk
 
-python ./verify.py
+python3 ./verify.py
 
 if [ $? -eq 0 ]
 then
