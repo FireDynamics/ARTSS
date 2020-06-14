@@ -38,7 +38,7 @@ cd ARTSS
 ```
 ./compile.sh [OPTIONS]
 ```
-*Note: Without options all executables will be compiled using the PGI compiler and CUDA 8.0.*
+*Note: Without options all executables will be compiled using the PGI compiler and CUDA 10.1.*
 
 OPTIONS (selection; show all by using --help flag):
 - '-s' -> Compile serial ARTSS version
