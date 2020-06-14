@@ -61,6 +61,7 @@ Other:
 
 Docker - ! cannot be combined with other commands ! (more information about docker commands in docker/README.md):
   ${YELLOW}--docker-build${NC}                    \t build docker image
+  ${YELLOW}--docker-hostname${NC}                 \t set hostname for docker image (default: docker_\$(hostname))
   ${YELLOW}--docker-run${NC}                      \t run docker with gpu support
   ${YELLOW}--docker-run-cpu${NC}                  \t run docker without gpu support
 "
@@ -69,6 +70,7 @@ HELP="$DESCRIPTION$OPTIONS"
 COMPILE=""
 DOCKERRUN=1
 DOCKERBUILD=1
+DOCKERHOST=docker_$(hostname)
 DOCKERRUNCPU=1
 PROCS=-1
 while [[ $# -gt 0 ]]
@@ -96,6 +98,11 @@ do
       ;;
     --docker-build)
       DOCKERBUILD=0
+      shift
+      ;;
+    --docker-host)
+      DOCKERHOST=$2
+      shift
       shift
       ;;
     --docker-run)
@@ -186,14 +193,12 @@ fi
 
 if [ $DOCKERRUN -eq 0 ]
 then
-  HNAME=docker_$(hostname)
-  docker run --gpus all -it --rm --hostname=${HNAME} -v $(pwd):/host_pwd -w /host_pwd artss_docker
+  docker run --gpus all -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker
 fi
 
 if [ $DOCKERRUNCPU -eq 0 ]
 then
-  HNAME=docker_$(hostname)
-  docker run -it --rm --hostname=${HNAME} -v $(pwd):/host_pwd -w /host_pwd artss_docker # /bin/bash -c "./compile.sh"
+  docker run -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker # /bin/bash -c "./compile.sh"
 fi
 
 if [ $DOCKERRUN -eq 0 -o $DOCKERRUNCPU -eq 0 -o $DOCKERBUILD -eq 0 ]
