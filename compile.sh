@@ -186,12 +186,14 @@ fi
 
 if [ $DOCKERRUN -eq 0 ]
 then
-  docker run --gpus all -it --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker
+  HNAME=docker_$(hostname)
+  docker run --gpus all -it --rm --hostname=${HNAME} -v $(pwd):/host_pwd -w /host_pwd artss_docker
 fi
 
 if [ $DOCKERRUNCPU -eq 0 ]
 then
-  docker run -it --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker # /bin/bash -c "./compile.sh"
+  HNAME=docker_$(hostname)
+  docker run -it --rm --hostname=${HNAME} -v $(pwd):/host_pwd -w /host_pwd artss_docker # /bin/bash -c "./compile.sh"
 fi
 
 if [ $DOCKERRUN -eq 0 -o $DOCKERRUNCPU -eq 0 -o $DOCKERBUILD -eq 0 ]
