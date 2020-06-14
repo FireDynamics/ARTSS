@@ -2,7 +2,7 @@
 Accelerator-based Real Time Smoke Simulator
 
 ARTSS is a real-time and prognosis capable CFD code basis simulating buoyancy-driven turbulent smoke spread
-based on finite differences and a large eddy simulation turbulence model. The open source code is portable on CPU and GPU and successfully verified using unit, analytical and
+based on finite differences and a large eddy simulation turbulence model. The open source code is portable on CPU and GPU and successfully verified using analytical and
 semi-analytical tests. It is also successfully validated with scenarios relevant for fire protection.
 ARTSS is based on JuROr, which was originally developed within the [ORPHEUS](http://www.orpheus-projekt.de) project
 (funded by [BMBF](https://www.bmbf.de/)) by Dr. Anne Küsters.
