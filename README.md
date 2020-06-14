@@ -57,7 +57,7 @@ Extra:
 It is also possible to compile ARTSS using a docker file. Instructions and further information can be found in the folder `docker`.
 
 
-### Code structure
+### Code Structure
 ```
 ARTSS
 │   compile.sh
