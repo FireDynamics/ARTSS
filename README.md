@@ -19,9 +19,7 @@ Detailed requirements are listed in the table below (general requirements for se
 | General  | Version control system (optional)                   | git      |   >= 2.0      |
 |          | Build processor using a compiler-independent method | CMake    |   >= 2.8      |
 |          | Compiler fully supporting C++-17 (gcc or clang)     | gcc      |   >= 7.0      |
-|          |                                                     | clang    |   >= 8.0      |
 |          | Visualization of output                             | vtk      |   >= 5.8      |
-|          |                                                     | Paraview |   >= 5.50     |
 |          | Testing for consistency of output while developing  | Python   |   >= 3.6      |
 | Specific | Compiler fully supporting C++-17 and OpenACC        | PGI      |   >= 19.10    |
 
