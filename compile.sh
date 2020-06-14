@@ -100,7 +100,7 @@ do
       DOCKERBUILD=0
       shift
       ;;
-    --docker-host)
+    --docker-hostname)
       DOCKERHOST=$2
       shift
       shift
