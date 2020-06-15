@@ -116,7 +116,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-  set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fbenchmark-arcs -ftest-coverage")
+  set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   message(STATUS "Debug flags: "  ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_DEBUG} )
 else(CMAKE_BUILD_TYPE MATCHES Debug)
   message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS} " ,  " ${CMAKE_CXX_FLAGS_RELEASE} )
