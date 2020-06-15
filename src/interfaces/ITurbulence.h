@@ -9,11 +9,11 @@
 
 #include "../Field.h"
 
-class TurbulenceI {
+class ITurbulence {
 
 public:
-	TurbulenceI() = default;
-	virtual ~TurbulenceI() = default;
+	ITurbulence() = default;
+	virtual ~ITurbulence() = default;
 
 	virtual void CalcTurbViscosity(Field* ev, Field* in_u, Field* in_v, Field* in_w, bool sync)=0;
 	virtual void ExplicitFiltering(Field* out, const Field* in, bool sync)=0;

@@ -7,11 +7,11 @@
 #ifndef ARTSS_ADVECTION_EXPLICITADVECT_H_
 #define ARTSS_ADVECTION_EXPLICITADVECT_H_
 
-#include "../interfaces/AdvectionI.h"
+#include "../interfaces/IAdvection.h"
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class ExplicitAdvect: public AdvectionI {
+class ExplicitAdvect: public IAdvection {
 public:
 	ExplicitAdvect();
     ~ExplicitAdvect() override = default;

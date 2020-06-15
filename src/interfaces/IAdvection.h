@@ -9,11 +9,11 @@
 
 #include "../Field.h"
 
-class AdvectionI {
+class IAdvection {
 
 public:
-	AdvectionI() = default;
-	virtual ~AdvectionI() = default;
+	IAdvection() = default;
+	virtual ~IAdvection() = default;
 
 	virtual void advect(Field* out, Field* in, const Field* u_vel, const Field* v_vel, const Field* w_vel, bool sync)=0;
 };

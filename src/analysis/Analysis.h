@@ -7,21 +7,21 @@
 #ifndef ARTSS_ANALYSIS_ANALYSIS_H_
 #define ARTSS_ANALYSIS_ANALYSIS_H_
 
-#include "../interfaces/SolverI.h"
+#include "../interfaces/ISolver.h"
 #include "../utility/GlobalMacrosTypes.h"
 
 class Analysis {
 public:
 	Analysis();
 
-	void Analyse(SolverI* solver, real t);
+	void Analyse(ISolver* solver, real t);
 	//real* CalcL2NormMidPoint(real t, real* sum, read_ptr num_u, read_ptr num_p, read_ptr num_T);
-	void CalcL2NormMidPoint(SolverI* solver, real t, real* sum);
+	void CalcL2NormMidPoint(ISolver* solver, real t, real* sum);
 	void CalcRMSError(real sumu, real sump, real sumT);
 	bool CheckTimeStepVN(Field* u, real dt);
 	bool CheckTimeStepCFL(Field* u, Field* v, Field* w, real dt);
 	real SetDTwithCFL(Field* u, Field* v, Field* w);
-	void SaveVariablesInFile(SolverI* solv);
+	void SaveVariablesInFile(ISolver* solv);
 
 private:
 	real m_tol = 1e-7;

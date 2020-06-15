@@ -7,12 +7,12 @@
 #ifndef ARTSS_SOLVER_ADVECTIONDIFFUSIONSOLVER_H_
 #define ARTSS_SOLVER_ADVECTIONDIFFUSIONSOLVER_H_
 
-#include "../interfaces/SolverI.h"
-#include "../interfaces/AdvectionI.h"
-#include "../interfaces/DiffusionI.h"
+#include "../interfaces/ISolver.h"
+#include "../interfaces/IAdvection.h"
+#include "../interfaces/IDiffusion.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class AdvectionDiffusionSolver : public SolverI {
+class AdvectionDiffusionSolver : public ISolver {
 public:
 	AdvectionDiffusionSolver();
 	~AdvectionDiffusionSolver() override;
@@ -20,8 +20,8 @@ public:
 	void DoStep(real t, bool sync) override;
 
 private:
-	AdvectionI* adv;
-	DiffusionI* dif;
+	IAdvection* adv;
+	IDiffusion* dif;
 
 	real m_nu;
 

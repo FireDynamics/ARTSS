@@ -55,21 +55,21 @@ NSSolver::~NSSolver() {
 void NSSolver::DoStep(real t, bool sync) {
 
 // local variables and parameters for GPU
-    auto u = SolverI::u;
-    auto v = SolverI::v;
-    auto w = SolverI::w;
-    auto u0 = SolverI::u0;
-    auto v0 = SolverI::v0;
-    auto w0 = SolverI::w0;
-    auto u_tmp = SolverI::u_tmp;
-    auto v_tmp = SolverI::v_tmp;
-    auto w_tmp = SolverI::w_tmp;
-    auto p = SolverI::p;
-    auto p0 = SolverI::p0;
-    auto rhs = SolverI::rhs;
-    auto f_x = SolverI::f_x;
-    auto f_y = SolverI::f_y;
-    auto f_z = SolverI::f_z;
+    auto u = ISolver::u;
+    auto v = ISolver::v;
+    auto w = ISolver::w;
+    auto u0 = ISolver::u0;
+    auto v0 = ISolver::v0;
+    auto w0 = ISolver::w0;
+    auto u_tmp = ISolver::u_tmp;
+    auto v_tmp = ISolver::v_tmp;
+    auto w_tmp = ISolver::w_tmp;
+    auto p = ISolver::p;
+    auto p0 = ISolver::p0;
+    auto rhs = ISolver::rhs;
+    auto f_x = ISolver::f_x;
+    auto f_y = ISolver::f_y;
+    auto f_z = ISolver::f_z;
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -104,7 +104,7 @@ void NSSolver::DoStep(real t, bool sync) {
 
 
 // Couple velocity to prepare for diffusion
-        SolverI::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve diffusion equation
         if (nu != 0.) {
@@ -117,7 +117,7 @@ void NSSolver::DoStep(real t, bool sync) {
             dif_vel->diffuse(w, w0, w_tmp, nu, sync);
 
             // Couple data to prepare for adding source
-            SolverI::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 3. Add force
@@ -128,7 +128,7 @@ void NSSolver::DoStep(real t, bool sync) {
 #endif
             sou->addSource(u, v, w, f_x, f_y, f_z, sync);
             // Couple data
-            SolverI::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 4. Solve pressure equation and project

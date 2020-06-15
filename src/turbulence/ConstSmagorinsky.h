@@ -7,9 +7,9 @@
 #ifndef ARTSS_TURBULENCE_CONSTSMAGORINSKY_H_
 #define ARTSS_TURBULENCE_CONSTSMAGORINSKY_H_
 
-#include "../interfaces/TurbulenceI.h"
+#include "../interfaces/ITurbulence.h"
 
-class ConstSmagorinsky : public TurbulenceI {
+class ConstSmagorinsky : public ITurbulence {
 public:
     ConstSmagorinsky();
 

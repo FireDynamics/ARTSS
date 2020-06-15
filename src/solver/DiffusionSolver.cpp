@@ -7,7 +7,7 @@
 #include <iostream>
 
 #include "DiffusionSolver.h"
-#include "../interfaces/DiffusionI.h"
+#include "../interfaces/IDiffusion.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
@@ -39,15 +39,15 @@ void DiffusionSolver::DoStep(real t, bool sync) {
 #endif
 // 1. Solve diffusion equation
     // local variables and parameters for GPU
-    auto u = SolverI::u;
-    auto v = SolverI::v;
-    auto w = SolverI::w;
-    auto u0 = SolverI::u0;
-    auto v0 = SolverI::v0;
-    auto w0 = SolverI::w0;
-    auto u_tmp = SolverI::u_tmp;
-    auto v_tmp = SolverI::v_tmp;
-    auto w_tmp = SolverI::w_tmp;
+    auto u = ISolver::u;
+    auto v = ISolver::v;
+    auto w = ISolver::w;
+    auto u0 = ISolver::u0;
+    auto v0 = ISolver::v0;
+    auto w0 = ISolver::w0;
+    auto u_tmp = ISolver::u_tmp;
+    auto v_tmp = ISolver::v_tmp;
+    auto w_tmp = ISolver::w_tmp;
 
     auto d_u = u->data;
     auto d_v = v->data;

@@ -8,11 +8,11 @@
 #define ARTSS_ADAPTION_VORTEX_H_
 
 
-#include "../interfaces/AdaptionFunctionI.h"
+#include "../interfaces/IAdaptionFunction.h"
 #include "Adaption.h"
 
 
-class Vortex : public AdaptionFunctionI {
+class Vortex : public IAdaptionFunction {
 public:
     Vortex(Adaption *pAdaption, Field **fields);
     ~Vortex();

@@ -8,7 +8,7 @@
 #define ARTSS_INTERFACE_ADPATIONFUNCTIONI_H
 
 
-class AdaptionFunctionI {
+class IAdaptionFunction {
 public:
     virtual void applyChanges() = 0;
     virtual bool update() = 0;

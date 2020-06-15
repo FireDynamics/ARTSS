@@ -7,11 +7,11 @@
 #ifndef ARTSS_SOURCE_EXPLICITEULERSOURCE_H_
 #define ARTSS_SOURCE_EXPLICITEULERSOURCE_H_
 
-#include "../interfaces/SourceI.h"
+#include "../interfaces/ISource.h"
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class ExplicitEulerSource: public SourceI {
+class ExplicitEulerSource: public ISource {
 public:
 	ExplicitEulerSource();
 

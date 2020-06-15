@@ -7,10 +7,10 @@
 #ifndef ARTSS_DIFFUSION_EXPLICITDIFFUSE_H_
 #define ARTSS_DIFFUSION_EXPLICITDIFFUSE_H_
 
-#include "../interfaces/DiffusionI.h"
+#include "../interfaces/IDiffusion.h"
 #include "../Field.h"
 
-class ExplicitDiffuse: public DiffusionI {
+class ExplicitDiffuse: public IDiffusion {
 public:
 	ExplicitDiffuse();
 
