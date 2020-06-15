@@ -29,17 +29,17 @@ Executables:
   ${YELLOW}--artss_gpu${NC}           \t Executable: artss_gpu
 ----
   Benchmarking (without output, visualization, analysis but with tracing for profiling):
-  ${YELLOW}--sp${NC}
-  ${YELLOW}--sprofile${NC}
-  ${YELLOW}--artss_profile${NC}           \t Executable artss_serial_profile
+  ${YELLOW}--sb${NC}
+  ${YELLOW}--sbenchmark${NC}
+  ${YELLOW}--artss_benchmark${NC}           \t Executable artss_serial_benchmark
 
-  ${YELLOW}--mp${NC}
-  ${YELLOW}--multicore_profile${NC}
-  ${YELLOW}--artss_multicore_cpu_profile${NC} \t Executable artss_multicore_cpu_profile
+  ${YELLOW}--mb${NC}
+  ${YELLOW}--multicore_benchmark${NC}
+  ${YELLOW}--artss_multicore_cpu_benchmark${NC} \t Executable artss_multicore_cpu_benchmark
 
-  ${YELLOW}--gp${NC}
-  ${YELLOW}--gpu_profile${NC}
-  ${YELLOW}--artss_gpu_profile${NC}        \t Executable artss_gpu_profile
+  ${YELLOW}--gb${NC}
+  ${YELLOW}--gpu_benchmark${NC}
+  ${YELLOW}--artss_gpu_benchmark${NC}        \t Executable artss_gpu_benchmark
 
 Other:
    ${YELLOW}-c${NC}
@@ -121,8 +121,8 @@ do
       GPU=0
       shift
       ;;
-    --gp|--gpu_profile---artss_gpu_profile)
-      COMPILE="artss_gpu_profile "
+    --gb|--gpu_benchmark---artss_gpu_benchmark)
+      COMPILE="artss_gpu_benchmark "
       GPU=0
       shift
       ;;
@@ -144,8 +144,8 @@ do
       COMPILE="artss_serial "
       shift
       ;;
-    --sp|--serial_profile|--artss_serial_profile)
-      COMPILE="artss_serial_profile "
+    --sb|--serial_benchmark|--artss_serial_benchmark)
+      COMPILE="artss_serial_benchmark "
       shift
       ;;
     --manual)
@@ -158,8 +158,8 @@ do
       GPU=0
       shift
       ;;
-    --mp|--multicore_profile|--artss_multicore_cpu_profile)
-      COMPILE="artss_multicore_cpu_profile "
+    --mb|--multicore_benchmark|--artss_multicore_cpu_benchmark)
+      COMPILE="artss_multicore_cpu_benchmark "
       GPU=0
       shift
       ;;

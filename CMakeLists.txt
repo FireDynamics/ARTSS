@@ -286,23 +286,23 @@ include_directories( $ENV{CUDA_INC} )
 #Targets
 add_executable( artss_serial ${SOURCE_FILES} src/main.cpp)
 
-add_executable( artss_serial_profile ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_serial_profile PROPERTIES COMPILE_FLAGS "-DPROFILING -DUSE_NVTX" )
-target_link_libraries( artss_serial_profile  )
+add_executable( artss_serial_benchmark ${SOURCE_FILES} src/main.cpp  )
+set_target_properties( artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX" )
+target_link_libraries( artss_serial_benchmark  )
 
 add_executable( artss_multicore_cpu ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=multicore" LINK_FLAGS "-acc -ta=multicore" )
 
-add_executable( artss_multicore_cpu_profile ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_multicore_cpu_profile PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DPROFILING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore" )
-target_link_libraries( artss_multicore_cpu_profile  )
+add_executable( artss_multicore_cpu_benchmark ${SOURCE_FILES} src/main.cpp  )
+set_target_properties( artss_multicore_cpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore" )
+target_link_libraries( artss_multicore_cpu_benchmark  )
 
 add_executable( artss_gpu ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
 
-add_executable( artss_gpu_profile ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_gpu_profile PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DPROFILING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
-target_link_libraries( artss_gpu_profile  )
+add_executable( artss_gpu_benchmark ${SOURCE_FILES} src/main.cpp  )
+set_target_properties( artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
+target_link_libraries( artss_gpu_benchmark  )
 
 enable_testing()
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests DESTINATION ${CMAKE_BINARY_DIR} )

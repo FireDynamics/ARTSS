@@ -71,12 +71,12 @@ void DiffusionTurbSolver::DoStep(real t, bool sync) {
 
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_nu_t[:bsize]) //EV
     {
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Calculating Turbulent viscosity ..." << std::endl;
         //TODO Logger
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Diffuse ..." << std::endl;
         //TODO Logger
 #endif

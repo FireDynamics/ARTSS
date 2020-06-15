@@ -132,7 +132,7 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 #pragma acc wait
         }
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Number of iterations:" << it << std::endl;
         std::cout << "Jacobi ||res|| = " << res << "\n";
         //TODO Logger
@@ -250,7 +250,7 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
         if (sync) {
 #pragma acc wait
         }
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Number of iterations:" << it << std::endl;
         std::cout << "Jacobi ||res|| = " << res << "\n";
         //TODO Logger

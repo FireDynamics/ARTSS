@@ -98,7 +98,7 @@ void NSTurbSolver::DoStep(real t, bool sync) {
     {
 
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect ..." << std::endl;
         //TODO Logger
 #endif
@@ -110,14 +110,14 @@ void NSTurbSolver::DoStep(real t, bool sync) {
         ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve turbulent diffusion equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Calculating Turbulent viscosity ..." << std::endl;
         //TODO Logger
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Diffuse ..." << std::endl;
         //TODO Logger
 #endif
@@ -131,7 +131,7 @@ void NSTurbSolver::DoStep(real t, bool sync) {
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add source ..." << std::endl;
             //TODO Logger
 #endif
@@ -146,7 +146,7 @@ void NSTurbSolver::DoStep(real t, bool sync) {
         pres->Divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Pressure ..." << std::endl;
         //TODO Logger
 #endif

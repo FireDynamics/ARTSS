@@ -23,7 +23,7 @@ BoundaryController::BoundaryController() {
     } else {
         m_multigrid = new Multigrid(m_bdc_boundary);
     }
-#ifndef PROFILING
+#ifndef BENCHMARKING
     printBoundaries();
 #endif
 }

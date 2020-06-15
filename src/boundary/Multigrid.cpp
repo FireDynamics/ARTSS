@@ -17,7 +17,7 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
     init();
     addMGLists();
     sendListsToGPU();
-#ifndef PROFILING
+#ifndef BENCHMARKING
     //print();
     control();
 #endif
@@ -98,7 +98,7 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
     init();
     addMGLists();
     sendListsToGPU();
-#ifndef PROFILING
+#ifndef BENCHMARKING
     //print();
     control();
 #endif

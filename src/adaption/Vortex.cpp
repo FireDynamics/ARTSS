@@ -96,7 +96,7 @@ void Vortex::applyChanges() {
 #pragma acc exit data delete(arr_idxExpansion[:len_e])
             delete[] arr_idxExpansion;
         }
-#ifndef PROFILING
+#ifndef BENCHMARKING
         else {
             size_t len_r = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_x1));
             auto *arr_idxReduction = new size_t[len_r];
@@ -119,7 +119,7 @@ void Vortex::applyChanges() {
 #pragma acc exit data delete(arr_idxExpansion[:len_e])
             delete[] arr_idxExpansion;
         }
-#ifndef PROFILING
+#ifndef BENCHMARKING
         else {
             size_t len_r = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_x2));
             auto *arr_idxReduction = new size_t[len_r];
@@ -142,7 +142,7 @@ void Vortex::applyChanges() {
 #pragma acc exit data delete(arr_idxExpansion[:len_e])
             delete[] arr_idxExpansion;
         }
-#ifndef PROFILING
+#ifndef BENCHMARKING
         else {
             size_t len_r = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(m_pAdaption->m_shift_y1));
             auto *arr_idxReduction = new size_t[len_r];
@@ -165,7 +165,7 @@ void Vortex::applyChanges() {
 #pragma acc exit data delete(arr_idxExpansion[:len_e])
             delete[] arr_idxExpansion;
         }
-#ifndef PROFILING
+#ifndef BENCHMARKING
         else {
             size_t len_r = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(m_pAdaption->m_shift_y2));
             auto *arr_idxReduction = new size_t[len_r];

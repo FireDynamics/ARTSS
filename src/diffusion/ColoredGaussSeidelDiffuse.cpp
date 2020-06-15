@@ -118,7 +118,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 //#pragma acc wait
     }
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
     std::cout << "Number of iterations:" << it << std::endl;
     std::cout << "Colored Gauss-Seidel ||res|| = " << res << "\n";
     //TODO Logger
@@ -215,7 +215,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 //#pragma acc wait
     }
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
     std::cout << "Number of iterations:" << it << std::endl;
     std::cout << "Colored Gauss-Seidel ||res|| = " << res << "\n";
     //TODO Logger
