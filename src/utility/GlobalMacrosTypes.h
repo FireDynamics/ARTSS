@@ -42,7 +42,7 @@
 
 #define xi(i,x,dx) ((x) + ((i)-0.5)*(dx)) // physical xcoords at midpoints calculated by index i=0..Nx-1
 #define yj(j,y,dy) ((y) + ((j)-0.5)*(dy)) // physical ycoords at midpoints calculated by index j=0..Ny-1
-#define zk(k,z,dz) ((z) + ((k)-0.5)*(dz)) // physical ycoords at midpoints calculated by index j=0..Ny-1
+#define zk(k,z,dz) ((z) + ((k)-0.5)*(dz)) // physical zcoords at midpoints calculated by index k=0..Nz-1
 #define tn(n, dt) ((n)*(dt))			  // simulation time calculated by time steps n = 0...Nt
 
 #define FOR_EACH_CELL(Nx, Ny, Nz) for (size_t k=0; k<Nz; k++) {\
