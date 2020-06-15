@@ -369,15 +369,24 @@ function create_testcases {
     <boundary field=\"T\" patch=\"front,back,top,left,right\" type=\"neumann\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"bottom\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"Uniform\">
-    <val> 303.64 </val>
+    echo "  <initial_conditions usr_fct = \"LayersT\" dir=\"y\">     <!-- Layers  -->
+    <n_layers> 5 </n_layers>
+    <border_1> -1.8 </border_1>  <!-- at cell face -->
+    <border_2> -0.6 </border_2>  <!-- at cell face -->
+    <border_3>  0.6 </border_3>  <!-- at cell face -->
+    <border_4>  1.8 </border_4>  <!-- at cell face -->
+    <value_1> 303.64 </value_1>
+    <value_2> 303.64 </value_2>
+    <value_3> 303.64 </value_3>
+    <value_4> 303.64 </value_4>
+    <value_5> 303.64 </value_5>
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     echo "      <source type = \"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct= \"RampTanh\" dissipation=\"No\">
         <HRR> 2500. </HRR>      <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
-        <x0> 0. </x0>
+        <x0> 0.  </x0>
         <y0> 1. </y0>
         <z0> 0.1 </z0>
         <sigmax> 0.1 </sigmax>
@@ -385,77 +394,6 @@ function create_testcases {
         <sigmaz> 0.1 </sigmaz>
         <tau> 5. </tau>
       </source>" > ${NAME}_$TSFILEVAL
-    ((INDEX++))
-
-    ####################NavierStokesTempTurb Steckler####################
-    NAMEVALUES[$INDEX]=NavierStokesTempTurb_Steckler
-    FPATHVALUES[$INDEX]=examples
-    NAME=${NAMEVALUES[$INDEX]}
-    BUILDER[$INDEX]="./xml-builder.sh --nstt --tend 1800. --dt 0.05 --nu 3.1e-5 --beta 3.34e-3 --g -9.81 --kappa 4.2e-5 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 5 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --prt 0.5 --solavail No  --xstart -2.8 --xend 4.2 --ystart 0. --yend 4.26 --zstart -2.8 --zend 2.8 --nx 160 --ny 128 --nz 128 --nplots 100"
-
-    echo "  <boundaries>
-    <boundary field=\"u,v,w\" patch=\"front,back,bottom,top,left,right\" type=\"dirichlet\" value=\"0.0\" />        
-    <boundary field=\"p\" patch=\"front,back,bottom,top,left,right\" type=\"dirichlet\" value=\"0.0\" />
-    <boundary field=\"T\" patch=\"front,back,top,left,right\" type=\"dirichlet\" value=\"299.14\" />
-    <boundary field=\"T\" patch=\"bottom\" type=\"neumann\" value=\"0.0\" />
-  </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"RandomT\">
-    <Ta> 299.14 </Ta>
-    <A> 0. </A>
-    <range> 1 </range>
-  </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
-    </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type = \"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct= \"RampTanh\" dissipation=\"No\">
-        <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
-        <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
-        <x0> 0. </x0>
-        <y0> 0.016640625 </y0>
-        <z0> 0. </z0>
-        <sigmax> 0.25 </sigmax>
-        <sigmay> 0.6 </sigmay>
-        <sigmaz> 0.25 </sigmaz>
-        <tau> 5. </tau>
-      </source>" > ${NAME}_$TSFILEVAL
-
-    echo "  <obstacles enabled=\"Yes\">
-    <obstacle>
-      <geometry ox1=\"-1.6625\" ox2=\"-1.4\" oy1=\"0.\" oy2=\"2.13\" oz1=\"-1.4\" oz2=\"1.4\"/>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
-    </obstacle>
-    <obstacle>
-      <geometry ox1=\"-1.6625\" ox2=\"1.6625\" oy1=\"2.13\" oy2=\"2.3296875\" oz1=\"-1.6625\" oz2=\"1.6625\"/>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
-    </obstacle>
-    <obstacle>
-      <geometry ox1=\"-1.6625\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"1.4\" oz2=\"1.6625\"/>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
-    </obstacle>
-    <obstacle>
-      <geometry ox1=\"-1.6625\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"-1.6625\" oz2=\"-1.4\"/>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
-    </obstacle>
-    <obstacle>
-      <geometry ox1=\"1.4\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"-1.4\" oz2=\"-0.4375\"/>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
-    </obstacle>
-    <obstacle>
-      <geometry ox1=\"1.4\" ox2=\"1.6625\" oy1=\"1.83046875\" oy2=\"2.13\" oz1=\"-0.4375\" oz2=\"0.4375\"/>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
-    </obstacle>
-    <obstacle>
-      <geometry ox1=\"1.4\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"0.4375\" oz2=\"1.4\"/>
-      <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-      <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
-    </obstacle>
-  </obstacles>" > ${NAME}_${DOFILEVAL}
-
     ((INDEX++))
   fi 
 }
