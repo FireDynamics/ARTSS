@@ -14,7 +14,7 @@
 #include "../boundary/BoundaryController.h"
 #include "../boundary/BoundaryData.h"
 #include "Solution.h"
-#include "../interfaces/SolverI.h"
+#include "../interfaces/ISolver.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 
@@ -35,7 +35,7 @@ Analysis::Analysis() {
 /// \param	solver		pointer to solver
 /// \param	t			current time
 // ***************************************************************************************
-void Analysis::Analyse(SolverI *solver, const real t) {
+void Analysis::Analyse(ISolver *solver, const real t) {
     //TODO statement t == 0.
     Solution solution;
 
@@ -233,7 +233,7 @@ real Analysis::CalcRelativeSpatialError(read_ptr num, read_ptr ana) {
 /// \param	t			current time
 /// \param	sum			pointer to sum for (u,p,T results)
 // ***************************************************************************************
-void Analysis::CalcL2NormMidPoint(SolverI *solver, real t, real *sum) {
+void Analysis::CalcL2NormMidPoint(ISolver *solver, real t, real *sum) {
     Solution solution;
 
     auto boundary = BoundaryController::getInstance();
@@ -429,7 +429,7 @@ real Analysis::SetDTwithCFL(Field *u, Field *v, Field *w) {
 /// \brief  saves variables in .dat files
 /// \param	solv		pointer to solver
 // ***************************************************************************************
-void Analysis::SaveVariablesInFile(SolverI *solv) {
+void Analysis::SaveVariablesInFile(ISolver *solv) {
     //TODO do not write field out if not used
     auto boundary = BoundaryController::getInstance();
     size_t *innerList = boundary->get_innerList_level_joined();

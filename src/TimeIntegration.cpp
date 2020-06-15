@@ -24,7 +24,7 @@
 /// \param  isolv	pointer to solver
 /// \param  fname	filename of xml-input (via argument)
 // ***************************************************************************************
-TimeIntegration::TimeIntegration(SolverI *isolv, const char *fname) {
+TimeIntegration::TimeIntegration(ISolver *isolv, const char *fname) {
 	auto params = Parameters::getInstance();
 	auto domain = Domain::getInstance();
 
@@ -175,6 +175,8 @@ void TimeIntegration::run(){
 
 		// Calculate
 		m_solver->DoStep(t_cur, false);
+
+		//TODO: UDP FIRIN HERE
 
 		// Visualize
 #ifndef PROFILING

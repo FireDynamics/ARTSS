@@ -9,10 +9,10 @@
 
 #include "../Field.h"
 
-class PressureI {
+class IPressure {
 public:
-	PressureI() = default;
-	virtual ~PressureI() = default;
+	IPressure() = default;
+	virtual ~IPressure() = default;
 
 	virtual void pressure(Field* out, Field* b, real t, bool sync)=0;
 

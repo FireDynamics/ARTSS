@@ -56,7 +56,7 @@ Visual::Visual() {
 /// \param 	t			time
 /// \param 	fname		xml-file name (via argument)
 // ***************************************************************************************
-void Visual::Visualize(SolverI* solver, const real t, const char *fname){
+void Visual::Visualize(ISolver* solver, const real t, const char *fname){
 
 	auto params = Parameters::getInstance();
 

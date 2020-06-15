@@ -10,9 +10,9 @@
 
 #include "../utility/GlobalMacrosTypes.h"
 #include "../Field.h"
-#include "../interfaces/AdaptionFunctionI.h"
+#include "../interfaces/IAdaptionFunction.h"
 
-class Layers:public AdaptionFunctionI {
+class Layers:public IAdaptionFunction {
 public:
     Layers(Adaption* pAdaption, Field** fields);
     ~Layers();

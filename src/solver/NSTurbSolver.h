@@ -7,15 +7,15 @@
 #ifndef ARTSS_SOLVER_NSTURBSOLVER_H_
 #define ARTSS_SOLVER_NSTURBSOLVER_H_
 
-#include "../interfaces/SolverI.h"
-#include "../interfaces/AdvectionI.h"
-#include "../interfaces/DiffusionI.h"
-#include "../interfaces/PressureI.h"
-#include "../interfaces/SourceI.h"
-#include "../interfaces/TurbulenceI.h"
+#include "../interfaces/ISolver.h"
+#include "../interfaces/IAdvection.h"
+#include "../interfaces/IDiffusion.h"
+#include "../interfaces/IPressure.h"
+#include "../interfaces/ISource.h"
+#include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class NSTurbSolver:public SolverI {
+class NSTurbSolver:public ISolver {
 public:
 	NSTurbSolver();
 	~NSTurbSolver() override;
@@ -23,11 +23,11 @@ public:
 	void DoStep(real t, bool sync) override;
 
 private:
-	AdvectionI* adv_vel;
-	DiffusionI* dif_vel;
-	PressureI* pres;
-	SourceI* sou_vel;
-	TurbulenceI*  mu_tub;
+	IAdvection* adv_vel;
+	IDiffusion* dif_vel;
+	IPressure* pres;
+	ISource* sou_vel;
+	ITurbulence*  mu_tub;
 
 	real m_nu;
 
