@@ -4,10 +4,9 @@
 /// \author 	Severt
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <cmath>
 #ifdef _OPENACC
 #include <accelmath.h>
-#else
-#include <cmath>
 #endif
 
 #include "SourceI.h"
@@ -114,7 +113,6 @@ void SourceI::BuoyancyST_MMS(Field *out, real t, bool sync) {
     auto bsize_i = boundary->getSize_innerList();
     auto bsize_b = boundary->getSize_boundaryList();
 
-    size_t i, j, k;
 
     // inner cells
 #pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], d_out[:bsize])
@@ -123,9 +121,9 @@ void SourceI::BuoyancyST_MMS(Field *out, real t, bool sync) {
 #pragma acc loop independent
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_iList[l];
-            k = idx / (Nx * Ny);
-            j = (idx - k * Nx * Ny) / Nx;
-            i = idx - k * Nx * Ny - j * Nx;
+            size_t k = getCoordinateK(idx, Nx, Ny);
+            size_t j = getCoordinateJ(idx, Nx, Ny, k);
+            size_t i = getCoordinateI(idx, Nx, Ny, j, k);
             d_out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
         }
 
@@ -134,9 +132,9 @@ void SourceI::BuoyancyST_MMS(Field *out, real t, bool sync) {
 #pragma acc loop independent
         for (size_t l = 0; l < bsize_b; ++l) {
             const size_t idx = d_bList[l];
-            k = idx / (Nx * Ny);
-            j = (idx - k * Nx * Ny) / Nx;
-            i = idx - k * Nx * Ny - j * Nx;
+            size_t k = getCoordinateK(idx, Nx, Ny);
+            size_t j = getCoordinateJ(idx, Nx, Ny, k);
+            size_t i = getCoordinateI(idx, Nx, Ny, j, k);
             d_out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
         }
         if (sync) {
@@ -188,43 +186,43 @@ void SourceI::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, re
 
     auto bsize_i = boundary->getSize_innerList();
 
-    size_t i, j, k;
-    real V = 0.;
     real HRRrV;
 
     // inner cells
 #pragma acc data present(d_iList[:bsize_i], d_out[:bsize])
     {
-#pragma acc kernels async
-#pragma acc loop independent
+        real V = 0.;
+//#pragma acc kernels //async
+#pragma acc parallel loop independent reduction(+:V)
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_iList[l];
-            k = idx / (Nx * Ny);
-            j = (idx - k * Nx * Ny) / Nx;
-            i = idx - k * Nx * Ny - j * Nx;
+            size_t k = getCoordinateK(idx, Nx, Ny);
+            size_t j = getCoordinateJ(idx, Nx, Ny, k);
+            size_t i = getCoordinateI(idx, Nx, Ny, j, k);
 
-            real expr = std::exp(-(rsigmax2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))\
- + rsigmay2 * ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0))\
- + rsigmaz2 * ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0))));
+            auto x_i = (xi(i, X1, dx) - x0);
+            auto y_j = (yj(j, Y1, dy) - y0);
+            auto z_k = (zk(k, Z1, dz) - z0);
+            real expr = std::exp(-(rsigmax2 * (x_i * x_i) + rsigmay2 * (y_j * y_j) + rsigmaz2 * (z_k * z_k)));
             V += expr * dx * dy * dz;
         }
 
 #pragma acc wait
-
+//        V = 108;
         HRRrV = HRR / V;        //in case of concentration Ys*HRR
         real rcp = 1. / cp;    // to get [K/s] for energy equation (d_t T), rho:=1, otherwise *1/rho; in case of concentration 1/Hc to get kg/m^3s
 
-#pragma acc kernels async
-#pragma acc loop independent
+#pragma acc parallel loop independent
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_iList[l];
-            k = idx / (Nx * Ny);
-            j = (idx - k * Nx * Ny) / Nx;
-            i = idx - k * Nx * Ny - j * Nx;
+            size_t k = getCoordinateK(idx, Nx, Ny);
+            size_t j = getCoordinateJ(idx, Nx, Ny, k);
+            size_t i = getCoordinateI(idx, Nx, Ny, j, k);
 
-            real expr = std::exp(-(rsigmax2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))\
- + rsigmay2 * ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0))\
- + rsigmaz2 * ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0))));
+            auto x_i = (xi(i, X1, dx) - x0);
+            auto y_j = (yj(j, Y1, dy) - y0);
+            auto z_k = (zk(k, Z1, dz) - z0);
+            real expr = std::exp(-(rsigmax2 * x_i * x_i + rsigmay2 * y_j * y_j + rsigmaz2 * z_k * z_k));
             d_out[idx] = HRRrV * rcp * expr;
         }
 
