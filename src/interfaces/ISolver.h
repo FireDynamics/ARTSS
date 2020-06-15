@@ -9,7 +9,7 @@
 
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
-#include "SourceI.h"
+#include "ISource.h"
 
 struct SolverTypes {
     inline static const std::string AdvectionSolver = "AdvectionSolver";
@@ -25,10 +25,10 @@ struct SolverTypes {
     inline static const std::string PressureSolver = "PressureSolver";
 };
 
-class SolverI {
+class ISolver {
 public:
-	SolverI();
-	virtual ~SolverI();
+	ISolver();
+	virtual ~ISolver();
 
 	virtual void DoStep(real t, bool sync)=0;
 
@@ -130,9 +130,9 @@ public:
 
 	Field* sight;
 
-	SourceI* sou_temp;
-	SourceI* sou_vel;
-	SourceI* sou_con;
+	ISource* sou_temp;
+	ISource* sou_vel;
+	ISource* sou_con;
 
 protected:
 	void SetUp();

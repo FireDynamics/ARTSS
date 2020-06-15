@@ -8,14 +8,14 @@
 #define ARTSS_SOLVER_NSTEMPSOLVER_H_
 
 
-#include "../interfaces/SolverI.h"
-#include "../interfaces/AdvectionI.h"
-#include "../interfaces/DiffusionI.h"
-#include "../interfaces/PressureI.h"
-#include "../interfaces/SourceI.h"
+#include "../interfaces/ISolver.h"
+#include "../interfaces/IAdvection.h"
+#include "../interfaces/IDiffusion.h"
+#include "../interfaces/IPressure.h"
+#include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class NSTempSolver:public SolverI {
+class NSTempSolver:public ISolver {
 public:
 	NSTempSolver();
 	~NSTempSolver() override;
@@ -23,13 +23,13 @@ public:
 	void DoStep(real t, bool sync) override;
 
 private:
-	AdvectionI* adv_vel;
-	DiffusionI* dif_vel;
-	AdvectionI* adv_temp;
-	DiffusionI* dif_temp;
-	PressureI* pres;
-	SourceI* sou_vel;
-	SourceI* sou_temp;
+	IAdvection* adv_vel;
+	IDiffusion* dif_vel;
+	IAdvection* adv_temp;
+	IDiffusion* dif_temp;
+	IPressure* pres;
+	ISource* sou_vel;
+	ISource* sou_temp;
 
 	real m_nu;
 	real m_kappa;

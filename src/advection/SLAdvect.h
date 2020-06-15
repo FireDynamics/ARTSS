@@ -7,11 +7,11 @@
 #ifndef ARTSS_ADVECTION_SLADVECT_H_
 #define ARTSS_ADVECTION_SLADVECT_H_
 
-#include "../interfaces/AdvectionI.h"
+#include "../interfaces/IAdvection.h"
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class SLAdvect: public AdvectionI {
+class SLAdvect: public IAdvection {
 public:
 	SLAdvect();
     ~SLAdvect() override = default;

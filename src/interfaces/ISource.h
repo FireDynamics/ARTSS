@@ -10,10 +10,10 @@
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class SourceI {
+class ISource {
 public:
-	SourceI() = default;
-	virtual ~SourceI() = default;
+	ISource() = default;
+	virtual ~ISource() = default;
 
 	virtual void addSource(Field* outx, Field* outy, Field* outz, Field* Sx, Field* Sy, Field* Sz, bool sync)=0;
 	virtual void addSource(Field* out, Field* S, bool sync)=0;

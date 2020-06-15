@@ -7,11 +7,11 @@
 #ifndef ARTSS_SOLVER_PRESSURESOLVER_H_
 #define ARTSS_SOLVER_PRESSURESOLVER_H_
 
-#include "../interfaces/SolverI.h"
-#include "../interfaces/PressureI.h"
+#include "../interfaces/ISolver.h"
+#include "../interfaces/IPressure.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class PressureSolver: public SolverI {
+class PressureSolver: public ISolver {
 public:
 	PressureSolver();
 	~PressureSolver() override;
@@ -19,7 +19,7 @@ public:
 	void DoStep(real t, bool sync) override;
 
 private:
-	PressureI* pres;
+	IPressure* pres;
 
     static void control();
 };

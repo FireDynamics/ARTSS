@@ -24,9 +24,9 @@
 /// \param  isolv pointer to solver
 /// \param  fname filename of xml-input (via argument)
 // ***************************************************************************************
-TimeIntegration::TimeIntegration(SolverI *isolv, const char *fname) {
-    auto params = Parameters::getInstance();
-    auto domain = Domain::getInstance();
+TimeIntegration::TimeIntegration(ISolver *isolv, const char *fname) {
+	auto params = Parameters::getInstance();
+	auto domain = Domain::getInstance();
 
     m_dt = params->getReal("physical_parameters/dt");
     m_t_end = params->getReal("physical_parameters/t_end");
@@ -178,8 +178,8 @@ void TimeIntegration::run() {
             // Calculate
             m_solver->DoStep(t_cur, false);
 
-            // Visualize
 #ifndef BENCHMARKING
+            // Visualize
 #pragma acc update host(d_u[:bsize])
 #pragma acc update host(d_v[:bsize])
 #pragma acc update host(d_w[:bsize])

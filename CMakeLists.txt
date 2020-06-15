@@ -175,9 +175,9 @@ set(SOURCE_FILES
         "src/diffusion/ExplicitDiffuse.cpp"
         "src/diffusion/JacobiDiffuse.cpp"
 
-        "src/interfaces/PressureI.cpp"
-        "src/interfaces/SolverI.cpp"
-        "src/interfaces/SourceI.cpp"
+        "src/interfaces/IPressure.cpp"
+        "src/interfaces/ISolver.cpp"
+        "src/interfaces/ISource.cpp"
 
         "src/pressure/VCycleMG.cpp"
 
@@ -237,13 +237,13 @@ set(HEADER_FILES
         "src/diffusion/ExplicitDiffuse.h"
         "src/diffusion/JacobiDiffuse.h"
 
-        "src/interfaces/AdaptionFunctionI.h"
-        "src/interfaces/advectionI.h"
-        "src/interfaces/diffusionI.h"
-        "src/interfaces/PressureI.h"
-        "src/interfaces/SolverI.h"
-        "src/interfaces/SourceI.h"
-        "src/interfaces/TurbulenceI.h"
+        "src/interfaces/IAdaptionFunction.h"
+        "src/interfaces/IAdvection.h"
+        "src/interfaces/IDiffusion.h"
+        "src/interfaces/IPressure.h"
+        "src/interfaces/ISolver.h"
+        "src/interfaces/ISource.h"
+        "src/interfaces/ITurbulence.h"
 
         "src/pressure/VCycleMG.h"
 
