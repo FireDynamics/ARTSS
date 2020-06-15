@@ -1,54 +1,58 @@
-/// \file 		Analysis.cpp
-/// \brief 		Calculates residual, compares analytical and numerical solutions, saves variables
-/// \date 		July 11, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       Analysis.cpp
+/// \brief      Calculates residual, compares analytical and numerical solutions, saves variables
+/// \date       July 11, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+
+
+#include <spdlog/spdlog.h>
 
 #include <vector>
 #include <cmath>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <spdlog/spdlog.h>
 
 #include "Analysis.h"
 #include "../boundary/BoundaryController.h"
-#include "../boundary/BoundaryData.h"
 #include "Solution.h"
-#include "../interfaces/SolverI.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
+#include "../utility/Utility.h"
+
 
 Analysis::Analysis() {
+    m_logger = Utility::createLogger(typeid(this).name());
     auto params = Parameters::getInstance();
     hasAnalyticSolution = params->get("solver/solution/available") == "Yes";
-    if (hasAnalyticSolution) m_tol = params->getReal("solver/solution/tol");
-    else spdlog::info("No analytical solution available!\n");
+    if (hasAnalyticSolution) {
+        m_tol = params->getReal("solver/solution/tol");
+    } else {
+        m_logger->info("No analytical solution available!\n");
+    }
 }
 
-// ===================================== Start analysis ==================================
-// ***************************************************************************************
+// ================================ Start analysis =============================
+// *****************************************************************************
 /// \brief  starts analysis to compare numerical and analytical solutions
-/// \param	solver		pointer to solver
-/// \param	t			current time
-// ***************************************************************************************
+/// \param  solver      pointer to solver
+/// \param  t           current time
+// *****************************************************************************
 void Analysis::Analyse(SolverI *solver, const real t) {
-    //TODO statement t == 0.
+    m_logger = Utility::createLogger(typeid(this).name());
+    // TODO statement t == 0.
     Solution solution;
 
     auto params = Parameters::getInstance();
 
     if (hasAnalyticSolution) {
-
-        std::string filename = params->get("xml_filename");
-        tinyxml2::XMLDocument doc(filename.c_str());
-        tinyxml2::XMLError eResult = doc.LoadFile(filename.c_str());
-        tinyxml2::XMLElement *xmlParameter = doc.RootElement()->FirstChildElement("boundaries");
+        tinyxml2::XMLElement* rootElement = params->getRootElement();
+        tinyxml2::XMLElement *xmlParameter = rootElement->FirstChildElement("boundaries");
 
         auto curElem = xmlParameter->FirstChildElement();
 
         solution.CalcAnalyticalSolution(t);
-        spdlog::info("Compare to analytical solution:");
+        m_logger->info("Compare to analytical solution:");
 
         while (curElem) {
             std::string nodeName(curElem->Value());
@@ -90,22 +94,21 @@ void Analysis::Analyse(SolverI *solver, const real t) {
                         CompareSolutions(solver->GetT(), solution.GetT(), solver->T->GetType(), t);
                     }
                 }
-            }//end if
+            }  // end if
             curElem = curElem->NextSiblingElement();
-        }//end while
+        }  // end while
     }
 }
 
-// ======================= Compare analytical and numerical solution =====================
-// ***************************************************************************************
+// ================== Compare analytical and numerical solution ================
+// *****************************************************************************
 /// \brief  compares analytical solution and numerical solution, returns true when verification passed
-/// \param	num		numerical solution
-/// \param	ana		analytical solution
-/// \param	type	type of variable
-/// \param	t		current time
-// ***************************************************************************************
+/// \param  num     numerical solution
+/// \param  ana     analytical solution
+/// \param  type    type of variable
+/// \param  t       current time
+// *****************************************************************************
 bool Analysis::CompareSolutions(read_ptr num, read_ptr ana, const FieldType type, const real t) {
-
     bool verification = false;
 
     real res;
@@ -114,24 +117,23 @@ bool Analysis::CompareSolutions(read_ptr num, read_ptr ana, const FieldType type
     //res = CalcRelativeSpatialError(num, ana);
 
     if (res <= m_tol) {
-        spdlog::info("{} PASSED Test at time {} with error e={}",
+        m_logger->info("{} PASSED Test at time {} with error e = {}",
                 BoundaryData::getFieldTypeName(type), t, res);
         verification = true;
     } else {
-        spdlog::error("{} FAILED Test at time {} with error e={}",
+        m_logger->warn("{} FAILED Test at time {} with error e = {}",
                 BoundaryData::getFieldTypeName(type), t, res);
     }
     return verification;
 }
 
-// ================================== Calculate absolute error ===========================
-// ***************************************************************************************
+// ============================= Calculate absolute error ======================
+// *****************************************************************************
 /// \brief  calculates absolute spatial error based on L2-norm
-/// \param	num		numerical solution
-/// \param	ana		analytical solution
-// ***************************************************************************************
+/// \param  num     numerical solution
+/// \param  ana     analytical solution
+// *****************************************************************************
 real Analysis::CalcAbsoluteSpatialError(read_ptr num, read_ptr ana) {
-
     real sum = 0.;
     real r;
 
@@ -148,26 +150,24 @@ real Analysis::CalcAbsoluteSpatialError(read_ptr num, read_ptr ana) {
     }
 
     //weight
-    real nr = size_iList;
-
+    real nr = static_cast<real>(size_iList);
     real eps = sqrt(1. / nr * sum);
 
-    spdlog::info("Absolute error ||e||={}", eps);
-    //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
-    //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
-    //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]	<< std::endl;
-    //std::cout << "ana =" << ana[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]	<< std::endl;
+    m_logger->info("Absolute error ||e|| = {}", eps);
+    //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
+    //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]    << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]    << std::endl;
     return eps;
 }
 
-// ================================== Calculate relative error ===========================
-// ***************************************************************************************
+// ============================= Calculate relative error ======================
+// *****************************************************************************
 /// \brief  calculates relative spatial error based on L2-norm
-/// \param	num		numerical solution
-/// \param	ana		analytical solution
-// ***************************************************************************************
+/// \param  num     numerical solution
+/// \param  ana     analytical solution
+// *****************************************************************************
 real Analysis::CalcRelativeSpatialError(read_ptr num, read_ptr ana) {
-
     real sumr = 0.;
     real rr;
 
@@ -182,7 +182,7 @@ real Analysis::CalcRelativeSpatialError(read_ptr num, read_ptr ana) {
     }
 
     //weight
-    real nr = size_iList;
+    real nr = static_cast<real>(size_iList);
     real adenom = sqrt(1. / nr * sumr);
 
     real eps;
@@ -211,22 +211,22 @@ real Analysis::CalcRelativeSpatialError(read_ptr num, read_ptr ana) {
         eps = epsa / adenom;
     }
 
-    spdlog::info("Relative error ||e||={}", eps);
-    /*std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
-    std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)] 		<< std::endl;
-    std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]	<< std::endl;
-    std::cout << "ana =" << ana[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]	<< std::endl;*/
+    m_logger->info("Relative error ||e|| = {}", eps);
+    //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]      << std::endl;
+    //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]  << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]  << std::endl;
 
     return eps;
 }
 
-// ============= Calculate absolute error at center to be averaged over time ==============
-// ***************************************************************************************
+// ======== Calculate absolute error at center to be averaged over time ========
+// *****************************************************************************
 /// \brief  calculates absolute spatial error at time t at midpoint based on L2-norm
-/// \param	solver		pointer to solver
-/// \param	t			current time
-/// \param	sum			pointer to sum for (u,p,T results)
-// ***************************************************************************************
+/// \param  solver      pointer to solver
+/// \param  t           current time
+/// \param  sum         pointer to sum for (u,p,T results)
+// *****************************************************************************
 void Analysis::CalcL2NormMidPoint(SolverI *solver, real t, real *sum) {
     Solution solution;
 
@@ -261,15 +261,14 @@ void Analysis::CalcL2NormMidPoint(SolverI *solver, real t, real *sum) {
     }
 }
 
-// ================================= Calculate RMS error ==================================
-// ***************************************************************************************
+// =========================== Calculate RMS error ============================
+// *****************************************************************************
 /// \brief  calculates absolute spatial error at time t at midpoint based on L2-norm
-/// \param	solver		pointer to solver
-/// \param	t			current time
-/// \param	sum			pointer to sum for (u,p,T results)
-// ***************************************************************************************
+/// \param  solver      pointer to solver
+/// \param  t           current time
+/// \param  sum         pointer to sum for (u,p,T results)
+// *****************************************************************************
 void Analysis::CalcRMSError(real sumu, real sump, real sumT) {
-
     auto params = Parameters::getInstance();
 
     if (params->get("solver/solution/available") == "Yes") {
@@ -277,25 +276,24 @@ void Analysis::CalcRMSError(real sumu, real sump, real sumT) {
         real dt = params->getReal("physical_parameters/dt");
         real t_end = params->getReal("physical_parameters/t_end");
         auto Nt = static_cast<size_t>(std::round(t_end / dt));
-        real rNt = 1. / Nt;
+        real rNt = 1. / static_cast<real>(Nt);
         real epsu = sqrt(rNt * sumu);
         real epsp = sqrt(rNt * sump);
         real epsT = sqrt(rNt * sumT);
 
-        spdlog::info("RMS error of u at domain center is e_RMS={}", epsu);
-        spdlog::info("RMS error of p at domain center is e_RMS={}", epsp);
-        spdlog::info("RMS error of T at domain center is e_RMS={}", epsT);
+        m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
+        m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
+        m_logger->info("RMS error of T at domain center is e_RMS = {}", epsT);
     }
 }
 
-// =============================== Check Von Neumann condition ===========================
-// ***************************************************************************************
+// ========================== Check Von Neumann condition ======================
+// *****************************************************************************
 /// \brief  checks Von Neumann condition on time step (returns true or false)
-/// \param	u			x-velocity field
-/// \param	dt			time step size
-// ***************************************************************************************
+/// \param  u           x-velocity field
+/// \param  dt          time step size
+// *****************************************************************************
 bool Analysis::CheckTimeStepVN(Field *u, real dt) {
-
     bool VN_check;
 
     auto params = Parameters::getInstance();
@@ -320,14 +318,14 @@ bool Analysis::CheckTimeStepVN(Field *u, real dt) {
     return VN_check;
 }
 
-// ================================= Check CFL condition ==================================
-// ***************************************************************************************
+// =========================== Check CFL condition ============================
+// *****************************************************************************
 /// \brief  checks CFL condition on time step (returns true or false)
-/// \param	u			x-velocity field
-/// \param	v			y-velocity field
-/// \param	w			z-velocity field
-/// \param	dt			time step size
-// ***************************************************************************************
+/// \param  u           x-velocity field
+/// \param  v           y-velocity field
+/// \param  w           z-velocity field
+/// \param  dt          time step size
+// *****************************************************************************
 bool Analysis::CheckTimeStepCFL(Field *u, Field *v, Field *w, real dt) {
 
     bool CFL_check;
@@ -347,10 +345,10 @@ bool Analysis::CheckTimeStepCFL(Field *u, Field *v, Field *w, real dt) {
     auto d_v = v->data;
     auto d_w = w->data;
 
-    real max_vel[sizei];
+    real *max_vel = new real[sizei];
     real uvrdx, uvwrdx, maxvelrdx;
 
-    //TODO correct?
+    // TODO correct?
     for (size_t i = 0; i < sizei; i++) {
         size_t idx = innerList[i];
         uvrdx = std::max(fabs(d_u[idx]) / dx, fabs(d_v[idx]) / dy);
@@ -366,20 +364,19 @@ bool Analysis::CheckTimeStepCFL(Field *u, Field *v, Field *w, real dt) {
 
     CFL_check = CFL < 1.;
 
-    spdlog::info("CFL = {}", CFL);
+    m_logger->info("CFL = {}", CFL);
 
     return CFL_check;
 }
 
-// =============================== Set dt based on CFL condition ========================
-// ***************************************************************************************
+// ========================== Set dt based on CFL condition ===================
+// *****************************************************************************
 /// \brief  sets time step size based on CFL=0.8 (returns dt)
-/// \param	u			x-velocity field
-/// \param	v			y-velocity field
-/// \param	w			z-velocity field
-// ***************************************************************************************
+/// \param  u           x-velocity field
+/// \param  v           y-velocity field
+/// \param  w           z-velocity field
+// *****************************************************************************
 real Analysis::SetDTwithCFL(Field *u, Field *v, Field *w) {
-
     auto boundary = BoundaryController::getInstance();
     auto domain = Domain::getInstance();
 
@@ -395,10 +392,10 @@ real Analysis::SetDTwithCFL(Field *u, Field *v, Field *w) {
     auto d_v = v->data;
     auto d_w = w->data;
 
-    real max_vel[sizei];
+    real *max_vel = new real[sizei];
     real uvrdx, uvwrdx, maxvelrdx;
 
-    //TODO correct?
+    // TODO correct?
     for (size_t i = 0; i < sizei; i++) {
         size_t idx = innerList[i];
         uvrdx = std::max(fabs(d_u[idx]) / dx, fabs(d_v[idx]) / dy);
@@ -416,11 +413,11 @@ real Analysis::SetDTwithCFL(Field *u, Field *v, Field *w) {
     return DT;
 }
 
-// ==================================== Save variables ===================================
-// ***************************************************************************************
+// =============================== Save variables ==============================
+// *****************************************************************************
 /// \brief  saves variables in .dat files
-/// \param	solv		pointer to solver
-// ***************************************************************************************
+/// \param  solv        pointer to solver
+// *****************************************************************************
 void Analysis::SaveVariablesInFile(SolverI *solv) {
     //TODO do not write field out if not used
     auto boundary = BoundaryController::getInstance();

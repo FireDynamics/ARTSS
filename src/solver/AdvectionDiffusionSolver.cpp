@@ -1,20 +1,25 @@
-/// \file 		AdvectionDiffusionSolver.h
-/// \brief 		Defines the steps to solve the advection and diffusion equation
-/// \date 		May 20, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       AdvectionDiffusionSolver.h
+/// \brief      Defines the steps to solve the advection and diffusion equation
+/// \date       May 20, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
+
 #include <spdlog/spdlog.h>
 
+#include <iostream>
+
 #include "AdvectionDiffusionSolver.h"
-#include "../interfaces/AdvectionI.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
+#include "../utility/Utility.h"
+
 
 AdvectionDiffusionSolver::AdvectionDiffusionSolver() {
-
+#ifndef PROFILING
+    m_logger = Utility::createLogger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
     std::string advectionType = params->get("solver/advection/type");
     SolverSelection::SetAdvectionSolver(&this->adv, advectionType);
@@ -33,16 +38,15 @@ AdvectionDiffusionSolver::~AdvectionDiffusionSolver() {
 }
 
 
-//====================================== DoStep =================================
-// ***************************************************************************************
+//================================= DoStep ============================
+// *******************************************************************
 /// \brief  brings all calculation steps together into one function
-/// \param	dt			time step
-/// \param	sync		synchronous kernel launching (true, default: false)
-// ***************************************************************************************
+/// \param  dt          time step
+/// \param  sync        synchronous kernel launching (true, default: false)
+// *******************************************************************
 
 void AdvectionDiffusionSolver::DoStep(real t, bool sync) {
-
-// local variables and parameters
+    // local variables and parameters
     auto u = SolverI::u;
     auto v = SolverI::v;
     auto w = SolverI::w;
@@ -97,20 +101,20 @@ void AdvectionDiffusionSolver::DoStep(real t, bool sync) {
     }//end data
 }
 
-//======================================= Check data ==================================
-// ***************************************************************************************
+//================================== Check data =============================
+// ************************************************************************
 /// \brief  Checks if field specified correctly
-// ***************************************************************************************
+// ************************************************************************
 void AdvectionDiffusionSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/advection/field") != "u,v,w") {
         spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
         spdlog::error("Fields not specified correctly!");
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
 }

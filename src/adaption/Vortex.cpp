@@ -88,7 +88,7 @@ void Vortex::applyChanges() {
 
     if (m_pAdaption->m_shift_x1 != 0) {
         if (m_pAdaption->m_shift_x1 < 0) {
-            size_t len_e = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_x1));
+            size_t len_e = (j_end - j_start) * (k_end - k_start) * labs(m_pAdaption->m_shift_x1);
             auto *arr_idxExpansion = new size_t[len_e];
 #pragma acc enter data create(arr_idxExpansion[:len_e])
             m_pAdaption->expandXDirection(m_pAdaption->m_shift_x1, true, arr_idxExpansion, len_e);
@@ -98,7 +98,7 @@ void Vortex::applyChanges() {
         }
 #ifndef PROFILING
         else {
-            size_t len_r = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_x1));
+            size_t len_r = (j_end - j_start) * (k_end - k_start) * labs(m_pAdaption->m_shift_x1);
             auto *arr_idxReduction = new size_t[len_r];
 #pragma acc enter data create(arr_idxReduction[:len_r])
             m_pAdaption->reduceXDirection(m_pAdaption->m_shift_x1, true, arr_idxReduction, len_r);
@@ -111,7 +111,7 @@ void Vortex::applyChanges() {
 
     if (m_pAdaption->m_shift_x2 != 0) {
         if (m_pAdaption->m_shift_x2 > 0) {
-            size_t len_e = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_x2));
+            size_t len_e = (j_end - j_start) * (k_end - k_start) * labs(m_pAdaption->m_shift_x2);
             auto *arr_idxExpansion = new size_t[len_e];
 #pragma acc enter data create(arr_idxExpansion[:len_e])
             m_pAdaption->expandXDirection(m_pAdaption->m_shift_x2, false, arr_idxExpansion, len_e);
@@ -121,7 +121,7 @@ void Vortex::applyChanges() {
         }
 #ifndef PROFILING
         else {
-            size_t len_r = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_x2));
+            size_t len_r = (j_end - j_start) * (k_end - k_start) * labs(m_pAdaption->m_shift_x2);
             auto *arr_idxReduction = new size_t[len_r];
 #pragma acc enter data create(arr_idxReduction[:len_r])
             m_pAdaption->reduceXDirection(m_pAdaption->m_shift_x2, false, arr_idxReduction, len_r);
@@ -134,7 +134,7 @@ void Vortex::applyChanges() {
 
     if (m_pAdaption->m_shift_y1 != 0) {
         if (m_pAdaption->m_shift_y1 < 0) {
-            size_t len_e = (i_end - i_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_y1));
+            size_t len_e = (i_end - i_start) * (k_end - k_start) * labs(m_pAdaption->m_shift_y1);
             auto *arr_idxExpansion = new size_t[len_e];
 #pragma acc enter data create(arr_idxExpansion[:len_e])
             m_pAdaption->expandYDirection(m_pAdaption->m_shift_y1, true, arr_idxExpansion, len_e);
@@ -144,7 +144,7 @@ void Vortex::applyChanges() {
         }
 #ifndef PROFILING
         else {
-            size_t len_r = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(m_pAdaption->m_shift_y1));
+            size_t len_r = (i_end - i_start) * (k_end - k_start) * labs(m_pAdaption->m_shift_y1);
             auto *arr_idxReduction = new size_t[len_r];
 #pragma acc enter data create(arr_idxReduction[:len_r])
             m_pAdaption->reduceYDirection(m_pAdaption->m_shift_y1, true, arr_idxReduction, len_r);
@@ -157,7 +157,7 @@ void Vortex::applyChanges() {
 
     if (m_pAdaption->m_shift_y2 != 0) {
         if (m_pAdaption->m_shift_y2 > 0) {
-            size_t len_e = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(m_pAdaption->m_shift_y2));
+            size_t len_e = (i_end - i_start) * (k_end - k_start) * labs(m_pAdaption->m_shift_y2);
             auto *arr_idxExpansion = new size_t[len_e];
 #pragma acc enter data create(arr_idxExpansion[:len_e])
             m_pAdaption->expandYDirection(m_pAdaption->m_shift_y2, false, arr_idxExpansion, len_e);
@@ -167,7 +167,7 @@ void Vortex::applyChanges() {
         }
 #ifndef PROFILING
         else {
-            size_t len_r = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(m_pAdaption->m_shift_y2));
+            size_t len_r = (i_end - i_start) * (k_end - k_start) * labs(m_pAdaption->m_shift_y2);
             auto *arr_idxReduction = new size_t[len_r];
 #pragma acc enter data create(arr_idxReduction[:len_r])
             m_pAdaption->reduceYDirection(m_pAdaption->m_shift_y2, false, arr_idxReduction, len_r);

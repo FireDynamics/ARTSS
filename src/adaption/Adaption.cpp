@@ -1,19 +1,21 @@
-/// \file 		Adaption.h
-/// \brief 		Controll class for adaption
-/// \date 		Nov 29, 2018
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       Adaption.h
+/// \brief      Controll class for adaption
+/// \date       Nov 29, 2018
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+
+
+#include <spdlog/spdlog.h>
 
 #ifdef _OPENACC
 #include <accelmath.h>
 #else
 #include <cmath>
 #endif
-#include <iostream>
+
 #include <chrono>
 #include <fstream>
-
-#include <spdlog/spdlog.h>
+#include <iostream>
 
 #include "Adaption.h"
 #include "Layers.h"
@@ -21,12 +23,14 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
+#include "../utility/Utility.h"
 
 class Vortex;
 
 class Layers;
 
 Adaption::Adaption(Field **fields) {
+    m_logger = Utility::createLogger(typeid(this).name());
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
     m_dynamic = (params->get("adaption/dynamic") == "Yes");
@@ -51,8 +55,9 @@ Adaption::Adaption(Field **fields) {
         } else if (init == "Vortex" || init == "VortexY") {
             func = new Vortex(this, fields);
         } else {
-            std::cout << "Type " << init << " is not defined" << std::endl;
-            throw std::exception();
+            m_logger->critical("Type {} is not defined", init);
+            std::exit(1);
+            ///TODO Error Handling
         }
 
         m_reduction = func->hasReduction();
@@ -70,7 +75,7 @@ Adaption::Adaption(Field **fields) {
 // ==================================== Run ====================================
 // ***************************************************************************************
 /// \brief  starts adaption process
-/// \param	t_cur	current timestep
+/// \param  t_cur   current timestep
 // ***************************************************************************************
 void Adaption::run(real t_cur) {
 
@@ -97,8 +102,8 @@ void Adaption::run(real t_cur) {
 // ==================================== Extract data ====================================
 // ***************************************************************************************
 /// \brief  takes 2D slice of 3D mesh at position y = height and writes slice into file
-/// \param	filename	filename
-/// \param	height y-value
+/// \param  filename    filename
+/// \param  height y-value
 /// \param  time timestep
 // ***************************************************************************************
 void Adaption::extractData(const std::string filename, real height, real time) {
@@ -134,7 +139,7 @@ void Adaption::extractData(const std::string filename, real height, real time) {
 // ==================================== Extract data ====================================
 // ***************************************************************************************
 /// \brief  takes all cells and writes into a file
-/// \param	filename	filename
+/// \param  filename    filename
 // ***************************************************************************************
 void Adaption::extractData(const std::string filename) {
     auto domain = Domain::getInstance();
@@ -202,26 +207,28 @@ void Adaption::applyChanges() {
 // ==================================== Is update necessary ==============================
 // ***************************************************************************************
 /// \brief  Checks if adaption should be done
-/// \return	bool true if yes false if no
+/// \return bool true if yes false if no
 // ***************************************************************************************
 bool Adaption::isUpdateNecessary() {
 #ifndef PROFILING
-  std::ofstream file;
-    file.open(getTimeMeasuringName(), std::ios::app);
+    std::ofstream file;
     std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
+    if (m_hasTimeMeasuring) {
+        file.open(getTimeMeasuringName(), std::ios::app);
+        start = std::chrono::system_clock::now();
+    }
 #endif
     bool update = false;
     if (!m_dynamic_end) {
         update = func->update();
     }
 #ifndef PROFILING
-    end = std::chrono::system_clock::now();
-    long ms = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     if(m_hasTimeMeasuring) {
+        end = std::chrono::system_clock::now();
+        long ms = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         file << "update: " << ms << " microsec\n";
+        file.close();
     }
-    file.close();
 #endif
     return update;
 }
@@ -229,7 +236,7 @@ bool Adaption::isUpdateNecessary() {
 // ==================================== Expand x direction ===============================
 // ***************************************************************************************
 /// \brief  Basic implementation for expansion in x direction (parallelized)
-/// \param	shift expansion size value in x direction
+/// \param  shift expansion size value in x direction
 /// \param  start indicates whether the expansion is at the beginning or the end of the computational domain
 /// \param  arr_idxExpansion  Index list of cells to be newly added
 /// \param len_e  size of arr_idxExpansion
@@ -279,7 +286,7 @@ void Adaption::expandXDirection(long shift, bool start, size_t *arr_idxExpansion
 // ==================================== Expand y direction ===============================
 // ***************************************************************************************
 /// \brief  Basic implementation for expansion in y direction (parallelized)
-/// \param	shift expansion size value in y direction
+/// \param  shift expansion size value in y direction
 /// \param  start indicates whether the expansion is at the beginning or the end of the computational domain
 /// \param  arr_idxExpansion  Index list of cells to be newly added
 /// \param len_e  size of arr_idxExpansion
@@ -328,14 +335,15 @@ void Adaption::expandYDirection(long shift, bool start, size_t *arr_idxExpansion
 // ==================================== Reduction x direction ===============================
 // ***************************************************************************************
 /// \brief  Basic implementation for expansion in x direction (parallelized)
-/// \param	shift reduction size value in x direction
+/// \param  shift reduction size value in x direction
 /// \param  start indicates whether the reduction is at the beginning or the end of the computational domain
 /// \param  arr_idxReduction  Index list of cells to be newly added
 /// \param len_e  size of arr_idxReduction
 // ***************************************************************************************
-void Adaption::reduceXDirection(long shift, bool start, size_t *arr_idxReduction, size_t len_r) {
+void Adaption::reduceXDirection(long shift_inp, bool start, size_t *arr_idxReduction, size_t len_r) {
 
     auto domain = Domain::getInstance();
+    unsigned long shift = shift_inp;
 #pragma acc data present(arr_idxReduction[:len_r])
     {
         size_t j_start = domain->GetIndexy1();//(y1 - Y1) / dy;
@@ -377,15 +385,16 @@ void Adaption::reduceXDirection(long shift, bool start, size_t *arr_idxReduction
 // ==================================== Reduction y direction ===============================
 // ***************************************************************************************
 /// \brief  Basic implementation for expansion in y direction (parallelized)
-/// \param	shift reduction size value in y direction
+/// \param  shift reduction size value in y direction
 /// \param  start indicates whether the reduction is at the beginning or the end of the computational domain
 /// \param  arr_idxReduction  Index list of cells to be newly added
 /// \param len_e  size of arr_idxReduction
 // ***************************************************************************************
-void Adaption::reduceYDirection(long shift, bool start, size_t *arr_idxReduction, size_t len_r) {
+void Adaption::reduceYDirection(long shift_inp, bool start, size_t *arr_idxReduction, size_t len_r) {
     // std::cout << "reduceYDirection" << std::endl;
 
     auto domain = Domain::getInstance();
+    unsigned long shift = shift_inp;
 #pragma acc data present(arr_idxReduction[:len_r])
     {
         size_t i_start = domain->GetIndexx1();//(x1 - X1) / dx;
@@ -428,7 +437,7 @@ void Adaption::reduceYDirection(long shift, bool start, size_t *arr_idxReduction
 // ==================================== Adaption x direction serial ===============================
 // ***************************************************************************************
 /// \brief  Checks if adaption is possible and allowed
-/// \param	f field
+/// \param  f field
 /// \param  checkValue check value
 /// \param  noBufferCell Buffersize
 /// \param  threshold precision of comparison
@@ -514,11 +523,12 @@ bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noB
     }
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
-        spdlog::error("Exception in x-Adaption: {} {} {} {}", size_t(expansion_start),
-                                                              size_t(reduction_start),
-                                                              size_t(expansion_end),
-                                                              size_t(reduction_end));
-        //TODO Error handling
+        m_logger->error("Exception in x-Adaption: {} {} {} {}",
+                        size_t(expansion_start),
+                        size_t(reduction_start),
+                        size_t(expansion_end),
+                        size_t(reduction_end));
+        // TODO Error handling
         throw std::exception();
     }
     if (reduction_start == ADTypes::UNKNOWN && expansion_start != ADTypes::YES) {
@@ -533,14 +543,14 @@ bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noB
            reduction_end == ADTypes::YES;
 }
 
-// ==================================== Adaption x direction parallel ===============================
-// ***************************************************************************************
+// ========================= Adaption x direction parallel ====================
+// *****************************************************************************
 /// \brief  Checks if adaption is possible and allowed
-/// \param	f field
+/// \param  f field
 /// \param  checkValue check value
 /// \param  noBufferCell Buffersize
 /// \param  threshold precision of comparison
-// ***************************************************************************************
+// *****************************************************************************
 bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCell, real threshold) {
     auto domain = Domain::getInstance();
     size_t expansion_counter_start = 0;
@@ -605,7 +615,7 @@ bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCe
     }
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
-        spdlog::error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
+        m_logger->error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
                 expansion_counter_start,
                 reduction_counter_start,
                 expansion_counter_end,
@@ -634,7 +644,7 @@ bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCe
 // ==================================== Adaption y direction serial ===============================
 // ***************************************************************************************
 /// \brief  Checks if adaption is possible and allowed
-/// \param	f field
+/// \param  f field
 /// \param  checkValue check value
 /// \param  noBufferCell Buffersize
 /// \param  threshold precision of comparison
@@ -720,11 +730,12 @@ bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noB
     }
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
-        spdlog::error("Exception in y-Adaption: {} {} {} {}", size_t(expansion_start),
-                                                              size_t(reduction_start),
-                                                              size_t(expansion_end),
-                                                              size_t(reduction_end));
-        //TODO Error handling
+        m_logger->error("Exception in y-Adaption: {} {} {} {}",
+                        size_t(expansion_start),
+                        size_t(reduction_start),
+                        size_t(expansion_end),
+                        size_t(reduction_end));
+        // TODO Error handling
         throw std::exception();
     }
     if (reduction_start == ADTypes::UNKNOWN && expansion_start != ADTypes::YES) {
@@ -740,14 +751,14 @@ bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noB
            reduction_end == ADTypes::YES;
 }
 
-// ==================================== Adaption x direction parallel ===============================
-// ***************************************************************************************
+// ========================= Adaption x direction parallel ====================
+// *****************************************************************************
 /// \brief  Checks if adaption is possible and allowed
-/// \param	f field
+/// \param  f field
 /// \param  checkValue check value
 /// \param  noBufferCell Buffersize
 /// \param  threshold precision of comparison
-// ***************************************************************************************
+// *****************************************************************************
 bool Adaption::adaptYDirection(const real *f, real checkValue, size_t noBufferCell, real threshold) {
     auto domain = Domain::getInstance();
 
@@ -812,13 +823,13 @@ bool Adaption::adaptYDirection(const real *f, real checkValue, size_t noBufferCe
     }
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
-        spdlog::error("Trying to reduce and expand at the same time (y): {}, {} | {}, {}",
+        m_logger->error(
+            "Trying to reduce and expand at the same time (y): {}, {} | {}, {}",
             expansion_counter_start,
             reduction_counter_start,
             expansion_counter_end,
             reduction_counter_end);
-        //TODO Error handling
-        //throw std::exception();
+        throw std::exception();
     }
     if (expansion_counter_start > 0) {
         m_shift_y1 = -1;

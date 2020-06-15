@@ -10,6 +10,9 @@
 
 #include "../utility/tinyxml2.h"
 #include "BoundaryData.h"
+#ifndef PROFILING
+#include <spdlog/logger.h>
+#endif
 
 class BoundaryDataController {
 public:
@@ -25,6 +28,9 @@ public:
 
 private:
     BoundaryData** m_boundaryData;
+#ifndef PROFILING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 
 };
 

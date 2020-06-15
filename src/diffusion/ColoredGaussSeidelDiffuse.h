@@ -22,6 +22,9 @@ public:
     static void ColoredGaussSeidelStencil(size_t i, size_t j, size_t k, real* out, real* b, const real alphaX, const real alphaY, const real alphaZ, const real dsign, const real beta, const real w, const size_t nx, const size_t ny);
 
 private:
+#ifndef PROFILING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     real m_dt;
     real m_dsign;
     real m_w;

@@ -93,17 +93,17 @@ function xml_parser {
    XSTART=$(xmllint -xpath "string(//x1)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
    XEND=$(xmllint -xpath "string(//x2)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
    NX=$(xmllint -xpath "string(//nx)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-   DX=$(bc <<< "scale=5; ($XEND - $XSTART) / ($NX - 2)")
+   DX=$(bc <<< "scale=5; ($XEND - $XSTART) / ($NX )")
    # echo "x1=$XSTART, x2=$XEND, NX=$NX, DX=$DX"
    YSTART=$(xmllint -xpath "string(//y1)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
    YEND=$(xmllint -xpath "string(//y2)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
    NY=$(xmllint -xpath "string(//ny)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-   DY=$( echo "scale=5; ($YEND - $YSTART) / ($NY-2)" | bc)
+   DY=$( echo "scale=5; ($YEND - $YSTART) / ($NY)" | bc)
    # echo "y1=$YSTART, y2=$YEND, NY=$NY, DY=$DY"
    ZSTART=$(xmllint -xpath "string(//z1)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
    ZEND=$(xmllint -xpath "string(//z2)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
    NZ=$(xmllint -xpath "string(//nz)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-   DZ=$(bc <<< "scale=5; ( $ZEND - $ZSTART ) / ( $NZ - 2 )")
+   DZ=$(bc <<< "scale=5; ( $ZEND - $ZSTART ) / ( $NZ )")
    # echo "z1=$ZSTART, z2=$ZEND, NZ=$NZ, DZ=$DZ"
 
    MAXITER=$(xmllint -xpath "string(//max_iter)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
@@ -284,8 +284,6 @@ if [[ "$HOST" = "ias7139" ]]
 then
     SERVER="ias7139"
     IAS7139=0
-    module load pgi
-    module load cuda
     export CUDA_LIB=$CUDA_ROOT/lib64
     export CUDA_INC=$CUDA_ROOT/include
     if [[ $COMPILE = *_multicore* ]];

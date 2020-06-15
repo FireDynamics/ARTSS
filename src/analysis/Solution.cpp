@@ -6,14 +6,15 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cmath>
-#include <iostream>
 
 #include "Solution.h"
 #include "../utility/Parameters.h"
 #include "../Functions.h"
 #include "../boundary/BoundaryController.h"
+#include "../utility/Utility.h"
 
 Solution::Solution() {
+    m_logger = Utility::createLogger(typeid(this).name());
     ua = new Field(FieldType::U, 0.0);
     va = new Field(FieldType::V, 0.0);
     wa = new Field(FieldType::W, 0.0);
@@ -48,7 +49,7 @@ Solution::~Solution() {
 // ***************************************************************************************
 void Solution::CalcAnalyticalSolution(const real t) {
 //TODO not every function has a full analytic solution with time parameter
-//TODO cout to often
+//TODO put each if block into a function and use a function pointer to prevent if queries each time. set function pointer in setUp function. also prevents multiple outputs of analytical solution set to zero
     auto params = Parameters::getInstance();
 
     // if analytical solution available
@@ -96,7 +97,7 @@ void Solution::CalcAnalyticalSolution(const real t) {
         } else if (initialCondition == FunctionNames::BuoyancyMMS) {
             Functions::BuoyancyMMS(ua, va, wa, pa, Ta, t);
         } else {
-            std::cout << "Analytical solution set to zero!" << std::endl;
+            m_logger->info("Analytical solution set to zero!");
         }
     }
 

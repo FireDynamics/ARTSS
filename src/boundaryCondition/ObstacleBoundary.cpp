@@ -35,6 +35,9 @@ void ObstacleBoundary::applyBoundaryCondition(real *dataField, size_t **indexFie
             case BoundaryCondition::PERIODIC:
                 applyPeriodic(dataField, d_patch, p, patch_start, patch_end, level, id);
                 break;
+            default:  // UNKOWN PATCH
+                // TODO logging / maybe exception
+                break;
         }
     }
     if (sync) {
@@ -84,25 +87,42 @@ void ObstacleBoundary::applyDirichlet(real *dataField, size_t *d_patch, Patch pa
         value = 0;
     }
     Domain *domain = Domain::getInstance();
-    int referenceIndex = 1;
+    size_t referenceIndex = 1;
     switch (patch) {
         case FRONT:
             referenceIndex = -1;
+            referenceIndex *= domain->GetNx(level) * domain->GetNy(level);
+            break;
+
         case BACK:
             referenceIndex *= domain->GetNx(level) * domain->GetNy(level);
             break;
+
         case BOTTOM:
             referenceIndex = -1;
+            referenceIndex *= domain->GetNx(level);
+            break;
+
         case TOP:
             referenceIndex *= domain->GetNx(level);
             break;
+
         case LEFT:
             referenceIndex = -1;
+            referenceIndex *= 1;
+            break;
+
         case RIGHT:
             referenceIndex *= 1;
             break;
+
+        default:  // UNKOWN PATCH
+            // TODO logging / maybe exception
+            break;
     }
-    applyBoundaryCondition(dataField, d_patch, patch_start, patch_end, level, referenceIndex, value * 2, -1);
+    applyBoundaryCondition(
+            dataField, d_patch, patch_start, patch_end,
+            level, static_cast<int>(referenceIndex), value * 2, -1);
 }
 
 //======================================== Apply neumann ====================================
@@ -121,28 +141,47 @@ void ObstacleBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patc
         value = 0;
     }
     Domain *domain = Domain::getInstance();
-    int referenceIndex = 1;
+    size_t referenceIndex = 1;
     switch (patch) {
         case FRONT:
             referenceIndex = -1;
+            value *= domain->Getdz(level);
+            referenceIndex *= domain->GetNx(level) * domain->GetNy(level);
+            break;
+
         case BACK:
             value *= domain->Getdz(level);
             referenceIndex *= domain->GetNx(level) * domain->GetNy(level);
             break;
+
         case BOTTOM:
             referenceIndex = -1;
+            value *= domain->Getdz(level);
+            referenceIndex *= domain->GetNx(level);
+            break;
+
         case TOP:
             value *= domain->Getdz(level);
             referenceIndex *= domain->GetNx(level);
             break;
         case LEFT:
             referenceIndex = -1;
+            value *= domain->Getdz(level);
+            referenceIndex *= 1;
+            break;
+
         case RIGHT:
             value *= domain->Getdz(level);
             referenceIndex *= 1;
             break;
+
+        default:  // UNKOWN PATCH
+            // TODO logging / maybe exception
+            break;
     }
-    applyBoundaryCondition(dataField, d_patch, patch_start, patch_end, level, referenceIndex, -value, 1);
+    applyBoundaryCondition(
+            dataField, d_patch, patch_start, patch_end,
+            level, static_cast<int>(referenceIndex), -value, 1);
 }
 
 //======================================== Apply periodic ====================================
@@ -160,23 +199,40 @@ void ObstacleBoundary::applyPeriodic(real *dataField, size_t *d_patch, Patch pat
     size_t Nx = domain->GetNx(level);
     size_t Ny = domain->GetNy(level);
     BoundaryController *bdc = BoundaryController::getInstance();
-    int referenceIndex = 1;
+    size_t referenceIndex = 1;
     switch (patch) {
         case BACK:
             referenceIndex = -1;
+            referenceIndex *= Nx * Ny * (bdc->getObstacleStrideZ(id, level) - 2);
+            break;
+
         case FRONT:
             referenceIndex *= Nx * Ny * (bdc->getObstacleStrideZ(id, level) - 2);
             break;
+
         case TOP:
             referenceIndex = -1;
+            referenceIndex *= Nx * (bdc->getObstacleStrideY(id, level) - 2);
+            break;
+
         case BOTTOM:
             referenceIndex *= Nx * (bdc->getObstacleStrideY(id, level) - 2);
             break;
+
         case RIGHT:
             referenceIndex = -1;
+            referenceIndex *= (bdc->getObstacleStrideX(id, level) - 2);
+            break;
+
         case LEFT:
             referenceIndex *= (bdc->getObstacleStrideX(id, level) - 2);
             break;
+
+        default:  // UNKOWN PATCH
+            // TODO logging / maybe exception
+            break;
     }
-    applyBoundaryCondition(dataField, d_patch, patch_start, patch_end, level, referenceIndex, 0, 1);
+    applyBoundaryCondition(
+            dataField, d_patch, patch_start, patch_end,
+            level, static_cast<int>(referenceIndex), 0, 1);
 }

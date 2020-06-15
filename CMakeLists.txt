@@ -79,7 +79,14 @@ endif()
 
 # Initialize CXXFLAGS.
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -std=c++17")
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  add_compile_options(-Wno-unused-parameter)
+  add_compile_options(-Wno-unused-variable)
+  add_compile_options(-Wno-unknown-pragmas)
+  add_compile_options(-Wno-cpp)
+  add_compile_options(-Wno-shadow)
+
   set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} ${warning_flags} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wshadow -Wunused -DTRACE_LOGGING")
   set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -w -DNDEBUG")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI" OR CMAKE_C_COMPILER_ID STREQUAL "PGI")
@@ -87,6 +94,12 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI" OR CMAKE_C_COMPILER_ID STREQUAL "PGI
   set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
   set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -fast -w -DNDEBUG")
 endif()
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+  set(CMAKE_CXX11_STANDARD_COMPILE_OPTION  --c++11)
+  set(CMAKE_CXX14_STANDARD_COMPILE_OPTION  --c++14)
+  set(CMAKE_CXX17_STANDARD_COMPILE_OPTION  --c++17)
+ endif()
 
 #--------------------
 if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
@@ -319,7 +332,6 @@ add_executable(artss_gpu_profile ${SOURCE_FILES} src/main.cpp)
 set_target_properties(artss_gpu_profile PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DPROFILING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
 target_link_libraries(artss_gpu_profile)
 target_link_libraries(artss_gpu_profile PRIVATE spdlog::spdlog)
-
 
 spdlog_enable_warnings(artss_serial)
 spdlog_enable_warnings(artss_serial_profile)

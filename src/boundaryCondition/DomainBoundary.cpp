@@ -34,6 +34,9 @@ void DomainBoundary::applyBoundaryCondition(real *dataField, size_t **indexField
             case BoundaryCondition::PERIODIC:
                 applyPeriodic(dataField, d_patch, p, patch_start, patch_end, level);
                 break;
+
+            default:
+                break;
         }
     }
     if (sync) {
@@ -83,8 +86,8 @@ void DomainBoundary::applyDirichlet(real *dataField, size_t *d_patch, Patch patc
         value = 0;
     }
     Domain* domain = Domain::getInstance();
-    int referenceIndex = 0;
-    switch (patch){
+    size_t referenceIndex = 0;
+    switch (patch) {
         case BACK:
             referenceIndex = -domain->GetNx(level) * domain->GetNy(level);
             break;
@@ -103,8 +106,12 @@ void DomainBoundary::applyDirichlet(real *dataField, size_t *d_patch, Patch patc
         case LEFT:
             referenceIndex = 1;
             break;
+        default:
+            break;
     }
-    applyBoundaryCondition(dataField, d_patch, patch_start, patch_end, level, referenceIndex, value * 2, -1);
+    applyBoundaryCondition(
+            dataField, d_patch, patch_start, patch_end,
+            level, static_cast<int>(referenceIndex), value * 2, -1);
 }
 
 //======================================== Apply neumann ====================================
@@ -123,7 +130,7 @@ void DomainBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patch,
         value = 0;
     }
     Domain* domain = Domain::getInstance();
-    int referenceIndex = 0;
+    size_t referenceIndex = 0;
     switch (patch){
         case BACK:
             value *= domain->Getdz(level);
@@ -149,8 +156,12 @@ void DomainBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patch,
             value *= domain->Getdz(level);
             referenceIndex = 1;
             break;
+        default:
+            break;
     }
-    applyBoundaryCondition(dataField, d_patch, patch_start, patch_end, level, referenceIndex, value, 1);
+    applyBoundaryCondition(
+            dataField, d_patch, patch_start, patch_end,
+            level, static_cast<int>(referenceIndex), value, 1);
 }
 
 //======================================== Apply periodic ====================================
@@ -168,8 +179,8 @@ void DomainBoundary::applyPeriodic(real *dataField, size_t *d_patch, Patch patch
     size_t Nx = domain->GetNx(level);
     size_t Ny = domain->GetNy(level);
 
-    int referenceIndex = 0;
-    switch (patch){
+    size_t referenceIndex = 0;
+    switch (patch) {
         case FRONT:
             referenceIndex = Nx * Ny * (Domain::getInstance()->Getnz(level) - 2);
             break;
@@ -188,6 +199,10 @@ void DomainBoundary::applyPeriodic(real *dataField, size_t *d_patch, Patch patch
         case RIGHT:
             referenceIndex = -(Domain::getInstance()->Getnx(level) - 2);
             break;
+        default:
+            break;
     }
-    applyBoundaryCondition(dataField, d_patch, patch_start, patch_end, level, referenceIndex, 0, 1);
+    applyBoundaryCondition(
+            dataField, d_patch, patch_start, patch_end,
+            level, static_cast<int>(referenceIndex), 0, 1);
 }

@@ -835,7 +835,7 @@ namespace Functions {
         size_t n_layers = static_cast<size_t> (params->getInt("initial_conditions/n_layers"));
 
         // layer border
-        real bord[n_layers + 1];
+        real *bord = new real[n_layers + 1];
         real val_bord;
 
         for (size_t l = 1; l < n_layers; ++l) {
@@ -867,7 +867,7 @@ namespace Functions {
 
         // get values in layers
         // layer values
-        real val[n_layers];
+        real *val = new real[n_layers];
         real val_out;
 
         for (size_t l = 0; l < n_layers; ++l) {
@@ -1147,21 +1147,21 @@ namespace Functions {
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va * (1 + A * randnr);
         }
         //boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va * (1 + A * randnr);
         }
         //obstacle cells
         for (size_t i = 0; i < size_oList; i++) {
             size_t idx = oList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va * (1 + A * randnr);
         }
     }
@@ -1190,21 +1190,21 @@ namespace Functions {
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va->data[idx] * (1 + A * randnr);
         }
         //boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va->data[idx] * (1 + A * randnr);
         }
         // obstacles
         for (size_t i = 0; i < size_oList; i++) {
             size_t idx = oList[i];
             //generate secret number between 0 and range:
-            size_t randnr = std::rand() % range;
+            real randnr = static_cast<real>(std::rand() % range);
             out->data[idx] = Va->data[idx] * (1 + A * randnr);
         }
     }

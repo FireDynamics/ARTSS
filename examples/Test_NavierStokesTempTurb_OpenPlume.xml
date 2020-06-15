@@ -115,4 +115,6 @@
   <visualization save_csv="No">
     <n_plots> 40 </n_plots>
   </visualization>
+
+  <logging file="Test_NavierStokesTempTurb_OpenPlume.log" level="debug"/>
 </JuROr>

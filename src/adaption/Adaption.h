@@ -11,6 +11,9 @@
 #include "../Field.h"
 #include "../interfaces/AdaptionFunctionI.h"
 #include "../utility/GlobalMacrosTypes.h"
+#ifndef PROFILING
+#include <spdlog/logger.h>
+#endif
 
 /* enum for different types of dynamic adaption:
  * NO = adaption impossible/no changes
@@ -114,6 +117,7 @@ public:
 
     long m_shift_x1, m_shift_x2, m_shift_y1, m_shift_y2, m_shift_z1, m_shift_z2;
 private:
+    std::shared_ptr<spdlog::logger> m_logger;
     bool isUpdateNecessary();
 
     void applyChanges();

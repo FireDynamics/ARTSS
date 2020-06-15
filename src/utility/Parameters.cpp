@@ -1,15 +1,18 @@
-/// \file 		Parameters.h
-/// \brief 		Access parameters of XML file
-/// \date 		May 20, 2016
-/// \author 	Arnold
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       Parameters.cpp
+/// \brief      Access parameters of XML file
+/// \date       May 20, 2016
+/// \author     Arnold
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+
+
+#include <spdlog/spdlog.h>
 
 #include <vector>
 #include <iostream>
-#include <spdlog/spdlog.h>
 
 #include "Parameters.h"
 #include "Utility.h"
+
 
 Parameters *Parameters::single = nullptr;
 
@@ -21,11 +24,11 @@ Parameters *Parameters::getInstance() {
     return single;
 }
 
-// ========================================= Parse =======================================
-// ***************************************************************************************
+// ==================================== Parse ==================================
+// *****************************************************************************
 /// \brief  parses xml file
-/// \param	filename		string (name of xml-file)
-// ***************************************************************************************
+/// \param  filename        string (name of xml-file)
+// *****************************************************************************
 void Parameters::parse(const std::string& filename) {
     if (filename.empty()) {
         spdlog::error("no XML file specified, skip reading parameter");
@@ -35,13 +38,14 @@ void Parameters::parse(const std::string& filename) {
     }
 
     tinyxml2::XMLError eResult = this->doc->LoadFile(filename.c_str());
+    this->doc->LoadFile(filename.c_str());
 }
 
-// ======================================== Getter =======================================
-// ***************************************************************************************
+// =================================== Getter ==================================
+// *****************************************************************************
 /// \brief  gets raw string (from xml-file)
-/// \param	raw_path   tree path (as string) of xml-file
-// ***************************************************************************************
+/// \param  raw_path   tree path (as string) of xml-file
+// *****************************************************************************
 std::string Parameters::get(const std::string &raw_path) {
     auto path = Utility::split(raw_path, '/');
 
@@ -64,7 +68,7 @@ std::string Parameters::get(const std::string &raw_path) {
 
 // ***************************************************************************************
 /// \brief  gets real number (from xml-file)
-/// \param	raw_path		tree path (as string) of xml-file
+/// \param  raw_path        tree path (as string) of xml-file
 // ***************************************************************************************
 real Parameters::getReal(const std::string &raw_path) {
     auto raw_result = this->get(raw_path);
@@ -73,7 +77,7 @@ real Parameters::getReal(const std::string &raw_path) {
 
 // ***************************************************************************************
 /// \brief  gets double number (from xml-file)
-/// \param	raw_path		tree path (as string) of xml-file
+/// \param  raw_path        tree path (as string) of xml-file
 // ***************************************************************************************
 double Parameters::getDouble(const std::string &raw_path) {
     auto raw_result = this->get(raw_path);
@@ -82,7 +86,7 @@ double Parameters::getDouble(const std::string &raw_path) {
 
 // ***************************************************************************************
 /// \brief  gets integer number (from xml-file)
-/// \param	raw_path		tree path (as string) of xml-file
+/// \param  raw_path        tree path (as string) of xml-file
 // ***************************************************************************************
 int Parameters::getInt(const std::string &raw_path) {
     auto raw_result = this->get(raw_path);
