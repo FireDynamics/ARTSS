@@ -1,5 +1,5 @@
 /// \file 		BoundaryDataController.h
-/// \brief 		Controll class for boundary data
+/// \brief 		Controller class for boundary data
 /// \date 		Dec 09, 2019
 /// \author 	My Linh Würzburger
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
@@ -27,7 +27,7 @@ BoundaryDataController::~BoundaryDataController(){
 
 // ================================= Add boundary data ===========================================
 // ***************************************************************************************
-/// \brief  Parses boundary data of XML tree to bounday data object
+/// \brief  Parses boundary data of XML tree to boundary data object
 /// \param 	xmlElement Pointer to XML element
 // ***************************************************************************************
 void BoundaryDataController::addBoundaryData(tinyxml2::XMLElement *xmlElement) {
