@@ -181,6 +181,8 @@ private:
     BoundaryDataController** m_bdc_obstacle;
 
     void removeBoundaryListsFromGPU();
+
+    void controlObstacleOverlap(Obstacle* o, size_t *i1, size_t *i2, size_t *j1, size_t *j2, size_t *k1, size_t *k2);
 };
 
 
