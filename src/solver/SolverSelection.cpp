@@ -7,7 +7,6 @@
 #include <iostream>
 #include "SolverSelection.h"
 #include "../advection/SLAdvect.h"
-#include "../advection/ExplicitAdvect.h"
 #include "../diffusion/JacobiDiffuse.h"
 #include "../diffusion/ColoredGaussSeidelDiffuse.h"
 #include "../diffusion/ExplicitDiffuse.h"
@@ -26,8 +25,6 @@
 void SolverSelection::SetAdvectionSolver(IAdvection **advectionSolver, const std::string& advectionType) {
     if (advectionType == AdvectionMethods::SemiLagrangian) {
         *advectionSolver = new SLAdvect();
-    } else if (advectionType == AdvectionMethods::Explicit) {
-        *advectionSolver = new ExplicitAdvect();
     } else {
         std::cout << "Advection method not yet implemented! Simulation stopped!" << std::endl;
         std::flush(std::cout);
