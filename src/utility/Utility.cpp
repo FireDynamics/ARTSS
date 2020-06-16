@@ -1,8 +1,8 @@
-/// \file 		Utility.cpp
-/// \brief 		Offers some tools
-/// \date 		October 01, 2019
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file      Utility.cpp
+/// \brief     Offers some tools
+/// \date      October 01, 2019
+/// \author    My Linh Würzburger
+/// \copyright <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cstring>
 #include <iterator>
@@ -30,42 +30,6 @@ std::vector<size_t> Utility::coordinateFromLinearIndex(size_t idx, size_t Nx, si
     return coord;
 }
 
-// ================================= Calculate coordinate i ==========================================
-// ***************************************************************************************
-/// \brief  Calculates the i coordinate
-/// \param  idx     linear (global) index
-/// \param  Nx      number of cells in x-direction of physical domain
-/// \param  Ny      number of cells in y-direction of physical domain
-/// \param  j       index of <i,j,k>
-/// \param  k       index of <i,j,k>
-// ***************************************************************************************
-//size_t Utility::getCoordinateI(size_t idx, size_t Nx, size_t Ny, size_t j, size_t k) {
-//    return idx - k * Nx * Ny - j * Nx;
-//}
-
-// ================================= Calculate coordinate j ==========================================
-// ***************************************************************************************
-/// \brief  Calculates the j coordinate
-/// \param  idx     linear (global) index
-/// \param  Nx      number of cells in x-direction of physical domain
-/// \param  Ny      number of cells in y-direction of physical domain
-/// \param  k       index of <i,j,k>
-// ***************************************************************************************
-//size_t Utility::getCoordinateJ(size_t idx, size_t Nx, size_t Ny, size_t k) {
-//    return (idx - k * Nx * Ny) / Nx;
-//}
-
-// ================================= Calculate coordinate k ==========================================
-// ***************************************************************************************
-/// \brief  Calculates the k coordinate
-/// \param  idx     linear (global) index
-/// \param  Nx      number of cells in x-direction of physical domain
-/// \param  Ny      number of cells in y-direction of physical domain
-// ***************************************************************************************
-//size_t Utility::getCoordinateK(size_t idx, size_t Nx, size_t Ny) {
-//    return idx / (Nx * Ny);
-//}
-
 // ================================= Split string at character ==========================================
 // ***************************************************************************************
 /// \brief  Splits a string at a defined char
@@ -90,4 +54,45 @@ std::vector<std::string> Utility::split(const char *text, char delimiter) {
         tokens.push_back(token);
     }
     return tokens;
+}
+
+std::vector<size_t> Utility::mergeSortedListsToUniqueList(size_t *list1, size_t size_list1, size_t *list2, size_t size_list2) {
+    std::vector<size_t> result;
+    size_t counter1 = 0;
+    size_t counter2 = 0;
+
+    if (list1[counter1] < list2[counter2]) {
+        result.push_back(list1[counter1]);
+        counter1++;
+    } else {
+        result.push_back(list2[counter2]);
+        counter2++;
+    }
+    while (counter1 < size_list1 && counter2 < size_list2) {
+        if (list1[counter1] == result[result.size()-1]){
+            counter1++;
+            continue;
+        }
+        if (list2[counter2] == result[result.size()-1]){
+            counter2++;
+            continue;
+        }
+        if (list1[counter1] < list2[counter2]) {
+            result.push_back(list1[counter1]);
+            counter1++;
+        } else {
+            result.push_back(list2[counter2]);
+            counter2++;
+        }
+    }
+    if (counter1 < size_list1){
+        for (size_t c = counter1; c < size_list1; c++){
+            result.push_back(list1[c]);
+        }
+    }else{
+        for (size_t c = counter2; c < size_list2; c++){
+            result.push_back(list2[c]);
+        }
+    }
+    return result;
 }
