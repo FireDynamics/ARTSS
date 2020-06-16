@@ -50,6 +50,8 @@ public:
     size_t getStrideY() {return m_j2-m_j1+1;};
     size_t getStrideZ() {return m_k2-m_k1+1;};
 
+    bool removeCellsFacingAnotherObstacle(Obstacle *o);
+    void control();
 private:
     size_t m_i1, m_j1, m_k1;
     size_t m_i2, m_j2, m_k2;
@@ -57,6 +59,7 @@ private:
     size_t m_level = 0;
 
     size_t* m_obstacleList;
+    size_t* m_obstacleBoundaryList;
     size_t* m_obstacleFront;
     size_t* m_obstacleBack;
     size_t* m_obstacleTop;
@@ -66,6 +69,7 @@ private:
     //size_t* m_obstacleInner;
 
     size_t m_size_obstacleList;
+    size_t m_size_obstacleBoundaryList;
     //size_t m_size_obstacleInner;
 
     //actual size
@@ -78,13 +82,16 @@ private:
 
     void init(size_t level);
     void createObstacle(size_t Nx, size_t Ny);
-    void control();
 
     static real matchGrid(double obstacleCoordinate, real dx, real x1);
 
     void printDetails();
 
     void removeCellsAtBoundary(size_t level);
+
+    static bool hasOverlap(size_t o1_coord1, size_t o1_coord2, size_t o2_coord1, size_t o2_coord2);
+
+    size_t getSize(){return getStrideZ() * getStrideY() * getStrideX();};
 };
 
 #endif /* ARTSS_BOUNDARY_OBSTACLE_H */

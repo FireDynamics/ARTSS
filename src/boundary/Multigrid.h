@@ -60,13 +60,13 @@ private:
     //surface indices divided by level
     size_t** m_MG_sList;
 
-    //----- patches divided by level (obstacle indices)
-    size_t** m_MG_oFront;
-    size_t** m_MG_oBack;
-    size_t** m_MG_oBottom;
-    size_t** m_MG_oTop;
-    size_t** m_MG_oLeft;
-    size_t** m_MG_oRight;
+  //  //----- patches divided by level (obstacle indices)
+  //  size_t** m_MG_oFront;
+  //  size_t** m_MG_oBack;
+  //  size_t** m_MG_oBottom;
+  //  size_t** m_MG_oTop;
+  //  size_t** m_MG_oLeft;
+  //  size_t** m_MG_oRight;
 
     // start index of each level in level joined list
     size_t* m_size_MG_iList_level;

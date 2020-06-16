@@ -216,8 +216,8 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
         }
     }
 
-    //// INNER of OBSTACLE
-    //// fill oInner list with inner indices of obstacles
+    // INNER of OBSTACLE
+    // fill oInner list with inner indices of obstacles
     //for (size_t k = 1; k < strideZ - 1; ++k) {
     //    for (size_t j = 1; j < strideY - 1; ++j) {
     //        for (size_t i = 1; i < strideX - 1; ++i) {
@@ -241,8 +241,8 @@ void Obstacle::print() {
 
     std::cout << "-- Obstacle" << std::endl;
     std::cout << "\t strides (x y z): " << strideX << " " << strideY << " " << strideZ << std::endl;
-    std::cout << "\t size of slices  (Front|Back Bottom|Top Left|Right): " << m_size_obstacleFront << "|" << m_size_obstacleBack << " " << m_size_obstacleBottom << "|" <<m_size_obstacleTop << " " << m_size_obstacleLeft
-     << "|" << m_size_obstacleRight << std::endl;
+    std::cout << "\t size of slices  (Front|Back Bottom|Top Left|Right): " << m_size_obstacleFront << "|" << m_size_obstacleBack << " " << m_size_obstacleBottom << "|" << m_size_obstacleTop << " " << m_size_obstacleLeft
+              << "|" << m_size_obstacleRight << std::endl;
     std::cout << "\t size of Obstacle: " << m_size_obstacleList << std::endl;
     //std::cout << "\t size of inner cells: " << m_size_obstacleInner << std::endl;
     std::cout << "\t coords (x y z): (" << m_i1 << "|" << m_i2 << ")(" << m_j1 << "|" << m_j2 << ")(" << m_k1 << "|" << m_k2 << ")" << std::endl;
@@ -252,7 +252,7 @@ void Obstacle::print() {
 // ***************************************************************************************
 /// \brief  Print detailed obstacle infos
 // ***************************************************************************************
-void Obstacle::printDetails(){
+void Obstacle::printDetails() {
     Domain *domain = Domain::getInstance();
     size_t Nx = domain->GetNx(m_level);
     size_t Ny = domain->GetNy(m_level);
@@ -273,10 +273,10 @@ void Obstacle::printDetails(){
 
     size_t size_back = getSize_obstacleBack();
     if (size_back > 0) {
-        std::cout << "Back: " << m_obstacleBack[0] << "|" << m_obstacleBack[size_back-1] << std::endl;
+        std::cout << "Back: " << m_obstacleBack[0] << "|" << m_obstacleBack[size_back - 1] << std::endl;
         coords = Utility::coordinateFromLinearIndex(m_obstacleBack[0], Nx, Ny);
         std::cout << "Back start: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
-        coords = Utility::coordinateFromLinearIndex(m_obstacleBack[size_back-1], Nx, Ny);
+        coords = Utility::coordinateFromLinearIndex(m_obstacleBack[size_back - 1], Nx, Ny);
         std::cout << "Back end: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
     } else {
         std::cout << "Back size = 0" << std::endl;
@@ -284,10 +284,10 @@ void Obstacle::printDetails(){
 
     size_t size_top = getSize_obstacleTop();
     if (size_top > 0) {
-        std::cout << "Top: " << m_obstacleTop[0] << "|" << m_obstacleTop[size_top-1] << std::endl;
+        std::cout << "Top: " << m_obstacleTop[0] << "|" << m_obstacleTop[size_top - 1] << std::endl;
         coords = Utility::coordinateFromLinearIndex(m_obstacleTop[0], Nx, Ny);
         std::cout << "Top start: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
-        coords = Utility::coordinateFromLinearIndex(m_obstacleTop[size_top-1], Nx, Ny);
+        coords = Utility::coordinateFromLinearIndex(m_obstacleTop[size_top - 1], Nx, Ny);
         std::cout << "Top end: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
     } else {
         std::cout << "Top size = 0" << std::endl;
@@ -295,21 +295,21 @@ void Obstacle::printDetails(){
 
     size_t size_bottom = getSize_obstacleBottom();
     if (size_bottom > 0) {
-        std::cout << "Bottom: " << m_obstacleBottom[0] << "|" << m_obstacleBottom[size_bottom-1] << std::endl;
+        std::cout << "Bottom: " << m_obstacleBottom[0] << "|" << m_obstacleBottom[size_bottom - 1] << std::endl;
         coords = Utility::coordinateFromLinearIndex(m_obstacleBottom[0], Nx, Ny);
         std::cout << "Bottom start: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
         coords = Utility::coordinateFromLinearIndex(m_obstacleBottom[size_bottom - 1], Nx, Ny);
         std::cout << "Bottom end: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
-    }else{
+    } else {
         std::cout << "Bottom size = 0" << std::endl;
     }
 
     size_t size_left = getSize_obstacleLeft();
     if (size_left > 0) {
-        std::cout << "Left: " << m_obstacleLeft[0] << "|" << m_obstacleLeft[size_left-1] << std::endl;
+        std::cout << "Left: " << m_obstacleLeft[0] << "|" << m_obstacleLeft[size_left - 1] << std::endl;
         coords = Utility::coordinateFromLinearIndex(m_obstacleLeft[0], Nx, Ny);
         std::cout << "Left start: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
-        coords = Utility::coordinateFromLinearIndex(m_obstacleLeft[size_left-1], Nx, Ny);
+        coords = Utility::coordinateFromLinearIndex(m_obstacleLeft[size_left - 1], Nx, Ny);
         std::cout << "Left end: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
     } else {
         std::cout << "Left size = 0" << std::endl;
@@ -317,10 +317,10 @@ void Obstacle::printDetails(){
 
     size_t size_right = getSize_obstacleRight();
     if (size_right > 0) {
-        std::cout << "Right: " << m_obstacleRight[0] << "|" << m_obstacleRight[size_right-1] << std::endl;
+        std::cout << "Right: " << m_obstacleRight[0] << "|" << m_obstacleRight[size_right - 1] << std::endl;
         coords = Utility::coordinateFromLinearIndex(m_obstacleRight[0], Nx, Ny);
         std::cout << "Right start: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
-        coords = Utility::coordinateFromLinearIndex(m_obstacleRight[size_right-1], Nx, Ny);
+        coords = Utility::coordinateFromLinearIndex(m_obstacleRight[size_right - 1], Nx, Ny);
         std::cout << "Right end: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
     } else {
         std::cout << "Right size = 0" << std::endl;
@@ -332,11 +332,18 @@ void Obstacle::printDetails(){
 /// \brief  Units test emergency solution
 // ***************************************************************************************
 void Obstacle::control() {
-   // size_t all_cells = m_size_obstacleSliceX * 2 - 4 * m_strideX + m_size_obstacleSliceY * 2 - 4 * m_strideY + m_size_obstacleSliceZ * 2 - 4 * (m_strideZ - 2) + m_size_obstacleInner;
-   // if (m_size_obstacleList != all_cells) {
-   //     std::cout << "list size of obstacle does not match the size of its parts. Obstacle List: " << m_size_obstacleList << " all cells: " << all_cells << " inner: " << m_size_obstacleInner << std::endl;
-   //     std::cout << "FRONT/BACK: " << m_size_obstacleSliceZ << " BOTTOM/TOP: " << m_size_obstacleSliceY << " LEFT/RIGHT: " << m_size_obstacleSliceX << std::endl;
-   // }
+    std::string message;
+    for (size_t i = 1; i < m_size_obstacleList; i++) {
+        long int diff = static_cast<long int>(m_obstacleList[i]) - static_cast<long int>(m_obstacleList[i - 1]);
+        if (diff < 0) {
+            message += "sorting error at index " + std::to_string(i - 1) + "|" + std::to_string(i) + " with values " + std::to_string(m_obstacleList[i - 1]) + "|" + std::to_string(m_obstacleList[i]) +
+                      "\n";
+        }
+    }
+    if (!message.empty()) {
+        message = "################ OBSTACLE CONTROL ################\n-- level " + std::to_string(m_level) + "\n" + message + "---------------- OBSTACLE CONTROL END ----------------";
+        std::cout << message << std::endl;
+    }
 }
 
 //======================================== Is obstacle cell ====================================
@@ -377,22 +384,81 @@ void Obstacle::removeCellsAtBoundary(size_t level) {
     size_t j2 = getCoordinates_j2();
     size_t k2 = getCoordinates_k2();
 
-    if (m_k1 <= domain->GetIndexz1(level)){
+    if (m_k1 <= domain->GetIndexz1(level)) {
         m_size_obstacleFront = 0;
     }
-    if (k2 >= domain->GetIndexz2(level)){
+    if (k2 >= domain->GetIndexz2(level)) {
         m_size_obstacleBack = 0;
     }
-    if (m_j1 <= domain->GetIndexy1(level)){
+    if (m_j1 <= domain->GetIndexy1(level)) {
         m_size_obstacleBottom = 0;
     }
-    if (j2 >= domain->GetIndexy2(level)){
+    if (j2 >= domain->GetIndexy2(level)) {
         m_size_obstacleTop = 0;
     }
-    if (m_i1 <= domain->GetIndexx1(level)){
+    if (m_i1 <= domain->GetIndexx1(level)) {
         m_size_obstacleLeft = 0;
     }
-    if (i2 >= domain->GetIndexx2(level)){
+    if (i2 >= domain->GetIndexx2(level)) {
         m_size_obstacleRight = 0;
     }
+}
+
+bool Obstacle::hasOverlap(size_t o1_coord1, size_t o1_coord2, size_t o2_coord1, size_t o2_coord2) {
+    return ((o1_coord1 <= o2_coord1 && o2_coord1 <= o1_coord2) || (o1_coord1 <= o2_coord2 && o2_coord2 <= o1_coord2));
+}
+
+bool Obstacle::removeCellsFacingAnotherObstacle(Obstacle *o) {
+    bool overlap = false;
+    if (m_i1 - 1 == o->getCoordinates_i2()) {
+        if (hasOverlap(m_j1, m_j2, o->getCoordinates_j1(), o->getCoordinates_j2()) && hasOverlap(m_k1, m_k2, o->getCoordinates_k1(), o->getCoordinates_k2())) {
+            // another obstacle at the left side
+            overlap = true;
+            //remove cells from x = m_i1, y = max(m_j1,o_j1), z = max(m_k1,o_k1) til x = m_i1, y = min(m_j2,o_j2), z = min(m_k2,o_k2)
+            size_t x1 = m_i1;
+            size_t x2 = m_i1;
+            size_t y1 = std::max(m_j1, o->getCoordinates_j1());
+            size_t y2 = std::max(m_j2, o->getCoordinates_j2());
+            size_t z1 = std::max(m_k1, o->getCoordinates_k1());
+            size_t z2 = std::max(m_k2, o->getCoordinates_k2());
+            size_t new_front_size = (x2 + 1 - x1) * (y2 + 1 - y2) * (z2 + 1 - z1);
+           // delete[]
+        }
+    }
+
+    if (m_i2 + 1 == o->getCoordinates_i1()) {
+        if (hasOverlap(m_j1, m_j2, o->getCoordinates_j1(), o->getCoordinates_j2()) && hasOverlap(m_k1, m_k2, o->getCoordinates_k1(), o->getCoordinates_k2())) {
+            // another obstacle at the right side
+            overlap = true;
+        }
+    }
+
+    if (m_j1 - 1 == o->getCoordinates_j2()) {
+        if (hasOverlap(m_i1, m_i2, o->getCoordinates_i1(), o->getCoordinates_i2()) && hasOverlap(m_k1, m_k2, o->getCoordinates_k1(), o->getCoordinates_k2())) {
+            // another obstacle at the bottom side
+            overlap = true;
+        }
+    }
+
+    if (m_j2 + 1 == o->getCoordinates_j1()) {
+        if (hasOverlap(m_i1, m_i2, o->getCoordinates_i1(), o->getCoordinates_i2()) && hasOverlap(m_k1, m_k2, o->getCoordinates_k1(), o->getCoordinates_k2())) {
+            // another obstacle at the top side
+            overlap = true;
+        }
+    }
+
+    if (m_k1 - 1 == o->getCoordinates_k2()) {
+        if (hasOverlap(m_i1, m_i2, o->getCoordinates_i1(), o->getCoordinates_i2()) && hasOverlap(m_j1, m_j2, o->getCoordinates_j1(), o->getCoordinates_j2())) {
+            // another obstacle at the front side
+            overlap = true;
+        }
+    }
+
+    if (m_k2 + 1 == o->getCoordinates_k1()) {
+        if (hasOverlap(m_i1, m_i2, o->getCoordinates_i1(), o->getCoordinates_i2()) && hasOverlap(m_j1, m_j2, o->getCoordinates_j1(), o->getCoordinates_j2())) {
+            // another obstacle at the back side
+            overlap = true;
+        }
+    }
+    return overlap;
 }
