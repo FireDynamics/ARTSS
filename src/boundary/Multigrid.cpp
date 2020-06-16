@@ -576,7 +576,7 @@ void Multigrid::calcObstacles(Obstacle **obstacleList) {
             list = data.data();
             size = data.size();
         }
-
+        delete[] oList;
         size_t *oList_tmp = new size_t[size];
         std::copy(&data[0], &data[size], oList_tmp);
         *(m_size_MG_oList_level) = size;
