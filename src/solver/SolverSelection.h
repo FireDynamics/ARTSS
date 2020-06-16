@@ -1,12 +1,11 @@
-/// \file 		SolverSelection.cpp
-/// \brief 		Selects the solver
-/// \date 		December 18, 2018
-/// \author 	My Linh Wuerzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       SolverSelection.cpp
+/// \brief      Selects the solver
+/// \date       December 18, 2019
+/// \author     My Linh Wuerzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_SOLVER_SOLVERSELECTION_H
 #define ARTSS_SOLVER_SOLVERSELECTION_H
-
 
 #include "../interfaces/IDiffusion.h"
 #include "../interfaces/ISource.h"
@@ -15,7 +14,6 @@
 #include "../interfaces/ITurbulence.h"
 
 struct AdvectionMethods {
-    inline static const std::string Explicit = "Explicit";
     inline static const std::string SemiLagrangian = "SemiLagrangian";
 };
 

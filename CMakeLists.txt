@@ -154,7 +154,6 @@ set(SOURCE_FILES
         "src/adaption/Layers.cpp"
         "src/adaption/Vortex.cpp"
 
-        "src/advection/ExplicitAdvect.cpp"
         "src/advection/SLAdvect.cpp"
 
         "src/analysis/Analysis.cpp"
@@ -219,7 +218,6 @@ set(HEADER_FILES
         "src/adaption/Layers.h"
         "src/adaption/Vortex.h"
 
-        "src/advection/ExplicitAdvect.h"
         "src/advection/SLAdvect.h"
 
         "src/boundary/Boundary.h"
