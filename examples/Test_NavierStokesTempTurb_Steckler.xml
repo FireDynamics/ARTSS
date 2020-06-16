@@ -25,7 +25,7 @@
     <source type = "ExplicitEuler" force_fct="Buoyancy" dir="y"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>
     <pressure type = "VCycleMG" field = "p">
-      <n_level> 5 </n_level>  <!-- number of restriction levels -->
+      <n_level> 4 </n_level>  <!-- number of restriction levels -->
       <n_cycle> 2 </n_cycle> <!-- number of cycles -->
       <max_cycle> 100 </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
@@ -136,6 +136,6 @@
   </initial_conditions>
 
   <visualization save_csv="No">
-    <n_plots> 100 </n_plots>
+    <n_plots> 36000 </n_plots>
   </visualization>
 </ARTSS>
