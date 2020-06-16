@@ -143,7 +143,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize], d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_S_T[:bsize], d_S_C[:bsize])
     {
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect ..." << std::endl;
         //TODO Logger
 #endif
@@ -156,7 +156,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 
 // 2. Solve diffusion equation
         if (nu != 0.) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Diffuse ..." << std::endl;
             //TODO Logger
 #endif
@@ -170,7 +170,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add momentum source ..." << std::endl;
             //TODO Logger
 #endif
@@ -185,7 +185,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
         pres->Divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Pressure ..." << std::endl;
         //TODO Logger
 #endif
@@ -196,7 +196,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 
 // 5. Solve Temperature and link back to force
         // Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect Temperature ..." << std::endl;
         //TODO Logger
 #endif
@@ -207,7 +207,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 
         // Solve diffusion equation
         if (kappa != 0.) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Diffuse Temperature ..." << std::endl;
             //TODO Logger
 #endif
@@ -219,7 +219,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 
         // Add dissipation
         if (m_hasDissipation) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add dissipation ..." << std::endl;
             //TODO Logger
 #endif
@@ -231,7 +231,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 
         // Add source
         if (m_tempFct != SourceMethods::Zero) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add temperature source ..." << std::endl;
             //TODO Logger
 #endif
@@ -243,7 +243,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 
 // 6. Solve for concentration
         // Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect Concentration ..." << std::endl;
         //TODO Logger
 #endif
@@ -254,7 +254,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 
         // Solve diffusion equation
         if (gamma != 0.) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Diffuse Concentration ..." << std::endl;
             //TODO Logger
 #endif
@@ -266,7 +266,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
 
         // Add source
         if (m_conFct != SourceMethods::Zero) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add concentration source ..." << std::endl;
             //TODO Logger
 #endif

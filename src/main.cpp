@@ -21,7 +21,7 @@
 #include "utility/tinyxml2.h"
 #include "utility/Parameters.h"
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
 #include "analysis/Analysis.h"
 #include "utility/Visual.h"
 #endif
@@ -61,7 +61,7 @@ int main(int argc, const char** argv) {
 	}
 
 // 1. Visualize and test initial conditions
-#ifndef PROFILING
+#ifndef BENCHMARKING
 	// Solution
 	Analysis ana;
 	ana.Analyse(solver, 0.);
@@ -83,7 +83,7 @@ int main(int argc, const char** argv) {
 	ti.run();
 
 // 3. Compute analytical solution and compare
-#ifndef PROFILING
+#ifndef BENCHMARKING
 	real t_end = params->getReal("physical_parameters/t_end");
 	ana.Analyse(solver, t_end);
 #endif

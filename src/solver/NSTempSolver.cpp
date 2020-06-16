@@ -123,7 +123,7 @@ void NSTempSolver::DoStep(real t, bool sync) {
                             d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_S_T[:bsize])
     {
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect ..." << std::endl;
         //TODO Logger
 #endif
@@ -137,7 +137,7 @@ void NSTempSolver::DoStep(real t, bool sync) {
 
 // 2. Solve diffusion equation
         if (nu != 0.) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Diffuse ..." << std::endl;
             //TODO Logger
 #endif
@@ -151,7 +151,7 @@ void NSTempSolver::DoStep(real t, bool sync) {
 
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add momentum source ..." << std::endl;
             //TODO Logger
 #endif
@@ -166,7 +166,7 @@ void NSTempSolver::DoStep(real t, bool sync) {
         pres->Divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Pressure ..." << std::endl;
         //TODO Logger
 #endif
@@ -177,7 +177,7 @@ void NSTempSolver::DoStep(real t, bool sync) {
 
 // 5. Solve Temperature and link back to force
         // Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect Temperature ..." << std::endl;
         //TODO Logger
 #endif
@@ -189,7 +189,7 @@ void NSTempSolver::DoStep(real t, bool sync) {
         // Solve diffusion equation
         if (kappa != 0.) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Diffuse Temperature ..." << std::endl;
             //TODO Logger
 #endif
@@ -202,7 +202,7 @@ void NSTempSolver::DoStep(real t, bool sync) {
         // Add dissipation
         if (m_hasDissipation) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add dissipation ..." << std::endl;
             //TODO Logger
 #endif
@@ -215,7 +215,7 @@ void NSTempSolver::DoStep(real t, bool sync) {
         // Add source
         if (m_tempFct != SourceMethods::Zero) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add temperature source ..." << std::endl;
             //TODO Logger
 #endif

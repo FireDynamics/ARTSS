@@ -17,7 +17,7 @@ Available Options:
 
 Load modules:
   ${YELLOW}--jureca${NC}                       \t load modules for JURECA
-  ${YELLOW}--p100${NC}                         \t load modules for P100
+  ${YELLOW}--p100${NC}                         \t setup for P100
 
 Executables:
   Production (with data output, visualization and analysis):
@@ -33,18 +33,18 @@ Executables:
   ${YELLOW}--gpu${NC}
   ${YELLOW}--artss_gpu${NC}                      \t Executable: artss_gpu
 ----  
-  Benchmarking (without output, visualization, analysis but with tracing for profiling):
-  ${YELLOW}--sp${NC}
-  ${YELLOW}--serial_profile${NC}
-  ${YELLOW}--artss_profile${NC}                  \t Executable artss_serial_profile
+  Benchmarking (without output, visualization, analysis):
+  ${YELLOW}--sb${NC}
+  ${YELLOW}--serial_benchmark${NC}
+  ${YELLOW}--artss_benchmark${NC}                  \t Executable artss_serial_benchmark
 
-  ${YELLOW}--mp${NC}
-  ${YELLOW}--multicore_profile${NC}
-  ${YELLOW}--artss_multicore_cpu_profile${NC}    \t Executable artss_multicore_cpu_profile
+  ${YELLOW}--mb${NC}
+  ${YELLOW}--multicore_benchmark${NC}
+  ${YELLOW}--artss_multicore_cpu_benchmark${NC}    \t Executable artss_multicore_cpu_benchmark
 
-  ${YELLOW}--gp${NC}
-  ${YELLOW}--gpu_profile${NC}
-  ${YELLOW}--artss_gpu_profile${NC}               \t Executable artss_gpu_profile
+  ${YELLOW}--gb${NC}
+  ${YELLOW}--gpu_benchmark${NC}
+  ${YELLOW}--artss_gpu_benchmark${NC}               \t Executable artss_gpu_benchmark
 
 Other:
    ${YELLOW}-c${NC}
@@ -77,11 +77,6 @@ while [[ $# -gt 0 ]]
 do
   key="$1"
   case $key in
-    --gp|--gpu_profile|--artss_gpu_profile)
-      COMPILE="$COMPILE artss_gpu_profile "
-      GPU=0
-      shift
-      ;;
     -c|--cuda)
       CUDA_VERSION="$2"
       shift
@@ -118,6 +113,11 @@ do
       GPU=0
       shift
       ;;
+    --gb|--gpu_benchmark|--artss_gpu_benchmark)
+      COMPILE="$COMPILE artss_gpu_benchmark "
+      GPU=0
+      shift
+      ;;
     --gcc)
       COMPILER="GCC"
       if [[ $2 != -* ]]
@@ -146,8 +146,8 @@ do
       GPU=0
       shift
       ;;
-    --mp|--multicore_profile|--artss_multicore_cpu_profile)
-      COMPILE="$COMPILE artss_multicore_cpu_profile"
+    --mb|--multicore_benchmark|--artss_multicore_cpu_benchmark)
+      COMPILE="$COMPILE artss_multicore_cpu_benchmark"
       GPU=0
       shift
       ;;
@@ -164,8 +164,8 @@ do
       COMPILE="$COMPILE artss_serial"
       shift
       ;;
-    --sp|--serial_profile|--artss_serial_profile)
-      COMPILE="$COMPILE artss_serial_profile"
+    --sb|--serial_benchmark|--artss_serial_benchmark)
+      COMPILE="$COMPILE artss_serial_benchmark"
       shift
       ;;
     --jureca)

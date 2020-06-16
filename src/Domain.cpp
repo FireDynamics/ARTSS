@@ -38,7 +38,7 @@ Domain::Domain() {
     m_Z2 = params->getReal("domain_parameters/Z2");
 
     calcMGValues();
-#ifndef PROFILING
+#ifndef BENCHMARKING
     //printDetails();
 #endif
 }
@@ -107,7 +107,7 @@ bool Domain::Resize(long shift_x1, long shift_x2, long shift_y1, long shift_y2, 
     }
 #pragma acc wait
     if (update) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
       std::cout << "Resize domain: " << shift_x1 << "|" << shift_x2 << " " << shift_y1 << "|" << shift_y2 << " " << shift_z1 << "|" << shift_z2 << std::endl;
       //std::cout << "RESIZE: (" << m_x1 << "|" << m_x2 << ") (" << m_y1 << "|" << m_y2 << ") (" << m_z1 << "|" << m_z2
       //          << ")" << std::endl;
