@@ -26,14 +26,14 @@ public:
     size_t* getObstacleLeft() {return m_obstacleLeft;};
     size_t* getObstacleRight() {return m_obstacleRight;};
 
-    size_t getSize_obstacleList()  {return m_size_obstacleList;};
+    size_t getSize_obstacleList() {return m_size_obstacleList;};
 
     size_t getSize_obstacleFront() {return m_size_obstacleFront;};
-    size_t getSize_obstacleBack()   {return m_size_obstacleBack;};
-    size_t getSize_obstacleBottom()  {return m_size_obstacleBottom;};
-    size_t getSize_obstacleTop()   {return m_size_obstacleTop;};
-    size_t getSize_obstacleLeft()   {return m_size_obstacleLeft;};
-    size_t getSize_obstacleRight()   {return m_size_obstacleRight;};
+    size_t getSize_obstacleBack() {return m_size_obstacleBack;};
+    size_t getSize_obstacleBottom() {return m_size_obstacleBottom;};
+    size_t getSize_obstacleTop() {return m_size_obstacleTop;};
+    size_t getSize_obstacleLeft() {return m_size_obstacleLeft;};
+    size_t getSize_obstacleRight() {return m_size_obstacleRight;};
 
     bool isObstacleCell(size_t i, size_t j, size_t k);
 
@@ -46,9 +46,9 @@ public:
     size_t getCoordinates_j2() { return m_j2; };
     size_t getCoordinates_k2() { return m_k2; };
 
-    size_t getStrideX() {return m_i2-m_i1+1;};
-    size_t getStrideY() {return m_j2-m_j1+1;};
-    size_t getStrideZ() {return m_k2-m_k1+1;};
+    size_t getStrideX() { return m_i2 - m_i1 + 1; };
+    size_t getStrideY() { return m_j2 - m_j1 + 1; };
+    size_t getStrideZ() { return m_k2 - m_k1 + 1; };
 
 private:
     size_t m_i1, m_j1, m_k1;
