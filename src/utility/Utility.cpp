@@ -86,10 +86,16 @@ std::vector<size_t> Utility::mergeSortedListsToUniqueList(size_t *list1, size_t 
         }
     }
     if (counter1 < size_list1){
+        if (list1[counter1] == result[result.size()-1]){
+            counter1++;
+        }
         for (size_t c = counter1; c < size_list1; c++){
             result.push_back(list1[c]);
         }
     }else{
+        if (list2[counter2] == result[result.size()-1]){
+            counter2++;
+        }
         for (size_t c = counter2; c < size_list2; c++){
             result.push_back(list2[c]);
         }
