@@ -7,8 +7,8 @@
 #ifndef ARTSS_TIMEINTEGRATION_H_
 #define ARTSS_TIMEINTEGRATION_H_
 
-#include "interfaces/SolverI.h"
-#include "interfaces/SourceI.h"
+#include "interfaces/ISolver.h"
+#include "interfaces/ISource.h"
 #include "utility/GlobalMacrosTypes.h"
 #include "analysis/Analysis.h"
 #include "utility/Utility.h"
@@ -18,12 +18,12 @@
 
 class TimeIntegration {
 public:
-	TimeIntegration(SolverI *isolv, const char *fname);
+	TimeIntegration(ISolver *isolv, const char *fname);
 
 	void run();
 
 private:
-	SolverI* m_solver;
+	ISolver* m_solver;
 	const char *m_fname;
 	real m_dt;
 	real m_t_end;

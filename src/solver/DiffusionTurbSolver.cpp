@@ -44,16 +44,16 @@ void DiffusionTurbSolver::DoStep(real t, bool sync) {
 
 // 1. Solve diffusion equation
 // local variables and parameters for GPU
-    auto u = SolverI::u;
-    auto v = SolverI::v;
-    auto w = SolverI::w;
-    auto u0 = SolverI::u0;
-    auto v0 = SolverI::v0;
-    auto w0 = SolverI::w0;
-    auto u_tmp = SolverI::u_tmp;
-    auto v_tmp = SolverI::v_tmp;
-    auto w_tmp = SolverI::w_tmp;
-    auto nu_t = SolverI::nu_t;     //Eddy Viscosity
+    auto u = ISolver::u;
+    auto v = ISolver::v;
+    auto w = ISolver::w;
+    auto u0 = ISolver::u0;
+    auto v0 = ISolver::v0;
+    auto w0 = ISolver::w0;
+    auto u_tmp = ISolver::u_tmp;
+    auto v_tmp = ISolver::v_tmp;
+    auto w_tmp = ISolver::w_tmp;
+    auto nu_t = ISolver::nu_t;     //Eddy Viscosity
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -72,12 +72,14 @@ void DiffusionTurbSolver::DoStep(real t, bool sync) {
 
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_nu_t[:bsize]) //EV
     {
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Calculating Turbulent viscosity ...");
+        //TODO Logger
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Diffuse ...");
+        //TODO Logger
 #endif
         dif->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif->diffuse(v, v0, v_tmp, nu, nu_t, sync);

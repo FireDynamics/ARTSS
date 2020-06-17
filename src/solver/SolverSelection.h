@@ -1,21 +1,19 @@
-/// \file 		SolverSelection.cpp
-/// \brief 		Selects the solver
-/// \date 		December 18, 2018
-/// \author 	My Linh Wuerzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       SolverSelection.cpp
+/// \brief      Selects the solver
+/// \date       December 18, 2019
+/// \author     My Linh Wuerzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_SOLVER_SOLVERSELECTION_H
 #define ARTSS_SOLVER_SOLVERSELECTION_H
 
-
-#include "../interfaces/DiffusionI.h"
-#include "../interfaces/SourceI.h"
-#include "../interfaces/PressureI.h"
-#include "../interfaces/AdvectionI.h"
-#include "../interfaces/TurbulenceI.h"
+#include "../interfaces/IDiffusion.h"
+#include "../interfaces/ISource.h"
+#include "../interfaces/IPressure.h"
+#include "../interfaces/IAdvection.h"
+#include "../interfaces/ITurbulence.h"
 
 struct AdvectionMethods {
-    inline static const std::string Explicit = "Explicit";
     inline static const std::string SemiLagrangian = "SemiLagrangian";
 };
 
@@ -46,15 +44,15 @@ struct TurbulenceMethods {
 
 class SolverSelection {
 public:
-    static void SetAdvectionSolver(AdvectionI **advectionSolver, const std::string& advectionType);
+    static void SetAdvectionSolver(IAdvection **advectionSolver, const std::string& advectionType);
 
-    static void SetDiffusionSolver(DiffusionI **diffusionSolver, const std::string& diffusionType);
+    static void SetDiffusionSolver(IDiffusion **diffusionSolver, const std::string& diffusionType);
 
-    static void SetPressureSolver(PressureI **pressureSolver, const std::string& pressureType, Field *p, Field *rhs);
+    static void SetPressureSolver(IPressure **pressureSolver, const std::string& pressureType, Field *p, Field *rhs);
 
-    static void SetSourceSolver(SourceI **sourceSolver, const std::string& sourceType);
+    static void SetSourceSolver(ISource **sourceSolver, const std::string& sourceType);
 
-    static void SetTurbulenceSolver(TurbulenceI **tubulenceSolver, const std::string& turbulenceType);
+    static void SetTurbulenceSolver(ITurbulence **tubulenceSolver, const std::string& turbulenceType);
 };
 
 

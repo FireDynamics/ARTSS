@@ -10,7 +10,7 @@
 #include "../utility/Utility.h"
 
 Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
     m_logger = Utility::createLogger(typeid(this).name());
 #endif
     m_bdc_boundary = bdc_boundary;
@@ -20,7 +20,7 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
     init();
     addMGLists();
     sendListsToGPU();
-#ifndef PROFILING
+#ifndef BENCHMARKING
     //print();
     control();
 #endif
@@ -101,7 +101,7 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
     init();
     addMGLists();
     sendListsToGPU();
-#ifndef PROFILING
+#ifndef BENCHMARKING
     //print();
     control();
 #endif
@@ -871,12 +871,22 @@ void Multigrid::sendObstacleListsToGPU() {
                 }
             }
         }
+        //std::cout << "control sendMGListsToGPU obstacle Front " << counter_oFront + 1 << "|" << size_oFront << std::endl;
+        //std::cout << "control sendMGListsToGPU obstacle Back " << counter_oBack + 1 << "|" << size_oBack << std::endl;
+        //std::cout << "control sendMGListsToGPU obstacle Bottom " << counter_oBottom + 1 << "|" << size_oBottom << std::endl;
+        //std::cout << "control sendMGListsToGPU obstacle Top " << counter_oTop + 1 << "|" << size_oTop << std::endl;
+        //std::cout << "control sendMGListsToGPU obstacle Left " << counter_oLeft + 1 << "|" << size_oLeft << std::endl;
+        //std::cout << "control sendMGListsToGPU obstacle Right " << counter_oRight + 1 << "|" << size_oRight << std::endl;
+
+        m_data_MG_oList_zero_joined = m_MG_oList[0];
+        size_t size_oList = getSize_obstacleList();
 #pragma acc enter data copyin(m_data_MG_oFront_level_joined[:size_oFront])
 #pragma acc enter data copyin(m_data_MG_oBack_level_joined[:size_oBack])
 #pragma acc enter data copyin(m_data_MG_oTop_level_joined[:size_oTop])
 #pragma acc enter data copyin(m_data_MG_oBottom_level_joined[:size_oBottom])
 #pragma acc enter data copyin(m_data_MG_oLeft_level_joined[:size_oLeft])
 #pragma acc enter data copyin(m_data_MG_oRight_level_joined[:size_oRight])
+#pragma acc enter data copyin(m_data_MG_oList_zero_joined[:size_oList])
     }
 }
 

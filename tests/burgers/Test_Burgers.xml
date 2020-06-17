@@ -1,62 +1,58 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<ARTSS>
+  <xml_filename>Test_Burgers.xml</xml_filename>
 
-<!-- Test Burgers: ExpSin (Hypothesis: Velocity decrease and shift) -->
+  <physical_parameters>
+    <t_end> 1.0 </t_end>  <!-- simulation end time -->
+    <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
+    <nu> 0.1 </nu>  <!-- kinematic viscosity -->
+  </physical_parameters>
 
-<JuROr>
-	<xml_filename>Test_Burgers.xml</xml_filename>
+  <solver description = "AdvectionDiffusionSolver" >
+    <advection type = "SemiLagrangian" field = "u,v,w">
+    </advection>
+    <diffusion type = "Jacobi" field = "u,v,w">
+      <max_iter> 100 </max_iter>  <!-- max number of iterations -->
+      <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
+      <w> 1 </w>  <!-- relaxation parameter -->
+    </diffusion>
+    <solution available = "Yes">
+      <tol> 1e-03 </tol>  <!-- tolerance for further tests -->
+    </solution>
+  </solver>
 
-	<physical_parameters>
-		<t_end> 1.0 </t_end>			<!-- simulation end time -->
-		<dt> 0.01 </dt>					<!-- time stepping -->
-		<nu> 0.1 </nu>					<!-- kinematic viscosity -->
-	</physical_parameters>
+  <domain_parameters>
+    <X1> -3.1415926536 </X1>  <!-- physical domain -->
+    <X2> 3.1415926536 </X2>
+    <Y1> -3.1415926536 </Y1>
+    <Y2> 3.1415926536 </Y2>
+    <Z1> -3.1415926536 </Z1>
+    <Z2> 3.1415926536 </Z2>
+    <x1> -3.1415926536 </x1>  <!-- computational domain -->
+    <x2> 3.1415926536 </x2>
+    <y1> -3.1415926536 </y1>
+    <y2> 3.1415926536 </y2>
+    <z1> -3.1415926536 </z1>
+    <z2> 3.1415926536 </z2>
+    <nx> 40 </nx>  <!-- grid resolution (number of cells excl. ghost cells) -->
+    <ny> 40 </ny>
+    <nz> 1 </nz>
+  </domain_parameters>
 
-	<solver description = "AdvectionDiffusionSolver" >
-		<advection type = "SemiLagrangian" field = "u,v,w">
-		</advection>
-		<diffusion type = "Jacobi" field = "u,v,w">
-			<max_iter> 100 </max_iter> 	<!-- max number of iterations -->
-			<tol_res> 1e-07 </tol_res> 	<!-- tolerance for residuum/ convergence -->
-			<w> 1 </w>				   	<!-- relaxation parameter -->
-		</diffusion>
-		<solution available = "Yes">
-			<tol> 1e-03 </tol>			<!-- tolerance for further tests -->
-		</solution>
-	</solver>
+  <adaption dynamic="No" data_extraction="No"> </adaption>
 
-	<domain_parameters>
-		<X1> -3.1415926536 </X1>		<!-- physical domain -->
-		<X2> 3.1415926536 </X2>
-		<Y1> -3.1415926536 </Y1>
-		<Y2> 3.1415926536 </Y2>
-		<Z1> -3.1415926536 </Z1>
-		<Z2> 3.1415926536 </Z2>
-		<x1> -3.1415926536 </x1>		<!-- computational domain -->
-		<x2> 3.1415926536 </x2>
-		<y1> -3.1415926536 </y1>
-		<y2> 3.1415926536 </y2>
-		<z1> -3.1415926536 </z1>
-		<z2> 3.1415926536 </z2>
-		<nx> 40 </nx>					<!-- computational grid resolution (number of cells incl. ghost cells) -->
-		<ny> 40 </ny>
-		<nz> 1  </nz>
-	</domain_parameters>
+  <boundaries>
+    <boundary field="u,v,w" patch="front,back,left,right,bottom,top" type="periodic" value="0.0" />
+  </boundaries>
 
-  <adaption dynamic="No" data_extraction="No">
-  </adaption>
-	<boundaries>
-		<boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="periodic" value="0.0" />
-	</boundaries>
-  
-  <obstacles enabled="No" />
-  <surfaces enabled="No" />
+  <obstacles enabled="No"/>
 
-	<initial_conditions usr_fct = "ExpSinusSum" >     <!-- Exp*Sin(x+y+z) function  -->
-	</initial_conditions>
+  <surfaces enabled="No"/>
 
-   <visualization save_csv="No">
-		<n_plots> 1 </n_plots>
+  <initial_conditions usr_fct = "ExpSinusSum" >     <!-- product of exponential and sinuses exp*sin*sin*sin -->
+  </initial_conditions>
+
+  <visualization save_csv="No">
+    <n_plots> 10 </n_plots>
   </visualization>
-
-  <logging level="info" file="burgers.log"/>
-</JuROr>
+</ARTSS>

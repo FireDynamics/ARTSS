@@ -86,29 +86,29 @@ NSTempConSolver::~NSTempConSolver() {
 void NSTempConSolver::DoStep(real t, bool sync) {
 
     // local variables and parameters for GPU
-    auto u = SolverI::u;
-    auto v = SolverI::v;
-    auto w = SolverI::w;
-    auto u0 = SolverI::u0;
-    auto v0 = SolverI::v0;
-    auto w0 = SolverI::w0;
-    auto u_tmp = SolverI::u_tmp;
-    auto v_tmp = SolverI::v_tmp;
-    auto w_tmp = SolverI::w_tmp;
-    auto p = SolverI::p;
-    auto p0 = SolverI::p0;
-    auto rhs = SolverI::rhs;
-    auto T = SolverI::T;
-    auto T0 = SolverI::T0;
-    auto T_tmp = SolverI::T_tmp;
-    auto C = SolverI::C;
-    auto C0 = SolverI::C0;
-    auto C_tmp = SolverI::C_tmp;
-    auto f_x = SolverI::f_x;
-    auto f_y = SolverI::f_y;
-    auto f_z = SolverI::f_z;
-    auto S_T = SolverI::S_T;
-    auto S_C = SolverI::S_C;
+    auto u = ISolver::u;
+    auto v = ISolver::v;
+    auto w = ISolver::w;
+    auto u0 = ISolver::u0;
+    auto v0 = ISolver::v0;
+    auto w0 = ISolver::w0;
+    auto u_tmp = ISolver::u_tmp;
+    auto v_tmp = ISolver::v_tmp;
+    auto w_tmp = ISolver::w_tmp;
+    auto p = ISolver::p;
+    auto p0 = ISolver::p0;
+    auto rhs = ISolver::rhs;
+    auto T = ISolver::T;
+    auto T0 = ISolver::T0;
+    auto T_tmp = ISolver::T_tmp;
+    auto C = ISolver::C;
+    auto C0 = ISolver::C0;
+    auto C_tmp = ISolver::C_tmp;
+    auto f_x = ISolver::f_x;
+    auto f_y = ISolver::f_y;
+    auto f_z = ISolver::f_z;
+    auto S_T = ISolver::S_T;
+    auto S_C = ISolver::S_C;
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -152,7 +152,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
         adv_vel->advect(w, w0, u0, v0, w0, sync);
 
         // Couple velocity to prepare for diffusion
-        SolverI::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve diffusion equation
         if (nu != 0.) {
@@ -164,7 +164,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
             dif_vel->diffuse(w, w0, w_tmp, nu, sync);
 
             // Couple data to prepare for adding source
-            SolverI::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 3. Add force
@@ -175,7 +175,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
             sou_vel->addSource(u, v, w, f_x, f_y, f_z, sync);
 
             // Couple data to prepare for adding source
-            SolverI::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 4. Solve pressure equation and project
@@ -199,7 +199,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
         adv_temp->advect(T, T0, u, v, w, sync);
 
         // Couple temperature to prepare for diffusion
-        SolverI::CoupleScalar(T, T0, T_tmp, sync);
+        ISolver::CoupleScalar(T, T0, T_tmp, sync);
 
         // Solve diffusion equation
         if (kappa != 0.) {
@@ -209,7 +209,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
             dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
 
             // Couple temperature to prepare for adding source
-            SolverI::CoupleScalar(T, T0, T_tmp, sync);
+            ISolver::CoupleScalar(T, T0, T_tmp, sync);
         }
 
         // Add dissipation
@@ -220,7 +220,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
             sou_temp->Dissipate(T, u, v, w, sync);
 
             // Couple temperature
-            SolverI::CoupleScalar(T, T0, T_tmp, sync);
+            ISolver::CoupleScalar(T, T0, T_tmp, sync);
         }
 
         // Add source
@@ -231,7 +231,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
             sou_temp->addSource(T, S_T, sync);
 
             // Couple temperature
-            SolverI::CoupleScalar(T, T0, T_tmp, sync);
+            ISolver::CoupleScalar(T, T0, T_tmp, sync);
         }
 
 // 6. Solve for concentration
@@ -242,7 +242,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
         adv_con->advect(C, C0, u, v, w, sync);
 
         // Couple concentration to prepare for diffusion
-        SolverI::CoupleScalar(C, C0, C_tmp, sync);
+        ISolver::CoupleScalar(C, C0, C_tmp, sync);
 
         // Solve diffusion equation
         if (gamma != 0.) {
@@ -252,7 +252,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
             dif_con->diffuse(C, C0, C_tmp, gamma, sync);
 
             // Couple concentration to prepare for adding source
-            SolverI::CoupleScalar(C, C0, C_tmp, sync);
+            ISolver::CoupleScalar(C, C0, C_tmp, sync);
         }
 
         // Add source
@@ -263,7 +263,7 @@ void NSTempConSolver::DoStep(real t, bool sync) {
             sou_con->addSource(C, S_C, sync);
 
             // Couple concentration
-            SolverI::CoupleScalar(C, C0, C_tmp, sync);
+            ISolver::CoupleScalar(C, C0, C_tmp, sync);
         }
 
 // 7. Sources updated in Solver::UpdateSources, TimeIntegration

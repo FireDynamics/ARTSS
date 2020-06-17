@@ -43,7 +43,7 @@ Domain::Domain() {
     m_Z2 = params->getReal("domain_parameters/Z2");
 
     calcMGValues();
-#ifndef PROFILING
+#ifndef BENCHMARKING
     //printDetails();
 #endif
 }

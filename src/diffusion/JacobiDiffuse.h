@@ -8,13 +8,13 @@
 #ifndef ARTSS_DIFFUSION_JACOBIDIFFUSE_H_
 #define ARTSS_DIFFUSION_JACOBIDIFFUSE_H_
 
-#include "../interfaces/DiffusionI.h"
+#include "../interfaces/IDiffusion.h"
 #include "../Field.h"
 #ifndef PROFILING
 #include <spdlog/logger.h>
 #endif
 
-class JacobiDiffuse: public DiffusionI {
+class JacobiDiffuse: public IDiffusion {
 public:
 	JacobiDiffuse();
 

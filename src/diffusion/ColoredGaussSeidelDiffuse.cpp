@@ -20,7 +20,7 @@
 
 // ========================== Constructor =================================
 ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
-#ifndef PROFILING
+#ifndef BENCHMARKING
     m_logger = Utility::createLogger(typeid(this).name());
 #endif
     auto params = Parameters::getInstance();
@@ -122,7 +122,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 //#pragma acc wait
     }
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
     m_logger->info("Number of iterations: {}", it);
     m_logger->info("Colored Gauss-Seidel ||res|| = {:.5e}", res);
 #endif
@@ -216,7 +216,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 //#pragma acc wait
     }
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
     m_logger->info("Number of iterations: {}", it);
     m_logger->info("Colored Gauss-Seidel ||res|| = {.5e}", res);
 #endif

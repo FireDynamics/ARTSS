@@ -4,19 +4,20 @@ GPU=1
 JURECA=1
 P100=1
 GPU_CC="cc30"
+CUDA_VERSION=10.1
 BUILDTYPE=Release
 
 YELLOW='\033[1;33m'
 NC='\033[0;m'
 
-DESCRIPTION="Script for compiling ARTSS. Select one or multiple executables for compiling (default: all executables). Specify CUDA version (default: $CUDA_VERSION) and GPU model (default: $GPU_MODEL). For a parallel execution choose --jobs, if there is no integer after the --jobs option, the number of processing units available to the current process will be used.
+DESCRIPTION="Script for compiling ARTSS. Select one or multiple executables for compiling (default: all executables). Specify CUDA version (default: $CUDA_VERSION) and GPU model (default: $GPU_CC). For a parallel execution choose --jobs, if there is no integer after the --jobs option, the number of processing units available to the current process will be used.
 "
 OPTIONS="
 Available Options:
 
 Load modules:
   ${YELLOW}--jureca${NC}                       \t load modules for JURECA
-  ${YELLOW}--p100${NC}                         \t load modules for P100
+  ${YELLOW}--p100${NC}                         \t setup for P100
 
 Executables:
   Production (with data output, visualization and analysis):
@@ -32,18 +33,18 @@ Executables:
   ${YELLOW}--gpu${NC}
   ${YELLOW}--artss_gpu${NC}                      \t Executable: artss_gpu
 ----  
-  Benchmarking (without output, visualization, analysis but with tracing for profiling):
-  ${YELLOW}--sp${NC}
-  ${YELLOW}--serial_profile${NC}
-  ${YELLOW}--artss_profile${NC}                  \t Executable artss_serial_profile
+  Benchmarking (without output, visualization, analysis):
+  ${YELLOW}--sb${NC}
+  ${YELLOW}--serial_benchmark${NC}
+  ${YELLOW}--artss_benchmark${NC}                  \t Executable artss_serial_benchmark
 
-  ${YELLOW}--mp${NC}
-  ${YELLOW}--multicore_profile${NC}
-  ${YELLOW}--artss_multicore_cpu_profile${NC}    \t Executable artss_multicore_cpu_profile
+  ${YELLOW}--mb${NC}
+  ${YELLOW}--multicore_benchmark${NC}
+  ${YELLOW}--artss_multicore_cpu_benchmark${NC}    \t Executable artss_multicore_cpu_benchmark
 
-  ${YELLOW}--gp${NC}
-  ${YELLOW}--gpu_profile${NC}
-  ${YELLOW}--artss_gpu_profile${NC}               \t Executable artss_gpu_profile
+  ${YELLOW}--gb${NC}
+  ${YELLOW}--gpu_benchmark${NC}
+  ${YELLOW}--artss_gpu_benchmark${NC}               \t Executable artss_gpu_benchmark
 
 Other:
    ${YELLOW}-c${NC}
@@ -57,20 +58,25 @@ Other:
 
   ${YELLOW}--gcc${NC}                             \t use gcc as compiler (optional: specify version)
   ${YELLOW}--pgi${NC}                             \t use pgcc ac compiler (optional: specify version)
+
+Docker - ! cannot be combined with other commands ! (more information about docker commands in docker/README.md):
+  ${YELLOW}--docker-build${NC}                    \t build docker image
+  ${YELLOW}--docker-hostname${NC}                 \t set hostname for docker image (default: docker_\$(hostname))
+  ${YELLOW}--docker-run${NC}                      \t run docker with gpu support
+  ${YELLOW}--docker-run-cpu${NC}                  \t run docker without gpu support
 "
 
 HELP="$DESCRIPTION$OPTIONS"
 COMPILE=""
+DOCKERRUN=1
+DOCKERBUILD=1
+DOCKERHOST=docker_$(hostname)
+DOCKERRUNCPU=1
 PROCS=-1
 while [[ $# -gt 0 ]]
 do
   key="$1"
   case $key in
-    --gp|--gpu_profile|--artss_gpu_profile)
-      COMPILE="$COMPILE artss_gpu_profile "
-      GPU=0
-      shift
-      ;;
     -c|--cuda)
       CUDA_VERSION="$2"
       shift
@@ -85,8 +91,30 @@ do
       BUILDTYPE=Debug 
       shift
       ;;
+    --docker-build)
+      DOCKERBUILD=0
+      shift
+      ;;
+    --docker-hostname)
+      DOCKERHOST=$2
+      shift
+      shift
+      ;;
+    --docker-run)
+      DOCKERRUN=0
+      shift
+      ;;
+    --docker-run-cpu)
+      DOCKERRUNCPU=0
+      shift
+      ;;
     -g|--gpu|--artss_gpu)
       COMPILE="$COMPILE artss_gpu" 
+      GPU=0
+      shift
+      ;;
+    --gb|--gpu_benchmark|--artss_gpu_benchmark)
+      COMPILE="$COMPILE artss_gpu_benchmark "
       GPU=0
       shift
       ;;
@@ -118,8 +146,8 @@ do
       GPU=0
       shift
       ;;
-    --mp|--multicore_profile|--artss_multicore_cpu_profile)
-      COMPILE="$COMPILE artss_multicore_cpu_profile"
+    --mb|--multicore_benchmark|--artss_multicore_cpu_benchmark)
+      COMPILE="$COMPILE artss_multicore_cpu_benchmark"
       GPU=0
       shift
       ;;
@@ -136,8 +164,8 @@ do
       COMPILE="$COMPILE artss_serial"
       shift
       ;;
-    --sp|--serial_profile|--artss_serial_profile)
-      COMPILE="$COMPILE artss_serial_profile"
+    --sb|--serial_benchmark|--artss_serial_benchmark)
+      COMPILE="$COMPILE artss_serial_benchmark"
       shift
       ;;
     --jureca)
@@ -155,6 +183,28 @@ do
       ;;
   esac
 done
+
+if [ $DOCKERBUILD -eq 0 ]
+then
+  cd docker
+  docker build -t artss_docker .
+  cd ..
+fi
+
+if [ $DOCKERRUN -eq 0 ]
+then
+  docker run --gpus all -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker
+fi
+
+if [ $DOCKERRUNCPU -eq 0 ]
+then
+  docker run -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker # /bin/bash -c "./compile.sh"
+fi
+
+if [ $DOCKERRUN -eq 0 -o $DOCKERRUNCPU -eq 0 -o $DOCKERBUILD -eq 0 ]
+then
+  exit
+fi
 
 if [[ $JURECA -eq 1 && $P100 -eq 1 ]]
 then

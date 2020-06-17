@@ -5,10 +5,6 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 
-#include <spdlog/spdlog.h>
-
-#include <iostream>
-
 #include "PressureSolver.h"
 
 
@@ -37,15 +33,16 @@ void PressureSolver::DoStep(real t, bool sync) {
 // 1. Solve pressure Poisson equation
 
     // local variables and parameters for GPU
-    auto pi = SolverI::p;
-    auto rhsi = SolverI::rhs;
-    // auto d_p = p->data;
-    // auto d_rhs = rhs->data;
-    // size_t bsize = Domain::getInstance()->GetSize(p->GetLevel());
+    auto p = ISolver::p;
+    auto rhs = ISolver::rhs;
+    auto d_p = p->data;
+    auto d_rhs = rhs->data;
+
+    size_t bsize = Domain::getInstance()->GetSize(p->GetLevel());
 
 #pragma acc data present(d_p[:bsize], d_rhs[:bsize])
     {
-        pres->pressure(pi, rhsi, t, sync);
+        pres->pressure(p, rhs, t, sync);
     }  // end data
 }
 

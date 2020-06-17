@@ -95,37 +95,18 @@ typedef const real* const aliased_read_ptr;
 ///
 /// \def END_FOR_ACC
 /// \brief End the parallelized independent nested \c for -loop
-// ****************************************************************************
+// ***************************************************************************************
 
-inline size_t IX(size_t i, size_t j, size_t k, size_t nx, size_t ny) {
-    return i + nx*j + nx*ny*k;
-}
-inline size_t getCoordinateI(size_t idx, size_t Nx, size_t Ny, size_t j, size_t k) {
-    return (idx - k * Nx * Ny - j * Nx);
-}
-inline size_t getCoordinateJ(size_t idx, size_t Nx, size_t Ny, size_t k) {
-    return ((idx - k * Nx * Ny) / Nx);
-}
-inline size_t getCoordinateK(size_t idx, size_t Nx, size_t Ny) {
-    return (idx / (Nx * Ny));
-}
+#define IX(i,j,k,Nx,Ny) ((i) + (Nx)*(j) + (Nx)*(Ny)*(k)) // row-major index for one dimensional arrays (i=0..Nx-1 columns, j=0..Ny-1 rows, k = 0...Nz-1)
+#define getCoordinateI(idx,Nx,Ny,j,k) (idx - k * Nx * Ny - j * Nx)
+#define getCoordinateJ(idx,Nx,Ny,k) ((idx - k * Nx * Ny) / Nx)
+#define getCoordinateK(idx,Nx,Ny)(idx / (Nx * Ny))
 
 
-inline real xi(size_t i, real x, real dx) {
-    return x + dx*(static_cast<real>(i)-0.5);
-}
-
-inline real yj(size_t j, real y, real dy) {
-    return y + dy*(static_cast<real>(j)-0.5);
-}
-
-inline real zk(size_t k, real z, real dz) {
-    return z + dz*(static_cast<real>(k)-0.5);
-}
-
-inline real tn(size_t n, real dt) {
-    return static_cast<real>(n) * dt;
-}
+#define xi(i,x,dx) ((x) + ((i)-0.5)*(dx)) // physical xcoords at midpoints calculated by index i=0..Nx-1
+#define yj(j,y,dy) ((y) + ((j)-0.5)*(dy)) // physical ycoords at midpoints calculated by index j=0..Ny-1
+#define zk(k,z,dz) ((z) + ((k)-0.5)*(dz)) // physical zcoords at midpoints calculated by index k=0..Nz-1
+#define tn(n, dt) ((n)*(dt))			  // simulation time calculated by time steps n = 0...Nt
 
 #define FOR_EACH_CELL(Nx, Ny, Nz) for (size_t k=0; k<Nz; k++) {\
                         for (size_t j=0; j<Ny; j++) {\

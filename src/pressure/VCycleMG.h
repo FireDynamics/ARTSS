@@ -8,14 +8,14 @@
 #define ARTSS_PRESSURE_VCYCLEMG_H_
 
 #include <vector>
-#include "../interfaces/PressureI.h"
+#include "../interfaces/IPressure.h"
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 #ifndef PROFILING
 #include <spdlog/logger.h>
 #endif
 
-class VCycleMG: public PressureI{
+class VCycleMG: public IPressure{
 public:
 	VCycleMG(Field* out, Field* b);
 	~VCycleMG() override;

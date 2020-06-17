@@ -14,44 +14,29 @@
 #include <string>
 
 #include "../analysis/Solution.h"
-#include "../interfaces/SolverI.h"
+#include "../interfaces/ISolver.h"
 
 class Visual {
- public:
-    Visual();
-    void Visualize(SolverI* solver, real t, const char *fname);
+public:
+	Visual();
+	void Visualize(ISolver* solver, real t, const char *fname);
 
- private:
-    void vtkWriteStep(
-            const char *fname, int n, read_ptr u, read_ptr v, read_ptr w,
-            read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s,
-            read_ptr nu_t, read_ptr S_T, read_ptr ua, read_ptr va, read_ptr wa,
-            read_ptr pa, read_ptr Ta);
+private:
+	void vtkWriteStep(const char *fname, int n, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t, read_ptr S_T, read_ptr ua, read_ptr va, read_ptr wa, read_ptr pa, read_ptr Ta);
+  std::string RemoveExtension(const std::string& filename);
+	void vtkPrepareAndWrite(const char *fname, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t, read_ptr S_T);
+	void vtkPrepareAndWrite(const char *fname, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr T, read_ptr s);
+	void csvPrepareAndWrite(std::string fname, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t, read_ptr S_T);
+	void csvPrepareAndWrite(std::string fname, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr T, read_ptr s);
 
-    std::string RemoveExtension(const std::string& filename);
-    void vtkPrepareAndWrite(
-            const char *fname, read_ptr u, read_ptr v, read_ptr w, read_ptr p,
-            read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t,
-            read_ptr S_T);
-    void vtkPrepareAndWrite(
-            const char *fname, read_ptr u, read_ptr v, read_ptr w, read_ptr p,
-            read_ptr T, read_ptr s);
-    void csvPrepareAndWrite(
-            std::string fname, read_ptr u, read_ptr v, read_ptr w, read_ptr p,
-            read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t,
-            read_ptr S_T);
-    void csvPrepareAndWrite(
-            std::string fname, read_ptr u, read_ptr v, read_ptr w, read_ptr p,
-            read_ptr T, read_ptr s);
+	int m_nx = 0, m_ny = 0, m_nz = 0;					// integer due to visit_writer boundary!
+	int m_Nx = 0, m_Ny = 0, m_Nz = 0, m_size = 0;
+	real m_x1, m_y1, m_z1;
+	real m_X1, m_Y1, m_Z1;
+	real m_dx, m_dy, m_dz;
+	int m_Nt;
 
-    int m_nx = 0, m_ny = 0, m_nz = 0;  // integer due to visit_writer boundary!
-    int m_Nx = 0, m_Ny = 0, m_Nz = 0, m_size = 0;
-    real m_x1, m_y1, m_z1;
-    real m_X1, m_Y1, m_Z1;
-    real m_dx, m_dy, m_dz;
-    int m_Nt;
-
-    Solution m_solution;
+	Solution m_solution;
 };
 
 #endif /* VISUAL_H_ */

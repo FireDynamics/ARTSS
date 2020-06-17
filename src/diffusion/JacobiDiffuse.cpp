@@ -17,7 +17,7 @@
 #include "../utility/Utility.h"
 
 JacobiDiffuse::JacobiDiffuse() {
-#ifndef PROFILING
+#ifndef BENCHMARKING
     m_logger = Utility::createLogger(typeid(this).name());
 #endif
     auto params = Parameters::getInstance();
@@ -136,9 +136,9 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 #pragma acc wait
         }
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
         m_logger->info("Number of iterations: {}", it);
-        m_logger->info("Jacobi ||res|| = {:.5e}", res);
+        m_logger->info("Jacobi ||res|| = {:0.5e}", res);
 #endif
     }  // end data region
 }
@@ -251,9 +251,9 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
         if (sync) {
 #pragma acc wait
         }
-#ifndef PROFILING
+#ifndef BENCHMARKING
         m_logger->info("Number of iterations: {}", it);
-        m_logger->info("Jacobi ||res|| = {.5e}", res);
+        m_logger->info("Jacobi ||res|| = {:0.5e}", res);
 #endif
     }  // end data region
 }

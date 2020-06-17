@@ -1,8 +1,8 @@
-/// \file 		Obstacle.h
-/// \brief 		Data class of obstacle object
-/// \date 		Oct 01, 2019
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       Obstacle.cpp
+/// \brief      Data class of obstacle object
+/// \date       Oct 01, 2019
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
 #include <vector>
@@ -11,6 +11,7 @@
 #include "../utility/Utility.h"
 
 Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
+    // TODO(n16h7 hunt3r) add logger
     Domain *domain = Domain::getInstance();
 
     real dx = domain->Getdx();
@@ -25,22 +26,21 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
     real Y1 = domain->GetY1();
     real Z1 = domain->GetZ1();
 
+    // TODO(n16h7 hunt3r) add logger
     real ox1 = matchGrid(x1, dx, X1);
     real ox2 = matchGrid(x2, dx, X1);
     real oy1 = matchGrid(y1, dy, Y1);
     real oy2 = matchGrid(y2, dy, Y1);
     real oz1 = matchGrid(z1, dz, Z1);
     real oz2 = matchGrid(z2, dz, Z1);
-    real lox = fabs(ox2 - ox1);
-    real loy = fabs(oy2 - oy1);
-    real loz = fabs(oz2 - oz1);
-    m_strideX = static_cast<size_t>(round(lox * rdx));
-    m_strideY = static_cast<size_t>(round(loy * rdy));
-    m_strideZ = static_cast<size_t>(round(loz * rdz));
 
     m_i1 = static_cast<size_t>((ox1 - X1) * rdx + 1);  // plus 1 for ghost cell
     m_j1 = static_cast<size_t>((oy1 - Y1) * rdy + 1);
     m_k1 = static_cast<size_t>((oz1 - Z1) * rdz + 1);
+
+    m_i2 = ((ox2 - X1) * rdx);
+    m_j2 = ((oy2 - Y1) * rdy);
+    m_k2 = ((oz2 - Z1) * rdz);
 
     init(0);
 }
@@ -48,14 +48,14 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
 
 Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level) {
     m_level = level;
-    m_strideX = coords_i2 - coords_i1 + 1;
-    m_strideY = coords_j2 - coords_j1 + 1;
-    m_strideZ = coords_k2 - coords_k1 + 1;
-
 
     m_i1 = coords_i1;
     m_j1 = coords_j1;
     m_k1 = coords_k1;
+
+    m_i2 = coords_i2;
+    m_j2 = coords_j2;
+    m_k2 = coords_k2;
 
     init(level);
 }
@@ -73,15 +73,20 @@ void Obstacle::init(size_t level) {
     Domain *domain = Domain::getInstance();
     size_t Nx = domain->GetNx(level);
     size_t Ny = domain->GetNy(level);
-    m_size_obstacleList = m_strideX * m_strideY * m_strideZ;
+
+    size_t strideX = getStrideX();
+    size_t strideY = getStrideY();
+    size_t strideZ = getStrideZ();
+
+    m_size_obstacleList = strideX * strideY * strideZ;
     m_obstacleList = new size_t[m_size_obstacleList];
 
-    m_size_obstacleFront = m_strideY * m_strideX;
-    m_size_obstacleBack = m_strideY * m_strideX;
-    m_size_obstacleBottom = m_strideZ * m_strideX;
-    m_size_obstacleTop = m_strideZ * m_strideX;
-    m_size_obstacleLeft = m_strideZ * m_strideY;
-    m_size_obstacleRight = m_strideZ * m_strideY;
+    m_size_obstacleFront = strideY * strideX;
+    m_size_obstacleBack = strideY * strideX;
+    m_size_obstacleBottom = strideZ * strideX;
+    m_size_obstacleTop = strideZ * strideX;
+    m_size_obstacleLeft = strideZ * strideY;
+    m_size_obstacleRight = strideZ * strideY;
     removeCellsAtBoundary(level);
 
     m_obstacleFront = new size_t[m_size_obstacleFront];
@@ -117,15 +122,15 @@ Obstacle::~Obstacle() {
 /// \brief  Creates lists of indices of obstacle cells
 // ***************************************************************************************
 void Obstacle::createObstacle(size_t Nx, size_t Ny) {
-    size_t i2 = getCoordinates_i2();
-    size_t j2 = getCoordinates_j2();
-    size_t k2 = getCoordinates_k2();
+    size_t strideX = getStrideX();
+    size_t strideY = getStrideY();
+    size_t strideZ = getStrideZ();
 
     size_t counter = 0;
     //fill obstacleList with corresponding indices
-    for (size_t k = m_k1; k <= k2; ++k) {
-        for (size_t j = m_j1; j <= j2; ++j) {
-            for (size_t i = m_i1; i <= i2; ++i) {
+    for (size_t k = m_k1; k <= m_k2; ++k) {
+        for (size_t j = m_j1; j <= m_j2; ++j) {
+            for (size_t i = m_i1; i <= m_i2; ++i) {
                 size_t idx = IX(i, j, k, Nx, Ny);
                 *(m_obstacleList + counter) = idx;
                 counter++;
@@ -137,19 +142,19 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
     // FRONT and BACK of OBSTACLE
     // fill oFront list with front indices of obstacle and oBack list with back indices of obstacle
     if (m_size_obstacleFront > 0) {
-        for (size_t j = 0; j < m_strideY; ++j) {
-            for (size_t i = 0; i < m_strideX; ++i) {
-                size_t index = i + m_strideX * j;
-                size_t idx_front = IX(i, j, 0, m_strideX, m_strideY);
+        for (size_t j = 0; j < strideY; ++j) {
+            for (size_t i = 0; i < strideX; ++i) {
+                size_t index = i + strideX * j;
+                size_t idx_front = IX(i, j, 0, strideX, strideY);
                 *(m_obstacleFront + index) = m_obstacleList[idx_front];
             }
         }
     }
     if (m_size_obstacleBack > 0) {
-        for (size_t j = 0; j < m_strideY; ++j) {
-            for (size_t i = 0; i < m_strideX; ++i) {
-                size_t index = i + m_strideX * j;
-                size_t idx_back = IX(i, j, m_strideZ - 1, m_strideX, m_strideY);
+        for (size_t j = 0; j < strideY; ++j) {
+            for (size_t i = 0; i < strideX; ++i) {
+                size_t index = i + strideX * j;
+                size_t idx_back = IX(i, j, strideZ - 1, strideX, strideY);
                 *(m_obstacleBack + index) = m_obstacleList[idx_back];
             }
         }
@@ -158,19 +163,19 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
     // TOP and BOTTOM of OBSTACLE
     // fill m_obstacleTop list with top indices of obstacle and oBottom list with bottom indices of obstacle
     if (m_size_obstacleBottom > 0) {
-        for (size_t k = 0; k < m_strideZ; ++k) {
-            for (size_t i = 0; i < m_strideX; ++i) {
-                size_t index = i + m_strideX * k;
-                size_t idx_bottom = IX(i, 0, k, m_strideX, m_strideY);
+        for (size_t k = 0; k < strideZ; ++k) {
+            for (size_t i = 0; i < strideX; ++i) {
+                size_t index = i + strideX * k;
+                size_t idx_bottom = IX(i, 0, k, strideX, strideY);
                 *(m_obstacleBottom + index) = m_obstacleList[idx_bottom];
             }
         }
     }
     if (m_size_obstacleTop > 0) {
-        for (size_t k = 0; k < m_strideZ; ++k) {
-            for (size_t i = 0; i < m_strideX; ++i) {
-                size_t index = i + m_strideX * k;
-                size_t idx_top = IX(i, m_strideY - 1, k, m_strideX, m_strideY);
+        for (size_t k = 0; k < strideZ; ++k) {
+            for (size_t i = 0; i < strideX; ++i) {
+                size_t index = i + strideX * k;
+                size_t idx_top = IX(i, strideY - 1, k, strideX, strideY);
                 *(m_obstacleTop + index) = m_obstacleList[idx_top];
             }
         }
@@ -179,19 +184,19 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
     // LEFT and RIGHT of OBSTACLE
     // fill oLeft list with left indices of obstacle and oRight list with right indices of obstacle
     if (m_size_obstacleLeft > 0) {
-        for (size_t k = 0; k < m_strideZ; ++k) {
-            for (size_t j = 0; j < m_strideY; ++j) {
-                size_t index = j + m_strideY * k;
-                size_t idx_left = IX(0, j, k, m_strideX, m_strideY);
+        for (size_t k = 0; k < strideZ; ++k) {
+            for (size_t j = 0; j < strideY; ++j) {
+                size_t index = j + strideY * k;
+                size_t idx_left = IX(0, j, k, strideX, strideY);
                 *(m_obstacleLeft + index) = m_obstacleList[idx_left];
             }
         }
     }
     if (m_size_obstacleRight > 0) {
-        for (size_t k = 0; k < m_strideZ; ++k) {
-            for (size_t j = 0; j < m_strideY; ++j) {
-                size_t index = j + m_strideY * k;
-                size_t idx_right = IX(m_strideX - 1, j, k, m_strideX, m_strideY);
+        for (size_t k = 0; k < strideZ; ++k) {
+            for (size_t j = 0; j < strideY; ++j) {
+                size_t index = j + strideY * k;
+                size_t idx_right = IX(strideX - 1, j, k, strideX, strideY);
                 *(m_obstacleRight + index) = m_obstacleList[idx_right];
             }
         }
@@ -199,12 +204,12 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
 
     //// INNER of OBSTACLE
     //// fill oInner list with inner indices of obstacles
-    //for (size_t k = 1; k < m_strideZ - 1; ++k) {
-    //    for (size_t j = 1; j < m_strideY - 1; ++j) {
-    //        for (size_t i = 1; i < m_strideX - 1; ++i) {
-    //            size_t index = (i - 1) + (m_strideX - 2) * (j - 1) + (m_strideX - 2) * (m_strideY - 2) * (k - 1);
+    //for (size_t k = 1; k < strideZ - 1; ++k) {
+    //    for (size_t j = 1; j < strideY - 1; ++j) {
+    //        for (size_t i = 1; i < strideX - 1; ++i) {
+    //            size_t index = (i - 1) + (strideX - 2) * (j - 1) + (strideX - 2) * (strideY - 2) * (k - 1);
 
-    //            size_t idx = IX(i, j, k, m_strideX, m_strideY);
+    //            size_t idx = IX(i, j, k, strideX, strideY);
     //            *(m_obstacleInner + index) = m_obstacleList[idx];
     //        }
     //    }
@@ -216,14 +221,15 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
 /// \brief  Print obstacle infos
 // ***************************************************************************************
 void Obstacle::print() {
-    size_t i2 = getCoordinates_i2();
-    size_t j2 = getCoordinates_j2();
-    size_t k2 = getCoordinates_k2();
+    size_t strideX = getStrideX();
+    size_t strideY = getStrideY();
+    size_t strideZ = getStrideZ();
+
     m_logger->info("-- Obstacle");
-    m_logger->info("\t strides (x y z): {} {} {}", m_strideX, m_strideY, m_strideZ);
+    m_logger->info("\t strides (x y z): {} {} {}", strideX, strideY, strideZ);
     m_logger->info("\t size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}", m_size_obstacleFront, m_size_obstacleBack, m_size_obstacleBottom, m_size_obstacleTop, m_size_obstacleLeft, m_size_obstacleRight);
     m_logger->info("\t size of Obstacle: {}", m_size_obstacleList);
-    m_logger->info("\t coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, i2, m_j1, j2, m_k1, k2);
+    m_logger->info("\t coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, m_i2, m_j1, m_j2, m_k1, m_k2);
 }
 
 //======================================== Print ====================================
@@ -330,18 +336,6 @@ bool Obstacle::isObstacleCell(size_t i, size_t j, size_t k) {
     size_t j2 = getCoordinates_j2();
     size_t k2 = getCoordinates_k2();
     return m_i1 <= i && i <= i2 && m_j1 <= j && j <= j2 && m_k1 <= k && k <= k2;
-}
-
-size_t Obstacle::getCoordinates_i2() {
-    return m_i1 + m_strideX - 1;
-}
-
-size_t Obstacle::getCoordinates_j2() {
-    return m_j1 + m_strideY - 1;
-}
-
-size_t Obstacle::getCoordinates_k2() {
-    return m_k1 + m_strideZ - 1;
 }
 
 //======================================== Match grid ====================================

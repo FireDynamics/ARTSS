@@ -9,7 +9,7 @@
 
 
 #include "../Field.h"
-#include "../interfaces/AdaptionFunctionI.h"
+#include "../interfaces/IAdaptionFunction.h"
 #include "../utility/GlobalMacrosTypes.h"
 #ifndef PROFILING
 #include <spdlog/logger.h>
@@ -55,7 +55,7 @@ enum VectorFieldsTypes : size_t {
 
 class Field;
 
-class AdaptionFunctionI;
+class IAdaptionFunction;
 
 class Adaption {
 public:
@@ -122,7 +122,7 @@ private:
 
     void applyChanges();
 
-    AdaptionFunctionI *func;
+    IAdaptionFunction *func;
     bool m_dynamic, m_dynamic_end;
     bool m_reduction;
     bool m_hasDataExtraction;

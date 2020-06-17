@@ -11,7 +11,7 @@
 
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
-#include "SourceI.h"
+#include "ISource.h"
 
 #ifndef PROFILING
 #include <spdlog/logger.h>
@@ -31,135 +31,131 @@ struct SolverTypes {
     inline static const std::string PressureSolver = "PressureSolver";
 };
 
-class SolverI {
- public:
-    SolverI();
-    virtual ~SolverI();
+class ISolver {
+public:
+    ISolver();
+    virtual ~ISolver();
 
-    virtual void DoStep(real t, bool sync) = 0;
+    virtual void DoStep(real t, bool sync)=0;
 
     void SetUpBoundary(bool sync = true);
     void UpdateData(bool sync = true);
     void UpdateSources(real t, bool sync);
 
     // Getter
-    return_ptr GetU() {
+    return_ptr GetU() const {
         return u->data;
     }
-    return_ptr GetV() {
+    return_ptr GetV() const {
         return v->data;
     }
-    return_ptr GetW() {
+    return_ptr GetW() const {
         return w->data;
     }
-    return_ptr GetU0() {
+    return_ptr GetU0() const {
         return u0->data;
     }
-    return_ptr GetV0() {
+    return_ptr GetV0() const {
         return v0->data;
     }
-    return_ptr GetW0() {
+    return_ptr GetW0() const {
         return w0->data;
     }
-    return_ptr GetU_tmp() {
+    return_ptr GetU_tmp() const {
         return u_tmp->data;
     }
-    return_ptr GetV_tmp() {
+    return_ptr GetV_tmp() const {
         return v_tmp->data;
     }
-    return_ptr GetW_tmp() {
+    return_ptr GetW_tmp() const {
         return w_tmp->data;
     }
-    return_ptr GetP() {
+    return_ptr GetP() const {
         return p->data;
     }
-    return_ptr GetP0() {
+    return_ptr GetP0() const {
         return p0->data;
     }
-    return_ptr GetRhs() {
+    return_ptr GetRhs() const {
         return rhs->data;
     }
-    return_ptr GetT() {
+    return_ptr GetT() const {
         return T->data;
     }
-    return_ptr GetT0() {
+    return_ptr GetT0() const {
         return T0->data;
     }
-    return_ptr GetT_tmp() {
+    return_ptr GetT_tmp() const {
         return T_tmp->data;
     }
-    return_ptr GetC() {
+    return_ptr GetC() const {
         return C->data;
     }
-    return_ptr GetC0() {
+    return_ptr GetC0() const {
         return C0->data;
     }
-    return_ptr GetC_tmp() {
+    return_ptr GetC_tmp() const {
         return C_tmp->data;
     }
 
-    return_ptr GetSight() {
+    return_ptr GetSight() const {
         return sight->data;
     }
 
-    return_ptr GetNu_t() {
+    return_ptr GetNu_t() const {
             return nu_t->data;
     }
 
-    return_ptr GetS_T() {
+    return_ptr GetS_T() const {
         return S_T->data;
     }
 
-    Field* u, *v, *w;        // velocities
+    Field* u, *v, *w;               // velocities
     Field* u0, *v0, *w0;
     Field* u_tmp, *v_tmp, *w_tmp;
     Field* nu_t;
     Field* kappa_t;
     Field* gamma_t;
 
-    Field* p;                // pressure
+    Field* p;                             // pressure
     Field* p0;
     Field* rhs;
 
-    Field* T;                // temperature
+    Field* T;                             // temperature
     Field* T0;
     Field* T_tmp;
     Field* T_a;
 
-    Field* C;                // smoke concentration
+    Field* C;                             // smoke concentration
     Field* C0;
     Field* C_tmp;
 
-    Field* f_x, *f_y, *f_z;  // sources
-    Field* S_T;              // temperature
-    Field* S_C;              // smoke concentration
+    Field* f_x, *f_y, *f_z;     // sources
+    Field* S_T;                             // temperature
+    Field* S_C;                             // smoke concentration
 
     Field* sight;
 
-    SourceI* sou_temp;
-    SourceI* sou_vel;
-    SourceI* sou_con;
+    ISource* sou_temp;
+    ISource* sou_vel;
+    ISource* sou_con;
 
- protected:
+protected:
     void SetUp();
     void Init();
     static void Init_c(Field* out, real in);
     static void Init_f(Field* out, const real* in);
-    static void CoupleVector(
-            const Field* a, Field* a0, Field* a_tmp, const Field* b, Field* b0,
-            Field* b_tmp, const Field* c, Field* c0, Field* c_tmp, bool sync);
-    static void CoupleScalar(
-            const Field* a, Field* a0, Field* a_tmp,
-            bool sync);
+    static void CoupleVector(const Field* a, Field* a0, Field* a_tmp, const Field* b, Field* b0, Field* b_tmp, const Field* c, Field* c0, Field* c_tmp, bool sync);
+    static void CoupleScalar(const Field* a, Field* a0, Field* a_tmp, bool sync);
 
- private:
-#ifndef PROFILING
-    std::shared_ptr<spdlog::logger> m_logger;
-#endif
+private:
     std::string m_string_solver;
     void ForceSource();
     void TemperatureSource();
     void MomentumSource();
+#ifndef PROFILING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ATSS_INTERFACES_SOLVERI_H_ */

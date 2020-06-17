@@ -18,7 +18,7 @@ Boundary::Boundary(size_t level) {
     init(0);
     innerCells();
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
     //print(0);
     control(0);
 #endif
@@ -28,7 +28,7 @@ Boundary::Boundary(Obstacle **obstacleList, size_t numberOfObstacles, size_t siz
     init(size_obstacles);
     innerCells(obstacleList, numberOfObstacles);
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
     //print(size_obstacles);
     control(size_obstacles);
 #endif

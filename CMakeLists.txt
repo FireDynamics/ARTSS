@@ -167,7 +167,6 @@ set(SOURCE_FILES
         "src/adaption/Layers.cpp"
         "src/adaption/Vortex.cpp"
 
-        "src/advection/ExplicitAdvect.cpp"
         "src/advection/SLAdvect.cpp"
 
         "src/analysis/Analysis.cpp"
@@ -188,9 +187,9 @@ set(SOURCE_FILES
         "src/diffusion/ExplicitDiffuse.cpp"
         "src/diffusion/JacobiDiffuse.cpp"
 
-        "src/interfaces/PressureI.cpp"
-        "src/interfaces/SolverI.cpp"
-        "src/interfaces/SourceI.cpp"
+        "src/interfaces/IPressure.cpp"
+        "src/interfaces/ISolver.cpp"
+        "src/interfaces/ISource.cpp"
 
         "src/pressure/VCycleMG.cpp"
 
@@ -232,7 +231,6 @@ set(HEADER_FILES
         "src/adaption/Layers.h"
         "src/adaption/Vortex.h"
 
-        "src/advection/ExplicitAdvect.h"
         "src/advection/SLAdvect.h"
 
         "src/boundary/Boundary.h"
@@ -250,13 +248,13 @@ set(HEADER_FILES
         "src/diffusion/ExplicitDiffuse.h"
         "src/diffusion/JacobiDiffuse.h"
 
-        "src/interfaces/AdaptionFunctionI.h"
-        "src/interfaces/advectionI.h"
-        "src/interfaces/diffusionI.h"
-        "src/interfaces/PressureI.h"
-        "src/interfaces/SolverI.h"
-        "src/interfaces/SourceI.h"
-        "src/interfaces/TurbulenceI.h"
+        "src/interfaces/IAdaptionFunction.h"
+        "src/interfaces/IAdvection.h"
+        "src/interfaces/IDiffusion.h"
+        "src/interfaces/IPressure.h"
+        "src/interfaces/ISolver.h"
+        "src/interfaces/ISource.h"
+        "src/interfaces/ITurbulence.h"
 
         "src/pressure/VCycleMG.h"
 
@@ -340,6 +338,17 @@ spdlog_enable_warnings(artss_multicore_cpu_profile)
 spdlog_enable_warnings(artss_gpu)
 spdlog_enable_warnings(artss_gpu_profile)
 
+add_executable( artss_serial_benchmark ${SOURCE_FILES} src/main.cpp  )
+set_target_properties( artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX" )
+target_link_libraries( artss_serial_benchmark  )
+
+add_executable( artss_multicore_cpu_benchmark ${SOURCE_FILES} src/main.cpp  )
+set_target_properties( artss_multicore_cpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore" )
+target_link_libraries( artss_multicore_cpu_benchmark  )
+
+add_executable( artss_gpu_benchmark ${SOURCE_FILES} src/main.cpp  )
+set_target_properties( artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
+target_link_libraries( artss_gpu_benchmark  )
 
 enable_testing()
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests DESTINATION ${CMAKE_BINARY_DIR} )
