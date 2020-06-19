@@ -5,7 +5,7 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
-#include "interfaces/SolverI.h"
+#include "interfaces/ISolver.h"
 #include "solver/DiffusionTurbSolver.h"
 #include "solver/DiffusionSolver.h"
 #include "solver/AdvectionSolver.h"
@@ -21,7 +21,7 @@
 #include "utility/tinyxml2.h"
 #include "utility/Parameters.h"
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
 #include "analysis/Analysis.h"
 #include "utility/Visual.h"
 #endif
@@ -40,7 +40,7 @@ int main(int argc, const char** argv) {
     params->parse(XMLfilename);
 
   // Solver
-	SolverI* solver;
+	ISolver* solver;
   std::string string_solver = params->get("solver/description");
 	if 		  (string_solver == SolverTypes::DiffusionSolver) 			   solver=new DiffusionSolver();
 	else if (string_solver == SolverTypes::AdvectionSolver) 			   solver=new AdvectionSolver();
@@ -61,7 +61,7 @@ int main(int argc, const char** argv) {
 	}
 
 // 1. Visualize and test initial conditions
-#ifndef PROFILING
+#ifndef BENCHMARKING
 	// Solution
 	Analysis ana;
 	ana.Analyse(solver, 0.);
@@ -83,7 +83,7 @@ int main(int argc, const char** argv) {
 	ti.run();
 
 // 3. Compute analytical solution and compare
-#ifndef PROFILING
+#ifndef BENCHMARKING
 	real t_end = params->getReal("physical_parameters/t_end");
 	ana.Analyse(solver, t_end);
 #endif

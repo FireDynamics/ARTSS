@@ -9,12 +9,12 @@
 #define VISUAL_H_
 
 #include "../analysis/Solution.h"
-#include "../interfaces/SolverI.h"
+#include "../interfaces/ISolver.h"
 
 class Visual {
 public:
 	Visual();
-	void Visualize(SolverI* solver, real t, const char *fname);
+	void Visualize(ISolver* solver, real t, const char *fname);
 
 private:
 	void vtkWriteStep(const char *fname, int n, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t, read_ptr S_T, read_ptr ua, read_ptr va, read_ptr wa, read_ptr pa, read_ptr Ta);

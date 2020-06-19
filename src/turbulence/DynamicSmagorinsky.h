@@ -7,10 +7,10 @@
 #ifndef ARTSS_TURBULENCE_DYNAMICSMAGORINSKY_H_
 #define ARTSS_TURBULENCE_DYNAMICSMAGORINSKY_H_
 
-#include "../interfaces/TurbulenceI.h"
+#include "../interfaces/ITurbulence.h"
 #include "../Field.h"
 
-class DynamicSmagorinsky: public TurbulenceI {
+class DynamicSmagorinsky: public ITurbulence {
 public:
 	DynamicSmagorinsky();
 	~DynamicSmagorinsky() override;

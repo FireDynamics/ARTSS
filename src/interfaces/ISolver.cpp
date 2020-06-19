@@ -7,16 +7,16 @@
 #include <cmath>
 #include <iostream>
 
-#include "SolverI.h"
+#include "ISolver.h"
 #include "../utility/Parameters.h"
 #include "../Functions.h"
-#include "SourceI.h"
+#include "ISource.h"
 #include "../source/ExplicitEulerSource.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 #include "../solver/SolverSelection.h"
 
-SolverI::SolverI() {
+ISolver::ISolver() {
     auto params = Parameters::getInstance();
 
     // Variables
@@ -117,7 +117,7 @@ SolverI::SolverI() {
 
 // ==================================== Destructor ====================================
 // ***************************************************************************************
-SolverI::~SolverI() {
+ISolver::~ISolver() {
     delete u;
     delete v;
     delete w;
@@ -175,7 +175,7 @@ SolverI::~SolverI() {
 // ***************************************************************************************
 /// \brief  initializes numerical and temporary solution
 // ***************************************************************************************
-void SolverI::SetUp() {
+void ISolver::SetUp() {
     std::cout << "Start initializing....\n" << std::endl;
     //TODO Logger
 
@@ -201,7 +201,7 @@ void SolverI::SetUp() {
 // ***************************************************************************************
 /// \brief  initializes variables \a u, \a v, \a p, \a d, \a T at \f$ t=0 \f$
 // ***************************************************************************************
-void SolverI::Init() {
+void ISolver::Init() {
 
     auto params = Parameters::getInstance();
     std::string string_init_usr_fct = params->get("initial_conditions/usr_fct");
@@ -411,7 +411,7 @@ void SolverI::Init() {
                 Functions::Uniform(f_z, val_z);
             }
         } else {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Initial values all set to zero!" << std::endl;
             //TODO Logger
 #endif
@@ -435,7 +435,7 @@ void SolverI::Init() {
 /// \param	out		output pointer
 /// \param	in		input pointer
 // ***************************************************************************************
-void SolverI::Init_f(Field *out, const real *in) {
+void ISolver::Init_f(Field *out, const real *in) {
 
     auto boundary = BoundaryController::getInstance();
 
@@ -469,7 +469,7 @@ void SolverI::Init_f(Field *out, const real *in) {
 /// \param	out		output pointer
 /// \param	in		constant real value
 // ***************************************************************************************
-void SolverI::Init_c(Field *out, const real in) {
+void ISolver::Init_c(Field *out, const real in) {
 
     auto boundary = BoundaryController::getInstance();
 
@@ -502,7 +502,7 @@ void SolverI::Init_c(Field *out, const real in) {
 /// \brief  initializes boundary cells
 /// \param  sync	synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SolverI::SetUpBoundary(bool sync) {
+void ISolver::SetUpBoundary(bool sync) {
 
     auto boundary = BoundaryController::getInstance();
 
@@ -542,7 +542,7 @@ void SolverI::SetUpBoundary(bool sync) {
 /// \param  c_tmp	temporal field in z- direction
 /// \param  sync	synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SolverI::CoupleVector(const Field *a, Field *a0, Field *a_tmp, const Field *b, Field *b0, Field *b_tmp, const Field *c, Field *c0, Field *c_tmp, bool sync) {
+void ISolver::CoupleVector(const Field *a, Field *a0, Field *a_tmp, const Field *b, Field *b0, Field *b_tmp, const Field *c, Field *c0, Field *c_tmp, bool sync) {
 
     // local variables and parameters for GPU
     auto d_a = a->data;
@@ -620,7 +620,7 @@ void SolverI::CoupleVector(const Field *a, Field *a0, Field *a_tmp, const Field 
 /// \param  a_tmp	temporal field in x- direction
 /// \param  sync	synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SolverI::CoupleScalar(const Field *a, Field *a0, Field *a_tmp, bool sync) {
+void ISolver::CoupleScalar(const Field *a, Field *a0, Field *a_tmp, bool sync) {
 
     // local variables and parameters for GPU
     auto d_a = a->data;
@@ -675,7 +675,7 @@ void SolverI::CoupleScalar(const Field *a, Field *a0, Field *a_tmp, bool sync) {
 /// \brief  Updates variables for the next iteration step or time dependent parameters such as temperature source function
 /// \param  sync	synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SolverI::UpdateData(bool sync) {
+void ISolver::UpdateData(bool sync) {
 
     // local variables and parameters for GPU
     auto bsize = Domain::getInstance()->GetSize();
@@ -775,7 +775,7 @@ void SolverI::UpdateData(bool sync) {
 /// \param	t		time
 /// \param  sync	synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SolverI::UpdateSources(real t, bool sync) {
+void ISolver::UpdateSources(real t, bool sync) {
 
     auto params = Parameters::getInstance();
 
@@ -791,7 +791,7 @@ void SolverI::UpdateSources(real t, bool sync) {
             forceFct == SourceMethods::Uniform) {
 
         } else if (forceFct == SourceMethods::Buoyancy) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Update f(T) ..." << std::endl;
             //TODO Logger
 #endif
@@ -902,7 +902,7 @@ void SolverI::UpdateSources(real t, bool sync) {
 // ***************************************************************************************
 /// \brief  Updates time dependent parameters temperature source functions
 // ***************************************************************************************
-void SolverI::TemperatureSource() {
+void ISolver::TemperatureSource() {
 // Temperature source
     if (Parameters::getInstance()->get("solver/temperature/source/temp_fct") == FunctionNames::BuoyancyST_MMS) {
         Functions::BuoyancyST_MMS(S_T, 0.);
@@ -913,7 +913,7 @@ void SolverI::TemperatureSource() {
 // ***************************************************************************************
 /// \brief  Updates time dependent parameters force source functions
 // ***************************************************************************************
-void SolverI::ForceSource() {
+void ISolver::ForceSource() {
     auto params = Parameters::getInstance();
     // Force
     if (params->get("solver/source/force_fct") == SourceMethods::Buoyancy) {
@@ -936,7 +936,7 @@ void SolverI::ForceSource() {
 // ***************************************************************************************
 /// \brief  Updates time dependent parameters momentum source functions
 // ***************************************************************************************
-void SolverI::MomentumSource() {
+void ISolver::MomentumSource() {
     //Momentum source
     auto params = Parameters::getInstance();
     std::string dir_vel = params->get("solver/source/dir");

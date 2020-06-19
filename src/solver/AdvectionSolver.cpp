@@ -7,7 +7,7 @@
 #include <iostream>
 
 #include "AdvectionSolver.h"
-#include "../interfaces/AdvectionI.h"
+#include "../interfaces/IAdvection.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
@@ -64,12 +64,12 @@ AdvectionSolver::~AdvectionSolver() {
 // ***************************************************************************************
 void AdvectionSolver::DoStep(real t, bool sync) {
   // local variables and parameters for GPU
-    auto u = SolverI::u;
-    auto v = SolverI::v;
-    auto w = SolverI::w;
-    auto u0 = SolverI::u0;
-    auto v0 = SolverI::v0;
-    auto w0 = SolverI::w0;
+    auto u = ISolver::u;
+    auto v = ISolver::v;
+    auto w = ISolver::w;
+    auto u0 = ISolver::u0;
+    auto v0 = ISolver::v0;
+    auto w0 = ISolver::w0;
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -91,7 +91,7 @@ void AdvectionSolver::DoStep(real t, bool sync) {
 #pragma acc data present(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize], d_u[:bsize], d_u0[:bsize], d_v[:bsize], d_v0[:bsize], d_w[:bsize], d_w0[:bsize])
     {
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect ..." << std::endl;
         //TODO Logger
 #endif

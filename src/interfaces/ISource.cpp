@@ -10,7 +10,7 @@
 #include <cmath>
 #endif
 
-#include "SourceI.h"
+#include "ISource.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
@@ -24,7 +24,7 @@
 /// \param  ina	ambient temperature
 /// \param  sync	synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SourceI::BuoyancyForce(Field *out, const Field *in, const Field *ina, bool sync) {
+void ISource::BuoyancyForce(Field *out, const Field *in, const Field *ina, bool sync) {
 
     // local variables and parameters for GPU
     auto d_out = out->data;
@@ -79,7 +79,7 @@ void SourceI::BuoyancyForce(Field *out, const Field *in, const Field *ina, bool 
 /// \param  t		time
 /// \param  sync	synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SourceI::BuoyancyST_MMS(Field *out, real t, bool sync) {
+void ISource::BuoyancyST_MMS(Field *out, real t, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto d_out = out->data;
@@ -156,7 +156,7 @@ void SourceI::BuoyancyST_MMS(Field *out, real t, bool sync) {
 /// \param  sigma	Radius of Gaussian
 /// \param  sync	synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SourceI::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, real sigmax, real sigmay, real sigmaz, bool sync) {
+void ISource::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, real sigmax, real sigmay, real sigmaz, bool sync) {
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
@@ -243,7 +243,7 @@ void SourceI::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, re
 /// \param  in_w	input pointer (\a z -velocity)
 /// \param  sync	synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SourceI::Dissipate(Field *out, const Field *inu, const Field *inv, const Field *inw, bool sync) {
+void ISource::Dissipate(Field *out, const Field *inu, const Field *inv, const Field *inw, bool sync) {
 
     // local variables and parameters for GPU
     auto d_out = out->data;

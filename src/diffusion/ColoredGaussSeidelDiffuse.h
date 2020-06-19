@@ -8,10 +8,10 @@
 #ifndef ARTSS_DIFFUSION_COLOREDGAUSSSEIDEL_H
 #define ARTSS_DIFFUSION_COLOREDGAUSSSEIDEL_H
 
-#include "../interfaces/DiffusionI.h"
+#include "../interfaces/IDiffusion.h"
 #include "../Field.h"
 
-class ColoredGaussSeidelDiffuse: public DiffusionI {
+class ColoredGaussSeidelDiffuse: public IDiffusion {
 public:
     ColoredGaussSeidelDiffuse();
 

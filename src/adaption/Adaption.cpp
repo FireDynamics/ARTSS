@@ -73,14 +73,14 @@ void Adaption::run(real t_cur) {
 
     if (m_dynamic && isUpdateNecessary()) {
         applyChanges();
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::ofstream file;
         file.open(getTimeMeasuringName(), std::ios::app);
         std::chrono::time_point<std::chrono::system_clock> start, end;
         start = std::chrono::system_clock::now();
 #endif
         BoundaryController::getInstance()->updateLists();
-#ifndef PROFILING
+#ifndef BENCHMARKING
             end = std::chrono::system_clock::now();
         if(m_hasTimeMeasuring) {
             long ms = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -168,7 +168,7 @@ void Adaption::extractData(const std::string filename) {
 /// \brief  Applies domain adaption
 // ***************************************************************************************
 void Adaption::applyChanges() {
-#ifndef PROFILING
+#ifndef BENCHMARKING
   std::ofstream file;
     file.open(getTimeMeasuringName(), std::ios::app);
     std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -186,7 +186,7 @@ void Adaption::applyChanges() {
         }
         func->applyChanges();
     }
-#ifndef PROFILING
+#ifndef BENCHMARKING
     end = std::chrono::system_clock::now();
     long ms = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     if(m_hasTimeMeasuring) {
@@ -202,7 +202,7 @@ void Adaption::applyChanges() {
 /// \return	bool true if yes false if no
 // ***************************************************************************************
 bool Adaption::isUpdateNecessary() {
-#ifndef PROFILING
+#ifndef BENCHMARKING
   std::ofstream file;
     file.open(getTimeMeasuringName(), std::ios::app);
     std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -212,7 +212,7 @@ bool Adaption::isUpdateNecessary() {
     if (!m_dynamic_end) {
         update = func->update();
     }
-#ifndef PROFILING
+#ifndef BENCHMARKING
     end = std::chrono::system_clock::now();
     long ms = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     if(m_hasTimeMeasuring) {

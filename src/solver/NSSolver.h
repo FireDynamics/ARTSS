@@ -6,14 +6,14 @@
 #ifndef ARTSS_SOLVER_NSSOLVER_H_
 #define ARTSS_SOLVER_NSSOLVER_H_
 
-#include "../interfaces/SolverI.h"
-#include "../interfaces/AdvectionI.h"
-#include "../interfaces/DiffusionI.h"
-#include "../interfaces/PressureI.h"
-#include "../interfaces/SourceI.h"
+#include "../interfaces/ISolver.h"
+#include "../interfaces/IAdvection.h"
+#include "../interfaces/IDiffusion.h"
+#include "../interfaces/IPressure.h"
+#include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class NSSolver : public SolverI {
+class NSSolver : public ISolver {
 public:
 	NSSolver();
 
@@ -22,10 +22,10 @@ public:
 	void DoStep(real t, bool sync) override;
 
 private:
-	AdvectionI *adv_vel;
-	DiffusionI *dif_vel;
-	PressureI *pres;
-	SourceI *sou;
+	IAdvection *adv_vel;
+	IDiffusion *dif_vel;
+	IPressure *pres;
+	ISource *sou;
 
 	real m_nu;
 

@@ -76,27 +76,27 @@ void NSTempTurbSolver::DoStep(real t, bool sync) {
     auto params = Parameters::getInstance();
 
     // local variables and parameters for GPU
-    auto u = SolverI::u;
-    auto v = SolverI::v;
-    auto w = SolverI::w;
-    auto u0 = SolverI::u0;
-    auto v0 = SolverI::v0;
-    auto w0 = SolverI::w0;
-    auto u_tmp = SolverI::u_tmp;
-    auto v_tmp = SolverI::v_tmp;
-    auto w_tmp = SolverI::w_tmp;
-    auto p = SolverI::p;
-    auto p0 = SolverI::p0;
-    auto rhs = SolverI::rhs;
-    auto T = SolverI::T;
-    auto T0 = SolverI::T0;
-    auto T_tmp = SolverI::T_tmp;
-    auto f_x = SolverI::f_x;
-    auto f_y = SolverI::f_y;
-    auto f_z = SolverI::f_z;
-    auto S_T = SolverI::S_T;
-    auto nu_t = SolverI::nu_t;            //nu_t - Eddy Viscosity
-    auto kappa_t = SolverI::kappa_t;     //kappa_t - Eddy thermal diffusivity
+    auto u = ISolver::u;
+    auto v = ISolver::v;
+    auto w = ISolver::w;
+    auto u0 = ISolver::u0;
+    auto v0 = ISolver::v0;
+    auto w0 = ISolver::w0;
+    auto u_tmp = ISolver::u_tmp;
+    auto v_tmp = ISolver::v_tmp;
+    auto w_tmp = ISolver::w_tmp;
+    auto p = ISolver::p;
+    auto p0 = ISolver::p0;
+    auto rhs = ISolver::rhs;
+    auto T = ISolver::T;
+    auto T0 = ISolver::T0;
+    auto T_tmp = ISolver::T_tmp;
+    auto f_x = ISolver::f_x;
+    auto f_y = ISolver::f_y;
+    auto f_z = ISolver::f_z;
+    auto S_T = ISolver::S_T;
+    auto nu_t = ISolver::nu_t;            //nu_t - Eddy Viscosity
+    auto kappa_t = ISolver::kappa_t;     //kappa_t - Eddy thermal diffusivity
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -131,7 +131,7 @@ void NSTempTurbSolver::DoStep(real t, bool sync) {
                             d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_S_T[:bsize], d_nu_t[:bsize], d_kappa_t[:bsize])
     {
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect ..." << std::endl;
         //TODO Logger
 #endif
@@ -140,17 +140,17 @@ void NSTempTurbSolver::DoStep(real t, bool sync) {
         adv_vel->advect(w, w0, u0, v0, w0, sync);
 
         // Couple velocity to prepare for diffusion
-        SolverI::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve turbulent diffusion equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Calculating Turbulent viscosity ..." << std::endl;
         //TODO Logger
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Diffuse ..." << std::endl;
         //TODO Logger
 #endif
@@ -159,18 +159,18 @@ void NSTempTurbSolver::DoStep(real t, bool sync) {
         dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
 
         // Couple data to prepare for adding source
-        SolverI::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add momentum source ..." << std::endl;
             //TODO Logger
 #endif
             sou_vel->addSource(u, v, w, f_x, f_y, f_z, sync);
 
             // Couple data to prepare for adding source
-            SolverI::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 4. Solve pressure equation and project
@@ -178,7 +178,7 @@ void NSTempTurbSolver::DoStep(real t, bool sync) {
         pres->Divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Pressure ..." << std::endl;
         //TODO Logger
 #endif
@@ -190,14 +190,14 @@ void NSTempTurbSolver::DoStep(real t, bool sync) {
 // 5. Solve Temperature and link back to force
 
         // Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect Temperature ..." << std::endl;
         //TODO Logger
 #endif
         adv_temp->advect(T, T0, u, v, w, sync);
 
         // Couple temperature to prepare for diffusion
-        SolverI::CoupleScalar(T, T0, T_tmp, sync);
+        ISolver::CoupleScalar(T, T0, T_tmp, sync);
 
         // Solve diffusion equation
         // turbulence
@@ -210,52 +210,52 @@ void NSTempTurbSolver::DoStep(real t, bool sync) {
             for (size_t i = 0; i < bsize; ++i) {
                 d_kappa_t[i] = d_nu_t[i] * rPr_T;
             }
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Diffuse turbulent Temperature ..." << std::endl;
             //TODO Logger
 #endif
             dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
 
             // Couple temperature to prepare for adding source
-            SolverI::CoupleScalar(T, T0, T_tmp, sync);
+            ISolver::CoupleScalar(T, T0, T_tmp, sync);
         } else {
             // no turbulence
             if (kappa != 0.) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
                 std::cout << "Diffuse Temperature ..." << std::endl;
                 //TODO Logger
 #endif
                 dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
 
                 // Couple temperature to prepare for adding source
-                SolverI::CoupleScalar(T, T0, T_tmp, sync);
+                ISolver::CoupleScalar(T, T0, T_tmp, sync);
             }
         }
 
         // Add dissipation
         if (m_hasDissipation) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add dissipation ..." << std::endl;
             //TODO Logger
 #endif
             sou_temp->Dissipate(T, u, v, w, sync);
 
             // Couple temperature
-            SolverI::CoupleScalar(T, T0, T_tmp, sync);
+            ISolver::CoupleScalar(T, T0, T_tmp, sync);
         }
 
         // Add source
         if (m_tempFct != SourceMethods::Zero) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             std::cout << "Add temperature source ..." << std::endl;
 #endif
             sou_temp->addSource(T, S_T, sync);
 
             // Couple temperature
-            SolverI::CoupleScalar(T, T0, T_tmp, sync);
+            ISolver::CoupleScalar(T, T0, T_tmp, sync);
         }
 
 // 6. Sources updated in Solver::UpdateSources, TimeIntegration

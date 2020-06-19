@@ -7,12 +7,12 @@
 #ifndef ARTSS_SOLVER_TURBDIFFUSIONSOLVER_H_
 #define ARTSS_SOLVER_TURBDIFFUSIONSOLVER_H_
 
-#include "../interfaces/SolverI.h"
-#include "../interfaces/DiffusionI.h"
-#include "../interfaces/TurbulenceI.h"
+#include "../interfaces/ISolver.h"
+#include "../interfaces/IDiffusion.h"
+#include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class DiffusionTurbSolver: public SolverI {
+class DiffusionTurbSolver: public ISolver {
 public:
 	DiffusionTurbSolver();
 	~DiffusionTurbSolver() override;
@@ -20,8 +20,8 @@ public:
 	void DoStep(real t, bool sync) override;
 
 private:
-	DiffusionI*   dif;
-	TurbulenceI*  mu_tub;
+	IDiffusion*   dif;
+	ITurbulence*  mu_tub;
 
 	real m_nu;
 
