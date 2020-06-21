@@ -54,7 +54,7 @@ EXAMPLE:
 `./compile.sh -m`
 
 Extra:
-It is also possible to compile ARTSS using a docker file. Instructions and further information can be found in the folder `docker`.
+It is also possible to work with ARTSS by using Docker. Instructions and further information can be found in [DOCKER.md](https://github.com/FireDynamics/ARTSS/tree/master/DOCKER.md).
 
 
 ### Code Structure
@@ -78,10 +78,6 @@ ARTSS
 │   # different tools that make your life easier
 ```
 
-## Authors
-* [**Anne Küsters**](https://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/kuesters_a.html?nn=361682): *Initial work*
-* [**Lukas Arnold**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Arnold_Lukas/main.html): *Contributor* and *Supervisor*
-* [**My Linh Würzburger**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Wuerzburger_My_Linh/main.html?nn=2302136): *Principal developer*
-* Christian von Mach: *Developer*
-* [**Max Böhler**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Boehler_Max/_node.html): *Contributor*
-* Suryanarayana Maddu Kondaiah: *Contributor*
+### Contributing
+
+We are constantly working on this project, which means that it is not done and we are working on improvements, new features, bug fixes etc. If you find any errors or you have a suggestions, please feel free to write an issue [here](https://github.com/FireDynamics/ARTSS/issues). If you want to work on the project, please refer to the [contributing guidlines](https://github.com/FireDynamics/ARTSS/tree/master/CONTRIBUTING.md).
