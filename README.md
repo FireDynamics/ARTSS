@@ -84,4 +84,4 @@ ARTSS
 * [**My Linh Würzburger**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Wuerzburger_My_Linh/main.html?nn=2302136): *Principal developer*
 * Christian von Mach: *Developer*
 * [**Max Böhler**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Boehler_Max/_node.html): *Contributor*
-* Suryanarayana Maddu Kondaiah
+* Suryanarayana Maddu Kondaiah: *Contributor*
