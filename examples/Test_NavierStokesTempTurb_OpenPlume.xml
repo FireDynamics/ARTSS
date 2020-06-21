@@ -4,7 +4,7 @@
 
   <physical_parameters>
     <t_end> 4. </t_end>  <!-- simulation end time -->
-    <dt> 0.1 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
+    <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
     <nu> 2.44139e-05 </nu>  <!-- kinematic viscosity -->
     <beta> 3.28e-3 </beta>  <!-- thermal expansion coefficient -->
     <g> -9.81 </g>  <!-- gravitational constant -->
