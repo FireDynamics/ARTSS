@@ -1546,7 +1546,7 @@ size_t Multigrid::getSize_obstacleList() {
 
 size_t* Multigrid::get_obstacleList(){
     if (m_numberOfObstacles > 0) {
-        return m_MG_oList[0];
+        return m_data_MG_oList_zero_joined;
     }else{
         return nullptr;
     }
