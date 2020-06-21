@@ -24,7 +24,7 @@ Detailed requirements are listed in the table below (general requirements for se
 | Specific | Compiler fully supporting C++-17 and OpenACC        | PGI      |   >= 19.10    |
 
 ### Compiling the Code
-Once the code has been checked out and all required software has been installed, JuROr
+Once the code has been checked out and all required software has been installed, ARTSS
 can be built from the terminal by first running cmake to configure the build, then
 running make. The steps are summarized below.  
 
