@@ -18,4 +18,4 @@ ARTSS is an open source project, administrated by the Fire Dynamics group of the
 ### Contributor
 The following people have contributed to ARTSS through fixes, small enhancements and many more.
 * Suryanarayana Maddu Kondaiah
-* [**Max Böhler**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Boehler_Max/_node.html): *Contributor*
+* [**Max Böhler**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Boehler_Max/_node.html)
