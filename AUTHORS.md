@@ -8,7 +8,8 @@ ARTSS is an open source project, administrated by the Fire Dynamics group of the
 ### Main developer
 * [**My Linh Würzburger**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Wuerzburger_My_Linh/main.html?nn=2302136)
 
-//### Developer
+### Developer
+* none
 
 
 ### Former developer
