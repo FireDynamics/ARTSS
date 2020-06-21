@@ -33,8 +33,8 @@ running make. The steps are summarized below.
 git clone https://github.com/FireDynamics/ARTSS.git
 cd ARTSS
 ```
-2. Compiling the code
 
+2. Compiling the code
 ```
 ./compile.sh [OPTIONS]
 ```
