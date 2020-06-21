@@ -53,6 +53,6 @@ More Docker commands: https://docs.docker.com/engine/reference/commandline/cli/
 
 The Docker image can be built with `./compile.sh --docker-build`
 
-To build ARTSS inside the container use `--docker-run` or `--docker-run-cpu``. To change the hostname of the Docker add the option `--docker-hostname`.
+To build ARTSS inside the container use `--docker-run` or `--docker-run-cpu`. To change the hostname of the Docker add the option `--docker-hostname`.
 
 The Docker commands can be combined with each other.
