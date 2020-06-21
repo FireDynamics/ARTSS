@@ -241,8 +241,7 @@ void Obstacle::print() {
 
     std::cout << "-- Obstacle" << std::endl;
     std::cout << "\t strides (x y z): " << strideX << " " << strideY << " " << strideZ << std::endl;
-    std::cout << "\t size of slices  (Front|Back Bottom|Top Left|Right): " << m_size_obstacleFront << "|" << m_size_obstacleBack << " " << m_size_obstacleBottom << "|" << m_size_obstacleTop << " " << m_size_obstacleLeft
-              << "|" << m_size_obstacleRight << std::endl;
+    std::cout << "\t size of slices  (Front|Back Bottom|Top Left|Right): " << m_size_obstacleFront << "|" << m_size_obstacleBack << " " << m_size_obstacleBottom << "|" <<m_size_obstacleTop << " " << m_size_obstacleLeft << "|" << m_size_obstacleRight << std::endl;
     std::cout << "\t size of Obstacle: " << m_size_obstacleList << std::endl;
     //std::cout << "\t size of inner cells: " << m_size_obstacleInner << std::endl;
     std::cout << "\t coords (x y z): (" << m_i1 << "|" << m_i2 << ")(" << m_j1 << "|" << m_j2 << ")(" << m_k1 << "|" << m_k2 << ")" << std::endl;
