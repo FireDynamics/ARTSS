@@ -11,6 +11,8 @@
 
 In the directory where the Dockerfile is located run: `docker build -t artss_docker .`
 
+It is not necessary to recreate the Docker image each time. It has to be created initially, and when a change is submitted to the Docker file.
+
 ## Building ARTSS inside the container
 
 Navigate to the ARTSS main directory (where `compile.sh` is located).
@@ -31,6 +33,7 @@ then run `compile.sh [OPTIONS]`. Don't use any GPU flags, since they will not wo
 
 
 ## Running ARTSS
+
 After compiling, ARTSS can be used as usual.
 
 
@@ -44,3 +47,12 @@ After compiling, ARTSS can be used as usual.
 - `docker image rm [tag]` -> Removes Docker image with tag [tag]
 
 More Docker commands: https://docs.docker.com/engine/reference/commandline/cli/
+
+
+## Using Docker with `compile.sh`
+
+The Docker image can be built with `./compile.sh --docker-build`
+
+To build ARTSS inside the container use `--docker-run` or `--docker-run-cpu`. To change the hostname of the Docker add the option `--docker-hostname`.
+
+The Docker commands can be combined with each other.

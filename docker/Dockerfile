@@ -1,3 +1,5 @@
+### author: Sebastian Leifeld
+
 FROM nvcr.io/hpc/pgi-compilers:ce
 
 RUN apt update
