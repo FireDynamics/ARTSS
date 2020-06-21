@@ -80,4 +80,4 @@ ARTSS
 
 ### Contributing
 
-We are constantly working on this project, which means that it is not done and we are working on improvements, new features, bug fixes etc. If you find any errors or you have a suggestions, please feel free to write an issue [here](https://github.com/FireDynamics/ARTSS/issues). If you want to work on the project, please refer to the [contributing guidlines](https://github.com/FireDynamics/ARTSS/tree/master/CONTRIBUTING.md).
+We are working constantly on this project, which above all means we are not finished yet: continuous improvements are made, new features are implemented and bugs getting fixed. If you find any errors or you have a suggestions, please feel free to write an issue [here](https://github.com/FireDynamics/ARTSS/issues). If you want to work on the project, please refer to the [contributing guidlines](https://github.com/FireDynamics/ARTSS/tree/master/CONTRIBUTING.md).
