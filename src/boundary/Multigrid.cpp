@@ -978,8 +978,7 @@ void Multigrid::applyBoundaryCondition(real *d, size_t level, FieldType f, bool 
     if (m_numberOfObstacles > 0) {
         for (size_t id = 0; id < m_numberOfObstacles; ++id) {
             size_t opatch_start[] = {getFirstIndex_oFront(level, id), getFirstIndex_oBack(level, id), getFirstIndex_oBottom(level, id), getFirstIndex_oTop(level, id), getFirstIndex_oLeft(level, id), getFirstIndex_oRight(level, id),};
-            size_t opatch_end[] = {getFirstIndex_oFront(level + 1, id), getFirstIndex_oBack(level + 1, id), getFirstIndex_oBottom(level + 1, id), getFirstIndex_oTop(level + 1, id), getFirstIndex_oLeft(level + 1, id),
-                                   getFirstIndex_oRight(level + 1, id),};
+            size_t opatch_end[] = {getLastIndex_oFront(level, id), getLastIndex_oBack(level, id), getLastIndex_oBottom(level, id), getLastIndex_oTop(level, id), getLastIndex_oLeft(level, id), getLastIndex_oRight(level, id),};
             ((BoundaryDataController *) *(m_bdc_obstacle + id))->applyBoundaryConditionObstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, id, sync);
         }
     }
