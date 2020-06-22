@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <random>
 
 #include "Functions.h"
 #include "utility/Parameters.h"
@@ -1112,7 +1113,6 @@ namespace Functions {
 /// \param  t	time
 // ***************************************************************************************
     real RampTanh(real t) {
-
         auto params = Parameters::getInstance();
         real tau = params->getReal("solver/temperature/source/tau");
 
@@ -1122,15 +1122,15 @@ namespace Functions {
         return result;
     }
 
-// ======== Temperature initial condition with random distribution (absolute) ============
+// ======== Temperature initial condition with random distribution ============
 // ***************************************************************************************
 /// \brief  Random function for any field
 /// \param  out		temperature
 /// \param 	Va 		ambient value
 /// \param	range	range of random numbers
+/// \param	abs     Check if random number is relativ or absolute to Va
 // ***************************************************************************************
-    void RandomAbsolute(Field *out, real Va, real absRange) {
-
+    void Random(Field *out, real Va, real range, bool abs) {
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
         size_t size_iList = boundary->getSize_innerList();
@@ -1138,42 +1138,52 @@ namespace Functions {
         size_t size_bList = boundary->getSize_boundaryList();
         size_t *oList = boundary->get_obstacleList();
         size_t size_oList = boundary->getSize_obstacleList();
-        real randFloat;
 
-        std::srand((unsigned) time(nullptr));
+        std::random_device rd;
+        std::mt19937 mt(rd());
+        std::uniform_real_distribution<real> dist(-range, range);
 
-        //inner cells
+        // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
             //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va + (randFloat * 2 * absRange - absRange);
+            if (abs) {
+                out->data[idx] = Va + dist(mt);
+            } else {
+                out->data[idx] = Va * 1 + dist(mt);
+            }
         }
-        //boundary cells
+        // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va + (randFloat * 2 * absRange - absRange);
+            // generate secret number between 0 and range:
+            if (abs) {
+                out->data[idx] = Va + dist(mt);
+            } else {
+                out->data[idx] = Va * 1 + dist(mt);
+            }
         }
-        //obstacle cells
+        // obstacle cells
         for (size_t i = 0; i < size_oList; i++) {
             size_t idx = oList[i];
-            //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va + (randFloat * 2 * absRange - absRange);
+            // generate secret number between 0 and range:
+            if (abs) {
+                out->data[idx] = Va + dist(mt);
+            } else {
+                out->data[idx] = Va * 1 + dist(mt);
+            }
         }
     }
 
-// === Random function (asbolute) with field as ambient value (e.g. for superposition of temperature layers and random values)
+// === Random function with field as ambient value (e.g. for superposition of temperature layers and random values)
 // ***************************************************************************************
 /// \brief  Random function for any field
 /// \param  out		temperature
 /// \param 	Va 		ambient value as pointer
 /// \param	range	range of random numbers
+/// \param	abs     Check if random number is relativ or absolute to Va
 // ***************************************************************************************
-    void RandomAbsolute(Field *out, Field *Va, real absRange) {
-
+    void Random(Field *out, Field *Va, real range, bool abs) {
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
         size_t size_iList = boundary->getSize_innerList();
@@ -1181,116 +1191,42 @@ namespace Functions {
         size_t size_bList = boundary->getSize_boundaryList();
         size_t *oList = boundary->get_obstacleList();
         size_t size_oList = boundary->getSize_obstacleList();
-        real randFloat;
 
-        std::srand((unsigned) time(nullptr));
+        std::random_device rd;
+        std::mt19937 mt(rd());
+        std::uniform_real_distribution<real> dist(-range, range);
 
-        //inner cells
+
+
+        // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va->data[idx] + (randFloat * 2 * absRange - absRange);
+            // generate secret number between 0 and range:
+            if (abs) {
+                out->data[idx] = Va->data[idx] + dist(mt);
+            } else {
+                out->data[idx] = Va->data[idx] * 1 + dist(mt);
+            }
         }
-        //boundary cells
+        // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
             //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va->data[idx] + (randFloat * 2 * absRange - absRange);
+            if (abs) {
+                out->data[idx] = Va->data[idx] + dist(mt);
+            } else {
+                out->data[idx] = Va->data[idx] * 1 + dist(mt);
+            }
         }
         // obstacles
         for (size_t i = 0; i < size_oList; i++) {
             size_t idx = oList[i];
-            //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va->data[idx] + (randFloat * 2 * absRange - absRange);
-        }
-    }
-
-// ========= Temperature initial condition with random distribution (relative) =============
-// ***************************************************************************************
-/// \brief  Random function for any field
-/// \param  out		temperature
-/// \param 	Va 		ambient value
-/// \param	range	range of random numbers
-// ***************************************************************************************
-    void RandomRelative(Field *out, real Va, real relRange) {
-
-        auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
-        size_t *oList = boundary->get_obstacleList();
-        size_t size_oList = boundary->getSize_obstacleList();
-        real randFloat;
-
-        std::srand((unsigned) time(nullptr));
-
-        //inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
-            //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va * 1 + (randFloat * 2 * relRange - relRange);
-        }
-        //boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
-            //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va * 1 + (randFloat * 2 * relRange - relRange);
-        }
-        //obstacle cells
-        for (size_t i = 0; i < size_oList; i++) {
-            size_t idx = oList[i];
-            //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va * 1 + (randFloat * 2 * relRange - relRange);
-        }
-    }
-
-// === Random function (relative) with field as ambient value (e.g. for superposition of temperature layers and random absolute values)
-// ***************************************************************************************
-/// \brief  Random function for any field
-/// \param  out		temperature
-/// \param 	Va 		ambient value as pointer
-/// \param	range	range of random numbers
-// ***************************************************************************************
-    void RandomRelative(Field *out, Field *Va, real relRange) {
-
-        auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
-        size_t *oList = boundary->get_obstacleList();
-        size_t size_oList = boundary->getSize_obstacleList();
-        real randFloat;
-
-        std::srand((unsigned) time(nullptr));
-
-        //inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
-            //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va->data[idx] * 1 + (randFloat * 2 * relRange - relRange);
-        }
-        //boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
-            //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va->data[idx] * 1 + (randFloat * 2 * relRange - relRange);
-        }
-        // obstacles
-        for (size_t i = 0; i < size_oList; i++) {
-            size_t idx = oList[i];
-            //generate secret number between 0 and range:
-            randFloat = static_cast<real>( rand() ) / static_cast<real>( RAND_MAX );
-            out->data[idx] = Va->data[idx] * 1 + (randFloat * 2 * relRange - relRange);
+            // generate secret number between 0 and range:
+            if (abs) {
+                out->data[idx] = Va->data[idx] + dist(mt);
+            } else {
+                out->data[idx] = Va->data[idx] * 1 + dist(mt);
+            }
         }
     }
 
