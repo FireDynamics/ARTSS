@@ -1,16 +1,20 @@
-/// \file 		SolverI.h
-/// \brief 		Interface holds solvers for solving governing equations
-/// \date 		May 20, 2016
-/// \author 	Severt
+/// \file 		  ISolver.cpp
+/// \brief 		  Interface holds solvers for solving governing equations
+/// \date 		  May 20, 2016
+/// \author 	  Severt
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cmath>
+
+#ifdef _OPENACC
+#include <accelmath.h>
+#endif
+
 #include <iostream>
 
 #include "ISolver.h"
 #include "../utility/Parameters.h"
 #include "../Functions.h"
-#include "ISource.h"
 #include "../source/ExplicitEulerSource.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"

@@ -1,8 +1,8 @@
-/// \file 		PressureI.cpp
-/// \brief 		Interface for pressure method
-/// \date 		Sep 14, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       IPressure.cpp
+/// \brief      Interface for pressure method
+/// \date       Sep 14, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "IPressure.h"
 #include "../utility/Parameters.h"
@@ -12,11 +12,11 @@
 //======================================== Divergence ====================================
 // ***************************************************************************************
 /// \brief  calculates divergence \f$ \nabla \cdot u\f$  via central finite differences
-/// \param  out		output pointer (\f$ \nabla \cdot u\f$)
-/// \param  in_x	input pointer (x -velocity)
-/// \param  in_y	input pointer (y -velocity)
-/// \param  in_z	input pointer (z -velocity)
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+/// \param  out   output pointer (\f$ \nabla \cdot u\f$)
+/// \param  in_x  input pointer (x -velocity)
+/// \param  in_y  input pointer (y -velocity)
+/// \param  in_z  input pointer (z -velocity)
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void IPressure::Divergence(Field *out, const Field *inx, const Field *iny, const Field *inz, bool sync) {
 
@@ -75,15 +75,15 @@ void IPressure::Divergence(Field *out, const Field *inx, const Field *iny, const
 //======================================== Projection ====================================
 // ***************************************************************************************
 /// \brief  subtracts pressure gradient (\f$ \phi_4 = \phi_3 - \nabla p\f$) via finite differences
-/// 		to make \a \f$ \phi_4 \f$ divergence-free
-/// \param  out_u	output pointer (x -velocity)
-/// \param  out_v	output pointer (y -velocity)
-/// \param  out_w	output pointer (z -velocity)
-/// \param  in_u	input pointer (x -velocity)
-/// \param  in_v	input pointer (y -velocity)
-/// \param  in_w	input pointer (z -velocity)
-/// \param  in_p	input pointer (pressure)
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+///     to make \a \f$ \phi_4 \f$ divergence-free
+/// \param  out_u output pointer (x -velocity)
+/// \param  out_v output pointer (y -velocity)
+/// \param  out_w output pointer (z -velocity)
+/// \param  in_u  input pointer (x -velocity)
+/// \param  in_v  input pointer (y -velocity)
+/// \param  in_w  input pointer (z -velocity)
+/// \param  in_p  input pointer (pressure)
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void IPressure::Project(Field *outu, Field *outv, Field *outw, const Field *inu, const Field *inv, const Field *inw, const Field *inp, bool sync) {
 

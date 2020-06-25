@@ -1,13 +1,13 @@
-/// \file 		SourceI.h
-/// \brief 		Interface for adding sources
-/// \date 		Dec 2, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       ISource.cpp
+/// \brief      Interface for adding sources
+/// \date       Dec 2, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+
+#include <cmath>
 
 #ifdef _OPENACC
 #include <accelmath.h>
-#else
-#include <cmath>
 #endif
 
 #include "ISource.h"
@@ -19,10 +19,10 @@
 //======================================== Force ======================================
 // ***************************************************************************************
 /// \brief  Buoyancy Force in momentum equation
-/// \param  out	buoyancy force
-/// \param  in	temperature
-/// \param  ina	ambient temperature
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+/// \param  out buoyancy force
+/// \param  in  temperature
+/// \param  ina ambient temperature
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::BuoyancyForce(Field *out, const Field *in, const Field *ina, bool sync) {
 
@@ -75,9 +75,9 @@ void ISource::BuoyancyForce(Field *out, const Field *in, const Field *ina, bool 
 //===================================== Energy Source ====================================
 // ***************************************************************************************
 /// \brief  Manufactured (MMS) energy source in energy equation
-/// \param  out		energy source
-/// \param  t		time
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+/// \param  out   energy source
+/// \param  t   time
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::BuoyancyST_MMS(Field *out, real t, bool sync) {
     auto domain = Domain::getInstance();
@@ -147,14 +147,14 @@ void ISource::BuoyancyST_MMS(Field *out, real t, bool sync) {
 
 // ***************************************************************************************
 /// \brief  Volumetric Gaussian temperature source in energy equation
-/// \param  out		energy source
-/// \param  HRR		total heat release rate
-/// \param  cp		heat capacity
-/// \param  x0		center of Gaussian (x-direction)
-/// \param  y0		center of Gaussian (y-direction)
-/// \param  z0		center of Gaussian (z-direction)
-/// \param  sigma	Radius of Gaussian
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+/// \param  out   energy source
+/// \param  HRR   total heat release rate
+/// \param  cp    heat capacity
+/// \param  x0    center of Gaussian (x-direction)
+/// \param  y0    center of Gaussian (y-direction)
+/// \param  z0    center of Gaussian (z-direction)
+/// \param  sigma Radius of Gaussian
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, real sigmax, real sigmay, real sigmaz, bool sync) {
 
@@ -237,11 +237,11 @@ void ISource::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, re
 //======================================== Dissipation ====================================
 // ***************************************************************************************
 /// \brief  Adding dissipation (e.g. via friction) into the equation
-/// \param  out		output pointer (\a T)
-/// \param  in_u	input pointer (\a x -velocity)
-/// \param  in_v	input pointer (\a y -velocity)
-/// \param  in_w	input pointer (\a z -velocity)
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+/// \param  out   output pointer (\a T)
+/// \param  in_u  input pointer (\a x -velocity)
+/// \param  in_v  input pointer (\a y -velocity)
+/// \param  in_w  input pointer (\a z -velocity)
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::Dissipate(Field *out, const Field *inu, const Field *inv, const Field *inw, bool sync) {
 
