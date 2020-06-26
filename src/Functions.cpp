@@ -1130,7 +1130,7 @@ namespace Functions {
 /// \param	range	range of random numbers
 /// \param	abs     Check if random number is relativ or absolute to Va
 // ***************************************************************************************
-    void Random(Field *out, real Va, real range, bool abs, bool seedCheck, int seed) {
+    void Random(Field *out, real Va, real range, bool abs, bool seedCheck, int seed, real stepsize) {
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
         size_t size_iList = boundary->getSize_innerList();
@@ -1139,6 +1139,7 @@ namespace Functions {
         size_t *oList = boundary->get_obstacleList();
         size_t size_oList = boundary->getSize_obstacleList();
         std::mt19937 mt;
+        stepsize = 1.0/stepsize;
 
         if (seedCheck) {
           mt = std::mt19937(seed);
@@ -1153,9 +1154,9 @@ namespace Functions {
             size_t idx = iList[i];
             //generate secret number between 0 and range:
             if (abs) {
-                out->data[idx] = Va + dist(mt);
+                out->data[idx] = Va + dist(mt)/stepsize;
             } else {
-                out->data[idx] = Va * 1 + dist(mt);
+                out->data[idx] = Va * 1 + dist(mt)/stepsize;
             }
         }
         // boundary cells
@@ -1163,9 +1164,9 @@ namespace Functions {
             size_t idx = bList[i];
             // generate secret number between 0 and range:
             if (abs) {
-                out->data[idx] = Va + dist(mt);
+                out->data[idx] = Va + dist(mt)/stepsize;
             } else {
-                out->data[idx] = Va * 1 + dist(mt);
+                out->data[idx] = Va * 1 + dist(mt)/stepsize;
             }
         }
         // obstacle cells
@@ -1173,9 +1174,9 @@ namespace Functions {
             size_t idx = oList[i];
             // generate secret number between 0 and range:
             if (abs) {
-                out->data[idx] = Va + dist(mt);
+                out->data[idx] = Va + dist(mt)/stepsize;
             } else {
-                out->data[idx] = Va * 1 + dist(mt);
+                out->data[idx] = Va * 1 + dist(mt)/stepsize;
             }
         }
     }
@@ -1188,7 +1189,7 @@ namespace Functions {
 /// \param	range	range of random numbers
 /// \param	abs     Check if random number is relativ or absolute to Va
 // ***************************************************************************************
-    void Random(Field *out, Field *Va, real range, bool abs, bool seedCheck, int seed) {
+    void Random(Field *out, Field *Va, real range, bool abs, bool seedCheck, int seed, real stepsize) {
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
         size_t size_iList = boundary->getSize_innerList();
@@ -1197,6 +1198,7 @@ namespace Functions {
         size_t *oList = boundary->get_obstacleList();
         size_t size_oList = boundary->getSize_obstacleList();
         std::mt19937 mt;
+        stepsize = 1.0/stepsize;
 
         if (seedCheck) {
           mt = std::mt19937(seed);
@@ -1204,16 +1206,16 @@ namespace Functions {
           std::random_device rd;
           mt = std::mt19937(rd());
         }
-        std::uniform_real_distribution<real> dist(-range, range);
+        std::uniform_real_distribution<real> dist(-range*stepsize, range*stepsize);
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
             // generate secret number between 0 and range:
             if (abs) {
-                out->data[idx] = Va->data[idx] + dist(mt);
+                out->data[idx] = Va->data[idx] + dist(mt)/stepsize;
             } else {
-                out->data[idx] = Va->data[idx] * 1 + dist(mt);
+                out->data[idx] = Va->data[idx] * 1 + dist(mt)/stepsize;
             }
         }
         // boundary cells
@@ -1221,9 +1223,9 @@ namespace Functions {
             size_t idx = bList[i];
             //generate secret number between 0 and range:
             if (abs) {
-                out->data[idx] = Va->data[idx] + dist(mt);
+                out->data[idx] = Va->data[idx] + dist(mt)/stepsize;
             } else {
-                out->data[idx] = Va->data[idx] * 1 + dist(mt);
+                out->data[idx] = Va->data[idx] * 1 + dist(mt)/stepsize;
             }
         }
         // obstacles
@@ -1231,9 +1233,9 @@ namespace Functions {
             size_t idx = oList[i];
             // generate secret number between 0 and range:
             if (abs) {
-                out->data[idx] = Va->data[idx] + dist(mt);
+                out->data[idx] = Va->data[idx] + dist(mt)/stepsize;
             } else {
-                out->data[idx] = Va->data[idx] * 1 + dist(mt);
+                out->data[idx] = Va->data[idx] * 1 + dist(mt)/stepsize;
             }
         }
     }

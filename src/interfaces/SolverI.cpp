@@ -950,14 +950,22 @@ void SolverI::CallRandom(Field* tempField) {
   auto params = Parameters::getInstance();
   bool abs = params->getBool("initial_conditions/absolute");
   real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
-  bool checkSeed = params->getBool("initial_conditions/customSeed");
-  if (checkSeed) {
-    bool seed = params->getInt("initial_conditions/seed");
-    Functions::Random(tempField, tempField, range, abs, checkSeed, seed);
-  } else {
-    Functions::Random(tempField, tempField, range, abs);
-  }
+  bool seedCheck = params->getBool("initial_conditions/customSeed");
+  bool stepsCheck = params->getBool("initial_conditions/customSteps");
 
+  if ((seedCheck) && (stepsCheck)) {
+    bool seed = params->getInt("initial_conditions/seed");
+    real stepsize = params->getReal("initial_conditions/stepsize");
+    Functions::Random(tempField, tempField, range, abs, seedCheck, seed, stepsize);
+  } else if (seedCheck) {
+    bool seed = params->getInt("initial_conditions/seed");
+    Functions::Random(tempField, tempField, range, abs, seedCheck, seed, 1.0);
+  } else if (stepsCheck) {
+    real stepsize = params->getReal("initial_conditions/stepsize");
+    Functions::Random(tempField, tempField, range, abs, false, 0, stepsize);
+  } else {
+    Functions::Random(tempField, tempField, range, abs, false, 0, 1.0);
+  }
 }
 
 //======================================= read and calll random function ==================================
@@ -970,12 +978,21 @@ void SolverI::CallRandom(Field* tempField, real Va) {
   auto params = Parameters::getInstance();
   bool abs = params->getBool("initial_conditions/absolute");
   real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
-  bool checkSeed = params->getBool("initial_conditions/customSeed");
-  if (checkSeed) {
+  bool seedCheck = params->getBool("initial_conditions/customSeed");
+  bool stepsCheck = params->getBool("initial_conditions/customSteps");
+
+  if ((seedCheck) && (stepsCheck)) {
     bool seed = params->getInt("initial_conditions/seed");
-    Functions::Random(tempField, Va, range, abs, checkSeed, seed);
+    real stepsize = params->getReal("initial_conditions/stepsize");
+    Functions::Random(tempField, Va, range, abs, seedCheck, seed, stepsize);
+  } else if (seedCheck) {
+    bool seed = params->getInt("initial_conditions/seed");
+    Functions::Random(tempField, Va, range, abs, seedCheck, seed, 1.0);
+  } else if (stepsCheck) {
+    real stepsize = params->getReal("initial_conditions/stepsize");
+    Functions::Random(tempField, Va, range, abs, false, 0, stepsize);
   } else {
-    Functions::Random(tempField, Va, range, abs);
+    Functions::Random(tempField, Va, range, abs, false, 0, 1.0);
   }
 
 }
