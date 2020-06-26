@@ -33,7 +33,8 @@ void Parameters::parse(const std::string& filename) {
         std::cout << "read in XML file: " << filename << std::endl;
     }
 
-    tinyxml2::XMLError eResult = this->doc->LoadFile(filename.c_str());
+    tinyxml2::XMLError eResult = this->doc->LoadFile(filename.c_str()); // loads xml file
+    m_filename = filename;
 }
 
 // ======================================== Getter =======================================
@@ -65,7 +66,7 @@ std::string Parameters::get(const std::string &raw_path) {
 /// \brief  gets real number (from xml-file)
 /// \param	raw_path		tree path (as string) of xml-file
 // ***************************************************************************************
-real Parameters::getReal(const std::string &raw_path) {
+real Parameters::get_real(const std::string &raw_path) {
     auto raw_result = this->get(raw_path);
     return real(std::stod(raw_result));
 }
@@ -74,7 +75,7 @@ real Parameters::getReal(const std::string &raw_path) {
 /// \brief  gets double number (from xml-file)
 /// \param	raw_path		tree path (as string) of xml-file
 // ***************************************************************************************
-double Parameters::getDouble(const std::string &raw_path) {
+double Parameters::get_double(const std::string &raw_path) {
     auto raw_result = this->get(raw_path);
     return std::stod(raw_result);
 }
@@ -83,7 +84,7 @@ double Parameters::getDouble(const std::string &raw_path) {
 /// \brief  gets integer number (from xml-file)
 /// \param	raw_path		tree path (as string) of xml-file
 // ***************************************************************************************
-int Parameters::getInt(const std::string &raw_path) {
+int Parameters::get_int(const std::string &raw_path) {
     auto raw_result = this->get(raw_path);
     return std::stoi(raw_result);
 }
