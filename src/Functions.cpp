@@ -1130,7 +1130,7 @@ namespace Functions {
 /// \param	range	range of random numbers
 /// \param	abs     Check if random number is relativ or absolute to Va
 // ***************************************************************************************
-    void Random(Field *out, real Va, real range, bool abs) {
+    void Random(Field *out, real Va, real range, bool abs, bool seedCheck, int seed) {
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
         size_t size_iList = boundary->getSize_innerList();
@@ -1138,9 +1138,14 @@ namespace Functions {
         size_t size_bList = boundary->getSize_boundaryList();
         size_t *oList = boundary->get_obstacleList();
         size_t size_oList = boundary->getSize_obstacleList();
+        std::mt19937 mt;
 
-        std::random_device rd;
-        std::mt19937 mt(rd());
+        if (seedCheck) {
+          mt = std::mt19937(seed);
+        } else {
+          std::random_device rd;
+          mt = std::mt19937(rd());
+        }
         std::uniform_real_distribution<real> dist(-range, range);
 
         // inner cells
@@ -1183,7 +1188,7 @@ namespace Functions {
 /// \param	range	range of random numbers
 /// \param	abs     Check if random number is relativ or absolute to Va
 // ***************************************************************************************
-    void Random(Field *out, Field *Va, real range, bool abs) {
+    void Random(Field *out, Field *Va, real range, bool abs, bool seedCheck, int seed) {
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
         size_t size_iList = boundary->getSize_innerList();
@@ -1191,12 +1196,15 @@ namespace Functions {
         size_t size_bList = boundary->getSize_boundaryList();
         size_t *oList = boundary->get_obstacleList();
         size_t size_oList = boundary->getSize_obstacleList();
+        std::mt19937 mt;
 
-        std::random_device rd;
-        std::mt19937 mt(rd());
+        if (seedCheck) {
+          mt = std::mt19937(seed);
+        } else {
+          std::random_device rd;
+          mt = std::mt19937(rd());
+        }
         std::uniform_real_distribution<real> dist(-range, range);
-
-
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {

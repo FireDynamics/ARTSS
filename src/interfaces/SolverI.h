@@ -147,6 +147,8 @@ private:
 	void ForceSource();
 	void TemperatureSource();
   void MomentumSource();
+  void CallRandom(Field* out);
+  void CallRandom(Field* out, real Va);
 };
 
 #endif /* ATSS_INTERFACES_SOLVERI_H_ */

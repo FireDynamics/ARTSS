@@ -335,6 +335,10 @@ void SolverI::Init() {
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             real val = params->getReal("initial_conditions/val");
             Functions::Uniform(T0, val);
+            bool rnd = params->getBool("initial_conditions/random");
+            if (rnd) {
+                CallRandom(T0);
+            }
             ForceSource();
             TemperatureSource();
         }
@@ -345,10 +349,7 @@ void SolverI::Init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             // Random temperature
-            real Ta = params->getReal("initial_conditions/Ta");        // ambient temperature in KELVIN!
-            bool abs = params->getBool("initial_conditions/absolute");
-            real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
-            Functions::Random(T0, T0, range, abs);
+            CallRandom(T0);
 
         }
         //Random concentration
@@ -356,9 +357,7 @@ void SolverI::Init() {
              m_string_solver == SolverTypes::NSTempTurbConSolver)
             and params->get("initial_conditions/con_fct") == "RandomC") {
             real Ca = params->getReal("initial_conditions/Ca");        //ambient concentration
-            bool abs = params->getBool("initial_conditions/absolute");
-            real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
-            Functions::Random(C0, Ca, range, abs);
+            CallRandom(C0,Ca);
         }
         if (m_string_solver == SolverTypes::NSTempSolver or \
             m_string_solver == SolverTypes::NSTempConSolver or \
@@ -375,9 +374,7 @@ void SolverI::Init() {
             Functions::Layers(T0);
             bool rnd = params->getBool("initial_conditions/random");
             if (rnd) {
-                bool abs = params->getBool("initial_conditions/absolute");
-                real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
-                Functions::Random(T0, T0, range, abs);
+                CallRandom(T0);
             }
             ForceSource();
             TemperatureSource();
@@ -942,4 +939,43 @@ void SolverI::MomentumSource() {
     if (dir_vel.find('z') != std::string::npos) {
         sou_vel->BuoyancyForce(f_z, T, T_a);
     }
+}
+
+//======================================= read and calll random function ==================================
+// ***************************************************************************************
+/// \brief  Calls random function and reads necessary input variables
+/// \param  tempField		temperature as a pointer
+// ***************************************************************************************
+void SolverI::CallRandom(Field* tempField) {
+  auto params = Parameters::getInstance();
+  bool abs = params->getBool("initial_conditions/absolute");
+  real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
+  bool checkSeed = params->getBool("initial_conditions/customSeed");
+  if (checkSeed) {
+    bool seed = params->getInt("initial_conditions/seed");
+    Functions::Random(tempField, tempField, range, abs, checkSeed, seed);
+  } else {
+    Functions::Random(tempField, tempField, range, abs);
+  }
+
+}
+
+//======================================= read and calll random function ==================================
+// ***************************************************************************************
+/// \brief  Calls random function and reads necessary input variables
+/// \param  tempField		temperature as a pointer
+/// \param 	Va 		ambient value
+// ***************************************************************************************
+void SolverI::CallRandom(Field* tempField, real Va) {
+  auto params = Parameters::getInstance();
+  bool abs = params->getBool("initial_conditions/absolute");
+  real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
+  bool checkSeed = params->getBool("initial_conditions/customSeed");
+  if (checkSeed) {
+    bool seed = params->getInt("initial_conditions/seed");
+    Functions::Random(tempField, Va, range, abs, checkSeed, seed);
+  } else {
+    Functions::Random(tempField, Va, range, abs);
+  }
+
 }

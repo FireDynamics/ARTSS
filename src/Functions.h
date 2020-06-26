@@ -56,8 +56,8 @@ namespace Functions { //alphabetically ordered
 
 	real RampTanh(real t);
 
-	void Random(Field* out, real Va, real range, bool abs);
-	void Random(Field* out, Field* Va, real range, bool abs);
+	void Random(Field* out, real Va, real range, bool abs, bool seedCheck = false, int seed = 0);
+	void Random(Field* out, Field* Va, real range, bool abs, bool seedCheck = false, int seed = 0);
 
 	void SinSinSin(Field* out);
 
