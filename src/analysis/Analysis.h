@@ -9,10 +9,11 @@
 
 #include "../interfaces/ISolver.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "Solution.h"
 
 class Analysis {
 public:
-	Analysis();
+	explicit Analysis(Solution *solution);
 
 	void Analyse(ISolver* solver, real t);
 	//real* CalcL2NormMidPoint(real t, real* sum, read_ptr num_u, read_ptr num_p, read_ptr num_T);
@@ -33,6 +34,7 @@ private:
                    size_t size_obstacleList);
 
     bool hasAnalyticSolution = false;
+    Solution *m_solution;
 };
 
 #endif /* ARTSS_ANALYSIS_ANALYSIS_H_ */

@@ -15,7 +15,7 @@
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
-Visual::Visual() {
+Visual::Visual(Solution *solution) {
     auto params = Parameters::getInstance();
     m_filename = remove_extension(params->get_filename());
 
@@ -31,12 +31,13 @@ Visual::Visual() {
         m_vtk_plots = params->get_int("visualisation/vtk_nth_plot");
     }
     m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
+    m_solution = solution;
 }
 
 void Visual::visualise(ISolver *solver, const real t) {
     int n = static_cast<int> (std::round(t / m_dt));
     if (m_has_analytical_solution) {
-        m_solution.CalcAnalyticalSolution(t);
+        m_solution->CalcAnalyticalSolution(t);
     }
 
     std::string filename = create_filename(m_filename, static_cast<int>(std::round(t / m_dt)), false);
@@ -44,7 +45,7 @@ void Visual::visualise(ISolver *solver, const real t) {
         if (fmod(n, m_vtk_plots) == 0 || t >= m_t_end) {
             VTKWriter::write_numerical(solver, filename);
             if (m_has_analytical_solution) {
-                VTKWriter::write_analytical(&m_solution, create_filename(m_filename, t, true));
+                VTKWriter::write_analytical(m_solution, create_filename(m_filename, t, true));
             }
         }
     }
@@ -53,7 +54,7 @@ void Visual::visualise(ISolver *solver, const real t) {
         if (fmod(n, m_csv_plots) == 0 || t >= m_t_end) {
             CSVWriter::write_numerical(solver, filename);
             if (m_has_analytical_solution) {
-                CSVWriter::write_analytical(&m_solution, create_filename(m_filename, t, true));
+                CSVWriter::write_analytical(m_solution, create_filename(m_filename, t, true));
             }
         }
     }

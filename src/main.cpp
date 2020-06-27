@@ -33,7 +33,7 @@
 #endif
 
 int main(int argc, const char **argv) {
-    // 0. Initialization
+    // Initialization
     // Parameters
     std::string XMLfilename;
     if (argc > 1) XMLfilename.assign(argv[1]);
@@ -61,35 +61,18 @@ int main(int argc, const char **argv) {
         std::exit(1);
     }
 
-    // 1. Visualise and test initial conditions
-#ifndef BENCHMARKING
-    // Solution
-    Analysis ana;
-    ana.Analyse(solver, 0.);
-
-    // Visualise
-    Visual vis;
-    vis.visualise(solver, 0.);
-#endif
-
 #ifdef _OPENACC
     // Initialize GPU
     acc_device_t dev_type = acc_get_device_type();
     acc_init( dev_type );
 #endif
 
-    // 2. Integrate over time and solve numerically
+    // Integrate over time and solve numerically
     // Time integration
     TimeIntegration ti(solver);
     ti.run();
 
-    // 3. Compute analytical solution and compare
-#ifndef BENCHMARKING
-    real t_end = params->get_real("physical_parameters/t_end");
-    ana.Analyse(solver, t_end);
-#endif
-
-    //4. Clean up
+    // Clean up
     delete solver;
     return 0;
 }

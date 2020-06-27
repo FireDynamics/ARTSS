@@ -12,7 +12,7 @@
 
 class Visual {
 public:
-    Visual();
+    explicit Visual(Solution* solution);
 
     void visualise(ISolver *solver, real t);
 
@@ -24,7 +24,7 @@ private:
     static std::string remove_extension(const std::string &filename);
 
     std::string m_filename;
-    Solution m_solution;
+    Solution *m_solution;
     bool m_save_csv = false;
     int m_csv_plots = 0;
     bool m_save_vtk = false;

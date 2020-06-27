@@ -48,7 +48,13 @@ void TimeIntegration::run() {
     start = std::chrono::system_clock::now();
 
 #ifndef BENCHMARKING
-    Analysis ana;
+    Solution  *solution = new Solution();
+    Analysis *analysis = new Analysis(solution);
+    analysis->Analyse(m_solver, 0.);
+
+    // Visualise
+    Visual *visual = new Visual(solution);
+    visual->visualise(m_solver, 0.);
 #endif
     {
         // local variables and parameters for GPU
@@ -161,12 +167,11 @@ void TimeIntegration::run() {
 #pragma acc update host(d_nu_t[:bsize])
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
 
-            Visual vis;
-            vis.visualise(m_solver, t_cur);
+            visual->visualise(m_solver, t_cur);
             if (adaption->isDataExtractionBeforeEnabled()) adaption->extractData(adaption->getBeforeName(), adaption->getBeforeHeight(), t_cur);
             // Error Calculation
             // RMS error at midposize_t at each time step Nt
-            ana.CalcL2NormMidPoint(m_solver, t_cur, Sum);
+            analysis->CalcL2NormMidPoint(m_solver, t_cur, Sum);
 
             // To check CFL and VN, comment out
             /*bool CFL_check = ana.CheckTimeStepCFL(u, v, w, dt);
@@ -202,7 +207,7 @@ void TimeIntegration::run() {
         // file.close();
         // Sum up RMS error
 #ifndef BENCHMARKING
-        ana.CalcRMSError(Sum[0], Sum[1], Sum[2]);
+        analysis->CalcRMSError(Sum[0], Sum[1], Sum[2]);
 #endif
 
 #pragma acc wait
@@ -225,7 +230,8 @@ void TimeIntegration::run() {
         adaption->extractData(adaption->getEndresultName());
     }
     // testing correct output (when changing implementation/ calculating on GPU)
-    ana.SaveVariablesInFile(m_solver);
+    analysis->SaveVariablesInFile(m_solver);
+    analysis->Analyse(m_solver, m_t_end);
 #endif
     delete (adaption);
 }

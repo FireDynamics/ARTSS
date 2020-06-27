@@ -18,7 +18,7 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 
-Analysis::Analysis() {
+Analysis::Analysis(Solution *solution) {
     auto params = Parameters::getInstance();
     hasAnalyticSolution = params->get("solver/solution/available") == "Yes";
     if (hasAnalyticSolution) {
@@ -27,6 +27,7 @@ Analysis::Analysis() {
         std::cout << "No analytical solution available!\n" << std::endl;
         //TODO Logger
     }
+    m_solution = solution;
 }
 
 // ===================================== Start analysis ==================================
@@ -38,15 +39,14 @@ Analysis::Analysis() {
 void Analysis::Analyse(ISolver *solver, const real t) {
     //TODO statement t == 0.
     if (hasAnalyticSolution) {
-        Solution solution;
-        solution.CalcAnalyticalSolution(t);
+        m_solution->CalcAnalyticalSolution(t);
 
         auto params = Parameters::getInstance();
 
         tinyxml2::XMLElement *xmlParameter = params->get_first_child("boundaries");
         auto curElem = xmlParameter->FirstChildElement();
 
-        solution.CalcAnalyticalSolution(t);
+        m_solution->CalcAnalyticalSolution(t);
         std::cout << "\nCompare to analytical solution:" << std::endl;
         //TODO Logger
 
@@ -56,19 +56,19 @@ void Analysis::Analyse(ISolver *solver, const real t) {
             if (nodeName == "boundary") {
                 std::string field = curElem->Attribute("field");
                 if (field.find(BoundaryData::getFieldTypeName(FieldType::U)) != std::string::npos) {
-                    CompareSolutions(solver->GetU(), solution.GetU(), FieldType::U, t);
+                    CompareSolutions(solver->GetU(), m_solution->GetU(), FieldType::U, t);
                 }
                 if (field.find(BoundaryData::getFieldTypeName(FieldType::V)) != std::string::npos) {
-                    CompareSolutions(solver->GetV(), solution.GetV(), FieldType::V, t);
+                    CompareSolutions(solver->GetV(), m_solution->GetV(), FieldType::V, t);
                 }
                 if (field.find(BoundaryData::getFieldTypeName(FieldType::W)) != std::string::npos) {
-                    CompareSolutions(solver->GetW(), solution.GetW(), FieldType::W, t);
+                    CompareSolutions(solver->GetW(), m_solution->GetW(), FieldType::W, t);
                 }
                 if (field.find(BoundaryData::getFieldTypeName(FieldType::P)) != std::string::npos) {
-                    CompareSolutions(solver->GetP(), solution.GetP(), FieldType::P, t);
+                    CompareSolutions(solver->GetP(), m_solution->GetP(), FieldType::P, t);
                 }
                 if (field.find(BoundaryData::getFieldTypeName(FieldType::T)) != std::string::npos) {
-                    CompareSolutions(solver->GetT(), solution.GetT(), FieldType::T, t);
+                    CompareSolutions(solver->GetT(), m_solution->GetT(), FieldType::T, t);
                 }
             }//end if
             curElem = curElem->NextSiblingElement();
@@ -209,7 +209,6 @@ real Analysis::CalcRelativeSpatialError(read_ptr num, read_ptr ana) {
 /// \param	sum			pointer to sum for (u,p,T results)
 // ***************************************************************************************
 void Analysis::CalcL2NormMidPoint(ISolver *solver, real t, real *sum) {
-    Solution solution;
 
     auto boundary = BoundaryController::getInstance();
     size_t *iList = boundary->get_innerList_level_joined();
@@ -222,12 +221,12 @@ void Analysis::CalcL2NormMidPoint(ISolver *solver, real t, real *sum) {
 
     auto params = Parameters::getInstance();
     if (hasAnalyticSolution) {
-        solution.CalcAnalyticalSolution(t);
+        m_solution->CalcAnalyticalSolution(t);
 
         // local variables and parameters
-        auto d_ua = solution.GetU();
-        auto d_pa = solution.GetP();
-        auto d_Ta = solution.GetT();
+        auto d_ua = m_solution->GetU();
+        auto d_pa = m_solution->GetP();
+        auto d_Ta = m_solution->GetT();
 
         auto d_u = solver->GetU();
         auto d_p = solver->GetP();
