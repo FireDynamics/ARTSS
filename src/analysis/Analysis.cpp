@@ -22,7 +22,7 @@ Analysis::Analysis() {
     auto params = Parameters::getInstance();
     hasAnalyticSolution = params->get("solver/solution/available") == "Yes";
     if (hasAnalyticSolution) {
-        m_tol = params->getReal("solver/solution/tol");
+        m_tol = params->get_real("solver/solution/tol");
     } else {
         std::cout << "No analytical solution available!\n" << std::endl;
         //TODO Logger
@@ -42,11 +42,7 @@ void Analysis::Analyse(ISolver *solver, const real t) {
     auto params = Parameters::getInstance();
 
     if (hasAnalyticSolution) {
-
-        std::string filename = params->get("xml_filename");
-        tinyxml2::XMLDocument doc(filename.c_str());
-        tinyxml2::XMLError eResult = doc.LoadFile(filename.c_str());
-        tinyxml2::XMLElement *xmlParameter = doc.RootElement()->FirstChildElement("boundaries");
+        tinyxml2::XMLElement *xmlParameter = params->get_first_child("boundaries");
 
         auto curElem = xmlParameter->FirstChildElement();
 
@@ -60,39 +56,19 @@ void Analysis::Analyse(ISolver *solver, const real t) {
             if (nodeName == "boundary") {
                 std::string field = curElem->Attribute("field");
                 if (field.find(BoundaryData::getFieldTypeName(FieldType::U)) != std::string::npos) {
-                    if (t == 0.) {
-                        CompareSolutions(solver->GetU0(), solution.GetU0(), solver->u0->GetType(), 0.);
-                    } else {
-                        CompareSolutions(solver->GetU(), solution.GetU(), solver->u->GetType(), t);
-                    }
+                    CompareSolutions(solver->GetU(), solution.GetU(), FieldType::U, t);
                 }
                 if (field.find(BoundaryData::getFieldTypeName(FieldType::V)) != std::string::npos) {
-                    if (t == 0.) {
-                        CompareSolutions(solver->GetV0(), solution.GetV0(), solver->v0->GetType(), 0.);
-                    } else {
-                        CompareSolutions(solver->GetV(), solution.GetV(), solver->v->GetType(), t);
-                    }
+                    CompareSolutions(solver->GetV(), solution.GetV(), FieldType::V, t);
                 }
                 if (field.find(BoundaryData::getFieldTypeName(FieldType::W)) != std::string::npos) {
-                    if (t == 0.) {
-                        CompareSolutions(solver->GetW0(), solution.GetW0(), solver->w0->GetType(), 0.);
-                    } else {
-                        CompareSolutions(solver->GetW(), solution.GetW(), solver->w->GetType(), t);
-                    }
+                    CompareSolutions(solver->GetW(), solution.GetW(), FieldType::W, t);
                 }
                 if (field.find(BoundaryData::getFieldTypeName(FieldType::P)) != std::string::npos) {
-                    if (t == 0.) {
-                        CompareSolutions(solver->GetP0(), solution.GetP0(), solver->p0->GetType(), 0.);
-                    } else {
-                        CompareSolutions(solver->GetP(), solution.GetP(), solver->p->GetType(), t);
-                    }
+                    CompareSolutions(solver->GetP(), solution.GetP(), FieldType::P, t);
                 }
                 if (field.find(BoundaryData::getFieldTypeName(FieldType::T)) != std::string::npos) {
-                    if (t == 0.) {
-                        CompareSolutions(solver->GetT0(), solution.GetT0(), solver->T0->GetType(), 0.);
-                    } else {
-                        CompareSolutions(solver->GetT(), solution.GetT(), solver->T->GetType(), t);
-                    }
+                    CompareSolutions(solver->GetT(), solution.GetT(), FieldType::T, t);
                 }
             }//end if
             curElem = curElem->NextSiblingElement();
@@ -124,7 +100,7 @@ bool Analysis::CompareSolutions(read_ptr num, read_ptr ana, const FieldType type
     } else {
         std::cout << BoundaryData::getFieldTypeName(type) << " FAILED Test at time " << t << " with error e=" << res << std::endl;
         //TODO Logger
-      }
+    }
     return verification;
 }
 
@@ -280,8 +256,8 @@ void Analysis::CalcRMSError(real sumu, real sump, real sumT) {
 
     if (params->get("solver/solution/available") == "Yes") {
         // local variables and parameters
-        real dt = params->getReal("physical_parameters/dt");
-        real t_end = params->getReal("physical_parameters/t_end");
+        real dt = params->get_real("physical_parameters/dt");
+        real t_end = params->get_real("physical_parameters/t_end");
         auto Nt = static_cast<size_t>(std::round(t_end / dt));
         real rNt = 1. / Nt;
         real epsu = sqrt(rNt * sumu);
@@ -309,7 +285,7 @@ bool Analysis::CheckTimeStepVN(Field *u, real dt) {
     auto domain = Domain::getInstance();
 
     // local variables and parameters
-    real nu = params->getReal("physical_parameters/nu");
+    real nu = params->get_real("physical_parameters/nu");
 
     real dx = domain->Getdx(u->GetLevel());
     real dy = domain->Getdy(u->GetLevel());
@@ -439,15 +415,15 @@ void Analysis::SaveVariablesInFile(ISolver *solv) {
     size_t *obstacleList = boundary->get_obstacleList();
     size_t size_obstacleList = boundary->getSize_obstacleList();
 
-    const real *dataField[numberOfFieldTypes-1];
-    dataField[FieldType::U-1] = solv->GetU();
-    dataField[FieldType::V-1] = solv->GetV();
-    dataField[FieldType::W-1] = solv->GetW();
-    dataField[FieldType::P-1] = solv->GetP();
-    dataField[FieldType::T-1] = solv->GetT();
+    const real *dataField[numberOfFieldTypes - 1];
+    dataField[FieldType::U - 1] = solv->GetU();
+    dataField[FieldType::V - 1] = solv->GetV();
+    dataField[FieldType::W - 1] = solv->GetW();
+    dataField[FieldType::P - 1] = solv->GetP();
+    dataField[FieldType::T - 1] = solv->GetT();
 
-    for (size_t i = 0; i < numberOfFieldTypes -1; i++) {
-        writeFile(dataField[i], BoundaryData::getFieldTypeName(static_cast<FieldType>(i+1)), innerList, size_innerList, boundaryList, size_boundaryList, obstacleList, size_obstacleList);
+    for (size_t i = 0; i < numberOfFieldTypes - 1; i++) {
+        writeFile(dataField[i], BoundaryData::getFieldTypeName(static_cast<FieldType>(i + 1)), innerList, size_innerList, boundaryList, size_boundaryList, obstacleList, size_obstacleList);
     }
 }
 

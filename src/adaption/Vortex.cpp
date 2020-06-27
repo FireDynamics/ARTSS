@@ -12,9 +12,9 @@ Vortex::Vortex(Adaption *pAdaption, Field **fields) {
 
     auto domain = Domain::getInstance();
     auto params = Parameters::getInstance();
-    m_u_lin = params->getReal("initial_conditions/u_lin");
-    m_v_lin = params->getReal("initial_conditions/v_lin");
-    m_w_lin = params->getReal("initial_conditions/w_lin");
+    m_u_lin = params->get_real("initial_conditions/u_lin");
+    m_v_lin = params->get_real("initial_conditions/v_lin");
+    m_w_lin = params->get_real("initial_conditions/w_lin");
     m_minimal = static_cast<size_t> (std::pow(2, domain->GetLevels()));
     m_reduction = (params->get("adaption/class/reduction/enabled") == "Yes");
     if (m_reduction){
@@ -23,8 +23,8 @@ Vortex::Vortex(Adaption *pAdaption, Field **fields) {
       if(dir.find('y')!=std::string::npos) m_y_side=true;
       if(dir.find('z')!=std::string::npos) m_z_side=true;
     }
-    m_buffer = params->getInt("adaption/class/buffer");
-    m_threshold = m_u_lin * params->getReal("adaption/class/threshold");
+    m_buffer = params->get_int("adaption/class/buffer");
+    m_threshold = m_u_lin * params->get_real("adaption/class/threshold");
     m_pAdaption = pAdaption;
 
     u = fields[VectorFieldsTypes::VEL_U];

@@ -7,7 +7,6 @@
 #ifndef ARTSS_DOMAIN_H
 #define ARTSS_DOMAIN_H
 
-
 #include <cstddef>
 #include <cmath>
 #include "utility/GlobalMacrosTypes.h"
@@ -53,12 +52,12 @@ public:
     real inline Getly() {return fabs(m_y2-m_y1);};
     real inline Getlz() {return fabs(m_z2-m_z1);};
 
-    real inline Getdx() {return this->Getlx()/(m_nx[0]-2);};
-    real inline Getdy() {return this->Getly()/(m_ny[0]-2);};
-    real inline Getdz() {return this->Getlz()/(m_nz[0]-2);};
-    real inline Getdx(size_t level) {return this->Getlx()/(m_nx[level]-2);};
-    real inline Getdy(size_t level) {return this->Getly()/(m_ny[level]-2);};
-    real inline Getdz(size_t level) {return this->Getlz()/(m_nz[level]-2);};
+    real inline Getdx() {return this->Getlx()/(static_cast<double>(m_nx[0])-2);};
+    real inline Getdy() {return this->Getly()/(static_cast<double>(m_ny[0])-2);};
+    real inline Getdz() {return this->Getlz()/(static_cast<double>(m_nz[0])-2);};
+    real inline Getdx(size_t level) {return this->Getlx()/(static_cast<double>(m_nx[level])-2);};
+    real inline Getdy(size_t level) {return this->Getly()/(static_cast<double>(m_ny[level])-2);};
+    real inline Getdz(size_t level) {return this->Getlz()/(static_cast<double>(m_nz[level])-2);};
 
     // start and end index of computational domain without ghost cells
     size_t inline GetIndexx1() { return GetIndexx1(0); }
@@ -74,7 +73,7 @@ public:
     size_t inline GetIndexz1(size_t level) { return static_cast<size_t> (std::round((m_z1 - m_Z1) / Getdz(level)))+1; }
     size_t inline GetIndexz2(size_t level) { return static_cast<size_t> (std::round((m_z2 - m_Z1) / Getdz(level))); }
 
-    size_t inline GetLevels(){return m_levels;};
+    size_t inline GetLevels() {return m_levels;};
 
     size_t inline GetSize(){ return GetNx()*GetNy()*GetNz();};
     size_t inline GetSize(size_t level){ return GetNx(level)*GetNy(level)*GetNz(level);};

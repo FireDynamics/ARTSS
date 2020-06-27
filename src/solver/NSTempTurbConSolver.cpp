@@ -29,7 +29,7 @@ NSTempTurbConSolver::NSTempTurbConSolver() {
     // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(&dif_vel, params->get("solver/diffusion/type"));
 
-    m_nu = params->getReal("physical_parameters/nu");
+    m_nu = params->get_real("physical_parameters/nu");
 
     // Turbulent viscosity for velocity diffusion
     SolverSelection::SetTurbulenceSolver(&mu_tub, params->get("solver/turbulence/type"));
@@ -37,12 +37,12 @@ NSTempTurbConSolver::NSTempTurbConSolver() {
     // Diffusion of temperature
     SolverSelection::SetDiffusionSolver(&dif_temp, params->get("solver/temperature/diffusion/type"));
 
-    m_kappa = params->getReal("physical_parameters/kappa");
+    m_kappa = params->get_real("physical_parameters/kappa");
 
     // Diffusion for concentration
     SolverSelection::SetDiffusionSolver(&dif_con, params->get("solver/concentration/diffusion/type"));
 
-    m_gamma = params->getReal("solver/concentration/diffusion/gamma");
+    m_gamma = params->get_real("solver/concentration/diffusion/gamma");
 
     // Pressure
     SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), p, rhs);
@@ -229,7 +229,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         // Solve diffusion equation
         // turbulence
         if (m_hasTurbulenceTemperature) {
-            real Pr_T = params->getReal("solver/temperature/turbulence/Pr_T");
+            real Pr_T = params->get_real("solver/temperature/turbulence/Pr_T");
             real rPr_T = 1. / Pr_T;
 
 #pragma acc parallel loop independent present(d_kappa_t[:bsize], d_nu_t[:bsize]) async
@@ -301,7 +301,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         // Solve diffusion equation
         // turbulence
         if (m_hasTurbulenceConcentration) {
-            real Sc_T = params->getReal("solver/concentration/turbulence/Sc_T");
+            real Sc_T = params->get_real("solver/concentration/turbulence/Sc_T");
             real rSc_T = 1. / Sc_T;
 
 #pragma acc parallel loop independent present(d_gamma_t[:bsize], d_nu_t[:bsize]) async

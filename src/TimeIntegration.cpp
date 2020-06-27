@@ -15,7 +15,7 @@
 #include "Domain.h"
 
 #ifndef BENCHMARKING
-#include "utility/Visual.h"
+#include "visualisation/Visual.h"
 #endif
 
 // ==================================== Constructor ====================================
@@ -25,11 +25,11 @@
 /// \param  fname filename of xml-input (via argument)
 // ***************************************************************************************
 TimeIntegration::TimeIntegration(ISolver *isolv, const char *fname) {
-	auto params = Parameters::getInstance();
-	auto domain = Domain::getInstance();
+  auto params = Parameters::getInstance();
+  auto domain = Domain::getInstance();
 
-    m_dt = params->getReal("physical_parameters/dt");
-    m_t_end = params->getReal("physical_parameters/t_end");
+    m_dt = params->get_real("physical_parameters/dt");
+    m_t_end = params->get_real("physical_parameters/t_end");
     m_t_cur = m_dt;        // since t=0 already handled in setup
 
     m_size = domain->GetSize();

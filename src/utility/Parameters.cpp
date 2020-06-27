@@ -88,3 +88,7 @@ int Parameters::get_int(const std::string &raw_path) {
     auto raw_result = this->get(raw_path);
     return std::stoi(raw_result);
 }
+
+tinyxml2::XMLElement* Parameters::get_first_child(const char* raw_path){
+    return this->doc->RootElement()->FirstChildElement(raw_path);
+}

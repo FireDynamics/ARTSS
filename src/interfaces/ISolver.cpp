@@ -337,7 +337,7 @@ void ISolver::Init() {
             m_string_solver == SolverTypes::NSTempConSolver or \
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
-            real val = params->getReal("initial_conditions/val");
+            real val = params->get_real("initial_conditions/val");
             Functions::Uniform(T0, val);
             ForceSource();
             TemperatureSource();
@@ -349,9 +349,9 @@ void ISolver::Init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             // Random temperature
-            real Ta = params->getReal("initial_conditions/Ta");        // ambient temperature in KELVIN!
-            real A = params->getReal("initial_conditions/A");            // amplitude
-            size_t range = static_cast<size_t>(params->getInt("initial_conditions/range")); // range of random numbers (0-range)
+            real Ta = params->get_real("initial_conditions/Ta");        // ambient temperature in KELVIN!
+            real A = params->get_real("initial_conditions/A");            // amplitude
+            size_t range = static_cast<size_t>(params->get_int("initial_conditions/range")); // range of random numbers (0-range)
             Functions::Random(T0, Ta, A, range);
         }
         //Random concentration
@@ -359,9 +359,9 @@ void ISolver::Init() {
              m_string_solver == SolverTypes::NSTempTurbConSolver)
             and params->get("initial_conditions/con_fct") == "RandomC") {
 
-            real Ca = params->getReal("initial_conditions/Ca");        //ambient concentration
-            real A_C = params->getReal("initial_conditions/A_C");        //amplitude
-            size_t range_C = static_cast<size_t>(params->getInt("initial_conditions/range_C")); //range of random numbers (0-range)
+            real Ca = params->get_real("initial_conditions/Ca");        //ambient concentration
+            real A_C = params->get_real("initial_conditions/A_C");        //amplitude
+            size_t range_C = static_cast<size_t>(params->get_int("initial_conditions/range_C")); //range of random numbers (0-range)
 
             Functions::Random(C0, Ca, A_C, range_C);
         }
@@ -387,8 +387,8 @@ void ISolver::Init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             Functions::Layers(T0);
-            real A = params->getReal("initial_conditions/A");        //amplitude
-            size_t range = static_cast<size_t>(params->getReal("initial_conditions/range"));    //range of random numbers (0-range)
+            real A = params->get_real("initial_conditions/A");        //amplitude
+            size_t range = static_cast<size_t>(params->get_real("initial_conditions/range"));    //range of random numbers (0-range)
             Functions::Random(T0, T0, A, range);
             ForceSource();
             TemperatureSource();
@@ -400,9 +400,9 @@ void ISolver::Init() {
             real val_x = 0;
             real val_y = 0;
             real val_z = 0;
-            val_x = params->getReal("solver/source/val_x");
-            val_y = params->getReal("solver/source/val_y");
-            val_z = params->getReal("solver/source/val_z");
+            val_x = params->get_real("solver/source/val_x");
+            val_y = params->get_real("solver/source/val_y");
+            val_z = params->get_real("solver/source/val_z");
             std::string dir = params->get("solver/source/dir");
 
             if (dir.find('x') != std::string::npos) {
@@ -821,14 +821,14 @@ void ISolver::UpdateSources(real t, bool sync) {
             sou_vel->BuoyancyST_MMS(S_T, t, sync);
         } else if (tempFct == SourceMethods::GaussST and params->get("solver/temperature/source/ramp_fct") == FunctionNames::RampTanh) {
             // get parameters for Gauss function
-            real HRR = params->getReal("solver/temperature/source/HRR");    // heat release rate in [kW]
-            real cp = params->getReal("solver/temperature/source/cp");        // specific heat capacity in [kJ/ kg K]
-            real x0 = params->getReal("solver/temperature/source/x0");
-            real y0 = params->getReal("solver/temperature/source/y0");
-            real z0 = params->getReal("solver/temperature/source/z0");
-            real sigmax = params->getReal("solver/temperature/source/sigmax");
-            real sigmay = params->getReal("solver/temperature/source/sigmay");
-            real sigmaz = params->getReal("solver/temperature/source/sigmaz");
+            real HRR = params->get_real("solver/temperature/source/HRR");    // heat release rate in [kW]
+            real cp = params->get_real("solver/temperature/source/cp");        // specific heat capacity in [kJ/ kg K]
+            real x0 = params->get_real("solver/temperature/source/x0");
+            real y0 = params->get_real("solver/temperature/source/y0");
+            real z0 = params->get_real("solver/temperature/source/z0");
+            real sigmax = params->get_real("solver/temperature/source/sigmax");
+            real sigmay = params->get_real("solver/temperature/source/sigmay");
+            real sigmaz = params->get_real("solver/temperature/source/sigmaz");
 
             sou_vel->Gauss(S_T, HRR, cp, x0, y0, z0, sigmax, sigmay, sigmaz, sync);
 
@@ -866,16 +866,16 @@ void ISolver::UpdateSources(real t, bool sync) {
         } else if (conFct == SourceMethods::GaussSC \
  and params->get("solver/concentration/source/ramp_fct") == FunctionNames::RampTanh) {
             //get parameters for Gauss function
-            real HRR = params->getReal("solver/concentration/source/HRR");       // heat release rate in [kW]
-            real Hc = params->getReal("solver/concentration/source/Hc");        // heating value in [kJ/kg]
-            real Ys = params->getReal("solver/concentration/source/Ys");        // soot yield in [g/g]
+            real HRR = params->get_real("solver/concentration/source/HRR");       // heat release rate in [kW]
+            real Hc = params->get_real("solver/concentration/source/Hc");        // heating value in [kJ/kg]
+            real Ys = params->get_real("solver/concentration/source/Ys");        // soot yield in [g/g]
             real YsHRR = Ys * HRR;
-            real x0 = params->getReal("solver/concentration/source/x0");
-            real y0 = params->getReal("solver/concentration/source/y0");
-            real z0 = params->getReal("solver/concentration/source/z0");
-            real sigmax = params->getReal("solver/concentration/source/sigmax");
-            real sigmay = params->getReal("solver/concentration/source/sigmay");
-            real sigmaz = params->getReal("solver/concentration/source/sigmaz");
+            real x0 = params->get_real("solver/concentration/source/x0");
+            real y0 = params->get_real("solver/concentration/source/y0");
+            real z0 = params->get_real("solver/concentration/source/z0");
+            real sigmax = params->get_real("solver/concentration/source/sigmax");
+            real sigmay = params->get_real("solver/concentration/source/sigmay");
+            real sigmaz = params->get_real("solver/concentration/source/sigmaz");
 
             sou_con->Gauss(S_C, YsHRR, Hc, x0, y0, z0, sigmax, sigmay, sigmaz, sync);
             auto d_S_C = S_C->data;

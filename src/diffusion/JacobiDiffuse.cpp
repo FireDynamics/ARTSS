@@ -17,12 +17,12 @@ JacobiDiffuse::JacobiDiffuse() {
 
     auto params = Parameters::getInstance();
 
-    m_dt = params->getReal("physical_parameters/dt");
+    m_dt = params->get_real("physical_parameters/dt");
     m_dsign = 1.;
-    m_w = params->getReal("solver/diffusion/w");
+    m_w = params->get_real("solver/diffusion/w");
 
-    m_max_iter = static_cast<size_t>(params->getInt("solver/diffusion/max_iter"));
-    m_tol_res = params->getReal("solver/diffusion/tol_res");
+    m_max_iter = static_cast<size_t>(params->get_int("solver/diffusion/max_iter"));
+    m_tol_res = params->get_real("solver/diffusion/tol_res");
 }
 
 //====================================== Diffuse ===============================================

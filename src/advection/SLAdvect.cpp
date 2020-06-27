@@ -27,7 +27,7 @@
 SLAdvect::SLAdvect() {
 
     auto params = Parameters::getInstance();
-    m_dt = params->getReal("physical_parameters/dt");
+    m_dt = params->get_real("physical_parameters/dt");
 }
 
 // ***************************************************************************************

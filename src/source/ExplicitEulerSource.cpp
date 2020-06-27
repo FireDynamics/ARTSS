@@ -14,7 +14,7 @@ ExplicitEulerSource::ExplicitEulerSource() {
 
     auto params = Parameters::getInstance();
 
-    m_dt = params->getReal("physical_parameters/dt");
+    m_dt = params->get_real("physical_parameters/dt");
     m_dir_vel = params->get("solver/source/dir");
 
     if (m_dir_vel.find('x') == std::string::npos && m_dir_vel.find('y') == std::string::npos && m_dir_vel.find('z') == std::string::npos) {

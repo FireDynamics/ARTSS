@@ -27,12 +27,12 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
     auto domain = Domain::getInstance();
 
     levels = domain->GetLevels();
-    cycles = static_cast<size_t> (params->getInt("solver/pressure/n_cycle"));
-    relaxs = static_cast<size_t> (params->getInt("solver/pressure/diffusion/n_relax"));
+    cycles = static_cast<size_t> (params->get_int("solver/pressure/n_cycle"));
+    relaxs = static_cast<size_t> (params->get_int("solver/pressure/diffusion/n_relax"));
 
     m_dsign = -1.;
     m_w = 2. / 3.;
-    m_w = params->getReal("solver/pressure/diffusion/w");
+    m_w = params->get_real("solver/pressure/diffusion/w");
 
     // copies of out and b to prevent aliasing
     auto d_out = out->data;
@@ -259,21 +259,21 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
     // solve more accurately, in first time step
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
-    const real dt = params->getReal("physical_parameters/dt");
+    const real dt = params->get_real("physical_parameters/dt");
     const size_t Nt = static_cast<size_t>(std::round(t / dt));
 
-    const size_t set_relaxs = static_cast<size_t>(params->getInt("solver/pressure/diffusion/n_relax"));
-    const size_t set_cycles = static_cast<size_t>(params->getInt("solver/pressure/n_cycle"));
+    const size_t set_relaxs = static_cast<size_t>(params->get_int("solver/pressure/diffusion/n_relax"));
+    const size_t set_cycles = static_cast<size_t>(params->get_int("solver/pressure/n_cycle"));
 
     size_t act_cycles = 0;
 
     if (Nt == 1) {
-        const int max_cycles = params->getInt("solver/pressure/max_cycle");
-        const int max_relaxs = params->getInt("solver/pressure/diffusion/max_solve");
+        const int max_cycles = params->get_int("solver/pressure/max_cycle");
+        const int max_relaxs = params->get_int("solver/pressure/diffusion/max_solve");
 
         real r = 10000.;
         real sum = 0;
-        const real tol_res = params->getReal("solver/pressure/tol_res");
+        const real tol_res = params->get_real("solver/pressure/tol_res");
 
         const size_t Nx = domain->GetNx();
         const size_t Ny = domain->GetNy();
@@ -988,8 +988,8 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
             size_t it = 0;
-            const size_t max_it = static_cast<size_t> (params->getInt("solver/pressure/diffusion/max_solve"));
-            const real tol_res = params->getReal("solver/pressure/diffusion/tol_res");
+            const size_t max_it = static_cast<size_t> (params->get_int("solver/pressure/diffusion/max_solve"));
+            const real tol_res = params->get_real("solver/pressure/diffusion/tol_res");
             real sum;
             real res = 10000.;
 
@@ -1042,8 +1042,8 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
             size_t it = 0;
-            const size_t max_it = static_cast<size_t>(params->getInt("solver/diffusion/max_iter"));
-            const real tol_res = params->getReal("solver/diffusion/tol_res");
+            const size_t max_it = static_cast<size_t>(params->get_int("solver/diffusion/max_iter"));
+            const real tol_res = params->get_real("solver/diffusion/tol_res");
             real sum;
             real res = 10000.;
 

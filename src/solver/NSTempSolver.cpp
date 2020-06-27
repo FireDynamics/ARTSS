@@ -26,12 +26,12 @@ NSTempSolver::NSTempSolver() {
     // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(&dif_vel, params->get("solver/diffusion/type"));
 
-    m_nu = params->getReal("physical_parameters/nu");
+    m_nu = params->get_real("physical_parameters/nu");
 
     // Diffusion of temperature
     SolverSelection::SetDiffusionSolver(&dif_temp, params->get("solver/temperature/diffusion/type"));
 
-    m_kappa = params->getReal("physical_parameters/kappa");
+    m_kappa = params->get_real("physical_parameters/kappa");
 
     // Pressure
     SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), p, rhs);

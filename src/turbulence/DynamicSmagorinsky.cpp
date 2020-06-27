@@ -16,7 +16,7 @@ DynamicSmagorinsky::DynamicSmagorinsky(){
 
 	auto params = Parameters::getInstance();
 
-	m_nu = params->getReal("physical_parameters/nu");
+	m_nu = params->get_real("physical_parameters/nu");
 
 	u_f = new Field(FieldType::U, 0.0);
 	v_f = new Field(FieldType::U, 0.0);

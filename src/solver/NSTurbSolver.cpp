@@ -23,7 +23,7 @@ NSTurbSolver::NSTurbSolver() {
     //Diffusion of velocity
     SolverSelection::SetDiffusionSolver(&dif_vel, params->get("solver/diffusion/type"));
 
-    m_nu = params->getReal("physical_parameters/nu");
+    m_nu = params->get_real("physical_parameters/nu");
 
     // Turbulent viscosity
     SolverSelection::SetTurbulenceSolver(&mu_tub, params->get("solver/turbulence/type"));

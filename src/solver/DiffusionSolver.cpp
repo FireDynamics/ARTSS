@@ -18,7 +18,7 @@ DiffusionSolver::DiffusionSolver() {
     std::string diffusionType = params->get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
 
-    m_nu = params->getReal("physical_parameters/nu");
+    m_nu = params->get_real("physical_parameters/nu");
     control();
 }
 
@@ -42,9 +42,6 @@ void DiffusionSolver::DoStep(real t, bool sync) {
     auto u = ISolver::u;
     auto v = ISolver::v;
     auto w = ISolver::w;
-    auto u0 = ISolver::u0;
-    auto v0 = ISolver::v0;
-    auto w0 = ISolver::w0;
     auto u_tmp = ISolver::u_tmp;
     auto v_tmp = ISolver::v_tmp;
     auto w_tmp = ISolver::w_tmp;
@@ -52,9 +49,6 @@ void DiffusionSolver::DoStep(real t, bool sync) {
     auto d_u = u->data;
     auto d_v = v->data;
     auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
     auto d_u_tmp = u_tmp->data;
     auto d_v_tmp = v_tmp->data;
     auto d_w_tmp = w_tmp->data;

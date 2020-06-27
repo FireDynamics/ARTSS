@@ -17,10 +17,10 @@ Layers::Layers(Adaption *pAdpation, Field ** fields) {
     m_minimal = static_cast<size_t> (std::pow(2, domain->GetLevels()));
     m_timecounter = 0;
 
-    m_noBufferCells = static_cast<size_t> (params->getInt("adaption/class/buffer"));//2;
-    m_checkValue = params->getReal("adaption/class/check_value");//temperature;
-    m_timestep = static_cast<size_t> (params->getInt("adaption/class/timestep"));//1;
-    m_expansion_size = static_cast<size_t> (params->getInt("adaption/class/expansion_size"));
+    m_noBufferCells = static_cast<size_t> (params->get_int("adaption/class/buffer"));//2;
+    m_checkValue = params->get_real("adaption/class/check_value");//temperature;
+    m_timestep = static_cast<size_t> (params->get_int("adaption/class/timestep"));//1;
+    m_expansion_size = static_cast<size_t> (params->get_int("adaption/class/expansion_size"));
 
     m_T = fields[VectorFieldsTypes::TEMPERATURE];
     m_Ta = fields[VectorFieldsTypes::TEMPERATURE_A];

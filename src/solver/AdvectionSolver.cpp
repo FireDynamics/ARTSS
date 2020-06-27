@@ -18,9 +18,9 @@ AdvectionSolver::AdvectionSolver() {
     std::string advectionType = params->get("solver/advection/type");
     SolverSelection::SetAdvectionSolver(&adv, params->get("solver/advection/type"));
 
-    real d_u_linm = params->getReal("initial_conditions/u_lin");
-    real d_v_linm = params->getReal("initial_conditions/v_lin");
-    real d_w_linm = params->getReal("initial_conditions/w_lin");
+    real d_u_linm = params->get_real("initial_conditions/u_lin");
+    real d_v_linm = params->get_real("initial_conditions/v_lin");
+    real d_w_linm = params->get_real("initial_conditions/w_lin");
 
     u_linm = new Field(FieldType::U, d_u_linm);
     v_linm = new Field(FieldType::V, d_v_linm);

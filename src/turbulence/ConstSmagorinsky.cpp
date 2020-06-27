@@ -18,12 +18,12 @@
 ConstSmagorinsky::ConstSmagorinsky() {
     auto params = Parameters::getInstance();
 
-    m_nu = params->getReal("physical_parameters/nu");
-    m_dt = params->getReal("physical_parameters/dt");
+    m_nu = params->get_real("physical_parameters/nu");
+    m_dt = params->get_real("physical_parameters/dt");
 
     m_Cs = 0.1; //Cs value of 0.1 is found to yield the best results for wide range of flows
     // reference from Ansys Fluent Subgrid Scale models
-    m_Cs = params->getReal("solver/turbulence/Cs");
+    m_Cs = params->get_real("solver/turbulence/Cs");
 }
 
 //============================ Calculate turbulent viscosity =============================

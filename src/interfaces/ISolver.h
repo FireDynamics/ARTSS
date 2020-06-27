@@ -153,7 +153,6 @@ public:
     ISource *sou_temp;
     ISource *sou_vel;
     ISource *sou_con;
-
 protected:
     void SetUp();
 

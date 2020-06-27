@@ -19,7 +19,7 @@ DiffusionTurbSolver::DiffusionTurbSolver() {
     std::string diffusionType = params->get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
 
-    m_nu = params->getReal("physical_parameters/nu");
+    m_nu = params->get_real("physical_parameters/nu");
 
     // Turbulent viscosity
     std::string turbluenceType = params->get("solver/turbulence/type");

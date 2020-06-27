@@ -25,7 +25,7 @@ NSSolver::NSSolver() {
     std::string diffusionType = params->get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(&dif_vel, diffusionType);
 
-    m_nu = params->getReal("physical_parameters/nu");
+    m_nu = params->get_real("physical_parameters/nu");
 
     //Pressure
     std::string pressureType = params->get("solver/pressure/type");

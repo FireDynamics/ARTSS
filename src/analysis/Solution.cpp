@@ -5,40 +5,27 @@
 /// \author 	Severt
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <cmath>
 #include <iostream>
-
 #include "Solution.h"
 #include "../utility/Parameters.h"
 #include "../Functions.h"
-#include "../boundary/BoundaryController.h"
 
 Solution::Solution() {
     ua = new Field(FieldType::U, 0.0);
     va = new Field(FieldType::V, 0.0);
     wa = new Field(FieldType::W, 0.0);
-    u0a = new Field(FieldType::U, 0.0);
-    v0a = new Field(FieldType::V, 0.0);
-    w0a = new Field(FieldType::W, 0.0);
     pa = new Field(FieldType::P, 0.0);
-    p0a = new Field(FieldType::P, 0.0);
     Ta = new Field(FieldType::T, 0.0);
-    T0a = new Field(FieldType::T, 0.0);
 
-    SetUp();
+    CalcAnalyticalSolution(0.);
 }
 
 Solution::~Solution() {
     delete ua;
     delete va;
     delete wa;
-    delete u0a;
-    delete v0a;
-    delete w0a;
     delete pa;
-    delete p0a;
     delete Ta;
-    delete T0a;
 }
 
 // =================== Calculate analytical solution based on test case ==================
@@ -48,7 +35,6 @@ Solution::~Solution() {
 // ***************************************************************************************
 void Solution::CalcAnalyticalSolution(const real t) {
 //TODO not every function has a full analytic solution with time parameter
-//TODO cout to often
     auto params = Parameters::getInstance();
 
     // if analytical solution available
@@ -99,41 +85,4 @@ void Solution::CalcAnalyticalSolution(const real t) {
             std::cout << "Analytical solution set to zero!" << std::endl;
         }
     }
-
-    if (t == 0.) {
-
-        auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t size_bList = boundary->getSize_boundaryList();
-
-        // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
-            u0a->data[idx] = ua->data[idx];
-            v0a->data[idx] = va->data[idx];
-            w0a->data[idx] = wa->data[idx];
-            p0a->data[idx] = pa->data[idx];
-            T0a->data[idx] = Ta->data[idx];
-        }
-
-        // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
-            u0a->data[idx] = ua->data[idx];
-            v0a->data[idx] = va->data[idx];
-            w0a->data[idx] = wa->data[idx];
-            p0a->data[idx] = pa->data[idx];
-            T0a->data[idx] = Ta->data[idx];
-        }
-    }
-}
-
-// ============ Calculate analytical solution at t=0 based on test case ==================
-// ***************************************************************************************
-/// \brief  calculates analytical solution at t=0
-// ***************************************************************************************
-void Solution::SetUp() {
-    CalcAnalyticalSolution(0.);
 }

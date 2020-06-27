@@ -15,13 +15,12 @@ ExplicitDiffuse::ExplicitDiffuse() {
 
     auto params = Parameters::getInstance();
 
-    m_dt = params->getReal("physical_parameters/dt");
+    m_dt = params->get_real("physical_parameters/dt");
 }
 
 //====================================== Diffuse ===============================================
 // ***************************************************************************************
 /// \brief  solves diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
-/// 		via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
 /// \param  out			output pointer
 /// \param	in			input pointer
 /// \param	b 			source pointer
@@ -44,7 +43,6 @@ void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real 
 //====================================== Turbulent Diffuse ===============================================
 // ***************************************************************************************
 /// \brief  solves diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
-/// 		via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
 /// \param  out			output pointer
 /// \param	in			input pointer
 /// \param	b 			source pointer

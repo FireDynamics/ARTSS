@@ -35,9 +35,9 @@ void ISource::BuoyancyForce(Field *out, const Field *in, const Field *ina, bool 
 
     auto params = Parameters::getInstance();
 
-    real beta = params->getReal("physical_parameters/beta");
+    real beta = params->get_real("physical_parameters/beta");
 
-    real g = params->getReal("physical_parameters/g");
+    real g = params->get_real("physical_parameters/g");
 
     auto boundary = BoundaryController::getInstance();
 
@@ -96,11 +96,11 @@ void ISource::BuoyancyST_MMS(Field *out, real t, bool sync) {
 
     auto params = Parameters::getInstance();
 
-    real nu = params->getReal("physical_parameters/nu");
-    real beta = params->getReal("physical_parameters/beta");
-    real kappa = params->getReal("physical_parameters/kappa");
-    real g = params->getReal("physical_parameters/g");
-    real rhoa = params->getReal("initial_conditions/rhoa");
+    real nu = params->get_real("physical_parameters/nu");
+    real beta = params->get_real("physical_parameters/beta");
+    real kappa = params->get_real("physical_parameters/kappa");
+    real g = params->get_real("physical_parameters/g");
+    real rhoa = params->get_real("initial_conditions/rhoa");
     real rbeta = 1. / beta;
     real rg = 1. / g;
     real c_nu = 2 * nu * M_PI * M_PI - 1;
@@ -264,8 +264,8 @@ void ISource::Dissipate(Field *out, const Field *inu, const Field *inv, const Fi
 
     auto params = Parameters::getInstance();
 
-    real dt = params->getReal("physical_parameters/dt");
-    real nu = params->getReal("physical_parameters/nu");
+    real dt = params->get_real("physical_parameters/dt");
+    real nu = params->get_real("physical_parameters/nu");
 
     auto size = Domain::getInstance()->GetSize(out->GetLevel());
     auto type = out->GetType();

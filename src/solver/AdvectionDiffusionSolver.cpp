@@ -21,7 +21,7 @@ AdvectionDiffusionSolver::AdvectionDiffusionSolver() {
     std::string diffusionType = params->get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
 
-    m_nu = params->getReal("physical_parameters/nu");
+    m_nu = params->get_real("physical_parameters/nu");
 
     control();
 }

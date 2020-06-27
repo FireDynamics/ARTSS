@@ -59,9 +59,9 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real a = params->getReal("initial_conditions/a"); //0.25 * M_PI;
-        real d = params->getReal("initial_conditions/d"); //0.5 * M_PI;
-        real nu = params->getReal("physical_parameters/nu"); //1;
+        real a = params->get_real("initial_conditions/a"); //0.25 * M_PI;
+        real d = params->get_real("initial_conditions/d"); //0.5 * M_PI;
+        real nu = params->get_real("physical_parameters/nu"); //1;
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -134,7 +134,7 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real a = params->getReal("initial_conditions/a"); //0.25 * M_PI;
+        real a = params->get_real("initial_conditions/a"); //0.25 * M_PI;
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -194,9 +194,9 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real a = params->getReal("initial_conditions/a"); //0.25 * M_PI;
-        real d = params->getReal("initial_conditions/d"); //0.5 * M_PI;
-        real nu = params->getReal("physical_parameters/nu"); //1.;
+        real a = params->get_real("initial_conditions/a"); //0.25 * M_PI;
+        real d = params->get_real("initial_conditions/d"); //0.5 * M_PI;
+        real nu = params->get_real("physical_parameters/nu"); //1.;
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -250,9 +250,9 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real a = params->getReal("initial_conditions/a");//0.25 * M_PI;
-        real d = params->getReal("initial_conditions/d");//0.5 * M_PI;
-        real nu = params->getReal("physical_parameters/nu"); //1.;
+        real a = params->get_real("initial_conditions/a");//0.25 * M_PI;
+        real d = params->get_real("initial_conditions/d");//0.5 * M_PI;
+        real nu = params->get_real("physical_parameters/nu"); //1.;
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -306,9 +306,9 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real a = params->getReal("initial_conditions/a");//0.25 * M_PI;
-        real d = params->getReal("initial_conditions/d");//0.25 * M_PI;
-        real nu = params->getReal("physical_parameters/nu");
+        real a = params->get_real("initial_conditions/a");//0.25 * M_PI;
+        real d = params->get_real("initial_conditions/d");//0.25 * M_PI;
+        real nu = params->get_real("physical_parameters/nu");
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -355,9 +355,9 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real beta = params->getReal("physical_parameters/beta");
+        real beta = params->get_real("physical_parameters/beta");
 
-        real g = params->getReal("physical_parameters/g"); //-9.81;
+        real g = params->get_real("physical_parameters/g"); //-9.81;
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -401,10 +401,10 @@ namespace Functions {
         real dy = domain->Getdy(outx->GetLevel());
 
         auto params = Parameters::getInstance();
-        real nu = params->getReal("physical_parameters/nu");
-        real beta = params->getReal("physical_parameters/beta");
-        real g = params->getReal("physical_parameters/g");
-        real rhoa = params->getReal("initial_conditions/rhoa");
+        real nu = params->get_real("physical_parameters/nu");
+        real beta = params->get_real("physical_parameters/beta");
+        real g = params->get_real("physical_parameters/g");
+        real rhoa = params->get_real("initial_conditions/rhoa");
         real rbeta = 1. / beta;
         real rg = 1. / g;
         real c = 2 * nu * M_PI * M_PI - 1;
@@ -464,11 +464,11 @@ namespace Functions {
         real dy = domain->Getdy(out->GetLevel());
 
         auto params = Parameters::getInstance();
-        real nu = params->getReal("physical_parameters/nu");
-        real beta = params->getReal("physical_parameters/beta");
-        real kappa = params->getReal("physical_parameters/kappa");
-        real g = params->getReal("physical_parameters/g");
-        real rhoa = params->getReal("initial_conditions/rhoa");
+        real nu = params->get_real("physical_parameters/nu");
+        real beta = params->get_real("physical_parameters/beta");
+        real kappa = params->get_real("physical_parameters/kappa");
+        real g = params->get_real("physical_parameters/g");
+        real rhoa = params->get_real("initial_conditions/rhoa");
         real rbeta = 1. / beta;
         real rg = 1. / g;
         real c_nu = 2 * nu * M_PI * M_PI - 1;
@@ -516,10 +516,10 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real u_lin = params->getReal("initial_conditions/u_lin");
-        real v_lin = params->getReal("initial_conditions/v_lin");
-        real w_lin = params->getReal("initial_conditions/w_lin");
-        real pa = params->getReal("initial_conditions/pa");
+        real u_lin = params->get_real("initial_conditions/u_lin");
+        real v_lin = params->get_real("initial_conditions/v_lin");
+        real w_lin = params->get_real("initial_conditions/w_lin");
+        real pa = params->get_real("initial_conditions/pa");
 
 
         auto boundary = BoundaryController::getInstance();
@@ -570,8 +570,8 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real nu = params->getReal("physical_parameters/nu");
-        real l = params->getReal("initial_conditions/l");
+        real nu = params->get_real("physical_parameters/nu");
+        real l = params->get_real("initial_conditions/l");
         real A = 1.0;
 
         real kpinu = 3 * l * l * M_PI * M_PI * nu;
@@ -631,7 +631,7 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real nu = params->getReal("physical_parameters/nu");
+        real nu = params->get_real("physical_parameters/nu");
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -718,7 +718,7 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real l = params->getReal("initial_conditions/l"); //2;
+        real l = params->get_real("initial_conditions/l"); //2;
         real dkpi = 3 * l * l * M_PI * M_PI;
         real rdkpi = 1. / dkpi;
 
@@ -774,13 +774,13 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real u_lin = params->getReal("initial_conditions/u_lin");
-        real v_lin = params->getReal("initial_conditions/v_lin");
-        real w_lin = params->getReal("initial_conditions/w_lin");
-        real xshift = params->getReal("initial_conditions/xshift");
-        real yshift = params->getReal("initial_conditions/yshift");
-        real zshift = params->getReal("initial_conditions/zshift");
-        real l = params->getReal("initial_conditions/l");
+        real u_lin = params->get_real("initial_conditions/u_lin");
+        real v_lin = params->get_real("initial_conditions/v_lin");
+        real w_lin = params->get_real("initial_conditions/w_lin");
+        real xshift = params->get_real("initial_conditions/xshift");
+        real yshift = params->get_real("initial_conditions/yshift");
+        real zshift = params->get_real("initial_conditions/zshift");
+        real l = params->get_real("initial_conditions/l");
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -831,7 +831,7 @@ namespace Functions {
 
         auto domain = Domain::getInstance();
         auto params = Parameters::getInstance();
-        size_t n_layers = static_cast<size_t> (params->getInt("initial_conditions/n_layers"));
+        size_t n_layers = static_cast<size_t> (params->get_int("initial_conditions/n_layers"));
 
         // layer border
         real bord[n_layers + 1];
@@ -840,7 +840,7 @@ namespace Functions {
         for (size_t l = 1; l < n_layers; ++l) {
             std::string val_bord_l = "initial_conditions/border_";
             val_bord_l += std::to_string(l);
-            val_bord = params->getReal(val_bord_l);
+            val_bord = params->get_real(val_bord_l);
             bord[l] = val_bord;
         }
 
@@ -872,7 +872,7 @@ namespace Functions {
         for (size_t l = 0; l < n_layers; ++l) {
             std::string val_out_l = "initial_conditions/value_";
             val_out_l += std::to_string(l + 1);
-            val_out = params->getReal(val_out_l);
+            val_out = params->get_real(val_out_l);
             val[l] = val_out;
         }
 
@@ -995,14 +995,14 @@ namespace Functions {
         real dz = domain->Getdz(out->GetLevel());
 
         auto params = Parameters::getInstance();
-        real start_x = params->getReal("initial_conditions/x1");
-        real end_x = params->getReal("initial_conditions/x2");
-        real start_y = params->getReal("initial_conditions/y1");
-        real end_y = params->getReal("initial_conditions/y2");
-        real start_z = params->getReal("initial_conditions/z1");
-        real end_z = params->getReal("initial_conditions/z2");
-        real val_in = params->getReal("initial_conditions/val_in");
-        real val_out = params->getReal("initial_conditions/val_out");
+        real start_x = params->get_real("initial_conditions/x1");
+        real end_x = params->get_real("initial_conditions/x2");
+        real start_y = params->get_real("initial_conditions/y1");
+        real end_y = params->get_real("initial_conditions/y2");
+        real start_z = params->get_real("initial_conditions/z1");
+        real end_z = params->get_real("initial_conditions/z2");
+        real val_in = params->get_real("initial_conditions/val_in");
+        real val_out = params->get_real("initial_conditions/val_out");
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -1067,9 +1067,9 @@ namespace Functions {
         real dy = domain->Getdy(outx->GetLevel());
 
         auto params = Parameters::getInstance();
-        real nu = params->getReal("physical_parameters/nu");
+        real nu = params->get_real("physical_parameters/nu");
 
-        real A = params->getReal("initial_conditions/A"); //2;
+        real A = params->get_real("initial_conditions/A"); //2;
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -1114,7 +1114,7 @@ namespace Functions {
     real RampTanh(real t) {
 
         auto params = Parameters::getInstance();
-        real tau = params->getReal("solver/temperature/source/tau");
+        real tau = params->get_real("solver/temperature/source/tau");
 
         real rt = t / tau;
         real result = tanh(rt);
@@ -1227,7 +1227,7 @@ namespace Functions {
         real dz = domain->Getdz(out->GetLevel());
 
         auto params = Parameters::getInstance();
-        real l = params->getReal("initial_conditions/l"); //2;
+        real l = params->get_real("initial_conditions/l"); //2;
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -1307,14 +1307,14 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real u_lin = params->getReal("initial_conditions/u_lin");
-        real v_lin = params->getReal("initial_conditions/v_lin");
+        real u_lin = params->get_real("initial_conditions/u_lin");
+        real v_lin = params->get_real("initial_conditions/v_lin");
 
         real L = domain->Getlx();
         real R_c = L / 20.;
         real G = 0.04 * u_lin * R_c * sqrt(exp(1));
-        real pa = params->getReal("initial_conditions/pa");
-        real rhoa = params->getReal("initial_conditions/rhoa");
+        real pa = params->get_real("initial_conditions/pa");
+        real rhoa = params->get_real("initial_conditions/rhoa");
 
         real GrR_c = G / (R_c * R_c);
         real rR_c = 1. / (2. * R_c * R_c);
@@ -1373,14 +1373,14 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real u_lin = params->getReal("initial_conditions/u_lin");
-        real v_lin = params->getReal("initial_conditions/v_lin");
+        real u_lin = params->get_real("initial_conditions/u_lin");
+        real v_lin = params->get_real("initial_conditions/v_lin");
 
         real L = domain->Getly();
         real R_c = L / 20.;
         real G = 0.04 * u_lin * R_c * sqrt(exp(1));
-        real pa = params->getReal("initial_conditions/pa");
-        real rhoa = params->getReal("initial_conditions/rhoa");
+        real pa = params->get_real("initial_conditions/pa");
+        real rhoa = params->get_real("initial_conditions/rhoa");
 
         real GrR_c = G / (R_c * R_c);
         real rR_c = 1. / (2. * R_c * R_c);
