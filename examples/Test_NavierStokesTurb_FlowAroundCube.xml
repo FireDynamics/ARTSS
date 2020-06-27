@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ARTSS>
   <physical_parameters>
-    <t_end> 0.1 </t_end>  <!-- simulation end time -->
+    <t_end> 10. </t_end>  <!-- simulation end time -->
     <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
     <nu> 0.00001 </nu>  <!-- kinematic viscosity -->
   </physical_parameters>
@@ -79,6 +79,6 @@
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
-    <vtk_nth_plot> 1 </vtk_nth_plot>
+    <vtk_nth_plot> 10 </vtk_nth_plot>
   </visualisation>
 </ARTSS>

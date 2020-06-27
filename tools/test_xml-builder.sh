@@ -368,17 +368,8 @@ function create_testcases {
     <boundary field=\"T\" patch=\"front,back,top,left,right\" type=\"neumann\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"bottom\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"LayersT\" dir=\"y\">     <!-- Layers  -->
-    <n_layers> 5 </n_layers>
-    <border_1> -1.8 </border_1>  <!-- at cell face -->
-    <border_2> -0.6 </border_2>  <!-- at cell face -->
-    <border_3>  0.6 </border_3>  <!-- at cell face -->
-    <border_4>  1.8 </border_4>  <!-- at cell face -->
-    <value_1> 303.64 </value_1>
-    <value_2> 303.64 </value_2>
-    <value_3> 303.64 </value_3>
-    <value_4> 303.64 </value_4>
-    <value_5> 303.64 </value_5>
+    echo "  <initial_conditions usr_fct = \"Uniform\">
+    <val> 303.64 </val>
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL

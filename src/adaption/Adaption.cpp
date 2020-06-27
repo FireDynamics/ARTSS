@@ -19,10 +19,6 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-class Vortex;
-
-class Layers;
-
 Adaption::Adaption(ISolver *solver) {
     m_solver = solver;
     auto params = Parameters::getInstance();
