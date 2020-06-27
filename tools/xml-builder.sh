@@ -79,9 +79,12 @@ MAXCYCLE=100
 MAXSOLVE=100
 CALCNLEVEL=1 #use function calc_nlevel
 
-#solution and visualization
+#solution and visualisation
 SOLAVAIL=No # solution available
-NPLOTS=10 #number of vtk plots
+CSV=No
+CSVPLOTS=10 #number of csv plots
+VTK=Yes
+VTKPLOTS=10 #number of vtk plots
 
 #domain parameters
 XSTART=-0.1556 #physical domain parameter X1
@@ -193,6 +196,10 @@ ${YELLOW}--cp${NC}            \tset specific heat capacity (in kJ/kgK) in case o
 
 ${YELLOW}--cs${NC}            \tset parameter for ConstSmagorinsky (default: $CS)
 
+${YELLOW}--csv${NC}           \tenable write out of csv files (default: $CSV)
+
+${YELLOW}--csvplots${NC}      \twrite out a csv file every nth timestep (default: $CSVPLOTS)
+
 ${YELLOW}--dataextraction${NC}\t enable data extraction
 
 ${YELLOW}--diff${NC}
@@ -240,8 +247,6 @@ ${YELLOW}--maxsolve${NC}\tset number of maximal iterations in solver in multigri
 ${YELLOW}--ncycle${NC}        \tset ncycle for multigrid (default: $NCYCLE)
 
 ${YELLOW}--nlevel${NC}        \tset nlevel for multigrid, set dependent on Nx,Ny,Nz (default: $NLEVEL)
-
-${YELLOW}--nplots${NC}        \tset number of vtk plots (default: $NPLOTS)
 
 ${YELLOW}--ns${NC}
 ${YELLOW}--navierstokes${NC}           \tcreate xml file with parameter for navier stokes
@@ -313,6 +318,10 @@ ${YELLOW}--tend${NC}          \tset t_end, multiple parameter possible. Delimite
 ${YELLOW}--turbulencetype${NC}\tset turbulence model (default: $TURBULENCETYPE)
 
 ${YELLOW}--verbose${NC}       \tprint output to screen (std out)
+
+${YELLOW}--vtk${NC}           \tenable write out of vtk files (default: $VTK)
+
+${YELLOW}--vtkplots${NC}      \twrite out a vtk file every nth timestep (default: $VTKPLOTS)
 
 ${YELLOW}--xstart${NC}        \tset both domain parameter (computational [x1] and physical domain [X1])
 
@@ -429,8 +438,6 @@ then
 else
   WRITETO="<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
 <ARTSS>
-  <xml_filename>$NAME</xml_filename>
-
   <physical_parameters>
     <t_end> $TEND </t_end>  <!-- simulation end time -->
     <dt> $DT </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->"
@@ -800,9 +807,19 @@ else
     fi
     
     WRITETO="${WRITETO}\n
-  <visualization save_csv=\"No\">
-    <n_plots> $NPLOTS </n_plots>
-  </visualization>
+  <visualisation save_vtk=\"$VTK\" save_csv=\"$CSV\">"
+    if [ $CSV == "Yes" ]
+    then
+      WRITETO=${WRITETO}"
+    <csv_nth_plot> $CSVPLOTS </csv_nth_plot>"
+    fi
+    if [ $VTK == "Yes" ]
+    then
+      WRITETO=${WRITETO}"
+    <vtk_nth_plot> $VTKPLOTS </vtk_nth_plot>"
+    fi
+    WRITETO=${WRITETO}"
+  </visualisation>
 </ARTSS>"
   echo -e "$WRITETO" >> $NAME
   fi
@@ -904,6 +921,15 @@ do
       ;;
     --cs)
       CS=$2
+      shift
+      shift
+      ;;
+    --csv)
+      CSV=Yes
+      shift
+      ;;
+    --csvplots)
+      CSVPLOTS=$2
       shift
       shift
       ;;
@@ -1067,11 +1093,6 @@ do
       shift
       shift
       ;;
-    -p|--plots|--nplots)
-      NPLOTS=$2
-      shift
-      shift
-      ;;
     --pre|--pressure)
       PRE=0
       SOLVER=PressureSolver
@@ -1186,6 +1207,16 @@ do
       ;;
     -v|--verbose)
       VERBOSE=0
+      shift
+      ;;
+    --vtk)
+      VTK=Yes
+      shift
+      ;;
+    --vtkplots)
+      VTK=Yes
+      VTKPLOTS=$2
+      shift
       shift
       ;;
     -x|--nx)

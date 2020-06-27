@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ARTSS>
-  <xml_filename>Test_NavierStokesTempTurb_OpenPlume.xml</xml_filename>
-
   <physical_parameters>
     <t_end> 4. </t_end>  <!-- simulation end time -->
     <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
@@ -96,11 +94,20 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Uniform">
-    <val> 303.64 </val>
+  <initial_conditions usr_fct = "LayersT" dir="y">     <!-- Layers  -->
+    <n_layers> 5 </n_layers>
+    <border_1> -1.8 </border_1>  <!-- at cell face -->
+    <border_2> -0.6 </border_2>  <!-- at cell face -->
+    <border_3>  0.6 </border_3>  <!-- at cell face -->
+    <border_4>  1.8 </border_4>  <!-- at cell face -->
+    <value_1> 303.64 </value_1>
+    <value_2> 303.64 </value_2>
+    <value_3> 303.64 </value_3>
+    <value_4> 303.64 </value_4>
+    <value_5> 303.64 </value_5>
   </initial_conditions>
 
-  <visualization save_csv="No">
-    <n_plots> 40 </n_plots>
-  </visualization>
+  <visualisation save_vtk="Yes" save_csv="No">
+    <vtk_nth_plot> 40 </vtk_nth_plot>
+  </visualisation>
 </ARTSS>
