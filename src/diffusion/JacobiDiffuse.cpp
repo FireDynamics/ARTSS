@@ -297,8 +297,8 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_iList[j];
         real out_h = beta * (dsign * d_b[i] + alphaX * (d_in[i + 1] + d_in[i - 1]) \
- + alphaY * (d_in[i + Nx] + d_in[i - Nx]) \
- + alphaZ * (d_in[i + Nx * Ny] + d_in[i - Nx * Ny]));
+                                            + alphaY * (d_in[i + Nx] + d_in[i - Nx]) \
+                                            + alphaZ * (d_in[i + Nx * Ny] + d_in[i - Nx * Ny]));
         d_out[i] = (1 - w) * d_in[i] + w * out_h;
     }
 

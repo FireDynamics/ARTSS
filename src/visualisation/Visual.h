@@ -16,19 +16,23 @@ public:
 
     void visualise(ISolver *solver, real t);
 
-    static void initialiseGrid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
+    static void initialise_grid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
 
-    static void prepareFields(read_ptr *fields, float **vars, int size);
+    static void prepare_fields(read_ptr *fields, float **vars, int size);
 
 private:
-    static std::string RemoveExtension(const std::string &filename);
+    static std::string remove_extension(const std::string &filename);
 
     std::string m_filename;
     Solution m_solution;
     bool m_save_csv = false;
+    int m_csv_plots = 0;
     bool m_save_vtk = false;
+    int m_vtk_plots = 0;
+    real m_dt;
+    real m_t_end;
 
-    static std::string createFilename(std::string filename, real t, bool analytical);
+    static std::string create_filename(std::string filename, int counter, bool analytical);
 
     bool m_has_analytical_solution = false;
 };

@@ -15,7 +15,9 @@
 #include "Domain.h"
 
 #ifndef BENCHMARKING
+
 #include "visualisation/Visual.h"
+
 #endif
 
 // ==================================== Constructor ====================================
@@ -24,9 +26,9 @@
 /// \param  isolv pointer to solver
 /// \param  fname filename of xml-input (via argument)
 // ***************************************************************************************
-TimeIntegration::TimeIntegration(ISolver *isolv, const char *fname) {
-  auto params = Parameters::getInstance();
-  auto domain = Domain::getInstance();
+TimeIntegration::TimeIntegration(ISolver *isolv) {
+    auto params = Parameters::getInstance();
+    auto domain = Domain::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
     m_t_end = params->get_real("physical_parameters/t_end");
@@ -35,12 +37,9 @@ TimeIntegration::TimeIntegration(ISolver *isolv, const char *fname) {
     m_size = domain->GetSize();
 
     this->m_solver = isolv;
-
-    m_fname = fname;
 }
 
 void TimeIntegration::run() {
-    Field **vector_fields;
     Adaption *adaption;
     std::cout << "Start calculating and timing...\n" << std::endl;
     // TODO Logger
@@ -81,35 +80,7 @@ void TimeIntegration::run() {
         auto kappa_t = m_solver->kappa_t;
         auto gamma_t = m_solver->gamma_t;
 
-        vector_fields = new Field *[27];
-        vector_fields[VectorFieldsTypes::VEL_U] = u;
-        vector_fields[VectorFieldsTypes::VEL_V] = v;
-        vector_fields[VectorFieldsTypes::VEL_W] = w;
-        vector_fields[VectorFieldsTypes::VEL_U0] = u0;
-        vector_fields[VectorFieldsTypes::VEL_V0] = v0;
-        vector_fields[VectorFieldsTypes::VEL_W0] = w0;
-        vector_fields[VectorFieldsTypes::VEL_U_TMP] = u_tmp;
-        vector_fields[VectorFieldsTypes::VEL_V_TMP] = v_tmp;
-        vector_fields[VectorFieldsTypes::VEL_W_TMP] = w_tmp;
-        vector_fields[VectorFieldsTypes::PRESSURE] = p;
-        vector_fields[VectorFieldsTypes::PRESSURE0] = p0;
-        vector_fields[VectorFieldsTypes::RHS] = rhs;
-        vector_fields[VectorFieldsTypes::TEMPERATURE] = T;
-        vector_fields[VectorFieldsTypes::TEMPERATURE0] = T0;
-        vector_fields[VectorFieldsTypes::TEMPERATURE_TMP] = T_tmp;
-        vector_fields[VectorFieldsTypes::TEMPERATURE_A] = T_a;
-        vector_fields[VectorFieldsTypes::CONCENTRATION] = C;
-        vector_fields[VectorFieldsTypes::CONCENTRATION0] = C0;
-        vector_fields[VectorFieldsTypes::CONCENTRATION_TMP] = C_tmp;
-        vector_fields[VectorFieldsTypes::FORCE_X] = f_x;
-        vector_fields[VectorFieldsTypes::FORCE_Y] = f_y;
-        vector_fields[VectorFieldsTypes::FORCE_Z] = f_z;
-        vector_fields[VectorFieldsTypes::SOURCE_T] = S_T;
-        vector_fields[VectorFieldsTypes::SOURCE_C] = S_C;
-        vector_fields[VectorFieldsTypes::NU_T] = nu_t;
-        vector_fields[VectorFieldsTypes::KAPPA_T] = kappa_t;
-        vector_fields[VectorFieldsTypes::GAMMA_T] = gamma_t;
-        adaption = new Adaption(vector_fields);
+        adaption = new Adaption(m_solver);
         auto d_u = u->data;
         auto d_v = v->data;
         auto d_w = w->data;
@@ -191,7 +162,7 @@ void TimeIntegration::run() {
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
 
             Visual vis;
-            vis.Visualize(m_solver, t_cur, m_fname);
+            vis.visualise(m_solver, t_cur);
             if (adaption->isDataExtractionBeforeEnabled()) adaption->extractData(adaption->getBeforeName(), adaption->getBeforeHeight(), t_cur);
             // Error Calculation
             // RMS error at midposize_t at each time step Nt
@@ -257,5 +228,4 @@ void TimeIntegration::run() {
     ana.SaveVariablesInFile(m_solver);
 #endif
     delete (adaption);
-    delete[] vector_fields;
 }

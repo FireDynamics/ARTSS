@@ -37,13 +37,13 @@ Analysis::Analysis() {
 // ***************************************************************************************
 void Analysis::Analyse(ISolver *solver, const real t) {
     //TODO statement t == 0.
-    Solution solution;
-
-    auto params = Parameters::getInstance();
-
     if (hasAnalyticSolution) {
-        tinyxml2::XMLElement *xmlParameter = params->get_first_child("boundaries");
+        Solution solution;
+        solution.CalcAnalyticalSolution(t);
 
+        auto params = Parameters::getInstance();
+
+        tinyxml2::XMLElement *xmlParameter = params->get_first_child("boundaries");
         auto curElem = xmlParameter->FirstChildElement();
 
         solution.CalcAnalyticalSolution(t);
@@ -88,10 +88,9 @@ bool Analysis::CompareSolutions(read_ptr num, read_ptr ana, const FieldType type
 
     bool verification = false;
 
-    real res;
 // Choose absolute or relative based error calculation
-    res = CalcAbsoluteSpatialError(num, ana);
-    //res = CalcRelativeSpatialError(num, ana);
+    real res = CalcAbsoluteSpatialError(num, ana);
+    //real res = CalcRelativeSpatialError(num, ana);
 
     if (res <= m_tol) {
         std::cout << BoundaryData::getFieldTypeName(type) << " PASSED Test at time " << t << " with error e=" << res << std::endl;
@@ -222,7 +221,7 @@ void Analysis::CalcL2NormMidPoint(ISolver *solver, real t, real *sum) {
     size_t ix = iList[boundary->getSize_innerList() / 2];
 
     auto params = Parameters::getInstance();
-    if (params->get("solver/solution/available") == "Yes") {
+    if (hasAnalyticSolution) {
         solution.CalcAnalyticalSolution(t);
 
         // local variables and parameters
@@ -254,7 +253,7 @@ void Analysis::CalcRMSError(real sumu, real sump, real sumT) {
 
     auto params = Parameters::getInstance();
 
-    if (params->get("solver/solution/available") == "Yes") {
+    if (hasAnalyticSolution) {
         // local variables and parameters
         real dt = params->get_real("physical_parameters/dt");
         real t_end = params->get_real("physical_parameters/t_end");

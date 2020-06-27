@@ -9,8 +9,8 @@
 
 class IAdaptionFunction {
 public:
-    virtual void applyChanges() = 0;
-    virtual bool update() = 0;
+    virtual void applyChanges(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) = 0;
+    virtual bool update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) = 0;
     virtual bool hasReduction() = 0;
 };
 

@@ -14,13 +14,12 @@
 
 class TimeIntegration {
 public:
-	TimeIntegration(ISolver *isolv, const char *fname);
+	explicit TimeIntegration(ISolver *isolv);
 
 	void run();
 
 private:
 	ISolver* m_solver;
-	const char *m_fname;
 	real m_dt;
 	real m_t_end;
 	real m_t_cur;

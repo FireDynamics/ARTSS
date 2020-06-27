@@ -21,7 +21,6 @@ private:
     static void csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr T);
 
     static void csv_write(const char *filename, float **vars, int size_vars, const char **var_names);
-    static char*
 };
 
 #endif /* ARTSS_VISUALISATION_CSVWRITER_H */

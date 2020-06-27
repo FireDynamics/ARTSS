@@ -82,7 +82,7 @@ void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                      static_cast<float *> (turb_visc),
                      static_cast<float *> (source_T)};
     read_ptr fields[] = {u, v, w, p, div, T, C, s, nu_t, S_T};
-    Visual::prepareFields(fields, vars, size_vars);
+    Visual::prepare_fields(fields, vars, size_vars);
 
     CSVWriter::csv_write(filename, vars, size_vars, var_names);
 
@@ -126,7 +126,7 @@ void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                      static_cast<float *> (Temp)};
     read_ptr fields[] = {u, v, w, p, T};
 
-    Visual::prepareFields(fields, vars, size_vars);
+    Visual::prepare_fields(fields, vars, size_vars);
     CSVWriter::csv_write(filename, vars, size_vars, var_names);
 
     // Clean up
@@ -157,7 +157,7 @@ void CSVWriter::csv_write(const char *filename, float **vars, int size_vars, con
     auto *y_centres = new float[size];
     auto *z_centres = new float[size];
     float *coords[] = {x_centres, y_centres, z_centres};
-    Visual::initialiseGrid(x_centres, y_centres, z_centres, Nx, Ny, Nz, dx, dy, dz);
+    Visual::initialise_grid(x_centres, y_centres, z_centres, Nx, Ny, Nz, dx, dy, dz);
 
     // write data to csv
     std::ofstream outputFile;

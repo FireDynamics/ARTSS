@@ -11,18 +11,27 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../Field.h"
 #include "../interfaces/IAdaptionFunction.h"
+#include "../interfaces/ISolver.h"
 
-class Layers:public IAdaptionFunction {
+class Layers : public IAdaptionFunction {
 public:
-    Layers(Adaption* pAdaption, Field** fields);
-    ~Layers();
-    virtual bool update() ;
-    virtual void applyChanges();
-    virtual bool hasReduction(){return false;};
+    explicit Layers(ISolver *solver);
+
+    bool update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
+
+    void applyChanges(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
+
+    bool hasReduction() override {
+        return false;
+    }
+
 private:
-    void adaptXDirection(real temperature, size_t noBufferCell);
-    void adaptXDirection_serial(real temperature, size_t noBufferCell);
-    void setXValues(bool start);
+    void adaptXDirection(real temperature, size_t noBufferCell, long *p_shift_x1, long *p_shift_x2);
+
+    void adaptXDirection_serial(real temperature, size_t noBufferCell, long *p_shift_x1, long *p_shift_x2);
+
+    void setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2, bool start);
+
     size_t getExpansionSize();
 
     size_t m_minimal;
@@ -32,8 +41,6 @@ private:
     Field *m_T, *m_Ta, *m_Nu, *m_kappa, *m_gamma;
     real m_x1, m_x2, m_y1, m_y2, m_z1, m_z2;
     size_t m_nx, m_ny, m_nz;
-    Adaption *m_pAdaption;
-    Field *m_u, *m_v, *m_w, *m_P;
 };
 
 

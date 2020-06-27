@@ -23,12 +23,13 @@ class Vortex;
 
 class Layers;
 
-Adaption::Adaption(Field **fields) {
+Adaption::Adaption(ISolver *solver) {
+    m_solver = solver;
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
     m_dynamic = (params->get("adaption/dynamic") == "Yes");
     std::string tmp = params->get("adaption/dynamic");
-    m_filename = Parameters::getInstance()->get("xml_filename");
+    m_filename = params->get_filename();
     m_filename.resize(m_filename.size()-4);//remove .xml from filename
     m_hasDataExtraction = (params->get("adaption/data_extraction") == "Yes");
     if (m_hasDataExtraction) {
@@ -40,13 +41,12 @@ Adaption::Adaption(Field **fields) {
         m_hasWriteField = (params->get("adaption/data_extraction/write_field/enabled") == "Yes");
         //m_hasWriteRuntime = (params->get("adaption/data_extraction/runtime/enabled") == "Yes");
     }
-    this->fields = fields;
     if (m_dynamic) {
         std::string init = params->get("adaption/class/name");
         if (init == "Layers") {
-            func = new Layers(this, fields);
+            func = new Layers(solver);
         } else if (init == "Vortex" || init == "VortexY") {
-            func = new Vortex(this, fields);
+            func = new Vortex(solver);
         } else {
             std::cout << "Type " << init << " is not defined" << std::endl;
             throw std::exception();
@@ -98,7 +98,7 @@ void Adaption::run(real t_cur) {
 /// \param	height y-value
 /// \param  time timestep
 // ***************************************************************************************
-void Adaption::extractData(const std::string filename, real height, real time) {
+void Adaption::extractData(const std::string& filename, real height, real time) {
     auto domain = Domain::getInstance();
     size_t x_start = 0;
     size_t x_end = domain->GetNx();
@@ -107,13 +107,13 @@ void Adaption::extractData(const std::string filename, real height, real time) {
     size_t Nx = domain->GetNx();
     size_t Ny = domain->GetNy();
 
-    real *data_temp = fields[VectorFieldsTypes::TEMPERATURE]->data;
-    real *data_tempA = fields[VectorFieldsTypes::TEMPERATURE_A]->data;
-    real *data_u = fields[VectorFieldsTypes::VEL_U]->data;
-    real *data_v = fields[VectorFieldsTypes::VEL_V]->data;
-    real *data_w = fields[VectorFieldsTypes::VEL_W]->data;
-    real *data_nu = fields[VectorFieldsTypes::NU_T]->data;
-    real *data_kappa = fields[VectorFieldsTypes::KAPPA_T]->data;
+    real *data_temp = m_solver->T->data;
+    real *data_tempA = m_solver->T_a->data;
+    real *data_u = m_solver->u->data;
+    real *data_v = m_solver->v->data;
+    real *data_w = m_solver->w->data;
+    real *data_nu = m_solver->nu_t->data;
+    real *data_kappa = m_solver->kappa_t->data;
 
     std::ofstream file;
     file.open(filename, std::ios::app);
@@ -133,7 +133,7 @@ void Adaption::extractData(const std::string filename, real height, real time) {
 /// \brief  takes all cells and writes into a file
 /// \param	filename	filename
 // ***************************************************************************************
-void Adaption::extractData(const std::string filename) {
+void Adaption::extractData(const std::string& filename) {
     auto domain = Domain::getInstance();
     size_t Nx = domain->GetNx();
     size_t Ny = domain->GetNy();
@@ -141,10 +141,10 @@ void Adaption::extractData(const std::string filename) {
     size_t y_end = Ny;
     size_t z_end = domain->GetNz();
 
-    real *data_temp = fields[VectorFieldsTypes::TEMPERATURE]->data;
-    real *data_u = fields[VectorFieldsTypes::VEL_U]->data;
-    real *data_v = fields[VectorFieldsTypes::VEL_V]->data;
-    real *data_w = fields[VectorFieldsTypes::VEL_W]->data;
+    real *data_temp = m_solver->T->data;
+    real *data_u = m_solver->u->data;
+    real *data_v = m_solver->v->data;
+    real *data_w = m_solver->w->data;
 
     std::ofstream file;
     file.open(filename, std::ios::app);
@@ -184,7 +184,7 @@ void Adaption::applyChanges() {
             domain->GetZ2() == domain->Getz2()) {
             m_dynamic_end = true;
         }
-        func->applyChanges();
+        func->applyChanges(&m_shift_x1, &m_shift_x2, &m_shift_y1, &m_shift_y2, &m_shift_z1, &m_shift_z2);
     }
 #ifndef BENCHMARKING
     end = std::chrono::system_clock::now();
@@ -210,7 +210,7 @@ bool Adaption::isUpdateNecessary() {
 #endif
     bool update = false;
     if (!m_dynamic_end) {
-        update = func->update();
+        update = func->update(&m_shift_x1, &m_shift_x2, &m_shift_y1, &m_shift_y2, &m_shift_z1, &m_shift_z2);
     }
 #ifndef BENCHMARKING
     end = std::chrono::system_clock::now();
@@ -430,7 +430,7 @@ void Adaption::reduceYDirection(long shift, bool start, size_t *arr_idxReduction
 /// \param  noBufferCell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noBufferCell, real threshold) {
+bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noBufferCell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
     size_t Nx = domain->GetNx();
     size_t Ny = domain->GetNy();
@@ -463,7 +463,7 @@ bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noB
     ADTypes reduction_start = ADTypes::NO;
     ADTypes reduction_end = ADTypes::NO;
     ADTypes reduction = ADTypes::NO;
-    if (m_reduction && domain->Getnx() > (m_minimal + noBufferCell) * 2) {
+    if (reduce && domain->Getnx() > (minimal + noBufferCell) * 2) {
         reduction_start = ADTypes::UNKNOWN;
         reduction_end = ADTypes::UNKNOWN;
         reduction = ADTypes::UNKNOWN;
@@ -475,12 +475,12 @@ bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noB
             // check innermost plane of the buffer zone on the left side
             size_t idx_s1 = IX(i_start + noBufferCell - 1, j, k, Nx, Ny);
             if (expansion_start == ADTypes::UNKNOWN && std::fabs(*(f + idx_s1) - checkValue) > threshold) {
-                m_shift_x1 = -1;
+                *p_shift_x1 = -1;
                 expansion_start = ADTypes::YES;
             } else {
                 // check innermost plane of the minimal zone to reduce on the left side
-                size_t idx = IX(i_start + m_minimal - 1, j, k, Nx, Ny);
-                size_t idx2 = IX(i_start + m_minimal - 1 + noBufferCell, j, k, Nx, Ny);
+                size_t idx = IX(i_start + minimal - 1, j, k, Nx, Ny);
+                size_t idx2 = IX(i_start + minimal - 1 + noBufferCell, j, k, Nx, Ny);
                 if (reduction_start == ADTypes::UNKNOWN && (std::fabs(*(f + idx2) - checkValue) > threshold ||
                                                             std::fabs(*(f + idx) - checkValue) > threshold)) {
                     reduction_start = ADTypes::NO;
@@ -489,12 +489,12 @@ bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noB
             // check innermost plane of the buffer zone on the right side
             size_t idx_s2 = IX(i_end - noBufferCell + 1, j, k, Nx, Ny);
             if (expansion_end == ADTypes::UNKNOWN && std::fabs(*(f + idx_s2) - checkValue) > threshold) {
-                m_shift_x2 = 1;
+                *p_shift_x2 = 1;
                 expansion_end = ADTypes::YES;
             } else {
                 // check innermost plane of the minimal zone to reduce on the right side
-                size_t idx = IX(i_end - m_minimal + 1, j, k, Nx, Ny);
-                size_t idx2 = IX(i_end - m_minimal + 1 - noBufferCell, j, k, Nx, Ny);
+                size_t idx = IX(i_end - minimal + 1, j, k, Nx, Ny);
+                size_t idx2 = IX(i_end - minimal + 1 - noBufferCell, j, k, Nx, Ny);
                 if (reduction_end == ADTypes::UNKNOWN && (std::fabs(*(f + idx2) - checkValue) > threshold ||
                                                           std::fabs(*(f + idx) - checkValue) > threshold)) {
                     reduction_end = ADTypes::NO;
@@ -518,11 +518,11 @@ bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noB
     }
     if (reduction_start == ADTypes::UNKNOWN && expansion_start != ADTypes::YES) {
         reduction_start = ADTypes::YES;
-        m_shift_x1 = 1;
+        *p_shift_x1 = 1;
     }
     if (reduction_end == ADTypes::UNKNOWN && expansion_end != ADTypes::YES) {
         reduction_end = ADTypes::YES;
-        m_shift_x2 = -1;
+        *p_shift_x2 = -1;
     }
     return expansion_end == ADTypes::YES || expansion_start == ADTypes::YES || reduction_start == ADTypes::YES ||
            reduction_end == ADTypes::YES;
@@ -536,16 +536,16 @@ bool Adaption::adaptXDirection_serial(const real *f, real checkValue, size_t noB
 /// \param  noBufferCell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCell, real threshold) {
+bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCell, real threshold, long *p_shift_x1, long *p_shift_x2, const size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;
     size_t reduction_counter_start = 0;
     size_t reduction_counter_end = 0;
 
-    bool reduction_start = m_reduction;
-    bool reduction_end = m_reduction;
-    if (m_reduction && domain->Getnx() > (m_minimal + noBufferCell) * 2) {
+    bool reduction_start = reduce;
+    bool reduction_end = reduce;
+    if (reduce && domain->Getnx() > (minimal + noBufferCell) * 2) {
         reduction_start = false;
         reduction_end = false;
     }
@@ -563,8 +563,6 @@ bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCe
 
         size_t i_start = nx_begin;
         size_t i_end = nx_begin + domain->Getnx() - 1;
-
-        size_t minimal = m_minimal;
 
         //expansion - expand if there is at least one cell in the buffer area fulfills the condition
         //reduction - reduce if all cells do not fulfil the condition any longer
@@ -606,17 +604,17 @@ bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCe
         //throw std::exception();
     }
     if (expansion_counter_start > 0) {
-        m_shift_x1 = -1;
+        *p_shift_x1 = -1;
     } else {
-        if (reduction_counter_start == 0 && m_reduction) {
-            m_shift_x1 = 1;
+        if (reduction_counter_start == 0 && reduce) {
+            *p_shift_x1 = 1;
         }
     }
     if (expansion_counter_end > 0) {
-        m_shift_x2 = 1;
+        *p_shift_x2 = 1;
     } else {
-        if (reduction_counter_end == 0 && m_reduction) {
-            m_shift_x2 = -1;
+        if (reduction_counter_end == 0 && reduce) {
+            *p_shift_x2 = -1;
         }
     }
     return (expansion_counter_end + expansion_counter_start) > 0 || reduction_counter_start == 0 ||
@@ -631,7 +629,7 @@ bool Adaption::adaptXDirection(const real *f, real checkValue, size_t noBufferCe
 /// \param  noBufferCell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noBufferCell, real threshold) {
+bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noBufferCell, real threshold, long *p_shift_y1, long *p_shift_y2, size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
     size_t Nx = domain->GetNx();
     size_t Ny = domain->GetNy();
@@ -664,7 +662,7 @@ bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noB
     ADTypes reduction_start = ADTypes::NO;
     ADTypes reduction_end = ADTypes::NO;
     ADTypes reduction = ADTypes::NO;
-    if (m_reduction && domain->Getnx() > (m_minimal + noBufferCell) * 2) {
+    if (reduce && domain->Getnx() > (minimal + noBufferCell) * 2) {
         reduction_start = ADTypes::UNKNOWN;
         reduction_end = ADTypes::UNKNOWN;
         reduction = ADTypes::UNKNOWN;
@@ -676,12 +674,12 @@ bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noB
             // check innermost plane of the buffer zone on the lower side
             size_t idx_s1 = IX(i, j_start + noBufferCell - 1, k, Nx, Ny);
             if (expansion_start == ADTypes::UNKNOWN && std::fabs(*(f + idx_s1) - checkValue) > threshold) {
-                m_shift_y1 = -1;
+                *p_shift_y1 = -1;
                 expansion_start = ADTypes::YES;
             } else {
                 // check innermost plane of the minimal zone to reduce on the lower side
-                size_t idx = IX(i, j_start + m_minimal - 1, k, Nx, Ny);
-                size_t idx2 = IX(i, j_start + m_minimal - 1 + noBufferCell, k, Nx, Ny);
+                size_t idx = IX(i, j_start + minimal - 1, k, Nx, Ny);
+                size_t idx2 = IX(i, j_start + minimal - 1 + noBufferCell, k, Nx, Ny);
                 if (reduction_start == ADTypes::UNKNOWN && (std::fabs(*(f + idx2) - checkValue) > threshold ||
                                                             std::fabs(*(f + idx) - checkValue) > threshold)) {
                     reduction_start = ADTypes::NO;
@@ -690,12 +688,12 @@ bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noB
             // check innermost plane of the buffer zone on the upper side
             size_t idx_s2 = IX(i, j_end - noBufferCell + 1, k, Nx, Ny);
             if (expansion_end == ADTypes::UNKNOWN && std::fabs(*(f + idx_s2) - checkValue) > threshold) {
-                m_shift_y2 = 1;
+                *p_shift_y2 = 1;
                 expansion_end = ADTypes::YES;
             } else {
                 // check innermost plane of the minimal zone to reduce on the upper side
-                size_t idx = IX(i, j_end - m_minimal + 1, k, Nx, Ny);
-                size_t idx2 = IX(i, j_end - m_minimal + 1 - noBufferCell, k, Nx, Ny);
+                size_t idx = IX(i, j_end - minimal + 1, k, Nx, Ny);
+                size_t idx2 = IX(i, j_end - minimal + 1 - noBufferCell, k, Nx, Ny);
                 if (reduction_end == ADTypes::UNKNOWN && (std::fabs(*(f + idx2) - checkValue) > threshold ||
                                                           std::fabs(*(f + idx) - checkValue) > threshold)) {
                     reduction_end = ADTypes::NO;
@@ -719,11 +717,11 @@ bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noB
     }
     if (reduction_start == ADTypes::UNKNOWN && expansion_start != ADTypes::YES) {
         reduction_start = ADTypes::YES;
-        m_shift_y1 = 1;
+        *p_shift_y1 = 1;
     }
     if (reduction_end == ADTypes::UNKNOWN && expansion_end != ADTypes::YES) {
         reduction_end = ADTypes::YES;
-        m_shift_y2 = -1;
+        *p_shift_y2 = -1;
     }
     return expansion_end == ADTypes::YES || expansion_start == ADTypes::YES ||
            reduction_start == ADTypes::YES ||
@@ -738,7 +736,7 @@ bool Adaption::adaptYDirection_serial(const real *f, real checkValue, size_t noB
 /// \param  noBufferCell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adaptYDirection(const real *f, real checkValue, size_t noBufferCell, real threshold) {
+bool Adaption::adaptYDirection(const real *f, real checkValue, size_t noBufferCell, real threshold, long *p_shift_y1, long *p_shift_y2, size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
 
     size_t expansion_counter_start = 0;
@@ -746,9 +744,9 @@ bool Adaption::adaptYDirection(const real *f, real checkValue, size_t noBufferCe
     size_t reduction_counter_start = 0;
     size_t reduction_counter_end = 0;
     //reduction - reduce if all cells do not fulfil the condition any longer
-    bool reduction_start = m_reduction;
-    bool reduction_end = m_reduction;
-    if (m_reduction && domain->Getny() > (m_minimal + noBufferCell) * 2) {
+    bool reduction_start = reduce;
+    bool reduction_end = reduce;
+    if (reduce && domain->Getny() > (minimal + noBufferCell) * 2) {
         reduction_start = false;
         reduction_end = false;
     }
@@ -766,8 +764,6 @@ bool Adaption::adaptYDirection(const real *f, real checkValue, size_t noBufferCe
 
         size_t j_start = ny_begin;
         size_t j_end = ny_begin + domain->Getny() - 1;
-
-        size_t minimal = m_minimal;
 
         //expansion - expand if there is at least one cell in the buffer area fulfills the condition
         //loop through lower side of cuboid in y direction
@@ -809,14 +805,14 @@ bool Adaption::adaptYDirection(const real *f, real checkValue, size_t noBufferCe
         //throw std::exception();
     }
     if (expansion_counter_start > 0) {
-        m_shift_y1 = -1;
-    } else if (reduction_counter_start == 0 && m_reduction) {
-        m_shift_y1 = 1;
+        *p_shift_y1 = -1;
+    } else if (reduction_counter_start == 0 && reduce) {
+        *p_shift_y1 = 1;
     }
     if (expansion_counter_end > 0) {
-        m_shift_y2 = 1;
-    } else if (reduction_counter_end == 0 && m_reduction) {
-        m_shift_y2 = -1;
+        *p_shift_y2 = 1;
+    } else if (reduction_counter_end == 0 && reduce) {
+        *p_shift_y2 = -1;
     }
     return (expansion_counter_end + expansion_counter_start) > 0 || reduction_counter_start == 0 ||
            reduction_counter_end == 0;

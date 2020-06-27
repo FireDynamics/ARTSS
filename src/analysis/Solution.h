@@ -41,11 +41,26 @@ public:
     }
 
 private:
+    void init();
+
+    void gauss_bubble(real t);
+    void exp_sinus_prod(real t);
+    void exp_sinus_sum(real t);
+    void hat(real t);
+    void fac_sin_sin_sin(real t);
+    void mcDermott(real t);
+    void vortex(real t);
+    void vortex_y(real t);
+    void beltrami(real t);
+    void buoyancy_mms(real t);
+    void zero(real t);
+
+
     Field *ua, *va, *wa;
     Field *pa;
     Field *Ta;
-
-    void SetUp();
+    real m_current_timestep = -1;
+    void (Solution::*m_init_function)(const real);
 };
 
 #endif /* ARTSS_ANALYSIS_SOLUTION_H_ */

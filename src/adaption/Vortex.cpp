@@ -8,8 +8,7 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 
-Vortex::Vortex(Adaption *pAdaption, Field **fields) {
-
+Vortex::Vortex(ISolver *solver) {
     auto domain = Domain::getInstance();
     auto params = Parameters::getInstance();
     m_u_lin = params->get_real("initial_conditions/u_lin");
@@ -25,11 +24,10 @@ Vortex::Vortex(Adaption *pAdaption, Field **fields) {
     }
     m_buffer = params->get_int("adaption/class/buffer");
     m_threshold = m_u_lin * params->get_real("adaption/class/threshold");
-    m_pAdaption = pAdaption;
 
-    u = fields[VectorFieldsTypes::VEL_U];
-    v = fields[VectorFieldsTypes::VEL_V];
-    w = fields[VectorFieldsTypes::VEL_W];
+    u = solver->u;
+    v = solver->v;
+    w = solver->w;
 }
 
 // ==================================== Has reduction ===============================
@@ -46,28 +44,28 @@ bool Vortex::hasReduction() {
 /// \brief  Checks for adaption
 /// \return  bool if adaption is possible true
 // ********************************************************************************
-bool Vortex::update() {
+bool Vortex::update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) {
     auto d_u = u->data;
     auto d_v = v->data;
     bool adaption = false;
 
-    m_pAdaption->m_shift_x1 = 0;
-    m_pAdaption->m_shift_x2 = 0;
-    m_pAdaption->m_shift_y1 = 0;
-    m_pAdaption->m_shift_y2 = 0;
-    m_pAdaption->m_shift_z1 = 0;
-    m_pAdaption->m_shift_z2 = 0;
+    *p_shift_x1 = 0;
+    *p_shift_x2 = 0;
+    *p_shift_y1 = 0;
+    *p_shift_y2 = 0;
+    *p_shift_z1 = 0;
+    *p_shift_z2 = 0;
 
-    adaption = m_pAdaption->adaptXDirection(d_u, m_u_lin, m_buffer, m_threshold) || adaption;
+    adaption = Adaption::adaptXDirection(d_u, m_u_lin, m_buffer, m_threshold, p_shift_x1, p_shift_x2, m_minimal, m_reduction) || adaption;
     if (m_y_side)
-      adaption = m_pAdaption->adaptYDirection(d_v, m_v_lin, m_buffer, m_threshold) || adaption;
+      adaption = Adaption::adaptYDirection(d_v, m_v_lin, m_buffer, m_threshold, p_shift_y1, p_shift_y2, m_minimal, m_reduction) || adaption;
 
-    m_pAdaption->m_shift_x1 *= m_minimal;
-    m_pAdaption->m_shift_x2 *= m_minimal;
-    m_pAdaption->m_shift_y1 *= m_minimal;
-    m_pAdaption->m_shift_y2 *= m_minimal;
-    m_pAdaption->m_shift_z1 *= m_minimal;
-    m_pAdaption->m_shift_z2 *= m_minimal;
+    *p_shift_x1 *= m_minimal;
+    *p_shift_x2 *= m_minimal;
+    *p_shift_y1 *= m_minimal;
+    *p_shift_y2 *= m_minimal;
+    *p_shift_z1 *= m_minimal;
+    *p_shift_z2 *= m_minimal;
 
     return adaption;
 }
@@ -76,7 +74,7 @@ bool Vortex::update() {
 // ********************************************************************************
 /// \brief  Set values for new domain
 // ********************************************************************************
-void Vortex::applyChanges() {
+void Vortex::applyChanges(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) {
     auto domain = Domain::getInstance();
 
     size_t i_start = domain->GetIndexx1();//(x1 - X1) / dx;
@@ -86,22 +84,22 @@ void Vortex::applyChanges() {
     size_t k_start = domain->GetIndexz1();//(z1 - Z1) / dz;
     size_t k_end = domain->GetIndexz2() + 2;//(z2 - Z1) / dz + 2;
 
-    if (m_pAdaption->m_shift_x1 != 0) {
-        if (m_pAdaption->m_shift_x1 < 0) {
-            size_t len_e = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_x1));
+    if (*p_shift_x1 != 0) {
+        if (*p_shift_x1 < 0) {
+            size_t len_e = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(*p_shift_x1));
             auto *arr_idxExpansion = new size_t[len_e];
 #pragma acc enter data create(arr_idxExpansion[:len_e])
-            m_pAdaption->expandXDirection(m_pAdaption->m_shift_x1, true, arr_idxExpansion, len_e);
+            Adaption::expandXDirection(*p_shift_x1, true, arr_idxExpansion, len_e);
             Vortex::Drift_dynamic(arr_idxExpansion, len_e);
 #pragma acc exit data delete(arr_idxExpansion[:len_e])
             delete[] arr_idxExpansion;
         }
 #ifndef BENCHMARKING
         else {
-            size_t len_r = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_x1));
+            size_t len_r = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(*p_shift_x1));
             auto *arr_idxReduction = new size_t[len_r];
 #pragma acc enter data create(arr_idxReduction[:len_r])
-            m_pAdaption->reduceXDirection(m_pAdaption->m_shift_x1, true, arr_idxReduction, len_r);
+            Adaption::reduceXDirection(*p_shift_x1, true, arr_idxReduction, len_r);
             Zero(arr_idxReduction, len_r);
 #pragma acc exit data delete(arr_idxReduction[:len_r])
             delete[] arr_idxReduction;
@@ -109,22 +107,22 @@ void Vortex::applyChanges() {
 #endif
     }
 
-    if (m_pAdaption->m_shift_x2 != 0) {
-        if (m_pAdaption->m_shift_x2 > 0) {
-            size_t len_e = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_x2));
+    if (*p_shift_x2 != 0) {
+        if (*p_shift_x2 > 0) {
+            size_t len_e = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(*p_shift_x2));
             auto *arr_idxExpansion = new size_t[len_e];
 #pragma acc enter data create(arr_idxExpansion[:len_e])
-            m_pAdaption->expandXDirection(m_pAdaption->m_shift_x2, false, arr_idxExpansion, len_e);
+            Adaption::expandXDirection(*p_shift_x2, false, arr_idxExpansion, len_e);
             Vortex::Drift_dynamic(arr_idxExpansion, len_e);
 #pragma acc exit data delete(arr_idxExpansion[:len_e])
             delete[] arr_idxExpansion;
         }
 #ifndef BENCHMARKING
         else {
-            size_t len_r = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_x2));
+            size_t len_r = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(*p_shift_x2));
             auto *arr_idxReduction = new size_t[len_r];
 #pragma acc enter data create(arr_idxReduction[:len_r])
-            m_pAdaption->reduceXDirection(m_pAdaption->m_shift_x2, false, arr_idxReduction, len_r);
+            Adaption::reduceXDirection(*p_shift_x2, false, arr_idxReduction, len_r);
             Zero(arr_idxReduction, len_r);
 #pragma acc exit data delete(arr_idxReduction[:len_r])
             delete[] arr_idxReduction;
@@ -132,22 +130,22 @@ void Vortex::applyChanges() {
 #endif
     }
 
-    if (m_pAdaption->m_shift_y1 != 0) {
-        if (m_pAdaption->m_shift_y1 < 0) {
-            size_t len_e = (i_end - i_start) * (k_end - k_start) * static_cast<size_t>(fabs(m_pAdaption->m_shift_y1));
+    if (*p_shift_y1 != 0) {
+        if (*p_shift_y1 < 0) {
+            size_t len_e = (i_end - i_start) * (k_end - k_start) * static_cast<size_t>(fabs(*p_shift_y1));
             auto *arr_idxExpansion = new size_t[len_e];
 #pragma acc enter data create(arr_idxExpansion[:len_e])
-            m_pAdaption->expandYDirection(m_pAdaption->m_shift_y1, true, arr_idxExpansion, len_e);
+            Adaption::expandYDirection(*p_shift_y1, true, arr_idxExpansion, len_e);
             Vortex::Drift_dynamic(arr_idxExpansion, len_e);
 #pragma acc exit data delete(arr_idxExpansion[:len_e])
             delete[] arr_idxExpansion;
         }
 #ifndef BENCHMARKING
         else {
-            size_t len_r = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(m_pAdaption->m_shift_y1));
+            size_t len_r = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(*p_shift_y1));
             auto *arr_idxReduction = new size_t[len_r];
 #pragma acc enter data create(arr_idxReduction[:len_r])
-            m_pAdaption->reduceYDirection(m_pAdaption->m_shift_y1, true, arr_idxReduction, len_r);
+            Adaption::reduceYDirection(*p_shift_y1, true, arr_idxReduction, len_r);
             Zero(arr_idxReduction, len_r);
 #pragma acc exit data delete(arr_idxReduction[:len_r])
             delete[] arr_idxReduction;
@@ -155,22 +153,22 @@ void Vortex::applyChanges() {
 #endif
     }
 
-    if (m_pAdaption->m_shift_y2 != 0) {
-        if (m_pAdaption->m_shift_y2 > 0) {
-            size_t len_e = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(m_pAdaption->m_shift_y2));
+    if (*p_shift_y2 != 0) {
+        if (*p_shift_y2 > 0) {
+            size_t len_e = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(*p_shift_y2));
             auto *arr_idxExpansion = new size_t[len_e];
 #pragma acc enter data create(arr_idxExpansion[:len_e])
-            m_pAdaption->expandYDirection(m_pAdaption->m_shift_y2, false, arr_idxExpansion, len_e);
+            Adaption::expandYDirection(*p_shift_y2, false, arr_idxExpansion, len_e);
             Vortex::Drift_dynamic(arr_idxExpansion, len_e);
 #pragma acc exit data delete(arr_idxExpansion[:len_e])
             delete[] arr_idxExpansion;
         }
 #ifndef BENCHMARKING
         else {
-            size_t len_r = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(m_pAdaption->m_shift_y2));
+            size_t len_r = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(*p_shift_y2));
             auto *arr_idxReduction = new size_t[len_r];
 #pragma acc enter data create(arr_idxReduction[:len_r])
-            m_pAdaption->reduceYDirection(m_pAdaption->m_shift_y2, false, arr_idxReduction, len_r);
+            Adaption::reduceYDirection(*p_shift_y2, false, arr_idxReduction, len_r);
             Zero(arr_idxReduction, len_r);
 #pragma acc exit data delete(arr_idxReduction[:len_r])
             delete[] arr_idxReduction;

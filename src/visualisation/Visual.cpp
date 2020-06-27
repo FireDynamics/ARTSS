@@ -17,42 +17,49 @@
 
 Visual::Visual() {
     auto params = Parameters::getInstance();
-    std::string fname = params->get_filename();
-    m_filename = RemoveExtension(fname);
+    m_filename = remove_extension(params->get_filename());
 
     m_save_csv = (params->get("visualisation/save_csv") == "Yes");
-    m_save_csv = (params->get("visualisation/save_vtk") == "Yes");
+    m_save_vtk = (params->get("visualisation/save_vtk") == "Yes");
 
+    m_dt = params->get_real("physical_parameters/dt");
+    m_t_end = params->get_real("physical_parameters/t_end");
+    if (m_save_csv) {
+        m_csv_plots = params->get_int("visualisation/csv_nth_plot");
+    }
+    if (m_save_vtk) {
+        m_vtk_plots = params->get_int("visualisation/vtk_nth_plot");
+    }
     m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
 }
 
 void Visual::visualise(ISolver *solver, const real t) {
-    // TODO 0 fields for t == 0. (change ? remove time independent solutions)
-
-    /*              solver->GetU0(), solver->GetV0(), solver->GetW0(), \
-                    solver->GetP0(), solver->GetRhs(), solver->GetT0(), solver->GetC0(), \
-                    solver->GetSight(), solver->GetNu_t(), solver->GetS_T(), \
-                    m_solution.GetU0(), m_solution.GetV0(), m_solution.GetW0(), \
-                    m_solution.GetP0(), m_solution.GetT0());
-                    */
-    if (m_has_analytical_solution){
-         m_solution.CalcAnalyticalSolution(t);
+    int n = static_cast<int> (std::round(t / m_dt));
+    if (m_has_analytical_solution) {
+        m_solution.CalcAnalyticalSolution(t);
     }
+
+    std::string filename = create_filename(m_filename, static_cast<int>(std::round(t / m_dt)), false);
     if (m_save_vtk) {
-        VTKWriter::write_numerical(solver, createFilename(m_filename, t, false));
-        if (m_has_analytical_solution){
-            VTKWriter::write_analytical(&m_solution, createFilename(m_filename, t, true));
+        if (fmod(n, m_vtk_plots) == 0 || t >= m_t_end) {
+            VTKWriter::write_numerical(solver, filename);
+            if (m_has_analytical_solution) {
+                VTKWriter::write_analytical(&m_solution, create_filename(m_filename, t, true));
+            }
         }
     }
 
     if (m_save_csv) {
-        CSVWriter::write_numerical(solver, createFilename(m_filename, t, false));
-        if (m_has_analytical_solution){
-            CSVWriter::write_analytical(&m_solution, createFilename(m_filename, t, true));
+        if (fmod(n, m_csv_plots) == 0 || t >= m_t_end) {
+            CSVWriter::write_numerical(solver, filename);
+            if (m_has_analytical_solution) {
+                CSVWriter::write_analytical(&m_solution, create_filename(m_filename, t, true));
+            }
         }
     }
 }
-void Visual::initialiseGrid(float *x_centres, float *y_centres, float *z_centres, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
+
+void Visual::initialise_grid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
     Domain *domain = Domain::getInstance();
     real X1 = domain->GetX1();
     real Y1 = domain->GetY1();
@@ -63,15 +70,15 @@ void Visual::initialiseGrid(float *x_centres, float *y_centres, float *z_centres
         for (int j = 0; j < Ny; j++) {
             for (int i = 0; i < Nx; i++) {
                 size_t index = IX(i, j, k, Nx, Ny);
-                x_centres[index] = static_cast<float> (X1 + (i-0.5) * dx);
-                y_centres[index] = static_cast<float> (Y1 + (j-0.5) * dy);
-                z_centres[index] = static_cast<float> (Z1 + (k-0.5) * dz);
+                x_coords[index] = static_cast<float> (X1 + (i - 0.5) * dx);
+                y_coords[index] = static_cast<float> (Y1 + (j - 0.5) * dy);
+                z_coords[index] = static_cast<float> (Z1 + (k - 0.5) * dz);
             }
         }
     }
 }
 
-void Visual::prepareFields(read_ptr *fields, float **vars, int size){
+void Visual::prepare_fields(read_ptr *fields, float **vars, int size) {
     Domain *domain = Domain::getInstance();
 
     int Nx = static_cast<int>(domain->GetNx());
@@ -83,7 +90,7 @@ void Visual::prepareFields(read_ptr *fields, float **vars, int size){
         for (int j = 0; j < Ny; j++) {
             for (int i = 0; i < Nx; i++) {
                 size_t index = IX(i, j, k, Nx, Ny);
-                for (int v = 0; v < size; v++){
+                for (int v = 0; v < size; v++) {
                     vars[v][index] = static_cast<float>(fields[v][index]);
                 }
             }
@@ -91,15 +98,15 @@ void Visual::prepareFields(read_ptr *fields, float **vars, int size){
     }
 }
 
-std::string Visual::createFilename(std::string filename, const real t, bool analytical){
+std::string Visual::create_filename(std::string filename, int counter, bool analytical) {
     std::string fname = std::move(filename);
-    if (analytical){
+    if (analytical) {
         fname.append("_ana_");
-    }else {
+    } else {
         fname.append("_num_");
     }
     std::ostringstream tstep;
-    tstep << std::setw(6) << std::setfill('0') << t;
+    tstep << std::setw(6) << std::setfill('0') << counter;
     fname.append(tstep.str());
     return fname;
 }
@@ -109,7 +116,7 @@ std::string Visual::createFilename(std::string filename, const real t, bool anal
 /// \brief  Removes extension from filename
 /// \param  filename    xml-file name (via argument)
 // ***************************************************************************************
-std::string Visual::RemoveExtension(const std::string &filename) {
+std::string Visual::remove_extension(const std::string &filename) {
     size_t lastdot = filename.find_last_of('.');
     if (lastdot == std::string::npos) return filename;
     return filename.substr(0, lastdot);

@@ -14,11 +14,10 @@
 
 class Vortex : public IAdaptionFunction {
 public:
-    Vortex(Adaption *pAdaption, Field **fields);
-    ~Vortex();
-    bool update() override;
+    explicit Vortex(ISolver *solver);
+    bool update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
 
-    void applyChanges() override;
+    void applyChanges(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
 
     bool hasReduction() override;
 
@@ -27,7 +26,6 @@ private:
 
     void Zero(size_t *arr_idx, size_t arr_idx_size);
 
-    Adaption *m_pAdaption;
     real m_u_lin;
     real m_v_lin;
     real m_w_lin;

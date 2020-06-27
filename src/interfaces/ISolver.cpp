@@ -181,24 +181,25 @@ ISolver::~ISolver() {
 // ***************************************************************************************
 void ISolver::SetUp() {
     std::cout << "Start initializing....\n" << std::endl;
-    //TODO Logger
+    // TODO Logger
 
-    // Initialization of variables at time t=0
+    // Initialization of variables
     Init();
 
-    // Initialization of temp and new variables
-    Init_f(u_tmp, u0->data);
-    Init_f(v_tmp, v0->data);
-    Init_f(w_tmp, w0->data);
-    Init_f(u, u0->data);
-    Init_f(v, v0->data);
-    Init_f(w, w0->data);
-    Init_f(p, p0->data);
-    Init_f(T, T0->data);
-    Init_f(T_tmp, T0->data);
-    Init_f(T_a, T0->data);
-    Init_f(C, C0->data);
-    Init_f(C_tmp, C0->data);
+    // TODO necessary?
+    // Initialization of temp and 0 variables
+    Init_f(u_tmp, u->data);
+    Init_f(v_tmp, v->data);
+    Init_f(w_tmp, w->data);
+    Init_f(u0, u->data);
+    Init_f(v0, v->data);
+    Init_f(w0, w->data);
+    Init_f(p0, p->data);
+    Init_f(T0, T->data);
+    Init_f(T_tmp, T->data);
+    Init_f(T_a, T->data);
+    Init_f(C0, C->data);
+    Init_f(C_tmp, C->data);
 }
 
 //================================== 0) Initialization ===================================
@@ -212,9 +213,9 @@ void ISolver::Init() {
 
     if (string_init_usr_fct == FunctionNames::GaussBubble) {
         if (m_string_solver == SolverTypes::AdvectionSolver) {
-            Functions::GaussBubble(u0, 0.);
-            Functions::GaussBubble(v0, 0.);
-            Functions::GaussBubble(w0, 0.);
+            Functions::GaussBubble(u, 0.);
+            Functions::GaussBubble(v, 0.);
+            Functions::GaussBubble(w, 0.);
         }
     } else if (string_init_usr_fct == FunctionNames::Drift) {
         if (m_string_solver == SolverTypes::AdvectionSolver or \
@@ -224,7 +225,7 @@ void ISolver::Init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver or \
             m_string_solver == SolverTypes::NSTurbSolver) {
-            Functions::Drift(u0, v0, w0, p0);
+            Functions::Drift(u, v, w, p);
         }
         if (m_string_solver == SolverTypes::NSTempSolver or \
             m_string_solver == SolverTypes::NSTempConSolver or \
@@ -237,21 +238,21 @@ void ISolver::Init() {
         // Diffusion test case
         if (m_string_solver == SolverTypes::DiffusionSolver or \
             m_string_solver == SolverTypes::DiffusionTurbSolver) {
-            Functions::ExpSinusProd(u0, 0.);
-            Functions::ExpSinusProd(v0, 0.);
-            Functions::ExpSinusProd(w0, 0.);
+            Functions::ExpSinusProd(u, 0.);
+            Functions::ExpSinusProd(v, 0.);
+            Functions::ExpSinusProd(w, 0.);
         }
     } else if (string_init_usr_fct == FunctionNames::Hat) {
         if (m_string_solver == SolverTypes::DiffusionSolver or \
             m_string_solver == SolverTypes::DiffusionTurbSolver) {
-            Functions::Hat(u0);
-            Functions::Hat(v0);
-            Functions::Hat(w0);
+            Functions::Hat(u);
+            Functions::Hat(v);
+            Functions::Hat(w);
         }
     } else if (string_init_usr_fct == FunctionNames::ExpSinusSum) {
         // Burgers (=nonlinear Advection + Diffusion) test case
         if (m_string_solver == SolverTypes::AdvectionDiffusionSolver) {
-            Functions::ExpSinusSum(u0, v0, w0, 0.);
+            Functions::ExpSinusSum(u, v, w, 0.);
         }
     } else if (string_init_usr_fct == FunctionNames::SinSinSin) {
         if (m_string_solver == SolverTypes::PressureSolver) {
@@ -266,8 +267,8 @@ void ISolver::Init() {
             m_string_solver == SolverTypes::NSTempConSolver or \
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::McDermott(u0, v0, w0, p0, 0.);
-            Init_c(p0, 0.);
+            Functions::McDermott(u, v, w, p, 0.);
+            Init_c(p, 0.);
         }
         if (m_string_solver == SolverTypes::NSTempSolver or \
             m_string_solver == SolverTypes::NSTempConSolver or \
@@ -284,8 +285,8 @@ void ISolver::Init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver or \
             m_string_solver == SolverTypes::NSTempSolver) {
-            Functions::Vortex(u0, v0, w0, p0);
-            Init_c(p0, 0.);
+            Functions::Vortex(u, v, w, p);
+            Init_c(p, 0.);
         }
         if (m_string_solver == SolverTypes::NSTempSolver or \
             m_string_solver == SolverTypes::NSTempConSolver or \
@@ -302,8 +303,8 @@ void ISolver::Init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver or \
             m_string_solver == SolverTypes::NSTempSolver) {
-            Functions::VortexY(u0, v0, w0, p0);
-            Init_c(p0, 0.);
+            Functions::VortexY(u, v, w, p);
+            Init_c(p, 0.);
         }
         if (m_string_solver == SolverTypes::NSTempSolver or \
             m_string_solver == SolverTypes::NSTempConSolver or \
@@ -316,8 +317,8 @@ void ISolver::Init() {
         // NavierStokes test case: Beltrami  (no force, no temperature) 3D
         if (m_string_solver == SolverTypes::NSSolver or \
             m_string_solver == SolverTypes::NSTurbSolver) {
-            Functions::Beltrami(u0, v0, w0, p0, 0.);
-            //Init_c(p0, 0.);
+            Functions::Beltrami(u, v, w, p, 0.);
+            //Init_c(p, 0.);
         }
     } else if (string_init_usr_fct == FunctionNames::BuoyancyMMS) {
         // NavierStokesTemp test case
@@ -326,8 +327,8 @@ void ISolver::Init() {
             m_string_solver == SolverTypes::NSTempConSolver or \
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::BuoyancyMMS(u0, v0, w0, p0, T0, 0.0);
-            Init_c(p0, 0.);
+            Functions::BuoyancyMMS(u, v, w, p, T, 0.0);
+            Init_c(p, 0.);
             ForceSource();
             TemperatureSource();
         }
@@ -338,7 +339,7 @@ void ISolver::Init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             real val = params->get_real("initial_conditions/val");
-            Functions::Uniform(T0, val);
+            Functions::Uniform(T, val);
             ForceSource();
             TemperatureSource();
         }
@@ -352,7 +353,7 @@ void ISolver::Init() {
             real Ta = params->get_real("initial_conditions/Ta");        // ambient temperature in KELVIN!
             real A = params->get_real("initial_conditions/A");            // amplitude
             size_t range = static_cast<size_t>(params->get_int("initial_conditions/range")); // range of random numbers (0-range)
-            Functions::Random(T0, Ta, A, range);
+            Functions::Random(T, Ta, A, range);
         }
         //Random concentration
         if ((m_string_solver == SolverTypes::NSTempConSolver or \
@@ -377,7 +378,7 @@ void ISolver::Init() {
             m_string_solver == SolverTypes::NSTempConSolver or \
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::Layers(T0);
+            Functions::Layers(T);
             ForceSource();
             TemperatureSource();
         }
@@ -386,10 +387,10 @@ void ISolver::Init() {
             m_string_solver == SolverTypes::NSTempConSolver or \
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::Layers(T0);
+            Functions::Layers(T);
             real A = params->get_real("initial_conditions/A");        //amplitude
             size_t range = static_cast<size_t>(params->get_real("initial_conditions/range"));    //range of random numbers (0-range)
-            Functions::Random(T0, T0, A, range);
+            Functions::Random(T, T, A, range);
             ForceSource();
             TemperatureSource();
         }
@@ -509,7 +510,7 @@ void ISolver::Init_c(Field *out, const real in) {
 void ISolver::SetUpBoundary(bool sync) {
 
     auto boundary = BoundaryController::getInstance();
-
+    // TODO necessary?
     boundary->applyBoundary(u0->data, u0->GetType(), sync);
     boundary->applyBoundary(v0->data, v0->GetType(), sync);
     boundary->applyBoundary(w0->data, w0->GetType(), sync);
@@ -524,11 +525,12 @@ void ISolver::SetUpBoundary(bool sync) {
     boundary->applyBoundary(T->data, T->GetType(), sync);
     boundary->applyBoundary(C->data, C->GetType(), sync);
 
+    // TODO necessary?
     boundary->applyBoundary(u_tmp->data, u_tmp->GetType(), sync);
     boundary->applyBoundary(v_tmp->data, v_tmp->GetType(), sync);
     boundary->applyBoundary(w_tmp->data, w_tmp->GetType(), sync);
     boundary->applyBoundary(T_tmp->data, T_tmp->GetType(), sync);
-    boundary->applyBoundary(T_a->data, T0->GetType(), sync);
+    boundary->applyBoundary(T_a->data, T_a->GetType(), sync);
     boundary->applyBoundary(C_tmp->data, C_tmp->GetType(), sync);
 }
 

@@ -80,7 +80,7 @@ int main(int argc, const char **argv) {
 
     // 2. Integrate over time and solve numerically
     // Time integration
-    TimeIntegration ti(solver, argv[1]);
+    TimeIntegration ti(solver);
     ti.run();
 
     // 3. Compute analytical solution and compare
