@@ -682,7 +682,7 @@ if ${YELLOW}--generate${NC} and ${YELLOW}--verbose${NC} are selected, temporary 
     rm *.xml
   fi
 
-  if [ $FAIL -eq 0 ]
+  if [ $FAIL -eq 1 ]
   then
     exit 1
   else
