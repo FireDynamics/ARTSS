@@ -43,3 +43,25 @@ jobs:
           docker build -t artss_docker .
           cd ..
           docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh --jobs 4 -s
+  cmake-tests:
+    
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: compile
+        run: |
+          git submodule update --init
+          cd docker
+          docker build -t artss_docker .
+          cd ..
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh --jobs 4 -s -m; cd build; make test
+          
+  test-xml:
+    
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: compile
+        run: |
+          cd tools
+          ./test_xml-builder.sh
