@@ -34,12 +34,9 @@ BoundaryController::BoundaryController() {
 // ***************************************************************************************
 void BoundaryController::readXML() {
     auto params = Parameters::getInstance();
-    std::string filename = params->get("xml_filename");
-    tinyxml2::XMLDocument doc(filename.c_str());
-    tinyxml2::XMLError eResult = doc.LoadFile(filename.c_str());
-    parseBoundaryParameter(doc.RootElement()->FirstChildElement("boundaries"));
-    parseObstacleParameter(doc.FirstChildElement()->FirstChildElement("obstacles"));
-    parseSurfaceParameter(doc.FirstChildElement()->FirstChildElement("surfaces"));
+    parseBoundaryParameter(params->get_first_child("boundaries"));
+    parseObstacleParameter(params->get_first_child("obstacles"));
+    parseSurfaceParameter( params->get_first_child("surfaces"));
 }
 
 // ================================= Parser =============================================
