@@ -14,16 +14,16 @@ static std::string ending = ".csv";
 const static char delimiter = ',';
 
 void CSVWriter::write_numerical(ISolver *solver, const std::string& filename) {
-    auto u = solver->GetU();
-    auto v = solver->GetV();
-    auto w = solver->GetW();
-    auto p = solver->GetP();
-    auto div = solver->GetRhs();
-    auto T = solver->GetT();
-    auto C = solver->GetC();
-    auto s = solver->GetSight();
-    auto nu_t = solver->GetNu_t();
-    auto S_T = solver->GetS_T();
+    auto u = solver->get_u();
+    auto v = solver->get_v();
+    auto w = solver->get_w();
+    auto p = solver->get_p();
+    auto div = solver->get_rhs();
+    auto T = solver->get_T();
+    auto C = solver->get_concentration();
+    auto s = solver->get_sight();
+    auto nu_t = solver->get_nu_t();
+    auto S_T = solver->get_S_T();
     CSVWriter::csvPrepareAndWrite((filename + ending).c_str(), u, v, w, p, div, T, C, s, nu_t, S_T);
 }
 
@@ -38,7 +38,7 @@ void CSVWriter::write_analytical(Solution *solution, const std::string& filename
 
 void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t, read_ptr S_T) {
     Domain *domain = Domain::getInstance();
-    int size = static_cast<int>(domain->GetSize());
+    int size = static_cast<int>(domain->get_size());
 
     // Initialize variables
     int size_vars = 10; // Number of variables
@@ -101,7 +101,7 @@ void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
 
 void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr T) {
     Domain *domain = Domain::getInstance();
-    int size = static_cast<int>(domain->GetSize());
+    int size = static_cast<int>(domain->get_size());
 
     // Initialize variables
     int size_vars = 5; // Number of variables
@@ -140,15 +140,15 @@ void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
 void CSVWriter::csv_write(const char *filename, float **vars, int size_vars, const char **var_names) {
     Domain *domain = Domain::getInstance();
 
-    int Nx = static_cast<int>(domain->GetNx());
-    int Ny = static_cast<int>(domain->GetNy());
-    int Nz = static_cast<int>(domain->GetNz());
+    int Nx = static_cast<int>(domain->get_Nx());
+    int Ny = static_cast<int>(domain->get_Ny());
+    int Nz = static_cast<int>(domain->get_Nz());
 
-    int size = static_cast<int>(domain->GetSize());
+    int size = static_cast<int>(domain->get_size());
 
-    real dx = domain->Getdx();
-    real dy = domain->Getdy();
-    real dz = domain->Getdz();
+    real dx = domain->get_dx();
+    real dy = domain->get_dy();
+    real dz = domain->get_dz();
 
     const int size_coords = 7;
     const char *coord_names[] = {"i", "j", "k", "index", "x-coords (m)", "y-coords (m)", "z-coords (m)"};

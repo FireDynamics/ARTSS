@@ -12,7 +12,6 @@
 class ConstSmagorinsky : public ITurbulence {
 public:
     ConstSmagorinsky();
-
     ~ConstSmagorinsky() override = default;
 
     void CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Field *in_w, bool sync) override;

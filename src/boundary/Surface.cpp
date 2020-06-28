@@ -13,20 +13,20 @@ Surface::Surface(tinyxml2::XMLElement* element) {
     std::cout << "################ SURFACE ################" << std::endl;
     auto domain = Domain::getInstance();
 
-    real dx = domain->Getdx();
-    real dy = domain->Getdy();
-    real dz = domain->Getdz();
+    real dx = domain->get_dx();
+    real dy = domain->get_dy();
+    real dz = domain->get_dz();
 
     real rdx = 1./dx;
     real rdy = 1./dy;
     real rdz = 1./dz;
 
-    real X1 = domain->GetX1();
-    real Y1 = domain->GetX1();
-    real Z1 = domain->GetX1();
+    real X1 = domain->get_X1();
+    real Y1 = domain->get_X1();
+    real Z1 = domain->get_X1();
 
-    size_t Nx = domain->GetNx();
-    size_t Ny = domain->GetNy();
+    size_t Nx = domain->get_Nx();
+    size_t Ny = domain->get_Ny();
 
     std::cout << "surface ID ";
     m_surfaceID = element->IntAttribute("ID");
@@ -63,8 +63,8 @@ Surface::Surface(size_t surfaceID, size_t startIndex, size_t strideX, size_t str
     m_strideZ = strideZ;
 
     Domain* domain = Domain::getInstance();
-    size_t Nx = domain->GetNx(level);
-    size_t Ny = domain->GetNy(level);
+    size_t Nx = domain->get_Nx(level);
+    size_t Ny = domain->get_Ny(level);
     std::vector<size_t> coords = Utility::coordinateFromLinearIndex(startIndex, Nx, Ny);
     m_i1 = coords[0];
     m_j1 = coords[1];

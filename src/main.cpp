@@ -21,13 +21,6 @@
 #include "utility/tinyxml2.h"
 #include "utility/Parameters.h"
 
-#ifndef BENCHMARKING
-
-#include "analysis/Analysis.h"
-#include "visualisation/Visual.h"
-
-#endif
-
 #ifdef _OPENACC
 #include <openacc.h>
 #endif
@@ -35,10 +28,10 @@
 int main(int argc, const char **argv) {
     // Initialization
     // Parameters
-    std::string XMLfilename;
-    if (argc > 1) XMLfilename.assign(argv[1]);
+    std::string XML_filename;
+    if (argc > 1) XML_filename.assign(argv[1]);
     auto params = Parameters::getInstance();
-    params->parse(XMLfilename);
+    params->parse(XML_filename);
 
     // Solver
     ISolver *solver;

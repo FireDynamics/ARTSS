@@ -10,10 +10,10 @@
 ///         stable semi-Lagrangian approach (backtrace and linear interpolation)
 // ***************************************************************************************
 
+#include <cmath>
+
 #ifdef _OPENACC
 #include <accelmath.h>
-#else
-#include <cmath>
 #endif
 
 #include <algorithm>
@@ -25,7 +25,6 @@
 // ==================================== Constructor ====================================
 // ***************************************************************************************
 SLAdvect::SLAdvect() {
-
     auto params = Parameters::getInstance();
     m_dt = params->get_real("physical_parameters/dt");
 }
@@ -41,11 +40,10 @@ SLAdvect::SLAdvect() {
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_vel, const Field *w_vel, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    size_t bsize = domain->GetSize(out->GetLevel());
+    size_t bsize = domain->get_size(out->GetLevel());
     FieldType type = out->GetType();
 
     auto d_out = out->data;
@@ -61,12 +59,12 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
 
 #pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize])
     {
-        const size_t Nx = domain->GetNx(out->GetLevel());    // due to unnecessary parameter passing of *this
-        const size_t Ny = domain->GetNy(out->GetLevel());
+        const size_t Nx = domain->get_Nx(out->GetLevel());    // due to unnecessary parameter passing of *this
+        const size_t Ny = domain->get_Ny(out->GetLevel());
 
-        const real dx = domain->Getdx(out->GetLevel());    // due to unnecessary parameter passing of *this
-        const real dy = domain->Getdy(out->GetLevel());
-        const real dz = domain->Getdz(out->GetLevel());
+        const real dx = domain->get_dx(out->GetLevel());    // due to unnecessary parameter passing of *this
+        const real dy = domain->get_dy(out->GetLevel());
+        const real dz = domain->get_dz(out->GetLevel());
 
         const real rdx = 1. / dx;        // due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;
@@ -79,12 +77,12 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
         const real dtz = dt * rdz;
 
         // start indices for computational domain of inner cells
-        long int i_start = static_cast<long int> (domain->GetIndexx1());
-        long int j_start = static_cast<long int> (domain->GetIndexy1());
-        long int k_start = static_cast<long int> (domain->GetIndexz1());
-        long int i_end = static_cast<long int> (domain->GetIndexx2());
-        long int j_end = static_cast<long int> (domain->GetIndexy2());
-        long int k_end = static_cast<long int> (domain->GetIndexz2());
+        long int i_start = static_cast<long int> (domain->get_index_x1());
+        long int j_start = static_cast<long int> (domain->get_index_y1());
+        long int k_start = static_cast<long int> (domain->get_index_z1());
+        long int i_end = static_cast<long int> (domain->get_index_x2());
+        long int j_end = static_cast<long int> (domain->get_index_y2());
+        long int k_end = static_cast<long int> (domain->get_index_z2());
 
 #pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize], d_iList[:bsize_i]) async
         for (size_t l = 0; l < bsize_i; ++l) {
@@ -171,7 +169,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             d_out[idx] = (1. - t) * ((1. - s) * ((1. - r) * d_000 + r * d_100)
                                           + s * ((1. - r) * d_010 + r * d_110))
                               + t * ((1. - s) * ((1. - r) * d_001 + r * d_101)
-                              + s * ((1. - r) * d_011 + r * d_111)); // row-major
+                                          + s * ((1. - r) * d_011 + r * d_111)); // row-major
         }
 
         boundary->applyBoundary(d_out, type, sync);

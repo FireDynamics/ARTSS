@@ -1,8 +1,8 @@
-/// \file 		NSSolver.cpp
-/// \brief 		Defines the (fractional) steps to solve the incompressible Navier-Stokes equations
-/// \date 		Dec 2, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file     NSSolver.cpp
+/// \brief    Defines the (fractional) steps to solve the incompressible Navier-Stokes equations
+/// \date     Dec 2, 2016
+/// \author   Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
 
@@ -46,13 +46,13 @@ NSSolver::~NSSolver() {
     delete sou;
 }
 
-//========================================== DoStep ======================================
+//========================================== do_step ======================================
 // ***************************************************************************************
 /// \brief  brings all calculation steps together into one function
-/// \param	dt			time step
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
+/// \param  dt      time step
+/// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void NSSolver::DoStep(real t, bool sync) {
+void NSSolver::do_step(real t, bool sync) {
 
 // local variables and parameters for GPU
     auto u = ISolver::u;
@@ -87,7 +87,7 @@ void NSSolver::DoStep(real t, bool sync) {
     auto d_fy = f_y->data;
     auto d_fz = f_z->data;
 
-    size_t bsize = Domain::getInstance()->GetSize(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
 
     auto nu = m_nu;
 
@@ -104,7 +104,7 @@ void NSSolver::DoStep(real t, bool sync) {
 
 
 // Couple velocity to prepare for diffusion
-        ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve diffusion equation
         if (nu != 0.) {
@@ -117,7 +117,7 @@ void NSSolver::DoStep(real t, bool sync) {
             dif_vel->diffuse(w, w0, w_tmp, nu, sync);
 
             // Couple data to prepare for adding source
-            ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 3. Add force
@@ -126,14 +126,14 @@ void NSSolver::DoStep(real t, bool sync) {
             std::cout << "Add source ..." << std::endl;
             //TODO Logger
 #endif
-            sou->addSource(u, v, w, f_x, f_y, f_z, sync);
+            sou->add_source(u, v, w, f_x, f_y, f_z, sync);
             // Couple data
-            ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 4. Solve pressure equation and project
         // Calculate divergence of u
-        pres->Divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
+        pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
 #ifndef BENCHMARKING
@@ -143,9 +143,9 @@ void NSSolver::DoStep(real t, bool sync) {
         pres->pressure(p, rhs, t, sync);
 
         // Correct
-        pres->Project(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
+        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
 
-// 5. Sources updated in Solver::UpdateSources, TimeIntegration
+// 5. Sources updated in Solver::update_sources, TimeIntegration
 
         if (sync) {
 #pragma acc wait

@@ -37,7 +37,7 @@ Visual::Visual(Solution *solution) {
 void Visual::visualise(ISolver *solver, const real t) {
     int n = static_cast<int> (std::round(t / m_dt));
     if (m_has_analytical_solution) {
-        m_solution->CalcAnalyticalSolution(t);
+        m_solution->calc_analytical_solution(t);
     }
 
     std::string filename = create_filename(m_filename, static_cast<int>(std::round(t / m_dt)), false);
@@ -62,9 +62,9 @@ void Visual::visualise(ISolver *solver, const real t) {
 
 void Visual::initialise_grid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
     Domain *domain = Domain::getInstance();
-    real X1 = domain->GetX1();
-    real Y1 = domain->GetY1();
-    real Z1 = domain->GetZ1();
+    real X1 = domain->get_X1();
+    real Y1 = domain->get_Y1();
+    real Z1 = domain->get_Z1();
 
     // Initialize grid
     for (int k = 0; k < Nz; k++) {
@@ -82,9 +82,9 @@ void Visual::initialise_grid(float *x_coords, float *y_coords, float *z_coords, 
 void Visual::prepare_fields(read_ptr *fields, float **vars, int size) {
     Domain *domain = Domain::getInstance();
 
-    int Nx = static_cast<int>(domain->GetNx());
-    int Ny = static_cast<int>(domain->GetNy());
-    int Nz = static_cast<int>(domain->GetNz());
+    int Nx = static_cast<int>(domain->get_Nx());
+    int Ny = static_cast<int>(domain->get_Ny());
+    int Nz = static_cast<int>(domain->get_Nz());
 
     // Cast variables to floats
     for (int k = 0; k < Nz; k++) {

@@ -34,28 +34,28 @@ TimeIntegration::TimeIntegration(ISolver *isolv) {
     m_t_end = params->get_real("physical_parameters/t_end");
     m_t_cur = m_dt;        // since t=0 already handled in setup
 
-    m_size = domain->GetSize();
+    m_size = domain->get_size();
 
     this->m_solver = isolv;
 }
 
 void TimeIntegration::run() {
     Adaption *adaption;
-    std::cout << "Start calculating and timing...\n" << std::endl;
-    // TODO Logger
-
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-
+    adaption = new Adaption(m_solver);
 #ifndef BENCHMARKING
-    Solution  *solution = new Solution();
+    Solution *solution = new Solution();
     Analysis *analysis = new Analysis(solution);
-    analysis->Analyse(m_solver, 0.);
+    analysis->analyse(m_solver, 0.);
 
     // Visualise
     Visual *visual = new Visual(solution);
     visual->visualise(m_solver, 0.);
 #endif
+    std::cout << "Start calculating and timing...\n" << std::endl;
+    // TODO Logger
+
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
     {
         // local variables and parameters for GPU
         auto u = m_solver->u;
@@ -73,20 +73,19 @@ void TimeIntegration::run() {
         auto T = m_solver->T;
         auto T0 = m_solver->T0;
         auto T_tmp = m_solver->T_tmp;
-        auto T_a = m_solver->T_a;
-        auto C = m_solver->C;
-        auto C0 = m_solver->C0;
-        auto C_tmp = m_solver->C_tmp;
+        auto T_a = m_solver->T_ambient;
+        auto C = m_solver->concentration;
+        auto C0 = m_solver->concentration0;
+        auto C_tmp = m_solver->concentration_tmp;
         auto f_x = m_solver->f_x;
         auto f_y = m_solver->f_y;
         auto f_z = m_solver->f_z;
         auto S_T = m_solver->S_T;
-        auto S_C = m_solver->S_C;
+        auto S_C = m_solver->S_concentration;
         auto nu_t = m_solver->nu_t;
         auto kappa_t = m_solver->kappa_t;
         auto gamma_t = m_solver->gamma_t;
 
-        adaption = new Adaption(m_solver);
         auto d_u = u->data;
         auto d_v = v->data;
         auto d_w = w->data;
@@ -129,7 +128,7 @@ void TimeIntegration::run() {
 #endif
 
 // copyin all variables
-#pragma acc enter data copyin(    d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], \
+#pragma acc enter data copyin(  d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], \
                                 d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], \
                                 d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], \
                                 d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], \
@@ -139,10 +138,10 @@ void TimeIntegration::run() {
                                 d_nu_t[:bsize], d_kappa_t[:bsize], d_gamma_t[:bsize])
 
         // initialize boundary cells
-        m_solver->SetUpBoundary(false);
+        m_solver->set_up_boundary(false);
 
         // std::ofstream file;
-        // file.open(adaption->getWriteRuntimeName(), ios::app);
+        // file.open(adaption->get_write_runtime_name(), ios::app);
         // std::chrono::time_point<std::chrono::system_clock> iter_start, iter_end;
         while (t_cur < t_end + dt) {
 
@@ -153,7 +152,7 @@ void TimeIntegration::run() {
 #endif
 
             // Calculate
-            m_solver->DoStep(t_cur, false);
+            m_solver->do_step(t_cur, false);
 
 #ifndef BENCHMARKING
             // Visualize
@@ -168,20 +167,20 @@ void TimeIntegration::run() {
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
 
             visual->visualise(m_solver, t_cur);
-            if (adaption->isDataExtractionBeforeEnabled()) adaption->extractData(adaption->getBeforeName(), adaption->getBeforeHeight(), t_cur);
+            if (adaption->is_data_extraction_before_enabled()) adaption->extractData(adaption->get_before_name(), adaption->get_before_height(), t_cur);
             // Error Calculation
             // RMS error at midposize_t at each time step Nt
-            analysis->CalcL2NormMidPoint(m_solver, t_cur, Sum);
+            analysis->calc_L2_norm_mid_point(m_solver, t_cur, Sum);
 
             // To check CFL and VN, comment out
-            /*bool CFL_check = ana.CheckTimeStepCFL(u, v, w, dt);
+            /*bool CFL_check = ana.check_time_step_CFL(u, v, w, dt);
             if(!CFL_check){
                 std::cout<<"CFL condition not met!\n";
                 // To change dt, comment out
-                //dt = ana.SetDTwithCFL(u, v, w);
+                //dt = ana.set_DT_with_CFL(u, v, w);
                 //std::cout<<" Setting dt = "<<dt<<std::endl;
             }
-            bool VN_check = ana.CheckTimeStepVN(u, dt);
+            bool VN_check = ana.check_time_step_VN(u, dt);
             if(!VN_check)
                 std::cout<<"Von Neumann condition not met!"<<std::endl;
             */
@@ -189,25 +188,21 @@ void TimeIntegration::run() {
             // update
             adaption->run(t_cur);
 #ifndef BENCHMARKING
-            if (adaption->isDataExtractionAfterEnabled()) adaption->extractData(adaption->getAfterName(), adaption->getAfterHeight(), t_cur);
+            if (adaption->is_data_extraction_after_enabled()) adaption->extractData(adaption->get_after_name(), adaption->get_after_height(), t_cur);
 #endif
-            m_solver->UpdateSources(t_cur, false);
-            m_solver->UpdateData(false);
+            m_solver->update_sources(t_cur, false);
+            m_solver->update_data(false);
 
             // iter_end = std::chrono::system_clock::now();
             // long ms = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();
             // file << "t_cur: "<<t_cur << " runtime: " << ms << " microsec\n";
-
-#ifndef BENCHMARKING
-            if (adaption->isWriteFieldEnabled()) adaption->extractData(adaption->getWriteFieldName(t_cur));
-#endif
             t_cur += dt;
 
         } // end while
         // file.close();
         // Sum up RMS error
 #ifndef BENCHMARKING
-        analysis->CalcRMSError(Sum[0], Sum[1], Sum[2]);
+        analysis->calc_RMS_error(Sum[0], Sum[1], Sum[2]);
 #endif
 
 #pragma acc wait
@@ -226,12 +221,12 @@ void TimeIntegration::run() {
     std::cout << "Global Time: " << ms << "ms" << std::endl;
     //TODO Logger
 #ifndef BENCHMARKING
-    if (adaption->isDataExtractionEndresultEnabled()) {
-        adaption->extractData(adaption->getEndresultName());
+    if (adaption->is_data_extraction_endresult_enabled()) {
+        adaption->extractData(adaption->get_endresult_name());
     }
     // testing correct output (when changing implementation/ calculating on GPU)
-    analysis->SaveVariablesInFile(m_solver);
-    analysis->Analyse(m_solver, m_t_end);
+    analysis->save_variables_in_file(m_solver);
+    analysis->analyse(m_solver, m_t_end);
 #endif
     delete (adaption);
 }

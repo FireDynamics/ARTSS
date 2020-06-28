@@ -1,9 +1,9 @@
-/// \file 		Solution.cpp
-/// \brief 		Calculates analytical solution
-/// \details	This class calculates the analytical solution of different test cases
-/// \date 		Jul 11, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       Solution.cpp
+/// \brief      Calculates analytical solution
+/// \details    This class calculates the analytical solution of different test cases
+/// \date       Jul 11, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
 #include "Solution.h"
@@ -11,21 +11,21 @@
 #include "../Functions.h"
 
 Solution::Solution() {
-    ua = new Field(FieldType::U, 0.0);
-    va = new Field(FieldType::V, 0.0);
-    wa = new Field(FieldType::W, 0.0);
-    pa = new Field(FieldType::P, 0.0);
-    Ta = new Field(FieldType::T, 0.0);
+    u_a = new Field(FieldType::U, 0.0);
+    v_a = new Field(FieldType::V, 0.0);
+    w_a = new Field(FieldType::W, 0.0);
+    p_a = new Field(FieldType::P, 0.0);
+    T_a = new Field(FieldType::T, 0.0);
 
     init();
 }
 
 Solution::~Solution() {
-    delete ua;
-    delete va;
-    delete wa;
-    delete pa;
-    delete Ta;
+    delete u_a;
+    delete v_a;
+    delete w_a;
+    delete p_a;
+    delete T_a;
 }
 
 void Solution::init() {
@@ -42,7 +42,7 @@ void Solution::init() {
     } else if (initialCondition == FunctionNames::Hat) {
         m_init_function = &Solution::hat;
     } else if (initialCondition == FunctionNames::SinSinSin) {
-        m_init_function = &Solution::fac_sin_sin_sin;
+        m_init_function = &Solution::sin_sin_sin;
     } else if (initialCondition == FunctionNames::McDermott) {
         m_init_function = &Solution::mcDermott;
     } else if (initialCondition == FunctionNames::Vortex) {
@@ -61,50 +61,50 @@ void Solution::init() {
 
 void Solution::gauss_bubble(const real t) {
     // Advection test case
-    Functions::GaussBubble(ua, t);
-    Functions::GaussBubble(va, t);
-    Functions::GaussBubble(wa, t);
+    Functions::GaussBubble(u_a, t);
+    Functions::GaussBubble(v_a, t);
+    Functions::GaussBubble(w_a, t);
 }
 
 void Solution::exp_sinus_prod(const real t) {
     // Diffusion test case
-    Functions::ExpSinusProd(ua, t);
-    Functions::ExpSinusProd(va, t);
-    Functions::ExpSinusProd(wa, t);
+    Functions::ExpSinusProd(u_a, t);
+    Functions::ExpSinusProd(v_a, t);
+    Functions::ExpSinusProd(w_a, t);
 }
 
 void Solution::exp_sinus_sum(const real t) {
     // Diffusion test case
-    Functions::ExpSinusSum(ua, va, wa, t);
+    Functions::ExpSinusSum(u_a, v_a, w_a, t);
 }
 
 void Solution::hat(const real t) {
     // Diffusion test case
-    Functions::Hat(ua); // TODO time dependency?
-    Functions::Hat(va);
-    Functions::Hat(wa);
+    Functions::Hat(u_a); // TODO time dependency?
+    Functions::Hat(v_a);
+    Functions::Hat(w_a);
 }
 
-void Solution::fac_sin_sin_sin(const real t) {
+void Solution::sin_sin_sin(real t) {
 // Pressure test case
-    Functions::FacSinSinSin(pa); // TODO time dependency?
+    Functions::FacSinSinSin(p_a); // TODO time dependency?
 }
 
 void Solution::mcDermott(const real t) {
 // NavierStokes test case
-    Functions::McDermott(ua, va, wa, pa, t);
+    Functions::McDermott(u_a, v_a, w_a, p_a, t);
 }
 
 void Solution::vortex(const real t) {
-    Functions::Vortex(ua, va, wa, pa); // TODO time dependency
+    Functions::Vortex(u_a, v_a, w_a, p_a); // TODO time dependency
 }
 
 void Solution::vortex_y(const real t) {
-    Functions::VortexY(ua, va, wa, pa); // TODO time dependency
+    Functions::VortexY(u_a, v_a, w_a, p_a); // TODO time dependency
 }
 
 void Solution::beltrami(const real t) {
-    Functions::Beltrami(ua, va, wa, pa, t);
+    Functions::Beltrami(u_a, v_a, w_a, p_a, t);
 }
 
 void Solution::zero(const real t) {
@@ -112,18 +112,18 @@ void Solution::zero(const real t) {
 }
 
 void Solution::buoyancy_mms(const real t) {
-    Functions::BuoyancyMMS(ua, va, wa, pa, Ta, t);
+    Functions::BuoyancyMMS(u_a, v_a, w_a, p_a, T_a, t);
 }
 
 // =================== Calculate analytical solution based on test case ==================
 // ***************************************************************************************
 /// \brief  calculates analytical solution
-/// \param	t		time
+/// \param  t   time
 // ***************************************************************************************
-void Solution::CalcAnalyticalSolution(const real t) {
-    if (m_current_timestep == t) {
+void Solution::calc_analytical_solution(real t) {
+    if (m_current_time_step == t) {
         return;
     }
-    m_current_timestep = t;
+    m_current_time_step = t;
     (*this.*m_init_function)(t);
 }

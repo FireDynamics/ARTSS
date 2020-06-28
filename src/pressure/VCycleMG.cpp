@@ -26,7 +26,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
 
-    levels = domain->GetLevels();
+    levels = domain->get_levels();
     cycles = static_cast<size_t> (params->get_int("solver/pressure/n_cycle"));
     relaxs = static_cast<size_t> (params->get_int("solver/pressure/diffusion/n_relax"));
 
@@ -36,10 +36,10 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 
     // copies of out and b to prevent aliasing
     auto d_out = out->data;
-    auto s_out = domain->GetSize(out->GetLevel());
+    auto s_out = domain->get_size(out->GetLevel());
     auto t_out = out->GetType();
     auto d_b = b->data;
-    auto s_b = domain->GetSize(b->GetLevel());
+    auto s_b = domain->get_size(b->GetLevel());
     auto t_b = b->GetType();
 
     Field *out_err1 = new Field(t_out, 0.0);
@@ -57,21 +57,21 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 // residuum
     residuum1.push_back(b_res1);
     auto data_residuum1 = residuum1.back()->data;
-    size_t bsize_residuum1 = domain->GetSize(residuum1.back()->GetLevel());
+    size_t bsize_residuum1 = domain->get_size(residuum1.back()->GetLevel());
 
 #pragma acc enter data copyin(data_residuum1[:bsize_residuum1])
 
 // error
     error1.push_back(out_err1);
     auto data_err1 = error1.back()->data;
-    size_t bsize_err1 = domain->GetSize(error1.back()->GetLevel());
+    size_t bsize_err1 = domain->get_size(error1.back()->GetLevel());
 
 #pragma acc enter data copyin(data_err1[:bsize_err1])
 
 // temporal solution
     mg_temporal_solution.push_back(out_tmp);
     auto data_mg_temporal_solution = mg_temporal_solution.back()->data;
-    size_t bsize_mg_temporal_solution = domain->GetSize(mg_temporal_solution.back()->GetLevel());
+    size_t bsize_mg_temporal_solution = domain->get_size(mg_temporal_solution.back()->GetLevel());
 
 #pragma acc enter data copyin(data_mg_temporal_solution[:bsize_mg_temporal_solution])
 
@@ -85,7 +85,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
         residuum0.push_back(r0);
 
         auto data_residuum0 = r0->data;
-        size_t bsize_residuum0 = domain->GetSize(r0->GetLevel());
+        size_t bsize_residuum0 = domain->get_size(r0->GetLevel());
 
 #pragma acc enter data copyin(data_residuum0[:bsize_residuum0])
 
@@ -94,7 +94,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
         residuum1.push_back(r1);
 
         auto data_residuum1 = r1->data;
-        size_t bsize_residuum1 = domain->GetSize(r1->GetLevel());
+        size_t bsize_residuum1 = domain->get_size(r1->GetLevel());
 
 #pragma acc enter data copyin(data_residuum1[:bsize_residuum1])
 
@@ -103,7 +103,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
         error1.push_back(e1);
 
         auto d_err1 = e1->data;
-        size_t bsize_err1 = domain->GetSize(e1->GetLevel());
+        size_t bsize_err1 = domain->get_size(e1->GetLevel());
 
 #pragma acc enter data copyin(d_err1[:bsize_err1])
 
@@ -112,7 +112,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
         mg_temporal_solution.push_back(mg);
 
         auto data_mg_temporal_solution = mg->data;
-        size_t bsize_mg_temporal_solution = domain->GetSize(mg->GetLevel());
+        size_t bsize_mg_temporal_solution = domain->get_size(mg->GetLevel());
 
 #pragma acc enter data copyin(data_mg_temporal_solution[:bsize_mg_temporal_solution])
     } // end level loop
@@ -125,7 +125,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
     err0[0] = e00;
 
     auto d_err00 = e00->data;
-    size_t bsize_err00 = domain->GetSize(e00->GetLevel());
+    size_t bsize_err00 = domain->get_size(e00->GetLevel());
 
 #pragma acc enter data copyin(d_err00[:bsize_err00])
 
@@ -139,7 +139,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
         err0[i] = e0;
 
         auto d_err0 = err0[i]->data;
-        size_t bsize_err0 = domain->GetSize(err0[i]->GetLevel());
+        size_t bsize_err0 = domain->get_size(err0[i]->GetLevel());
 
 #pragma acc enter data copyin(d_err0[:bsize_err0])
     }
@@ -151,7 +151,7 @@ VCycleMG::~VCycleMG() {
     while (residuum0.size() > 0) {
         auto field = residuum0.back();
         auto data = residuum0.back()->data;
-        size_t bsize = domain->GetSize(residuum0.back()->GetLevel());
+        size_t bsize = domain->get_size(residuum0.back()->GetLevel());
 #pragma acc exit data delete(data[:bsize])
         delete field;
         field = nullptr;
@@ -160,7 +160,7 @@ VCycleMG::~VCycleMG() {
     while (residuum1.size() > 0) {
         auto field = residuum1.back();
         auto data = residuum1.back()->data;
-        size_t bsize = domain->GetSize(residuum1.back()->GetLevel());
+        size_t bsize = domain->get_size(residuum1.back()->GetLevel());
 #pragma acc exit data delete(data[:bsize])
         delete field;
         field = nullptr;
@@ -169,7 +169,7 @@ VCycleMG::~VCycleMG() {
     while (err0.size() > 0) {
         auto field = err0.back();
         auto data = err0.back()->data;
-        size_t bsize = domain->GetSize(err0.back()->GetLevel());
+        size_t bsize = domain->get_size(err0.back()->GetLevel());
 #pragma acc exit data delete(data[:bsize])
         delete field;
         field = nullptr;
@@ -178,7 +178,7 @@ VCycleMG::~VCycleMG() {
     while (error1.size() > 0) {
         auto field = error1.back();
         auto data = error1.back()->data;
-        size_t bsize = domain->GetSize(error1.back()->GetLevel());
+        size_t bsize = domain->get_size(error1.back()->GetLevel());
 #pragma acc exit data delete(data[:bsize])
         delete field;
         field = nullptr;
@@ -187,7 +187,7 @@ VCycleMG::~VCycleMG() {
     while (mg_temporal_solution.size() > 0) {
         auto field = mg_temporal_solution.back();
         auto data = mg_temporal_solution.back()->data;
-        size_t bsize = domain->GetSize(mg_temporal_solution.back()->GetLevel());
+        size_t bsize = domain->get_size(mg_temporal_solution.back()->GetLevel());
 #pragma acc exit data delete(data[:bsize])
         delete field;
         field = nullptr;
@@ -206,9 +206,9 @@ void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto d_out = out->data;
-    auto s_out = domain->GetSize(out->GetLevel());
+    auto s_out = domain->get_size(out->GetLevel());
     auto d_b = b->data;
-    auto s_b = domain->GetSize(b->GetLevel());
+    auto s_b = domain->get_size(b->GetLevel());
 
     auto f_err1 = error1[0];
     auto f_mg_tmp = mg_temporal_solution[0];
@@ -218,9 +218,9 @@ void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
     auto d_mg_tmp = mg_temporal_solution[0]->data;
     auto d_res1 = residuum1[0]->data;
 
-    auto s_err1 = domain->GetSize(error1[0]->GetLevel());
-    auto s_mg_tmp = domain->GetSize(mg_temporal_solution[0]->GetLevel());
-    auto s_res1 = domain->GetSize(residuum1[0]->GetLevel());
+    auto s_err1 = domain->get_size(error1[0]->GetLevel());
+    auto s_mg_tmp = domain->get_size(mg_temporal_solution[0]->GetLevel());
+    auto s_res1 = domain->get_size(residuum1[0]->GetLevel());
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
@@ -275,13 +275,13 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
         real sum = 0;
         const real tol_res = params->get_real("solver/pressure/tol_res");
 
-        const size_t Nx = domain->GetNx();
-        const size_t Ny = domain->GetNy();
-        size_t bsize = domain->GetSize();
+        const size_t Nx = domain->get_Nx();
+        const size_t Ny = domain->get_Ny();
+        size_t bsize = domain->get_size();
 
-        const real dx = domain->Getdx();
-        const real dy = domain->Getdy();
-        const real dz = domain->Getdz();
+        const real dx = domain->get_dx();
+        const real dy = domain->get_dy();
+        const real dz = domain->get_dz();
 
         const real rdx2 = 1. / (dx * dx);
         const real rdy2 = 1. / (dy * dy);
@@ -356,9 +356,9 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
         auto d_mg_tmpi = mg_temporal_solution[0]->data;
         auto d_res1i = residuum1[0]->data;
         auto d_out = out->data;
-        auto s_mg_tmpi = domain->GetSize(mg_temporal_solution[0]->GetLevel());
-        auto s_res1i = domain->GetSize(residuum1[0]->GetLevel());
-        auto s_out = domain->GetSize();
+        auto s_mg_tmpi = domain->get_size(mg_temporal_solution[0]->GetLevel());
+        auto s_res1i = domain->get_size(residuum1[0]->GetLevel());
+        auto s_out = domain->get_size();
 
 #pragma acc data present(d_out[:s_out], d_mg_tmpi[:s_mg_tmpi], d_res1i[:s_res1i])
         {
@@ -385,13 +385,13 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
         auto d_res1ip = residuum1[i + 1]->data;
         auto d_out = out->data;
 
-        auto s_res0i = domain->GetSize(residuum0[i]->GetLevel());
-        auto s_err1i = domain->GetSize(error1[i]->GetLevel());
-        auto s_err1ip = domain->GetSize(error1[i + 1]->GetLevel());
-        auto s_mg_tmpi = domain->GetSize(mg_temporal_solution[i]->GetLevel());
-        auto s_res1i = domain->GetSize(residuum1[i]->GetLevel());
-        auto s_res1ip = domain->GetSize(residuum1[i + 1]->GetLevel());
-        auto s_out = domain->GetSize(out->GetLevel());
+        auto s_res0i = domain->get_size(residuum0[i]->GetLevel());
+        auto s_err1i = domain->get_size(error1[i]->GetLevel());
+        auto s_err1ip = domain->get_size(error1[i + 1]->GetLevel());
+        auto s_mg_tmpi = domain->get_size(mg_temporal_solution[i]->GetLevel());
+        auto s_res1i = domain->get_size(residuum1[i]->GetLevel());
+        auto s_res1ip = domain->get_size(residuum1[i + 1]->GetLevel());
+        auto s_out = domain->get_size(out->GetLevel());
 
         FieldType type_r0 = f_res0i->GetType();
 
@@ -468,20 +468,20 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
         auto d_res1im = residuum1[i - 1]->data;
         auto d_out = out->data;
 
-        auto s_err0i = domain->GetSize(err0[i]->GetLevel());
-        auto s_err1i = domain->GetSize(error1[i]->GetLevel());
-        auto s_err1im = domain->GetSize(error1[i - 1]->GetLevel());
-        auto s_mg_tmpim = domain->GetSize(mg_temporal_solution[i - 1]->GetLevel());
-        auto s_res1im = domain->GetSize(residuum1[i - 1]->GetLevel());
-        auto s_out = domain->GetSize(out->GetLevel());
+        auto s_err0i = domain->get_size(err0[i]->GetLevel());
+        auto s_err1i = domain->get_size(error1[i]->GetLevel());
+        auto s_err1im = domain->get_size(error1[i - 1]->GetLevel());
+        auto s_mg_tmpim = domain->get_size(mg_temporal_solution[i - 1]->GetLevel());
+        auto s_res1im = domain->get_size(residuum1[i - 1]->GetLevel());
+        auto s_out = domain->get_size(out->GetLevel());
 
-        size_t Nx_e0 = domain->GetNx(f_err0i->GetLevel());
-        size_t Ny_e0 = domain->GetNy(f_err0i->GetLevel());
-        size_t Nz_e0 = domain->GetNz(f_err0i->GetLevel());
+        size_t Nx_e0 = domain->get_Nx(f_err0i->GetLevel());
+        size_t Ny_e0 = domain->get_Ny(f_err0i->GetLevel());
+        size_t Nz_e0 = domain->get_Nz(f_err0i->GetLevel());
 
-        real dx_e0 = domain->Getdx(f_err0i->GetLevel());
-        real dy_e0 = domain->Getdy(f_err0i->GetLevel());
-        real dz_e0 = domain->Getdz(f_err0i->GetLevel());
+        real dx_e0 = domain->get_dx(f_err0i->GetLevel());
+        real dy_e0 = domain->get_dy(f_err0i->GetLevel());
+        real dz_e0 = domain->get_dz(f_err0i->GetLevel());
 
         FieldType type_e0 = f_err0i->GetType();
 
@@ -574,9 +574,9 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    const real dx = domain->Getdx(out->GetLevel());
-    const real dy = domain->Getdy(out->GetLevel());
-    const real dz = domain->Getdz(out->GetLevel());
+    const real dx = domain->get_dx(out->GetLevel());
+    const real dy = domain->get_dy(out->GetLevel());
+    const real dz = domain->get_dz(out->GetLevel());
 
     auto d_out = out->data;
     auto d_tmp = tmp->data;
@@ -584,7 +584,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 
     auto params = Parameters::getInstance();
 
-    size_t bsize = domain->GetSize(out->GetLevel());
+    size_t bsize = domain->get_size(out->GetLevel());
     FieldType type = out->GetType();
 
     auto boundary = BoundaryController::getInstance();
@@ -673,7 +673,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
             for (size_t i = 0; i < relaxs; i++) {
-                ColoredGaussSeidelDiffuse::ColoredGaussSeidelStep(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
+                ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync); // for res/err only Dirichlet BC
             }
         } //end data region
@@ -703,12 +703,12 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    const size_t Nx = domain->GetNx(in->GetLevel());
-    const size_t Ny = domain->GetNy(in->GetLevel());
+    const size_t Nx = domain->get_Nx(in->GetLevel());
+    const size_t Ny = domain->get_Ny(in->GetLevel());
 
-    const real dx = domain->Getdx(in->GetLevel());
-    const real dy = domain->Getdy(in->GetLevel());
-    const real dz = domain->Getdz(in->GetLevel());
+    const real dx = domain->get_dx(in->GetLevel());
+    const real dy = domain->get_dy(in->GetLevel());
+    const real dz = domain->get_dz(in->GetLevel());
 
     const real rdx2 = 1. / (dx * dx);
     const real rdy2 = 1. / (dy * dy);
@@ -718,7 +718,7 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync
     auto d_in = in->data;
     auto d_b = b->data;
 
-    size_t bsize = domain->GetSize(out->GetLevel());
+    size_t bsize = domain->get_size(out->GetLevel());
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
@@ -758,18 +758,18 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
 
     // local variables and parameters for GPU
     // coarse grid
-    const size_t Nx = domain->GetNx(out->GetLevel());
-    const size_t Ny = domain->GetNy(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->GetLevel());
+    const size_t Ny = domain->get_Ny(out->GetLevel());
 
     // fine grid
-    const size_t nx = domain->GetNx(in->GetLevel());
-    const size_t ny = domain->GetNy(in->GetLevel());
+    const size_t nx = domain->get_Nx(in->GetLevel());
+    const size_t ny = domain->get_Ny(in->GetLevel());
 
     auto d_out = out->data;
     auto d_in = in->data;
 
-    size_t bsize_out = domain->GetSize(out->GetLevel());
-    size_t bsize_in = domain->GetSize(in->GetLevel());
+    size_t bsize_out = domain->get_size(out->GetLevel());
+    size_t bsize_in = domain->get_size(in->GetLevel());
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
@@ -779,7 +779,7 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     size_t start_i = boundary->get_innerList_level_joined_start(level + 1);
     size_t end_i = boundary->get_innerList_level_joined_end(level + 1) + 1;
 
-    if (end_i == start_i) std::cout << "Be cautious: Obstacle might fill up inner cells completely in level " << level << " with nx= " << domain->Getnx(out->GetLevel()) << "!" << std::endl;
+    if (end_i == start_i) std::cout << "Be cautious: Obstacle might fill up inner cells completely in level " << level << " with nx= " << domain->get_nx(out->GetLevel()) << "!" << std::endl;
     //TODO Error handling + Logger
 
     // average from eight neighboring cells
@@ -828,18 +828,18 @@ void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
 
     // local variables and parameters for GPU
     // fine grid
-    const size_t nx = domain->GetNx(out->GetLevel());
-    const size_t ny = domain->GetNy(out->GetLevel());
+    const size_t nx = domain->get_Nx(out->GetLevel());
+    const size_t ny = domain->get_Ny(out->GetLevel());
 
     // coarse grid
-    const size_t Nx = domain->GetNx(in->GetLevel());
-    const size_t Ny = domain->GetNy(in->GetLevel());
+    const size_t Nx = domain->get_Nx(in->GetLevel());
+    const size_t Ny = domain->get_Ny(in->GetLevel());
 
     auto d_out = out->data;
     auto d_in = in->data;
 
-    size_t bsize_out = domain->GetSize(out->GetLevel());
-    size_t bsize_in = domain->GetSize(in->GetLevel());
+    size_t bsize_out = domain->get_size(out->GetLevel());
+    size_t bsize_in = domain->get_size(in->GetLevel());
 
     auto boundary = BoundaryController::getInstance();
 
@@ -901,9 +901,9 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    const size_t Nx = domain->GetNx(out->GetLevel());
-    const size_t Ny = domain->GetNy(out->GetLevel());
-    const size_t Nz = domain->GetNz(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->GetLevel());
+    const size_t Ny = domain->get_Ny(out->GetLevel());
+    const size_t Nz = domain->get_Nz(out->GetLevel());
 
     if (level < levels - 1) {
         std::cout << "Wrong level =" << level << std::endl;
@@ -918,9 +918,9 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
         //TODO Error handling + Logger
     }
 
-    const real dx = domain->Getdx(out->GetLevel());
-    const real dy = domain->Getdy(out->GetLevel());
-    const real dz = domain->Getdz(out->GetLevel());
+    const real dx = domain->get_dx(out->GetLevel());
+    const real dy = domain->get_dy(out->GetLevel());
+    const real dz = domain->get_dz(out->GetLevel());
 
     auto d_out = out->data;
     auto d_tmp = tmp->data;
@@ -928,7 +928,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
     auto params = Parameters::getInstance();
 
-    size_t bsize = domain->GetSize(out->GetLevel());
+    size_t bsize = domain->get_size(out->GetLevel());
     FieldType type = out->GetType();
 
     auto boundary = BoundaryController::getInstance();
@@ -1049,7 +1049,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
             while (res > tol_res && it < max_it) {
 
-                ColoredGaussSeidelDiffuse::ColoredGaussSeidelStep(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
+                ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync); // for res/err only Dirichlet BC
 
                 sum = 0.;

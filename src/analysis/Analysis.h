@@ -1,8 +1,8 @@
-/// \file 		Analysis.h
-/// \brief 		Calculates residual, compares analytical and numerical solutions, saves variables
-/// \date 		July 11, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       Analysis.h
+/// \brief      Calculates residual, compares analytical and numerical solutions, saves variables
+/// \date       July 11, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_ANALYSIS_ANALYSIS_H_
 #define ARTSS_ANALYSIS_ANALYSIS_H_
@@ -13,27 +13,32 @@
 
 class Analysis {
 public:
-	explicit Analysis(Solution *solution);
+    explicit Analysis(Solution *solution);
 
-	void Analyse(ISolver* solver, real t);
-	//real* CalcL2NormMidPoint(real t, real* sum, read_ptr num_u, read_ptr num_p, read_ptr num_T);
-	void CalcL2NormMidPoint(ISolver* solver, real t, real* sum);
-	void CalcRMSError(real sumu, real sump, real sumT);
-	bool CheckTimeStepVN(Field* u, real dt);
-	bool CheckTimeStepCFL(Field* u, Field* v, Field* w, real dt);
-	real SetDTwithCFL(Field* u, Field* v, Field* w);
-	void SaveVariablesInFile(ISolver* solv);
+    void analyse(ISolver *solver, real t);
+
+    void calc_L2_norm_mid_point(ISolver *solver, real t, real *sum);
+    void calc_RMS_error(real sum_u, real sum_p, real sum_T);
+
+    bool check_time_step_VN(Field *u, real dt);
+    bool check_time_step_CFL(Field *u, Field *v, Field *w, real dt);
+
+    real set_DT_with_CFL(Field *u, Field *v, Field *w);
+
+    void save_variables_in_file(ISolver *solv);
 
 private:
-	real m_tol = 1e-7;
+    real m_tol = 1e-7;
 
-	bool CompareSolutions(read_ptr num, read_ptr ana, FieldType type, real t);
-	real CalcAbsoluteSpatialError(read_ptr num, read_ptr ana);
-	real CalcRelativeSpatialError(read_ptr num, read_ptr ana);
-	void writeFile(const real *field, std::string filename, size_t *innerList, size_t size_innerList, size_t *boundaryList, size_t size_boundaryList, size_t *obstacleList,
-                   size_t size_obstacleList);
+    bool compare_solutions(read_ptr num, read_ptr ana, FieldType type, real t);
 
-    bool hasAnalyticSolution = false;
+    real calc_absolute_spatial_error(read_ptr num, read_ptr ana);
+    real calc_relative_spatial_error(read_ptr num, read_ptr ana);
+
+    void write_file(const real *field, std::string filename, size_t *inner_list, size_t size_inner_list, size_t *boundary_list, size_t size_boundary_list, size_t *obstacle_list,
+                    size_t size_obstacle_list);
+
+    bool has_analytic_solution = false;
     Solution *m_solution;
 };
 

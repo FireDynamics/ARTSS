@@ -1,8 +1,8 @@
-/// \file 		DiffusionTurbSolver.h
-/// \brief 		Defines the steps to solve the turbulent diffusion equation
-/// \date 		August 18, 2016
-/// \author 	Suryanarayana Maddu
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file     DiffusionTurbSolver.h
+/// \brief    Defines the steps to solve the turbulent diffusion equation
+/// \date     August 18, 2016
+/// \author   Suryanarayana Maddu
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_SOLVER_TURBDIFFUSIONSOLVER_H_
 #define ARTSS_SOLVER_TURBDIFFUSIONSOLVER_H_
@@ -14,16 +14,16 @@
 
 class DiffusionTurbSolver: public ISolver {
 public:
-	DiffusionTurbSolver();
-	~DiffusionTurbSolver() override;
+  DiffusionTurbSolver();
+  ~DiffusionTurbSolver() override;
 
-	void DoStep(real t, bool sync) override;
+  void do_step(real t, bool sync) override;
 
 private:
-	IDiffusion*   dif;
-	ITurbulence*  mu_tub;
+  IDiffusion*   dif;
+  ITurbulence*  mu_tub;
 
-	real m_nu;
+  real m_nu;
 
     static void control();
 };
