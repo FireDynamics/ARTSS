@@ -139,11 +139,11 @@ void TimeIntegration::run() {
 
         // initialize boundary cells
         m_solver->set_up_boundary(false);
-
+        int iteration_step = 1;
         // std::ofstream file;
         // file.open(adaption->get_write_runtime_name(), ios::app);
         // std::chrono::time_point<std::chrono::system_clock> iter_start, iter_end;
-        while (t_cur < t_end + dt) {
+        while (t_cur < t_end + dt/2) {
 
             //iter_start = std::chrono::system_clock::now();
 #ifndef BENCHMARKING
@@ -196,7 +196,8 @@ void TimeIntegration::run() {
             // iter_end = std::chrono::system_clock::now();
             // long ms = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();
             // file << "t_cur: "<<t_cur << " runtime: " << ms << " microsec\n";
-            t_cur += dt;
+            iteration_step++;
+            t_cur = iteration_step * dt;
 
         } // end while
         // file.close();
