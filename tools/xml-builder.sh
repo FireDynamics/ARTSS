@@ -114,7 +114,6 @@ ADAPT_DATA=No
 ADAPT_BEFORE=No
 ADAPT_AFTER=No
 ADAPT_TIME=No
-ADAPT_FIELD=No
 ADAPT_END=No
 
 OBSTACLE=1
@@ -746,14 +745,6 @@ else
             WRITETO="$WRITETO
       <time_measuring enabled=\"Yes\"> </time_measuring>"
           fi
-          if [[ $ADAPT_FIELD == "No" ]]
-          then
-            WRITETO="$WRITETO
-      <write_field enabled=\"No\"> </write_field>"
-          else
-            WRITETO="$WRITETO
-      <write_field enabled=\"Yes\"> </write_field>"
-          fi
           WRITETO="$WRITETO
     </data_extraction>
   </adaption>"
@@ -848,10 +839,6 @@ do
       ;;
     --adaptionendresult)
       ADAPT_END=0
-      shift
-      ;;
-    --adaptionfield)
-      ADAPT_FIELD=0
       shift
       ;;
     --adaptionparameter)

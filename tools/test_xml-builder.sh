@@ -249,7 +249,6 @@ function create_testcases {
       <after enabled=\"No\"> </after>
       <endresult enabled=\"No\"> </endresult>
       <time_measuring enabled=\"No\"> </time_measuring>
-      <write_field enabled=\"No\"> </write_field>
     </data_extraction>
   </adaption>" > ${NAME}_$AFILEVAL
     ((INDEX++))
