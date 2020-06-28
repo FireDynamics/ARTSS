@@ -54,7 +54,7 @@ jobs:
           cd docker
           docker build -t artss_docker .
           cd ..
-          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh --jobs 4 -s -m; cd build; make test
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "./compile.sh --jobs 4 -s -m && cd build && make test"
           
   test-xml:
     
@@ -67,4 +67,4 @@ jobs:
           cd docker
           docker build -t artss_docker .
           cd ..
-          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ; cd tools; ./test_xml-builder.sh
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "cd tools && pwd && ./test_xml-builder.sh"
