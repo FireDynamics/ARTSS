@@ -187,7 +187,7 @@ void CSVWriter::csv_write(const char *filename, float **vars, int size_vars, con
                     outputFile << coord[index] << delimiter;
                 }
                 for (int v = 0; v < size_vars - 1; v++) {
-                    outputFile << vars[0][index] << delimiter;
+                    outputFile << vars[v][index] << delimiter;
                 }
                 outputFile << vars[size_vars - 1][index] << std::endl;
             }
