@@ -184,10 +184,10 @@ void CSVWriter::csv_write(const char *filename, float **vars, int size_vars, con
                            << index << delimiter
                            << std::setprecision(16);
                 for (int v = 0; v < size_coords; v++){
-                    outputFile << coords[0][index] << delimiter;
+                    outputFile << coords[v][index] << delimiter;
                 }
                 for (int v = 0; v < size_vars - 1; v++) {
-                    outputFile << vars[0][index] << delimiter;
+                    outputFile << vars[v][index] << delimiter;
                 }
                 outputFile << vars[size_vars - 1][index] << std::endl;
             }
