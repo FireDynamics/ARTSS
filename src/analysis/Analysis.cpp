@@ -405,19 +405,22 @@ void Analysis::save_variables_in_file(ISolver *solv) {
     size_t *obstacleList = boundary->get_obstacleList();
     size_t size_obstacleList = boundary->getSize_obstacleList();
 
-    const real *dataField[numberOfFieldTypes - 1];
-    dataField[FieldType::U - 1] = solv->get_u();
-    dataField[FieldType::V - 1] = solv->get_v();
-    dataField[FieldType::W - 1] = solv->get_w();
-    dataField[FieldType::P - 1] = solv->get_p();
-    dataField[FieldType::T - 1] = solv->get_T();
+    std::vector<FieldType> v_fields = boundary->get_used_fields();
 
-    for (size_t i = 0; i < numberOfFieldTypes - 1; i++) {
-        write_file(dataField[i], BoundaryData::getFieldTypeName(static_cast<FieldType>(i + 1)), innerList, size_innerList, boundaryList, size_boundaryList, obstacleList, size_obstacleList);
+    const real *dataField[v_fields.size()];
+    dataField[FieldType::RHO] = solv->get_concentration();
+    dataField[FieldType::U] = solv->get_u();
+    dataField[FieldType::V] = solv->get_v();
+    dataField[FieldType::W] = solv->get_w();
+    dataField[FieldType::P] = solv->get_p();
+    dataField[FieldType::T] = solv->get_T();
+
+    for (auto & v_field : v_fields) {
+        write_file(dataField[v_field], BoundaryData::getFieldTypeName(v_field), innerList, size_innerList, boundaryList, size_boundaryList, obstacleList, size_obstacleList);
     }
 }
 
-void Analysis::write_file(const real *field, std::string filename, size_t *inner_list, size_t size_inner_list, size_t *boundary_list, size_t size_boundary_list, size_t *obstacle_list, size_t size_obstacle_list) {
+void Analysis::write_file(const real *field, const std::string& filename, size_t *inner_list, size_t size_inner_list, size_t *boundary_list, size_t size_boundary_list, size_t *obstacle_list, size_t size_obstacle_list) {
 
     std::ofstream out;
     out.open(filename + ".dat", std::ofstream::out);
@@ -425,7 +428,7 @@ void Analysis::write_file(const real *field, std::string filename, size_t *inner
     std::ofstream out_inner;
     out_inner.open(filename + "_inner.dat", std::ofstream::out);
     for (size_t idx = 0; idx < size_inner_list; idx++) {
-        out_inner << inner_list[idx] << "|" << field[inner_list[idx]] << std::endl;
+        out_inner << inner_list[idx] << ";" << field[inner_list[idx]] << std::endl;
         out << field[inner_list[idx]] << std::endl;
     }
     out_inner.close();
@@ -433,7 +436,7 @@ void Analysis::write_file(const real *field, std::string filename, size_t *inner
     std::ofstream out_obstacle;
     out_obstacle.open(filename + "_obstacle.dat", std::ofstream::out);
     for (size_t idx = 0; idx < size_obstacle_list; idx++) {
-        out_obstacle << obstacle_list[idx] << "|" << field[obstacle_list[idx]] << std::endl;
+        out_obstacle << obstacle_list[idx] << ";" << field[obstacle_list[idx]] << std::endl;
         out << field[obstacle_list[idx]] << std::endl;
     }
     out_obstacle.close();
@@ -441,7 +444,7 @@ void Analysis::write_file(const real *field, std::string filename, size_t *inner
     std::ofstream out_boundary;
     out_boundary.open(filename + "_boundary.dat", std::ofstream::out);
     for (size_t idx = 0; idx < size_boundary_list; idx++) {
-        out_boundary << boundary_list[idx] << "|" << field[boundary_list[idx]] << std::endl;
+        out_boundary << boundary_list[idx] << ";" << field[boundary_list[idx]] << std::endl;
         out << field[boundary_list[idx]] << std::endl;
     }
     out_boundary.close();
