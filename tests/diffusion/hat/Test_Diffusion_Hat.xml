@@ -55,7 +55,7 @@
     <val_out> 1.0 </val_out>
   </initial_conditions>
 
-  <visualisation save_vtk="No" save_csv="No">
+  <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 5 </vtk_nth_plot>
   </visualisation>
 </ARTSS>

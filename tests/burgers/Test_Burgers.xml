@@ -50,8 +50,7 @@
   <initial_conditions usr_fct = "ExpSinusSum" >     <!-- product of exponential and sinuses exp*sin*sin*sin -->
   </initial_conditions>
 
-  <visualisation save_vtk="Yes" save_csv="Yes">
+  <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 10 </vtk_nth_plot>
-    <csv_nth_plot> 100 </csv_nth_plot>
   </visualisation>
 </ARTSS>
