@@ -1,6 +1,6 @@
 /// \file       DiffusionTurbSolver.h
 /// \brief      Defines the steps to solve the turbulent diffusion equation
-/// \date       August 18, 2016
+/// \date       Aug 18, 2016
 /// \author     Suryanarayana Maddu
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
