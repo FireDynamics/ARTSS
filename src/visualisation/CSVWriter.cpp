@@ -150,7 +150,6 @@ void CSVWriter::csv_write(const char *filename, float **vars, int size_vars, con
     real dy = domain->get_dy();
     real dz = domain->get_dz();
 
-    const int size_coords = 7;
     const char *coord_names[] = {"i", "j", "k", "index", "x-coords (m)", "y-coords (m)", "z-coords (m)"};
 
     auto *x_centres = new float[size];
@@ -183,8 +182,9 @@ void CSVWriter::csv_write(const char *filename, float **vars, int size_vars, con
                            << k << delimiter
                            << index << delimiter
                            << std::setprecision(16);
-                for (int v = 0; v < size_coords; v++){
-                    outputFile << coords[v][index] << delimiter;
+
+                for (auto & coord : coords) {
+                    outputFile << coord[index] << delimiter;
                 }
                 for (int v = 0; v < size_vars - 1; v++) {
                     outputFile << vars[v][index] << delimiter;

@@ -1,4 +1,4 @@
-/// \file       ExplicitDiffuse.cpp
+/// \file       ExplicitDiffuse.h
 /// \brief      Solves diffusion equation with an explicit method
 /// \date       December 12, 2019
 /// \author     Max Boehler

@@ -1,7 +1,8 @@
-/// \file     Navier-Stokes Solver with force f(T)
-/// \brief    Defines the steps to solve advection, diffusion, pressure and add sources (dependent on T), solves temperature and concentration equation
-/// \date     Sep 27, 2017
-/// \author   Küsters
+/// \file       NSTempConSolver.cpp
+/// \brief      Navier-Stokes Solver with force f(T)
+/// \details    Defines the steps to solve advection, diffusion, pressure and add sources (dependent on T), solves temperature and concentration equation
+/// \date       Sep 27, 2017
+/// \author     Küsters
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>

@@ -45,7 +45,7 @@ void Visual::visualise(ISolver *solver, const real t) {
         if (fmod(n, m_vtk_plots) == 0 || t >= m_t_end) {
             VTKWriter::write_numerical(solver, filename);
             if (m_has_analytical_solution) {
-                VTKWriter::write_analytical(m_solution, create_filename(m_filename, t, true));
+                VTKWriter::write_analytical(m_solution, create_filename(m_filename, static_cast<int>(t/m_dt), true));
             }
         }
     }
@@ -54,7 +54,7 @@ void Visual::visualise(ISolver *solver, const real t) {
         if (fmod(n, m_csv_plots) == 0 || t >= m_t_end) {
             CSVWriter::write_numerical(solver, filename);
             if (m_has_analytical_solution) {
-                CSVWriter::write_analytical(m_solution, create_filename(m_filename, t, true));
+                CSVWriter::write_analytical(m_solution, create_filename(m_filename, static_cast<int>(t/m_dt), true));
             }
         }
     }
@@ -82,19 +82,12 @@ void Visual::initialise_grid(float *x_coords, float *y_coords, float *z_coords, 
 void Visual::prepare_fields(read_ptr *fields, float **vars, int size) {
     Domain *domain = Domain::getInstance();
 
-    int Nx = static_cast<int>(domain->get_Nx());
-    int Ny = static_cast<int>(domain->get_Ny());
-    int Nz = static_cast<int>(domain->get_Nz());
+    int domain_size = static_cast<int>(domain->get_size());
 
     // Cast variables to floats
-    for (int k = 0; k < Nz; k++) {
-        for (int j = 0; j < Ny; j++) {
-            for (int i = 0; i < Nx; i++) {
-                size_t index = IX(i, j, k, Nx, Ny);
-                for (int v = 0; v < size; v++) {
-                    vars[v][index] = static_cast<float>(fields[v][index]);
-                }
-            }
+    for (int index = 0; index < domain_size; index++) {
+        for (int v = 0; v < size; v++) {
+            vars[v][index] = static_cast<float>(fields[v][index]);
         }
     }
 }

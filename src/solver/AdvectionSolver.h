@@ -1,7 +1,7 @@
-/// \file     AdvectionSolver.h
-/// \brief    Defines the steps to solve the advection equation
-/// \date     August 22, 2016
-/// \author   Severt
+/// \file       AdvectionSolver.h
+/// \brief      Defines the steps to solve the advection equation
+/// \date       August 22, 2016
+/// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_SOLVER_ADVECTIONSOLVER_H_

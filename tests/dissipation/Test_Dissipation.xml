@@ -86,6 +86,6 @@
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
-    <vtk_nth_plot> 50 </vtk_nth_plot>
+    <vtk_nth_plot> 200 </vtk_nth_plot>
   </visualisation>
 </ARTSS>

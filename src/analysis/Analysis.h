@@ -35,7 +35,7 @@ private:
     real calc_absolute_spatial_error(read_ptr num, read_ptr ana);
     real calc_relative_spatial_error(read_ptr num, read_ptr ana);
 
-    void write_file(const real *field, std::string filename, size_t *inner_list, size_t size_inner_list, size_t *boundary_list, size_t size_boundary_list, size_t *obstacle_list,
+    static void write_file(const real *field, const std::string& filename, size_t *inner_list, size_t size_inner_list, size_t *boundary_list, size_t size_boundary_list, size_t *obstacle_list,
                     size_t size_obstacle_list);
 
     bool has_analytic_solution = false;

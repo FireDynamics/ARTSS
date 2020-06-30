@@ -1,7 +1,7 @@
-/// \file     Adaption.cpp
-/// \brief    Controller class for adaption
-/// \date     Nov 29, 2018
-/// \author   My Linh Würzburger
+/// \file       Adaption.cpp
+/// \brief      Controller class for adaption
+/// \date       Nov 29, 2018
+/// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cmath>

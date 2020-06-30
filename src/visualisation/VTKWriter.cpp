@@ -104,18 +104,6 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     auto *y_centres = new float[size];
     auto *z_centres = new float[size];
 
-    // centers of the grid cells
-    for (int k = 0; k < Nz; k++) {
-        for (int j = 0; j < Ny; j++) {
-            for (int i = 0; i < Nx; i++) {
-                size_t index = IX(i, j, k, Nx, Ny);
-                x_centres[index] = x_coords[i] + static_cast<float> (0.5 * dx);
-                y_centres[index] = y_coords[i] + static_cast<float> (0.5 * dy);
-                z_centres[index] = z_coords[i] + static_cast<float> (0.5 * dz);
-            }
-        }
-    }
-
     // velocities
     auto *u_vel = new float[size];
     auto *v_vel = new float[size];
@@ -140,6 +128,9 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
         for (int j = 0; j < Ny; j++) {
             for (int i = 0; i < Nx; i++) {
                 size_t index = IX(i, j, k, Nx, Ny);
+                x_centres[index] = x_coords[i] + static_cast<float> (0.5 * dx);
+                y_centres[index] = y_coords[j] + static_cast<float> (0.5 * dy);
+                z_centres[index] = z_coords[k] + static_cast<float> (0.5 * dz);
                 u_vel[index] = static_cast<float>(u[index]);
                 v_vel[index] = static_cast<float>(v[index]);
                 w_vel[index] = static_cast<float>(w[index]);

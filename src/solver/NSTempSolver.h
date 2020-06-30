@@ -1,4 +1,4 @@
-/// \file       Navier-Stokes Solver with force f(T)
+/// \file       NSTempSolver.h
 /// \brief      Defines the steps to solve advection, diffusion, pressure and add sources (dependent on T), solves temperature equation
 /// \date       Dec 2, 2016
 /// \author     Severt

@@ -1,5 +1,5 @@
 /// \file       NSTempSolver.cpp
-/// \brief      Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T)
+/// \brief      Defines the steps to solve advection, diffusion, pressure and add sources (dependent on T), solves temperature equation
 /// \date       Feb 15, 2017
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.

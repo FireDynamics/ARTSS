@@ -256,3 +256,7 @@ size_t BoundaryController::getObstacleStrideY(size_t id, size_t level){
 size_t BoundaryController::getObstacleStrideZ(size_t id, size_t level){
     return m_multigrid->getObstacleStrideZ(id, level);
 }
+
+std::vector<FieldType> BoundaryController::get_used_fields() {
+    return m_bdc_boundary->get_used_fields();
+}
