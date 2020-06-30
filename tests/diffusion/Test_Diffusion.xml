@@ -49,7 +49,7 @@
     <l> 2.5 </l>                              <!-- wavelength -->
   </initial_conditions>
 
-  <visualisation save_vtk="Yes" save_csv="No">
-    <vtk_nth_plot> 10 </vtk_nth_plot>
+  <visualisation save_vtk="No" save_csv="No">
+    <vtk_nth_plot> 8 </vtk_nth_plot>
   </visualisation>
 </ARTSS>

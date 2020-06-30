@@ -69,7 +69,7 @@
   <initial_conditions usr_fct = "Zero" >
   </initial_conditions>
 
-  <visualisation save_vtk="Yes" save_csv="No">
-    <vtk_nth_plot> 50 </vtk_nth_plot>
+  <visualisation save_vtk="No" save_csv="No">
+    <vtk_nth_plot> 20 </vtk_nth_plot>
   </visualisation>
 </ARTSS>
