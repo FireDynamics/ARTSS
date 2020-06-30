@@ -1,7 +1,7 @@
-/// \file     NSSolver.h
-/// \brief    Defines the (fractional) steps to solve the incompressible Navier-Stokes equations
-/// \date     Dec 2, 2016
-/// \author   Severt
+/// \file       NSSolver.h
+/// \brief      Defines the (fractional) steps to solve the incompressible Navier-Stokes equations
+/// \date       Dec 2, 2016
+/// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved
 #ifndef ARTSS_SOLVER_NSSOLVER_H_
 #define ARTSS_SOLVER_NSSOLVER_H_

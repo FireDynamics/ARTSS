@@ -1,7 +1,7 @@
-/// \file     Adaption.h
-/// \brief    Controller class for adaption
-/// \date     Nov 29, 2018
-/// \author   My Linh Würzburger
+/// \file       Adaption.h
+/// \brief      Controller class for adaption
+/// \date       Nov 29, 2018
+/// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_ADAPTION_ADAPTION_H_
