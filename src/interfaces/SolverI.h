@@ -146,9 +146,8 @@ private:
 	std::string m_string_solver;
 	void ForceSource();
 	void TemperatureSource();
-  void MomentumSource();
-  static void CallRandom(Field* out);
-  void CallRandom(Field* out, real Va);
+        void MomentumSource();
+        static void CallRandom(Field* out);
 };
 
 #endif /* ATSS_INTERFACES_SOLVERI_H_ */
