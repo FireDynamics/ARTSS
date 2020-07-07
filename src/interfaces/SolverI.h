@@ -147,7 +147,7 @@ private:
 	void ForceSource();
 	void TemperatureSource();
   void MomentumSource();
-  void CallRandom(Field* out);
+  static void CallRandom(Field* out);
   void CallRandom(Field* out, real Va);
 };
 

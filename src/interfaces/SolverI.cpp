@@ -205,6 +205,7 @@ void SolverI::Init() {
 
     auto params = Parameters::getInstance();
     std::string string_init_usr_fct = params->get("initial_conditions/usr_fct");
+    bool random = params->get("initial_conditions/random") == "Yes";
 
     if (string_init_usr_fct == FunctionNames::GaussBubble) {
         if (m_string_solver == SolverTypes::AdvectionSolver) {
@@ -335,8 +336,7 @@ void SolverI::Init() {
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             real val = params->getReal("initial_conditions/val");
             Functions::Uniform(T0, val);
-            bool rnd = params->getBool("initial_conditions/random");
-            if (rnd) {
+            if (random) {
                 CallRandom(T0);
             }
             ForceSource();
@@ -350,14 +350,7 @@ void SolverI::Init() {
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             // Random temperature
             CallRandom(T0);
-
-        }
-        //Random concentration
-        if ((m_string_solver == SolverTypes::NSTempConSolver or \
-             m_string_solver == SolverTypes::NSTempTurbConSolver)
-            and params->get("initial_conditions/con_fct") == "RandomC") {
-            real Ca = params->getReal("initial_conditions/Ca");        //ambient concentration
-            CallRandom(C0,Ca);
+            // TODO ?
         }
         if (m_string_solver == SolverTypes::NSTempSolver or \
             m_string_solver == SolverTypes::NSTempConSolver or \
@@ -372,8 +365,7 @@ void SolverI::Init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             Functions::Layers(T0);
-            bool rnd = params->getBool("initial_conditions/random");
-            if (rnd) {
+            if (random) {
                 CallRandom(T0);
             }
             ForceSource();
@@ -405,6 +397,14 @@ void SolverI::Init() {
             std::cout << "Initial values all set to zero!" << std::endl;
             //TODO Logger
 #endif
+        }
+        //Random concentration
+        if ((m_string_solver == SolverTypes::NSTempConSolver or \
+             m_string_solver == SolverTypes::NSTempTurbConSolver)
+            and params->get("initial_conditions/con_fct") == FunctionNames::RandomC) {
+            real Ca = params->getReal("initial_conditions/Ca");        //ambient concentration
+            Functions::Uniform(C0, Ca);
+            CallRandom(C0);
         }
     }
 
@@ -941,58 +941,27 @@ void SolverI::MomentumSource() {
     }
 }
 
-//======================================= read and calll random function ==================================
+//======================================= read and call random function ==================================
 // ***************************************************************************************
 /// \brief  Calls random function and reads necessary input variables
-/// \param  tempField		temperature as a pointer
+/// \param  field		field as a pointer
 // ***************************************************************************************
-void SolverI::CallRandom(Field* tempField) {
+void SolverI::CallRandom(Field* field) {
   auto params = Parameters::getInstance();
-  bool abs = params->getBool("initial_conditions/absolute");
-  real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
-  bool seedCheck = params->getBool("initial_conditions/customSeed");
-  bool stepsCheck = params->getBool("initial_conditions/customSteps");
+  real range = params->getReal("initial_conditions/random/range"); // +- range of random numbers
+  bool is_absolute = params->get("initial_conditions/absolute") == "Yes";
+  bool has_custom_seed = params->get("initial_conditions/random/custom_seed") == "Yes";
+  bool has_custom_steps = params->get("initial_conditions/random/custom_steps") == "Yes";
 
-  if ((seedCheck) && (stepsCheck)) {
-    bool seed = params->getInt("initial_conditions/seed");
-    real stepsize = params->getReal("initial_conditions/stepsize");
-    Functions::Random(tempField, tempField, range, abs, seedCheck, seed, stepsize);
-  } else if (seedCheck) {
-    bool seed = params->getInt("initial_conditions/seed");
-    Functions::Random(tempField, tempField, range, abs, seedCheck, seed, 1.0);
-  } else if (stepsCheck) {
-    real stepsize = params->getReal("initial_conditions/stepsize");
-    Functions::Random(tempField, tempField, range, abs, false, 0, stepsize);
-  } else {
-    Functions::Random(tempField, tempField, range, abs, false, 0, 1.0);
-  }
-}
-
-//======================================= read and calll random function ==================================
-// ***************************************************************************************
-/// \brief  Calls random function and reads necessary input variables
-/// \param  tempField		temperature as a pointer
-/// \param 	Va 		ambient value
-// ***************************************************************************************
-void SolverI::CallRandom(Field* tempField, real Va) {
-  auto params = Parameters::getInstance();
-  bool abs = params->getBool("initial_conditions/absolute");
-  real range = static_cast<real>(params->getReal("initial_conditions/range")); // +- range of random numbers
-  bool seedCheck = params->getBool("initial_conditions/customSeed");
-  bool stepsCheck = params->getBool("initial_conditions/customSteps");
-
-  if ((seedCheck) && (stepsCheck)) {
-    bool seed = params->getInt("initial_conditions/seed");
-    real stepsize = params->getReal("initial_conditions/stepsize");
-    Functions::Random(tempField, Va, range, abs, seedCheck, seed, stepsize);
-  } else if (seedCheck) {
-    bool seed = params->getInt("initial_conditions/seed");
-    Functions::Random(tempField, Va, range, abs, seedCheck, seed, 1.0);
-  } else if (stepsCheck) {
-    real stepsize = params->getReal("initial_conditions/stepsize");
-    Functions::Random(tempField, Va, range, abs, false, 0, stepsize);
-  } else {
-    Functions::Random(tempField, Va, range, abs, false, 0, 1.0);
+  int seed = -1;
+  if (has_custom_seed){
+      seed = params->getInt("initial_conditions/random/seed");
   }
 
+  real step_size = 1.0;
+  if(has_custom_steps){
+      step_size = params->getReal("initial_conditions/random/step_size");
+  }
+
+  Functions::Random(field, range, is_absolute, has_custom_seed, seed, step_size);
 }

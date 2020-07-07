@@ -19,6 +19,7 @@ struct FunctionNames{
     static const std::string GaussBubble;
     static const std::string Hat;
     static const std::string McDermott;
+    static const std::string RandomC;
     static const std::string RandomT;
     static const std::string RampTanh;
     static const std::string SinSinSin;
@@ -56,8 +57,7 @@ namespace Functions { //alphabetically ordered
 
 	real RampTanh(real t);
 
-	void Random(Field* out, real Va, real range, bool abs, bool seedCheck, int seed, real stepsize);
-	void Random(Field* out, Field* Va, real range, bool abs, bool seedCheck, int seed, real stepsize);
+	void Random(Field* out, real range, bool is_absolute, int seed, real step_size);
 
 	void SinSinSin(Field* out);
 
