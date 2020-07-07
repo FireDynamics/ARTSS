@@ -201,8 +201,11 @@ set(SOURCE_FILES
         "src/utility/Parameters.cpp"
         "src/utility/tinyxml2.cpp"
         "src/utility/Utility.cpp"
-        "src/utility/visit_writer.cpp"
-        "src/utility/Visual.cpp"
+
+        "src/visualisation/CSVWriter.cpp"
+        "src/visualisation/Visual.cpp"
+        "src/visualisation/VTKWriter.cpp"
+        "src/visualisation/visit_writer.cpp"
 
         "src/Domain.cpp"
         "src/Field.cpp"
@@ -267,8 +270,11 @@ set(HEADER_FILES
         "src/utility/tinyxml2.h"
         "src/utility/Tracer.h"
         "src/utility/Utility.h"
-        "src/utility/visit_writer.h"
-        "src/utility/Visual.h"
+
+        "src/visualisation/CSVWriter.h"
+        "src/visualisation/Visual.h"
+        "src/visualisation/VTKWriter.h"
+        "src/visualisation/visit_writer.h"
 
         "src/Domain.h"
         "src/Field.h"
