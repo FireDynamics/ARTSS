@@ -37,6 +37,7 @@ jobs:
         run: |
           ./compile.sh --docker-build
           docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh --jobs 4 -s
+          
   cmake-tests:
     
     runs-on: ubuntu-latest
