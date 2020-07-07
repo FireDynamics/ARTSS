@@ -349,6 +349,8 @@ void SolverI::Init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             // Random temperature
+            real Ta = params->getReal("initial_conditions/Ta"); // ambient temperature in KELVIN!
+            Functions::Uniform(T0, Ta);
             CallRandom(T0);
             // TODO ?
         }
@@ -963,5 +965,5 @@ void SolverI::CallRandom(Field* field) {
       step_size = params->getReal("initial_conditions/random/step_size");
   }
 
-  Functions::Random(field, range, is_absolute, has_custom_seed, seed, step_size);
+  Functions::Random(field, range, is_absolute, seed, step_size);
 }

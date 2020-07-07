@@ -1,11 +1,10 @@
-/// \file 		Functions.h
-/// \brief 		Functions for Initialization
-/// \date 		June 13, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       Functions.cpp
+/// \brief      Functions for Initialization
+/// \date       Jun 13, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cmath>
-#include <cstdlib>
 #include <ctime>
 #include <iostream>
 #include <random>
@@ -39,11 +38,11 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC =================================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - Beltrami
-/// \param  outx	x-velocity
-/// \param  outy	y-velocity
-/// \param  outz	z-velocity
-/// \param  outp	pressure
-/// \param  t	time
+/// \param  outx  x-velocity
+/// \param  outy  y-velocity
+/// \param  outz  z-velocity
+/// \param  outp  pressure
+/// \param  t time
 // ***************************************************************************************
     void Beltrami(Field *outx, Field *outy, Field *outz, Field *outp, real t) {
 
@@ -118,7 +117,7 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC for p ==========================
 // ***************************************************************************************
 /// \brief  Initial pressure set up for NS Test - Beltrami
-/// \param  outx	pressure
+/// \param  outx  pressure
 // ***************************************************************************************
     void BeltramiBC_p(Field *outx) {
 
@@ -177,8 +176,8 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC for u ==========================
 // ***************************************************************************************
 /// \brief  Initial x-velocity set up for NS Test - Beltrami
-/// \param  outx	x-velocity
-/// \param  t	time
+/// \param  outx  x-velocity
+/// \param  t time
 // ***************************************************************************************
     void BeltramiBC_u(Field *outx, real t) {
 
@@ -233,8 +232,8 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC for v ==========================
 // ***************************************************************************************
 /// \brief  Initial y-velocity set up for NS Test - Beltrami
-/// \param  outy	y-velocity
-/// \param  t	time
+/// \param  outy  y-velocity
+/// \param  t time
 // ***************************************************************************************
     void BeltramiBC_v(Field *outx, real t) {
 
@@ -289,8 +288,8 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC for w ==========================
 // ***************************************************************************************
 /// \brief  Initial z-velocity set up for NS Test - Beltrami
-/// \param  outz	z-velocity
-/// \param  t	time
+/// \param  outz  z-velocity
+/// \param  t time
 // ***************************************************************************************
     void BeltramiBC_w(Field *outx, real t) {
 
@@ -345,9 +344,9 @@ namespace Functions {
 // ===================================== Buoyancy Force ==================================
 // ***************************************************************************************
 /// \brief  Buoyancy Force
-/// \param  out		force
-/// \param  T		Temperature
-/// \param  Ta		Ambient temperature
+/// \param  out   force
+/// \param  T   Temperature
+/// \param  Ta    Ambient temperature
 // ***************************************************************************************
     void BuoyancyForce(Field *out, Field *T, Field *Ta) {
 
@@ -383,12 +382,12 @@ namespace Functions {
 // ================== NSTemp Test - MMS IC for u,v,w,p,T with buoyancy ===================
 // ***************************************************************************************
 /// \brief  Initial set up for NSTemp Test - MMS with buoyant force
-/// \param  outx	x-velocity
-/// \param  outy	y-velocity
-/// \param  outz	z-velocity
-/// \param  outp	pressure
-/// \param  outT	temperature
-/// \param  t		time
+/// \param  outx  x-velocity
+/// \param  outy  y-velocity
+/// \param  outz  z-velocity
+/// \param  outp  pressure
+/// \param  outT  temperature
+/// \param  t   time
 // ***************************************************************************************
     void BuoyancyMMS(Field *outx, Field *outy, Field *outz, Field *outp, Field *outT, real t) {
 
@@ -450,8 +449,8 @@ namespace Functions {
 // ========== NSTemp Test - MMS source term for temperature equation with buoyancy ========
 // ***************************************************************************************
 /// \brief  Source term for NSTemp Test - MMS with buoyant force
-/// \param  out	force
-/// \param  t	time
+/// \param  out force
+/// \param  t time
 // ***************************************************************************************
     void BuoyancyST_MMS(Field *out, real t) {
 
@@ -509,10 +508,10 @@ namespace Functions {
 // ===================================== NS Test - IC for u,v,w,p ========================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - Flow around cube or Channel flow with Drift
-/// \param  outx	x-velocity
-/// \param  outy	y-velocity
-/// \param  outz	z-velocity
-/// \param  outp	pressure
+/// \param  outx  x-velocity
+/// \param  outy  y-velocity
+/// \param  outz  z-velocity
+/// \param  outp  pressure
 // ***************************************************************************************
     void Drift(Field *outx, Field *outy, Field *outz, Field *outp) {
 
@@ -553,8 +552,8 @@ namespace Functions {
 // ================================ Diffusion Test - IC for u,v,w ========================
 // ***************************************************************************************
 /// \brief  Initial set up for Diffusion Test (c*exp*sin*sin*sin)
-/// \param  out	velocity
-/// \param 	t 	time
+/// \param  out velocity
+/// \param  t   time
 // ***************************************************************************************
     void ExpSinusProd(Field *out, real t) {
 
@@ -611,10 +610,10 @@ namespace Functions {
 // ============================ Burgers Test - IC for u,v,w ==============================
 // ***************************************************************************************
 /// \brief  Initial set up for Burgers Test (c*exp*sin(x+y+z))
-/// \param  outx	x-velocity
-/// \param  outy	y-velocity
-/// \param  outz	z-velocity
-/// \param 	t 	time
+/// \param  outx  x-velocity
+/// \param  outy  y-velocity
+/// \param  outz  z-velocity
+/// \param  t   time
 // ***************************************************************************************
     void ExpSinusSum(Field *outx, Field *outy, Field *outz, real t) {
 
@@ -702,7 +701,7 @@ namespace Functions {
 // ============================= Diffusion Test - IC for u,v,w ===========================
 // ***************************************************************************************
 /// \brief  Initial set up for Diffusion Test (c*sin*sin*sin)
-/// \param  out	velocity
+/// \param  out velocity
 // ***************************************************************************************
     void FacSinSinSin(Field *out) {
 
@@ -757,8 +756,8 @@ namespace Functions {
 // ============================= Advection Test - IC for u,v,w ===========================
 // ***************************************************************************************
 /// \brief  Initial set up for Advection Test
-/// \param  out	velocity
-/// \param 	t	time
+/// \param  out velocity
+/// \param  t time
 // ***************************************************************************************
     void GaussBubble(Field *out, real t) {
 
@@ -827,7 +826,7 @@ namespace Functions {
 // ======================== Layers (e.g. for temperature in PIV experiments) =============
 // ***************************************************************************************
 /// \brief  Initial set up as layers throughout the domain
-/// \param  out	temperature
+/// \param  out temperature
 // ***************************************************************************************
     void Layers(Field *out) {
 
@@ -980,7 +979,7 @@ namespace Functions {
 // ============================= Diffusion Test - IC for u,v,w ===========================
 // ***************************************************************************************
 /// \brief  Initial set up for Diffusion Test
-/// \param  out	velocity
+/// \param  out velocity
 // ***************************************************************************************
     void Hat(Field *out) {
 
@@ -1050,11 +1049,11 @@ namespace Functions {
 // ========================== NS Test - McDermott IC for u,v,w,p =========================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - McDermott
-/// \param  outx	x-velocity
-/// \param  outy	y-velocity
-/// \param  outz	z-velocity
-/// \param  outp	pressure
-/// \param  t		time
+/// \param  outx  x-velocity
+/// \param  outy  y-velocity
+/// \param  outz  z-velocity
+/// \param  outp  pressure
+/// \param  t   time
 // ***************************************************************************************
     void McDermott(Field *outx, Field *outy, Field *outz, Field *outp, real t) {
 
@@ -1111,7 +1110,7 @@ namespace Functions {
 // ============================= Ramp up function for HRR source =========================
 // ***************************************************************************************
 /// \brief  Ramp up function (in time) for Gaussian temperature source in energy equation
-/// \param  t	time
+/// \param  t time
 // ***************************************************************************************
     real RampTanh(real t) {
         auto params = Parameters::getInstance();
@@ -1126,9 +1125,9 @@ namespace Functions {
 // === Random function with field as ambient value (e.g. for superposition of temperature layers and random values)
 // ***************************************************************************************
 /// \brief  Random function for any field
-/// \param  out	    field
-/// \param	range   range of random numbers
-/// \param	abs     Check if random number is relative (multiply) or absolute (additive)
+/// \param  out     field
+/// \param  range   range of random numbers
+/// \param  abs     Check if random number is relative (multiply) or absolute (additive)
 /// \param  seed    custom seed if given, else seed <= 0
 /// \param
 // ***************************************************************************************
@@ -1186,7 +1185,7 @@ namespace Functions {
 // ================================= Pressure Test - IC for p ============================
 // ***************************************************************************************
 /// \brief  Initial set up for Pressure Test (sin*sin*sin)
-/// \param  out		pressure
+/// \param  out   pressure
 // ***************************************************************************************
     void SinSinSin(Field *out) {
         auto domain = Domain::getInstance();
@@ -1237,8 +1236,8 @@ namespace Functions {
 // ======================= uniform distribution (eg. for force) ==========================
 // ***************************************************************************************
 /// \brief  Initial uniform set up
-/// \param  out		force
-/// \param 	val		value of uniform distribution
+/// \param  out   force
+/// \param  val   value of uniform distribution
 // ***************************************************************************************
     void Uniform(Field *out, real val) {
 
@@ -1263,10 +1262,10 @@ namespace Functions {
 // ============================= NS Test - Vortex IC for u,v,w,p =========================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - Vertex
-/// \param  outx		x-velocity
-/// \param  outy		y-velocity
-/// \param  outz		z-velocity
-/// \param  outp		pressure
+/// \param  outx    x-velocity
+/// \param  outy    y-velocity
+/// \param  outz    z-velocity
+/// \param  outp    pressure
 // ***************************************************************************************
     void Vortex(Field *outx, Field *outy, Field *outz, Field *outp) {
 
