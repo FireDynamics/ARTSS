@@ -951,7 +951,7 @@ void SolverI::MomentumSource() {
 void SolverI::CallRandom(Field* field) {
   auto params = Parameters::getInstance();
   real range = params->getReal("initial_conditions/random/range"); // +- range of random numbers
-  bool is_absolute = params->get("initial_conditions/absolute") == "Yes";
+  bool is_absolute = params->get("initial_conditions/random/absolute") == "Yes";
   bool has_custom_seed = params->get("initial_conditions/random/custom_seed") == "Yes";
   bool has_custom_steps = params->get("initial_conditions/random/custom_steps") == "Yes";
 
