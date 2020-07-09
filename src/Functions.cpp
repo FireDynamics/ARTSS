@@ -25,7 +25,6 @@ const std::string FunctionNames::GaussBubble = "GaussBubble";
 const std::string FunctionNames::Hat = "Hat";
 const std::string FunctionNames::McDermott = "McDermott";
 const std::string FunctionNames::RandomC = "RandomC";
-const std::string FunctionNames::RandomT = "RandomT";
 const std::string FunctionNames::RampTanh = "RampTanh";
 const std::string FunctionNames::SinSinSin = "SinSinSin";
 const std::string FunctionNames::Uniform = "Uniform";
@@ -1129,7 +1128,7 @@ namespace Functions {
 /// \param  range   range of random numbers
 /// \param  abs     Check if random number is relative (multiply) or absolute (additive)
 /// \param  seed    custom seed if given, else seed <= 0
-/// \param
+/// \param  step_size interval steps of random numbers
 // ***************************************************************************************
     void Random(Field *out, real range, bool is_absolute, int seed, real step_size) {
         auto boundary = BoundaryController::getInstance();
@@ -1141,33 +1140,33 @@ namespace Functions {
         size_t size_oList = boundary->getSize_obstacleList();
 
         std::mt19937 mt;
-        step_size = 1.0/step_size;
+        double steps = range/step_size;
         if (seed > 0) {
           mt = std::mt19937(seed);
         } else {
           std::random_device rd;
           mt = std::mt19937(rd());
         }
-        std::uniform_real_distribution<real> dist(-range*step_size, range*step_size);
+        std::uniform_int_distribution<int> dist(steps, steps);
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
             // generate secret number between -range and range:
             if (is_absolute) {
-                out->data[idx] += (dist(mt)/step_size);
+                out->data[idx] += (dist(mt)*step_size);
             } else {
-                out->data[idx] *= (1 + dist(mt)/step_size);
+                out->data[idx] *= (1 + dist(mt)*step_size);
             }
         }
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            //generate secret number between -range and range:
+            // generate secret number between -range and range:
             if (is_absolute) {
-                out->data[idx] += (dist(mt)/step_size);
+                out->data[idx] += (dist(mt)*step_size);
             } else {
-                out->data[idx] *= (1 + dist(mt)/step_size);
+                out->data[idx] *= (1 + dist(mt)*step_size);
             }
         }
         // obstacles
@@ -1175,9 +1174,9 @@ namespace Functions {
             size_t idx = oList[i];
             // generate secret number between -range and range:
             if (is_absolute) {
-                out->data[idx] += (dist(mt)/step_size);
+                out->data[idx] += (dist(mt)*step_size);
             } else {
-                out->data[idx] *= (1 + dist(mt)/step_size);
+                out->data[idx] *= (1 + dist(mt)*step_size);
             }
         }
     }

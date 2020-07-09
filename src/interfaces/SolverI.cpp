@@ -342,25 +342,6 @@ void SolverI::Init() {
             ForceSource();
             TemperatureSource();
         }
-    } else if (string_init_usr_fct == FunctionNames::RandomT) {
-        //Random
-        if (m_string_solver == SolverTypes::NSTempSolver or \
-            m_string_solver == SolverTypes::NSTempConSolver or \
-            m_string_solver == SolverTypes::NSTempTurbConSolver or \
-            m_string_solver == SolverTypes::NSTempTurbSolver) {
-            // Random temperature
-            real Ta = params->getReal("initial_conditions/Ta"); // ambient temperature in KELVIN!
-            Functions::Uniform(T0, Ta);
-            CallRandom(T0);
-            // TODO ?
-        }
-        if (m_string_solver == SolverTypes::NSTempSolver or \
-            m_string_solver == SolverTypes::NSTempConSolver or \
-            m_string_solver == SolverTypes::NSTempTurbConSolver or \
-            m_string_solver == SolverTypes::NSTempTurbSolver) {
-            ForceSource();
-            TemperatureSource();
-        }
     } else if (string_init_usr_fct == "LayersT") {
         if (m_string_solver == SolverTypes::NSTempSolver or \
             m_string_solver == SolverTypes::NSTempConSolver or \
