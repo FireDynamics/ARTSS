@@ -675,9 +675,4 @@ if ${YELLOW}--generate${NC} and ${YELLOW}--verbose${NC} are selected, temporary 
   ALLXML=$(( $(ls -R ../tests | grep -e '\.xml' | wc -l) + $(ls -R ../examples | grep -e '\.xml' | wc -l) ))
   echo "XML Files: $INDEX/$ALLXML"
 
-  if [ $FAIL -eq 0 ]
-  then
-    exit 1
-  else
-    exit 0
-  fi
+  exit $FAIL
