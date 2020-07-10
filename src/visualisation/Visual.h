@@ -20,6 +20,8 @@ public:
 
     static void prepare_fields(read_ptr *fields, float **vars, int size);
 
+    void write_csv(ISolver *solver, std::string filename);
+
 private:
     static std::string remove_extension(const std::string &filename);
 

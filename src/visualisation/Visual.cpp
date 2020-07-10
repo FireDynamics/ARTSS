@@ -60,6 +60,10 @@ void Visual::visualise(ISolver *solver, const real t) {
     }
 }
 
+void Visual::write_csv(ISolver *solver, std::string filename){
+    CSVWriter::write_numerical(solver, filename);
+}
+
 void Visual::initialise_grid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
     Domain *domain = Domain::getInstance();
     real X1 = domain->get_X1();

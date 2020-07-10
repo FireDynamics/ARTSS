@@ -153,7 +153,7 @@ void TimeIntegration::run() {
 
             // Calculate
             m_solver->do_step(t_cur, false);
-
+            visual->write_csv(m_solver, "test_do_step_" + std::to_string(t_cur));
 #ifndef BENCHMARKING
             // Visualize
 #pragma acc update host(d_u[:bsize])
@@ -191,7 +191,9 @@ void TimeIntegration::run() {
             if (adaption->is_data_extraction_after_enabled()) adaption->extractData(adaption->get_after_name(), adaption->get_after_height(), t_cur);
 #endif
             m_solver->update_sources(t_cur, false);
+            visual->write_csv(m_solver, "test_update_sources_" + std::to_string(t_cur));
             m_solver->update_data(false);
+            visual->write_csv(m_solver, "test_update_data_" + std::to_string(t_cur));
 
             // iter_end = std::chrono::system_clock::now();
             // long ms = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();
