@@ -16,7 +16,7 @@ Boundary::Boundary(size_t level) {
     init(0);
     innerCells();
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
     //print(0);
     control(0);
 #endif
@@ -26,7 +26,7 @@ Boundary::Boundary(Obstacle **obstacleList, size_t numberOfObstacles, size_t siz
     init(size_obstacles);
     innerCells(obstacleList, numberOfObstacles);
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
     //print(size_obstacles);
     control(size_obstacles);
 #endif
@@ -41,9 +41,9 @@ Boundary::Boundary(Obstacle **obstacleList, size_t numberOfObstacles, size_t siz
 void Boundary::init(size_t size_obstacles){
     auto domain = Domain::getInstance();
 
-    const size_t nx = domain->Getnx(m_level);
-    const size_t ny = domain->Getny(m_level);
-    const size_t nz = domain->Getnz(m_level);
+    const size_t nx = domain->get_nx(m_level);
+    const size_t ny = domain->get_ny(m_level);
+    const size_t nz = domain->get_nz(m_level);
 
     m_size_boundaryList = 2 * nx * ny + 2 * (nz - 2) * (ny - 2) + 2 * (nz - 2) * nx;
     m_boundaryList = new size_t[m_size_boundaryList];
@@ -103,11 +103,11 @@ void Boundary::control(size_t size_obstacles) {
     //TODO Tests
     std::string message;
     Domain* domain = Domain::getInstance();
-    size_t nx = domain->Getnx(m_level);
-    size_t ny = domain->Getny(m_level);
-    size_t nz = domain->Getnz(m_level);
-    size_t Nx = domain->GetNx(m_level);
-    size_t Ny = domain->GetNy(m_level);
+    size_t nx = domain->get_nx(m_level);
+    size_t ny = domain->get_ny(m_level);
+    size_t nz = domain->get_nz(m_level);
+    size_t Nx = domain->get_Nx(m_level);
+    size_t Ny = domain->get_Ny(m_level);
     size_t all_cells =  m_size_boundaryFront + m_size_boundaryBack + m_size_boundaryBottom + m_size_boundaryTop + m_size_boundaryLeft + m_size_boundaryRight;
     size_t duplicates = 4 * nx + 4 * (ny - 2) + 4 * (nz - 2) + 8;
     if ( m_size_boundaryList != all_cells - duplicates){
@@ -115,38 +115,38 @@ void Boundary::control(size_t size_obstacles) {
         message = message + "Front: " + std::to_string(m_size_boundaryFront) + " Back: " + std::to_string(m_size_boundaryBack) + " Bottom: " + std::to_string(m_size_boundaryBottom) + " Top: " + std::to_string(m_size_boundaryTop) + " Left: " + std::to_string(m_size_boundaryLeft) + " Right: " + std::to_string(m_size_boundaryRight) + "\n";
     }
     if ( m_size_boundaryList + m_size_innerList + size_obstacles != nx*ny*nz){
-        message = message + "list size of all domain cells is not equal with domain size. Boundary List: " + std::to_string(m_size_boundaryList) + " Inner List: " + std::to_string(m_size_innerList) + " Domain Size: " + std::to_string(domain->GetSize(m_level))  + " Obstacle size: " +  std::to_string(size_obstacles) + "\n";
+        message = message + "list size of all domain cells is not equal with domain size. Boundary List: " + std::to_string(m_size_boundaryList) + " Inner List: " + std::to_string(m_size_innerList) + " Domain Size: " + std::to_string(domain->get_size(m_level)) + " Obstacle size: " + std::to_string(size_obstacles) + "\n";
     }
     size_t innerCells = (nz - 2) * (ny - 2) * (nx - 2);
     if (m_size_innerList != innerCells - size_obstacles){
         message = message + "list size of inner cell is not equal with domain inner size minus size of obstacles. Inner List: " + std::to_string(m_size_innerList) + " Domain inner size: " + std::to_string(innerCells) + " obstacle size: " + std::to_string(size_obstacles) + "\n";
     }
-    size_t startIndex = IX((domain->GetIndexx1(m_level) - 1),(domain->GetIndexy1(m_level) - 1), (domain->GetIndexz1(m_level) - 1), Nx, Ny);
-    size_t endIndex = IX((domain->GetIndexx2(m_level) + 1), (domain->GetIndexy2(m_level) + 1), (domain->GetIndexz2(m_level) + 1), Nx, Ny);
+    size_t startIndex = IX((domain->get_index_x1(m_level) - 1), (domain->get_index_y1(m_level) - 1), (domain->get_index_z1(m_level) - 1), Nx, Ny);
+    size_t endIndex = IX((domain->get_index_x2(m_level) + 1), (domain->get_index_y2(m_level) + 1), (domain->get_index_z2(m_level) + 1), Nx, Ny);
     if (*(m_boundaryList) != startIndex || *(m_boundaryList + m_size_boundaryList - 1) != endIndex){
         message = message + "first or last index of boundary list not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryList)) + "(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryList + m_size_boundaryList - 1)) + "\n";
     }
-    size_t front2 = IX(domain->GetIndexx2(m_level) + 1, domain->GetIndexy2(m_level) + 1, domain->GetIndexz1(m_level) - 1, Nx, Ny);
+    size_t front2 = IX(domain->get_index_x2(m_level) + 1, domain->get_index_y2(m_level) + 1, domain->get_index_z1(m_level) - 1, Nx, Ny);
     if (*(m_boundaryFront) != startIndex || *(m_boundaryFront + m_size_boundaryFront - 1) != front2){
         message = message + "first or last index of boundary Front not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryFront)) + "(" + std::to_string(front2) + "|" + std::to_string(*(m_boundaryFront + m_size_boundaryFront - 1)) + "\n";
     }
-    size_t back1 = IX(domain->GetIndexx1(m_level) - 1, domain->GetIndexy1(m_level) - 1 , domain->GetIndexz2(m_level) + 1, Nx, Ny);
+    size_t back1 = IX(domain->get_index_x1(m_level) - 1, domain->get_index_y1(m_level) - 1 , domain->get_index_z2(m_level) + 1, Nx, Ny);
     if (*(m_boundaryBack) != back1 || *(m_boundaryBack + m_size_boundaryBack - 1) != endIndex){
         message = message + "first or last index of boundary Back not correct (" + std::to_string(back1) + "|" + std::to_string(*(m_boundaryBack)) + "(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryBack + m_size_boundaryBack - 1)) + "\n";
     }
-    size_t bottom2 = IX(domain->GetIndexx2(m_level) + 1, domain->GetIndexy1(m_level) - 1, domain->GetIndexz2(m_level) + 1, Nx, Ny);
+    size_t bottom2 = IX(domain->get_index_x2(m_level) + 1, domain->get_index_y1(m_level) - 1, domain->get_index_z2(m_level) + 1, Nx, Ny);
     if (*(m_boundaryBottom) != startIndex || *(m_boundaryBottom + m_size_boundaryBottom - 1) != bottom2){
         message = message + "first or last index of boundary Bottom not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryBottom)) + "(" + std::to_string(bottom2) + "|" + std::to_string(*(m_boundaryBottom + m_size_boundaryBottom - 1)) + "\n";
     }
-    size_t top1 = IX(domain->GetIndexx1(m_level) - 1, domain->GetIndexy2(m_level) + 1, domain->GetIndexz1(m_level) - 1, Nx, Ny);
+    size_t top1 = IX(domain->get_index_x1(m_level) - 1, domain->get_index_y2(m_level) + 1, domain->get_index_z1(m_level) - 1, Nx, Ny);
     if (*(m_boundaryTop) !=  top1 || *(m_boundaryTop + m_size_boundaryTop - 1) != endIndex){
         message = message + "first or last index of boundary Back not correct (" + std::to_string(top1) + "|" + std::to_string(*(m_boundaryBack)) + "(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryBack + m_size_boundaryBack - 1)) + "\n";
     }
-    size_t left2 = IX(domain->GetIndexx1(m_level) - 1, domain->GetIndexy2(m_level) + 1, domain->GetIndexz2(m_level) + 1, Nx, Ny);
+    size_t left2 = IX(domain->get_index_x1(m_level) - 1, domain->get_index_y2(m_level) + 1, domain->get_index_z2(m_level) + 1, Nx, Ny);
     if (*(m_boundaryLeft) != startIndex || *(m_boundaryLeft + m_size_boundaryLeft - 1) != left2){
         message = message + "first or last index of boundary Left not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryLeft)) + "(" + std::to_string(left2) + "|" + std::to_string(*(m_boundaryLeft + m_size_boundaryLeft - 1)) + "\n";
     }
-    size_t right1 = IX(domain->GetIndexx2(m_level) + 1, domain->GetIndexy1(m_level) - 1, domain->GetIndexz1(m_level) - 1, Nx, Ny);
+    size_t right1 = IX(domain->get_index_x2(m_level) + 1, domain->get_index_y1(m_level) - 1, domain->get_index_z1(m_level) - 1, Nx, Ny);
     if (*(m_boundaryRight) != right1 || *(m_boundaryRight + m_size_boundaryRight - 1) != endIndex){
         message = message + "first or last index of boundary Right not correct (" + std::to_string(right1) + "|" + std::to_string(*(m_boundaryRight)) + "(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryRight + m_size_boundaryRight - 1)) + "\n";
     }
@@ -181,8 +181,8 @@ Boundary::~Boundary() {
 void Boundary::boundaryCells() {
     auto domain = Domain::getInstance();
 
-    const size_t Nx = domain->GetNx(m_level);
-    const size_t Ny = domain->GetNy(m_level);
+    const size_t Nx = domain->get_Nx(m_level);
+    const size_t Ny = domain->get_Ny(m_level);
 
     // DETAILED and CONCATENATED LISTS
 // BOUNDARY
@@ -190,14 +190,14 @@ void Boundary::boundaryCells() {
     //TODO: boundaries for physical domain. New method for computational domain -> redefine XML usage of boundaries
 
     //start indices for computational domain minus 1 for ghost cells
-    size_t x1 = domain->GetIndexx1(m_level) - 1;
-    size_t y1 = domain->GetIndexy1(m_level) - 1;
-    size_t z1 = domain->GetIndexz1(m_level) - 1;
+    size_t x1 = domain->get_index_x1(m_level) - 1;
+    size_t y1 = domain->get_index_y1(m_level) - 1;
+    size_t z1 = domain->get_index_z1(m_level) - 1;
 
     //end indices for computational domain plus 1 for ghost cells
-    size_t x2 = domain->GetIndexx2(m_level) + 1;
-    size_t y2 = domain->GetIndexy2(m_level) + 1;
-    size_t z2 = domain->GetIndexz2(m_level) + 1;
+    size_t x2 = domain->get_index_x2(m_level) + 1;
+    size_t y2 = domain->get_index_y2(m_level) + 1;
+    size_t z2 = domain->get_index_z2(m_level) + 1;
 
     // fill boundaryList with boundary indices of computational domain (sorted)
     size_t counter = 0;
@@ -292,15 +292,15 @@ void Boundary::boundaryCells() {
 // ***************************************************************************************
 void Boundary::innerCells(Obstacle **obstacleList, size_t numberOfObstacles) {
     Domain *domain = Domain::getInstance();
-    size_t k1 = domain->GetIndexz1(m_level);
-    size_t j1 = domain->GetIndexy1(m_level);
-    size_t i1 = domain->GetIndexx1(m_level);
-    size_t k2 = domain->GetIndexz2(m_level);
-    size_t j2 = domain->GetIndexy2(m_level);
-    size_t i2 = domain->GetIndexx2(m_level);
+    size_t k1 = domain->get_index_z1(m_level);
+    size_t j1 = domain->get_index_y1(m_level);
+    size_t i1 = domain->get_index_x1(m_level);
+    size_t k2 = domain->get_index_z2(m_level);
+    size_t j2 = domain->get_index_y2(m_level);
+    size_t i2 = domain->get_index_x2(m_level);
 
-    size_t Nx = domain->GetNx(m_level);
-    size_t Ny = domain->GetNy(m_level);
+    size_t Nx = domain->get_Nx(m_level);
+    size_t Ny = domain->get_Ny(m_level);
 
     size_t counter = 0;
     for (size_t k = k1; k <= k2; ++k) {
@@ -329,15 +329,15 @@ void Boundary::innerCells(Obstacle **obstacleList, size_t numberOfObstacles) {
 // ***************************************************************************************
 void Boundary::innerCells() {
     Domain *domain = Domain::getInstance();
-    size_t k1 = domain->GetIndexz1(m_level);
-    size_t j1 = domain->GetIndexy1(m_level);
-    size_t i1 = domain->GetIndexx1(m_level);
-    size_t k2 = domain->GetIndexz2(m_level);
-    size_t j2 = domain->GetIndexy2(m_level);
-    size_t i2 = domain->GetIndexx2(m_level);
+    size_t k1 = domain->get_index_z1(m_level);
+    size_t j1 = domain->get_index_y1(m_level);
+    size_t i1 = domain->get_index_x1(m_level);
+    size_t k2 = domain->get_index_z2(m_level);
+    size_t j2 = domain->get_index_y2(m_level);
+    size_t i2 = domain->get_index_x2(m_level);
 
-    size_t Nx = domain->GetNx(m_level);
-    size_t Ny = domain->GetNy(m_level);
+    size_t Nx = domain->get_Nx(m_level);
+    size_t Ny = domain->get_Ny(m_level);
 
     size_t counter = 0;
     for (size_t k = k1; k <= k2; ++k) {

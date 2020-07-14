@@ -1,8 +1,8 @@
 # ARTSS
-Accelerated Based Real Time Smoke Simulation
+Accelerator-based Real Time Smoke Simulator
 
 ARTSS is a real-time and prognosis capable CFD code basis simulating buoyancy-driven turbulent smoke spread
-based on finite differences and a large eddy simulation turbulence model. The open source code is portable on CPU and GPU and successfully verified using unit, analytical and
+based on finite differences and a large eddy simulation turbulence model. The open source code is portable on CPU and GPU and successfully verified using analytical and
 semi-analytical tests. It is also successfully validated with scenarios relevant for fire protection.
 ARTSS is based on JuROr, which was originally developed within the [ORPHEUS](http://www.orpheus-projekt.de) project
 (funded by [BMBF](https://www.bmbf.de/)) by Dr. Anne Küsters.
@@ -19,14 +19,12 @@ Detailed requirements are listed in the table below (general requirements for se
 | General  | Version control system (optional)                   | git      |   >= 2.0      |
 |          | Build processor using a compiler-independent method | CMake    |   >= 2.8      |
 |          | Compiler fully supporting C++-17 (gcc or clang)     | gcc      |   >= 7.0      |
-|          |                                                     | clang    |   >= 8.0      |
 |          | Visualization of output                             | vtk      |   >= 5.8      |
-|          |                                                     | Paraview |   >= 5.50     |
 |          | Testing for consistency of output while developing  | Python   |   >= 3.6      |
 | Specific | Compiler fully supporting C++-17 and OpenACC        | PGI      |   >= 19.10    |
 
 ### Compiling the Code
-Once the code has been checked out and all required software has been installed, JuROr
+Once the code has been checked out and all required software has been installed, ARTSS
 can be built from the terminal by first running cmake to configure the build, then
 running make. The steps are summarized below.  
 
@@ -35,12 +33,12 @@ running make. The steps are summarized below.
 git clone https://github.com/FireDynamics/ARTSS.git
 cd ARTSS
 ```
-2. Compiling the code
 
+2. Compiling the code
 ```
 ./compile.sh [OPTIONS]
 ```
-*Note: Without options all executables will be compiled using the PGI compiler and CUDA 8.0.*
+*Note: Without options all executables will be compiled using the PGI compiler and CUDA 10.1.*
 
 OPTIONS (selection; show all by using --help flag):
 - '-s' -> Compile serial ARTSS version
@@ -56,10 +54,10 @@ EXAMPLE:
 `./compile.sh -m`
 
 Extra:
-It is also possible to compile ARTSS using a docker file. Instructions and further information can be found in the folder `docker`.
+It is also possible to work with ARTSS by using Docker. Instructions and further information can be found in [DOCKER.md](https://github.com/FireDynamics/ARTSS/tree/master/DOCKER.md).
 
 
-### Code structure
+### Code Structure
 ```
 ARTSS
 │   compile.sh
@@ -80,9 +78,6 @@ ARTSS
 │   # different tools that make your life easier
 ```
 
-## Authors
-* [**Anne Küsters**](https://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/kuesters_a.html?nn=361682): *Initial work*
-* [**Lukas Arnold**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Arnold_Lukas/main.html): *Contributor* and *Supervisor*
-* [**My Linh Würzburger**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Wuerzburger_My_Linh/main.html?nn=2302136): *Contributor*
-* [**Max Böhler**](https://www.fz-juelich.de/ias/ias-7/EN/AboutUs/Staff/Current/Boehler_Max/_node.html)
-* Suryanarayana Maddu Kondaiah
+### Contributing
+
+We are working constantly on this project, which above all means we are not finished yet: continuous improvements are made, new features are implemented and bugs getting fixed. If you find any errors or you have a suggestions, please feel free to write an issue [here](https://github.com/FireDynamics/ARTSS/issues). If you want to work on the project, please refer to the [contributing guidlines](https://github.com/FireDynamics/ARTSS/tree/master/CONTRIBUTING.md).

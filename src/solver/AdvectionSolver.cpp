@@ -1,13 +1,13 @@
-/// \file 		AdvectionSolver.h
-/// \brief 		Defines the steps to solve the advection equation
-/// \date 		August 22, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       AdvectionSolver.cpp
+/// \brief      Defines the steps to solve the advection equation
+/// \date       August 22, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
 
 #include "AdvectionSolver.h"
-#include "../interfaces/AdvectionI.h"
+#include "../interfaces/IAdvection.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
@@ -18,9 +18,9 @@ AdvectionSolver::AdvectionSolver() {
     std::string advectionType = params->get("solver/advection/type");
     SolverSelection::SetAdvectionSolver(&adv, params->get("solver/advection/type"));
 
-    real d_u_linm = params->getReal("initial_conditions/u_lin");
-    real d_v_linm = params->getReal("initial_conditions/v_lin");
-    real d_w_linm = params->getReal("initial_conditions/w_lin");
+    real d_u_linm = params->get_real("initial_conditions/u_lin");
+    real d_v_linm = params->get_real("initial_conditions/v_lin");
+    real d_w_linm = params->get_real("initial_conditions/w_lin");
 
     u_linm = new Field(FieldType::U, d_u_linm);
     v_linm = new Field(FieldType::V, d_v_linm);
@@ -34,7 +34,7 @@ AdvectionSolver::AdvectionSolver() {
     auto d_v_lin = v_lin->data;
     auto d_w_lin = w_lin->data;
 
-    size_t bsize = Domain::getInstance()->GetSize(u_linm->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u_linm->GetLevel());
 
 #pragma acc enter data copyin(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize])
     control();
@@ -47,7 +47,7 @@ AdvectionSolver::~AdvectionSolver() {
     auto d_v_lin = v_linm->data;
     auto d_w_lin = w_linm->data;
 
-    size_t bsize = Domain::getInstance()->GetSize(u_linm->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u_linm->GetLevel());
 
 #pragma acc exit data delete(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize])
 
@@ -56,20 +56,20 @@ AdvectionSolver::~AdvectionSolver() {
     delete w_linm;
 }
 
-//====================================== DoStep =================================
+//====================================== do_step =================================
 // ***************************************************************************************
 /// \brief  brings all calculation steps together into one function
-/// \param	dt			time step
-/// \param	sync		synchronous kernel launching (true, default: false)
+/// \param  dt      time step
+/// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void AdvectionSolver::DoStep(real t, bool sync) {
+void AdvectionSolver::do_step(real t, bool sync) {
   // local variables and parameters for GPU
-    auto u = SolverI::u;
-    auto v = SolverI::v;
-    auto w = SolverI::w;
-    auto u0 = SolverI::u0;
-    auto v0 = SolverI::v0;
-    auto w0 = SolverI::w0;
+    auto u = ISolver::u;
+    auto v = ISolver::v;
+    auto w = ISolver::w;
+    auto u0 = ISolver::u0;
+    auto v0 = ISolver::v0;
+    auto w0 = ISolver::w0;
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -86,12 +86,12 @@ void AdvectionSolver::DoStep(real t, bool sync) {
     auto d_v_lin = v_lin->data;
     auto d_w_lin = w_lin->data;
 
-    size_t bsize = Domain::getInstance()->GetSize(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
 
 #pragma acc data present(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize], d_u[:bsize], d_u0[:bsize], d_v[:bsize], d_v0[:bsize], d_w[:bsize], d_w0[:bsize])
     {
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         std::cout << "Advect ..." << std::endl;
         //TODO Logger
 #endif

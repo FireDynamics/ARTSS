@@ -1,8 +1,8 @@
-/// \file 		PressureSolver.cpp
-/// \brief 		Defines the steps to solve the pressure Poisson equation
-/// \date 		Sep 13, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       PressureSolver.cpp
+/// \brief      Defines the steps to solve the pressure Poisson equation
+/// \date       Sep 13, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
 
@@ -23,15 +23,15 @@ PressureSolver::~PressureSolver() {
     delete pres;
 }
 
-//========================================= DoStep =======================================
+//========================================= do_step =======================================
 // ***************************************************************************************
 /// \brief  brings all calculation steps together into one function
-/// \param	dt			time step
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
+/// \param  dt      time step
+/// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void PressureSolver::DoStep(real t, bool sync) {
+void PressureSolver::do_step(real t, bool sync) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
     std::cout << "Pressure ..." << std::endl;
     //TODO Logger
 #endif
@@ -39,12 +39,12 @@ void PressureSolver::DoStep(real t, bool sync) {
 // 1. Solve pressure Poisson equation
 
     // local variables and parameters for GPU
-    auto p = SolverI::p;
-    auto rhs = SolverI::rhs;
+    auto p = ISolver::p;
+    auto rhs = ISolver::rhs;
     auto d_p = p->data;
     auto d_rhs = rhs->data;
 
-    size_t bsize = Domain::getInstance()->GetSize(p->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(p->GetLevel());
 
 #pragma acc data present(d_p[:bsize], d_rhs[:bsize])
     {

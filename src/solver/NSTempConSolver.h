@@ -1,44 +1,45 @@
-/// \file 		Navier-Stokes Solver with force f(T)
-/// \brief 		Defines the steps to solve advection, diffusion, pressure and add sources (dependent on T), solves temperature and concentration equation
-/// \date 		Sep 27, 2017
-/// \author 	Küsters
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       NSTempConSolver.cpp 
+/// \brief      Navier-Stokes Solver with force f(T)
+/// \details    Defines the steps to solve advection, diffusion, pressure and add sources (dependent on T), solves temperature and concentration equation
+/// \date       Sep 27, 2017
+/// \author     Küsters
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 
 #ifndef ARTSS_SOLVER_NSTEMPCONSOLVER_H_
 #define ARTSS_SOLVER_NSTEMPCONSOLVER_H_
 
 
-#include "../interfaces/SolverI.h"
-#include "../interfaces/AdvectionI.h"
-#include "../interfaces/DiffusionI.h"
-#include "../interfaces/PressureI.h"
-#include "../interfaces/SourceI.h"
+#include "../interfaces/ISolver.h"
+#include "../interfaces/IAdvection.h"
+#include "../interfaces/IDiffusion.h"
+#include "../interfaces/IPressure.h"
+#include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class NSTempConSolver:public SolverI {
+class NSTempConSolver:public ISolver {
 public:
-	NSTempConSolver();
-	~NSTempConSolver() override;
+  NSTempConSolver();
+  ~NSTempConSolver() override;
 
-	void DoStep(real t, bool sync) override;
+  void do_step(real t, bool sync) override;
 
 private:
-	AdvectionI* adv_vel;
-	DiffusionI* dif_vel;
-	AdvectionI* adv_temp;
-	DiffusionI* dif_temp;
-	AdvectionI* adv_con;
-	DiffusionI* dif_con;
-	PressureI* pres;
-	SourceI* sou_vel;
-	SourceI* sou_temp;
-	SourceI* sou_con;
+  IAdvection* adv_vel;
+  IDiffusion* dif_vel;
+  IAdvection* adv_temp;
+  IDiffusion* dif_temp;
+  IAdvection* adv_con;
+  IDiffusion* dif_con;
+  IPressure* pres;
+  ISource* sou_vel;
+  ISource* sou_temp;
+  ISource* sou_con;
 
-	real m_nu;
-	real m_kappa;
-	real m_gamma;
-	std::string m_dir_vel;
+  real m_nu;
+  real m_kappa;
+  real m_gamma;
+  std::string m_dir_vel;
 
   static void control();
 

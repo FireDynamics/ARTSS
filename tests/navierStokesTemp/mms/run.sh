@@ -1,8 +1,8 @@
-$1 ./Test_NavierStokesBuoyancyMMS.xml
+$1 ./Test_NavierStokesTempBuoyancyMMS.xml
 
 rm -rf *.vtk
 
-python ./verify.py
+python3 ./verify.py
 
 if [ $? -eq 0 ]
 then

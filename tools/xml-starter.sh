@@ -29,17 +29,17 @@ Executables:
   ${YELLOW}--artss_gpu${NC}           \t Executable: artss_gpu
 ----
   Benchmarking (without output, visualization, analysis but with tracing for profiling):
-  ${YELLOW}--sp${NC}
-  ${YELLOW}--sprofile${NC}
-  ${YELLOW}--artss_profile${NC}           \t Executable artss_serial_profile
+  ${YELLOW}--sb${NC}
+  ${YELLOW}--sbenchmark${NC}
+  ${YELLOW}--artss_benchmark${NC}           \t Executable artss_serial_benchmark
 
-  ${YELLOW}--mp${NC}
-  ${YELLOW}--multicore_profile${NC}
-  ${YELLOW}--artss_multicore_cpu_profile${NC} \t Executable artss_multicore_cpu_profile
+  ${YELLOW}--mb${NC}
+  ${YELLOW}--multicore_benchmark${NC}
+  ${YELLOW}--artss_multicore_cpu_benchmark${NC} \t Executable artss_multicore_cpu_benchmark
 
-  ${YELLOW}--gp${NC}
-  ${YELLOW}--gpu_profile${NC}
-  ${YELLOW}--artss_gpu_profile${NC}        \t Executable artss_gpu_profile
+  ${YELLOW}--gb${NC}
+  ${YELLOW}--gpu_benchmark${NC}
+  ${YELLOW}--artss_gpu_benchmark${NC}        \t Executable artss_gpu_benchmark
 
 Other:
    ${YELLOW}-c${NC}
@@ -73,7 +73,7 @@ Other:
 INIT="Initialised values: output file=$OUT, verbose=false, compile version=$COMPILE, hoster name=$HOSTNAME\n"
 HELP="$OPTIONS$INIT$EXAMPLE"
 
-HEADER="Date${DELIM}Server${DELIM}Version${DELIM}Hardware${DELIM}t_end${DELIM}Nt${DELIM}dt${DELIM}Nx${DELIM}Ny${DELIM}Nz${DELIM}dx${DELIM}dy${DELIM}dz${DELIM}Iterations${DELIM}Max. Iterations${DELIM}Residuum${DELIM}RMS Error${DELIM}Error e${DELIM}calctime[s]${DELIM}runtime[s]${DELIM}CUPS${DELIM}XML${DELIM}Output${DELIM}Dynamic${DELIM}Comment"
+HEADER="Date${DELIM}Server${DELIM}Version${DELIM}Hardware${DELIM}t_end${DELIM}Nt${DELIM}dt${DELIM}nx${DELIM}ny${DELIM}nz${DELIM}dx${DELIM}dy${DELIM}dz${DELIM}RMS Error u${DELIM}RMS Error p${DELIM}RMS Error T${DELIM}Absolute Error u${DELIM}Absolute Error v${DELIM}Absolute Error w${DELIM}Absolute Error p${DELIM}Absolute Error T${DELIM}calctime[s]${DELIM}runtime[s]${DELIM}CUPS${DELIM}XML${DELIM}Output${DELIM}Obstacles${DELIM}Surfaces${DELIM}Dynamic${DELIM}Comment"
 
 HOMEPATH=$HOME
 HOSTER=$(hostname)
@@ -82,10 +82,12 @@ JUHYDRA=1
 JURECA=1
 
 function xml_parser {
-   SOLUTION=$(xmllint -xpath "string(//JuROr/solver/solution/@available)" $1)
-   DYNAMIC=$(xmllint -xpath "string(//JuROr/boundaries/@dynamic)" $1)
-   NAME=$(xmllint -xpath "string(//JuROr/solver/diffusion/@type)" $1)
-   #echo "solver=$NAME"
+   SOLUTION=$(xmllint -xpath "string(//ARTSS/solver/solution/@available)" $1)
+   DYNAMIC=$(xmllint -xpath "string(//ARTSS/adaption/@dynamic)" $1)
+   OBSTACLES=$(xmllint -xpath "string(//ARTSS/obstacles/@enabled)" $1)
+   SURFACES=$(xmllint -xpath "string(//ARTSS/surfaces/@enabled)" $1)
+   SOLVER=$(xmllint -xpath "string(//ARTSS/solver/@description)" $1)
+   #echo "solver=$SOLVER"
    TEND=$(xmllint -xpath "string(//t_end)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
    DT=$(xmllint -xpath "string(//dt)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
    NT=$(bc <<< "scale=0; $TEND / $DT")
@@ -107,7 +109,6 @@ function xml_parser {
    # echo "z1=$ZSTART, z2=$ZEND, NZ=$NZ, DZ=$DZ"
 
    MAXITER=$(xmllint -xpath "string(//max_iter)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-   DYNAMIC=$(xmllint -xpath "string(//dynamic)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 }
 
 POSITIONAL=()
@@ -121,8 +122,8 @@ do
       GPU=0
       shift
       ;;
-    --gp|--gpu_profile---artss_gpu_profile)
-      COMPILE="artss_acc_profile "
+    --gb|--gpu_benchmark---artss_gpu_benchmark)
+      COMPILE="artss_gpu_benchmark "
       GPU=0
       shift
       ;;
@@ -144,8 +145,8 @@ do
       COMPILE="artss_serial "
       shift
       ;;
-    --sp|--serial_profile|--artss_serial_profile)
-      COMPILE="artss_serial_profile "
+    --sb|--serial_benchmark|--artss_serial_benchmark)
+      COMPILE="artss_serial_benchmark "
       shift
       ;;
     --manual)
@@ -158,8 +159,8 @@ do
       GPU=0
       shift
       ;;
-    --mp|--multicore_profile|--artss_multicore_cpu_profile)
-      COMPILE="artss_multicore_cpu_profile "
+    --mb|--multicore_benchmark|--artss_multicore_cpu_benchmark)
+      COMPILE="artss_multicore_cpu_benchmark "
       GPU=0
       shift
       ;;
@@ -362,7 +363,7 @@ do
 
     if [ -f ${TMP}.error ]
     then
-        ERRCOUNT=$((wc -l) < ${TMP}.error)
+        ERRCOUNT=$( (wc -l) < ${TMP}.error)
         if [ $ERRCOUNT -eq 0 ]
         then
             rm ${TMP}.error
@@ -374,35 +375,66 @@ do
 
     END=$(date +%s)
 
-    if [[ $COMPILE == *_prof* ]]
+    ERRU="-"
+    ERRV="-"
+    ERRW="-"
+    ERRP="-"
+    ERRT="-"
+    RMSU="-"
+    RMSP="-"
+    RMST="-"
+    if [ "$SOLUTION" = "Yes" ]
     then
-        TIME=`cat $TMPNAME | tail -n 1 | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
-        ITER="-"
-        RES="-"
-        ERR="-"
-        RMS="-"
-    else
-        if [ "$SOLUTION" = "Yes" ]
+      if [[ "$SOLVER" == *Advection* || "$SOLVER" == *Diffusion* ]] 
+      then
+        TIME=`cat $TMPNAME | tail -n 12 | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
+        ERRU=`cat $TMPNAME | tail -n 8  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        ERRV=`cat $TMPNAME | tail -n 5  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        ERRW=`cat $TMPNAME | tail -n 2  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMSU=`cat $TMPNAME | tail -n 18 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMSP=`cat $TMPNAME | tail -n 17 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMST=`cat $TMPNAME | tail -n 16 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+      elif [[ "$SOLVER" == NS* ]]
+      then
+        if [[ "$SOLVER" == *Temp* ]]
         then
-          TIME=`cat $TMPNAME | tail -n 15 | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
-          RES=`cat  $TMPNAME | tail -n 24 | head -1 |  awk '{split($0, a, " "); print(a[4]);}'`
-          ERR=`cat  $TMPNAME | tail -n 11 | head -1 |  awk '{split($0, a, "="); print(a[2]);}'`
-          RMS=`cat  $TMPNAME | tail -n 21 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          ITER=`cat $TMPNAME | tail -n 25 | head -1 | awk '{split($0, a, ":"); print(a[2]);}'`
+          TIME=`cat $TMPNAME | tail -n 18 | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
+          ERRU=`cat $TMPNAME | tail -n 14 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRV=`cat $TMPNAME | tail -n 11 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRW=`cat $TMPNAME | tail -n 8  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRP=`cat $TMPNAME | tail -n 5  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRT=`cat $TMPNAME | tail -n 2  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMSU=`cat $TMPNAME | tail -n 24 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMSP=`cat $TMPNAME | tail -n 23 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMST=`cat $TMPNAME | tail -n 22 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
         else
-          TIME=`cat $TMPNAME | tail -n 4 | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
-          RES=`cat  $TMPNAME | tail -n 12 | head -1 | awk '{split($0, a, " "); print(a[4]);}'`
-          ERR="-"
-          RMS="-"
-          ITER=`cat $TMPNAME | tail -n 13 | head -1 | awk '{split($0, a, ":"); print(a[2]);}'`
+          TIME=`cat $TMPNAME | tail -n 15 | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
+          ERRU=`cat $TMPNAME | tail -n 11 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRV=`cat $TMPNAME | tail -n 8  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRW=`cat $TMPNAME | tail -n 5  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRP=`cat $TMPNAME | tail -n 2  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMSU=`cat $TMPNAME | tail -n 21 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMSP=`cat $TMPNAME | tail -n 20 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMST=`cat $TMPNAME | tail -n 19 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
         fi
+      elif [[ "$SOLVER" == "PressureSolver" ]]
+      then
+        TIME=`cat $TMPNAME | tail -n 5 | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
+        ERRP=`cat $TMPNAME | tail -n 1  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMSU=`cat $TMPNAME | tail -n 11 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMSP=`cat $TMPNAME | tail -n 10 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMST=`cat $TMPNAME | tail -n 9  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+      fi
+    else
+      TIME=`cat $TMPNAME | tail -n 1  | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
     fi
+
     NUMBEROFLINES=$(cat $TMPNAME | wc -l)
     if [ "$TIME" = "0" ]
     then
       CUPS="-"
     else
-      CUPS=$(bc <<< "scale=2; ($NX - 2) * ($NY - 2) * ($NZ - 2) * $NT / $TIME")
+      CUPS=$(bc <<< "scale=2; ($NX+2) * ($NY+2) * ($NZ+2) * $NT / $TIME")
     fi
     TTIME=$(bc <<< "scale=2; $END - $START")
     NEWNAME=$TMP
@@ -417,7 +449,7 @@ do
     fi
     mv $TMPNAME $NEWNAME
     #rmdir $DIRE
-    echo -e "$TIMEANDDATE${DELIM}$SERVER${DELIM}$COMPILE${DELIM}$HARDWARE${DELIM}$TEND${DELIM}$NT${DELIM}$DT${DELIM}$NX${DELIM}$NY${DELIM}$NZ${DELIM}$DX${DELIM}$DY${DELIM}$DZ${DELIM}$ITER${DELIM}$MAXITER${DELIM}$RES${DELIM}$RMS${DELIM}$ERR${DELIM}$TIME${DELIM}$TTIME${DELIM}$CUPS${DELIM}$FILE${DELIM}$NEWNAME${DELIM}$DYNAMIC${DELIM}$COMMENT${DELIM}$NUMBEROFLINES${DELIM}$ERRORMES" >> $OUT
+    echo -e "$TIMEANDDATE${DELIM}$SERVER${DELIM}$COMPILE${DELIM}$HARDWARE${DELIM}$TEND${DELIM}$NT${DELIM}$DT${DELIM}$NX${DELIM}$NY${DELIM}$NZ${DELIM}$DX${DELIM}$DY${DELIM}$DZ${DELIM}$RMSU${DELIM}$RMSP${DELIM}$RMST${DELIM}$ERRU${DELIM}$ERRV${DELIM}$ERRW${DELIM}$ERRP${DELIM}$ERRT${DELIM}$TIME${DELIM}$TTIME${DELIM}$CUPS${DELIM}$FILE${DELIM}$NEWNAME${DELIM}${OBSTACLES}${DELIM}${SURFACES}${DELIM}$DYNAMIC${DELIM}$COMMENT${DELIM}$ERRORMES" >> $OUT
     echo -e "\tdt=$DT (t_end=$TEND) size=${NX}x${NY}x${NZ} is finished. Data file: $FILE"
     echo -e "\ttmp data file=$TMP"
     echo "$(date) endtime: $TTIME"

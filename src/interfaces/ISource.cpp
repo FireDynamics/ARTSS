@@ -1,16 +1,16 @@
-/// \file 		SourceI.h
-/// \brief 		Interface for adding sources
-/// \date 		Dec 2, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       ISource.cpp
+/// \brief      Interface for adding sources
+/// \date       Dec 2, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+
+#include <cmath>
 
 #ifdef _OPENACC
 #include <accelmath.h>
-#else
-#include <cmath>
 #endif
 
-#include "SourceI.h"
+#include "ISource.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
@@ -19,25 +19,25 @@
 //======================================== Force ======================================
 // ***************************************************************************************
 /// \brief  Buoyancy Force in momentum equation
-/// \param  out	buoyancy force
-/// \param  in	temperature
-/// \param  ina	ambient temperature
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+/// \param  out buoyancy force
+/// \param  in  temperature
+/// \param  in_temperature_ambient ambient temperature
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SourceI::BuoyancyForce(Field *out, const Field *in, const Field *ina, bool sync) {
+void ISource::buoyancy_force(Field *out, const Field *in, const Field *in_temperature_ambient, bool sync) {
 
     // local variables and parameters for GPU
     auto d_out = out->data;
     auto d_in = in->data;
-    auto d_ina = ina->data;
+    auto d_ina = in_temperature_ambient->data;
 
-    auto bsize = Domain::getInstance()->GetSize(out->GetLevel());
+    auto bsize = Domain::getInstance()->get_size(out->GetLevel());
 
     auto params = Parameters::getInstance();
 
-    real beta = params->getReal("physical_parameters/beta");
+    real beta = params->get_real("physical_parameters/beta");
 
-    real g = params->getReal("physical_parameters/g");
+    real g = params->get_real("physical_parameters/g");
 
     auto boundary = BoundaryController::getInstance();
 
@@ -75,32 +75,32 @@ void SourceI::BuoyancyForce(Field *out, const Field *in, const Field *ina, bool 
 //===================================== Energy Source ====================================
 // ***************************************************************************************
 /// \brief  Manufactured (MMS) energy source in energy equation
-/// \param  out		energy source
-/// \param  t		time
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+/// \param  out   energy source
+/// \param  t   time
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SourceI::BuoyancyST_MMS(Field *out, real t, bool sync) {
+void ISource::buoyancy_ST_MMS(Field *out, real t, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto d_out = out->data;
-    auto bsize = domain->GetSize(out->GetLevel());
+    auto bsize = domain->get_size(out->GetLevel());
 
-    size_t Nx = domain->GetNx(out->GetLevel());
-    size_t Ny = domain->GetNy(out->GetLevel());
+    size_t Nx = domain->get_Nx(out->GetLevel());
+    size_t Ny = domain->get_Ny(out->GetLevel());
 
-    real X1 = domain->GetX1();
-    real Y1 = domain->GetY1();
+    real X1 = domain->get_X1();
+    real Y1 = domain->get_Y1();
 
-    real dx = domain->Getdx(out->GetLevel());
-    real dy = domain->Getdy(out->GetLevel());
+    real dx = domain->get_dx(out->GetLevel());
+    real dy = domain->get_dy(out->GetLevel());
 
     auto params = Parameters::getInstance();
 
-    real nu = params->getReal("physical_parameters/nu");
-    real beta = params->getReal("physical_parameters/beta");
-    real kappa = params->getReal("physical_parameters/kappa");
-    real g = params->getReal("physical_parameters/g");
-    real rhoa = params->getReal("initial_conditions/rhoa");
+    real nu = params->get_real("physical_parameters/nu");
+    real beta = params->get_real("physical_parameters/beta");
+    real kappa = params->get_real("physical_parameters/kappa");
+    real g = params->get_real("physical_parameters/g");
+    real rhoa = params->get_real("initial_conditions/rhoa");
     real rbeta = 1. / beta;
     real rg = 1. / g;
     real c_nu = 2 * nu * M_PI * M_PI - 1;
@@ -147,40 +147,40 @@ void SourceI::BuoyancyST_MMS(Field *out, real t, bool sync) {
 
 // ***************************************************************************************
 /// \brief  Volumetric Gaussian temperature source in energy equation
-/// \param  out		energy source
-/// \param  HRR		total heat release rate
-/// \param  cp		heat capacity
-/// \param  x0		center of Gaussian (x-direction)
-/// \param  y0		center of Gaussian (y-direction)
-/// \param  z0		center of Gaussian (z-direction)
-/// \param  sigma	Radius of Gaussian
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+/// \param  out   energy source
+/// \param  HRR   total heat release rate
+/// \param  cp    heat capacity
+/// \param  x0    center of Gaussian (x-direction)
+/// \param  y0    center of Gaussian (y-direction)
+/// \param  z0    center of Gaussian (z-direction)
+/// \param  sigma Radius of Gaussian
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SourceI::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, real sigmax, real sigmay, real sigmaz, bool sync) {
+void ISource::gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z, bool sync) {
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto d_out = out->data;
-    auto bsize = domain->GetSize(out->GetLevel());
+    auto bsize = domain->get_size(out->GetLevel());
 
-    size_t Nx = domain->GetNx(out->GetLevel());
-    size_t Ny = domain->GetNy(out->GetLevel());
+    size_t Nx = domain->get_Nx(out->GetLevel());
+    size_t Ny = domain->get_Ny(out->GetLevel());
 
-    real X1 = domain->GetX1();
-    real Y1 = domain->GetY1();
-    real Z1 = domain->GetZ1();
+    real X1 = domain->get_X1();
+    real Y1 = domain->get_Y1();
+    real Z1 = domain->get_Z1();
 
-    real dx = domain->Getdx(out->GetLevel());
-    real dy = domain->Getdy(out->GetLevel());
-    real dz = domain->Getdz(out->GetLevel());
+    real dx = domain->get_dx(out->GetLevel());
+    real dy = domain->get_dy(out->GetLevel());
+    real dz = domain->get_dz(out->GetLevel());
 
     //get parameters for Gaussian
-    real sigmax2 = 2 * sigmax * sigmax;
-    real rsigmax2 = 1. / sigmax2;
-    real sigmay2 = 2 * sigmay * sigmay;
-    real rsigmay2 = 1. / sigmay2;
-    real sigmaz2 = 2 * sigmaz * sigmaz;
-    real rsigmaz2 = 1. / sigmaz2;
+    real sigma_x_2 = 2 * sigma_x * sigma_x;
+    real r_sigma_x_2 = 1. / sigma_x_2;
+    real sigma_y_2 = 2 * sigma_y * sigma_y;
+    real r_sigma_y_2 = 1. / sigma_y_2;
+    real sigma_z_2 = 2 * sigma_z * sigma_z;
+    real r_sigma_z_2 = 1. / sigma_z_2;
 
     //set Gaussian to cells
     auto boundary = BoundaryController::getInstance();
@@ -203,9 +203,9 @@ void SourceI::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, re
             j = (idx - k * Nx * Ny) / Nx;
             i = idx - k * Nx * Ny - j * Nx;
 
-            real expr = std::exp(-(rsigmax2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))\
- + rsigmay2 * ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0))\
- + rsigmaz2 * ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0))));
+            real expr = std::exp(-(r_sigma_x_2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))
+                                    + r_sigma_y_2 * ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0))
+                                    + r_sigma_z_2 * ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0))));
             V += expr * dx * dy * dz;
         }
 
@@ -222,9 +222,9 @@ void SourceI::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, re
             j = (idx - k * Nx * Ny) / Nx;
             i = idx - k * Nx * Ny - j * Nx;
 
-            real expr = std::exp(-(rsigmax2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))\
- + rsigmay2 * ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0))\
- + rsigmaz2 * ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0))));
+            real expr = std::exp(-(r_sigma_x_2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))
+                                    + r_sigma_y_2 * ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0))
+                                    + r_sigma_z_2 * ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0))));
             d_out[idx] = HRRrV * rcp * expr;
         }
 
@@ -237,37 +237,37 @@ void SourceI::Gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, re
 //======================================== Dissipation ====================================
 // ***************************************************************************************
 /// \brief  Adding dissipation (e.g. via friction) into the equation
-/// \param  out		output pointer (\a T)
-/// \param  in_u	input pointer (\a x -velocity)
-/// \param  in_v	input pointer (\a y -velocity)
-/// \param  in_w	input pointer (\a z -velocity)
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+/// \param  out   output pointer (\a T)
+/// \param  in_u  input pointer (\a x -velocity)
+/// \param  in_v  input pointer (\a y -velocity)
+/// \param  in_w  input pointer (\a z -velocity)
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SourceI::Dissipate(Field *out, const Field *inu, const Field *inv, const Field *inw, bool sync) {
+void ISource::dissipate(Field *out, const Field *in_u, const Field *in_v, const Field *in_w, bool sync) {
 
     // local variables and parameters for GPU
     auto d_out = out->data;
-    auto d_inu = inu->data;
-    auto d_inv = inv->data;
-    auto d_inw = inw->data;
+    auto d_inu = in_u->data;
+    auto d_inv = in_v->data;
+    auto d_inw = in_w->data;
 
     auto domain = Domain::getInstance();
-    size_t Nx = domain->GetNx(out->GetLevel());
-    size_t Ny = domain->GetNy(out->GetLevel());
+    size_t Nx = domain->get_Nx(out->GetLevel());
+    size_t Ny = domain->get_Ny(out->GetLevel());
 
-    real dx = domain->Getdx(out->GetLevel());
-    real dy = domain->Getdy(out->GetLevel());
-    real dz = domain->Getdz(out->GetLevel());
+    real dx = domain->get_dx(out->GetLevel());
+    real dy = domain->get_dy(out->GetLevel());
+    real dz = domain->get_dz(out->GetLevel());
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
 
     auto params = Parameters::getInstance();
 
-    real dt = params->getReal("physical_parameters/dt");
-    real nu = params->getReal("physical_parameters/nu");
+    real dt = params->get_real("physical_parameters/dt");
+    real nu = params->get_real("physical_parameters/nu");
 
-    auto size = Domain::getInstance()->GetSize(out->GetLevel());
+    auto size = Domain::getInstance()->get_size(out->GetLevel());
     auto type = out->GetType();
 
     auto boundary = BoundaryController::getInstance();
@@ -281,16 +281,15 @@ void SourceI::Dissipate(Field *out, const Field *inu, const Field *inv, const Fi
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_iList[j];
-            real out_h = nu * (2 * (0.5 * rdx * (d_inu[i + 1] - d_inu[i - 1])) * (0.5 * rdx * (d_inu[i + 1] - d_inu[i - 1]))\
- + 2 * (0.5 * rdy * (d_inv[i + Nx] - d_inv[i - Nx])) * (0.5 * rdy * (d_inv[i + Nx] - d_inv[i - Nx]))\
- + 2 * (0.5 * rdz * (d_inw[i + Nx * Ny] - d_inw[i - Nx * Ny])) * (0.5 * rdz * (d_inw[i + Nx * Ny] - d_inw[i - Nx * Ny]))\
- + ((0.5 * rdx * (d_inv[i + 1] - d_inv[i - 1])) + (0.5 * rdy * (d_inu[i + Nx] - d_inu[i - Nx])))\
- * ((0.5 * rdx * (d_inv[i + 1] - d_inv[i - 1])) + (0.5 * rdy * (d_inu[i + Nx] - d_inu[i - Nx])))\
- + ((0.5 * rdy * (d_inw[i + Nx] - d_inw[i - Nx])) + (0.5 * rdz * (d_inv[i + Nx * Ny] - d_inv[i - Nx * Ny])))\
- * ((0.5 * rdy * (d_inw[i + Nx] - d_inw[i - Nx])) + (0.5 * rdz * (d_inv[i + Nx * Ny] - d_inv[i - Nx * Ny])))\
- + ((0.5 * rdz * (d_inu[i + Nx * Ny] - d_inu[i - Nx * Ny])) + (0.5 * rdx * (d_inw[i + 1] - d_inw[i - 1])))\
- * ((0.5 * rdz * (d_inu[i + Nx * Ny] - d_inu[i - Nx * Ny])) + (0.5 * rdx * (d_inw[i + 1] - d_inw[i - 1])))\
-);
+            real out_h = nu * (2 * (0.5 * rdx * (d_inu[i + 1      ] - d_inu[i - 1      ])) * (0.5 * rdx * (d_inu[i + 1      ] - d_inu[i - 1 ]))
+                             + 2 * (0.5 * rdy * (d_inv[i + Nx     ] - d_inv[i - Nx     ])) * (0.5 * rdy * (d_inv[i + Nx     ] - d_inv[i - Nx]))
+                             + 2 * (0.5 * rdz * (d_inw[i + Nx * Ny] - d_inw[i - Nx * Ny])) * (0.5 * rdz * (d_inw[i + Nx * Ny] - d_inw[i - Nx * Ny]))
+                                + ((0.5 * rdx * (d_inv[i + 1      ] - d_inv[i - 1      ])) + (0.5 * rdy * (d_inu[i + Nx     ] - d_inu[i - Nx])))
+                                * ((0.5 * rdx * (d_inv[i + 1      ] - d_inv[i - 1      ])) + (0.5 * rdy * (d_inu[i + Nx     ] - d_inu[i - Nx])))
+                                + ((0.5 * rdy * (d_inw[i + Nx     ] - d_inw[i - Nx     ])) + (0.5 * rdz * (d_inv[i + Nx * Ny] - d_inv[i - Nx * Ny])))
+                                * ((0.5 * rdy * (d_inw[i + Nx     ] - d_inw[i - Nx     ])) + (0.5 * rdz * (d_inv[i + Nx * Ny] - d_inv[i - Nx * Ny])))
+                                + ((0.5 * rdz * (d_inu[i + Nx * Ny] - d_inu[i - Nx * Ny])) + (0.5 * rdx * (d_inw[i + 1      ] - d_inw[i - 1])))
+                                * ((0.5 * rdz * (d_inu[i + Nx * Ny] - d_inu[i - Nx * Ny])) + (0.5 * rdx * (d_inw[i + 1      ] - d_inw[i - 1]))));
             d_out[i] += dt * out_h;
         }
 

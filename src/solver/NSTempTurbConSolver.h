@@ -1,13 +1,6 @@
-/*
- * NSTempTurbConSolver.h
- *
- *  Created on: Oct 02, 2017
- *      Author: Küsters
- */
-
 /// \file 		NSTempTurbConSolver.h
 /// \brief 		Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
-/// \date 		Sep 27, 2017
+/// \date 		Oct 02, 2017
 /// \author 	Küsters
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
@@ -15,44 +8,44 @@
 #ifndef NSTEMPTURBCONSOLVER_H_
 #define NSTEMPTURBCONSOLVER_H_
 
-#include "../interfaces/SolverI.h"
-#include "../interfaces/AdvectionI.h"
-#include "../interfaces/DiffusionI.h"
-#include "../interfaces/PressureI.h"
-#include "../interfaces/SourceI.h"
-#include "../interfaces/TurbulenceI.h"
+#include "../interfaces/ISolver.h"
+#include "../interfaces/IAdvection.h"
+#include "../interfaces/IDiffusion.h"
+#include "../interfaces/IPressure.h"
+#include "../interfaces/ISource.h"
+#include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class NSTempTurbConSolver:public SolverI {
+class NSTempTurbConSolver : public ISolver {
 public:
-	NSTempTurbConSolver();
-	~NSTempTurbConSolver() override;
+    NSTempTurbConSolver();
+    ~NSTempTurbConSolver() override;
 
-	void DoStep(real t, bool sync) override;
+    void do_step(real t, bool sync) override;
 
 private:
-	AdvectionI* adv_vel;
-	DiffusionI* dif_vel;
-	AdvectionI* adv_temp;
-	DiffusionI* dif_temp;
-	AdvectionI* adv_con;
-	DiffusionI* dif_con;
-	PressureI* pres;
-	SourceI* sou_vel;
-	SourceI* sou_temp;
-	SourceI* sou_con;
-	TurbulenceI*  mu_tub;
+    IAdvection *adv_vel;
+    IDiffusion *dif_vel;
+    IAdvection *adv_temp;
+    IDiffusion *dif_temp;
+    IAdvection *adv_con;
+    IDiffusion *dif_con;
+    IPressure *pres;
+    ISource *sou_vel;
+    ISource *sou_temp;
+    ISource *sou_con;
+    ITurbulence *mu_tub;
 
-	real m_nu;
-	real m_kappa;
-	real m_gamma;
-	std::string m_dir_vel = "";
+    real m_nu;
+    real m_kappa;
+    real m_gamma;
+    std::string m_dir_vel = "";
 
     static void control();
 
-    bool m_hasTurbulenceTemperature;
-    bool m_hasTurbulenceConcentration;
-    bool m_hasDissipation;
+    bool m_has_turbulence_temperature;
+    bool m_has_turbulence_concentration;
+    bool m_has_dissipation;
     std::string m_forceFct;
     std::string m_tempFct;
     std::string m_conFct;

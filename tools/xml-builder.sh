@@ -17,12 +17,12 @@ BOUNDARYCONDITIONS="
        <boundary field=\"T\" patch=\"bottom\" type=\"neumann\" value=\"0.0\" />
     </boundaries>"
 INITIALCONDITION="
-    <initial_conditions usr_fct = \"LayersT\" dir=\"y\">     <!-- Layers  -->
+    <initial_conditions usr_fct = \"LayersT\" dir=\"y\">  <!-- Layers  -->
 	<n_layers> 5 </n_layers>
-        <border_1> 1. </border_1> <!-- at cell face -->
-        <border_2> 2. </border_2> <!-- at cell face -->
-        <border_3> 3. </border_3> <!-- at cell face -->
-        <border_4> 4. </border_4> <!-- at cell face -->
+        <border_1> 1. </border_1>  <!-- at cell face -->
+        <border_2> 2. </border_2>  <!-- at cell face -->
+        <border_3> 3. </border_3>  <!-- at cell face -->
+        <border_4> 4. </border_4>  <!-- at cell face -->
         <value_1> 303.64 </value_1>
         <value_2> 304.04 </value_2>
         <value_3> 305.24 </value_3>
@@ -79,9 +79,12 @@ MAXCYCLE=100
 MAXSOLVE=100
 CALCNLEVEL=1 #use function calc_nlevel
 
-#solution and visualization
+#solution and visualisation
 SOLAVAIL=No # solution available
-NPLOTS=10 #number of vtk plots
+CSV=No
+CSVPLOTS=10 #number of csv plots
+VTK=Yes
+VTKPLOTS=10 #number of vtk plots
 
 #domain parameters
 XSTART=-0.1556 #physical domain parameter X1
@@ -111,7 +114,6 @@ ADAPT_DATA=No
 ADAPT_BEFORE=No
 ADAPT_AFTER=No
 ADAPT_TIME=No
-ADAPT_FIELD=No
 ADAPT_END=No
 
 OBSTACLE=1
@@ -132,7 +134,7 @@ DSURF=1
 POSITIONAL=()
 #----Help text----
 DESCRIPTION="Description:
-Script to build a XML file for the different cases of JuROr. Built in: Advection, Burgers (Advection Diffusion), Diffusion, Diffusion Turbulence, Navier Stokes, Navier Stokes Temperature, Navier Stokes Temperatur Turbulence, Navier Stokes Turbulence, Navier Stokes Temperature Turbulence Concentration, Pressure.
+Script to build a XML file for the different cases of ARTSS. Built in: Advection, Burgers (Advection Diffusion), Diffusion, Diffusion Turbulence, Navier Stokes, Navier Stokes Temperature, Navier Stokes Temperatur Turbulence, Navier Stokes Turbulence, Navier Stokes Temperature Turbulence Concentration, Pressure.
 
 There is no validation of the given parameter.\n"
 OPTIONSTEXT="Available options:
@@ -193,6 +195,10 @@ ${YELLOW}--cp${NC}            \tset specific heat capacity (in kJ/kgK) in case o
 
 ${YELLOW}--cs${NC}            \tset parameter for ConstSmagorinsky (default: $CS)
 
+${YELLOW}--csv${NC}           \tenable write out of csv files (default: $CSV)
+
+${YELLOW}--csvplots${NC}      \twrite out a csv file every nth timestep (default: $CSVPLOTS)
+
 ${YELLOW}--dataextraction${NC}\t enable data extraction
 
 ${YELLOW}--diff${NC}
@@ -240,8 +246,6 @@ ${YELLOW}--maxsolve${NC}\tset number of maximal iterations in solver in multigri
 ${YELLOW}--ncycle${NC}        \tset ncycle for multigrid (default: $NCYCLE)
 
 ${YELLOW}--nlevel${NC}        \tset nlevel for multigrid, set dependent on Nx,Ny,Nz (default: $NLEVEL)
-
-${YELLOW}--nplots${NC}        \tset number of vtk plots (default: $NPLOTS)
 
 ${YELLOW}--ns${NC}
 ${YELLOW}--navierstokes${NC}           \tcreate xml file with parameter for navier stokes
@@ -313,6 +317,10 @@ ${YELLOW}--tend${NC}          \tset t_end, multiple parameter possible. Delimite
 ${YELLOW}--turbulencetype${NC}\tset turbulence model (default: $TURBULENCETYPE)
 
 ${YELLOW}--verbose${NC}       \tprint output to screen (std out)
+
+${YELLOW}--vtk${NC}           \tenable write out of vtk files (default: $VTK)
+
+${YELLOW}--vtkplots${NC}      \twrite out a vtk file every nth timestep (default: $VTKPLOTS)
 
 ${YELLOW}--xstart${NC}        \tset both domain parameter (computational [x1] and physical domain [X1])
 
@@ -428,110 +436,104 @@ then
   echo "$NAME already exist. Skipping file"
 else
   WRITETO="<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
-  <JuROr>
-    <xml_filename>$NAME</xml_filename>
-
-    <physical_parameters>
-      <t_end> $TEND </t_end>	<!-- simulation end time -->
-      <dt> $DT </dt>			<!-- time stepping -->" #, caution: CFL-condition dt < 0.5*dx^2/nu -->
+<ARTSS>
+  <physical_parameters>
+    <t_end> $TEND </t_end>  <!-- simulation end time -->
+    <dt> $DT </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->"
   if [ $BUR -eq 0 -o $DIFF -eq 0 -o $DIFFT -eq 0 -o $NS -eq 0 -o $NSTe -eq 0 -o $NSTC -eq 0 -o $NSTT -eq 0 -o $NSTTC -eq 0 -o $NSTu -eq 0 ]
   then
     WRITETO="$WRITETO
-      <nu> $NU </nu>            <!-- kinematic viscosity -->"
+    <nu> $NU </nu>  <!-- kinematic viscosity -->"
   fi
-#  if [ $NS -eq 0 -o $NSTe -eq 0 -o $NSTC -eq 0 -o $NSTT -eq 0 -o $NSTTC -eq 0 -o $NSTu -eq 0 ]
-#  then
-#  WRITETO="$WRITETO
-#      <nu> $NU </nu>            <!-- kinematic viscosity -->"
-#  fi
   if [ $NSTe -eq 0 -o $NSTC -eq 0 -o $NSTT -eq 0 -o $NSTTC -eq 0 ]
   then
     if [ \"$FORCEFCT\" == \"Buoyancy\" ]
     then
     WRITETO="$WRITETO
-      <beta> $BETA </beta>      <!-- thermal expansion coefficient -->
-      <g> $G </g>               <!-- gravitational constant -->"
+    <beta> $BETA </beta>  <!-- thermal expansion coefficient -->
+    <g> $G </g>  <!-- gravitational constant -->"
     fi
   fi
   if [ $NSTe -eq 0 -o $NSTC -eq 0 -o $NSTT -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-      <kappa> $KAPPA </kappa>   <!-- thermal diffusion -->"
+    <kappa> $KAPPA </kappa>  <!-- thermal diffusion -->"
   fi
   WRITETO="$WRITETO
-    </physical_parameters>"
+  </physical_parameters>
+"
   if [ $ADV -eq 0 ]
   then
     WRITETO="$WRITETO
-    <solver description = \"AdvectionSolver\" >"
+  <solver description = \"AdvectionSolver\" >"
   elif [ $BUR -eq 0 ]
   then
     WRITETO="$WRITETO
-    <solver description = \"AdvectionDiffusionSolver\" >"
+  <solver description = \"AdvectionDiffusionSolver\" >"
   elif [ $DIFF -eq 0 ]
   then
     WRITETO="$WRITETO
-    <solver description = \"DiffusionSolver\" >"
+  <solver description = \"DiffusionSolver\" >"
   elif [ $DIFFT -eq 0 ]
   then
     WRITETO="$WRITETO
-    <solver description = \"DiffusionTurbSolver\" >"
+  <solver description = \"DiffusionTurbSolver\" >"
   elif [ $NS -eq 0 ]
   then
     WRITETO="$WRITETO
-    <solver description = \"NSSolver\" >"
+  <solver description = \"NSSolver\" >"
   elif [ $NSTu -eq 0 ]
   then
     WRITETO="$WRITETO
-    <solver description = \"NSTurbSolver\" >"
+  <solver description = \"NSTurbSolver\" >"
   elif [ $NSTe -eq 0 ]
   then
     WRITETO="$WRITETO
-    <solver description = \"NSTempSolver\" >"
+  <solver description = \"NSTempSolver\" >"
   elif [ $NSTT -eq 0 ]
   then
     WRITETO="$WRITETO
-    <solver description = \"NSTempTurbSolver\" >"
+  <solver description = \"NSTempTurbSolver\" >"
   elif [ $NSTC -eq 0 ]
   then
     WRITETO="$WRITETO
-    <solver description = \"NSTempConSolver\" >"
+  <solver description = \"NSTempConSolver\" >"
   elif [ $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-    <solver description = \"NSTempTurbConSolver\" >"
+  <solver description = \"NSTempTurbConSolver\" >"
   elif [ $PRE -eq 0 ]
   then
     WRITETO="$WRITETO
-    <solver description = \"PressureSolver\" >"
+  <solver description = \"PressureSolver\" >"
   else
     WRITETO="$WRITETO
-    <solver description = \"$SOLVER\" >"
+  <solver description = \"$SOLVER\" >"
   fi
 #-------advection------
   if [ $ADV -eq 0 -o $BUR -eq 0 -o $NS -eq 0 -o $NSTu -eq 0 -o $NSTe -eq 0 -o $NSTT -eq 0 -o $NSTC -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-      <advection type = \"$ADVECTIONTYPE\" field = \"u,v,w\">
-      </advection>"
+    <advection type = \"$ADVECTIONTYPE\" field = \"u,v,w\">
+    </advection>"
   fi
 #-------diffusion-------
   if [ $DIFF -eq 0 -o $DIFFT -eq 0 -o $BUR -eq 0 -o $NS -eq 0 -o $NSTu -eq 0 -o $NSTe -eq 0 -o $NSTT -eq 0 -o $NSTC -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-      <diffusion type = \"$DIFFUSIONTYPE\" field = \"u,v,w\">
-        <max_iter> $MAXITER </max_iter> <!-- max number of iterations -->
-        <tol_res> 1e-07 </tol_res>      <!-- tolerance for residuum/ convergence -->
-        <w> 1 </w>				        <!-- relaxation parameter -->
-      </diffusion>"
+    <diffusion type = \"$DIFFUSIONTYPE\" field = \"u,v,w\">
+      <max_iter> $MAXITER </max_iter>  <!-- max number of iterations -->
+      <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
+      <w> 1 </w>  <!-- relaxation parameter -->
+    </diffusion>"
   fi
 #-------turbulence-------
   if [ $DIFFT -eq 0 -o $NSTu -eq 0 -o $NSTT -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-      <turbulence type = \"$TURBULENCETYPE\">
-        <Cs> $CS </Cs>
-      </turbulence>"
+    <turbulence type = \"$TURBULENCETYPE\">
+      <Cs> $CS </Cs>
+    </turbulence>"
   fi
 #--------source-------
   if [ $NS -eq 0 -o $NSTu -eq 0 -o $NSTe -eq 0 -o $NSTT -eq 0 -o $NSTC -eq 0 -o $NSTTC -eq 0 ]
@@ -541,46 +543,46 @@ else
       WRITETO=${WRITETO}"\n"$(cat $SFILE)
     else
       WRITETO="$WRITETO
-      <source type = \"$SOURCETYPE\" force_fct = \"$FORCEFCT\" dir = \"$FORCEDIR\"> <!-- Direction of force (x,y,z or combinations xy,xz,yz,xyz) -->
-      </source>"
+    <source type = \"$SOURCETYPE\" force_fct = \"$FORCEFCT\" dir = \"$FORCEDIR\">  <!-- Direction of force (x,y,z or combinations xy,xz,yz,xyz) -->
+    </source>"
     fi
   fi
 #------pressure-------
   if [ $PRE -eq 0 -o $NS -eq 0 -o $NSTu -eq 0 -o $NSTe -eq 0 -o $NSTT -eq 0 -o $NSTC -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-      <pressure type = \"$PRESSURETYPE\" field = \"p\">
-        <n_level> $NLEVEL </n_level>	<!-- number of restriction levels -->
-        <n_cycle> $NCYCLE </n_cycle>    <!-- number of cycles -->
-        <max_cycle> $MAXCYCLE </max_cycle>    <!-- maximal number of cycles in first time step -->
-        <tol_res> 1e-07 </tol_res>      <!-- tolerance for residuum/ convergence -->
-        <diffusion type = \"$PRESSUREDIFFUSIONTYPE\" field = \"p\">
-          <n_relax> 4 </n_relax> 	    <!-- number of iterations -->
-          <max_solve> $MAXSOLVE </max_solve><!-- maximal number of iterations in solving at lowest level -->
-          <tol_res> 1e-07 </tol_res>    <!-- tolerance for residuum/ convergence -->
-          <w> 0.6666666667 </w>	        <!-- relaxation parameter  -->
-        </diffusion>
-      </pressure>"
+    <pressure type = \"$PRESSURETYPE\" field = \"p\">
+      <n_level> $NLEVEL </n_level>  <!-- number of restriction levels -->
+      <n_cycle> $NCYCLE </n_cycle> <!-- number of cycles -->
+      <max_cycle> $MAXCYCLE </max_cycle>  <!-- maximal number of cycles in first time step -->
+      <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
+      <diffusion type = \"$PRESSUREDIFFUSIONTYPE\" field = \"p\">
+        <n_relax> 4 </n_relax>  <!-- number of iterations -->
+        <max_solve> $MAXSOLVE </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
+        <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
+        <w> 0.6666666667 </w>  <!-- relaxation parameter  -->
+      </diffusion>
+    </pressure>"
   fi
 #------temperature---------
   if [ $NSTe -eq 0 -o $NSTT -eq 0 -o $NSTC -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-      <temperature>
-        <advection type = \"$TEMPADVECTIONTYPE\" field = \"T\">
-        </advection>
-        <diffusion type = \"$TEMPDIFFUSIONTYPE\" field = \"T\">
-          <max_iter> $MAXITER </max_iter>
-          <tol_res> 1e-07 </tol_res>
-          <w> 1 </w>
-        </diffusion>"
+    <temperature>
+      <advection type = \"$TEMPADVECTIONTYPE\" field = \"T\">
+      </advection>
+      <diffusion type = \"$TEMPDIFFUSIONTYPE\" field = \"T\">
+        <max_iter> $MAXITER </max_iter>
+        <tol_res> 1e-07 </tol_res>
+        <w> 1 </w>
+      </diffusion>"
   fi
   if [ $NSTT -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-        <turbulence include = \"Yes\">
-          <Pr_T> $PRT </Pr_T>
-        </turbulence>"
+      <turbulence include = \"Yes\">
+        <Pr_T> $PRT </Pr_T>
+      </turbulence>"
   fi
   if [  $NSTe -eq 0 -o $NSTT -eq 0 -o $NSTC -eq 0 -o $NSTTC -eq 0 ]
   then
@@ -588,19 +590,18 @@ else
     then
       WRITETO="$WRITETO\n$(cat $TSFILE)"
     else
-
       if [ "$TEMPSOURCEFCT" == "Zero" ]
       then
         WRITETO="$WRITETO
-        <source type = \"$TEMPSOURCETYPE\" temp_fct = \"$TEMPSOURCEFCT\" dissipation = \"No\">
-        </source>"
+      <source type = \"$TEMPSOURCETYPE\" temp_fct = \"$TEMPSOURCEFCT\" dissipation = \"No\">
+      </source>"
       fi
       if [ \"$TEMPSOURCEFCT\" == \"GaussST\" ]
       then
         WRITETO="$WRITETO
-        <source type = \"$TEMPSOURCETYPE\" temp_fct = \"GaussST\" ramp_fct = \"RampTanh\" dissipation = \"No\">
-        <HRR> $HRR </HRR>             <!-- total heat release rate (in kW) -->
-        <cp> $CP </cp>                <!-- specific heat capacity (in kJ/kgK)-->
+      <source type = \"$TEMPSOURCETYPE\" temp_fct = \"GaussST\" ramp_fct = \"RampTanh\" dissipation = \"No\">
+        <HRR> $HRR </HRR>  <!-- total heat release rate (in kW) -->
+        <cp> $CP </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> $GAUSSX0  </x0>
         <y0> $GAUSSY0 </y0>
         <z0> $GAUSSZ0 </z0>
@@ -608,186 +609,178 @@ else
         <sigmay> $SIGMAY </sigmay>
         <sigmaz> $SIGMAZ </sigmaz>
         <tau> $TAU </tau>
-        </source>"
+      </source>"
       fi
     fi
     WRITETO="$WRITETO
-      </temperature>"
+    </temperature>"
   fi
 #-------concentration---------
   if [ $NSTTC -eq 0 -o $NSTC -eq 0 ]
   then
     WRITETO="$WRITETO
-      <concentration>
-        <advection type = \"$CONADVECTIONTYPE\" field = \"rho\">
-        </advection>
-        <diffusion type = \"$CONDIFFUSIONTYPE\" field = \"rho\">
-          <gamma> $GAMMA </gamma>        <!-- concentration diffussion -->
-          <max_iter> $MAXITER </max_iter> <!-- max number of iterations -->
-          <tol_res> 1e-07 </tol_res> <!-- tolerance for residuum/ convergence -->
-          <w> 1 </w>                 <!-- relaxation parameter -->
-        </diffusion>"
+    <concentration>
+      <advection type = \"$CONADVECTIONTYPE\" field = \"rho\">
+      </advection>
+      <diffusion type = \"$CONDIFFUSIONTYPE\" field = \"rho\">
+        <gamma> $GAMMA </gamma>  <!-- concentration diffussion -->
+        <max_iter> $MAXITER </max_iter>  <!-- max number of iterations -->
+        <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
+        <w> 1 </w>  <!-- relaxation parameter -->
+      </diffusion>"
     if [ $NSTTC -eq 0 ]
     then
       WRITETO="$WRITETO
-          <turbulence include = \"Yes\">
-            <Sc_T> $SCT </Sc_T>
-          </turbulence>"
+        <turbulence include = \"Yes\">
+          <Sc_T> $SCT </Sc_T>
+        </turbulence>"
     fi
     if [ $CONFORCEFCT == "Zero" ]
     then
       WRITETO="$WRITETO
-          <source type = \"$CONSOURCETYPE\" con_fct = \"Zero\">
-          </source>"
+        <source type = \"$CONSOURCETYPE\" con_fct = \"Zero\">
+        </source>"
     elif [ $CONFORCEFCT == "GaussSC" ]
     then
       WRITETO="$WRITETO
-          <source type = \"$CONSOURCETYPE\" con_fct = \"GaussSC\" ramp_fct = \"RampTanh\">
-            <HRR> $HRR </HRR>       <!-- total heat release rate (in kW) -->
-            <Hc> $HC </Hc>          <!-- Heating value (in kJ/kg) -->
-            <Ys> $YS </Ys>          <!-- Soot yield -->
-            <x0> $GAUSSX0  </x0>
-            <y0> $GAUSSY0 </y0>
-            <z0> $GAUSSZ0 </z0>
-            <sigmax> $SIGMAX </sigmax>
-            <sigmay> $SIGMAY </sigmay>
-            <sigmaz> $SIGMAZ </sigmaz>
-            <tau> $TAU </tau>
-          </source>"
+        <source type = \"$CONSOURCETYPE\" con_fct = \"GaussSC\" ramp_fct = \"RampTanh\">
+          <HRR> $HRR </HRR>  <!-- total heat release rate (in kW) -->
+          <Hc> $HC </Hc>  <!-- Heating value (in kJ/kg) -->
+          <Ys> $YS </Ys>  <!-- Soot yield -->
+          <x0> $GAUSSX0 </x0>
+          <y0> $GAUSSY0 </y0>
+          <z0> $GAUSSZ0 </z0>
+          <sigmax> $SIGMAX </sigmax>
+          <sigmay> $SIGMAY </sigmay>
+          <sigmaz> $SIGMAZ </sigmaz>
+          <tau> $TAU </tau>
+        </source>"
     fi
   WRITETO=${WRITETO}"
-     </concentration>"
+    </concentration>"
 
   fi
   WRITETO="$WRITETO
-      <solution available = \"$SOLAVAIL\">"
+    <solution available = \"$SOLAVAIL\">"
   if [ "$SOLAVAIL" == "Yes" ]
   then
     WRITETO="$WRITETO
-        <tol> 1e-03 </tol>		<!-- tolerance for further tests -->"
+      <tol> 1e-03 </tol>  <!-- tolerance for further tests -->"
   fi
   WRITETO="$WRITETO
-      </solution>
-    </solver>"
+    </solution>
+  </solver>"
   WRITETO="$WRITETO
 
-    <domain_parameters>
-      <X1> $XSTART </X1>			<!-- physical domain -->
-      <X2> $XEND </X2>
-      <Y1> $YSTART </Y1>
-      <Y2> $YEND </Y2>
-      <Z1> $ZSTART </Z1>
-      <Z2> $ZEND </Z2>
-      <x1> $xSTART </x1>			<!-- computational domain -->
-      <x2> $xEND </x2>
-      <y1> $ySTART </y1>
-      <y2> $yEND </y2>
-      <z1> $zSTART </z1>
-      <z2> $zEND </z2>
-      <nx> $NX </nx>			<!-- grid resolution (number of cells incl. ghost cells) -->
-      <ny> $NY </ny>
-      <nz> $NZ </nz>
-    </domain_parameters>
-    "
+  <domain_parameters>
+    <X1> $XSTART </X1>  <!-- physical domain -->
+    <X2> $XEND </X2>
+    <Y1> $YSTART </Y1>
+    <Y2> $YEND </Y2>
+    <Z1> $ZSTART </Z1>
+    <Z2> $ZEND </Z2>
+    <x1> $xSTART </x1>  <!-- computational domain -->
+    <x2> $xEND </x2>
+    <y1> $ySTART </y1>
+    <y2> $yEND </y2>
+    <z1> $zSTART </z1>
+    <z2> $zEND </z2>
+    <nx> $NX </nx>  <!-- grid resolution (number of cells excl. ghost cells) -->
+    <ny> $NY </ny>
+    <nz> $NZ </nz>
+  </domain_parameters>
+"
 
-    WRITETO="${WRITETO}
-    <adaption dynamic="
-    if [[ $ADAPTION == "No" && $ADAPT_DATA == "No" ]]
+    if [ $ADAPT_PAR -eq 0 ]
     then
-      WRITETO="$WRITETO\"No\" data_extraction=\"No\"> </adaption>"
+      ATEMP="\n$(cat $AFILE)\n"
     else
-      unset ATEMP
-      if [[ $ADAPTION == "Yes" ]]
+      WRITETO="${WRITETO}
+  <adaption dynamic="
+      if [[ $ADAPTION == "No" && $ADAPT_DATA == "No" ]]
       then
-        WRITETO="$WRITETO\"Yes\""
-        if [ $ADAPT_PAR -eq 0 ]
-        then
-          ATEMP="\n$(cat $AFILE)\n"
-        fi
+        WRITETO="$WRITETO\"No\" data_extraction=\"No\"> </adaption>"
       else
-        WRITETO="$WRITETO\"No\""
-      fi
-      if [[ $ADAPT_DATA == "Yes" ]]
-      then
-        WRITETO="$WRITETO data_extraction=\"Yes\">
-      $ATEMP
-      <data_extraction>"
-        if [[ $ADAPT_BEFORE == "No" ]]
+        unset ATEMP
+        if [[ $ADAPTION == "Yes" ]]
         then
-          WRITETO="$WRITETO
-        <before enabled=\"No\"> </before>"
+          WRITETO="$WRITETO\"Yes\""
         else
-          WRITETO="$WRITETO
-        <before enabled=\"Yes\">$ADAPT_BEFORE</before>"
+          WRITETO="$WRITETO\"No\""
         fi
-        if [[ $ADAPT_AFTER == "No" ]]
+        if [[ $ADAPT_DATA == "Yes" ]]
         then
+          WRITETO="$WRITETO data_extraction=\"Yes\">
+        $ATEMP
+    <data_extraction>"
+          if [[ $ADAPT_BEFORE == "No" ]]
+          then
+            WRITETO="$WRITETO
+      <before enabled=\"No\"> </before>"
+          else
+            WRITETO="$WRITETO
+      <before enabled=\"Yes\">$ADAPT_BEFORE</before>"
+          fi
+          if [[ $ADAPT_AFTER == "No" ]]
+          then
+            WRITETO="$WRITETO
+      <after enabled=\"No\"> </after>"
+          else
+            WRITETO="$WRITETO
+      <after enabled=\"Yes\">$ADAPT_AFTER</after>"
+          fi
+          if [[ $ADAPT_END == "No" ]]
+          then
+            WRITETO="$WRITETO
+      <endresult enabled=\"No\"> </endresult>"
+          else
+            WRITETO="$WRITETO
+      <endresult enabled=\"Yes\"> </endresult>"
+          fi
+          if [[ $ADAPT_TIME == "No" ]]
+          then
+            WRITETO="$WRITETO
+      <time_measuring enabled=\"No\"> </time_measuring>"
+          else
+            WRITETO="$WRITETO
+      <time_measuring enabled=\"Yes\"> </time_measuring>"
+          fi
           WRITETO="$WRITETO
-        <after enabled=\"No\"> </after>"
+    </data_extraction>
+  </adaption>"
         else
-          WRITETO="$WRITETO
-        <after enabled=\"Yes\">$ADAPT_AFTER</after>"
+          WRITETO="$WRITETO data_extraction=\"No\">$ATEMP </adaption>"
         fi
-        if [[ $ADAPT_END == "No" ]]
-        then
-          WRITETO="$WRITETO
-        <endresult enabled=\"No\"> </endresult>"
-        else
-          WRITETO="$WRITETO
-        <endresult enabled=\"Yes\"> </endresult>"
-        fi
-        if [[ $ADAPT_TIME == "No" ]]
-        then
-          WRITETO="$WRITETO
-        <time_measuring enabled=\"No\"> </time_measuring>"
-        else
-          WRITETO="$WRITETO
-        <time_measuring enabled=\"Yes\"> </time_measuring>"
-        fi
-        if [[ $ADAPT_FIELD == "No" ]]
-        then
-          WRITETO="$WRITETO
-        <write_field enabled=\"No\"> </write_field>"
-        else
-          WRITETO="$WRITETO
-        <write_field enabled=\"Yes\"> </write_field>"
-        fi
-        WRITETO="$WRITETO
-      </data_extraction>
-    </adaption>"
-      else
-        WRITETO="$WRITETO data_extraction=\"No\">$ATEMP </adaption>"
       fi
     fi
     if [ $BOUC -eq 0 ]
     then
-      WRITETO=${WRITETO}"\n"$(cat $BFILE)
+      WRITETO=${WRITETO}"\n\n"$(cat $BFILE)
     else
       WRITETO=${WRITETO}${BOUNDARYCONDITIONS}
     fi
-    if [ $OBSTACLE -eq 1 ]
+    if [ $DOBST -eq 0 ]
     then
-      WRITETO="${WRITETO}\n
-    <obstacles enabled=\"No\"/>"
-    else
-      WRITETO="${WRITETO}\n
-    <obstacles enabled=\"Yes\">"
-      if [ $DOBST -eq 0 ]
+      WRITETO="${WRITETO}\n$(cat $DOBSTFILE)"
+    else 
+      if [ $OBSTACLE -eq 1 ]
       then
-        WRITETO="${WRITETO}\n$(cat $DOBSTFILE)"
+        WRITETO="${WRITETO}\n
+  <obstacles enabled=\"No\"/>"
       else
-        WRITETO="${WRITETO}${DOMAINOBSTACLES}"
+        WRITETO="${WRITETO}\n
+  <obstacles enabled=\"Yes\">"
+        WRITETO="${WRITETO}${DOMAINOBSTACLES}
+  </obstacles>"
       fi
-      WRITETO="${WRITETO}
-    </obstacles>"
     fi
     if [ $SURFACE -eq 1 ]
     then
       WRITETO="$WRITETO\n
-    <surfaces enabled=\"No\"/>"
+  <surfaces enabled=\"No\"/>"
     else
       WRITETO="$WRITETO\n
-    <surfaces enabled=\"Yes\">"
+  <surfaces enabled=\"Yes\">"
       if [ $DSURF -eq 0 ]
       then
         WRITETO="${WRITETO}\n$(cat $DSURFFILE)"
@@ -795,20 +788,30 @@ else
         WRITETO="${WRITETO}${DOMAINSURFACES}"
       fi
       WRITETO="${WRITETO}
-    </surfaces>"
+  </surfaces>"
     fi
     if [ $INIC -eq 0 ]
     then
-      WRITETO=${WRITETO}"\n"$(cat $IFILE)
+      WRITETO=${WRITETO}"\n\n"$(cat $IFILE)
     else
       WRITETO=${WRITETO}${INITIALCONDITION}
     fi
     
-    WRITETO="${WRITETO}
-    <visualization save_csv=\"No\">
-      <n_plots> $NPLOTS </n_plots>
-    </visualization>
-</JuROr>"
+    WRITETO="${WRITETO}\n
+  <visualisation save_vtk=\"$VTK\" save_csv=\"$CSV\">"
+    if [ $CSV == "Yes" ]
+    then
+      WRITETO=${WRITETO}"
+    <csv_nth_plot> $CSVPLOTS </csv_nth_plot>"
+    fi
+    if [ $VTK == "Yes" ]
+    then
+      WRITETO=${WRITETO}"
+    <vtk_nth_plot> $VTKPLOTS </vtk_nth_plot>"
+    fi
+    WRITETO=${WRITETO}"
+  </visualisation>
+</ARTSS>"
   echo -e "$WRITETO" >> $NAME
   fi
 }
@@ -836,10 +839,6 @@ do
       ;;
     --adaptionendresult)
       ADAPT_END=0
-      shift
-      ;;
-    --adaptionfield)
-      ADAPT_FIELD=0
       shift
       ;;
     --adaptionparameter)
@@ -909,6 +908,15 @@ do
       ;;
     --cs)
       CS=$2
+      shift
+      shift
+      ;;
+    --csv)
+      CSV=Yes
+      shift
+      ;;
+    --csvplots)
+      CSVPLOTS=$2
       shift
       shift
       ;;
@@ -1072,11 +1080,6 @@ do
       shift
       shift
       ;;
-    -p|--plots|--nplots)
-      NPLOTS=$2
-      shift
-      shift
-      ;;
     --pre|--pressure)
       PRE=0
       SOLVER=PressureSolver
@@ -1191,6 +1194,16 @@ do
       ;;
     -v|--verbose)
       VERBOSE=0
+      shift
+      ;;
+    --vtk)
+      VTK=Yes
+      shift
+      ;;
+    --vtkplots)
+      VTK=Yes
+      VTKPLOTS=$2
+      shift
       shift
       ;;
     -x|--nx)

@@ -1,10 +1,10 @@
-/// \file 		PressureI.cpp
-/// \brief 		Interface for pressure method
-/// \date 		Sep 14, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       IPressure.cpp
+/// \brief      Interface for pressure method
+/// \date       Sep 14, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include "PressureI.h"
+#include "IPressure.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
@@ -12,32 +12,32 @@
 //======================================== Divergence ====================================
 // ***************************************************************************************
 /// \brief  calculates divergence \f$ \nabla \cdot u\f$  via central finite differences
-/// \param  out		output pointer (\f$ \nabla \cdot u\f$)
-/// \param  in_x	input pointer (x -velocity)
-/// \param  in_y	input pointer (y -velocity)
-/// \param  in_z	input pointer (z -velocity)
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+/// \param  out   output pointer (\f$ \nabla \cdot u\f$)
+/// \param  in_x  input pointer (x -velocity)
+/// \param  in_y  input pointer (y -velocity)
+/// \param  in_z  input pointer (z -velocity)
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void PressureI::Divergence(Field *out, const Field *inx, const Field *iny, const Field *inz, bool sync) {
+void IPressure::divergence(Field *out, const Field *in_x, const Field *in_y, const Field *in_z, bool sync) {
 
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
     auto d_out = out->data;
-    auto d_inx = inx->data;
-    auto d_iny = iny->data;
-    auto d_inz = inz->data;
+    auto d_inx = in_x->data;
+    auto d_iny = in_y->data;
+    auto d_inz = in_z->data;
 
-    auto Nx = domain->GetNx(out->GetLevel());
-    auto Ny = domain->GetNy(out->GetLevel());
-    auto dx = domain->Getdx(out->GetLevel());
-    auto dy = domain->Getdy(out->GetLevel());
-    auto dz = domain->Getdz(out->GetLevel());
+    auto Nx = domain->get_Nx(out->GetLevel());
+    auto Ny = domain->get_Ny(out->GetLevel());
+    auto dx = domain->get_dx(out->GetLevel());
+    auto dy = domain->get_dy(out->GetLevel());
+    auto dz = domain->get_dz(out->GetLevel());
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
 
-    auto size = domain->GetSize(out->GetLevel());
+    auto size = domain->get_size(out->GetLevel());
 
     auto boundary = BoundaryController::getInstance();
 
@@ -75,45 +75,45 @@ void PressureI::Divergence(Field *out, const Field *inx, const Field *iny, const
 //======================================== Projection ====================================
 // ***************************************************************************************
 /// \brief  subtracts pressure gradient (\f$ \phi_4 = \phi_3 - \nabla p\f$) via finite differences
-/// 		to make \a \f$ \phi_4 \f$ divergence-free
-/// \param  out_u	output pointer (x -velocity)
-/// \param  out_v	output pointer (y -velocity)
-/// \param  out_w	output pointer (z -velocity)
-/// \param  in_u	input pointer (x -velocity)
-/// \param  in_v	input pointer (y -velocity)
-/// \param  in_w	input pointer (z -velocity)
-/// \param  in_p	input pointer (pressure)
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
+///     to make \a \f$ \phi_4 \f$ divergence-free
+/// \param  out_u output pointer (x -velocity)
+/// \param  out_v output pointer (y -velocity)
+/// \param  out_w output pointer (z -velocity)
+/// \param  in_u  input pointer (x -velocity)
+/// \param  in_v  input pointer (y -velocity)
+/// \param  in_w  input pointer (z -velocity)
+/// \param  in_p  input pointer (pressure)
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void PressureI::Project(Field *outu, Field *outv, Field *outw, const Field *inu, const Field *inv, const Field *inw, const Field *inp, bool sync) {
+void IPressure::projection(Field *out_u, Field *out_v, Field *out_w, const Field *in_u, const Field *in_v, const Field *in_w, const Field *in_p, bool sync) {
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto d_outu = outu->data;
-    auto d_outv = outv->data;
-    auto d_outw = outw->data;
+    auto d_outu = out_u->data;
+    auto d_outv = out_v->data;
+    auto d_outw = out_w->data;
 
-    auto d_inu = inu->data;
-    auto d_inv = inv->data;
-    auto d_inw = inw->data;
-    auto d_inp = inp->data;
+    auto d_inu = in_u->data;
+    auto d_inv = in_v->data;
+    auto d_inw = in_w->data;
+    auto d_inp = in_p->data;
 
-    auto Nx = domain->GetNx(outu->GetLevel());
-    auto Ny = domain->GetNy(outu->GetLevel());
+    auto Nx = domain->get_Nx(out_u->GetLevel());
+    auto Ny = domain->get_Ny(out_u->GetLevel());
 
-    auto dx = domain->Getdx(outu->GetLevel());
-    auto dy = domain->Getdy(outu->GetLevel());
-    auto dz = domain->Getdz(outu->GetLevel());
+    auto dx = domain->get_dx(out_u->GetLevel());
+    auto dy = domain->get_dy(out_u->GetLevel());
+    auto dz = domain->get_dz(out_u->GetLevel());
 
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
 
-    auto size = domain->GetSize(outu->GetLevel());
+    auto size = domain->get_size(out_u->GetLevel());
 
-    auto typeu = outu->GetType();
-    auto typev = outv->GetType();
-    auto typew = outw->GetType();
+    auto typeu = out_u->GetType();
+    auto typev = out_v->GetType();
+    auto typew = out_w->GetType();
 
     auto boundary = BoundaryController::getInstance();
 
