@@ -92,7 +92,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "LayersT" dir="y">     <!-- Layers  -->
+  <initial_conditions usr_fct = "LayersT" dir="y" random = "No">     <!-- Layers  -->
     <n_layers> 5 </n_layers>
     <border_1> -1.8 </border_1>  <!-- at cell face -->
     <border_2> -0.6 </border_2>  <!-- at cell face -->

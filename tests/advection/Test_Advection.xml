@@ -41,7 +41,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "GaussBubble" >  <!-- Gaussian function  -->
+  <initial_conditions usr_fct = "GaussBubble" random = "No">  <!-- Gaussian function  -->
     <u_lin> 0.5 </u_lin>      <!-- x-velocity in linear case  -->
     <v_lin> 0.5 </v_lin>      <!-- y-velocity in linear case  -->
     <w_lin> 0.25 </w_lin>     <!-- z-velocity in linear case  -->
