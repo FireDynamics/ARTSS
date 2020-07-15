@@ -407,7 +407,7 @@ void Analysis::save_variables_in_file(ISolver *solv) {
 
     std::vector<FieldType> v_fields = boundary->get_used_fields();
 
-    const real *dataField[v_fields.size()];
+    const real *dataField[numberOfFieldTypes];
     dataField[FieldType::RHO] = solv->get_concentration();
     dataField[FieldType::U] = solv->get_u();
     dataField[FieldType::V] = solv->get_v();
