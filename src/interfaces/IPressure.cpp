@@ -8,6 +8,7 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
+#include "../visualisation/Visual.h"
 
 //======================================== Divergence ====================================
 // ***************************************************************************************
@@ -85,7 +86,7 @@ void IPressure::divergence(Field *out, const Field *in_x, const Field *in_y, con
 /// \param  in_p  input pointer (pressure)
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void IPressure::projection(Field *out_u, Field *out_v, Field *out_w, const Field *in_u, const Field *in_v, const Field *in_w, const Field *in_p, bool sync) {
+void IPressure::projection(Field *out_u, Field *out_v, Field *out_w, const Field *in_u, const Field *in_v, const Field *in_w, const Field *in_p, ISolver *solver, real t, bool sync) {
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
@@ -121,6 +122,19 @@ void IPressure::projection(Field *out_u, Field *out_v, Field *out_w, const Field
 
     auto bsize_i = boundary->getSize_innerList();
 
+    {
+#pragma acc update host(d_outu[:size])
+#pragma acc update host(d_outv[:size])
+#pragma acc update host(d_outw[:size])
+#pragma acc update host(d_inu[:size])
+#pragma acc update host(d_inv[:size])
+#pragma acc update host(d_inw[:size])
+#pragma acc update host(d_inp[:size]) wait
+        real *data[] = {d_outu, d_outv, d_outw, d_inu, d_inv, d_inw, d_inp};
+        std::string data_titles[] = {"out_u", "out_v", "out_w", "in_u", "in_v", "in_w", "in_p"};
+        Visual::write_data(data_titles, data, 7, "test_do_step_before_projection_" + std::to_string(t));
+    }
+
 #pragma acc data present(d_outu[:size], d_outv[:size], d_outw[:size], d_inu[:size], d_inv[:size], d_inw[:size], d_inp[:size], d_iList[:bsize_i])
     {
 #pragma acc kernels async
@@ -141,4 +155,16 @@ void IPressure::projection(Field *out_u, Field *out_v, Field *out_w, const Field
 #pragma acc wait
         }
     }//end data region
+    {
+#pragma acc update host(d_outu[:size])
+#pragma acc update host(d_outv[:size])
+#pragma acc update host(d_outw[:size])
+#pragma acc update host(d_inu[:size])
+#pragma acc update host(d_inv[:size])
+#pragma acc update host(d_inw[:size])
+#pragma acc update host(d_inp[:size]) wait
+        real *data[] = {d_outu, d_outv, d_outw, d_inu, d_inv, d_inw, d_inp};
+        std::string data_titles[] = {"out_u", "out_v", "out_w", "in_u", "in_v", "in_w", "in_p"};
+        Visual::write_data(data_titles, data, 7, "test_do_step_after_projection_" + std::to_string(t));
+    }
 }

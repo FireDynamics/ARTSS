@@ -191,27 +191,7 @@ void TimeIntegration::run() {
             if (adaption->is_data_extraction_after_enabled()) adaption->extractData(adaption->get_after_name(), adaption->get_after_height(), t_cur);
 #endif
             m_solver->update_sources(t_cur, false);
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_C[:bsize])
-#pragma acc update host(d_nu_t[:bsize])
-#pragma acc update host(d_S_T[:bsize]) wait	// all in one update does not work!
-            visual->write_csv(m_solver, "test_update_sources_" + std::to_string(t_cur));
             m_solver->update_data(false);
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_C[:bsize])
-#pragma acc update host(d_nu_t[:bsize])
-#pragma acc update host(d_S_T[:bsize]) wait	// all in one update does not work!
-            visual->write_csv(m_solver, "test_update_data_" + std::to_string(t_cur));
 
             // iter_end = std::chrono::system_clock::now();
             // long ms = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();

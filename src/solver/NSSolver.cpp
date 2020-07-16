@@ -143,7 +143,7 @@ void NSSolver::do_step(real t, bool sync) {
         pres->pressure(p, rhs, t, sync);
 
         // Correct
-        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
+        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, this, t, sync);
 
 // 5. Sources updated in Solver::update_sources, TimeIntegration
 

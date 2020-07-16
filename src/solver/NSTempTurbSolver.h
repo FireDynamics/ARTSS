@@ -14,6 +14,7 @@
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../visualisation/Visual.h"
 
 class NSTempTurbSolver : public ISolver {
 public:

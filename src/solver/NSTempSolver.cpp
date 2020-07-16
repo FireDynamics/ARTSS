@@ -173,7 +173,7 @@ void NSTempSolver::do_step(real t, bool sync) {
         pres->pressure(p, rhs, t, sync);        //only multigrid cycle, divergence and velocity update (in case of NS) need to be added
 
         // Correct
-        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
+        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p,this, t, sync);
 
 // 5. Solve Temperature and link back to force
         // Solve advection equation

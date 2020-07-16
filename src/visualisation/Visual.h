@@ -20,7 +20,9 @@ public:
 
     static void prepare_fields(read_ptr *fields, float **vars, int size);
 
-    void write_csv(ISolver *solver, std::string filename);
+    static void write_csv(ISolver *solver, std::string filename);
+
+    static void write_data(std::string *data_titles, real **data, size_t size_data, std::string filename);
 
 private:
     static std::string remove_extension(const std::string &filename);
@@ -37,6 +39,7 @@ private:
     static std::string create_filename(std::string filename, int counter, bool analytical);
 
     bool m_has_analytical_solution = false;
+
 };
 
 #endif /* ARTSS_VISUALISATION_VISUAL_H_ */

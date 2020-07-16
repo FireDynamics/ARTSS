@@ -183,9 +183,31 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         //TODO Logger
 #endif
         pres->pressure(p, rhs, t, sync);
+        {
+#pragma acc update host(d_u[:bsize])
+#pragma acc update host(d_v[:bsize])
+#pragma acc update host(d_w[:bsize])
+#pragma acc update host(d_p[:bsize])
+#pragma acc update host(d_rhs[:bsize])
+#pragma acc update host(d_T[:bsize])
+#pragma acc update host(d_nu_t[:bsize])
+#pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
+            Visual::write_csv(this, "test_do_step_pressure_" + std::to_string(t));
+        }
 
         // Correct
-        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
+        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p,this, t, sync);
+        {
+#pragma acc update host(d_u[:bsize])
+#pragma acc update host(d_v[:bsize])
+#pragma acc update host(d_w[:bsize])
+#pragma acc update host(d_p[:bsize])
+#pragma acc update host(d_rhs[:bsize])
+#pragma acc update host(d_T[:bsize])
+#pragma acc update host(d_nu_t[:bsize])
+#pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
+            Visual::write_csv(this, "test_do_step_project_" + std::to_string(t));
+        }
 
 // 5. Solve Temperature and link back to force
 
