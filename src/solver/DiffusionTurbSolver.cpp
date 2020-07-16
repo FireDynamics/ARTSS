@@ -1,8 +1,8 @@
-/// \file 		DiffusionTurbSolver.h
-/// \brief 		Defines the steps to solve the turbulent diffusion equation
-/// \date 		August 18, 2016
-/// \author 	Suryanarayana Maddu
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       DiffusionTurbSolver.h
+/// \brief      Defines the steps to solve the turbulent diffusion equation
+/// \date       Aug 18, 2016
+/// \author     Suryanarayana Maddu
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
 
@@ -19,7 +19,7 @@ DiffusionTurbSolver::DiffusionTurbSolver() {
     std::string diffusionType = params->get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
 
-    m_nu = params->getReal("physical_parameters/nu");
+    m_nu = params->get_real("physical_parameters/nu");
 
     // Turbulent viscosity
     std::string turbluenceType = params->get("solver/turbulence/type");
@@ -33,13 +33,13 @@ DiffusionTurbSolver::~DiffusionTurbSolver() {
     delete mu_tub;
 }
 
-//====================================== DoStep =================================
+//====================================== do_step =================================
 // ***************************************************************************************
 /// \brief  brings all calculation steps together into one function
-/// \param	dt			time step
-/// \param	sync		synchronous kernel launching (true, default: false)
+/// \param  dt      time step
+/// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void DiffusionTurbSolver::DoStep(real t, bool sync) {
+void DiffusionTurbSolver::do_step(real t, bool sync) {
 
 // 1. Solve diffusion equation
 // local variables and parameters for GPU
@@ -65,7 +65,7 @@ void DiffusionTurbSolver::DoStep(real t, bool sync) {
     auto d_w_tmp = w_tmp->data;
     auto d_nu_t = nu_t->data;
 
-    size_t bsize = Domain::getInstance()->GetSize(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
 
     auto nu = m_nu;
 

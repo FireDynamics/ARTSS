@@ -1,13 +1,13 @@
 /// \file         ConstSmagorinsky.cpp
 /// \brief        calculates eddy viscosity based on Constant Smagorinsky-Lilly LES model
-/// \date         August 18, 2016
+/// \date         Aug 18, 2016
 /// \author       Suryanarayana Maddu
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <cmath>
+
 #ifdef _OPENACC
 #include <accelmath.h>
-#else
-#include <cmath>
 #endif
 
 #include "ConstSmagorinsky.h"
@@ -18,12 +18,12 @@
 ConstSmagorinsky::ConstSmagorinsky() {
     auto params = Parameters::getInstance();
 
-    m_nu = params->getReal("physical_parameters/nu");
-    m_dt = params->getReal("physical_parameters/dt");
+    m_nu = params->get_real("physical_parameters/nu");
+    m_dt = params->get_real("physical_parameters/dt");
 
     m_Cs = 0.1; //Cs value of 0.1 is found to yield the best results for wide range of flows
     // reference from Ansys Fluent Subgrid Scale models
-    m_Cs = params->getReal("solver/turbulence/Cs");
+    m_Cs = params->get_real("solver/turbulence/Cs");
 }
 
 //============================ Calculate turbulent viscosity =============================
@@ -39,7 +39,7 @@ void ConstSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Fi
 
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    auto bsize = domain->GetSize(in_u->GetLevel());
+    auto bsize = domain->get_size(in_u->GetLevel());
 
     auto d_u = in_u->data;
     auto d_v = in_v->data;
@@ -48,12 +48,12 @@ void ConstSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Fi
 
 #pragma acc data present(d_ev[:bsize], d_u[:bsize], d_v[:bsize], d_w[:bsize])
     {
-        const size_t Nx = domain->GetNx(in_u->GetLevel());
-        const size_t Ny = domain->GetNy(in_v->GetLevel());
+        const size_t Nx = domain->get_Nx(in_u->GetLevel());
+        const size_t Ny = domain->get_Ny(in_v->GetLevel());
 
-        const real dx = domain->Getdx(in_u->GetLevel());
-        const real dy = domain->Getdy(in_v->GetLevel());
-        const real dz = domain->Getdz(in_w->GetLevel());
+        const real dx = domain->get_dx(in_u->GetLevel());
+        const real dy = domain->get_dy(in_v->GetLevel());
+        const real dz = domain->get_dz(in_w->GetLevel());
 
         const real rdx = 1. / dx;
         const real rdy = 1. / dy;

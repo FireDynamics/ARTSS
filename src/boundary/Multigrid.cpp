@@ -35,7 +35,7 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
     m_numberOfSurfaces = numberOfSurfaces;
     m_numberOfObstacles = numberOfObstacles;
 
-    m_levels = Domain::getInstance()->GetLevels(); //multigrid level, 0 otherwise
+    m_levels = Domain::getInstance()->get_levels(); //multigrid level, 0 otherwise
 
     if (m_numberOfSurfaces > 0) {
         //list of surfaces for each level
@@ -59,12 +59,12 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
 
         //obstacle indices divided by level
         m_MG_oList = new size_t *[m_levels + 1];
-        //m_MG_oFront = new size_t *[m_levels + 1];
-        //m_MG_oBack = new size_t *[m_levels + 1];
-        //m_MG_oBottom = new size_t *[m_levels + 1];
-        //m_MG_oTop = new size_t *[m_levels + 1];
-        //m_MG_oLeft = new size_t *[m_levels + 1];
-        //m_MG_oRight = new size_t *[m_levels + 1];
+        m_MG_oFront = new size_t *[m_levels + 1];
+        m_MG_oBack = new size_t *[m_levels + 1];
+        m_MG_oBottom = new size_t *[m_levels + 1];
+        m_MG_oTop = new size_t *[m_levels + 1];
+        m_MG_oLeft = new size_t *[m_levels + 1];
+        m_MG_oRight = new size_t *[m_levels + 1];
 
         //start index of each obstacle in level joined list (SliceZ = Front/Back, SliceY = Bottom/Top, SliceX = Left/Right)
         m_size_MG_oFront_level = new size_t[(m_levels + 1) * m_numberOfObstacles + 1];
@@ -170,13 +170,13 @@ Multigrid::~Multigrid() {
             }
             delete[] obstacle_level;
 
-        //    delete (*(m_MG_oList + level));
-        //    delete (*(m_MG_oFront + level));
-        //    delete (*(m_MG_oBack + level));
-        //    delete (*(m_MG_oBottom + level));
-        //    delete (*(m_MG_oTop + level));
-        //    delete (*(m_MG_oLeft + level));
-        //    delete (*(m_MG_oRight + level));
+            delete (*(m_MG_oList + level));
+            delete (*(m_MG_oFront + level));
+            delete (*(m_MG_oBack + level));
+            delete (*(m_MG_oBottom + level));
+            delete (*(m_MG_oTop + level));
+            delete (*(m_MG_oLeft + level));
+            delete (*(m_MG_oRight + level));
         }
         delete (*(m_MG_boundaryList + level));
     }
@@ -223,25 +223,25 @@ Multigrid::~Multigrid() {
     if (m_numberOfObstacles > 0) {
         delete[] m_MG_obstacleList;
         delete[] m_MG_oList;
-     //   delete[] m_MG_oFront;
-     //   delete[] m_MG_oBack;
-     //   delete[] m_MG_oBottom;
-     //   delete[] m_MG_oTop;
-     //   delete[] m_MG_oLeft;
-     //   delete[] m_MG_oRight;
+        delete[] m_MG_oFront;
+        delete[] m_MG_oBack;
+        delete[] m_MG_oBottom;
+        delete[] m_MG_oTop;
+        delete[] m_MG_oLeft;
+        delete[] m_MG_oRight;
 
-//        size_t size_oFront = getLen_oFront_joined();
-//        size_t size_oBack = getLen_oBack_joined();
-//        size_t size_oBottom = getLen_oBottom_joined();
-//        size_t size_oTop = getLen_oTop_joined();
-//        size_t size_oLeft = getLen_oLeft_joined();
-//        size_t size_oRight = getLen_oRight_joined();
-//#pragma acc exit data delete(m_data_MG_oFront_level_joined[:size_oFront])
-//#pragma acc exit data delete(m_data_MG_oBack_level_joined[:size_oBack])
-//#pragma acc exit data delete(m_data_MG_oTop_level_joined[:size_oTop])
-//#pragma acc exit data delete(m_data_MG_oBottom_level_joined[:size_oBottom])
-//#pragma acc exit data delete(m_data_MG_oLeft_level_joined[:size_oLeft])
-//#pragma acc exit data delete(m_data_MG_oRight_level_joined[:size_oRight])
+        size_t size_oFront = getLen_oFront_joined();
+        size_t size_oBack = getLen_oBack_joined();
+        size_t size_oBottom = getLen_oBottom_joined();
+        size_t size_oTop = getLen_oTop_joined();
+        size_t size_oLeft = getLen_oLeft_joined();
+        size_t size_oRight = getLen_oRight_joined();
+#pragma acc exit data delete(m_data_MG_oFront_level_joined[:size_oFront])
+#pragma acc exit data delete(m_data_MG_oBack_level_joined[:size_oBack])
+#pragma acc exit data delete(m_data_MG_oTop_level_joined[:size_oTop])
+#pragma acc exit data delete(m_data_MG_oBottom_level_joined[:size_oBottom])
+#pragma acc exit data delete(m_data_MG_oLeft_level_joined[:size_oLeft])
+#pragma acc exit data delete(m_data_MG_oRight_level_joined[:size_oRight])
         delete[] m_data_MG_oFront_level_joined;
         delete[] m_data_MG_oBack_level_joined;
         delete[] m_data_MG_oTop_level_joined;
@@ -345,14 +345,8 @@ void Multigrid::control() {
         }
     }
     for (size_t level = 0; level < m_levels + 1; level++) {
-        Boundary *b = m_MG_boundaryList[level];
+        Boundary *b = *(m_MG_boundaryList + level);
         b->control(getSize_oList(level));
-    }
-    for (size_t level = 0; level < m_levels + 1; level++) {
-        for (size_t id = 0; id < m_numberOfObstacles; id++) {
-            Obstacle *o = m_MG_obstacleList[level][id];
-            o->control();
-        }
     }
 
     {
@@ -524,69 +518,57 @@ void Multigrid::calcObstacles(Obstacle **obstacleList) {
     if (m_numberOfObstacles > 0) {
         size_t level = 0;
         size_t *oList = new size_t[getSize_oList(level)];
-     //   size_t *oFront = new size_t[getLen_oFront(level)];
-     //   size_t *oBack = new size_t[getLen_oBack(level)];
-     //   size_t *oBottom = new size_t[getLen_oBottom(level)];
-     //   size_t *oTop = new size_t[getLen_oTop(level)];
-     //   size_t *oLeft = new size_t[getLen_oLeft(level)];
-     //   size_t *oRight = new size_t[getLen_oRight(level)];
+        size_t *oFront = new size_t[getLen_oFront(level)];
+        size_t *oBack = new size_t[getLen_oBack(level)];
+        size_t *oBottom = new size_t[getLen_oBottom(level)];
+        size_t *oTop = new size_t[getLen_oTop(level)];
+        size_t *oLeft = new size_t[getLen_oLeft(level)];
+        size_t *oRight = new size_t[getLen_oRight(level)];
 
 //TODO notwendig?
         for (size_t o = 0; o < m_numberOfObstacles; o++) {
             Obstacle *obstacle_tmp = obstacleList[o];
 
-       //     size_t len_front = obstacle_tmp->getSize_obstacleFront();
-       //     for (size_t i = 0; i < len_front; i++) {
-       //         oFront[i] = obstacle_tmp->getObstacleFront()[i];
-       //     }
-       //     size_t len_back = obstacle_tmp->getSize_obstacleBack();
-       //     for (size_t i = 0; i < len_back; i++) {
-       //         *(oBack + i) = obstacle_tmp->getObstacleBack()[i];
-       //     }
-       //     //*(m_size_MG_oSliceZ_level + o + 1) = counter_z;
-       //     size_t len_bottom = obstacle_tmp->getSize_obstacleBottom();
-       //     for (size_t i = 0; i < len_bottom; i++) {
-       //         *(oBottom + i) = obstacle_tmp->getObstacleBottom()[i];
-       //     }
-       //     size_t len_top = obstacle_tmp->getSize_obstacleTop();
-       //     for (size_t i = 0; i < len_top; i++) {
-       //         *(oTop + i) = obstacle_tmp->getObstacleTop()[i];
-       //     }
-       //     //*(m_size_MG_oSliceY_level + o + 1) = counter_y;
-       //     size_t len_left = obstacle_tmp->getSize_obstacleLeft();
-       //     for (size_t i = 0; i < len_left; i++) {
-       //         *(oLeft + i) = obstacle_tmp->getObstacleLeft()[i];
-       //     }
-       //     size_t len_right = obstacle_tmp->getSize_obstacleRight();
-       //     for (size_t i = 0; i < len_right; i++) {
-       //         *(oRight + i) = obstacle_tmp->getObstacleRight()[i];
-       //     }
+            size_t len_front = obstacle_tmp->getSize_obstacleFront();
+            for (size_t i = 0; i < len_front; i++) {
+                oFront[i] = obstacle_tmp->getObstacleFront()[i];
+            }
+            size_t len_back = obstacle_tmp->getSize_obstacleBack();
+            for (size_t i = 0; i < len_back; i++) {
+                *(oBack + i) = obstacle_tmp->getObstacleBack()[i];
+            }
+            //*(m_size_MG_oSliceZ_level + o + 1) = counter_z;
+            size_t len_bottom = obstacle_tmp->getSize_obstacleBottom();
+            for (size_t i = 0; i < len_bottom; i++) {
+                *(oBottom + i) = obstacle_tmp->getObstacleBottom()[i];
+            }
+            size_t len_top = obstacle_tmp->getSize_obstacleTop();
+            for (size_t i = 0; i < len_top; i++) {
+                *(oTop + i) = obstacle_tmp->getObstacleTop()[i];
+            }
+            //*(m_size_MG_oSliceY_level + o + 1) = counter_y;
+            size_t len_left = obstacle_tmp->getSize_obstacleLeft();
+            for (size_t i = 0; i < len_left; i++) {
+                *(oLeft + i) = obstacle_tmp->getObstacleLeft()[i];
+            }
+            size_t len_right = obstacle_tmp->getSize_obstacleRight();
+            for (size_t i = 0; i < len_right; i++) {
+                *(oRight + i) = obstacle_tmp->getObstacleRight()[i];
+            }
             //*(m_size_MG_oSliceX_level + o + 1) = counter_x;
             size_t len_all = obstacle_tmp->getSize_obstacleList();
             for (size_t i = 0; i < len_all; i++) {
                 *(oList + i) = obstacle_tmp->getObstacleList()[i];
             }
         }
-        std::vector<size_t> data;
-        size_t *list = obstacleList[0]->getObstacleList();
-        size_t size = obstacleList[0]->getSize_obstacleList();
-        for (size_t o = 1; o < m_numberOfObstacles; o++) {
-            Obstacle *obstacle = obstacleList[o];
-            data = Utility::mergeSortedListsToUniqueList(list, size, obstacle->getObstacleList(), obstacle->getSize_obstacleList());
-            list = data.data();
-            size = data.size();
-        }
-        delete[] oList;
-        size_t *oList_tmp = new size_t[size];
-        std::copy(&data[0], &data[size], oList_tmp);
-        *(m_size_MG_oList_level) = size;
-        *(m_MG_oList) = oList_tmp;
-       // *(m_MG_oFront) = oFront;
-       // *(m_MG_oBack) = oBack;
-       // *(m_MG_oBottom) = oBottom;
-       // *(m_MG_oTop) = oTop;
-       // *(m_MG_oLeft) = oLeft;
-       // *(m_MG_oRight) = oRight;
+
+        *(m_MG_oList) = oList;
+        *(m_MG_oFront) = oFront;
+        *(m_MG_oBack) = oBack;
+        *(m_MG_oBottom) = oBottom;
+        *(m_MG_oTop) = oTop;
+        *(m_MG_oLeft) = oLeft;
+        *(m_MG_oRight) = oRight;
     }
 }
 
@@ -682,7 +664,7 @@ Obstacle **Multigrid::obstacleDominantRestriction(size_t level) {
         return nullptr;
     }
 //TODO define lists with obstacle size
-    Domain *domain = Domain::getInstance();
+    Domain* domain = Domain::getInstance();
     Obstacle **obstacleList_fine = *(m_MG_obstacleList + (level - 1));
     Obstacle **obstacleList_coarse = new Obstacle *[m_numberOfObstacles];
     *(m_MG_obstacleList + level) = obstacleList_coarse;
@@ -704,22 +686,18 @@ Obstacle **Multigrid::obstacleDominantRestriction(size_t level) {
         size_t k2_coarse = (k2_fine + 1) / 2;
 
         //TODO exit?
-        if (i2_fine - i1_fine + 1 < domain->Getnx(level - 1) - 2 && i2_coarse - i1_coarse + 1 >= domain->Getnx(level) - 2) {
+        if (i2_fine - i1_fine + 1< domain->Getnx(level-1)-2 && i2_coarse - i1_coarse +1>= domain->Getnx(level)-2){
             std::cout << "Be cautious! Obstacle fills up inner cells in x-direction at level " << level << std::endl;
         }
-        if (j2_fine - j1_fine + 1 < domain->Getny(level - 1) - 2 && j2_coarse - j1_coarse + 1 >= domain->Getny(level) - 2) {
+        if (j2_fine - j1_fine +1< domain->Getny(level-1)-2 && j2_coarse - j1_coarse +1>= domain->Getny(level)-2){
             std::cout << "Be cautious! Obstacle fills up inner cells in y-direction at level " << level << std::endl;
         }
-        if (k2_fine - k1_fine + 1 < domain->Getnz(level - 1) - 2 && k2_coarse - k1_coarse + 1 >= domain->Getnz(level) - 2) {
+        if (k2_fine - k1_fine +1< domain->Getnz(level-1)-2 && k2_coarse - k1_coarse +1>= domain->Getnz(level)-2){
             std::cout << "Be cautious! Obstacle fills up inner cells in z-direction at level " << level << std::endl;
         }
-        //for (size_t c = 0; c < id; c++) {
-        //    controlObstacleOverlap(obstacleList_coarse[c], &i1_coarse, &i2_coarse, &j1_coarse, &j2_coarse, &k1_coarse, &k2_coarse);
-        //}
 
         Obstacle *obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse, i2_coarse, j2_coarse, k2_coarse, level);
         *(obstacleList_coarse + id) = obstacle_coarse;
-
         size_t index = level * m_numberOfObstacles + id + 1;
         m_size_MG_oFront_level[index] = obstacle_coarse->getSize_obstacleFront() + m_size_MG_oFront_level[index - 1];
         m_size_MG_oBack_level[index] = obstacle_coarse->getSize_obstacleBack() + m_size_MG_oBack_level[index - 1];
@@ -730,54 +708,7 @@ Obstacle **Multigrid::obstacleDominantRestriction(size_t level) {
         *(m_size_MG_oList_level + level) += obstacle_coarse->getSize_obstacleList();
 
     } //end obstacle id loop
-
-    std::vector<size_t> data;
-    size_t *list = obstacleList_coarse[0]->getObstacleList();
-    size_t size = obstacleList_coarse[0]->getSize_obstacleList();
-    for (size_t o = 1; o < m_numberOfObstacles; o++) {
-        Obstacle *obstacle = obstacleList_coarse[o];
-        data = Utility::mergeSortedListsToUniqueList(list, size, obstacle->getObstacleList(), obstacle->getSize_obstacleList());
-        list = data.data();
-        size = data.size();
-    }
-
-    size_t *oList_tmp = new size_t[size];
-    std::copy(&data[0], &data[size], oList_tmp);
-    *(m_size_MG_oList_level + level) = size;
-    *(m_MG_oList + level) = oList_tmp;
     return obstacleList_coarse;
-}
-
-// ================================= Send lists to GPU ==========================================
-// ***************************************************************************************
-/// \brief  control and correct when obstacles are overlapping caused by the dominant restriction
-// ***************************************************************************************
-void Multigrid::controlObstacleOverlap(Obstacle *o, size_t *i1, size_t *i2, size_t *j1, size_t *j2, size_t *k1, size_t *k2) {
-    size_t o_i1 = o->getCoordinates_i1();
-    size_t o_i2 = o->getCoordinates_i2();
-    size_t o_j1 = o->getCoordinates_j1();
-    size_t o_j2 = o->getCoordinates_j2();
-    size_t o_k1 = o->getCoordinates_k1();
-    size_t o_k2 = o->getCoordinates_k2();
-
-    if (o_i1 <= *i1 && *i1 <= o_i2) {
-        *i1 = o_i2 + 1;
-    }
-    if (o_i1 <= *i2 && *i2 <= o_i2) {
-        *i2 = o_i1 - 1;
-    }
-    if (o_j1 <= *j1 && *j1 <= o_j2) {
-        *j1 = o_j2 + 1;
-    }
-    if (o_j1 <= *j2 && *j2 <= o_j2) {
-        *j2 = o_j1 - 1;
-    }
-    if (o_k1 <= *k1 && *k1 <= o_k2) {
-        *k1 = o_k2 + 1;
-    }
-    if (o_k1 <= *k2 && *k2 <= o_k2) {
-        *k2 = o_k1 - 1;
-    }
 }
 
 // ================================= Send lists to GPU ==========================================
@@ -944,7 +875,7 @@ void Multigrid::sendObstacleListsToGPU() {
         //std::cout << "control sendMGListsToGPU obstacle Left " << counter_oLeft + 1 << "|" << size_oLeft << std::endl;
         //std::cout << "control sendMGListsToGPU obstacle Right " << counter_oRight + 1 << "|" << size_oRight << std::endl;
 
-        m_data_MG_oList_zero_joined = m_MG_oList[0];// TODO wrong because only one obstacle is used
+        m_data_MG_oList_zero_joined = m_MG_oList[0];
         size_t size_oList = getSize_obstacleList();
 #pragma acc enter data copyin(m_data_MG_oFront_level_joined[:size_oFront])
 #pragma acc enter data copyin(m_data_MG_oBack_level_joined[:size_oBack])
@@ -978,7 +909,8 @@ void Multigrid::applyBoundaryCondition(real *d, size_t level, FieldType f, bool 
     if (m_numberOfObstacles > 0) {
         for (size_t id = 0; id < m_numberOfObstacles; ++id) {
             size_t opatch_start[] = {getFirstIndex_oFront(level, id), getFirstIndex_oBack(level, id), getFirstIndex_oBottom(level, id), getFirstIndex_oTop(level, id), getFirstIndex_oLeft(level, id), getFirstIndex_oRight(level, id),};
-            size_t opatch_end[] = {getLastIndex_oFront(level, id), getLastIndex_oBack(level, id), getLastIndex_oBottom(level, id), getLastIndex_oTop(level, id), getLastIndex_oLeft(level, id), getLastIndex_oRight(level, id),};
+            size_t opatch_end[] = {getFirstIndex_oFront(level + 1, id), getFirstIndex_oBack(level + 1, id), getFirstIndex_oBottom(level + 1, id), getFirstIndex_oTop(level + 1, id), getFirstIndex_oLeft(level + 1, id),
+                                   getFirstIndex_oRight(level + 1, id),};
             ((BoundaryDataController *) *(m_bdc_obstacle + id))->applyBoundaryConditionObstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, id, sync);
         }
     }
@@ -1000,7 +932,7 @@ void Multigrid::updateLists() {
 
     if (m_numberOfObstacles > 0) {
         for (size_t level = 0; level < m_levels + 1; level++) {
-            Boundary *boundary = *(m_MG_boundaryList + level);
+            Boundary * boundary =  *(m_MG_boundaryList + level);
             boundary->updateLists(*(m_MG_obstacleList + level), m_numberOfObstacles, getSize_oList(level));
             m_size_MG_iList_level[level + 1] = m_size_MG_iList_level[level] + boundary->getSize_innerList();
             m_size_MG_bList_level[level + 1] = m_size_MG_bList_level[level] + boundary->getSize_boundaryList();
@@ -1008,9 +940,9 @@ void Multigrid::updateLists() {
             m_size_MG_bSliceY_level[level + 1] = m_size_MG_bSliceY_level[level] + boundary->getSize_boundaryTop();
             m_size_MG_bSliceX_level[level + 1] = m_size_MG_bSliceX_level[level] + boundary->getSize_boundaryLeft();
         }
-    } else {
+    }else{
         for (size_t level = 0; level < m_levels + 1; level++) {
-            Boundary *boundary = *(m_MG_boundaryList + level);
+            Boundary * boundary =  *(m_MG_boundaryList + level);
             boundary->updateLists();
             m_size_MG_iList_level[level + 1] = m_size_MG_iList_level[level] + boundary->getSize_innerList();
             m_size_MG_bList_level[level + 1] = m_size_MG_bList_level[level] + boundary->getSize_boundaryList();
@@ -1028,7 +960,7 @@ void Multigrid::updateLists() {
     m_data_boundary_patches_joined[Patch::RIGHT] = m_data_MG_bRight_level_joined;
 }
 
-void Multigrid::removeBoundaryListsFromGPU() {
+void Multigrid::removeBoundaryListsFromGPU(){
     size_t size_iList = getLen_iList_joined();
     size_t size_bList = getLen_bList_joined();
 #pragma acc exit data delete(m_data_MG_iList_level_joined[:size_iList])
@@ -1612,10 +1544,10 @@ size_t Multigrid::getSize_obstacleList() {
     return getSize_oList(0);
 }
 
-size_t *Multigrid::get_obstacleList() {
+size_t* Multigrid::get_obstacleList(){
     if (m_numberOfObstacles > 0) {
         return m_MG_oList[0];
-    } else {
+    }else{
         return nullptr;
     }
 }

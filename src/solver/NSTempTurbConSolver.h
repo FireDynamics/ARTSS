@@ -1,13 +1,6 @@
-/*
- * NSTempTurbConSolver.h
- *
- *  Created on: Oct 02, 2017
- *      Author: Küsters
- */
-
 /// \file 		NSTempTurbConSolver.h
 /// \brief 		Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
-/// \date 		Sep 27, 2017
+/// \date 		Oct 02, 2017
 /// \author 	Küsters
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
@@ -23,36 +16,36 @@
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class NSTempTurbConSolver:public ISolver {
+class NSTempTurbConSolver : public ISolver {
 public:
-	NSTempTurbConSolver();
-	~NSTempTurbConSolver() override;
+    NSTempTurbConSolver();
+    ~NSTempTurbConSolver() override;
 
-	void DoStep(real t, bool sync) override;
+    void do_step(real t, bool sync) override;
 
 private:
-	IAdvection* adv_vel;
-	IDiffusion* dif_vel;
-	IAdvection* adv_temp;
-	IDiffusion* dif_temp;
-	IAdvection* adv_con;
-	IDiffusion* dif_con;
-	IPressure* pres;
-	ISource* sou_vel;
-	ISource* sou_temp;
-	ISource* sou_con;
-	ITurbulence*  mu_tub;
+    IAdvection *adv_vel;
+    IDiffusion *dif_vel;
+    IAdvection *adv_temp;
+    IDiffusion *dif_temp;
+    IAdvection *adv_con;
+    IDiffusion *dif_con;
+    IPressure *pres;
+    ISource *sou_vel;
+    ISource *sou_temp;
+    ISource *sou_con;
+    ITurbulence *mu_tub;
 
-	real m_nu;
-	real m_kappa;
-	real m_gamma;
-	std::string m_dir_vel = "";
+    real m_nu;
+    real m_kappa;
+    real m_gamma;
+    std::string m_dir_vel = "";
 
     static void control();
 
-    bool m_hasTurbulenceTemperature;
-    bool m_hasTurbulenceConcentration;
-    bool m_hasDissipation;
+    bool m_has_turbulence_temperature;
+    bool m_has_turbulence_concentration;
+    bool m_has_dissipation;
     std::string m_forceFct;
     std::string m_tempFct;
     std::string m_conFct;
