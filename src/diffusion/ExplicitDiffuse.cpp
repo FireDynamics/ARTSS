@@ -1,10 +1,14 @@
-/// \file 		ExplicitDiffuse.cpp
-/// \brief 		Solves diffusion equation with an explicit method
-/// \date 		December 12, 2019
-/// \author 	Max Boehler
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       ExplicitDiffuse.cpp
+/// \brief      Solves diffusion equation with an explicit method
+/// \date       December 12, 2019
+/// \author     Max Boehler
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cmath>
+
+#ifdef _OPENACC
+#include <accelmath.h>
+#endif
 
 #include "ExplicitDiffuse.h"
 #include "../utility/Parameters.h"
@@ -15,18 +19,17 @@ ExplicitDiffuse::ExplicitDiffuse() {
 
     auto params = Parameters::getInstance();
 
-    m_dt = params->getReal("physical_parameters/dt");
+    m_dt = params->get_real("physical_parameters/dt");
 }
 
 //====================================== Diffuse ===============================================
 // ***************************************************************************************
 /// \brief  solves diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
-/// 		via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
-/// \param  out			output pointer
-/// \param	in			input pointer
-/// \param	b 			source pointer
-/// \param	D			diffusion coefficient (nu - velocity, kappa - temperature)
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
+/// \param  out     output pointer
+/// \param  in      input pointer
+/// \param  b       source pointer
+/// \param  D       diffusion coefficient (nu - velocity, kappa - temperature)
+/// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
 
@@ -44,18 +47,17 @@ void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real 
 //====================================== Turbulent Diffuse ===============================================
 // ***************************************************************************************
 /// \brief  solves diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
-/// 		via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
-/// \param  out			output pointer
-/// \param	in			input pointer
-/// \param	b 			source pointer
-/// \param	D			diffusion coefficient (nu - velocity, kappa - temperature)
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
+/// \param  out     output pointer
+/// \param  in      input pointer
+/// \param  b       source pointer
+/// \param  D       diffusion coefficient (nu - velocity, kappa - temperature)
+/// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, const Field *EV, bool sync) {
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto bsize = domain->GetSize(out->GetLevel());
+    auto bsize = domain->get_size(out->GetLevel());
     FieldType type = out->GetType();
 
     auto d_out = out->data;
@@ -71,10 +73,10 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, bo
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->GetNx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->GetNy(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->GetLevel());
 
-    auto bsize = domain->GetSize(out->GetLevel());
+    auto bsize = domain->get_size(out->GetLevel());
 
     auto d_out = out->data;
     auto d_in = in->data;
@@ -84,9 +86,9 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, bo
     size_t *d_iList = boundary->get_innerList_level_joined();
     auto bsize_i = boundary->getSize_innerList();
 
-    real rdx = D / (domain->Getdx(out->GetLevel()) * domain->Getdx(out->GetLevel()));
-    real rdy = D / (domain->Getdy(out->GetLevel()) * domain->Getdy(out->GetLevel()));
-    real rdz = D / (domain->Getdz(out->GetLevel()) * domain->Getdz(out->GetLevel()));
+    real rdx = D / (domain->get_dx(out->GetLevel()) * domain->get_dx(out->GetLevel()));
+    real rdy = D / (domain->get_dy(out->GetLevel()) * domain->get_dy(out->GetLevel()));
+    real rdz = D / (domain->get_dz(out->GetLevel()) * domain->get_dz(out->GetLevel()));
 
 #pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_iList[:bsize_i]) async
     for (size_t ii = 0; ii < bsize_i; ++ii) {
@@ -114,10 +116,10 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, co
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->GetNx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->GetNy(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->GetLevel());
 
-    auto bsize = domain->GetSize(out->GetLevel());
+    auto bsize = domain->get_size(out->GetLevel());
 
     auto d_out = out->data;
     auto d_in = in->data;
