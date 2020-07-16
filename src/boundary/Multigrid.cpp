@@ -570,6 +570,7 @@ void Multigrid::calcObstacles(Obstacle **obstacleList) {
         std::vector<size_t> data;
         size_t *list = obstacleList[0]->getObstacleList();
         size_t size = obstacleList[0]->getSize_obstacleList();
+        data.assign(list, list+size);
         for (size_t o = 1; o < m_numberOfObstacles; o++) {
             Obstacle *obstacle = obstacleList[o];
             data = Utility::mergeSortedListsToUniqueList(list, size, obstacle->getObstacleList(), obstacle->getSize_obstacleList());
@@ -731,9 +732,11 @@ Obstacle **Multigrid::obstacleDominantRestriction(size_t level) {
 
     } //end obstacle id loop
 
-    std::vector<size_t> data;
     size_t *list = obstacleList_coarse[0]->getObstacleList();
     size_t size = obstacleList_coarse[0]->getSize_obstacleList();
+    std::vector<size_t> data;
+    data.assign(list, list+size);
+
     for (size_t o = 1; o < m_numberOfObstacles; o++) {
         Obstacle *obstacle = obstacleList_coarse[o];
         data = Utility::mergeSortedListsToUniqueList(list, size, obstacle->getObstacleList(), obstacle->getSize_obstacleList());
