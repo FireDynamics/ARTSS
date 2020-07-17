@@ -20,7 +20,6 @@ struct FunctionNames{
     static const std::string Hat;
     static const std::string McDermott;
     static const std::string RandomC;
-    static const std::string RandomT;
     static const std::string RampTanh;
     static const std::string SinSinSin;
     static const std::string Uniform;

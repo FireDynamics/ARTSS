@@ -1123,10 +1123,10 @@ namespace Functions {
 
 // === Random function with field as ambient value (e.g. for superposition of temperature layers and random values)
 // ***************************************************************************************
-/// \brief  Random function for any field
+/// \brief  Creates random absolute/relative noise on given field
 /// \param  out     field
 /// \param  range   range of random numbers
-/// \param  abs     Check if random number is relative (multiply) or absolute (additive)
+/// \param  is_absolute    Check if random number is relative (multiply) or absolute (additive)
 /// \param  seed    custom seed if given, else seed <= 0
 /// \param  step_size interval steps of random numbers
 // ***************************************************************************************
