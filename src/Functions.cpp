@@ -1112,14 +1112,9 @@ namespace Functions {
 /// \param  t	time
 // ***************************************************************************************
     real RampTanh(real t) {
-
         auto params = Parameters::getInstance();
         real tau = params->get_real("solver/temperature/source/tau");
-
-        real rt = t / tau;
-        real result = tanh(rt);
-
-        return result;
+        return tanh(t/tau);
     }
 
 // ============== Temperature initial condition with random distribution =================

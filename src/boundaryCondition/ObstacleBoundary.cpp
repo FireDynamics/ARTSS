@@ -87,19 +87,22 @@ void ObstacleBoundary::applyDirichlet(real *dataField, size_t *d_patch, Patch pa
     int referenceIndex = 1;
     switch (patch) {
         case FRONT:
-            referenceIndex = -1;
+            referenceIndex = -1 * static_cast<int>(domain->get_Nx(level)) * static_cast<int>(domain->get_Ny(level));
+            break;
         case BACK:
-            referenceIndex *= domain->get_Nx(level) * domain->get_Ny(level);
+            referenceIndex = static_cast<int>(domain->get_Nx(level)) * static_cast<int>(domain->get_Ny(level));
             break;
         case BOTTOM:
-            referenceIndex = -1;
+            referenceIndex = -1 * static_cast<int>(domain->get_Nx(level));
+            break;
         case TOP:
-            referenceIndex *= domain->get_Nx(level);
+            referenceIndex = domain->get_Nx(level);
             break;
         case LEFT:
             referenceIndex = -1;
+            break;
         case RIGHT:
-            referenceIndex *= 1;
+            referenceIndex = 1;
             break;
     }
     applyBoundaryCondition(dataField, d_patch, patch_start, patch_end, level, referenceIndex, value * 2, -1);
@@ -124,22 +127,28 @@ void ObstacleBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patc
     int referenceIndex = 1;
     switch (patch) {
         case FRONT:
-            referenceIndex = -1;
+            value *= domain->get_dz(level);
+            referenceIndex = -1 * static_cast<int>(domain->get_Nx(level)) * static_cast<int>(domain->get_Ny(level));
+            break;
         case BACK:
             value *= domain->get_dz(level);
-            referenceIndex *= domain->get_Nx(level) * domain->get_Ny(level);
+            referenceIndex = static_cast<int>(domain->get_Nx(level)) * static_cast<int>(domain->get_Ny(level));
             break;
         case BOTTOM:
-            referenceIndex = -1;
+            value *= domain->get_dy(level);
+            referenceIndex = -1 *static_cast<int>(domain->get_Nx(level));
+            break;
         case TOP:
             value *= domain->get_dy(level);
-            referenceIndex *= domain->get_Nx(level);
+            referenceIndex = static_cast<int>(domain->get_Nx(level));
             break;
         case LEFT:
+            value *= domain->get_dx(level);
             referenceIndex = -1;
+            break;
         case RIGHT:
             value *= domain->get_dx(level);
-            referenceIndex *= 1;
+            referenceIndex = 1;
             break;
     }
     applyBoundaryCondition(dataField, d_patch, patch_start, patch_end, level, referenceIndex, -value, 1);

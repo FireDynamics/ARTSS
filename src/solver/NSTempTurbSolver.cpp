@@ -120,7 +120,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     auto d_nu_t = nu_t->data;
     auto d_kappa_t = kappa_t->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size();
 
     auto nu = m_nu;
     auto kappa = m_kappa;
