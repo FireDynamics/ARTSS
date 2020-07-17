@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ARTSS>
-  <xml_filename>Test_NavierStokesTempTurb_Steckler.xml</xml_filename>
-
   <physical_parameters>
     <t_end> 1800. </t_end>  <!-- simulation end time -->
     <dt> 0.05 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
@@ -25,7 +23,7 @@
     <source type = "ExplicitEuler" force_fct="Buoyancy" dir="y"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>
     <pressure type = "VCycleMG" field = "p">
-      <n_level> 4 </n_level>  <!-- number of restriction levels -->
+      <n_level> 1 </n_level>  <!-- number of restriction levels -->
       <n_cycle> 2 </n_cycle> <!-- number of cycles -->
       <max_cycle> 100 </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
@@ -85,42 +83,43 @@
 
   <boundaries>
     <boundary field="u,v,w" patch="front,back,bottom,top,left,right" type="dirichlet" value="0.0" />        
-    <boundary field="p" patch="front,back,bottom,top,left,right" type="dirichlet" value="0.0" />
+    <boundary field="p" patch="front,back,bottom,top,left,right" type="neumann" value="0.0" />
     <boundary field="T" patch="front,back,top,left,right" type="dirichlet" value="299.14" />
     <boundary field="T" patch="bottom" type="neumann" value="0.0" />
   </boundaries>
+
   <obstacles enabled="Yes">
-    <obstacle>
+    <obstacle> <!-- left wall -->
       <geometry ox1="-1.6625" ox2="-1.4" oy1="0." oy2="2.13" oz1="-1.4" oz2="1.4"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle>
+    <obstacle> <!-- ceiling -->
       <geometry ox1="-1.6625" ox2="1.6625" oy1="2.13" oy2="2.3296875" oz1="-1.6625" oz2="1.6625"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle>
+    <obstacle> <!-- back wall -->
       <geometry ox1="-1.6625" ox2="1.6625" oy1="0." oy2="2.13" oz1="1.4" oz2="1.6625"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle>
+    <obstacle> <!-- front wall -->
       <geometry ox1="-1.6625" ox2="1.6625" oy1="0." oy2="2.13" oz1="-1.6625" oz2="-1.4"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle>
+    <obstacle> <!-- right wall -->
       <geometry ox1="1.4" ox2="1.6625" oy1="0." oy2="2.13" oz1="-1.4" oz2="-0.4375"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle>
-      <geometry ox1="1.4" ox2="1.6625" oy1="1.83046875" oy2="2.13" oz1="-0.4375" oz2="0.4375"/>
+    <obstacle> <!-- right wall -->
+      <geometry ox1="1.4" ox2="1.6625" oy1="1.83" oy2="2.13" oz1="-0.4375" oz2="0.4375"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle>
+    <obstacle> <!-- right wall -->
       <geometry ox1="1.4" ox2="1.6625" oy1="0." oy2="2.13" oz1="0.4375" oz2="1.4"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
@@ -135,7 +134,7 @@
     <range> 1 </range>
   </initial_conditions>
 
-  <visualization save_csv="No">
-    <n_plots> 36000 </n_plots>
-  </visualization>
+  <visualisation save_csv="No" save_vtk="Yes">
+    <vtk_nth_plot> 100 </vtk_nth_plot>
+  </visualisation>
 </ARTSS>

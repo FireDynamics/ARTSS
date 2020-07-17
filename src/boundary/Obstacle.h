@@ -35,7 +35,7 @@ public:
     size_t getSize_obstacleLeft() { return m_size_obstacleLeft; }
     size_t getSize_obstacleRight() { return m_size_obstacleRight; }
 
-    bool isObstacleCell(size_t i, size_t j, size_t k);
+    bool isObstacleCell(size_t i, size_t j, size_t k) const;
 
     void print();
 
@@ -83,7 +83,8 @@ private:
     void init(size_t level);
     void createObstacle(size_t Nx, size_t Ny);
 
-    static real matchGrid(double obstacleCoordinate, real dx, real x1);
+    static real match_grid(real obstacle_coordinate, real spacing, real start_coordinate);
+    static int get_matching_index(real obstacle_coordinate, real spacing, real start_coordinate);
 
     void printDetails();
 

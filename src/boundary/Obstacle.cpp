@@ -30,12 +30,12 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
 //    m_obstacleID = element->IntAttribute("ID");
 //    std::cout << m_obstacleID << std::endl;
 
-    real ox1 = matchGrid(x1, dx, X1);
-    real ox2 = matchGrid(x2, dx, X1);
-    real oy1 = matchGrid(y1, dy, Y1);
-    real oy2 = matchGrid(y2, dy, Y1);
-    real oz1 = matchGrid(z1, dz, Z1);
-    real oz2 = matchGrid(z2, dz, Z1);
+    //real ox1 = match_grid(x1, dx, X1);
+    //real ox2 = match_grid(x2, dx, X1);
+    //real oy1 = match_grid(y1, dy, Y1);
+    //real oy2 = match_grid(y2, dy, Y1);
+    //real oz1 = match_grid(z1, dz, Z1);
+    //real oz2 = match_grid(z2, dz, Z1);
 
     /* ox1 and ox2 as outer boundary
        #########################
@@ -47,13 +47,13 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
                   m_i1    m_i2
     */
 
-    m_i1 = ((ox1 - X1) * rdx) + 1; //plus 1 for ghost cell
-    m_j1 = ((oy1 - Y1) * rdy) + 1;
-    m_k1 = ((oz1 - Z1) * rdz) + 1;
+    m_i1 = get_matching_index(x1, dx, X1) + 1;//((ox1 - X1) * rdx) + 1; //plus 1 for ghost cell
+    m_j1 = get_matching_index(y1, dy, Y1) + 1;//((oy1 - Y1) * rdy) + 1;
+    m_k1 = get_matching_index(z1, dz, Z1) + 1;//((oz1 - Z1) * rdz) + 1;
 
-    m_i2 = ((ox2 - X1) * rdx);
-    m_j2 = ((oy2 - Y1) * rdy);
-    m_k2 = ((oz2 - Z1) * rdz);
+    m_i2 = get_matching_index(x2, dx, X1);//((ox2 - X1) * rdx);
+    m_j2 = get_matching_index(y2, dy, Y1);//((oy2 - Y1) * rdy);
+    m_k2 = get_matching_index(z2, dz, Z1);//((oz2 - Z1) * rdz);
 
     init(0);
     //std::cout << "---------------- END OBSTACLE ----------------" << std::endl;
@@ -353,23 +353,24 @@ void Obstacle::control() {
 /// \param  k z-coordinate
 /// \return  bool true if yes false if no
 // ***************************************************************************************
-bool Obstacle::isObstacleCell(size_t i, size_t j, size_t k) {
-    size_t i2 = getCoordinates_i2();
-    size_t j2 = getCoordinates_j2();
-    size_t k2 = getCoordinates_k2();
-    return m_i1 <= i && i <= i2 && m_j1 <= j && j <= j2 && m_k1 <= k && k <= k2;
+bool Obstacle::isObstacleCell(size_t i, size_t j, size_t k) const {
+    return m_i1 <= i && i <= m_i2 && m_j1 <= j && j <= m_j2 && m_k1 <= k && k <= m_k2;
 }
 
 //======================================== Match grid ====================================
 // ***************************************************************************************
-/// \brief  Snaps value to grid discretization
-/// \param  obstacleCoordinate Coordinate of obstacle
+/// \brief  Snaps value to grid discretisation
+/// \param  obstacle_coordinate Coordinate of obstacle
 /// \param  spacing dx/dy/dz
-/// \param  startCoordinate X1/Y1/Z1
+/// \param  start_coordinate X1/Y1/Z1
 /// \return real Calculated real grid coordiante
 // ***************************************************************************************
-real Obstacle::matchGrid(double obstacleCoordinate, real spacing, real startCoordinate) {
-    return std::round((-startCoordinate + obstacleCoordinate) / spacing) * spacing + startCoordinate;
+real Obstacle::match_grid(real obstacle_coordinate, real spacing, real start_coordinate) {
+    return get_matching_index(obstacle_coordinate, spacing, start_coordinate) * spacing + start_coordinate;
+}
+
+int Obstacle::get_matching_index(real obstacle_coordinate, real spacing, real start_coordinate) {
+    return static_cast<int>(round((-start_coordinate + obstacle_coordinate) / spacing));
 }
 
 //======================================== Remove cells at boundary ====================================
@@ -379,26 +380,22 @@ real Obstacle::matchGrid(double obstacleCoordinate, real spacing, real startCoor
 // ***************************************************************************************
 void Obstacle::removeCellsAtBoundary(size_t level) {
     Domain *domain = Domain::getInstance();
-    size_t i2 = getCoordinates_i2();
-    size_t j2 = getCoordinates_j2();
-    size_t k2 = getCoordinates_k2();
-
     if (m_k1 <= domain->get_index_z1(level)){
         m_size_obstacleFront = 0;
     }
-    if (k2 >= domain->get_index_z2(level)){
+    if (m_k2 >= domain->get_index_z2(level)){
         m_size_obstacleBack = 0;
     }
     if (m_j1 <= domain->get_index_y1(level)){
         m_size_obstacleBottom = 0;
     }
-    if (j2 >= domain->get_index_y2(level)){
+    if (m_j2 >= domain->get_index_y2(level)){
         m_size_obstacleTop = 0;
     }
     if (m_i1 <= domain->get_index_x1(level)){
         m_size_obstacleLeft = 0;
     }
-    if (i2 >= domain->get_index_x2(level)){
+    if (m_i2 >= domain->get_index_x2(level)){
         m_size_obstacleRight = 0;
     }
 }
