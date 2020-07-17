@@ -389,11 +389,11 @@ function create_testcases {
     NAMEVALUES[$INDEX]=NavierStokesTempTurb_Steckler
     FPATHVALUES[$INDEX]=examples
     NAME=${NAMEVALUES[$INDEX]}
-    BUILDER[$INDEX]="./xml-builder.sh --nstt --tend 1800. --dt 0.05 --nu 3.1e-5 --beta 3.34e-3 --g -9.81 --kappa 4.2e-5 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 5 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --prt 0.5 --solavail No  --xstart -2.8 --xend 4.2 --ystart 0. --yend 4.26 --zstart -2.8 --zend 2.8 --nx 160 --ny 128 --nz 128 --nplots 100"
+    BUILDER[$INDEX]="./xml-builder.sh --nstt --tend 1800. --dt 0.05 --nu 3.1e-5 --beta 3.34e-3 --g -9.81 --kappa 4.2e-5 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 5 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --prt 0.5 --solavail No  --xstart -2.8 --xend 4.2 --ystart 0. --yend 4.26 --zstart -2.8 --zend 2.8 --nx 160 --ny 128 --nz 128 --vtkplots 100"
 
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,bottom,top,left,right\" type=\"dirichlet\" value=\"0.0\" />        
-    <boundary field=\"p\" patch=\"front,back,bottom,top,left,right\" type=\"dirichlet\" value=\"0.0\" />
+    <boundary field=\"p\" patch=\"front,back,bottom,top,left,right\" type=\"neumann\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"front,back,top,left,right\" type=\"dirichlet\" value=\"299.14\" />
     <boundary field=\"T\" patch=\"bottom\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
@@ -417,37 +417,37 @@ function create_testcases {
       </source>" > ${NAME}_$TSFILEVAL
 
     echo "  <obstacles enabled=\"Yes\">
-    <obstacle>
+    <obstacle> <!-- left wall -->
       <geometry ox1=\"-1.6625\" ox2=\"-1.4\" oy1=\"0.\" oy2=\"2.13\" oz1=\"-1.4\" oz2=\"1.4\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle>
+    <obstacle> <!-- ceiling -->
       <geometry ox1=\"-1.6625\" ox2=\"1.6625\" oy1=\"2.13\" oy2=\"2.3296875\" oz1=\"-1.6625\" oz2=\"1.6625\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle>
+    <obstacle> <!-- back wall -->
       <geometry ox1=\"-1.6625\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"1.4\" oz2=\"1.6625\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle>
+    <obstacle> <!-- front wall -->
       <geometry ox1=\"-1.6625\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"-1.6625\" oz2=\"-1.4\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle>
+    <obstacle> <!-- right wall -->
       <geometry ox1=\"1.4\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"-1.4\" oz2=\"-0.4375\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle>
-      <geometry ox1=\"1.4\" ox2=\"1.6625\" oy1=\"1.83046875\" oy2=\"2.13\" oz1=\"-0.4375\" oz2=\"0.4375\"/>
+    <obstacle> <!-- right wall -->
+      <geometry ox1=\"1.4\" ox2=\"1.6625\" oy1=\"1.83\" oy2=\"2.13\" oz1=\"-0.4375\" oz2=\"0.4375\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle>
+    <obstacle> <!-- right wall -->
       <geometry ox1=\"1.4\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"0.4375\" oz2=\"1.4\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
