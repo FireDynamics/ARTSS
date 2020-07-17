@@ -1121,7 +1121,7 @@ namespace Functions {
         return result;
     }
 
-// === Random function with field as ambient value (e.g. for superposition of temperature layers and random values)
+// === Random Function - Superposition of field values with random values ===
 // ***************************************************************************************
 /// \brief  Creates random absolute/relative noise on given field
 /// \param  out     field
