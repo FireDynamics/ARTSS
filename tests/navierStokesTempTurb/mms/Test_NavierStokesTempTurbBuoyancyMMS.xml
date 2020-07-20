@@ -82,7 +82,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "BuoyancyMMS" >
+  <initial_conditions usr_fct = "BuoyancyMMS" random = "No">
     <rhoa> 1. </rhoa>
   </initial_conditions>
 

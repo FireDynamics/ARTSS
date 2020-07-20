@@ -210,6 +210,7 @@ void ISolver::init() {
 
     auto params = Parameters::getInstance();
     std::string string_init_usr_fct = params->get("initial_conditions/usr_fct");
+    bool random = params->get("initial_conditions/random") == "Yes";
 
     if (string_init_usr_fct == FunctionNames::GaussBubble) {
         if (m_string_solver == SolverTypes::AdvectionSolver) {
@@ -339,37 +340,10 @@ void ISolver::init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             real val = params->get_real("initial_conditions/val");
-            Functions::Uniform(T, val);
-            force_source();
-            temperature_source();
-        }
-    } else if (string_init_usr_fct == FunctionNames::RandomT) {
-        //Random
-        if (m_string_solver == SolverTypes::NSTempSolver or \
-            m_string_solver == SolverTypes::NSTempConSolver or \
-            m_string_solver == SolverTypes::NSTempTurbConSolver or \
-            m_string_solver == SolverTypes::NSTempTurbSolver) {
-            // Random temperature
-            real Ta = params->get_real("initial_conditions/Ta");        // ambient temperature in KELVIN!
-            real A = params->get_real("initial_conditions/A");            // amplitude
-            size_t range = static_cast<size_t>(params->get_int("initial_conditions/range")); // range of random numbers (0-range)
-            Functions::Random(T, Ta, A, range);
-        }
-        //Random concentration
-        if ((m_string_solver == SolverTypes::NSTempConSolver or \
-             m_string_solver == SolverTypes::NSTempTurbConSolver)
-            and params->get("initial_conditions/con_fct") == "RandomC") {
-
-            real Ca = params->get_real("initial_conditions/Ca");        //ambient concentration
-            real A_C = params->get_real("initial_conditions/A_C");        //amplitude
-            size_t range_C = static_cast<size_t>(params->get_int("initial_conditions/range_C")); //range of random numbers (0-range)
-
-            Functions::Random(concentration0, Ca, A_C, range_C);
-        }
-        if (m_string_solver == SolverTypes::NSTempSolver or \
-            m_string_solver == SolverTypes::NSTempConSolver or \
-            m_string_solver == SolverTypes::NSTempTurbConSolver or \
-            m_string_solver == SolverTypes::NSTempTurbSolver) {
+            Functions::Uniform(T0, val);
+            if (random) {
+                CallRandom(T0);
+            }
             force_source();
             temperature_source();
         }
@@ -378,19 +352,10 @@ void ISolver::init() {
             m_string_solver == SolverTypes::NSTempConSolver or \
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::Layers(T);
-            force_source();
-            temperature_source();
-        }
-    } else if (string_init_usr_fct == "LayersT,RandomT") {
-        if (m_string_solver == SolverTypes::NSTempSolver or \
-            m_string_solver == SolverTypes::NSTempConSolver or \
-            m_string_solver == SolverTypes::NSTempTurbConSolver or \
-            m_string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::Layers(T);
-            real A = params->get_real("initial_conditions/A");        //amplitude
-            size_t range = static_cast<size_t>(params->get_real("initial_conditions/range"));    //range of random numbers (0-range)
-            Functions::Random(T, T, A, range);
+            Functions::Layers(T0);
+            if (random) {
+                CallRandom(T0);
+            }
             force_source();
             temperature_source();
         }
@@ -420,6 +385,14 @@ void ISolver::init() {
             std::cout << "Initial values all set to zero!" << std::endl;
             //TODO Logger
 #endif
+        }
+        //Random concentration
+        if ((m_string_solver == SolverTypes::NSTempConSolver or \
+             m_string_solver == SolverTypes::NSTempTurbConSolver)
+            and params->get("initial_conditions/con_fct") == FunctionNames::RandomC) {
+            real Ca = params->get_real("initial_conditions/Ca");        //ambient concentration
+            Functions::Uniform(concentration0, Ca);
+            CallRandom(concentration0);
         }
     }
 
@@ -955,4 +928,29 @@ void ISolver::momentum_source() {
     if (dir_vel.find('z') != std::string::npos) {
         source_velocity->buoyancy_force(f_z, T, T_ambient);
     }
+}
+
+//======================================= read and call random function ==================================
+// ***************************************************************************************
+/// \brief  Calls random function and reads necessary input variables
+/// \param  field		field as a pointer
+// ***************************************************************************************
+void ISolver::CallRandom(Field* field) {
+  auto params = Parameters::getInstance();
+  real range = params->get_real("initial_conditions/random/range"); // +- range of random numbers
+  bool is_absolute = params->get("initial_conditions/random/absolute") == "Yes";
+  bool has_custom_seed = params->get("initial_conditions/random/custom_seed") == "Yes";
+  bool has_custom_steps = params->get("initial_conditions/random/custom_steps") == "Yes";
+
+  int seed = -1;
+  if (has_custom_seed){
+      seed = params->get_int("initial_conditions/random/seed");
+  }
+
+  real step_size = 1.0;
+  if(has_custom_steps){
+      step_size = params->get_real("initial_conditions/random/step_size");
+  }
+
+  Functions::Random(field, range, is_absolute, seed, step_size);
 }
