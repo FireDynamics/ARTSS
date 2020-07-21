@@ -389,7 +389,7 @@ function create_testcases {
     NAMEVALUES[$INDEX]=NavierStokesTempTurb_Steckler
     FPATHVALUES[$INDEX]=examples
     NAME=${NAMEVALUES[$INDEX]}
-    BUILDER[$INDEX]="./xml-builder.sh --nstt --tend 1800. --dt 0.05 --nu 3.1e-5 --beta 3.34e-3 --g -9.81 --kappa 4.2e-5 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 5 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --prt 0.5 --solavail No  --xstart -2.8 --xend 4.2 --ystart 0. --yend 4.26 --zstart -2.8 --zend 2.8 --nx 160 --ny 128 --nz 128 --vtkplots 100"
+    BUILDER[$INDEX]="./xml-builder.sh --nstt --tend 1800. --dt 0.05 --nu 3.1e-5 --beta 3.34e-3 --g -9.81 --kappa 4.2e-5 --advectiontype SemiLagrangian --diffusiontype Explicit --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 3 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Explicit --prt 0.5 --solavail No  --xstart -2.8 --xend 4.2 --ystart 0. --yend 4.26 --zstart -2.8 --zend 2.8 --nx 160 --ny 128 --nz 128 --vtkplots 100"
 
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,bottom,top,left,right\" type=\"dirichlet\" value=\"0.0\" />        
