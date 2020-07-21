@@ -87,7 +87,6 @@
     <boundary field="T" patch="front,back,top,left,right" type="dirichlet" value="299.14" />
     <boundary field="T" patch="bottom" type="neumann" value="0.0" />
   </boundaries>
-
   <obstacles enabled="Yes">
     <obstacle> <!-- left wall -->
       <geometry ox1="-1.6625" ox2="-1.4" oy1="0." oy2="2.13" oz1="-1.4" oz2="1.4"/>
@@ -134,7 +133,7 @@
     <range> 1 </range>
   </initial_conditions>
 
-  <visualisation save_csv="No" save_vtk="Yes">
+  <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 100 </vtk_nth_plot>
   </visualisation>
 </ARTSS>
