@@ -1,7 +1,7 @@
-/// \file 		ObstacleBoundary.cpp
-/// \brief 		Applies boundary condition for obstacle boundary
-/// \date 		Feb 03, 2020
-/// \author 	My Linh Würzburger
+/// \file 		  ObstacleBoundary.cpp
+/// \brief 		  Applies boundary condition for obstacle boundary
+/// \date 		  Feb 03, 2020
+/// \author 	  My Linh Würzburger
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 #include "ObstacleBoundary.h"
 #include "../Domain.h"
@@ -59,8 +59,8 @@ void ObstacleBoundary::applyBoundaryCondition(real *dataField, const size_t *d_p
     size_t bsize = domain->get_size(level);
 #pragma acc data present(dataField[:bsize])
     {
-#pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
-        for (size_t j = patch_start; j < patch_end; ++j) {
+#pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start+1)]) async
+        for (size_t j = patch_start; j <= patch_end; ++j) { // <= because in patch_end is last index of the patch, so its inclusive
             const size_t index = d_patch[j];
             dataField[index] = sign * dataField[index + referenceIndex] + value;
         }
