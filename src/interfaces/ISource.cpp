@@ -199,13 +199,13 @@ void ISource::gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, re
 #pragma acc loop independent
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_iList[l];
-            k = idx / (Nx * Ny);
-            j = (idx - k * Nx * Ny) / Nx;
-            i = idx - k * Nx * Ny - j * Nx;
+            k = getCoordinateK(idx, Nx, Ny);
+            j = getCoordinateJ(idx, Nx, Ny, k);
+            i = getCoordinateI(idx, Nx, Ny, j, k);
 
-            real expr = std::exp(-(r_sigma_x_2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))
-                                    + r_sigma_y_2 * ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0))
-                                    + r_sigma_z_2 * ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0))));
+            real expr = std::exp(-(((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0)) / sigma_x_2
+                                    + ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0)) / sigma_y_2
+                                    + ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0)) / sigma_z_2));
             V += expr * dx * dy * dz;
         }
 
@@ -218,13 +218,13 @@ void ISource::gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, re
 #pragma acc loop independent
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_iList[l];
-            k = idx / (Nx * Ny);
-            j = (idx - k * Nx * Ny) / Nx;
-            i = idx - k * Nx * Ny - j * Nx;
+            k = getCoordinateK(idx, Nx, Ny);
+            j = getCoordinateJ(idx, Nx, Ny, k);
+            i = getCoordinateI(idx, Nx, Ny, j, k);
 
-            real expr = std::exp(-(r_sigma_x_2 * ((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0))
-                                    + r_sigma_y_2 * ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0))
-                                    + r_sigma_z_2 * ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0))));
+            real expr = std::exp(-(((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0)) / sigma_x_2
+                                    + ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0)) / sigma_y_2
+                                    + ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0)) / sigma_z_2));
             d_out[idx] = HRRrV * rcp * expr;
         }
 
