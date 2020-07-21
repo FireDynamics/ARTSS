@@ -397,10 +397,13 @@ function create_testcases {
     <boundary field=\"T\" patch=\"front,back,top,left,right\" type=\"dirichlet\" value=\"299.14\" />
     <boundary field=\"T\" patch=\"bottom\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"RandomT\">
-    <Ta> 299.14 </Ta>
-    <A> 0. </A>
-    <range> 1 </range>
+    echo "  <initial_conditions usr_fct = \"Uniform\" random = \"Yes\">
+    <val> 299.14 </val>
+    <random absolute=\"Yes\" custom_seed=\"Yes\" custom_steps=\"Yes\">
+      <seed> 0 </seed>
+      <step_size> 0.1 </step_size>
+      <range> 1 </range>
+    </random>
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
