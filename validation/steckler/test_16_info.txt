@@ -1,0 +1,22 @@
+Info of Test case 16:
+
+Table B-12, p.44
+
+Delta X = 0.095 m
+Delta Z = 0.114 m
+Z_n = 1.048 m
+
+Outflow rate = 0.637 kg/s
+Inflow rate = 0.594 kg/s
+Outdoor temperature = 21.5-25.6°C
+
+Opening Configuration: 7/6 Door
+Fire Strength Q [kw]: 62.9
+Fire Location: A
+Air Mass Flow Rate m_a [kg/s]: 0.616
+Neutral Plane Location N/H_o: 0.573
+Thermal Interface Height Z_i [m]: 1.03 +/- 0.17
+Avg. Temp of Upper Gas Layer T_u [°C]: 120
+Avg. Temp of Lower Gas Layer T_l [°C]: 44
+Ambient Temperature T_inf [°C]: 26
+Maximum Mixing Rate (m_j) max [kg/s]: 0.146
