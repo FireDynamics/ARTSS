@@ -340,9 +340,9 @@ void ISolver::init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             real val = params->get_real("initial_conditions/val");
-            Functions::Uniform(T0, val);
+            Functions::Uniform(T, val);
             if (random) {
-                CallRandom(T0);
+                CallRandom(T);
             }
             force_source();
             temperature_source();
@@ -352,9 +352,9 @@ void ISolver::init() {
             m_string_solver == SolverTypes::NSTempConSolver or \
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::Layers(T0);
+            Functions::Layers(T);
             if (random) {
-                CallRandom(T0);
+                CallRandom(T);
             }
             force_source();
             temperature_source();
