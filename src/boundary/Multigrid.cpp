@@ -5,6 +5,7 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
+#include <algorithm>
 #include "Multigrid.h"
 #include "../Domain.h"
 #include "../utility/Utility.h"
@@ -366,6 +367,28 @@ void Multigrid::control() {
         }
     }
 
+    {
+        std::vector<size_t> v(m_data_MG_oList_zero_joined, m_data_MG_oList_zero_joined + getSize_obstacleList());
+        std::sort(v.begin(), v.end());
+        std::vector<size_t>::iterator it = std::unique(v.begin(), v.begin() + getSize_obstacleList());
+        v.resize(std::distance(v.begin(), it));
+        if (v.size() != getSize_obstacleList()) {
+            message += "obstacles are not allowed to overlap in level 0! difference: " + std::to_string(getSize_obstacleList()- v.size()) + "\n";
+
+            for (size_t i = 0; i < m_numberOfObstacles; i++){
+                Obstacle *o1 = m_MG_obstacleList[0][i];
+                size_t  size1 = o1->getSize_obstacleList();
+                for (size_t j = i+1; j < m_numberOfObstacles; j++) {
+                    Obstacle *o2 = m_MG_obstacleList[0][j];
+                    size_t size2 = o2->getSize_obstacleList();
+                    std::vector<size_t> tmp = Utility::mergeSortedListsToUniqueList(o1->getObstacleList(), size1, o2->getObstacleList(), size2);
+                    if (tmp.size() != size1 + size2){
+                        message += "Obstacles " + std::to_string(i) + " and " + std::to_string(j) + "are overlapping\n";
+                    }
+                }
+            }
+        }
+    }
     if (!message.empty()) {
         message = "################ MULTIGRID CONTROL ################\n" + message + "---------------- MULTIGRID CONTROL END ----------------";
         std::cout << message << std::endl;
@@ -525,14 +548,15 @@ void Multigrid::calcObstacles(Obstacle **obstacleList) {
         size_t level = 0;
         size_t o_size = getSize_oList(level);
         size_t *oList = new size_t[o_size];
+        size_t counter = 0;
         for (size_t o = 0; o < m_numberOfObstacles; o++) {
             Obstacle *obstacle_tmp = obstacleList[o];
             size_t len_all = obstacle_tmp->getSize_obstacleList();
             for (size_t i = 0; i < len_all; i++) {
-                *(oList + i) = obstacle_tmp->getObstacleList()[i];
+                *(oList + counter) = obstacle_tmp->getObstacleList()[i];
+                counter++;
             }
         }
-        *(m_size_MG_oList_level) = o_size;
         *(m_MG_oList) = oList;
     }
 }
