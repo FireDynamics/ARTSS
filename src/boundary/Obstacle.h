@@ -59,7 +59,7 @@ private:
     size_t m_level = 0;
 
     size_t* m_obstacleList;
-    size_t* m_obstacleBoundaryList;
+    //size_t* m_obstacleBoundaryList;
     size_t* m_obstacleFront;
     size_t* m_obstacleBack;
     size_t* m_obstacleTop;
@@ -69,7 +69,7 @@ private:
     //size_t* m_obstacleInner;
 
     size_t m_size_obstacleList;
-    size_t m_size_obstacleBoundaryList;
+    //size_t m_size_obstacleBoundaryList;
     //size_t m_size_obstacleInner;
 
     //actual size
