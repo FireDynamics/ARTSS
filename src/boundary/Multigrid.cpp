@@ -517,77 +517,23 @@ void Multigrid::addMGLists() {
 
 // ================================= Calc obstacles ==========================================
 // ***************************************************************************************
-/// \brief  create obstacles of level 0
+/// \brief  create obstacles of level 0, no check if obstacles are overlapping
 /// \param obstacleList List of obstacle objects
 // ***************************************************************************************
 void Multigrid::calcObstacles(Obstacle **obstacleList) {
     if (m_numberOfObstacles > 0) {
         size_t level = 0;
-        size_t *oList = new size_t[getSize_oList(level)];
-     //   size_t *oFront = new size_t[getLen_oFront(level)];
-     //   size_t *oBack = new size_t[getLen_oBack(level)];
-     //   size_t *oBottom = new size_t[getLen_oBottom(level)];
-     //   size_t *oTop = new size_t[getLen_oTop(level)];
-     //   size_t *oLeft = new size_t[getLen_oLeft(level)];
-     //   size_t *oRight = new size_t[getLen_oRight(level)];
-
-//TODO notwendig?
+        size_t o_size = getSize_oList(level);
+        size_t *oList = new size_t[o_size];
         for (size_t o = 0; o < m_numberOfObstacles; o++) {
             Obstacle *obstacle_tmp = obstacleList[o];
-
-       //     size_t len_front = obstacle_tmp->getSize_obstacleFront();
-       //     for (size_t i = 0; i < len_front; i++) {
-       //         oFront[i] = obstacle_tmp->getObstacleFront()[i];
-       //     }
-       //     size_t len_back = obstacle_tmp->getSize_obstacleBack();
-       //     for (size_t i = 0; i < len_back; i++) {
-       //         *(oBack + i) = obstacle_tmp->getObstacleBack()[i];
-       //     }
-       //     //*(m_size_MG_oSliceZ_level + o + 1) = counter_z;
-       //     size_t len_bottom = obstacle_tmp->getSize_obstacleBottom();
-       //     for (size_t i = 0; i < len_bottom; i++) {
-       //         *(oBottom + i) = obstacle_tmp->getObstacleBottom()[i];
-       //     }
-       //     size_t len_top = obstacle_tmp->getSize_obstacleTop();
-       //     for (size_t i = 0; i < len_top; i++) {
-       //         *(oTop + i) = obstacle_tmp->getObstacleTop()[i];
-       //     }
-       //     //*(m_size_MG_oSliceY_level + o + 1) = counter_y;
-       //     size_t len_left = obstacle_tmp->getSize_obstacleLeft();
-       //     for (size_t i = 0; i < len_left; i++) {
-       //         *(oLeft + i) = obstacle_tmp->getObstacleLeft()[i];
-       //     }
-       //     size_t len_right = obstacle_tmp->getSize_obstacleRight();
-       //     for (size_t i = 0; i < len_right; i++) {
-       //         *(oRight + i) = obstacle_tmp->getObstacleRight()[i];
-       //     }
-            //*(m_size_MG_oSliceX_level + o + 1) = counter_x;
             size_t len_all = obstacle_tmp->getSize_obstacleList();
             for (size_t i = 0; i < len_all; i++) {
                 *(oList + i) = obstacle_tmp->getObstacleList()[i];
             }
         }
-        std::vector<size_t> data;
-        size_t *list = obstacleList[0]->getObstacleList();
-        size_t size = obstacleList[0]->getSize_obstacleList();
-        data.assign(list, list+size);
-        for (size_t o = 1; o < m_numberOfObstacles; o++) {
-            Obstacle *obstacle = obstacleList[o];
-            data = Utility::mergeSortedListsToUniqueList(list, size, obstacle->getObstacleList(), obstacle->getSize_obstacleList());
-            list = data.data();
-            size = data.size();
-        }
-        delete[] oList;
-        size_t *oList_tmp = new size_t[size];
-        std::copy(&data[0], &data[size], oList_tmp);
-        *(m_size_MG_oList_level) = size;
-        *(m_MG_oList) = oList_tmp;
-       // *(m_MG_oFront) = oFront;
-       // *(m_MG_oBack) = oBack;
-       // *(m_MG_oBottom) = oBottom;
-       // *(m_MG_oTop) = oTop;
-       // *(m_MG_oLeft) = oLeft;
-       // *(m_MG_oRight) = oRight;
+        *(m_size_MG_oList_level) = o_size;
+        *(m_MG_oList) = oList;
     }
 }
 
@@ -676,7 +622,7 @@ void Multigrid::surfaceDominantRestriction(size_t level) {
 /// \param level Multigrid level
 /// \return Obstacle** list of created obstacles
 // ***************************************************************************************
-Obstacle **Multigrid::obstacleDominantRestriction(size_t level) {
+Obstacle** Multigrid::obstacleDominantRestriction(size_t level) {
 // OBSTACLES
     // add index to m_oLists if any of l-1 indices building the l index was an obstacle (dominant restriction)
     if (m_numberOfObstacles == 0) {
@@ -979,11 +925,14 @@ void Multigrid::applyBoundaryCondition(real *d, size_t level, FieldType f, bool 
         }
     }
     if (m_numberOfObstacles > 0) {
-        for (size_t id = 0; id < m_numberOfObstacles; ++id) {
-            size_t opatch_start[] = {getFirstIndex_oFront(level, id), getFirstIndex_oBack(level, id), getFirstIndex_oBottom(level, id), getFirstIndex_oTop(level, id), getFirstIndex_oLeft(level, id), getFirstIndex_oRight(level, id),};
-            size_t opatch_end[] = {getLastIndex_oFront(level, id), getLastIndex_oBack(level, id), getLastIndex_oBottom(level, id), getLastIndex_oTop(level, id), getLastIndex_oLeft(level, id), getLastIndex_oRight(level, id),};
+        for (size_t id = 0; id < m_numberOfObstacles - 1; ++id) {
+            size_t opatch_start[] = {getFirstIndex_oFront(level, id), getFirstIndex_oBack(level, id), getFirstIndex_oBottom(level, id), getFirstIndex_oTop(level, id), getFirstIndex_oLeft(level, id), getFirstIndex_oRight(level, id)};
+            size_t opatch_end[] = {getFirstIndex_oFront(level, id+1), getFirstIndex_oBack(level, id+1), getFirstIndex_oBottom(level, id+1), getFirstIndex_oTop(level, id+1), getFirstIndex_oLeft(level, id+1), getFirstIndex_oRight(level, id+1)};
             ((BoundaryDataController *) *(m_bdc_obstacle + id))->applyBoundaryConditionObstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, id, sync);
         }
+        size_t opatch_start[] = {getFirstIndex_oFront(level, m_numberOfObstacles-1), getFirstIndex_oBack(level, m_numberOfObstacles-1), getFirstIndex_oBottom(level, m_numberOfObstacles-1), getFirstIndex_oTop(level, m_numberOfObstacles-1), getFirstIndex_oLeft(level, m_numberOfObstacles-1), getFirstIndex_oRight(level, m_numberOfObstacles-1)};
+        size_t opatch_end[] = {getFirstIndex_oFront(level+1, 0), getFirstIndex_oBack(level+1, 0), getFirstIndex_oBottom(level+1, 0), getFirstIndex_oTop(level+1, 0), getFirstIndex_oLeft(level+1, 0), getFirstIndex_oRight(level+1, 0)};
+        ((BoundaryDataController *) *(m_bdc_obstacle + m_numberOfObstacles-1))->applyBoundaryConditionObstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, m_numberOfObstacles-1, sync);
     }
 }
 
@@ -1506,13 +1455,10 @@ size_t Multigrid::getFirstIndex_oRight(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // ***************************************************************************************
-size_t Multigrid::getLastIndex_oFront(size_t level, size_t id) {
-    size_t index = 0;
+int Multigrid::getLastIndex_oFront(size_t level, size_t id) {
+    int index = 0;
     if (m_numberOfObstacles > 0) {
         index = m_size_MG_oFront_level[level * m_numberOfObstacles + id + 1];
-        if (index > 0) {
-            index = m_size_MG_oFront_level[level * m_numberOfObstacles + id + 1] - 1;
-        }
     }
     return index;
 }
@@ -1523,13 +1469,10 @@ size_t Multigrid::getLastIndex_oFront(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // ***************************************************************************************
-size_t Multigrid::getLastIndex_oBack(size_t level, size_t id) {
-    size_t index = 0;
+int Multigrid::getLastIndex_oBack(size_t level, size_t id) {
+    int index = 0;
     if (m_numberOfObstacles > 0) {
         index = m_size_MG_oBack_level[level * m_numberOfObstacles + id + 1];
-        if (index > 0) {
-            index = m_size_MG_oBack_level[level * m_numberOfObstacles + id + 1] - 1;
-        }
     }
     return index;
 }
@@ -1540,13 +1483,10 @@ size_t Multigrid::getLastIndex_oBack(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // ***************************************************************************************
-size_t Multigrid::getLastIndex_oBottom(size_t level, size_t id) {
+int Multigrid::getLastIndex_oBottom(size_t level, size_t id) {
     size_t index = 0;
     if (m_numberOfObstacles > 0) {
-        index = m_size_MG_oBottom_level[level * m_numberOfObstacles + id + 1];
-        if (index > 0) {
-            index = m_size_MG_oBottom_level[level * m_numberOfObstacles + id + 1] - 1;
-        }
+        index = m_size_MG_oBottom_level[level * m_numberOfObstacles + id + 1] - 1;
     }
     return index;
 }
@@ -1555,15 +1495,12 @@ size_t Multigrid::getLastIndex_oBottom(size_t level, size_t id) {
 /// \brief get the index of joined obstacle cell list of top patch of the last cell of of level l
 /// \param level Multigrid level
 /// \param id ID of obstacle
-/// \return size_t
+/// \return int
 // ***************************************************************************************
-size_t Multigrid::getLastIndex_oTop(size_t level, size_t id) {
-    size_t index = 0;
+int Multigrid::getLastIndex_oTop(size_t level, size_t id) {
+    int index = 0;
     if (m_numberOfObstacles > 0) {
-        index = m_size_MG_oTop_level[level * m_numberOfObstacles + id + 1];
-        if (index > 0) {
-            index = m_size_MG_oTop_level[level * m_numberOfObstacles + id + 1] - 1;
-        }
+        index = m_size_MG_oTop_level[level * m_numberOfObstacles + id + 1] - 1;
     }
     return index;
 }
@@ -1572,15 +1509,12 @@ size_t Multigrid::getLastIndex_oTop(size_t level, size_t id) {
 /// \brief get the index of joined obstacle cell list of left patch of the last cell of of level l
 /// \param level Multigrid level
 /// \param id ID of obstacle
-/// \return size_t
+/// \return int
 // ***************************************************************************************
-size_t Multigrid::getLastIndex_oLeft(size_t level, size_t id) {
-    size_t index = 0;
+int Multigrid::getLastIndex_oLeft(size_t level, size_t id) {
+    int index = 0;
     if (m_numberOfObstacles > 0) {
         index = m_size_MG_oLeft_level[level * m_numberOfObstacles + id + 1];
-        if (index > 0) {
-            index = m_size_MG_oLeft_level[level * m_numberOfObstacles + id + 1] - 1;
-        }
     }
     return index;
 }
@@ -1589,15 +1523,12 @@ size_t Multigrid::getLastIndex_oLeft(size_t level, size_t id) {
 /// \brief get the index of joined obstacle cell list of right patch of the last cell of of level l
 /// \param level Multigrid level
 /// \param id ID of obstacle
-/// \return size_t
+/// \return int
 // ***************************************************************************************
-size_t Multigrid::getLastIndex_oRight(size_t level, size_t id) {
-    size_t index = 0;
+int Multigrid::getLastIndex_oRight(size_t level, size_t id) {
+    int index = 0;
     if (m_numberOfObstacles > 0) {
         index = m_size_MG_oRight_level[level * m_numberOfObstacles + id + 1];
-        if (index > 0) {
-            index = m_size_MG_oRight_level[level * m_numberOfObstacles + id + 1] - 1;
-        }
     }
     return index;
 }

@@ -60,17 +60,11 @@ private:
     //surface indices divided by level
     size_t** m_MG_sList;
 
-  //  //----- patches divided by level (obstacle indices)
-  //  size_t** m_MG_oFront;
-  //  size_t** m_MG_oBack;
-  //  size_t** m_MG_oBottom;
-  //  size_t** m_MG_oTop;
-  //  size_t** m_MG_oLeft;
-  //  size_t** m_MG_oRight;
-
     // start index of each level in level joined list
     size_t* m_size_MG_iList_level;
     size_t* m_size_MG_bList_level;
+    size_t* m_size_MG_oList_level;
+    size_t* m_size_MG_sList_level;
 
     // start index of each boundary object in level joined list (SliceZ = Front/Back, SliceY = Bottom/Top, SliceX = Left/Right)
     size_t* m_size_MG_bSliceZ_level;
@@ -84,10 +78,6 @@ private:
     size_t* m_size_MG_oBottom_level;
     size_t* m_size_MG_oLeft_level;
     size_t* m_size_MG_oRight_level;
-
-
-    size_t* m_size_MG_sList_level;
-    size_t* m_size_MG_oList_level;
 
     //---- all level joined / arrays for GPU -----
     size_t* m_data_MG_iList_level_joined;
@@ -110,12 +100,12 @@ private:
     size_t* m_data_MG_oList_zero_joined;
 
     size_t getSize_oList(size_t level);
-    size_t getLastIndex_oFront( size_t level, size_t id);
-    size_t getLastIndex_oBack( size_t level, size_t id);
-    size_t getLastIndex_oBottom( size_t level, size_t id);
-    size_t getLastIndex_oTop( size_t level, size_t id);
-    size_t getLastIndex_oLeft( size_t level, size_t id);
-    size_t getLastIndex_oRight( size_t level, size_t id);
+    int getLastIndex_oFront( size_t level, size_t id);
+    int getLastIndex_oBack( size_t level, size_t id);
+    int getLastIndex_oBottom( size_t level, size_t id);
+    int getLastIndex_oTop( size_t level, size_t id);
+    int getLastIndex_oLeft( size_t level, size_t id);
+    int getLastIndex_oRight( size_t level, size_t id);
     size_t getFirstIndex_oFront(size_t level, size_t id);
     size_t getFirstIndex_oBack( size_t level, size_t id);
     size_t getFirstIndex_oBottom( size_t level, size_t id);
