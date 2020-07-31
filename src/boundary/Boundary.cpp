@@ -124,31 +124,31 @@ void Boundary::control(size_t size_obstacles) {
     size_t startIndex = IX((domain->get_index_x1(m_level) - 1), (domain->get_index_y1(m_level) - 1), (domain->get_index_z1(m_level) - 1), Nx, Ny);
     size_t endIndex = IX((domain->get_index_x2(m_level) + 1), (domain->get_index_y2(m_level) + 1), (domain->get_index_z2(m_level) + 1), Nx, Ny);
     if (*(m_boundaryList) != startIndex || *(m_boundaryList + m_size_boundaryList - 1) != endIndex){
-        message = message + "first or last index of boundary list not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryList)) + "(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryList + m_size_boundaryList - 1)) + "\n";
+        message = message + "first or last index of boundary list not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryList)) + ")(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryList + m_size_boundaryList - 1)) + ")\n";
     }
     size_t front2 = IX(domain->get_index_x2(m_level) + 1, domain->get_index_y2(m_level) + 1, domain->get_index_z1(m_level) - 1, Nx, Ny);
     if (*(m_boundaryFront) != startIndex || *(m_boundaryFront + m_size_boundaryFront - 1) != front2){
-        message = message + "first or last index of boundary Front not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryFront)) + "(" + std::to_string(front2) + "|" + std::to_string(*(m_boundaryFront + m_size_boundaryFront - 1)) + "\n";
+        message = message + "first or last index of boundary Front not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryFront)) + ")(" + std::to_string(front2) + "|" + std::to_string(*(m_boundaryFront + m_size_boundaryFront - 1)) + ")\n";
     }
     size_t back1 = IX(domain->get_index_x1(m_level) - 1, domain->get_index_y1(m_level) - 1 , domain->get_index_z2(m_level) + 1, Nx, Ny);
     if (*(m_boundaryBack) != back1 || *(m_boundaryBack + m_size_boundaryBack - 1) != endIndex){
-        message = message + "first or last index of boundary Back not correct (" + std::to_string(back1) + "|" + std::to_string(*(m_boundaryBack)) + "(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryBack + m_size_boundaryBack - 1)) + "\n";
+        message = message + "first or last index of boundary Back not correct (" + std::to_string(back1) + "|" + std::to_string(*(m_boundaryBack)) + ")(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryBack + m_size_boundaryBack - 1)) + ")\n";
     }
     size_t bottom2 = IX(domain->get_index_x2(m_level) + 1, domain->get_index_y1(m_level) - 1, domain->get_index_z2(m_level) + 1, Nx, Ny);
     if (*(m_boundaryBottom) != startIndex || *(m_boundaryBottom + m_size_boundaryBottom - 1) != bottom2){
-        message = message + "first or last index of boundary Bottom not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryBottom)) + "(" + std::to_string(bottom2) + "|" + std::to_string(*(m_boundaryBottom + m_size_boundaryBottom - 1)) + "\n";
+        message = message + "first or last index of boundary Bottom not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryBottom)) + ")(" + std::to_string(bottom2) + "|" + std::to_string(*(m_boundaryBottom + m_size_boundaryBottom - 1)) + ")\n";
     }
     size_t top1 = IX(domain->get_index_x1(m_level) - 1, domain->get_index_y2(m_level) + 1, domain->get_index_z1(m_level) - 1, Nx, Ny);
     if (*(m_boundaryTop) !=  top1 || *(m_boundaryTop + m_size_boundaryTop - 1) != endIndex){
-        message = message + "first or last index of boundary Back not correct (" + std::to_string(top1) + "|" + std::to_string(*(m_boundaryBack)) + "(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryBack + m_size_boundaryBack - 1)) + "\n";
+        message = message + "first or last index of boundary Top not correct (" + std::to_string(top1) + "|" + std::to_string(*(m_boundaryTop)) + ")(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryTop + m_size_boundaryTop - 1)) + ")\n";
     }
     size_t left2 = IX(domain->get_index_x1(m_level) - 1, domain->get_index_y2(m_level) + 1, domain->get_index_z2(m_level) + 1, Nx, Ny);
     if (*(m_boundaryLeft) != startIndex || *(m_boundaryLeft + m_size_boundaryLeft - 1) != left2){
-        message = message + "first or last index of boundary Left not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryLeft)) + "(" + std::to_string(left2) + "|" + std::to_string(*(m_boundaryLeft + m_size_boundaryLeft - 1)) + "\n";
+        message = message + "first or last index of boundary Left not correct (" + std::to_string(startIndex) + "|" + std::to_string(*(m_boundaryLeft)) + ")(" + std::to_string(left2) + "|" + std::to_string(*(m_boundaryLeft + m_size_boundaryLeft - 1)) + ")\n";
     }
     size_t right1 = IX(domain->get_index_x2(m_level) + 1, domain->get_index_y1(m_level) - 1, domain->get_index_z1(m_level) - 1, Nx, Ny);
     if (*(m_boundaryRight) != right1 || *(m_boundaryRight + m_size_boundaryRight - 1) != endIndex){
-        message = message + "first or last index of boundary Right not correct (" + std::to_string(right1) + "|" + std::to_string(*(m_boundaryRight)) + "(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryRight + m_size_boundaryRight - 1)) + "\n";
+        message = message + "first or last index of boundary Right not correct (" + std::to_string(right1) + "|" + std::to_string(*(m_boundaryRight)) + ")(" + std::to_string(endIndex) + "|" + std::to_string(*(m_boundaryRight + m_size_boundaryRight - 1)) + ")\n";
     }
 
     for (size_t i = 1; i < m_size_boundaryList; i++) {
@@ -303,6 +303,7 @@ void Boundary::innerCells(Obstacle **obstacleList, size_t numberOfObstacles) {
     size_t Ny = domain->get_Ny(m_level);
 
     size_t counter = 0;
+    size_t counter_obstacle = 0;
     for (size_t k = k1; k <= k2; ++k) {
         for (size_t j = j1; j <= j2; ++j) {
             for (size_t i = i1; i <= i2; ++i) {
@@ -311,6 +312,7 @@ void Boundary::innerCells(Obstacle **obstacleList, size_t numberOfObstacles) {
                 for (size_t o = 0; o < numberOfObstacles && isInnerCell; o++) {
                     if (obstacleList[o]->isObstacleCell(i, j, k)) {
                         isInnerCell = false;
+                        counter_obstacle++;
                     }
                 }
                 if (isInnerCell) {
