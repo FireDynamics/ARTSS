@@ -1143,16 +1143,17 @@ namespace Functions {
           std::random_device rd;
           mt = std::mt19937(rd());
         }
-        std::uniform_int_distribution<int> dist(steps, steps);
+        std::uniform_int_distribution<int> dist(-steps, steps);
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
             // generate secret number between -range and range:
+            real no = dist(mt);
             if (is_absolute) {
-                out->data[idx] += (dist(mt)*step_size);
+                out->data[idx] += (no * step_size);
             } else {
-                out->data[idx] *= (1 + dist(mt)*step_size);
+                out->data[idx] *= (1 + no*step_size);
             }
         }
         // boundary cells
