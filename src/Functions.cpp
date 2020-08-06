@@ -1147,7 +1147,7 @@ namespace Functions {
           std::random_device rd;
           mt = std::mt19937(rd());
         }
-        std::uniform_int_distribution<int> dist(steps, steps);
+        std::uniform_int_distribution<int> dist(-steps, steps);
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
