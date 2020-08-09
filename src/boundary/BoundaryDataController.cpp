@@ -20,7 +20,7 @@ BoundaryDataController::BoundaryDataController() {
     }
 }
 
-BoundaryDataController::~BoundaryDataController(){
+BoundaryDataController::~BoundaryDataController() {
     for (size_t i = 0; i < numberOfFieldTypes; i++) {
         delete m_boundaryData[i];
     }
@@ -98,4 +98,14 @@ void BoundaryDataController::applyBoundaryConditionObstacle(real *data, size_t *
     if (!((BoundaryData *) *(m_boundaryData + fieldType))->isEmpty()) {
         ObstacleBoundary::applyBoundaryCondition(data, indexFields, patch_start, patch_end, level, m_boundaryData[fieldType], id, sync);
     }
+}
+
+std::vector<FieldType> BoundaryDataController::get_used_fields() {
+    std::vector<FieldType> v_fields;
+    for (size_t fieldType = 0; fieldType < numberOfFieldTypes; fieldType++) {
+        if (!((BoundaryData *) *(m_boundaryData + fieldType))->isEmpty()){
+            v_fields.push_back(static_cast<FieldType>(fieldType));
+        }
+    }
+    return v_fields;
 }

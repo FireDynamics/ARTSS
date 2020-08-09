@@ -7,6 +7,7 @@
 #include "BoundaryController.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
+#include <tuple>
 #include "../utility/Utility.h"
 #include <algorithm>
 
@@ -14,7 +15,7 @@ BoundaryController *BoundaryController::singleton = nullptr; // Singleton
 
 
 BoundaryController::BoundaryController() {
-#ifndef PROFILING
+#ifndef BENCHMARKING
     m_logger = Utility::createLogger(typeid(this).name());
 #endif
     m_bdc_boundary = new BoundaryDataController();
@@ -35,10 +36,9 @@ BoundaryController::BoundaryController() {
 // ***************************************************************************************
 void BoundaryController::readXML() {
     auto params = Parameters::getInstance();
-    tinyxml2::XMLElement* rootElement = params->getRootElement();
-    parseBoundaryParameter(rootElement->FirstChildElement("boundaries"));
-    parseObstacleParameter(rootElement->FirstChildElement("obstacles"));
-    parseSurfaceParameter(rootElement->FirstChildElement("surfaces"));
+    parseBoundaryParameter(params->get_first_child("boundaries"));
+    parseObstacleParameter(params->get_first_child("obstacles"));
+    parseSurfaceParameter( params->get_first_child("surfaces"));
 }
 
 // ================================= Parser =============================================
@@ -257,4 +257,8 @@ size_t BoundaryController::getObstacleStrideY(size_t id, size_t level){
 }
 size_t BoundaryController::getObstacleStrideZ(size_t id, size_t level){
     return m_multigrid->getObstacleStrideZ(id, level);
+}
+
+std::vector<FieldType> BoundaryController::get_used_fields() {
+    return m_bdc_boundary->get_used_fields();
 }

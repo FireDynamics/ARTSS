@@ -40,6 +40,7 @@
 #endif
 
 
+// TODO(n167h7): DELETE
 //================================= parse params =============================
 // ***************************************************************************
 /// \brief parses arguments provided to the program for logging
@@ -59,49 +60,38 @@ std::shared_ptr<spdlog::logger> installLogger(std::string XMLfilename) {
 }
 
 int main(int argc, char **argv) {
-    // 0. Initialization
+    // Initialization
     // Parameters
-    std::string XMLfilename;
-
+    std::string XML_filename;
     if (argc > 1) {
-        XMLfilename.assign(argv[1]);
+        XML_filename.assign(argv[1]);
+        installLogger(XML_filename);  // TODO(n167h7): DELETE
     } else {
         std::cerr << "XML file missing" << std::endl;
         std::exit(1);
     }
-
     auto params = Parameters::getInstance();
-    params->parse(XMLfilename);
+    params->parse(XML_filename);
 
-    ISolver* solver;
+    // Solver
+    ISolver *solver;
     std::string string_solver = params->get("solver/description");
-    if      (string_solver == SolverTypes::DiffusionSolver)          solver = new DiffusionSolver();
-    else if (string_solver == SolverTypes::AdvectionSolver)          solver = new AdvectionSolver();
+    if (string_solver == SolverTypes::DiffusionSolver) solver = new DiffusionSolver();
+    else if (string_solver == SolverTypes::AdvectionSolver) solver = new AdvectionSolver();
     else if (string_solver == SolverTypes::AdvectionDiffusionSolver) solver = new AdvectionDiffusionSolver();
-    else if (string_solver == SolverTypes::PressureSolver)           solver = new PressureSolver();
-    else if (string_solver == SolverTypes::DiffusionTurbSolver)      solver = new DiffusionTurbSolver();
-    else if (string_solver == SolverTypes::NSSolver)                 solver = new NSSolver();
-    else if (string_solver == SolverTypes::NSTurbSolver)             solver = new NSTurbSolver();
-    else if (string_solver == SolverTypes::NSTempSolver)             solver = new NSTempSolver();
-    else if (string_solver == SolverTypes::NSTempTurbSolver)         solver = new NSTempTurbSolver();
-    else if (string_solver == SolverTypes::NSTempConSolver)          solver = new NSTempConSolver();
-    else if (string_solver == SolverTypes::NSTempTurbConSolver)      solver = new NSTempTurbConSolver();
+    else if (string_solver == SolverTypes::PressureSolver) solver = new PressureSolver();
+    else if (string_solver == SolverTypes::DiffusionTurbSolver) solver = new DiffusionTurbSolver();
+    else if (string_solver == SolverTypes::NSSolver) solver = new NSSolver();
+    else if (string_solver == SolverTypes::NSTurbSolver) solver = new NSTurbSolver();
+    else if (string_solver == SolverTypes::NSTempSolver) solver = new NSTempSolver();
+    else if (string_solver == SolverTypes::NSTempTurbSolver) solver = new NSTempTurbSolver();
+    else if (string_solver == SolverTypes::NSTempConSolver) solver = new NSTempConSolver();
+    else if (string_solver == SolverTypes::NSTempTurbConSolver) solver = new NSTempTurbConSolver();
 
     else {
         spdlog::error("Solver not yet implemented! Simulation stopped!");
         std::exit(1);
     }
-
-// 1. Visualize and test initial conditions
-#ifndef BENCHMARKING
-    // Solution
-    Analysis ana;
-    ana.Analyse(solver, 0.);
-
-    // Visualize
-    Visual vis;
-    vis.Visualize(solver, 0., argv[1]);
-#endif
 
 #ifdef _OPENACC
     // Initialize GPU
@@ -109,18 +99,12 @@ int main(int argc, char **argv) {
     acc_init( dev_type );
 #endif
 
-// 2. Integrate over time and solve numerically
+    // Integrate over time and solve numerically
     // Time integration
-    TimeIntegration ti(solver, argv[1]);
+    TimeIntegration ti(solver);
     ti.run();
 
-// 3. Compute analytical solution and compare
-#ifndef BENCHMARKING
-    real t_end = params->getReal("physical_parameters/t_end");
-    ana.Analyse(solver, t_end);
-#endif
-
-//4. Clean up
+    // Clean up
     delete solver;
     return 0;
 }

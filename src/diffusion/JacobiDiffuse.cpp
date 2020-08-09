@@ -5,7 +5,9 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#ifndef BENCHMARKING
 #include <spdlog/spdlog.h>
+#endif
 
 #include <cmath>
 #include <iostream>
@@ -22,28 +24,28 @@ JacobiDiffuse::JacobiDiffuse() {
 #endif
     auto params = Parameters::getInstance();
 
-    m_dt = params->getReal("physical_parameters/dt");
+    m_dt = params->get_real("physical_parameters/dt");
     m_dsign = 1.;
-    m_w = params->getReal("solver/diffusion/w");
+    m_w = params->get_real("solver/diffusion/w");
 
-    m_max_iter = static_cast<size_t>(params->getInt("solver/diffusion/max_iter"));
-    m_tol_res = params->getReal("solver/diffusion/tol_res");
+    m_max_iter = static_cast<size_t>(params->get_int("solver/diffusion/max_iter"));
+    m_tol_res = params->get_real("solver/diffusion/tol_res");
 }
 
 // ============================ Diffuse =====================================
 // *****************************************************************************
 /// \brief  solves diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
-///         via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
-/// \param  out         output pointer
-/// \param  in          input pointer
-/// \param  b           source pointer
-/// \param  D           diffusion coefficient (nu - velocity, kappa - temperature)
-/// \param  sync        synchronization boolean (true=sync (default), false=async)
-// *****************************************************************************
+///     via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
+/// \param  out     output pointer
+/// \param  in      input pointer
+/// \param  b       source pointer
+/// \param  D     diffusion coefficient (nu - velocity, kappa - temperature)
+/// \param  sync    synchronization boolean (true=sync (default), false=async)
+// ***************************************************************************************
 void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto bsize = domain->GetSize(out->GetLevel());
+    auto bsize = domain->get_size(out->GetLevel());
     FieldType type = out->GetType();
 
     auto d_out = out->data;
@@ -60,9 +62,9 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 
 #pragma acc data present(d_out[:bsize], d_in[:bsize], d_b[:bsize])
     {
-        const real dx = domain->Getdx(out->GetLevel()); //due to unnecessary parameter passing of *this
-        const real dy = domain->Getdy(out->GetLevel());
-        const real dz = domain->Getdz(out->GetLevel());
+        const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
+        const real dy = domain->get_dy(out->GetLevel());
+        const real dz = domain->get_dz(out->GetLevel());
 
         const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;
@@ -146,18 +148,18 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 // ======================= Turbulent version ================================
 // ************************************************************************
 /// \brief  solves turbulent diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
-///         via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
-/// \param  out         output pointer
-/// \param  in          input pointer
-/// \param  b           source pointer
-/// \param  D           diffusion coefficient (nu - velocity, kappa - temperature)
-/// \param  EV          turbulent diffusion coefficient (eddy viscosity)
-/// \param  sync        synchronization boolean (true=sync (default), false=async)
-// ************************************************************************
+///     via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
+/// \param  out     output pointer
+/// \param  in      input pointer
+/// \param  b       source pointer
+/// \param  D     diffusion coefficient (nu - velocity, kappa - temperature)
+/// \param  EV      turbulent diffusion coefficient (eddy viscosity)
+/// \param  sync    synchronization boolean (true=sync (default), false=async)
+// ***************************************************************************************
 void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, const Field *EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto bsize = domain->GetSize(out->GetLevel());
+    auto bsize = domain->get_size(out->GetLevel());
     FieldType type = out->GetType();
 
     auto d_out = out->data;
@@ -175,9 +177,9 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 
 #pragma acc data present(d_out[:bsize], d_in[:bsize], d_b[:bsize], d_EV[:bsize])
     {
-        const real dx = domain->Getdx(out->GetLevel()); //due to unnecessary parameter passing of *this
-        const real dy = domain->Getdy(out->GetLevel());
-        const real dz = domain->Getdz(out->GetLevel());
+        const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
+        const real dy = domain->get_dy(out->GetLevel());
+        const real dz = domain->get_dz(out->GetLevel());
 
         const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;
@@ -261,27 +263,27 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 // ======================= Jacobian stencil ================================
 // ************************************************************************
 /// \brief  performs one (weighted) Jacobi step \f$ x_i^{(n+1)}:=\frac1{a_{ii}}\left(b_i-\sum_{j\not=i} a_{ij}\cdot x_j^{(n)}\right), \, i=0,\dots,N_x-2 \f$
-/// \param  out     output pointer
-/// \param  in      input pointer
-/// \param  b       source pointer
-/// \param  alpha   3-dimensional array;
-///                     \f$ (1/dx^2, 1/dy^2, 1/dz^2)\f$ for pressure,
-///                     \f$ (\nu\cdot dt\cdot 1/dx^2, \nu\cdot dt\cdot 1/dy^2, \nu\cdot dt\cdot 1/dz^2)\f$  for velocity,
-///                     \f$ (\kappa\cdot dt\cdot 1/dx^2, \kappa\cdot dt\cdot 1/dy^2, \kappa\cdot dt\cdot 1/dz^2)\f$ for temperature
-/// \param  beta    3-dimensional array;
-///                     \f$ 1./(2\cdot(\alpha_0 + \alpha_1 + \alpha_2) + 0.5)\f$ for pressure
-///                     \f$ 1/(2\cdot(\alpha_0 + \alpha_1 + \alpha_2) + 1)\f$ for velocity
-/// \param  dsign   sign (\a -1. for pressure, \a 1. else)
-/// \param  w       weight (1. - diffusion, 2./3. - multigrid)
-/// \param  sync    synchronous kernel launching (true, default: false)
-// ************************************************************************
+/// \param  out   output pointer
+/// \param  in    input pointer
+/// \param  b     source pointer
+/// \param  alpha 3-dimensional array;
+///           \f$ (1/dx^2, 1/dy^2, 1/dz^2)\f$ for pressure,
+///           \f$ (\nu\cdot dt\cdot 1/dx^2, \nu\cdot dt\cdot 1/dy^2, \nu\cdot dt\cdot 1/dz^2)\f$  for velocity,
+///           \f$ (\kappa\cdot dt\cdot 1/dx^2, \kappa\cdot dt\cdot 1/dy^2, \kappa\cdot dt\cdot 1/dz^2)\f$ for temperature
+/// \param  beta  3-dimensional array;
+///           \f$ 1./(2\cdot(\alpha_0 + \alpha_1 + \alpha_2) + 0.5)\f$ for pressure
+///           \f$ 1/(2\cdot(\alpha_0 + \alpha_1 + \alpha_2) + 1)\f$ for velocity
+/// \param  dsign sign (\a -1. for pressure, \a 1. else)
+/// \param  w   weight (1. - diffusion, 2./3. - multigrid)
+/// \param  sync  synchronous kernel launching (true, default: false)
+// ***************************************************************************************
 void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, const real alphaX, const real alphaY, const real alphaZ, const real beta, const real dsign, const real w, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->GetNx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->GetNy(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->GetLevel());
 
-    auto bsize = domain->GetSize(out->GetLevel());
+    auto bsize = domain->get_size(out->GetLevel());
 
     auto d_out = out->data;
     auto d_in = in->data;
@@ -309,28 +311,28 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
 // =============== Multigrid version for Jacobian stencil ===============
 // ************************************************************************
 /// \brief  performs one (weighted) Jacobi step at multigrid level, \f$ x_i^{(n+1)}:=\frac1{a_{ii}}\left(b_i-\sum_{j\not=i} a_{ij}\cdot x_j^{(n)}\right), \, i=0,\dots,N_x-2 \f$
-/// \param  level   multigrid level
-/// \param  out     output pointer
-/// \param  in      input pointer
-/// \param  b       source pointer
-/// \param  alpha   3-dimensional array;
-///                     \f$ (1/dx^2, 1/dy^2, 1/dz^2)\f$ for pressure,
-///                     \f$ (\nu\cdot dt\cdot 1/dx^2, \nu\cdot dt\cdot 1/dy^2, \nu\cdot dt\cdot 1/dz^2)\f$  for velocity,
-///                     \f$ (\kappa\cdot dt\cdot 1/dx^2, \kappa\cdot dt\cdot 1/dy^2, \kappa\cdot dt\cdot 1/dz^2)\f$ for temperature
-/// \param  beta    3-dimensional array;
-///                     \f$ 1./(2\cdot(\alpha_0 + \alpha_1 + \alpha_2) + 0.5)\f$ for pressure
-///                     \f$ 1/(2\cdot(\alpha_0 + \alpha_1 + \alpha_2) + 1)\f$ for velocity
-/// \param  dsign   sign (\a -1. for pressure, \a 1. else)
-/// \param  w       weight (1. - diffusion, 2./3. - multigrid)
-/// \param  sync    synchronous kernel launching (true, default: false)
-// ************************************************************************
+/// \param  level multigrid level
+/// \param  out   output pointer
+/// \param  in    input pointer
+/// \param  b     source pointer
+/// \param  alpha 3-dimensional array;
+///           \f$ (1/dx^2, 1/dy^2, 1/dz^2)\f$ for pressure,
+///           \f$ (\nu\cdot dt\cdot 1/dx^2, \nu\cdot dt\cdot 1/dy^2, \nu\cdot dt\cdot 1/dz^2)\f$  for velocity,
+///           \f$ (\kappa\cdot dt\cdot 1/dx^2, \kappa\cdot dt\cdot 1/dy^2, \kappa\cdot dt\cdot 1/dz^2)\f$ for temperature
+/// \param  beta  3-dimensional array;
+///           \f$ 1./(2\cdot(\alpha_0 + \alpha_1 + \alpha_2) + 0.5)\f$ for pressure
+///           \f$ 1/(2\cdot(\alpha_0 + \alpha_1 + \alpha_2) + 1)\f$ for velocity
+/// \param  dsign sign (\a -1. for pressure, \a 1. else)
+/// \param  w   weight (1. - diffusion, 2./3. - multigrid)
+/// \param  sync  synchronous kernel launching (true, default: false)
+// ***************************************************************************************
 void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const Field *b, const real alphaX, const real alphaY, const real alphaZ, const real beta, const real dsign, const real w, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->GetNx(level);  //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->GetNy(level);
+    const size_t Nx = domain->get_Nx(level); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(level);
 
-    auto bsize = domain->GetSize(out->GetLevel());
+    auto bsize = domain->get_size(out->GetLevel());
 
     auto d_out = out->data;
     auto d_in = in->data;
@@ -359,31 +361,31 @@ void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const 
 // =============== Turbulent version for Jacobian stencil ===============
 // ************************************************************************
 /// \brief  performs one (weighted) Jacobi step for turbulent diffusion, \f$ x_i^{(n+1)}:=\frac1{a_{ii}}\left(b_i-\sum_{j\not=i} a_{ij}\cdot x_j^{(n)}\right), \, i=0,\dots,N_x-2 \f$
-/// \param  out     output pointer
-/// \param  in      input pointer
-/// \param  b       source pointer
-/// \param  dsign   sign (\a -1. for pressure, \a 1. else)
-/// \param  w       weight (1. - diffusion, 2./3. - multigrid)
-/// \param  D       diffusion coefficient (nu - velocity, kappa - temperature)
-/// \param  EV      turbulent diffusion coefficient (eddy viscosity)
-/// \param  dt      time step
-/// \param  sync    synchronous kernel launching (true, default: false)
-// ************************************************************************
+/// \param  out   output pointer
+/// \param  in    input pointer
+/// \param  b     source pointer
+/// \param  dsign sign (\a -1. for pressure, \a 1. else)
+/// \param  w   weight (1. - diffusion, 2./3. - multigrid)
+/// \param  D   diffusion coefficient (nu - velocity, kappa - temperature)
+/// \param  EV    turbulent diffusion coefficient (eddy viscosity)
+/// \param  dt    time step
+/// \param  sync  synchronous kernel launching (true, default: false)
+// ***************************************************************************************
 void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, const real dsign, const real w, const real D, const Field *EV, const real dt, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->GetNx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->GetNy(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->GetLevel());
 
-    const real dx = domain->Getdx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const real dy = domain->Getdy(out->GetLevel());
-    const real dz = domain->Getdz(out->GetLevel());
+    const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out->GetLevel());
+    const real dz = domain->get_dz(out->GetLevel());
 
     const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
     const real rdy = 1. / dy;
     const real rdz = 1. / dz;
 
-    auto bsize = domain->GetSize(out->GetLevel());
+    auto bsize = domain->get_size(out->GetLevel());
 
     real aX, aY, aZ, bb, rb; //multipliers calculated
 

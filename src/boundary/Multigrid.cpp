@@ -38,7 +38,7 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
     m_numberOfSurfaces = numberOfSurfaces;
     m_numberOfObstacles = numberOfObstacles;
 
-    m_levels = Domain::getInstance()->GetLevels(); //multigrid level, 0 otherwise
+    m_levels = Domain::getInstance()->get_levels(); //multigrid level, 0 otherwise
 
     if (m_numberOfSurfaces > 0) {
         //list of surfaces for each level
@@ -130,7 +130,7 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
 /// \brief  Initialize member variables (arrays)
 // ***************************************************************************************
 void Multigrid::init() {
-    m_levels = Domain::getInstance()->GetLevels(); //multigrid level, 0 otherwise
+    m_levels = Domain::getInstance()->get_levels(); //multigrid level, 0 otherwise
 
     //list of domain boundary for each level
     m_MG_boundaryList = new Boundary *[m_levels + 1];
@@ -270,9 +270,9 @@ void Multigrid::control() {
     std::string message;
     auto domain = Domain::getInstance();
     for (size_t level = 0; level < m_levels + 1; level++) {
-        size_t nx = domain->Getnx(level);
-        size_t ny = domain->Getny(level);
-        size_t nz = domain->Getnz(level);
+        size_t nx = domain->get_nx(level);
+        size_t ny = domain->get_ny(level);
+        size_t nz = domain->get_nz(level);
 
         if (!message.empty()) {
             message += "For Level " + std::to_string(level) + "\n";
@@ -281,53 +281,53 @@ void Multigrid::control() {
         size_t bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_innerList();
         size_t cLen = getLastIndex_iList(level) - getFirstIndex_iList(level) + 1;
         if (cLen != bLen) {
-            size_t control = (domain->Getnx(level) - 2) * (domain->Getny(level) - 2) * (domain->Getnz(level) - 2);
+            size_t control = (domain->get_nx(level) - 2) * (domain->get_ny(level) - 2) * (domain->get_nz(level) - 2);
             message += "length calculated by first and last index of iList does not equals size of innerList of Boundary object " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
         }
         bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryList();
         cLen = getLastIndex_bList(level) - getFirstIndex_bList(level) + 1;
         if (cLen != bLen) {
-            size_t control = (domain->Getnx(level) * domain->Getny(level) * 2) + (domain->Getnx(level) * (domain->Getnz(level) - 2)) * 2 + ((domain->Getny(level) - 2) * (domain->Getnz(level) - 2)) * 2;
+            size_t control = (domain->get_nx(level) * domain->get_ny(level) * 2) + (domain->get_nx(level) * (domain->get_nz(level) - 2)) * 2 + ((domain->get_ny(level) - 2) * (domain->get_nz(level) - 2)) * 2;
             message += "length calculated by first and last index of bList does not equals size of boundaryList of Boundary object " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
         }
         bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryLeft();
         cLen = getLastIndex_bSliceX(level) - getFirstIndex_bSliceX(level) + 1;
         if (cLen != bLen) {
-            size_t control = domain->Getny(level) * domain->Getnz(level);
+            size_t control = domain->get_ny(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceX does not equals size of bSliceX of bLeft " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
         bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryRight();
         cLen = getLastIndex_bSliceX(level) - getFirstIndex_bSliceX(level) + 1;
         if (cLen != bLen) {
-            size_t control = domain->Getny(level) * domain->Getnz(level);
+            size_t control = domain->get_ny(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceX does not equals size of bSliceX of bRight " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
         bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryBottom();
         cLen = getLastIndex_bSliceY(level) - getFirstIndex_bSliceY(level) + 1;
         if (cLen != bLen) {
-            size_t control = domain->Getnx(level) * domain->Getnz(level);
+            size_t control = domain->get_nx(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceY does not equals size of bSliceY of bBottom " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
         bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryTop();
         cLen = getLastIndex_bSliceY(level) - getFirstIndex_bSliceY(level) + 1;
         if (cLen != bLen) {
-            size_t control = domain->Getnx(level) * domain->Getnz(level);
+            size_t control = domain->get_nx(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceY does not equals size of bSliceY of bTop " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
         bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryFront();
         cLen = getLastIndex_bSliceZ(level) - getFirstIndex_bSliceZ(level) + 1;
         if (cLen != bLen) {
-            size_t control = domain->Getnx(level) * domain->Getny(level);
+            size_t control = domain->get_nx(level) * domain->get_ny(level);
             message += "length calculated by first and last index of bSliceZ does not equals size of bSliceZ of bFront " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
         bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryBack();
         cLen = getLastIndex_bSliceZ(level) - getFirstIndex_bSliceZ(level) + 1;
         if (cLen != bLen) {
-            size_t control = domain->Getnx(level) * domain->Getny(level);
+            size_t control = domain->get_nx(level) * domain->get_ny(level);
             message += "length calculated by first and last index of bSliceZ does not equals size of bSliceZ of bBack " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
 
-        size_t csize_inner = (domain->Getnx(level) - 2) * (domain->Getny(level) - 2) * (domain->Getnz(level) - 2) - getSize_oList(level);
+        size_t csize_inner = (domain->get_nx(level) - 2) * (domain->get_ny(level) - 2) * (domain->get_nz(level) - 2) - getSize_oList(level);
         size_t bsize_inner = getSize_innerList(level);
         if (csize_inner != bsize_inner) {
             message += "getSize_innerList(level) does not equal (nx-2)*(ny-2)*(nz-2) " + std::to_string(bsize_inner) + "|" + std::to_string(csize_inner) + "\n";
@@ -607,8 +607,8 @@ void Multigrid::surfaceDominantRestriction(size_t level) {
     if (m_numberOfSurfaces > 0) {
 // add index to m_surfaceList if any of l-1 indices building the l index was a surface (dominant restriction)
         Domain *domain = Domain::getInstance();
-        size_t Nx = domain->GetNx(level);
-        size_t Ny = domain->GetNy(level);
+        size_t Nx = domain->get_Nx(level);
+        size_t Ny = domain->get_Ny(level);
 
         Surface **surfaceList_fine = *(m_MG_surfaceList + (level - 1));
         Surface **surfaceList_coarse = new Surface *[m_numberOfSurfaces];
@@ -621,7 +621,7 @@ void Multigrid::surfaceDominantRestriction(size_t level) {
             size_t stride_y_fine = surface_fine->getStrideY();
             size_t stride_z_fine = surface_fine->getStrideZ();
             size_t startIndex_fine = surface_fine->getSurfaceList()[0];
-            std::vector<size_t> coords = Utility::coordinateFromLinearIndex(startIndex_fine, domain->GetNx(level - 1), domain->GetNy(level - 1));
+            std::vector<size_t> coords = Utility::coordinateFromLinearIndex(startIndex_fine, domain->get_Nx(level - 1), domain->get_Ny(level - 1));
             size_t i_fine = coords[0];
             size_t j_fine = coords[1];
             size_t k_fine = coords[2];
@@ -689,13 +689,13 @@ Obstacle **Multigrid::obstacleDominantRestriction(size_t level) {
         size_t k2_coarse = (k2_fine + 1) / 2;
 
         //TODO exit?
-        if (i2_fine - i1_fine + 1< domain->Getnx(level-1)-2 && i2_coarse - i1_coarse +1>= domain->Getnx(level)-2){
+        if (i2_fine - i1_fine + 1< domain->get_nx(level - 1) - 2 && i2_coarse - i1_coarse + 1 >= domain->get_nx(level) - 2){
             m_logger->warn("Be cautious! Obstacle fills up inner cells in x-direction at level {}", level);
         }
-        if (j2_fine - j1_fine +1< domain->Getny(level-1)-2 && j2_coarse - j1_coarse +1>= domain->Getny(level)-2){
+        if (j2_fine - j1_fine +1< domain->get_ny(level - 1) - 2 && j2_coarse - j1_coarse + 1 >= domain->get_ny(level) - 2){
             m_logger->warn("Be cautious! Obstacle fills up inner cells in y-direction at level {}", level);
         }
-        if (k2_fine - k1_fine +1< domain->Getnz(level-1)-2 && k2_coarse - k1_coarse +1>= domain->Getnz(level)-2){
+        if (k2_fine - k1_fine +1< domain->get_nz(level - 1) - 2 && k2_coarse - k1_coarse + 1 >= domain->get_nz(level) - 2){
             m_logger->warn("Be cautious! Obstacle fills up inner cells in z-direction at level {}", level);
         }
 
@@ -1549,7 +1549,7 @@ size_t Multigrid::getSize_obstacleList() {
 
 size_t* Multigrid::get_obstacleList(){
     if (m_numberOfObstacles > 0) {
-        return m_MG_oList[0];
+        return m_data_MG_oList_zero_joined;
     }else{
         return nullptr;
     }

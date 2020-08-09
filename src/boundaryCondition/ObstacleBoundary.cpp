@@ -59,7 +59,7 @@ void ObstacleBoundary::applyBoundaryCondition(real *dataField, size_t **indexFie
 // ***************************************************************************************
 void ObstacleBoundary::applyBoundaryCondition(real *dataField, const size_t *d_patch, size_t patch_start, size_t patch_end, size_t level, int referenceIndex, real value, int8_t sign) {
     Domain *domain = Domain::getInstance();
-    size_t bsize = domain->GetSize(level);
+    size_t bsize = domain->get_size(level);
 #pragma acc data present(dataField[:bsize])
     {
 #pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
@@ -95,7 +95,7 @@ void ObstacleBoundary::applyDirichlet(real *dataField, size_t *d_patch, Patch pa
             break;
 
         case BACK:
-            referenceIndex *= domain->GetNx(level) * domain->GetNy(level);
+            referenceIndex *= domain->get_Nx(level) * domain->get_Ny(level);
             break;
 
         case BOTTOM:
@@ -104,7 +104,7 @@ void ObstacleBoundary::applyDirichlet(real *dataField, size_t *d_patch, Patch pa
             break;
 
         case TOP:
-            referenceIndex *= domain->GetNx(level);
+            referenceIndex *= domain->get_Nx(level);
             break;
 
         case LEFT:
@@ -150,8 +150,8 @@ void ObstacleBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patc
             break;
 
         case BACK:
-            value *= domain->Getdz(level);
-            referenceIndex *= domain->GetNx(level) * domain->GetNy(level);
+            value *= domain->get_dz(level);
+            referenceIndex *= domain->get_Nx(level) * domain->get_Ny(level);
             break;
 
         case BOTTOM:
@@ -161,8 +161,8 @@ void ObstacleBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patc
             break;
 
         case TOP:
-            value *= domain->Getdz(level);
-            referenceIndex *= domain->GetNx(level);
+            value *= domain->get_dy(level);
+            referenceIndex *= domain->get_Nx(level);
             break;
         case LEFT:
             referenceIndex = -1;
@@ -171,7 +171,7 @@ void ObstacleBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patc
             break;
 
         case RIGHT:
-            value *= domain->Getdz(level);
+            value *= domain->get_dx(level);
             referenceIndex *= 1;
             break;
 
@@ -196,8 +196,8 @@ void ObstacleBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patc
 // ***************************************************************************************
 void ObstacleBoundary::applyPeriodic(real *dataField, size_t *d_patch, Patch patch, size_t patch_start, size_t patch_end, size_t level, size_t id) {
     Domain *domain = Domain::getInstance();
-    size_t Nx = domain->GetNx(level);
-    size_t Ny = domain->GetNy(level);
+    size_t Nx = domain->get_Nx(level);
+    size_t Ny = domain->get_Ny(level);
     BoundaryController *bdc = BoundaryController::getInstance();
     size_t referenceIndex = 1;
     switch (patch) {

@@ -1,8 +1,8 @@
-/// \file 		NSTurbSolver.cpp
-/// \brief 		Defines the steps to solve advection, diffusion, pressure and add sources (with LES turbulence)
-/// \date 		Feb 15, 2017
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       NSTurbSolver.cpp
+/// \brief      Defines the steps to solve advection, diffusion, pressure and add sources (with LES turbulence)
+/// \date       Feb 15, 2017
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
 #include <spdlog/spdlog.h>
@@ -24,7 +24,7 @@ NSTurbSolver::NSTurbSolver() {
     //Diffusion of velocity
     SolverSelection::SetDiffusionSolver(&dif_vel, params->get("solver/diffusion/type"));
 
-    m_nu = params->getReal("physical_parameters/nu");
+    m_nu = params->get_real("physical_parameters/nu");
 
     // Turbulent viscosity
     SolverSelection::SetTurbulenceSolver(&mu_tub, params->get("solver/turbulence/type"));
@@ -35,7 +35,7 @@ NSTurbSolver::NSTurbSolver() {
     //Source
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
 
-    m_forceFct = params->get("solver/source/force_fct");
+    m_force_function = params->get("solver/source/force_fct");
     control();
 }
 
@@ -47,13 +47,13 @@ NSTurbSolver::~NSTurbSolver() {
     delete sou_vel;
 }
 
-//=========================================== DoStep ====================================
+//=========================================== do_step ====================================
 // ***************************************************************************************
 /// \brief  brings all calculation steps together into one function
-/// \param	dt			time step
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
+/// \param  dt      time step
+/// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void NSTurbSolver::DoStep(real t, bool sync) {
+void NSTurbSolver::do_step(real t, bool sync) {
 
     // local variables and parameters for GPU
     auto u = ISolver::u;
@@ -90,7 +90,7 @@ void NSTurbSolver::DoStep(real t, bool sync) {
     auto d_fz = f_z->data;
     auto d_nu_t = nu_t->data;
 
-    size_t bsize = Domain::getInstance()->GetSize(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
 
     auto nu = m_nu;
 
@@ -107,7 +107,7 @@ void NSTurbSolver::DoStep(real t, bool sync) {
         adv_vel->advect(w, w0, u0, v0, w0, sync);
 
         // Couple velocity to prepare for diffusion
-        ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve turbulent diffusion equation
 #ifndef PROFILING
@@ -124,23 +124,23 @@ void NSTurbSolver::DoStep(real t, bool sync) {
         dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
 
         // Couple data to prepare for adding source
-        ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 3. Add force
-        if (m_forceFct != SourceMethods::Zero) {
+        if (m_force_function != SourceMethods::Zero) {
 
 #ifndef PROFILING
             spdlog::info("Add source ...");
 #endif
-            sou_vel->addSource(u, v, w, f_x, f_y, f_z, sync);
+            sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
 
             // Couple data
-            ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 4. Solve pressure equation and project
         // Calculate divergence of u
-        pres->Divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
+        pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
 #ifndef PROFILING
@@ -149,9 +149,9 @@ void NSTurbSolver::DoStep(real t, bool sync) {
         pres->pressure(p, rhs, t, sync);
 
         // Correct
-        pres->Project(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
+        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
 
-// 5. Sources updated in Solver::UpdateSources, TimeIntegration
+// 5. Sources updated in Solver::update_sources, TimeIntegration
 
         if (sync) {
 #pragma acc wait

@@ -25,10 +25,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: compile
         run: |
-          git submodule update --init
-          cd docker
-          docker build -t artss_docker .
-          cd ..
+          ./compile.sh --docker-build
           docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh -m --jobs 4
           
   build-pgi-serial:
@@ -38,8 +35,25 @@ jobs:
       - uses: actions/checkout@v2
       - name: compile
         run: |
-          git submodule update --init
-          cd docker
-          docker build -t artss_docker .
-          cd ..
+          ./compile.sh --docker-build
           docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh --jobs 4 -s
+          
+  cmake-tests:
+    
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: compile
+        run: |
+          ./compile.sh --docker-build
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "./compile.sh --jobs 4 -s -m -d && cd build && make test"
+          
+  test-xml:
+    
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: compile
+        run: |
+          ./compile.sh --docker-build
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "cd tools && pwd && ./test_xml-builder.sh"

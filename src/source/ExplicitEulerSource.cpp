@@ -1,8 +1,8 @@
-/// \file 		ExplicitSource.h
-/// \brief 		Adding source via Explicit Euler
-/// \date 		Dec 2, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       ExplicitSource.cpp
+/// \brief      Adding source via Explicit Euler
+/// \date       Dec 2, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <iostream>
 #include <spdlog/spdlog.h>
@@ -15,7 +15,7 @@ ExplicitEulerSource::ExplicitEulerSource() {
 
     auto params = Parameters::getInstance();
 
-    m_dt = params->getReal("physical_parameters/dt");
+    m_dt = params->get_real("physical_parameters/dt");
     m_dir_vel = params->get("solver/source/dir");
 
     if (m_dir_vel.find('x') == std::string::npos && m_dir_vel.find('y') == std::string::npos && m_dir_vel.find('z') == std::string::npos) {
@@ -28,28 +28,28 @@ ExplicitEulerSource::ExplicitEulerSource() {
 //==================================== Add Source ======================================
 // ***************************************************************************************
 /// \brief  adds source \f$ \partial_t \phi_1 = S_{\phi} \f$ via Explicit Euler
-/// \param  outx	output pointer in x-direction
-/// \param  outy	output pointer in y-direction
-/// \param  outz	output pointer in z-direction
-/// \param  Sx		Source pointer in x-direction
-/// \param  Sy		Source pointer in y-direction
-/// \param  Sz		Source pointer in z-direction
-/// \param	sync	synchronous kernel launching (true, default: false)
+/// \param  out_x  output pointer in x-direction
+/// \param  out_y  output pointer in y-direction
+/// \param  out_z  output pointer in z-direction
+/// \param  S_x    Source pointer in x-direction
+/// \param  S_y    Source pointer in y-direction
+/// \param  S_z    Source pointer in z-direction
+/// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void ExplicitEulerSource::addSource(Field *outx, Field *outy, Field *outz, Field *Sx, Field *Sy, Field *Sz, bool sync) {
+void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, Field *S_x, Field *S_y, Field *S_z, bool sync) {
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    size_t level = outx->GetLevel();
-    size_t bsize = domain->GetSize(level);
-    FieldType type = outx->GetType();
+    size_t level = out_x->GetLevel();
+    size_t bsize = domain->get_size(level);
+    FieldType type = out_x->GetType();
 
-    auto d_outx = outx->data;
-    auto d_outy = outy->data;
-    auto d_outz = outz->data;
-    auto d_Sx = Sx->data;
-    auto d_Sy = Sy->data;
-    auto d_Sz = Sz->data;
+    auto d_outx = out_x->data;
+    auto d_outy = out_y->data;
+    auto d_outz = out_z->data;
+    auto d_Sx = S_x->data;
+    auto d_Sy = S_y->data;
+    auto d_Sz = S_z->data;
 
     auto dt = m_dt;
     auto dir = m_dir_vel;
@@ -102,16 +102,16 @@ void ExplicitEulerSource::addSource(Field *outx, Field *outy, Field *outz, Field
 
 // ***************************************************************************************
 /// \brief  adds source \f$ \partial_t \phi_1 = S_{\phi} \f$ via Explicit Euler
-/// \param  out		output pointer
-/// \param  S		Source pointer
-/// \param	sync	synchronous kernel launching (true, default: false)
+/// \param  out   output pointer
+/// \param  S   Source pointer
+/// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void ExplicitEulerSource::addSource(Field *out, Field *S, bool sync) {
+void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     size_t level = out->GetLevel();
-    auto bsize = domain->GetSize(level);
+    auto bsize = domain->get_size(level);
     FieldType type = out->GetType();
 
     auto d_out = out->data;

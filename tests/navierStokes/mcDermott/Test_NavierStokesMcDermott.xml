@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ARTSS>
-  <xml_filename>Test_NavierStokesMcDermott.xml</xml_filename>
-
   <physical_parameters>
     <t_end> 6.2831853072 </t_end>  <!-- simulation end time -->
     <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
@@ -64,11 +62,11 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "McDermott" >
+  <initial_conditions usr_fct = "McDermott" random = "No">
     <A> 2 </A>
   </initial_conditions>
 
-  <visualization save_csv="No">
-    <n_plots> 10 </n_plots>
-  </visualization>
+  <visualisation save_vtk="Yes" save_csv="No">
+    <vtk_nth_plot> 63 </vtk_nth_plot>
+  </visualisation>
 </ARTSS>

@@ -1,6 +1,6 @@
 /// \file 		NSTempTurbConSolver.cpp
 /// \brief 		Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
-/// \date 		Sep 27, 2017
+/// \date 		Oct 02, 2017
 /// \author 	Küsters
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
@@ -30,7 +30,7 @@ NSTempTurbConSolver::NSTempTurbConSolver() {
     // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(&dif_vel, params->get("solver/diffusion/type"));
 
-    m_nu = params->getReal("physical_parameters/nu");
+    m_nu = params->get_real("physical_parameters/nu");
 
     // Turbulent viscosity for velocity diffusion
     SolverSelection::SetTurbulenceSolver(&mu_tub, params->get("solver/turbulence/type"));
@@ -38,12 +38,12 @@ NSTempTurbConSolver::NSTempTurbConSolver() {
     // Diffusion of temperature
     SolverSelection::SetDiffusionSolver(&dif_temp, params->get("solver/temperature/diffusion/type"));
 
-    m_kappa = params->getReal("physical_parameters/kappa");
+    m_kappa = params->get_real("physical_parameters/kappa");
 
     // Diffusion for concentration
     SolverSelection::SetDiffusionSolver(&dif_con, params->get("solver/concentration/diffusion/type"));
 
-    m_gamma = params->getReal("solver/concentration/diffusion/gamma");
+    m_gamma = params->get_real("solver/concentration/diffusion/gamma");
 
     // Pressure
     SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), p, rhs);
@@ -59,9 +59,9 @@ NSTempTurbConSolver::NSTempTurbConSolver() {
 
     // Constants
     m_dir_vel = params->get("solver/source/dir");
-    m_hasTurbulenceTemperature = (params->get("solver/temperature/turbulence/include") == "Yes");
-    m_hasTurbulenceConcentration = (params->get("solver/concentration/turbulence/include") == "Yes");
-    m_hasDissipation = (params->get("solver/temperature/source/dissipation") == "Yes");
+    m_has_turbulence_temperature = (params->get("solver/temperature/turbulence/include") == "Yes");
+    m_has_turbulence_concentration = (params->get("solver/concentration/turbulence/include") == "Yes");
+    m_has_dissipation = (params->get("solver/temperature/source/dissipation") == "Yes");
     m_forceFct = params->get("solver/source/force_fct");
     m_tempFct = params->get("solver/temperature/source/temp_fct");
     m_conFct = params->get("solver/concentration/source/con_fct");
@@ -82,13 +82,13 @@ NSTempTurbConSolver::~NSTempTurbConSolver() {
     delete sou_con;
 }
 
-//====================================== DoStep =================================
+//====================================== do_step =================================
 // ***************************************************************************************
 /// \brief  brings all calculation steps together into one function
 /// \param	dt			time step
 /// \param  sync		synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void NSTempTurbConSolver::DoStep(real t, bool sync) {
+void NSTempTurbConSolver::do_step(real t, bool sync) {
 
     auto params = Parameters::getInstance();
 
@@ -108,14 +108,14 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
     auto T = ISolver::T;
     auto T0 = ISolver::T0;
     auto T_tmp = ISolver::T_tmp;
-    auto C = ISolver::C;
-    auto C0 = ISolver::C0;
-    auto C_tmp = ISolver::C_tmp;
+    auto C = ISolver::concentration;
+    auto C0 = ISolver::concentration0;
+    auto C_tmp = ISolver::concentration_tmp;
     auto f_x = ISolver::f_x;
     auto f_y = ISolver::f_y;
     auto f_z = ISolver::f_z;
     auto S_T = ISolver::S_T;
-    auto S_C = ISolver::S_C;
+    auto S_C = ISolver::S_concentration;
     auto nu_t = ISolver::nu_t;            //nu_t - Eddy Viscosity
     auto kappa_t = ISolver::kappa_t;        //kappa_t - Eddy thermal diffusivity
     auto gamma_t = ISolver::gamma_t;        //gamma_t - Eddy mass diffsusivity
@@ -147,7 +147,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
     auto d_kappa_t = kappa_t->data;
     auto d_gamma_t = gamma_t->data;
 
-    size_t bsize = Domain::getInstance()->GetSize(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
 
     auto nu = m_nu;
     auto kappa = m_kappa;
@@ -168,7 +168,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         adv_vel->advect(w, w0, u0, v0, w0, sync);
 
         // Couple velocity to prepare for diffusion
-        ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve turbulent diffusion equation
 #ifndef PROFILING
@@ -184,22 +184,22 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
 
         // Couple data to prepare for adding source
-        ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
 #ifndef PROFILING
             spdlog::info("Add momentum source ...");
 #endif
-            sou_vel->addSource(u, v, w, f_x, f_y, f_z, sync);
+            sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
 
             // Couple data to prepare for adding source
-            ISolver::CoupleVector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 4. Solve pressure equation and project
         // Calculate divergence of u
-        pres->Divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
+        pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
 #ifndef PROFILING
@@ -208,7 +208,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         pres->pressure(p, rhs, t, sync);
 
         // Correct
-        pres->Project(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
+        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
 
 // 5. Solve Temperature and link back to force
 
@@ -219,12 +219,12 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         adv_temp->advect(T, T0, u, v, w, sync);
 
         // Couple temperature to prepare for diffusion
-        ISolver::CoupleScalar(T, T0, T_tmp, sync);
+        ISolver::couple_scalar(T, T0, T_tmp, sync);
 
         // Solve diffusion equation
         // turbulence
-        if (m_hasTurbulenceTemperature) {
-            real Pr_T = params->getReal("solver/temperature/turbulence/Pr_T");
+        if (m_has_turbulence_temperature) {
+            real Pr_T = params->get_real("solver/temperature/turbulence/Pr_T");
             real rPr_T = 1. / Pr_T;
 
 #pragma acc parallel loop independent present(d_kappa_t[:bsize], d_nu_t[:bsize]) async
@@ -238,7 +238,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
             dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
 
             // Couple temperature to prepare for adding source
-            ISolver::CoupleScalar(T, T0, T_tmp, sync);
+            ISolver::couple_scalar(T, T0, T_tmp, sync);
         } else {
             // no turbulence
             if (kappa != 0.) {
@@ -249,20 +249,20 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
                 dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
 
                 // Couple temperature to prepare for adding source
-                ISolver::CoupleScalar(T, T0, T_tmp, sync);
+                ISolver::couple_scalar(T, T0, T_tmp, sync);
             }
         }
 
         // Add dissipation
-        if (m_hasDissipation) {
+        if (m_has_dissipation) {
 
 #ifndef PROFILING
             spdlog::info("Add dissipation ...");
 #endif
-            sou_temp->Dissipate(T, u, v, w, sync);
+            sou_temp->dissipate(T, u, v, w, sync);
 
             // Couple temperature
-            ISolver::CoupleScalar(T, T0, T_tmp, sync);
+            ISolver::couple_scalar(T, T0, T_tmp, sync);
         }
 
             // Add source
@@ -271,10 +271,10 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
 #ifndef PROFILING
             spdlog::info("Add temperature source ...");
 #endif
-            sou_temp->addSource(T, S_T, sync);
+            sou_temp->add_source(T, S_T, sync);
 
             // Couple temperature
-            ISolver::CoupleScalar(T, T0, T_tmp, sync);
+            ISolver::couple_scalar(T, T0, T_tmp, sync);
         }
 
 // 6. Solve Concentration
@@ -286,12 +286,12 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
         adv_con->advect(C, C0, u, v, w, sync);
 
         // Couple concentration to prepare for diffusion
-        ISolver::CoupleScalar(C, C0, C_tmp, sync);
+        ISolver::couple_scalar(C, C0, C_tmp, sync);
 
         // Solve diffusion equation
         // turbulence
-        if (m_hasTurbulenceConcentration) {
-            real Sc_T = params->getReal("solver/concentration/turbulence/Sc_T");
+        if (m_has_turbulence_concentration) {
+            real Sc_T = params->get_real("solver/concentration/turbulence/Sc_T");
             real rSc_T = 1. / Sc_T;
 
 #pragma acc parallel loop independent present(d_gamma_t[:bsize], d_nu_t[:bsize]) async
@@ -303,7 +303,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
             dif_con->diffuse(C, C0, C_tmp, gamma, gamma_t, sync);
 
             // Couple concentration to prepare for adding source
-            ISolver::CoupleScalar(C, C0, C_tmp, sync);
+            ISolver::couple_scalar(C, C0, C_tmp, sync);
         } else {
             // no turbulence
             if (gamma != 0.) {
@@ -313,7 +313,7 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
                 dif_con->diffuse(C, C0, C_tmp, gamma, sync);
 
                 // Couple concentration to prepare for adding source
-                ISolver::CoupleScalar(C, C0, C_tmp, sync);
+                ISolver::couple_scalar(C, C0, C_tmp, sync);
             }
         }
 
@@ -323,13 +323,13 @@ void NSTempTurbConSolver::DoStep(real t, bool sync) {
 #ifndef PROFILING
             spdlog::info("Add concentration source ...");
 #endif
-            sou_con->addSource(C, S_C, sync);
+            sou_con->add_source(C, S_C, sync);
 
             // Couple concentration
-            ISolver::CoupleScalar(C, C0, C_tmp, sync);
+            ISolver::couple_scalar(C, C0, C_tmp, sync);
         }
 
-// 7. Sources updated in Solver::UpdateSources, TimeIntegration
+// 7. Sources updated in Solver::update_sources, TimeIntegration
 
         if (sync) {
 #pragma acc wait

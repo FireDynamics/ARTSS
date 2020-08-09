@@ -58,7 +58,7 @@ void DomainBoundary::applyBoundaryCondition(real *dataField, size_t **indexField
 // ***************************************************************************************
 void DomainBoundary::applyBoundaryCondition(real *dataField, const size_t *d_patch, size_t patch_start, size_t patch_end, size_t level, int referenceIndex, real value, int8_t sign) {
     Domain *domain = Domain::getInstance();
-    size_t bsize = domain->GetSize(level);
+    size_t bsize = domain->get_size(level);
 #pragma acc data present(dataField[:bsize])
     {
 #pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
@@ -89,16 +89,16 @@ void DomainBoundary::applyDirichlet(real *dataField, size_t *d_patch, Patch patc
     size_t referenceIndex = 0;
     switch (patch) {
         case BACK:
-            referenceIndex = -domain->GetNx(level) * domain->GetNy(level);
+            referenceIndex = -domain->get_Nx(level) * domain->get_Ny(level);
             break;
         case FRONT:
-            referenceIndex = domain->GetNx(level) * domain->GetNy(level);
+            referenceIndex = domain->get_Nx(level) * domain->get_Ny(level);
             break;
         case TOP:
-            referenceIndex = -domain->GetNx(level);
+            referenceIndex = -domain->get_Nx(level);
             break;
         case BOTTOM:
-            referenceIndex = domain->GetNx(level);
+            referenceIndex = domain->get_Nx(level);
             break;
         case RIGHT:
             referenceIndex = -1;
@@ -133,27 +133,27 @@ void DomainBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patch,
     size_t referenceIndex = 0;
     switch (patch){
         case BACK:
-            value *= domain->Getdz(level);
-            referenceIndex = -domain->GetNx(level) * domain->GetNy(level);
+            value *= domain->get_dz(level);
+            referenceIndex = -domain->get_Nx(level) * domain->get_Ny(level);
             break;
         case FRONT:
-            value *= domain->Getdz(level);
-            referenceIndex = domain->GetNx(level) * domain->GetNy(level);
+            value *= domain->get_dz(level);
+            referenceIndex = domain->get_Nx(level) * domain->get_Ny(level);
             break;
         case TOP:
-            value *= domain->Getdy(level);
-            referenceIndex = -domain->GetNx(level);
+            value *= domain->get_dy(level);
+            referenceIndex = -domain->get_Nx(level);
             break;
         case BOTTOM:
-            value *= domain->Getdy(level);
-            referenceIndex = domain->GetNx(level);
+            value *= domain->get_dy(level);
+            referenceIndex = domain->get_Nx(level);
             break;
         case RIGHT:
-            value *= domain->Getdz(level);
+            value *= domain->get_dz(level);
             referenceIndex = -1;
             break;
         case LEFT:
-            value *= domain->Getdz(level);
+            value *= domain->get_dz(level);
             referenceIndex = 1;
             break;
         default:
@@ -176,28 +176,28 @@ void DomainBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patch,
 // ***************************************************************************************
 void DomainBoundary::applyPeriodic(real *dataField, size_t *d_patch, Patch patch, size_t patch_start, size_t patch_end, size_t level) {
     Domain *domain = Domain::getInstance();
-    size_t Nx = domain->GetNx(level);
-    size_t Ny = domain->GetNy(level);
+    size_t Nx = domain->get_Nx(level);
+    size_t Ny = domain->get_Ny(level);
 
     size_t referenceIndex = 0;
     switch (patch) {
         case FRONT:
-            referenceIndex = Nx * Ny * (Domain::getInstance()->Getnz(level) - 2);
+            referenceIndex = Nx * Ny * (Domain::getInstance()->get_nz(level) - 2);
             break;
         case BACK:
-            referenceIndex = -Nx * Ny * (Domain::getInstance()->Getnz(level) - 2);
+            referenceIndex = -Nx * Ny * (Domain::getInstance()->get_nz(level) - 2);
             break;
         case BOTTOM:
-            referenceIndex = Nx * (Domain::getInstance()->Getny(level) - 2);
+            referenceIndex = Nx * (Domain::getInstance()->get_ny(level) - 2);
             break;
         case TOP:
-            referenceIndex = -Nx * (Domain::getInstance()->Getny(level) - 2);
+            referenceIndex = -Nx * (Domain::getInstance()->get_ny(level) - 2);
             break;
         case LEFT:
-            referenceIndex = (Domain::getInstance()->Getnx(level) - 2);
+            referenceIndex = (Domain::getInstance()->get_nx(level) - 2);
             break;
         case RIGHT:
-            referenceIndex = -(Domain::getInstance()->Getnx(level) - 2);
+            referenceIndex = -(Domain::getInstance()->get_nx(level) - 2);
             break;
         default:
             break;

@@ -25,8 +25,8 @@ PressureSolver::~PressureSolver() {
 /// \param  dt      time step
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
-void PressureSolver::DoStep(real t, bool sync) {
-#ifndef PROFILING
+void PressureSolver::do_step(real t, bool sync) {
+#ifndef BENCHMARKING
     spdlog::info("Pressure ...");
 #endif
 
@@ -38,7 +38,7 @@ void PressureSolver::DoStep(real t, bool sync) {
     auto d_p = p->data;
     auto d_rhs = rhs->data;
 
-    size_t bsize = Domain::getInstance()->GetSize(p->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(p->GetLevel());
 
 #pragma acc data present(d_p[:bsize], d_rhs[:bsize])
     {

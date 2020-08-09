@@ -14,17 +14,17 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
     // TODO(n16h7 hunt3r) add logger
     Domain *domain = Domain::getInstance();
 
-    real dx = domain->Getdx();
-    real dy = domain->Getdy();
-    real dz = domain->Getdz();
+    real dx = domain->get_dx();
+    real dy = domain->get_dy();
+    real dz = domain->get_dz();
 
     real rdx = 1. / dx;
     real rdy = 1. / dy;
     real rdz = 1. / dz;
 
-    real X1 = domain->GetX1();
-    real Y1 = domain->GetY1();
-    real Z1 = domain->GetZ1();
+    real X1 = domain->get_X1();
+    real Y1 = domain->get_Y1();
+    real Z1 = domain->get_Z1();
 
     // TODO(n16h7 hunt3r) add logger
     real ox1 = matchGrid(x1, dx, X1);
@@ -71,8 +71,8 @@ void Obstacle::init(size_t level) {
     m_logger = Utility::createLogger(typeid(this).name());
 #endif
     Domain *domain = Domain::getInstance();
-    size_t Nx = domain->GetNx(level);
-    size_t Ny = domain->GetNy(level);
+    size_t Nx = domain->get_Nx(level);
+    size_t Ny = domain->get_Ny(level);
 
     size_t strideX = getStrideX();
     size_t strideY = getStrideY();
@@ -238,8 +238,8 @@ void Obstacle::print() {
 // ***************************************************************************************
 void Obstacle::printDetails(){
     Domain *domain = Domain::getInstance();
-    size_t Nx = domain->GetNx(m_level);
-    size_t Ny = domain->GetNy(m_level);
+    size_t Nx = domain->get_Nx(m_level);
+    size_t Ny = domain->get_Ny(m_level);
 
     std::vector<size_t> coords;
 
@@ -361,22 +361,22 @@ void Obstacle::removeCellsAtBoundary(size_t level) {
     size_t j2 = getCoordinates_j2();
     size_t k2 = getCoordinates_k2();
 
-    if (m_k1 <= domain->GetIndexz1(level)){
+    if (m_k1 <= domain->get_index_z1(level)){
         m_size_obstacleFront = 0;
     }
-    if (k2 >= domain->GetIndexz2(level)){
+    if (k2 >= domain->get_index_z2(level)){
         m_size_obstacleBack = 0;
     }
-    if (m_j1 <= domain->GetIndexy1(level)){
+    if (m_j1 <= domain->get_index_y1(level)){
         m_size_obstacleBottom = 0;
     }
-    if (j2 >= domain->GetIndexy2(level)){
+    if (j2 >= domain->get_index_y2(level)){
         m_size_obstacleTop = 0;
     }
-    if (m_i1 <= domain->GetIndexx1(level)){
+    if (m_i1 <= domain->get_index_x1(level)){
         m_size_obstacleLeft = 0;
     }
-    if (i2 >= domain->GetIndexx2(level)){
+    if (i2 >= domain->get_index_x2(level)){
         m_size_obstacleRight = 0;
     }
 }

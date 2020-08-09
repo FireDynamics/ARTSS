@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ARTSS>
-  <xml_filename>Test_NavierStokesTurbVortex.xml</xml_filename>
-
   <physical_parameters>
     <t_end> 1.0 </t_end>  <!-- simulation end time -->
     <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
@@ -66,7 +64,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Vortex" >
+  <initial_conditions usr_fct = "Vortex" random = "No">
     <u_lin> 0.1 </u_lin>
     <v_lin> 0 </v_lin>
     <w_lin> 0 </w_lin>
@@ -74,7 +72,7 @@
     <rhoa> 1. </rhoa>
   </initial_conditions>
 
-  <visualization save_csv="No">
-    <n_plots> 10 </n_plots>
-  </visualization>
+  <visualisation save_vtk="Yes" save_csv="No">
+    <vtk_nth_plot> 10 </vtk_nth_plot>
+  </visualisation>
 </ARTSS>

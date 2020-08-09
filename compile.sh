@@ -187,7 +187,7 @@ done
 if [ $DOCKERBUILD -eq 0 ]
 then
   cd docker
-  docker build -t artss_docker .
+  docker build -t artss_docker --no-cache .
   cd ..
 fi
 

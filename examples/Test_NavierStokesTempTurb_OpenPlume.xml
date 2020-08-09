@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ARTSS>
-  <xml_filename>Test_NavierStokesTempTurb_OpenPlume.xml</xml_filename>
-
   <physical_parameters>
     <t_end> 4. </t_end>  <!-- simulation end time -->
     <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
@@ -85,7 +83,7 @@
 
   <boundaries>
     <boundary field="u,v,w" patch="bottom" type="dirichlet" value="0.0" />
-    <boundary field="u,v,w" patch="front,back,top,left,right" type="neumann" value="0.0" />        
+    <boundary field="u,v,w" patch="front,back,top,left,right" type="neumann" value="0.0" />
     <boundary field="p" patch="bottom" type="neumann" value="0.0" />
     <boundary field="p" patch="front,back,top,left,right" type="dirichlet" value="0.0" />
     <boundary field="T" patch="front,back,top,left,right" type="neumann" value="0.0" />
@@ -96,16 +94,11 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Uniform">
+  <initial_conditions usr_fct = "Uniform" random = "No">
     <val> 303.64 </val>
   </initial_conditions>
 
-  <visualization save_csv="No">
-    <n_plots> 40 </n_plots>
-  </visualization>
-  <logging>
-    <level>DEBUG</level>
-    <file>tmp.log</file>
-  </logging>
-
+  <visualisation save_vtk="Yes" save_csv="No">
+    <vtk_nth_plot> 40 </vtk_nth_plot>
+  </visualisation>
 </ARTSS>

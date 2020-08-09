@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ARTSS>
-  <xml_filename>Test_NavierStokesTurb_FlowAroundCube.xml</xml_filename>
-
   <physical_parameters>
     <t_end> 10. </t_end>  <!-- simulation end time -->
     <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
@@ -65,7 +63,7 @@
   </boundaries>
   <obstacles enabled="Yes">
     <obstacle>
-      <geometry ox1="0.0273" ox2="0.964" oy1="0.0078" oy2="0.992" oz1="-0.492" oz2="0.4785"/> 
+      <geometry ox1="0.0273" ox2="0.964" oy1="0.0078" oy2="0.992" oz1="-0.492" oz2="0.4785"/>
       <boundary field="u,v,w" patch="front,back,left,right,bottom,top" type="dirichlet" value="0.0" />
       <boundary field="p" patch="front,back,left,right,bottom,top" type="neumann" value="0.0" />
     </obstacle>
@@ -73,14 +71,14 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Drift" >
+  <initial_conditions usr_fct = "Drift" random = "No" >
     <u_lin> 0.4 </u_lin>                        <!-- background velocity -->
     <v_lin> 0.0 </v_lin>                        <!-- background velocity -->
     <w_lin> 0.0 </w_lin>                        <!-- background velocity -->
     <pa> 0. </pa>                               <!-- ambient pressure -->
   </initial_conditions>
 
-  <visualization save_csv="No">
-    <n_plots> 10 </n_plots>
-  </visualization>
+  <visualisation save_vtk="Yes" save_csv="No">
+    <vtk_nth_plot> 10 </vtk_nth_plot>
+  </visualisation>
 </ARTSS>

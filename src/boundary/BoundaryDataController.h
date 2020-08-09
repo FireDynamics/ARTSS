@@ -26,6 +26,8 @@ public:
 
     //void setIndexFields(size_t** indexFields);
 
+    std::vector<FieldType> get_used_fields();
+
 private:
     BoundaryData** m_boundaryData;
 #ifndef PROFILING

@@ -50,6 +50,9 @@ public:
     size_t getObstacleStrideX(size_t id, size_t level);
     size_t getObstacleStrideY(size_t id, size_t level);
     size_t getObstacleStrideZ(size_t id, size_t level);
+
+    std::vector<FieldType> get_used_fields();
+
 private:
 #ifndef PROFILING
     std::shared_ptr<spdlog::logger> m_logger;
