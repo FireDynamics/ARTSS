@@ -51,7 +51,7 @@ public:
     size_t getStrideZ() { return m_k2 - m_k1 + 1; }
 
 private:
-#ifndef PROFILING
+#ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     size_t m_i1, m_j1, m_k1;

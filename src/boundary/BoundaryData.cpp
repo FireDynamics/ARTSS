@@ -12,7 +12,7 @@ inline static const std::vector<std::string> PatchNames = {"front", "back", "bot
 inline static const std::vector<std::string> BoundaryConditionNames = {"neumann", "dirichlet", "periodic"};
 
 BoundaryData::BoundaryData() {
-#ifndef PROFILING
+#ifndef BENCHMARKING
     m_logger = Utility::createLogger(typeid(this).name());
 #endif
     m_values = new real[numberOfPatches];

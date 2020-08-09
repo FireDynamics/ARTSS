@@ -193,8 +193,8 @@ void TimeIntegration::run() {
 #ifndef BENCHMARKING
             if (adaption->is_data_extraction_after_enabled()) adaption->extractData(adaption->get_after_name(), adaption->get_after_height(), t_cur);
 #endif
-        m_solver->UpdateSources(t_cur, false);
-        m_solver->UpdateData(false);
+        m_solver->update_sources(t_cur, false);
+        m_solver->update_data(false);
 
             // iter_end = std::chrono::system_clock::now();
             // long ms = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();

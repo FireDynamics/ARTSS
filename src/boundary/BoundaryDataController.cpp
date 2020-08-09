@@ -11,7 +11,7 @@
 #include "../boundaryCondition/ObstacleBoundary.h"
 
 BoundaryDataController::BoundaryDataController() {
-#ifndef PROFILING
+#ifndef BENCHMARKING
     m_logger = Utility::createLogger(typeid(this).name());
 #endif
     m_boundaryData = new BoundaryData *[numberOfFieldTypes];

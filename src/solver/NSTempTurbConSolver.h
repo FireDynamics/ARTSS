@@ -15,15 +15,16 @@
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
 
 class NSTempTurbConSolver : public ISolver {
-public:
+ public:
     NSTempTurbConSolver();
     ~NSTempTurbConSolver() override;
 
     void do_step(real t, bool sync) override;
 
-private:
+ private:
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
     IAdvection *adv_temp;

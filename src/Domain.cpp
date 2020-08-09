@@ -5,13 +5,13 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Domain.h"
-#include <iostream>
-#include <spdlog/spdlog.h>
-#include "utility/Parameters.h"
 
 Domain *Domain::single = nullptr; //Singleton
 
 Domain::Domain() {
+#ifndef BENCHMARKING
+    m_logger = Utility::createLogger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
     auto solver = params->get("solver/description");
     if (solver.find("NS") != std::string::npos || solver.find("Pressure") != std::string::npos) {
@@ -131,7 +131,7 @@ bool Domain::resize(long shift_x1, long shift_x2, long shift_y1, long shift_y2, 
 /// \return coordinate of new computational domain
 // ***************************************************************************************
 real Domain::calc_new_coord(real oldCoord, long shift, real cell_width) {
-    return oldCoord + static_cast<real>(shift) * cellwidth;
+    return oldCoord + static_cast<real>(shift) * cell_width;
 }
 
 // =============================== Setting coordinates of new computational domain  ========================
@@ -157,39 +157,49 @@ bool Domain::set_new_value(long shift, real startCoord_p, real endCoord_p, real 
 }
 
 void Domain::print() {
-    std::cout << "-- Domain" << std::endl;
-    std::cout << "\t Domain size inner cells: (" << get_nx() - 2 << "|" << get_ny() - 2 << "|" << get_nz() - 2 << ")" << std::endl;
-    std::cout << "\t step size (x|y|z): (" << get_dx() << "|" << get_dy() << "|" << get_dz() << ")" << std::endl;
+    m_logger->info("-- Domain");
+    m_logger->info("Domain size inner cells: ({}|{}{})", get_nx() - 2,
+                                                         get_ny() - 2,
+                                                         get_nz() - 2);
+    m_logger->info("step size (x|y|z): ({}|{}|{})", get_dx(),
+                                                    get_dy(),
+                                                    get_dz());
 }
 
 void Domain::printDetails() {
-    std::cout << "############### Domain Parameter ###############" << std::endl;
+    m_logger->info("############### Domain Parameter ###############");
     for (size_t level = 0; level < m_levels + 1; level++) {
-        std::cout << "For Level " << level << " Nx: " << get_Nx(level) << " Ny: " << get_Ny(level) << " Nz: " << get_Nz(level) << std::endl;
+        m_logger->info("For Level {} Nx: {}, Ny: {}, Nz: {}", level,
+                get_Nx(level), get_Ny(level), get_Nz(level));
     }
-    std::cout << std::endl;
     for (size_t level = 0; level < m_levels + 1; level++) {
-        std::cout << "For Level " << level << " nx: " << get_nx(level) << " ny: " << get_ny(level) << " nz: " << get_nz(level) << std::endl;
+        m_logger->info("For Level {} nx: {}, ny {}, nz {}", level,
+                get_nx(level), get_ny(level), get_nz(level));
     }
-    std::cout << std::endl;
-    std::cout << "X: (" << get_X1() << "|" << get_X2() << ") x: (" << get_x1() << "|" << get_x2() << ")" << std::endl;
-    std::cout << "Y: (" << get_Y1() << "|" << get_Y2() << ") y: (" << get_y1() << "|" << get_y2() << ")" << std::endl;
-    std::cout << "Z: (" << get_Z1() << "|" << get_Z2() << ") z: (" << get_z1() << "|" << get_z2() << ")" << std::endl;
 
-    std::cout << std::endl;
-    std::cout << "Lx: " << get_Lx() << " Ly:" << get_Ly() << " Lz: " << get_Lz() << std::endl;
-    std::cout << "lx: " << get_lx() << " ly:" << get_ly() << " lz: " << get_lz() << std::endl;
-    std::cout << std::endl;
+    m_logger->info("X: ({}|{}) x: ({}|{})", get_X1(), get_X2(),
+                                            get_x1(), get_x2());
+    m_logger->info("Y: ({}|{}) y: ({}|{})", get_Y1(), get_Y2(),
+                                            get_y1(), get_y2());
+    m_logger->info("Z: ({}|{}) z: ({}|{})", get_Z1(), get_Z2(),
+                                            get_z1(), get_z2());
+
+    m_logger->info("Lx: {}, Ly: {}, Lz: {}", get_Lx(), get_Ly(), get_Lz());
+    m_logger->info("lx: {}, ly: {}, lz: {}", get_lx(), get_ly(), get_lz());
+
     for (size_t level = 0; level < m_levels + 1; level++) {
-        std::cout << "For Level " << level << " dx: " << get_dx(level) << " dy:" << get_dy(level) << " dz: " << get_dz(level) << std::endl;
-    }
-    std::cout << std::endl;
-    for (size_t level = 0; level < m_levels + 1; level++) {
-        std::cout << "for Level " << level << " X: (" << get_index_x1(level) << "|" << get_index_x2(level) << ") Y: (" << get_index_y1(level) << "|" << get_index_y2(level) << ") Z: (" << get_index_z1(level) << "|" << get_index_z2(level) << ")"
-                  << std::endl;
+        m_logger->info("For Level {} dx: {}, dy: {}, dz: {}", level,
+                get_dx(level), get_dy(level), get_dz(level));
     }
     for (size_t level = 0; level < m_levels + 1; level++) {
-        std::cout << " For Level " << level << " domain size: " << get_size(level) << std::endl;
+        m_logger->info("for Level {} X: ({}|{}) Y: ({}|{}) Z: ({}|{})", level,
+                get_index_x1(level), get_index_x2(level),
+                get_index_y1(level), get_index_y2(level),
+                get_index_z1(level), get_index_z2(level));
     }
-    std::cout << "--------------- Domain Parameter end ---------------" << std::endl;
+    for (size_t level = 0; level < m_levels + 1; level++) {
+        m_logger->info(" For Level {} domain size: {}", level, get_size(level));
+    }
+
+    m_logger->info("--------------- Domain Parameter end ---------------");
 }

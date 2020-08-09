@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include "Solution.h"
+#include "../utility/Utility.h"
 #include "../utility/Parameters.h"
 #include "../Functions.h"
 

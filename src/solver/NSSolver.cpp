@@ -95,7 +95,7 @@ void NSSolver::do_step(real t, bool sync) {
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_fx[:bsize], d_fy[:bsize], d_fz[:bsize])
     {
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
@@ -108,7 +108,7 @@ void NSSolver::do_step(real t, bool sync) {
 
 // 2. Solve diffusion equation
         if (nu != 0.) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Diffuse ...");
 #endif
             dif_vel->diffuse(u, u0, u_tmp, nu, sync);
@@ -121,7 +121,7 @@ void NSSolver::do_step(real t, bool sync) {
 
 // 3. Add force
         if (m_sourceFct != SourceMethods::Zero) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Add source ...");
 #endif
             sou->add_source(u, v, w, f_x, f_y, f_z, sync);
@@ -134,7 +134,7 @@ void NSSolver::do_step(real t, bool sync) {
         pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);

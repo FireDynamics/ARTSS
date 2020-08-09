@@ -11,7 +11,7 @@
 #include "../interfaces/IAdvection.h"
 #include "../interfaces/IDiffusion.h"
 #include "../utility/GlobalMacrosTypes.h"
-#ifndef PROFILING
+#ifndef BENCHMARKING
 #include <spdlog/logger.h>
 #endif
 
@@ -29,7 +29,7 @@ private:
   real m_nu;
 
     static void control();
-#ifndef PROFILING
+#ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
 };

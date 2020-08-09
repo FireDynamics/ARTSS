@@ -145,7 +145,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize], d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_S_T[:bsize], d_S_C[:bsize])
     {
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
@@ -157,7 +157,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
 
 // 2. Solve diffusion equation
         if (nu != 0.) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Diffuse ...");
 #endif
             dif_vel->diffuse(u, u0, u_tmp, nu, sync);
@@ -170,7 +170,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
 
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Add momentum source ...");
 #endif
             sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
@@ -184,7 +184,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
         pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);        //only multigrid cycle, divergence and velocity update (in case of NS) need to be added
@@ -194,7 +194,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
 
 // 5. Solve Temperature and link back to force
         // Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Advect Temperature ...");
 #endif
         adv_temp->advect(T, T0, u, v, w, sync);
@@ -204,7 +204,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
 
         // Solve diffusion equation
         if (kappa != 0.) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Diffuse Temperature ...");
 #endif
             dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
@@ -215,7 +215,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
 
         // Add dissipation
         if (m_hasDissipation) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Add dissipation ...");
 #endif
             sou_temp->dissipate(T, u, v, w, sync);
@@ -226,7 +226,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
 
         // Add source
         if (m_tempFct != SourceMethods::Zero) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Add temperature source ...");
 #endif
             sou_temp->add_source(T, S_T, sync);
@@ -237,7 +237,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
 
 // 6. Solve for concentration
         // Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Advect Concentration ...");
 #endif
         adv_con->advect(C, C0, u, v, w, sync);
@@ -247,7 +247,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
 
         // Solve diffusion equation
         if (gamma != 0.) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Diffuse Concentration ...");
 #endif
             dif_con->diffuse(C, C0, C_tmp, gamma, sync);
@@ -258,7 +258,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
 
         // Add source
         if (m_conFct != SourceMethods::Zero) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Add concentration source ...");
 #endif
             sou_con->add_source(C, S_C, sync);

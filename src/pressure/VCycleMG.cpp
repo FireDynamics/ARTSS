@@ -783,7 +783,7 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
 
     if (end_i == start_i)
         m_logger->warn("Be cautious: Obstacle might fill up inner cells completely in level {} with nx= {}!",
-                level, domain->Getnx(out->GetLevel()));
+                level, domain->get_nx(out->GetLevel()));
 
     // average from eight neighboring cells
     // obstacles not used in fine grid, since coarse grid only obstacle if one of 8 fine grids was an obstacle,

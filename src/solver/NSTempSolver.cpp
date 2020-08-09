@@ -124,7 +124,7 @@ void NSTempSolver::do_step(real t, bool sync) {
                             d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_S_T[:bsize])
     {
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
@@ -137,7 +137,7 @@ void NSTempSolver::do_step(real t, bool sync) {
 
 // 2. Solve diffusion equation
         if (nu != 0.) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Diffuse ...");
 #endif
             dif_vel->diffuse(u, u0, u_tmp, nu, sync);
@@ -150,7 +150,7 @@ void NSTempSolver::do_step(real t, bool sync) {
 
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Add momentum source ...");
 #endif
             sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
@@ -164,7 +164,7 @@ void NSTempSolver::do_step(real t, bool sync) {
         pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);        //only multigrid cycle, divergence and velocity update (in case of NS) need to be added
@@ -174,7 +174,7 @@ void NSTempSolver::do_step(real t, bool sync) {
 
 // 5. Solve Temperature and link back to force
         // Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Advect Temperature ...");
 #endif
         adv_temp->advect(T, T0, u, v, w, sync);
@@ -185,7 +185,7 @@ void NSTempSolver::do_step(real t, bool sync) {
         // Solve diffusion equation
         if (kappa != 0.) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Diffuse Temperature ...");
 #endif
             dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
@@ -197,7 +197,7 @@ void NSTempSolver::do_step(real t, bool sync) {
         // Add dissipation
         if (m_has_dissipation) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Add dissipation ...");
 #endif
             sou_temp->dissipate(T, u, v, w, sync);
@@ -209,7 +209,7 @@ void NSTempSolver::do_step(real t, bool sync) {
         // Add source
         if (m_tempFct != SourceMethods::Zero) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Add temperature source ...");
 #endif
             sou_temp->add_source(T, S_T, sync);
@@ -255,7 +255,6 @@ void NSTempSolver::control() {
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
         spdlog::error("Fields not specified correctly!");
         //TODO Error Handling
-        std::flush(std::cout);
         std::exit(1);
     }
 }

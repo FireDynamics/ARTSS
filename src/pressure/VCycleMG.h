@@ -11,7 +11,7 @@
 #include "../interfaces/IPressure.h"
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
-#ifndef PROFILING
+#ifndef BENCHMARKING
 #include <spdlog/logger.h>
 #endif
 
@@ -43,7 +43,7 @@ private:
 	std::vector<Field*> err0;
 	std::vector<Field*> error1;
 	std::vector<Field*> mg_temporal_solution;
-#ifndef PROFILING
+#ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
 };

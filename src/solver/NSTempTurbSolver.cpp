@@ -10,6 +10,7 @@
 #include "NSTempTurbSolver.h"
 #include "../pressure/VCycleMG.h"
 #include "../utility/Parameters.h"
+#include "../utility/Utility.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
@@ -127,13 +128,17 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     auto kappa = m_kappa;
     auto dir_vel = m_dir_vel;
 
+#ifndef BENCHMARKING
+    auto m_logger = Utility::createLogger(typeid(NSTempTurbSolver).name());
+#endif
+
 #pragma acc data present(    d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], \
                             d_w0[:bsize], d_w_tmp[:bsize], d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], \
                             d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_S_T[:bsize], d_nu_t[:bsize], d_kappa_t[:bsize])
     {
 // 1. Solve advection equation
-#ifndef PROFILING
-        spdlog::info("Advect ...");
+#ifndef BENCHMARKING
+        m_logger->info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
         adv_vel->advect(v, v0, u0, v0, w0, sync);
@@ -143,14 +148,14 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve turbulent diffusion equation
-#ifndef PROFILING
-        spdlog::info("Calculating Turbulent viscosity ...");
+#ifndef BENCHMARKING
+        m_logger->info("Calculating Turbulent viscosity ...");
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 
 
-#ifndef PROFILING
-        spdlog::info("Diffuse ...");
+#ifndef BENCHMARKING
+        m_logger->info("Diffuse ...");
 #endif
         dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
@@ -161,8 +166,8 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
-#ifndef PROFILING
-            spdlog::info("Add momentum source ...");
+#ifndef BENCHMARKING
+            m_logger->info("Add momentum source ...");
 #endif
             sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
 
@@ -175,8 +180,8 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
-#ifndef PROFILING
-        spdlog::info("Pressure ...");
+#ifndef BENCHMARKING
+        m_logger->info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);
 
@@ -186,8 +191,8 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 // 5. Solve Temperature and link back to force
 
         // Solve advection equation
-#ifndef PROFILING
-        spdlog::info("Advect Temperature ...");
+#ifndef BENCHMARKING
+        m_logger->info("Advect Temperature ...");
 #endif
         adv_temp->advect(T, T0, u, v, w, sync);
 
@@ -205,8 +210,8 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
             for (size_t i = 0; i < bsize; ++i) {
                 d_kappa_t[i] = d_nu_t[i] * rPr_T;
             }
-#ifndef PROFILING
-            spdlog::info("Diffuse turbulent Temperature ...");
+#ifndef BENCHMARKING
+            m_logger->info("Diffuse turbulent Temperature ...");
 #endif
             dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
 
@@ -216,8 +221,8 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
             // no turbulence
             if (kappa != 0.) {
 
-#ifndef PROFILING
-                spdlog::info("Diffuse Temperature ...");
+#ifndef BENCHMARKING
+                m_logger->info("Diffuse Temperature ...");
 #endif
                 dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
 
@@ -229,8 +234,8 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         // Add dissipation
         if (m_hasDissipation) {
 
-#ifndef PROFILING
-            spdlog::info("Add dissipation ...");
+#ifndef BENCHMARKING
+            m_logger->info("Add dissipation ...");
 #endif
             sou_temp->dissipate(T, u, v, w, sync);
 
@@ -240,8 +245,8 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 
         // Add source
         if (m_tempFct != SourceMethods::Zero) {
-#ifndef PROFILING
-            spdlog::info("Add temperature source ...");
+#ifndef BENCHMARKING
+            m_logger->info("Add temperature source ...");
 #endif
             sou_temp->add_source(T, S_T, sync);
 
@@ -263,29 +268,30 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 // ***************************************************************************************
 void NSTempTurbSolver::control() {
     auto params = Parameters::getInstance();
+    auto m_logger = Utility::createLogger(typeid(NSTempTurbSolver).name());
 
     if (params->get("solver/advection/field") != "u,v,w") {
-        spdlog::error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        spdlog::error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/temperature/advection/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
-        spdlog::error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/temperature/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
-        spdlog::error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
-        spdlog::error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
         std::exit(1);
         //TODO Error handling
     }

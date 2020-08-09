@@ -13,7 +13,7 @@
 #include "../Field.h"
 #include "BoundaryDataController.h"
 #include <vector>
-#ifndef PROFILING
+#ifndef BENCHMARKING
 #include <spdlog/logger.h>
 #endif
 
@@ -47,7 +47,7 @@ public:
     size_t getObstacleStrideZ(size_t id, size_t level);
 
 private:
-#ifndef PROFILING
+#ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     std::vector<BoundaryData*> m_boundaryData;

@@ -67,7 +67,7 @@ Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t 
 /// \param  level Multigrid level
 // ***************************************************************************************
 void Obstacle::init(size_t level) {
-#ifndef PROFILING
+#ifndef BENCHMARKING
     m_logger = Utility::createLogger(typeid(this).name());
 #endif
     Domain *domain = Domain::getInstance();

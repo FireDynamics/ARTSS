@@ -91,7 +91,7 @@ void ObstacleBoundary::applyDirichlet(real *dataField, size_t *d_patch, Patch pa
     switch (patch) {
         case FRONT:
             referenceIndex = -1;
-            referenceIndex *= domain->GetNx(level) * domain->GetNy(level);
+            referenceIndex *= domain->get_Nx(level) * domain->get_Ny(level);
             break;
 
         case BACK:
@@ -100,7 +100,7 @@ void ObstacleBoundary::applyDirichlet(real *dataField, size_t *d_patch, Patch pa
 
         case BOTTOM:
             referenceIndex = -1;
-            referenceIndex *= domain->GetNx(level);
+            referenceIndex *= domain->get_Nx(level);
             break;
 
         case TOP:
@@ -145,8 +145,8 @@ void ObstacleBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patc
     switch (patch) {
         case FRONT:
             referenceIndex = -1;
-            value *= domain->Getdz(level);
-            referenceIndex *= domain->GetNx(level) * domain->GetNy(level);
+            value *= domain->get_dz(level);
+            referenceIndex *= domain->get_Nx(level) * domain->get_Ny(level);
             break;
 
         case BACK:
@@ -156,8 +156,8 @@ void ObstacleBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patc
 
         case BOTTOM:
             referenceIndex = -1;
-            value *= domain->Getdz(level);
-            referenceIndex *= domain->GetNx(level);
+            value *= domain->get_dz(level);
+            referenceIndex *= domain->get_Nx(level);
             break;
 
         case TOP:
@@ -166,7 +166,7 @@ void ObstacleBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patc
             break;
         case LEFT:
             referenceIndex = -1;
-            value *= domain->Getdz(level);
+            value *= domain->get_dz(level);
             referenceIndex *= 1;
             break;
 

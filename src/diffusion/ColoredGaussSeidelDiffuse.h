@@ -22,7 +22,7 @@ public:
     static void colored_gauss_seidel_stencil(size_t i, size_t j, size_t k, real* out, real* b, const real alpha_x, const real alpha_y, const real alpha_z, const real dsign, const real beta, const real w, const size_t Nx, const size_t Ny);
 
 private:
-#ifndef PROFILING
+#ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     real m_dt;

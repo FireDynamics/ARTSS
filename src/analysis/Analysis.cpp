@@ -26,7 +26,7 @@ Analysis::Analysis(Solution *solution) {
     if (has_analytic_solution) {
         m_tol = params->get_real("solver/solution/tol");
     } else {
-        m_logger->info("No analytical solution available!\n");
+        m_logger->info("No analytical solution available!");
     }
     m_solution = solution;
 }
@@ -252,9 +252,9 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
         real t_end = params->get_real("physical_parameters/t_end");
         auto Nt = static_cast<size_t>(std::round(t_end / dt));
         real rNt = 1. / static_cast<real>(Nt);
-        real epsu = sqrt(rNt * sumu);
-        real epsp = sqrt(rNt * sump);
-        real epsT = sqrt(rNt * sumT);
+        real epsu = sqrt(rNt * sum_u);
+        real epsp = sqrt(rNt * sum_p);
+        real epsT = sqrt(rNt * sum_T);
 
         m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
         m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
@@ -288,7 +288,7 @@ bool Analysis::check_time_step_VN(Field *u, real dt) {
 
     VN_check = VN < 0.5;
 
-    std::cout << "VN = " << VN << std::endl;
+    m_logger->info("VN = {}", VN);
 
     return VN_check;
 }

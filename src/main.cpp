@@ -31,7 +31,6 @@
 
 #ifndef BENCHMARKING
 #include "analysis/Analysis.h"
-#include "utility/Visual.h"
 #include "utility/Utility.h"
 #endif
 
@@ -63,15 +62,15 @@ int main(int argc, char **argv) {
     // Initialization
     // Parameters
     std::string XML_filename;
+    auto params = Parameters::getInstance();
     if (argc > 1) {
         XML_filename.assign(argv[1]);
+        params->parse(XML_filename);
         installLogger(XML_filename);  // TODO(n167h7): DELETE
     } else {
         std::cerr << "XML file missing" << std::endl;
         std::exit(1);
     }
-    auto params = Parameters::getInstance();
-    params->parse(XML_filename);
 
     // Solver
     ISolver *solver;

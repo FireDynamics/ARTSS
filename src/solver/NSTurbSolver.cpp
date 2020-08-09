@@ -99,7 +99,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
     {
 
 // 1. Solve advection equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
@@ -110,13 +110,13 @@ void NSTurbSolver::do_step(real t, bool sync) {
         ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve turbulent diffusion equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Calculating Turbulent viscosity ...");
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Diffuse ...");
 #endif
         dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
@@ -129,7 +129,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
 // 3. Add force
         if (m_force_function != SourceMethods::Zero) {
 
-#ifndef PROFILING
+#ifndef BENCHMARKING
             spdlog::info("Add source ...");
 #endif
             sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
@@ -143,7 +143,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
         pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
-#ifndef PROFILING
+#ifndef BENCHMARKING
         spdlog::info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);

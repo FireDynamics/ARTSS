@@ -54,7 +54,7 @@ public:
     std::vector<FieldType> get_used_fields();
 
 private:
-#ifndef PROFILING
+#ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     static BoundaryController* singleton;

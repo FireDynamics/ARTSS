@@ -10,7 +10,6 @@
 #endif
 
 #include <cmath>
-#include <iostream>
 
 #include "JacobiDiffuse.h"
 #include "../utility/Parameters.h"

@@ -14,7 +14,6 @@
 #include "SolverSelection.h"
 
 DiffusionSolver::DiffusionSolver() {
-
     auto params = Parameters::getInstance();
     std::string diffusionType = params->get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
@@ -36,7 +35,7 @@ DiffusionSolver::~DiffusionSolver() {
 void DiffusionSolver::do_step(real t, bool sync) {
 
 #ifndef BENCHMARKING
-    std::cout << "Diffuse ..." << std::endl;
+    spdlog::info("Diffuse ...");
 #endif
 // 1. Solve diffusion equation
     // local variables and parameters for GPU
