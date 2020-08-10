@@ -102,7 +102,7 @@
     <vtk_nth_plot> 40 </vtk_nth_plot>
   </visualisation>
   <logging>
-    <level>WARNING</level>
+    <level>INFO</level>
     <file>tmp.log</file>
   </logging>
 </ARTSS>
