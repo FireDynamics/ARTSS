@@ -26,7 +26,7 @@ void SolverSelection::SetAdvectionSolver(IAdvection **advectionSolver, const std
     if (advectionType == AdvectionMethods::SemiLagrangian) {
         *advectionSolver = new SLAdvect();
     } else {
-#ifndef benchmarking
+#ifndef BENCHMARKING
         auto m_logger = Utility::create_logger(typeid(SolverSelection).name());
         m_logger->error("Advection method not yet implemented! simulation stopped!");
 #endif
@@ -49,7 +49,7 @@ void SolverSelection::SetDiffusionSolver(IDiffusion **diffusionSolver, const std
     } else if (diffusionType == DiffusionMethods::Explicit) {
         *diffusionSolver = new ExplicitDiffuse();
     } else {
-#ifndef benchmarking
+#ifndef BENCHMARKING
         auto m_logger = Utility::create_logger(typeid(SolverSelection).name());
         m_logger->error("Diffusion method not yet implemented! Simulation stopped!");
 #endif
@@ -68,7 +68,7 @@ void SolverSelection::SetPressureSolver(IPressure **pressureSolver, const std::s
     if (pressureType == PressureMethods::VCycleMG) {
         *pressureSolver = new VCycleMG(p, rhs);
     } else {
-#ifndef benchmarking
+#ifndef BENCHMARKING
         auto m_logger = Utility::create_logger(typeid(SolverSelection).name());
         m_logger->error("Pressure method not yet implemented! Simulation stopped!");
 #endif
@@ -87,7 +87,7 @@ void SolverSelection::SetSourceSolver(ISource **sourceSolver, const std::string&
     if (sourceType == SourceMethods::ExplicitEuler) {
         *sourceSolver = new ExplicitEulerSource();
     } else {
-#ifndef benchmarking
+#ifndef BENCHMARKING
         auto m_logger = Utility::create_logger(typeid(SolverSelection).name());
         m_logger->error("Source method not yet implemented! Simulation stopped!");
 #endif
@@ -108,7 +108,7 @@ void SolverSelection::SetTurbulenceSolver(ITurbulence **turbulenceSolver, const 
     } else if (turbulenceType == TurbulenceMethods::DynamicSmagorinsky) {
         *turbulenceSolver = new DynamicSmagorinsky();
     } else {
-#ifndef benchmarking
+#ifndef BENCHMARKING
         auto m_logger = Utility::create_logger(typeid(SolverSelection).name());
         m_logger->error("Turbulence model is not yet implemented! Simulation stopped!");
 #endif

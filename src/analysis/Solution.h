@@ -51,7 +51,9 @@ private:
     void (Solution::*m_init_function)(const real);
 
     real m_current_time_step = -1;
+#ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_ANALYSIS_SOLUTION_H_ */

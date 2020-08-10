@@ -38,7 +38,6 @@ DiffusionTurbSolver::~DiffusionTurbSolver() {
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void DiffusionTurbSolver::do_step(real t, bool sync) {
-
 // 1. Solve diffusion equation
 // local variables and parameters for GPU
     auto u = ISolver::u;
@@ -70,13 +69,12 @@ void DiffusionTurbSolver::do_step(real t, bool sync) {
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_nu_t[:bsize]) //EV
     {
 #ifndef BENCHMARKING
-        spdlog::info("Calculating Turbulent viscosity ...");
-        //TODO Logger
+        auto m_logger = Utility::create_logger(typeid(DiffusionTurbSolver).name());
+        m_logger->info("Calculating Turbulent viscosity ...");
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 #ifndef BENCHMARKING
-        spdlog::info("Diffuse ...");
-        //TODO Logger
+        m_logger->info("Diffuse ...");
 #endif
         dif->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif->diffuse(v, v0, v_tmp, nu, nu_t, sync);
@@ -91,7 +89,10 @@ void DiffusionTurbSolver::do_step(real t, bool sync) {
 void DiffusionTurbSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        spdlog::error("Fields not specified correctly!");
+#ifndef BENCHMARKING
+        auto m_logger = Utility::create_logger(typeid(DiffusionTurbSolver).name());
+        m_logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error handling
     }

@@ -265,30 +265,42 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 // ***************************************************************************************
 void NSTempTurbSolver::control() {
     auto params = Parameters::getInstance();
+#ifndef BENCHMARKING
     auto m_logger = Utility::create_logger(typeid(NSTempTurbSolver).name());
+#endif
 
     if (params->get("solver/advection/field") != "u,v,w") {
+#ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
+#ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/temperature/advection/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
+#ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/temperature/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
+#ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
+#ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error handling
     }

@@ -363,7 +363,9 @@ void Multigrid::control() {
 
     if (!message.empty()) {
         message = "################ MULTIGRID CONTROL ################\n" + message + "---------------- MULTIGRID CONTROL END ----------------";
+#ifndef BENCHMARKING
         m_logger->warn(message);
+#endif
     }
 }
 
@@ -373,8 +375,8 @@ void Multigrid::control() {
 // ***************************************************************************************
 void Multigrid::print() {
 #ifdef BENCHMARKING
-    return
-#endif
+    return;
+#else
     m_logger->info("################ MULTIGRID ################");
     m_logger->info("Number of Obstacles: {}, Number of Surfaces: {}",
             m_numberOfObstacles, m_numberOfSurfaces);
@@ -502,6 +504,7 @@ and the corresponding indices at this position: {} | {}",
     }
     m_logger->info("Total length of sList: {}", getLen_sList_joined());
     m_logger->info("---------------- MULTIGRID END ----------------");
+#endif
 }
 
 // ================================= Add MG lists ==========================================
@@ -685,18 +688,22 @@ void Multigrid::surfaceDominantRestriction(size_t level) {
                 stride_z_coarse = (stride_z_fine + 1) / 2;
             }
             size_t startIndex_coarse = IX(i_fine / 2, j_fine / 2, k_fine / 2, Nx, Ny);
+#ifndef BENCHMARKING
             m_logger->info("startIndex multigrid surface: {} {}|{}",
                     startIndex_fine,
                     startIndex_coarse,
                     startIndex_fine / 2);
+#endif
 
             Surface *surface_coarse = new Surface(surfaceID, startIndex_coarse, stride_x_coarse, stride_y_coarse, stride_z_coarse, level);
             *(surfaceList_coarse + surfaceID) = surface_coarse;
             size_t index = level * m_numberOfSurfaces + surfaceID + 1;
             *(m_size_MG_sList_level + index) = *(m_size_MG_sList_level + index - 1) + surface_coarse->getSize_surfaceList();
+#ifndef BENCHMARKING
             m_logger->info("control multigrid surface index: {} {}",
                     *(m_size_MG_sList_level + index),
                     surface_coarse->getSize_surfaceList());
+#endif
         } //end surface id loop
     }
 }
@@ -736,6 +743,7 @@ Obstacle **Multigrid::obstacleDominantRestriction(size_t level) {
         size_t k2_coarse = (k2_fine + 1) / 2;
 
         //TODO exit?
+#ifndef BENCHMARKING
         if (i2_fine - i1_fine + 1< domain->get_nx(level - 1) - 2 && i2_coarse - i1_coarse + 1 >= domain->get_nx(level) - 2){
             m_logger->warn("Be cautious! Obstacle fills up inner cells in x-direction at level {}", level);
         }
@@ -745,6 +753,7 @@ Obstacle **Multigrid::obstacleDominantRestriction(size_t level) {
         if (k2_fine - k1_fine +1< domain->get_nz(level - 1) - 2 && k2_coarse - k1_coarse + 1 >= domain->get_nz(level) - 2){
             m_logger->warn("Be cautious! Obstacle fills up inner cells in z-direction at level {}", level);
         }
+#endif
 
         Obstacle *obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse, i2_coarse, j2_coarse, k2_coarse, level);
         *(obstacleList_coarse + id) = obstacle_coarse;

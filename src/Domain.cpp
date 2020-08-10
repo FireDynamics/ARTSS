@@ -157,6 +157,9 @@ bool Domain::set_new_value(long shift, real startCoord_p, real endCoord_p, real 
 }
 
 void Domain::print() {
+#ifdef BENCHMARKING
+    return;
+#else
     m_logger->info("-- Domain");
     m_logger->info("Domain size inner cells: ({}|{}{})", get_nx() - 2,
                                                          get_ny() - 2,
@@ -164,9 +167,13 @@ void Domain::print() {
     m_logger->info("step size (x|y|z): ({}|{}|{})", get_dx(),
                                                     get_dy(),
                                                     get_dz());
+#endif
 }
 
 void Domain::printDetails() {
+#ifdef BENCHMARKING
+    return;
+#else
     m_logger->info("############### Domain Parameter ###############");
     for (size_t level = 0; level < m_levels + 1; level++) {
         m_logger->info("For Level {} Nx: {}, Ny: {}, Nz: {}", level,
@@ -202,4 +209,5 @@ void Domain::printDetails() {
     }
 
     m_logger->info("--------------- Domain Parameter end ---------------");
+#endif
 }

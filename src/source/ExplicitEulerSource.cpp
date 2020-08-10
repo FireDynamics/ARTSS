@@ -17,7 +17,10 @@ ExplicitEulerSource::ExplicitEulerSource() {
     m_dir_vel = params->get("solver/source/dir");
 
     if (m_dir_vel.find('x') == std::string::npos && m_dir_vel.find('y') == std::string::npos && m_dir_vel.find('z') == std::string::npos) {
-        spdlog::error("unknown direction -> exit");
+#ifndef BENCHMARKING
+        auto m_logger = Utility::create_logger(typeid(ExplicitEulerSource).name());
+        m_logger->error("unknown direction -> exit");
+#endif
         std::exit(1);
         //TODO Error handling
     }

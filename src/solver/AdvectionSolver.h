@@ -13,16 +13,16 @@
 
 class AdvectionSolver : public ISolver {
 public:
-  AdvectionSolver();
-  ~AdvectionSolver() override;
+    AdvectionSolver();
+    ~AdvectionSolver() override;
 
-  void do_step(real t, bool sync) override;
+    void do_step(real t, bool sync) override;
 
 private:
-  IAdvection* adv;
-  Field* u_linm;
-  Field* v_linm;
-  Field* w_linm;
+    IAdvection* adv;
+    Field* u_linm;
+    Field* v_linm;
+    Field* w_linm;
 
     static void control();
 };

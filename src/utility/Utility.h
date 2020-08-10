@@ -10,9 +10,11 @@
 #include <string>
 #include <vector>
 
+#ifndef BENCHMARKING
 #include "spdlog/logger.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
+#endif
 
 class Utility {
  public:

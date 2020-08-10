@@ -683,7 +683,9 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
             }
         } //end data region
     } else {
+#ifndef BENCHMARKING
         m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
+#endif
         std::exit(1);
         // TODO Error handling
     }
@@ -781,9 +783,11 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     size_t start_i = boundary->get_innerList_level_joined_start(level + 1);
     size_t end_i = boundary->get_innerList_level_joined_end(level + 1) + 1;
 
+#ifndef BENCHMARKING
     if (end_i == start_i)
         m_logger->warn("Be cautious: Obstacle might fill up inner cells completely in level {} with nx= {}!",
                 level, domain->get_nx(out->GetLevel()));
+#endif
 
     // average from eight neighboring cells
     // obstacles not used in fine grid, since coarse grid only obstacle if one of 8 fine grids was an obstacle,
@@ -907,13 +911,17 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
     const size_t Nz = domain->get_Nz(out->GetLevel());
 
     if (level < levels - 1) {
+#ifndef BENCHMARKING
         m_logger->warn("Wrong level = {}", level);
+#endif
         return;
         // TODO Error handling
     }
 
     if (Nx <= 4 && Ny <= 4) {
+#ifndef BENCHMARKING
         m_logger->warn(" Grid is too coarse with Nx={} and Ny={}. Just smooth here", Nx, Ny);
+#endif
         Smooth(out, tmp, b, level, sync);
         return;
         // TODO Error handling
@@ -1065,7 +1073,9 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             }  // end while
         }  // end data region
     } else {
+#ifndef BENCHMARKING
         m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
+#endif
         std::exit(1);
         // TODO Error handling
     }

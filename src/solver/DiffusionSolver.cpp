@@ -30,9 +30,9 @@ DiffusionSolver::~DiffusionSolver() {
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void DiffusionSolver::do_step(real t, bool sync) {
-
 #ifndef BENCHMARKING
-    spdlog::info("Diffuse ...");
+    auto m_logger = Utility::create_logger(typeid(DiffusionSolver).name());
+    m_logger->info("Diffuse ...");
 #endif
 // 1. Solve diffusion equation
     // local variables and parameters for GPU
@@ -73,7 +73,10 @@ void DiffusionSolver::do_step(real t, bool sync) {
 void DiffusionSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        spdlog::error("Fields not specified correctly!");
+#ifndef BENCHMARKING
+        auto m_logger = Utility::create_logger(typeid(DiffusionSolver).name());
+        m_logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error handling
     }

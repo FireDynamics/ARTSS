@@ -110,7 +110,9 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
                     oz1 = curElem->DoubleAttribute("oz1");
                     oz2 = curElem->DoubleAttribute("oz2");
                 } else {
+#ifndef BENCHMARKING
                     m_logger->warn("Ignoring unknown node {}", nodeName);
+#endif
                 }
                 curElem = curElem->NextSiblingElement();
             }
@@ -158,6 +160,9 @@ BoundaryController *BoundaryController::getInstance() {
 /// \brief  prints boundaries (outer, inner, surfaces)
 // ***************************************************************************************
 void BoundaryController::printBoundaries() {
+#ifdef BENCHMARKING
+    return;
+#else
     m_logger->info("-- Info summary");
     Domain::getInstance()->print();
     m_bdc_boundary->print();
@@ -168,6 +173,7 @@ void BoundaryController::printBoundaries() {
     for (size_t i = 0; i < m_numberOfSurfaces; i++) {
         m_surfaceList[i]->print();
     }
+#endif
 }
 
 //======================================== Update lists ====================================

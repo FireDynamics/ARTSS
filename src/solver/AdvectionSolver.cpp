@@ -105,7 +105,10 @@ void AdvectionSolver::do_step(real t, bool sync) {
 void AdvectionSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/advection/field") != "u,v,w") {
-        spdlog::error("Fields not specified correctly!");
+#ifndef BENCHMARKING
+        auto m_logger = Utility::create_logger(typeid(AdvectionSolver).name());
+        m_logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error handling
     }

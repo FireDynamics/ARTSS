@@ -83,7 +83,9 @@ ISolver::ISolver() {
         if (params->get("solver/source/type") == SourceMethods::ExplicitEuler) {
             this->source_velocity = new ExplicitEulerSource();
         } else {
+#ifndef BENCHMARKING
             m_logger->critical("Source method not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
             // TODO Error handling
         }
@@ -97,7 +99,9 @@ ISolver::ISolver() {
         if (params->get("solver/temperature/source/type") == SourceMethods::ExplicitEuler) {
             this->source_temperature = new ExplicitEulerSource();
         } else {
+#ifndef BENCHMARKING
             m_logger->critical("Source method not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
             // TODO Error handling
         }
@@ -109,7 +113,9 @@ ISolver::ISolver() {
         if (params->get("solver/concentration/source/type") == SourceMethods::ExplicitEuler) {
             this->source_concentration = new ExplicitEulerSource();
         } else {
+#ifndef BENCHMARKING
             m_logger->critical("Source method not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
             // TODO Error handling
         }
@@ -179,7 +185,9 @@ ISolver::~ISolver() {
 /// \brief  initializes numerical and temporary solution
 // *****************************************************************************
 void ISolver::set_up() {
+#ifndef BENCHMARKING
     m_logger->info("Start initializing....");
+#endif
 
     // Initialization of variables
     init();
@@ -764,7 +772,9 @@ void ISolver::update_sources(real t, bool sync) {
 #endif
             momentum_source();
         } else {
+#ifndef BENCHMARKING
             m_logger->critical("Source function not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
             // TODO Error handling
         }
@@ -812,7 +822,9 @@ void ISolver::update_sources(real t, bool sync) {
                 d_S_T[idx] *= t_ramp;
             }
         } else {
+#ifndef BENCHMARKING
             m_logger->critical("Source function not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
             // TODO Error handling
         }
@@ -855,7 +867,9 @@ void ISolver::update_sources(real t, bool sync) {
                 d_S_C[idx] *= t_ramp;
             }
         } else {
+#ifndef BENCHMARKING
             m_logger->critical("Source function not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
             // TODO Error handling
         }

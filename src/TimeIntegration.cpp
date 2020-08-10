@@ -53,8 +53,8 @@ void TimeIntegration::run() {
     // Visualise
     Visual *visual = new Visual(solution);
     visual->visualise(m_solver, 0.);
-#endif
     m_logger->info("Start calculating and timing...");
+#endif
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
@@ -215,14 +215,16 @@ void TimeIntegration::run() {
 
     } // end RANGE
 
+#ifndef BENCHMARKING
     m_logger->info("Done calculating and timing ...");
+#endif
 
     // stop timer
     end = std::chrono::system_clock::now();
     long ms = std::chrono::duration_cast < std::chrono::milliseconds > (end - start).count();
-    m_logger->info("Global Time: {}ms", ms);
 
 #ifndef BENCHMARKING
+    m_logger->info("Global Time: {}ms", ms);
     if (adaption->is_data_extraction_endresult_enabled()) {
         adaption->extractData(adaption->get_endresult_name());
     }
@@ -230,5 +232,6 @@ void TimeIntegration::run() {
     analysis->save_variables_in_file(m_solver);
     analysis->analyse(m_solver, m_t_end);
 #endif
+
     delete (adaption);
 }

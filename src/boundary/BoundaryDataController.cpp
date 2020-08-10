@@ -55,6 +55,9 @@ void BoundaryDataController::addBoundaryData(tinyxml2::XMLElement *xmlElement) {
 /// \brief  Prints info of boundary data
 // ***************************************************************************************
 void BoundaryDataController::print() {
+#ifdef BENCHMARKING
+    return;
+#else
     for (size_t i = 0; i < numberOfFieldTypes; i++) {
         auto boundary = *(m_boundaryData + i);
         if (!boundary->isEmpty()) {
@@ -62,6 +65,7 @@ void BoundaryDataController::print() {
             boundary->print();
         }
     }
+#endif
 }
 
 //======================================== Apply boundary condition ====================================

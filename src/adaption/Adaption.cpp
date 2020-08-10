@@ -42,7 +42,9 @@ Adaption::Adaption(ISolver *solver) {
         } else if (init == "Vortex" || init == "VortexY") {
             func = new Vortex(solver);
         } else {
+#ifndef BENCHMARKING
             m_logger->critical("Type {} is not defined", init);
+#endif
             std::exit(1);
             ///TODO Error Handling
         }
@@ -508,11 +510,13 @@ bool Adaption::adapt_x_direction_serial(const real *f, real check_value, size_t 
     }
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
+#ifndef BENCHMARKING
         spdlog::error("Exception in x-Adaption: {} {} {} {}",
                         size_t(expansion_start),
                         size_t(reduction_start),
                         size_t(expansion_end),
                         size_t(reduction_end));
+#endif
         // TODO Error handling
         throw std::exception();
     }
@@ -598,11 +602,13 @@ bool Adaption::adapt_x_direction(const real *f, real check_value, size_t no_buff
     }
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
+#ifndef BENCHMARKING
         spdlog::error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
                 expansion_counter_start,
                 reduction_counter_start,
                 expansion_counter_end,
                 reduction_counter_end);
+#endif
         //TODO Error Handling
         //throw std::exception();
     }
@@ -713,11 +719,13 @@ bool Adaption::adapt_y_direction_serial(const real *f, real check_value, size_t 
     }
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
+#ifndef BENCHMARKING
         spdlog::error("Exception in y-Adaption: {} {} {} {}",
                         size_t(expansion_start),
                         size_t(reduction_start),
                         size_t(expansion_end),
                         size_t(reduction_end));
+#endif
         // TODO Error handling
         throw std::exception();
     }
@@ -804,12 +812,14 @@ bool Adaption::adapt_y_direction(const real *f, real check_value, size_t no_buff
     }
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
+#ifndef BENCHMARKING
         spdlog::error(
             "Trying to reduce and expand at the same time (y): {}, {} | {}, {}",
             expansion_counter_start,
             reduction_counter_start,
             expansion_counter_end,
             reduction_counter_end);
+#endif
         throw std::exception();
     }
     if (expansion_counter_start > 0) {

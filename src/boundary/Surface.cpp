@@ -93,6 +93,9 @@ Surface::~Surface() {
 }
 
 void Surface::print() {
+#ifdef BENCHMARKING
+    return;
+#else
     size_t i2 = get_i2();
     size_t j2 = get_j2();
     size_t k2 = get_k2();
@@ -104,6 +107,7 @@ void Surface::print() {
     m_logger->info("coords: ({}|{}) ({}|{}) ({}|{})", m_i1, i2,
                                                       m_j1, j2,
                                                       m_k1, k2);
+#endif
 }
 
 void Surface::init(size_t Nx, size_t Ny) {
@@ -116,7 +120,9 @@ void Surface::init(size_t Nx, size_t Ny) {
 
 void Surface::createSurface(size_t Nx, size_t Ny) {
     size_t counter = 0;
+#ifndef BENCHMARKING
     m_logger->info("list size of sList: {}", m_size_surfaceList);
+#endif
 
     // fill sList with corresponding indices
     for (size_t k = m_k1; k < m_k1 + m_strideZ; ++k) {
@@ -128,9 +134,11 @@ void Surface::createSurface(size_t Nx, size_t Ny) {
             }
         }
     }
+#ifndef BENCHMARKING
     m_logger->info("control create Surface ({}|{})", counter,
                                                      m_size_surfaceList);
     m_logger->info("end of creating sList");
+#endif
 }
 
 void Surface::setBoundaryConditions(tinyxml2::XMLElement *xmlElement) {

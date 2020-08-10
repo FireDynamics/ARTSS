@@ -19,13 +19,17 @@
 #include "../utility/Utility.h"
 
 Analysis::Analysis(Solution *solution) {
+#ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
     has_analytic_solution = params->get("solver/solution/available") == "Yes";
     if (has_analytic_solution) {
         m_tol = params->get_real("solver/solution/tol");
     } else {
+#ifndef BENCHMARKING
         m_logger->info("No analytical solution available!");
+#endif
     }
     m_solution = solution;
 }
@@ -47,7 +51,9 @@ void Analysis::analyse(ISolver *solver, real t) {
         auto curElem = xmlParameter->FirstChildElement();
 
         m_solution->calc_analytical_solution(t);
+#ifndef BENCHMARKING
         m_logger->info("Compare to analytical solution:");
+#endif
 
         while (curElem) {
             std::string nodeName(curElem->Value());
@@ -91,12 +97,16 @@ bool Analysis::compare_solutions(read_ptr num, read_ptr ana, FieldType type, rea
     //real res = calc_relative_spatial_error(num, ana);
 
     if (res <= m_tol) {
+#ifndef BENCHMARKING
         m_logger->info("{} PASSED Test at time {} with error e = {}",
                 BoundaryData::getFieldTypeName(type), t, res);
+#endif
         verification = true;
     } else {
+#ifndef BENCHMARKING
         m_logger->warn("{} FAILED Test at time {} with error e = {}",
                 BoundaryData::getFieldTypeName(type), t, res);
+#endif
     }
     return verification;
 }
@@ -128,7 +138,9 @@ real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
     real eps = sqrt(1. / nr * sum);
 
     //TODO(n16h7) add. output
+#ifndef BENCHMARKING
     m_logger->info("Absolute error ||e|| = {}", eps);
+#endif
     //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
     //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
     //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]    << std::endl;
@@ -187,7 +199,9 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
     }
 
     //TODO(n16h7) add. output
+#ifndef BENCHMARKING
     m_logger->info("Relative error ||e|| = {}", eps);
+#endif
     //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
     //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]      << std::endl;
     //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]  << std::endl;
@@ -255,9 +269,11 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
         real epsp = sqrt(rNt * sum_p);
         real epsT = sqrt(rNt * sum_T);
 
+#ifndef BENCHMARKING
         m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
         m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
         m_logger->info("RMS error of T at domain center is e_RMS = {}", epsT);
+#endif
     }
 }
 
@@ -287,7 +303,9 @@ bool Analysis::check_time_step_VN(Field *u, real dt) {
 
     VN_check = VN < 0.5;
 
+#ifndef BENCHMARKING
     m_logger->info("VN = {}", VN);
+#endif
 
     return VN_check;
 }
@@ -337,7 +355,9 @@ bool Analysis::check_time_step_CFL(Field *u, Field *v, Field *w, real dt) {
 
     CFL_check = CFL < 1.;
 
+#ifndef BENCHMARKING
     m_logger->info("CFL = {}", CFL);
+#endif
 
     return CFL_check;
 }

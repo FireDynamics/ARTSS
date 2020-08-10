@@ -39,6 +39,7 @@
 #endif
 
 
+#ifndef BENCHMARKING
 // TODO(n167h7): DELETE
 //================================= parse params =============================
 // ***************************************************************************
@@ -57,6 +58,7 @@ std::shared_ptr<spdlog::logger> installLogger(std::string XMLfilename) {
     logger->info("Provided logging output: {}", logFile);
     return logger;
 }
+#endif
 
 int main(int argc, char **argv) {
     // Initialization
@@ -66,7 +68,9 @@ int main(int argc, char **argv) {
     if (argc > 1) {
         XML_filename.assign(argv[1]);
         params->parse(XML_filename);
+#ifndef BENCHMARKING
         installLogger(XML_filename);  // TODO(n167h7): DELETE
+#endif
     } else {
         std::cerr << "XML file missing" << std::endl;
         std::exit(1);

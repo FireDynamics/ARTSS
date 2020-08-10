@@ -860,7 +860,11 @@ namespace Functions {
             real z2 = domain->get_z2();
             bord[0] = z1;
             bord[n_layers] = z2;
-        } else spdlog::error("No distance for layers specified!");
+        } else {
+#ifndef BENCHMARKING
+            spdlog::error("No distance for layers specified!");
+#endif
+        }
         //TODO Error handling
 
         // get values in layers
@@ -919,7 +923,11 @@ namespace Functions {
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
-                } else spdlog::error("No distance for layers specified!");
+                } else {
+#ifndef BENCHMARKING
+                    spdlog::error("No distance for layers specified!");
+#endif
+                }
                 //TODO Error handling
             }
 
@@ -943,7 +951,11 @@ namespace Functions {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
                     if (z < bord[0]) out->data[idx] = val[0];
-                } else spdlog::error("No distance for layers specified!");
+                } else {
+#ifndef BENCHMARKING
+                    spdlog::error("No distance for layers specified!");
+#endif
+                }
                 //TODO Error handling
             }
             //obstacles
@@ -966,7 +978,11 @@ namespace Functions {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
                     if (z < bord[0]) out->data[idx] = val[0];
-                } else spdlog::error("No distance for layers specified!");
+                } else {
+#ifndef BENCHMARKING
+                    spdlog::error("No distance for layers specified!");
+#endif
+                }
                 //TODO Error handling
             }
 

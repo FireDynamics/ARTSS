@@ -152,20 +152,29 @@ void NSSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void NSSolver::control() {
+#ifndef BENCHMARKING
+    auto m_logger = Utility::create_logger(typeid(NSSolver).name());
+#endif
     auto params = Parameters::getInstance();
 
     if (params->get("solver/advection/field") != "u,v,w") {
+#ifndef BENCHMARKING
         spdlog::error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Eroor Handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
+#ifndef BENCHMARKING
         spdlog::error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Eroor Handling
     }
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
+#ifndef BENCHMARKING
         spdlog::error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Eroor Handling
     }

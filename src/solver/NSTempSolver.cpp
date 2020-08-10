@@ -228,29 +228,43 @@ void NSTempSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void NSTempSolver::control() {
+#ifndef BENCHMARKING
+    auto m_logger = Utility::create_logger(typeid(NSTempSolver).name());
+#endif
+
     auto params = Parameters::getInstance();
     if (params->get("solver/advection/field") != "u,v,w") {
+#ifndef BENCHMARKING
         spdlog::error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error Handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
+#ifndef BENCHMARKING
         spdlog::error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error Handling
     }
     if (params->get("solver/temperature/advection/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
+#ifndef BENCHMARKING
         spdlog::error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error Handling
     }
     if (params->get("solver/temperature/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
+#ifndef BENCHMARKING
         spdlog::error("Fields not specified correctly!");
+#endif
         std::exit(1);
         //TODO Error Handling
     }
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
+#ifndef BENCHMARKING
         spdlog::error("Fields not specified correctly!");
+#endif
         //TODO Error Handling
         std::exit(1);
     }

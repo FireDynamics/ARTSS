@@ -123,7 +123,9 @@ private:
     void temperature_source();
     void momentum_source();
     static void CallRandom(Field* out);
+#ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_INTERFACES_ISOLVER_H_ */

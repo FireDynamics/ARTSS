@@ -77,6 +77,9 @@ void Boundary::init(size_t size_obstacles){
 /// \param  size_obstacles Amount of obstacle cells
 // ***************************************************************************************
 void Boundary::print(size_t size_obstacles) {
+#ifdef BENCHMARKING
+    return;
+#else
     auto m_logger = Utility::create_logger(typeid(Boundary).name());
     m_logger->info("################ BOUNDARY ################");
     m_logger->info("list size of bList: {}", m_size_boundaryList);
@@ -102,6 +105,7 @@ void Boundary::print(size_t size_obstacles) {
     m_logger->info("Inner starts with {} and ends with {}", *(m_innerList + 0),
                                                           *(m_innerList + m_size_innerList - 1));
     m_logger->info("--------------- END BOUNDARY ---------------");
+#endif
 }
 
 //======================================== Control ====================================

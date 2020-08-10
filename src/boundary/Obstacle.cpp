@@ -222,6 +222,9 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
 /// \brief  Print obstacle infos
 // ***************************************************************************************
 void Obstacle::print() {
+#ifdef BENCHMARKING
+    return;
+#else
     size_t strideX = getStrideX();
     size_t strideY = getStrideY();
     size_t strideZ = getStrideZ();
@@ -231,6 +234,7 @@ void Obstacle::print() {
     m_logger->info("\t size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}", m_size_obstacleFront, m_size_obstacleBack, m_size_obstacleBottom, m_size_obstacleTop, m_size_obstacleLeft, m_size_obstacleRight);
     m_logger->info("\t size of Obstacle: {}", m_size_obstacleList);
     m_logger->info("\t coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, m_i2, m_j1, m_j2, m_k1, m_k2);
+#endif
 }
 
 //======================================== Print ====================================
@@ -238,6 +242,9 @@ void Obstacle::print() {
 /// \brief  Print detailed obstacle infos
 // ***************************************************************************************
 void Obstacle::printDetails(){
+#ifdef BENCHMARKING
+    return;
+#else
     Domain *domain = Domain::getInstance();
     size_t Nx = domain->get_Nx(m_level);
     size_t Ny = domain->get_Ny(m_level);
@@ -342,6 +349,7 @@ void Obstacle::printDetails(){
     } else {
         m_logger->info("Right size = 0");
     }
+#endif
 }
 
 //======================================== Control ====================================
