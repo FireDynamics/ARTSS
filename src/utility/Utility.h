@@ -30,7 +30,9 @@ class Utility {
     static std::vector<std::string> split(const std::string& text,
                                           char delimiter);
 
-    static std::shared_ptr<spdlog::logger> createLogger(std::string loggerName);
+#ifndef BENCHMARKING
+    static std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
+#endif
 
  private:
     Utility() = default;

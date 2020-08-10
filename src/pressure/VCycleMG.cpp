@@ -26,7 +26,7 @@
 // *****************************************************************************
 VCycleMG::VCycleMG(Field *out, Field *b) {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
 
     auto params = Parameters::getInstance();

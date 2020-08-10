@@ -13,7 +13,7 @@ inline static const std::vector<std::string> BoundaryConditionNames = {"neumann"
 
 BoundaryData::BoundaryData() {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_values = new real[numberOfPatches];
     m_boundaryConditions = new BoundaryCondition[numberOfPatches];

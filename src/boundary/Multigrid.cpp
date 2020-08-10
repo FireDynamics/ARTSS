@@ -9,7 +9,7 @@
 
 Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_bdc_boundary = bdc_boundary;
     m_numberOfSurfaces = 0;

@@ -10,7 +10,7 @@
 Surface::Surface(tinyxml2::XMLElement* element) {
     m_boundaryDataController = new BoundaryDataController();
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     m_logger->info("################ SURFACE ################");
 #endif
     auto domain = Domain::getInstance();
@@ -55,14 +55,14 @@ Surface::Surface(tinyxml2::XMLElement* element) {
 
     createSurface(Nx, Ny);
     print();
-#endif BENCHMARKING
+#ifndef BENCHMARKING
     m_logger->info("----------------END SURFACE ----------------");
 #endif
 }
 
 Surface::Surface(size_t surfaceID, size_t startIndex, size_t strideX, size_t strideY, size_t strideZ, size_t level) {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     m_logger->info("################ SURFACE ################");
 #endif
     m_surfaceID = surfaceID;

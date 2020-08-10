@@ -4,7 +4,6 @@
 /// \author 	My Linh Würzburger
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include "BoundaryDataController.h"
 #include "../utility/Utility.h"
 #include "../boundaryCondition/DomainBoundary.h"
@@ -12,7 +11,7 @@
 
 BoundaryDataController::BoundaryDataController() {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_boundaryData = new BoundaryData *[numberOfFieldTypes];
     for (size_t i = 0; i < numberOfFieldTypes; i++) {

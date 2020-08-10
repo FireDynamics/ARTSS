@@ -9,7 +9,7 @@
 
 Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     Domain *domain = Domain::getInstance();
 
@@ -46,7 +46,7 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
 
 Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level) {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_level = level;
 
@@ -69,7 +69,7 @@ Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t 
 // ***************************************************************************************
 void Obstacle::init(size_t level) {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     Domain *domain = Domain::getInstance();
     size_t Nx = domain->get_Nx(level);

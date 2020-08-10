@@ -10,7 +10,7 @@ Domain *Domain::single = nullptr; //Singleton
 
 Domain::Domain() {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto params = Parameters::getInstance();
     auto solver = params->get("solver/description");

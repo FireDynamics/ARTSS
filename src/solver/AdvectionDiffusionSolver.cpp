@@ -15,7 +15,7 @@
 
 AdvectionDiffusionSolver::AdvectionDiffusionSolver() {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto params = Parameters::getInstance();
     std::string advectionType = params->get("solver/advection/type");

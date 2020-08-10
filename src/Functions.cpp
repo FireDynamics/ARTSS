@@ -6,8 +6,6 @@
 
 #include <cmath>
 #include <ctime>
-#include <iostream>
-#include <spdlog/spdlog.h>
 #include <random>
 
 #include "Functions.h"

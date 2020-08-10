@@ -6,10 +6,7 @@
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
 
-#include <spdlog/spdlog.h>
-
 #include <cmath>
-#include <iostream>
 
 #include "ColoredGaussSeidelDiffuse.h"
 #include "../boundary/BoundaryController.h"
@@ -21,7 +18,7 @@
 // ========================== Constructor =================================
 ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto params = Parameters::getInstance();
 

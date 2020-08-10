@@ -5,15 +5,12 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 
-#include <spdlog/spdlog.h>
-
 #ifdef _OPENACC
 #include <accelmath.h>
 #endif
 
 #include <chrono>
 #include <fstream>
-#include <iostream>
 
 #include "Adaption.h"
 #include "Layers.h"

@@ -5,8 +5,6 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cmath>
-#include <iostream>
-#include <spdlog/spdlog.h>
 
 #include "Boundary.h"
 #include "../Field.h"
@@ -79,7 +77,7 @@ void Boundary::init(size_t size_obstacles){
 /// \param  size_obstacles Amount of obstacle cells
 // ***************************************************************************************
 void Boundary::print(size_t size_obstacles) {
-    auto m_logger = Utility::createLogger(typeid(Boundary).name());
+    auto m_logger = Utility::create_logger(typeid(Boundary).name());
     m_logger->info("################ BOUNDARY ################");
     m_logger->info("list size of bList: {}", m_size_boundaryList);
     m_logger->info("Boundary starts with {} and ends with {}", *(m_boundaryList + 0),
@@ -172,7 +170,7 @@ void Boundary::control(size_t size_obstacles) {
     if(!message.empty()) {
         message = "############### BOUNDARY CONTROL ###############\n-- level " + std::to_string(m_level) + "\n" + message + "--------------- END BOUNDARY CONTROL ---------------";
 #ifndef BENCHMARKING
-        auto m_logger = Utility::createLogger(typeid(Boundary).name());
+        auto m_logger = Utility::create_logger(typeid(Boundary).name());
         m_logger->warn(message);
 #endif
     }

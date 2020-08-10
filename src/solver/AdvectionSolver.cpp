@@ -4,9 +4,6 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-#include <spdlog/spdlog.h>
-
 #include "AdvectionSolver.h"
 #include "../interfaces/IAdvection.h"
 #include "../utility/Parameters.h"

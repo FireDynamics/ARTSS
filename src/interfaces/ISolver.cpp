@@ -5,13 +5,10 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cmath>
-#include <spdlog/spdlog.h>
 
 #ifdef _OPENACC
 #include <accelmath.h>
 #endif
-
-#include <iostream>
 
 #include "ISolver.h"
 #include "../utility/Parameters.h"
@@ -24,7 +21,7 @@
 
 ISolver::ISolver() {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto params = Parameters::getInstance();
 

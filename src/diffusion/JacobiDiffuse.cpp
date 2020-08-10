@@ -19,7 +19,7 @@
 
 JacobiDiffuse::JacobiDiffuse() {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto params = Parameters::getInstance();
 

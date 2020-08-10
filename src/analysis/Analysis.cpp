@@ -7,7 +7,6 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
-#include <iostream>
 #include <fstream>
 
 #include "Analysis.h"
@@ -20,7 +19,7 @@
 #include "../utility/Utility.h"
 
 Analysis::Analysis(Solution *solution) {
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     auto params = Parameters::getInstance();
     has_analytic_solution = params->get("solver/solution/available") == "Yes";
     if (has_analytic_solution) {

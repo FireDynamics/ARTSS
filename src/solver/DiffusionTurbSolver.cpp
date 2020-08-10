@@ -4,9 +4,6 @@
 /// \author     Suryanarayana Maddu
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-#include <spdlog/spdlog.h>
-
 #include "DiffusionTurbSolver.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"

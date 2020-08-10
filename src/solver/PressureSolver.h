@@ -7,9 +7,7 @@
 #ifndef ARTSS_SOLVER_PRESSURESOLVER_H_
 #define ARTSS_SOLVER_PRESSURESOLVER_H_
 
-
 #include <spdlog/spdlog.h>
-#include <iostream>
 
 #include "../pressure/VCycleMG.h"
 #include "../utility/Parameters.h"

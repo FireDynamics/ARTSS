@@ -6,7 +6,6 @@
 
 #include <chrono>
 #include <vector>
-#include <iostream>
 
 #include "TimeIntegration.h"
 #include "utility/Parameters.h"
@@ -28,7 +27,7 @@
 // ***************************************************************************************
 TimeIntegration::TimeIntegration(ISolver *isolv) {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
 
     auto params = Parameters::getInstance();

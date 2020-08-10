@@ -92,13 +92,15 @@ std::vector<std::string> Utility::split(const char *text, char delimiter) {
     return tokens;
 }
 
+#ifndef BENCHMARKING
 // ==================== Split string at character ==============================
 // *****************************************************************************
-/// \brief  Splits a string at a defined char
-/// \param  loggerName  name of logger, represented in log file
+/// \brief  creates a new named logger this function is only available if
+//          BENCHMARKING is not enabled
+/// \param  loggerName name of logger, represented in log file
 //          make sure you dont call this function twice with the same loggerName
 // *****************************************************************************
-std::shared_ptr<spdlog::logger> Utility::createLogger(std::string loggerName) {
+std::shared_ptr<spdlog::logger> Utility::create_logger(std::string logger_name) {
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> stderr_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
@@ -130,10 +132,11 @@ std::shared_ptr<spdlog::logger> Utility::createLogger(std::string loggerName) {
     sinks.push_back(stdout_sink);
     sinks.push_back(stderr_sink);
     sinks.push_back(file_sink);
-    auto logger = std::make_shared<spdlog::logger>(loggerName,
+    auto logger = std::make_shared<spdlog::logger>(logger_name,
                                                    begin(sinks),
                                                    end(sinks));
     logger->flush_on(spdlog::level::err);
 
     return logger;
 }
+#endif

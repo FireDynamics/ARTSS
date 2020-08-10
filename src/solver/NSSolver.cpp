@@ -4,9 +4,6 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-#include <spdlog/spdlog.h>
-
 #include "NSSolver.h"
 #include "../pressure/VCycleMG.h"
 #include "../utility/Parameters.h"

@@ -4,9 +4,6 @@
 /// \author 	Küsters
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-#include <spdlog/spdlog.h>
-
 #include "NSTempTurbConSolver.h"
 #include "../pressure/VCycleMG.h"
 #include "../utility/Parameters.h"
@@ -154,7 +151,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
     auto dir_vel = m_dir_vel;
 
 #ifndef BENCHMARKING
-    auto m_logger = Utility::createLogger(typeid(NSTempTurbConSolver).name());
+    auto m_logger = Utility::create_logger(typeid(NSTempTurbConSolver).name());
 #endif
 
 #pragma acc data present(    d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], \
@@ -346,7 +343,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 // ***************************************************************************************
 void NSTempTurbConSolver::control() {
     auto params = Parameters::getInstance();
-    auto m_logger = Utility::createLogger(typeid(NSTempTurbConSolver).name());
+    auto m_logger = Utility::create_logger(typeid(NSTempTurbConSolver).name());
     if (params->get("solver/advection/field") != "u,v,w") {
         m_logger->error("Fields not specified correctly!");
         std::exit(1);

@@ -47,7 +47,7 @@
 // ***************************************************************************
 std::shared_ptr<spdlog::logger> installLogger(std::string XMLfilename) {
     auto params = Parameters::getInstance();
-    auto logger = Utility::createLogger("basic");
+    auto logger = Utility::create_logger("basic");
 
     std::string logLevel = params->get("logging/level");
     std::string logFile = params->get("logging/file");

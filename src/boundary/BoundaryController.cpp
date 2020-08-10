@@ -16,7 +16,7 @@ BoundaryController *BoundaryController::singleton = nullptr; // Singleton
 
 BoundaryController::BoundaryController() {
 #ifndef BENCHMARKING
-    m_logger = Utility::createLogger(typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_bdc_boundary = new BoundaryDataController();
     readXML();
