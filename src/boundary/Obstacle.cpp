@@ -331,12 +331,56 @@ void Obstacle::printDetails() {
 /// \brief  Units test emergency solution
 // ***************************************************************************************
 void Obstacle::control() {
+    Domain *domain = Domain::getInstance();
+    size_t Nx = domain->get_Nx(m_level);
+    size_t Ny  = domain->get_Ny(m_level);
+
     std::string message;
     for (size_t i = 1; i < m_size_obstacleList; i++) {
         long int diff = static_cast<long int>(m_obstacleList[i]) - static_cast<long int>(m_obstacleList[i - 1]);
         if (diff < 0) {
             message += "sorting error at index " + std::to_string(i - 1) + "|" + std::to_string(i) + " with values " + std::to_string(m_obstacleList[i - 1]) + "|" + std::to_string(m_obstacleList[i]) +
                       "\n";
+        }
+    }
+
+    size_t start_index = IX(m_i1, m_j1, m_k1, Nx, Ny);
+    size_t end_index = IX(m_i2, m_j2, m_k2, Nx, Ny);
+
+    if (m_size_obstacleFront > 0){
+        size_t front_end = IX(m_i2, m_j2, m_k1, Nx, Ny);
+        if ( start_index != m_obstacleFront[0] || front_end != m_obstacleFront[m_size_obstacleFront - 1]){
+            message += "first or last index of obstacle front list not correct (" + std::to_string(start_index) + "|" + std::to_string(m_obstacleFront[0]) + ")(" + std::to_string(front_end) + "|" + std::to_string(m_obstacleFront[m_size_obstacleFront - 1]) + ")\n";
+        }
+    }
+    if (m_size_obstacleBack > 0){
+        size_t back_start = IX(m_i1, m_j1, m_k2, Nx, Ny);
+        if ( back_start != m_obstacleBack[0] || end_index != m_obstacleBack[m_size_obstacleBack - 1]){
+            message += "first or last index of obstacle back list not correct (" + std::to_string(back_start) + "|" + std::to_string(m_obstacleBack[0]) + ")(" + std::to_string(end_index) + "|" + std::to_string(m_obstacleBack[m_size_obstacleBack - 1]) + ")\n";
+        }
+    }
+    if (m_size_obstacleBottom > 0){
+        size_t bottom_end = IX(m_i2, m_j1, m_k2, Nx, Ny);
+        if ( start_index != m_obstacleBottom[0] || bottom_end != m_obstacleBottom[m_size_obstacleBottom - 1]){
+            message += "first or last index of obstacle bottom list not correct (" + std::to_string(start_index) + "|" + std::to_string(m_obstacleBottom[0]) + ")(" + std::to_string(bottom_end) + "|" + std::to_string(m_obstacleBottom[m_size_obstacleBottom - 1]) + ")\n";
+        }
+    }
+    if (m_size_obstacleTop > 0){
+        size_t top_start = IX(m_i1, m_j2, m_k1, Nx, Ny);
+        if ( top_start != m_obstacleTop[0] || end_index != m_obstacleTop[m_size_obstacleTop - 1]){
+            message += "first or last index of obstacle top list not correct (" + std::to_string(top_start) + "|" + std::to_string(m_obstacleTop[0]) + ")(" + std::to_string(end_index) + "|" + std::to_string(m_obstacleTop[m_size_obstacleTop - 1]) + ")\n";
+        }
+    }
+    if (m_size_obstacleLeft > 0){
+        size_t left_end = IX(m_i1, m_j2, m_k2, Nx, Ny);
+        if ( start_index != m_obstacleLeft[0] || left_end != m_obstacleLeft[m_size_obstacleLeft - 1]){
+            message += "first or last index of obstacle left list not correct (" + std::to_string(start_index) + "|" + std::to_string(m_obstacleLeft[0]) + ")(" + std::to_string(left_end) + "|" + std::to_string(m_obstacleLeft[m_size_obstacleLeft - 1]) + ")\n";
+        }
+    }
+    if (m_size_obstacleRight > 0){
+        size_t right_start = IX(m_i2, m_j1, m_k1, Nx, Ny);
+        if ( right_start != m_obstacleRight[0] || end_index != m_obstacleRight[m_size_obstacleRight - 1]){
+            message += "first or last index of obstacle right list not correct (" + std::to_string(right_start) + "|" + std::to_string(m_obstacleRight[0]) + ")(" + std::to_string(end_index) + "|" + std::to_string(m_obstacleRight[m_size_obstacleRight - 1]) + ")\n";
         }
     }
     if (!message.empty()) {
