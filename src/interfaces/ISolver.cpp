@@ -51,7 +51,7 @@ ISolver::ISolver() {
     T = new Field(FieldType::T, 0.0);
     T0 = new Field(FieldType::T, 0.0);
     T_tmp = new Field(FieldType::T, 0.0);
-    T_ambient = new Field(FieldType::T, 0.0);
+    T_ambient = new Field(FieldType::T, 300.0);
 
     // Concentration
     concentration = new Field(FieldType::RHO, 0.0);
@@ -197,7 +197,6 @@ void ISolver::set_up() {
     init_f(p0, p->data);
     init_f(T0, T->data);
     init_f(T_tmp, T->data);
-    init_f(T_ambient, T->data);
     init_f(concentration0, concentration->data);
     init_f(concentration_tmp, concentration->data);
 }
@@ -340,9 +339,9 @@ void ISolver::init() {
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
             real val = params->get_real("initial_conditions/val");
-            Functions::Uniform(T0, val);
+            Functions::Uniform(T, val);
             if (random) {
-                CallRandom(T0);
+                CallRandom(T);
             }
             force_source();
             temperature_source();
@@ -352,9 +351,9 @@ void ISolver::init() {
             m_string_solver == SolverTypes::NSTempConSolver or \
             m_string_solver == SolverTypes::NSTempTurbConSolver or \
             m_string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::Layers(T0);
+            Functions::Layers(T);
             if (random) {
-                CallRandom(T0);
+                CallRandom(T);
             }
             force_source();
             temperature_source();
@@ -897,16 +896,16 @@ void ISolver::force_source() {
     // Force
     if (params->get("solver/source/force_fct") == SourceMethods::Buoyancy) {
         std::string dir = params->get("solver/source/dir");
-        init_f(T_ambient, T0->data);
+        //init_f(T_ambient, T0->data);
 
         if (dir.find('x') != std::string::npos) {
-            Functions::BuoyancyForce(f_x, T0, T_ambient);
+            Functions::BuoyancyForce(f_x, T, T_ambient);
         }
         if (dir.find('y') != std::string::npos) {
-            Functions::BuoyancyForce(f_y, T0, T_ambient);
+            Functions::BuoyancyForce(f_y, T, T_ambient);
         }
         if (dir.find('z') != std::string::npos) {
-            Functions::BuoyancyForce(f_z, T0, T_ambient);
+            Functions::BuoyancyForce(f_z, T, T_ambient);
         }
     }
 }
