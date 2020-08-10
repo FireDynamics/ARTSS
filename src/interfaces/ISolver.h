@@ -120,6 +120,8 @@ private:
     void temperature_source();
 
     void momentum_source();
+
+    static void CallRandom(Field* out);
 };
 
 #endif /* ARTSS_INTERFACES_ISOLVER_H_ */

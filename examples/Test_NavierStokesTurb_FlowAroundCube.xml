@@ -63,7 +63,7 @@
   </boundaries>
   <obstacles enabled="Yes">
     <obstacle>
-      <geometry ox1="0.0273" ox2="0.964" oy1="0.0078" oy2="0.992" oz1="-0.492" oz2="0.4785"/> 
+      <geometry ox1="0.0273" ox2="0.964" oy1="0.0078" oy2="0.992" oz1="-0.492" oz2="0.4785"/>
       <boundary field="u,v,w" patch="front,back,left,right,bottom,top" type="dirichlet" value="0.0" />
       <boundary field="p" patch="front,back,left,right,bottom,top" type="neumann" value="0.0" />
     </obstacle>
@@ -71,7 +71,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Drift" >
+  <initial_conditions usr_fct = "Drift" random = "No" >
     <u_lin> 0.4 </u_lin>                        <!-- background velocity -->
     <v_lin> 0.0 </v_lin>                        <!-- background velocity -->
     <w_lin> 0.0 </w_lin>                        <!-- background velocity -->
