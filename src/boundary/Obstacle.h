@@ -8,9 +8,14 @@
 #define ARTSS_BOUNDARY_OBSTACLE_H
 
 #include <cmath>
+#include <vector>
+
 #include "../utility/tinyxml2.h"
 #include "BoundaryData.h"
 #include "BoundaryDataController.h"
+#include "../Domain.h"
+#include "../utility/Utility.h"
+
 
 class Obstacle {
 public:

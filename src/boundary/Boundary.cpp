@@ -19,17 +19,18 @@ Boundary::Boundary(size_t level) {
     innerCells();
 
 #ifndef BENCHMARKING
-    //print(0);
+    // print(0);
     control(0);
 #endif
 }
+
 Boundary::Boundary(Obstacle **obstacleList, size_t numberOfObstacles, size_t size_obstacles, size_t level) {
     m_level = level;
     init(size_obstacles);
     innerCells(obstacleList, numberOfObstacles);
 
 #ifndef BENCHMARKING
-    //print(size_obstacles);
+    // print(size_obstacles);
     control(size_obstacles);
 #endif
 }
@@ -78,30 +79,31 @@ void Boundary::init(size_t size_obstacles){
 /// \param  size_obstacles Amount of obstacle cells
 // ***************************************************************************************
 void Boundary::print(size_t size_obstacles) {
-    spdlog::info("################ BOUNDARY ################");
-    spdlog::info("list size of bList: {}", m_size_boundaryList);
-    spdlog::info("Boundary starts with {} and ends with {}", *(m_boundaryList + 0),
+    auto m_logger = Utility::createLogger(typeid(Boundary).name());
+    m_logger->info("################ BOUNDARY ################");
+    m_logger->info("list size of bList: {}", m_size_boundaryList);
+    m_logger->info("Boundary starts with {} and ends with {}", *(m_boundaryList + 0),
                                                              *(m_boundaryList + m_size_boundaryList - 1));
-    spdlog::info("list size of size_z: {}", m_size_boundaryFront);
-    spdlog::info("Front starts with {} and ends with {}", *(m_boundaryFront + 0),
+    m_logger->info("list size of size_z: {}", m_size_boundaryFront);
+    m_logger->info("Front starts with {} and ends with {}", *(m_boundaryFront + 0),
                                                           *(m_boundaryList + m_size_boundaryList - 1));
-    spdlog::info("Back starts with {} and ends with {}", *(m_boundaryBack + 0),
+    m_logger->info("Back starts with {} and ends with {}", *(m_boundaryBack + 0),
                                                          *(m_boundaryList + m_size_boundaryList - 1));
-    spdlog::info("list size of size_y: ", m_size_boundaryBottom);
-    spdlog::info("Bottom starts with {} and ends with {}", *(m_boundaryBottom + 0),
+    m_logger->info("list size of size_y: ", m_size_boundaryBottom);
+    m_logger->info("Bottom starts with {} and ends with {}", *(m_boundaryBottom + 0),
                                                            *(m_boundaryBottom + m_size_boundaryBottom - 1));
-    spdlog::info("Top starts with {} and ends with {}", *(m_boundaryTop + 0),
+    m_logger->info("Top starts with {} and ends with {}", *(m_boundaryTop + 0),
                                                         *(m_boundaryTop + m_size_boundaryTop - 1));
-    spdlog::info("list size of size_x: ", m_size_boundaryLeft);
-    spdlog::info("Left starts with {} and ends with {}", *(m_boundaryLeft + 0),
+    m_logger->info("list size of size_x: ", m_size_boundaryLeft);
+    m_logger->info("Left starts with {} and ends with {}", *(m_boundaryLeft + 0),
                                                          *(m_boundaryLeft + m_size_boundaryLeft - 1));
-    spdlog::info("Right starts with {} and ends with {}", *(m_boundaryRight + 0),
+    m_logger->info("Right starts with {} and ends with {}", *(m_boundaryRight + 0),
                                                           *(m_boundaryRight + m_size_boundaryRight - 1));
-    spdlog::info("list size of innerList: {} obstacle size: {}", m_size_innerList,
+    m_logger->info("list size of innerList: {} obstacle size: {}", m_size_innerList,
                                                                  size_obstacles);
-    spdlog::info("Inner starts with {} and ends with {}", *(m_innerList + 0),
+    m_logger->info("Inner starts with {} and ends with {}", *(m_innerList + 0),
                                                           *(m_innerList + m_size_innerList - 1));
-    spdlog::info("--------------- END BOUNDARY ---------------");
+    m_logger->info("--------------- END BOUNDARY ---------------");
 }
 
 //======================================== Control ====================================

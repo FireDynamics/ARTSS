@@ -4,14 +4,13 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-#include <vector>
 #include "Obstacle.h"
-#include "../Domain.h"
-#include "../utility/Utility.h"
+
 
 Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
-    // TODO(n16h7 hunt3r) add logger
+#ifndef BENCHMARKING
+    m_logger = Utility::createLogger(typeid(this).name());
+#endif
     Domain *domain = Domain::getInstance();
 
     real dx = domain->get_dx();
@@ -26,7 +25,6 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
     real Y1 = domain->get_Y1();
     real Z1 = domain->get_Z1();
 
-    // TODO(n16h7 hunt3r) add logger
     real ox1 = matchGrid(x1, dx, X1);
     real ox2 = matchGrid(x2, dx, X1);
     real oy1 = matchGrid(y1, dy, Y1);
@@ -47,6 +45,9 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
 
 
 Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level) {
+#ifndef BENCHMARKING
+    m_logger = Utility::createLogger(typeid(this).name());
+#endif
     m_level = level;
 
     m_i1 = coords_i1;
@@ -117,7 +118,7 @@ Obstacle::~Obstacle() {
     //delete (m_obstacleInner);
 }
 
-//======================================== Create obstacle ====================================
+//===================================== Create obstacle ==================================
 // ***************************************************************************************
 /// \brief  Creates lists of indices of obstacle cells
 // ***************************************************************************************
@@ -127,7 +128,7 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
     size_t strideZ = getStrideZ();
 
     size_t counter = 0;
-    //fill obstacleList with corresponding indices
+    // fill obstacleList with corresponding indices
     for (size_t k = m_k1; k <= m_k2; ++k) {
         for (size_t j = m_j1; j <= m_j2; ++j) {
             for (size_t i = m_i1; i <= m_i2; ++i) {
@@ -138,7 +139,7 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
         }
     }
 
-//DETAILED OBSTACLE LISTS
+    // DETAILED OBSTACLE LISTS
     // FRONT and BACK of OBSTACLE
     // fill oFront list with front indices of obstacle and oBack list with back indices of obstacle
     if (m_size_obstacleFront > 0) {
@@ -246,68 +247,100 @@ void Obstacle::printDetails(){
 
     size_t size_front = getSize_obstacleFront();
     if (size_front > 0) {
-        std::cout << "Front: " << m_obstacleFront[0] << "|" << m_obstacleFront[size_front - 1] << std::endl;
+        m_logger->info("Front: {} | {}",
+                m_obstacleFront[0],
+                m_obstacleFront[size_front - 1]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleFront[0], Nx, Ny);
-        std::cout << "Front start: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
+        m_logger->info("Front start: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleFront[size_front - 1], Nx, Ny);
-        std::cout << "Front end: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
+        m_logger->info("Front end: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
     } else {
-        std::cout << "Front size = 0" << std::endl;
+        m_logger->info("Front size = 0");
     }
 
     size_t size_back = getSize_obstacleBack();
     if (size_back > 0) {
-        std::cout << "Back: " << m_obstacleBack[0] << "|" << m_obstacleBack[size_back-1] << std::endl;
+        m_logger->info("Back: {} | {}",
+                m_obstacleBack[0],
+                m_obstacleBack[size_back-1]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleBack[0], Nx, Ny);
-        std::cout << "Back start: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
+        m_logger->info("Back start: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleBack[size_back-1], Nx, Ny);
-        std::cout << "Back end: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
+        m_logger->info("Back end: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
     } else {
-        std::cout << "Back size = 0" << std::endl;
+        m_logger->info("Back size = 0");
     }
 
     size_t size_top = getSize_obstacleTop();
     if (size_top > 0) {
-        std::cout << "Top: " << m_obstacleTop[0] << "|" << m_obstacleTop[size_top-1] << std::endl;
+        m_logger->info("Top: {} | {}",
+                m_obstacleTop[0], m_obstacleTop[size_top-1]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleTop[0], Nx, Ny);
-        std::cout << "Top start: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
+        m_logger->info("Top start: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleTop[size_top-1], Nx, Ny);
-        std::cout << "Top end: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
+        m_logger->info("Top end: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
     } else {
-        std::cout << "Top size = 0" << std::endl;
+        m_logger->info("Top size = 0");
     }
 
     size_t size_bottom = getSize_obstacleBottom();
     if (size_bottom > 0) {
-        std::cout << "Bottom: " << m_obstacleBottom[0] << "|" << m_obstacleBottom[size_bottom-1] << std::endl;
+        m_logger->info("Bottom: {} | {}",
+                m_obstacleBottom[0], m_obstacleBottom[size_bottom-1]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleBottom[0], Nx, Ny);
-        std::cout << "Bottom start: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
+        m_logger->info("Bottom start: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleBottom[size_bottom - 1], Nx, Ny);
-        std::cout << "Bottom end: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
-    }else{
-        std::cout << "Bottom size = 0" << std::endl;
+        m_logger->info("Bottom end: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
+    } else {
+        m_logger->info("Bottom size = 0");
     }
 
     size_t size_left = getSize_obstacleLeft();
     if (size_left > 0) {
-        std::cout << "Left: " << m_obstacleLeft[0] << "|" << m_obstacleLeft[size_left-1] << std::endl;
+        m_logger->info("Left: {} | {}",
+                m_obstacleLeft[0], m_obstacleLeft[size_left-1]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleLeft[0], Nx, Ny);
-        std::cout << "Left start: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
+        m_logger->info("Left start: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleLeft[size_left-1], Nx, Ny);
-        std::cout << "Left end: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
+        m_logger->info("Left end: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
     } else {
-        std::cout << "Left size = 0" << std::endl;
+        m_logger->info("Left size = 0");
     }
 
     size_t size_right = getSize_obstacleRight();
     if (size_right > 0) {
-        std::cout << "Right: " << m_obstacleRight[0] << "|" << m_obstacleRight[size_right-1] << std::endl;
+        m_logger->info("Right: {} | {}",
+                m_obstacleRight[0], m_obstacleRight[size_right-1]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleRight[0], Nx, Ny);
-        std::cout << "Right start: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
+        m_logger->info("Right start: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
+
         coords = Utility::coordinateFromLinearIndex(m_obstacleRight[size_right-1], Nx, Ny);
-        std::cout << "Right end: " << coords[0] << "|" << coords[1] << "|" << coords[2] << std::endl;
+        m_logger->info("Right end: {}|{}|{}",
+                coords[0], coords[1], coords[2]);
     } else {
-        std::cout << "Right size = 0" << std::endl;
+        m_logger->info("Right size = 0");
     }
 }
 
