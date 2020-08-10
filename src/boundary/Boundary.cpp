@@ -112,7 +112,7 @@ void Boundary::print(size_t size_obstacles) {
 /// \param  size_obstacles Amount of obstacle cells
 // ***************************************************************************************
 void Boundary::control(size_t size_obstacles) {
-    //TODO Tests
+    // TODO(n16h7): clean up
     std::string message;
     Domain* domain = Domain::getInstance();
     size_t nx = domain->get_nx(m_level);
@@ -171,7 +171,10 @@ void Boundary::control(size_t size_obstacles) {
     }
     if(!message.empty()) {
         message = "############### BOUNDARY CONTROL ###############\n-- level " + std::to_string(m_level) + "\n" + message + "--------------- END BOUNDARY CONTROL ---------------";
-        std::cout << message << std::endl;
+#ifndef BENCHMARKING
+        auto m_logger = Utility::createLogger(typeid(Boundary).name());
+        m_logger->warn(message);
+#endif
     }
 }
 
