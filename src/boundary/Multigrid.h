@@ -11,8 +11,11 @@
 #include "Surface.h"
 #include "Obstacle.h"
 #include "../Field.h"
+#include "../Domain.h"
+#include "../utility/Utility.h"
 #include "BoundaryDataController.h"
 #include <vector>
+
 #ifndef BENCHMARKING
 #include <spdlog/logger.h>
 #endif
