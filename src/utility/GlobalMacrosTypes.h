@@ -69,32 +69,6 @@ typedef const real* const aliased_read_ptr;
 ///
 /// \def tn(n,dt)
 /// \brief Simulation time calculated by time steps \a n = 0...Nt
-///
-/// \def FOR_EACH_CELL(Nx, Ny, Nz)
-/// \brief Creates a nested \c for -loop for each cell in the
-///        computational domain (\f$ i=0, ..., Nx-1 \f$, \f$ j=0, ..., Ny-1 \f$
-///        and \f$ l=0, ..., Nz-1 \f$)
-///
-/// \def FOR_EACH_INNER_CELL(Nx, Ny, Nz)
-/// \brief Creates a nested \c for -loop for the inner cells in the
-///        computational domain (\f$ i=1, ..., Nx-2 \f$, \f$ j=1, ..., Ny-2 \f$
-///        and \f$ l=0, ..., Nz-2 \f$)
-///
-/// \def END_FOR
-/// \brief End the nested \c for -loop
-///
-/// \def FOR_EACH_CELL_ACC(Nx, Ny, Nz)
-/// \brief Creates a parallelized independent nested \c for -loop for each cell
-///        in the computational domain (\f$ i=0, ..., Nx-1 \f$, \f$ j=0, ...,
-///        Ny-1 \f$ and \f$ l=0, ..., Nz-1 \f$)
-///
-/// \def FOR_EACH_INNER_CELL_ACC(Nx, Ny, Nz)
-/// \brief Creates a parallelized independent nested \c for -loop for the
-///        inner cells in the computational domain (\f$ i=1, ..., Nx-2 \f$,
-///        \f$ j=1, ..., Ny-2 \f$ and \f$ l=0, ..., Nz-2 \f$)
-///
-/// \def END_FOR_ACC
-/// \brief End the parallelized independent nested \c for -loop
 // ***************************************************************************************
 
 #define IX(i,j,k,Nx,Ny) ((i) + (Nx)*(j) + (Nx)*(Ny)*(k)) // row-major index for one dimensional arrays (i=0..Nx-1 columns, j=0..Ny-1 rows, k = 0...Nz-1)
@@ -108,34 +82,4 @@ typedef const real* const aliased_read_ptr;
 #define zk(k,z,dz) ((z) + ((k)-0.5)*(dz)) // physical zcoords at midpoints calculated by index k=0..Nz-1
 #define tn(n, dt) ((n)*(dt))			  // simulation time calculated by time steps n = 0...Nt
 
-#define FOR_EACH_CELL(Nx, Ny, Nz) for (size_t k=0; k<Nz; k++) {\
-                        for (size_t j=0; j<Ny; j++) {\
-                            for (size_t i=0; i<Nx; i++) {
-#define FOR_EACH_INNER_CELL(Nx, Ny, Nz) for (size_t k=1; k<Nz-1; k++) {\
-                        for (size_t j=1; j<Ny-1; j++) {\
-                            for (size_t i=1; i<Nx-1; i++) {
-#define END_FOR       }}}
-
-// OpenACC Loops
-#define FOR_EACH_CELL_ACC(Nx, Ny, Nz) _Pragma("acc loop independent")\
-                                {\
-                                    for (size_t k=0; k<Nz; k++) {\
-                                        _Pragma("acc loop independent")\
-                                            {\
-                                                for (size_t j=0; j<Ny; j++) {\
-                                                    _Pragma("acc loop independent")\
-                                                            {\
-                                                                for (size_t i=0; i<Nx; i++) {
-
-#define FOR_EACH_INNER_CELL_ACC(Nx, Ny, Nz) _Pragma("acc loop independent")\
-                                {\
-                                    for (size_t k=1; k<Nz-1; k++) {\
-                                        _Pragma("acc loop independent")\
-                                                {\
-                                                    for (size_t j=1; j<Ny-1; j++) {\
-                                                        _Pragma("acc loop independent")\
-                                                                {\
-                                                                    for (size_t i=1; i<Nx-1; i++) {
-
-#define END_FOR_ACC       }}}}}}
 #endif /* ARTSS_UTILITY_GLOBALMACROSTYPES_H_ */
