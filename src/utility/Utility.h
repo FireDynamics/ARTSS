@@ -11,6 +11,7 @@
 #include <vector>
 
 #ifndef BENCHMARKING
+#define FMT_USE_UDL_TEMPLATE 0
 #include "spdlog/logger.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
