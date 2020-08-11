@@ -103,6 +103,6 @@
   </visualisation>
   <logging>
     <level>INFO</level>
-    <file>tmp.log</file>
+    <file>tmp</file>
   </logging>
 </ARTSS>
