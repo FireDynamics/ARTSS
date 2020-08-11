@@ -64,7 +64,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Vortex" random = "No">
+  <initial_conditions usr_fct = "Vortex"  random = "No">
     <u_lin> 0.1 </u_lin>
     <v_lin> 0 </v_lin>
     <w_lin> 0 </w_lin>
@@ -75,4 +75,8 @@
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 10 </vtk_nth_plot>
   </visualisation>
+  <logging>
+    <level>INFO</level>
+    <file>tmp</file>
+  </logging>
 </ARTSS>

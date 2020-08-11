@@ -71,7 +71,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Drift" random = "No" >
+  <initial_conditions usr_fct = "Drift" random = "No">
     <u_lin> 0.4 </u_lin>                        <!-- background velocity -->
     <v_lin> 0.0 </v_lin>                        <!-- background velocity -->
     <w_lin> 0.0 </w_lin>                        <!-- background velocity -->
@@ -81,8 +81,8 @@
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 10 </vtk_nth_plot>
   </visualisation>
-    <logging>
+  <logging>
     <level>INFO</level>
-    <file>tmp.log</file>
+    <file>tmp</file>
   </logging>
 </ARTSS>

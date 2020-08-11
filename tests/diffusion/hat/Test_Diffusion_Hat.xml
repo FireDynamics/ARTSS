@@ -44,7 +44,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Hat" random = "No">     <!-- 2 in [0.5;1.0]^3, 1 elsewhere -->
+  <initial_conditions usr_fct = "Hat"  random = "No">     <!-- 2 in [0.5;1.0]^3, 1 elsewhere -->
     <x1> 0.5 </x1>
     <x2> 1.0 </x2>
     <y1> 0.5 </y1>
@@ -58,4 +58,8 @@
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 5 </vtk_nth_plot>
   </visualisation>
+  <logging>
+    <level>INFO</level>
+    <file>tmp</file>
+  </logging>
 </ARTSS>

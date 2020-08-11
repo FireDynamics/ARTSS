@@ -120,6 +120,9 @@ OBSTACLE=1
 SURFACE=1
 
 LEADINGNO=2
+
+LOGGINGFILE=tmp
+LOGGINGLEVEL=INFO
 #------------------------------------------------------------------------------
 YELLOW='\033[1;33m'
 NC='\033[0;m'
@@ -236,6 +239,9 @@ ${YELLOW}--initialconditions${NC} \tgive initial conditions in file
 ${YELLOW}--ys${NC}          \tset soot yield (in %/100)
 
 ${YELLOW}--kappa${NC}         \tset physical parameter thermal diffusion (default: $KAPPA)
+
+${YELLOW}--logginglevel${NC}        \tset the logging level \{TRACE, DEBUG, INFO, WARN, ERROR\}
+${YELLOW}--loggingfile${NC}         \tset the output file
 
 ${YELLOW}--maxcycle${NC}\tset number of maximal cycles for V-Cycle multigrid pre-conditioning (default: $MAXCYCLE)
 
@@ -810,7 +816,12 @@ else
     <vtk_nth_plot> $VTKPLOTS </vtk_nth_plot>"
     fi
     WRITETO=${WRITETO}"
-  </visualisation>
+  </visualisation>"
+    WRITETO=${WRITETO}"
+  <logging>
+    <level>${LOGGINGLEVEL}</level>
+    <file>${LOGGINGFILE}</file>
+  </logging>
 </ARTSS>"
   echo -e "$WRITETO" >> $NAME
   fi
@@ -1010,6 +1021,16 @@ do
       ;;
     --kappa)
       KAPPA=$2
+      shift
+      shift
+      ;;
+    --logginglevel)
+      LOGGINGLEVEL=$2
+      shift
+      shift
+      ;;
+    --loggingfile)
+      LOGGINGFILE=$2
       shift
       shift
       ;;

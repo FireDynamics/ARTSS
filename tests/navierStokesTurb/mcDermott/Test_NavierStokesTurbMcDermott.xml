@@ -64,11 +64,15 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "McDermott" random = "No">
+  <initial_conditions usr_fct = "McDermott"  random = "No">
     <A> 2 </A>
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 63 </vtk_nth_plot>
   </visualisation>
+  <logging>
+    <level>INFO</level>
+    <file>tmp</file>
+  </logging>
 </ARTSS>
