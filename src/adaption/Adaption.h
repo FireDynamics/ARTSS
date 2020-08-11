@@ -13,10 +13,6 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../interfaces/ISolver.h"
 
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#endif
-
 /* enum for different types of dynamic adaption:
  * NO = adaption impossible/no changes
  * UNKNOWN = adaption is possible but not determined

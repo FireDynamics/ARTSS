@@ -109,7 +109,8 @@ bool Domain::resize(long shift_x1, long shift_x2, long shift_y1, long shift_y2, 
 #pragma acc wait
     if (update) {
 #ifndef BENCHMARKING
-        spdlog::info("Resize domain: {}|{} {}|{} {}|{}", shift_x1, shift_x2,
+        auto m_logger = Utility::create_logger(typeid(Domain).name());
+        m_logger->info("Resize domain: {}|{} {}|{} {}|{}", shift_x1, shift_x2,
                                                          shift_y1, shift_y2,
                                                          shift_z1, shift_z2);
 #endif

@@ -4,8 +4,6 @@
 /// \author   Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <spdlog/spdlog.h>
-
 #include "AdvectionDiffusionSolver.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
@@ -71,7 +69,8 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        spdlog::info("Advect ...");
+        auto m_logger = Utility::create_logger(typeid(AdvectionDiffusionSolver).name());
+        m_logger->info("Advect ...");
 #endif
         adv->advect(u, u0, u0, v0, w0, sync);
         adv->advect(v, v0, u0, v0, w0, sync);
@@ -83,7 +82,7 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
 // 3. Solve diffusion equation
         if (nu != 0.) {
 #ifndef BENCHMARKING
-            spdlog::info("Diffuse ...");
+            m_logger->info("Diffuse ...");
 #endif
             dif->diffuse(u, u0, u_tmp, nu, sync);
             dif->diffuse(v, v0, v_tmp, nu, sync);
@@ -103,13 +102,21 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
 // ************************************************************************
 void AdvectionDiffusionSolver::control() {
     auto params = Parameters::getInstance();
+#ifndef BENCHMARKING
+        auto m_logger = Utility::create_logger(typeid(AdvectionDiffusionSolver).name());
+#endif
+
     if (params->get("solver/advection/field") != "u,v,w") {
-        spdlog::error("Fields not specified correctly!");
+#ifndef BENCHMARKING
+        m_logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
         // TODO Error handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        spdlog::error("Fields not specified correctly!");
+#ifndef BENCHMARKING
+        m_logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
         // TODO Error handling
     }

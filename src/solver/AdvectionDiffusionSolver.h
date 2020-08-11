@@ -11,9 +11,7 @@
 #include "../interfaces/IAdvection.h"
 #include "../interfaces/IDiffusion.h"
 #include "../utility/GlobalMacrosTypes.h"
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#endif
+#include "../utility/Utility.h"
 
 class AdvectionDiffusionSolver : public ISolver {
 public:

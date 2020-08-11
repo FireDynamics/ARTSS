@@ -5,10 +5,6 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef BENCHMARKING
-#include <spdlog/spdlog.h>
-#endif
-
 #include <cmath>
 
 #include "JacobiDiffuse.h"

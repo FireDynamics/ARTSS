@@ -13,10 +13,6 @@
 #endif
 #include <cstddef>
 
-#ifndef BENCHMARKING
-#include <spdlog/spdlog.h>
-#endif
-
 #include "utility/GlobalMacrosTypes.h"
 #include "utility/Parameters.h"
 #include "utility/Utility.h"

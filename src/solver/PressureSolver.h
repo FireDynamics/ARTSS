@@ -7,17 +7,16 @@
 #ifndef ARTSS_SOLVER_PRESSURESOLVER_H_
 #define ARTSS_SOLVER_PRESSURESOLVER_H_
 
-#include <spdlog/spdlog.h>
-
 #include "../pressure/VCycleMG.h"
 #include "../utility/Parameters.h"
+#include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IPressure.h"
-#include "../utility/GlobalMacrosTypes.h"
 
 class PressureSolver : public ISolver {
 public:

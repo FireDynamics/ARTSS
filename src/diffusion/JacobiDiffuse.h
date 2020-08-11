@@ -10,9 +10,8 @@
 
 #include "../interfaces/IDiffusion.h"
 #include "../Field.h"
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#endif
+
+#include "../utility/Utility.h"
 
 class JacobiDiffuse : public IDiffusion {
 public:

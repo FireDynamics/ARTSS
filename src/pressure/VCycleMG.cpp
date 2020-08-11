@@ -4,8 +4,6 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <spdlog/spdlog.h>
-
 #include <cmath>
 
 #include "VCycleMG.h"

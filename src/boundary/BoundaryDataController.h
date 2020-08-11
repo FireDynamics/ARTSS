@@ -10,9 +10,6 @@
 
 #include "../utility/tinyxml2.h"
 #include "BoundaryData.h"
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#endif
 
 class BoundaryDataController {
 public:

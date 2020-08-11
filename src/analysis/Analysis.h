@@ -7,9 +7,6 @@
 #ifndef ARTSS_ANALYSIS_ANALYSIS_H_
 #define ARTSS_ANALYSIS_ANALYSIS_H_
 
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#endif
 #include "../interfaces/ISolver.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "Solution.h"

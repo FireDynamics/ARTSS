@@ -12,9 +12,6 @@
 #include "utility/GlobalMacrosTypes.h"
 #include "analysis/Analysis.h"
 #include "utility/Utility.h"
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#endif
 
 class TimeIntegration {
 public:

@@ -11,9 +11,9 @@
 #include "../interfaces/IPressure.h"
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#endif
+#include "../utility/Utility.h"
+
+
 
 class VCycleMG: public IPressure{
 public:

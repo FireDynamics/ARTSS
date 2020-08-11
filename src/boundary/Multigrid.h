@@ -16,9 +16,6 @@
 #include "BoundaryDataController.h"
 #include <vector>
 
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#endif
 
 class Multigrid {
 public:

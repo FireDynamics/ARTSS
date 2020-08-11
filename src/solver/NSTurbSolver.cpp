@@ -97,7 +97,8 @@ void NSTurbSolver::do_step(real t, bool sync) {
 
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        spdlog::info("Advect ...");
+        auto m_logger = Utility::create_logger(typeid(NSTurbSolver).name());
+        m_logger->info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
         adv_vel->advect(v, v0, u0, v0, w0, sync);
@@ -108,13 +109,13 @@ void NSTurbSolver::do_step(real t, bool sync) {
 
 // 2. Solve turbulent diffusion equation
 #ifndef BENCHMARKING
-        spdlog::info("Calculating Turbulent viscosity ...");
+        m_logger->info("Calculating Turbulent viscosity ...");
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 
 
 #ifndef BENCHMARKING
-        spdlog::info("Diffuse ...");
+        m_logger->info("Diffuse ...");
 #endif
         dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
@@ -127,7 +128,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
         if (m_force_function != SourceMethods::Zero) {
 
 #ifndef BENCHMARKING
-            spdlog::info("Add source ...");
+            m_logger->info("Add source ...");
 #endif
             sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
 
@@ -141,7 +142,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
 
         // Solve pressure equation
 #ifndef BENCHMARKING
-        spdlog::info("Pressure ...");
+        m_logger->info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);
 
@@ -167,21 +168,21 @@ void NSTurbSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/advection/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        spdlog::error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        spdlog::error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
 #ifndef BENCHMARKING
-        spdlog::error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling

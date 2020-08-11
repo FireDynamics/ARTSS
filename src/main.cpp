@@ -10,9 +10,6 @@
 
 #include <iostream>
 
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/basic_file_sink.h"
-
 #include "interfaces/ISolver.h"
 #include "solver/DiffusionTurbSolver.h"
 #include "solver/DiffusionSolver.h"
@@ -39,27 +36,6 @@
 #endif
 
 
-#ifndef BENCHMARKING
-// TODO(n167h7): DELETE
-//================================= parse params =============================
-// ***************************************************************************
-/// \brief parses arguments provided to the program for logging
-/// \param XMLfilename       filename of provided xml file
-// ***************************************************************************
-std::shared_ptr<spdlog::logger> installLogger(std::string XMLfilename) {
-    auto params = Parameters::getInstance();
-    auto logger = Utility::create_logger("basic");
-
-    std::string logLevel = params->get("logging/level");
-    std::string logFile = params->get("logging/file");
-
-    logger->info("Provided XML file: {}", XMLfilename);
-    logger->info("Provided logging level: {}", logLevel);
-    logger->info("Provided logging output: {}", logFile);
-    return logger;
-}
-#endif
-
 int main(int argc, char **argv) {
     // Initialization
     // Parameters
@@ -68,9 +44,6 @@ int main(int argc, char **argv) {
     if (argc > 1) {
         XML_filename.assign(argv[1]);
         params->parse(XML_filename);
-#ifndef BENCHMARKING
-        installLogger(XML_filename);  // TODO(n167h7): DELETE
-#endif
     } else {
         std::cerr << "XML file missing" << std::endl;
         std::exit(1);
@@ -92,7 +65,10 @@ int main(int argc, char **argv) {
     else if (string_solver == SolverTypes::NSTempTurbConSolver) solver = new NSTempTurbConSolver();
 
     else {
-        spdlog::error("Solver not yet implemented! Simulation stopped!");
+#ifndef BENCHMARKING
+        auto m_logger = Utility::create_logger("main");
+        m_logger->error("Solver not yet implemented! Simulation stopped!");
+#endif
         std::exit(1);
     }
 

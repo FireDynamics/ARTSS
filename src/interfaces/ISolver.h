@@ -10,12 +10,10 @@
 #include <string>
 
 #include "../Field.h"
+#include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "ISource.h"
 
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#endif
 
 struct SolverTypes {
     inline static const std::string AdvectionSolver = "AdvectionSolver";

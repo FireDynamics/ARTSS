@@ -8,10 +8,8 @@
 #ifndef ARTSS_ANALYSIS_SOLUTION_H_
 #define ARTSS_ANALYSIS_SOLUTION_H_
 
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#endif
 #include "../Field.h"
+#include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 
 class Solution {

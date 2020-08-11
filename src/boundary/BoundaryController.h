@@ -8,7 +8,6 @@
 #define ARTSS_BOUNDARY_BOUNDARYCONTROLLER_H_
 
 
-#include <spdlog/logger.h>
 #include "../Field.h"
 #include "Multigrid.h"
 #include "Surface.h"

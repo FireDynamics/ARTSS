@@ -7,11 +7,9 @@
 #ifndef ARTSS_BOUNDARY_BOUNDARYDATA_H_
 #define ARTSS_BOUNDARY_BOUNDARYDATA_H_
 
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#endif
 #include <string>
 #include <vector>
+#include "../utility/Utility.h"
 #include "../utility/tinyxml2.h"
 #include "../Field.h"
 

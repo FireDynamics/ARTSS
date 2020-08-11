@@ -862,7 +862,8 @@ namespace Functions {
             bord[n_layers] = z2;
         } else {
 #ifndef BENCHMARKING
-            spdlog::error("No distance for layers specified!");
+            auto m_logger = Utility::create_logger("Functions");
+            m_logger->error("No distance for layers specified!");
 #endif
         }
         //TODO Error handling
@@ -925,7 +926,8 @@ namespace Functions {
                     if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
                 } else {
 #ifndef BENCHMARKING
-                    spdlog::error("No distance for layers specified!");
+                    auto m_logger = Utility::create_logger("Functions");
+                    m_logger->error("No distance for layers specified!");
 #endif
                 }
                 //TODO Error handling
@@ -953,7 +955,8 @@ namespace Functions {
                     if (z < bord[0]) out->data[idx] = val[0];
                 } else {
 #ifndef BENCHMARKING
-                    spdlog::error("No distance for layers specified!");
+                    auto m_logger = Utility::create_logger("Functions");
+                    m_logger->error("No distance for layers specified!");
 #endif
                 }
                 //TODO Error handling
@@ -980,7 +983,8 @@ namespace Functions {
                     if (z < bord[0]) out->data[idx] = val[0];
                 } else {
 #ifndef BENCHMARKING
-                    spdlog::error("No distance for layers specified!");
+                    auto m_logger = Utility::create_logger("Functions");
+                    m_logger->error("No distance for layers specified!");
 #endif
                 }
                 //TODO Error handling

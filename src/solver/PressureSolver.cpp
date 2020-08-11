@@ -27,7 +27,8 @@ PressureSolver::~PressureSolver() {
 // *****************************************************************************
 void PressureSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
-    spdlog::info("Pressure ...");
+    auto m_logger = Utility::create_logger(typeid(PressureSolver).name());
+    m_logger->info("Pressure ...");
 #endif
 
 // 1. Solve pressure Poisson equation
@@ -54,7 +55,10 @@ void PressureSolver::control() {
     auto params = Parameters::getInstance();
     auto p_field = params->get("solver/pressure/field");
     if (p_field != BoundaryData::getFieldTypeName(FieldType::P)) {
-        spdlog::error("Fields not specified correctly!");
+#ifndef BENCHMARKING
+        auto m_logger = Utility::create_logger(typeid(PressureSolver).name());
+        m_logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
         // TODO Error handling
     }
