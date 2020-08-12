@@ -37,6 +37,15 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 
 void TimeIntegration::set_up() {
 #ifndef BENCHMARKING
+#pragma acc update host(d_u[:bsize])
+#pragma acc update host(d_v[:bsize])
+#pragma acc update host(d_w[:bsize])
+#pragma acc update host(d_p[:bsize])
+#pragma acc update host(d_rhs[:bsize])
+#pragma acc update host(d_T[:bsize])
+#pragma acc update host(d_C[:bsize])
+#pragma acc update host(d_nu_t[:bsize])
+#pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
     m_analysis->analyse(m_field_controller, 0.);
     m_visual->visualise(m_field_controller, 0.);
 #endif
