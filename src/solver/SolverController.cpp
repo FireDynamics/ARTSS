@@ -40,6 +40,7 @@ SolverController::SolverController() {
 }
 
 SolverController::~SolverController() {
+    delete m_field_controller;
     delete source_velocity;
     delete source_temperature;
     delete source_concentration;

@@ -16,15 +16,24 @@ GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real 
 }
 
 GaussFunction::~GaussFunction() {
+    auto data_spatial = m_field_spatial_values->data;
+    size_t size = Domain::getInstance()->get_size();
+#pragma acc exit data delete(data_spatial[:size])
     delete m_field_spatial_values;
 }
 
 void GaussFunction::update_source(Field *out, real t_cur) {
+    size_t size = Domain::getInstance()->get_size();
     auto data_out = out->data;
     auto data_spatial = m_field_spatial_values->data;
-    size_t size = Domain::getInstance()->get_size(out->get_level());
-    for (size_t i = 0; i < size; i++){
-        data_out[i] = data_spatial[i] * get_time_value(t_cur);
+
+#pragma acc data present(data_out[:size], data_spatial[:size])
+    {
+#pragma acc parallel loop independent present(data_out[:size], data_spatial[:size]) async
+        for (size_t i = 0; i < size; i++) {
+            data_out[i] = data_spatial[i] * get_time_value(t_cur);
+        }
+#pragma acc wait
     }
 }
 
@@ -40,6 +49,7 @@ void GaussFunction::update_source(Field *out, real t_cur) {
 // ***************************************************************************************
 void GaussFunction::create_spatial_values(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z) {
     auto domain = Domain::getInstance();
+    auto bsize = domain->get_size();
     // local variables and parameters for GPU
     auto d_out = m_field_spatial_values->data;
     auto level = m_field_spatial_values->get_level();
@@ -100,6 +110,8 @@ void GaussFunction::create_spatial_values(real HRR, real cp, real x0, real y0, r
         real expr = std::exp(-(r_sigma_x_2 * x_i * x_i + r_sigma_y_2 * y_j * y_j + r_sigma_z_2 * z_k * z_k));
         d_out[idx] = HRRrV * rcp * expr;
     }
+
+#pragma acc enter data copyin(d_out[:bsize])
 }
 
 // ============================= Ramp up function for HRR source =========================
@@ -108,5 +120,5 @@ void GaussFunction::create_spatial_values(real HRR, real cp, real x0, real y0, r
 /// \param  t time
 // ***************************************************************************************
 real GaussFunction::get_time_value(real t_cur) {
-    return tanh(t_cur/m_tau);
+    return tanh(t_cur / m_tau);
 }

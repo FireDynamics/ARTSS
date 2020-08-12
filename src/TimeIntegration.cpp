@@ -135,16 +135,6 @@ void TimeIntegration::run() {
          */
 #endif
 
-// copyin all variables
-#pragma acc enter data copyin(  d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], \
-                                d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], \
-                                d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], \
-                                d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], \
-                                d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], d_T_a[:bsize], \
-                                d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize], \
-                                d_f_x[:bsize], d_f_y[:bsize], d_f_z[:bsize], d_S_T[:bsize], d_S_C[:bsize], \
-                                d_nu_t[:bsize], d_kappa_t[:bsize], d_gamma_t[:bsize])
-
         int iteration_step = 1;
         // std::ofstream file;
         // file.open(adaption->get_write_runtime_name(), ios::app);
@@ -198,9 +188,14 @@ void TimeIntegration::run() {
 #endif
 
 #pragma acc wait
-// delete unnecessary variables copyout numerical solution
-#pragma acc exit data delete(d_u0[:bsize], d_u_tmp[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_p0[:bsize], d_T0[:bsize], d_T_tmp[:bsize], d_T_a[:bsize], d_C0[:bsize], d_C_tmp[:bsize], d_f_x[:bsize], d_f_y[:bsize], d_f_z[:bsize], d_S_T[:bsize], d_S_C[:bsize], d_nu_t[:bsize], d_kappa_t[:bsize], d_gamma_t[:bsize])
-#pragma acc exit data copyout(d_u[:bsize], d_v[:bsize], d_w[:bsize], d_p[:bsize], d_rhs[:bsize], d_T[:bsize], d_C[:bsize])
+
+#pragma acc update host(d_u[:bsize])
+#pragma acc update host(d_v[:bsize])
+#pragma acc update host(d_w[:bsize])
+#pragma acc update host(d_p[:bsize])
+#pragma acc update host(d_rhs[:bsize])
+#pragma acc update host(d_T[:bsize])
+#pragma acc update host(d_C[:bsize]) wait
 
     } // end RANGE
 
@@ -220,8 +215,10 @@ void TimeIntegration::run() {
     m_analysis->save_variables_in_file(m_field_controller);
     m_analysis->analyse(m_field_controller, m_t_end);
 #endif
+    delete m_solver_controller;
     delete m_adaption;
     delete m_analysis;
     delete m_solution;
     delete m_visual;
+
 }
