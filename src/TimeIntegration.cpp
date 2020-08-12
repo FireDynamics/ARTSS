@@ -173,17 +173,16 @@ void TimeIntegration::run() {
             analysis->calc_L2_norm_mid_point(m_solver, t_cur, Sum);
 
             // To check CFL and VN, comment out
-            /*bool CFL_check = ana.check_time_step_CFL(u, v, w, dt);
+            bool CFL_check = analysis->check_time_step_CFL(u, v, w, dt);
             if(!CFL_check){
                 std::cout<<"CFL condition not met!\n";
                 // To change dt, comment out
-                //dt = ana.set_DT_with_CFL(u, v, w);
-                //std::cout<<" Setting dt = "<<dt<<std::endl;
+                // dt = ana.set_DT_with_CFL(u, v, w);
+                // std::cout<<" Setting dt = "<<dt<<std::endl;
             }
-            bool VN_check = ana.check_time_step_VN(u, dt);
-            if(!VN_check)
-                std::cout<<"Von Neumann condition not met!"<<std::endl;
-            */
+            // bool VN_check = ana.check_time_step_VN(u, dt);
+            // if(!VN_check)
+            //     std::cout<<"Von Neumann condition not met!"<<std::endl;
 #endif
             // update
             adaption->run(t_cur);

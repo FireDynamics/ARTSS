@@ -295,16 +295,20 @@ bool Analysis::check_time_step_VN(Field *u, real dt) {
     return VN_check;
 }
 
-// ================================= Check CFL condition ==================================
-// ***************************************************************************************
-/// \brief  checks CFL condition on time step (returns true or false)
+// =========================== Check CFL condition =============================
+// *****************************************************************************
+/// \brief  checks CFL condition on time step, returns true if for any cell
+//          C > 1.
 /// \param  u     x-velocity field
 /// \param  v     y-velocity field
 /// \param  w     z-velocity field
 /// \param  dt      time step size
-// ***************************************************************************************
+// *****************************************************************************
 bool Analysis::check_time_step_CFL(Field *u, Field *v, Field *w, real dt) {
-    bool CFL_check;
+    bool cfl_okay;     // check if cfl_max is still under threshold
+    real cfl_max = 0;  // heighest seen C. C is always positiv, so 0 is a lower
+                       // bound
+    real cfl_local;    // C in the local cell
 
     auto boundary = BoundaryController::getInstance();
     auto domain = Domain::getInstance();
@@ -321,29 +325,23 @@ bool Analysis::check_time_step_CFL(Field *u, Field *v, Field *w, real dt) {
     auto d_v = v->data;
     auto d_w = w->data;
 
-    real max_vel[sizei];
-    real uvrdx, uvwrdx, maxvelrdx;
-
-    //TODO correct?
-    for (size_t i = 0; i < sizei; i++) {
+    // calc C for every cell and get the maximum
+    for (size_t i=0; i < sizei; i++) {
         size_t idx = innerList[i];
-        uvrdx = std::max(fabs(d_u[idx]) / dx, fabs(d_v[idx]) / dy);
-        uvwrdx = std::max(uvrdx, fabs(d_w[idx]) / dz);
-
-        max_vel[i] = uvwrdx;
-        ++i;
+        // \frac{C}{\Delta t} = \frac{\Delta u}{\Delta x} +
+        //                      \frac{\Delta v}{\Delta y} +
+        //                      \frac{\Delta w}{\Delta z} +
+        // https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition#The_two_and_general_n-dimensional_case
+        cfl_local = d_u[idx] / dx + d_v[idx] / dy + d_w[idx] / dz;
+        cfl_max = std::max(cfl_max, cfl_local);
     }
+    cfl_max = dt * cfl_max;
+    cfl_okay = cfl_max < 1;
 
-    maxvelrdx = *(std::max_element(max_vel, max_vel + sizei));
-
-    real CFL = dt * maxvelrdx;
-
-    CFL_check = CFL < 1.;
-
-    std::cout << "CFL = " << CFL << std::endl;
+    std::cout << "CFL = " << cfl_max << std::endl;
     //TODO Logger
 
-    return CFL_check;
+    return cfl_okay;
 }
 
 // =============================== Set dt based on CFL condition ========================
