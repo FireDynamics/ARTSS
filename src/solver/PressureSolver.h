@@ -10,14 +10,16 @@
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IPressure.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../field/FieldController.h"
 
 class PressureSolver : public ISolver {
 public:
-    PressureSolver();
-    ~PressureSolver() override;
+    PressureSolver(FieldController *field_controller);
+    ~PressureSolver();
     void do_step(real t, bool sync) override;
 
 private:
+    FieldController *m_field_controller;
     IPressure *pres;
     static void control();
 };

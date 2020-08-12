@@ -605,9 +605,9 @@ else
         <x0> $GAUSSX0  </x0>
         <y0> $GAUSSY0 </y0>
         <z0> $GAUSSZ0 </z0>
-        <sigmax> $SIGMAX </sigmax>
-        <sigmay> $SIGMAY </sigmay>
-        <sigmaz> $SIGMAZ </sigmaz>
+        <sigma_x> $SIGMAX </sigma_x>
+        <sigma_y> $SIGMAY </sigma_y>
+        <sigma_z> $SIGMAZ </sigma_z>
         <tau> $TAU </tau>
       </source>"
       fi
@@ -650,9 +650,9 @@ else
           <x0> $GAUSSX0 </x0>
           <y0> $GAUSSY0 </y0>
           <z0> $GAUSSZ0 </z0>
-          <sigmax> $SIGMAX </sigmax>
-          <sigmay> $SIGMAY </sigmay>
-          <sigmaz> $SIGMAZ </sigmaz>
+          <sigma_x> $SIGMAX </sigma_x>
+          <sigma_y> $SIGMAY </sigma_y>
+          <sigma_z> $SIGMAZ </sigma_z>
           <tau> $TAU </tau>
         </source>"
     fi

@@ -8,7 +8,7 @@
 #define ARTSS_BOUNDARY_BOUNDARYCONTROLLER_H_
 
 
-#include "../Field.h"
+#include "../field/Field.h"
 #include "Multigrid.h"
 #include "Surface.h"
 #include "Obstacle.h"

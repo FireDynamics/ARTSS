@@ -17,7 +17,7 @@
     <turbulence type = "ConstSmagorinsky">
       <Cs> 0.2 </Cs>
     </turbulence>
-    <source type = "ExplicitEuler" force_fct="Zero" dir = "xyz"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    <source type="ExplicitEuler" force_fct="Zero" dir="xyz"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>
     <pressure type = "VCycleMG" field = "p">
       <n_level> 5 </n_level>  <!-- number of restriction levels -->
@@ -71,7 +71,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Drift" random = "No" >
+  <initial_conditions usr_fct="Drift" random="No">
     <u_lin> 0.4 </u_lin>                        <!-- background velocity -->
     <v_lin> 0.0 </v_lin>                        <!-- background velocity -->
     <w_lin> 0.0 </w_lin>                        <!-- background velocity -->

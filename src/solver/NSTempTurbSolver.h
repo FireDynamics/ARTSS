@@ -18,12 +18,14 @@
 
 class NSTempTurbSolver : public ISolver {
 public:
-    NSTempTurbSolver();
-    ~NSTempTurbSolver() override;
+    explicit NSTempTurbSolver(FieldController *fieldController);
+    ~NSTempTurbSolver();
 
     void do_step(real t, bool sync) override;
 
 private:
+    FieldController *m_field_controller;
+
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
     IAdvection *adv_temp;
@@ -36,7 +38,7 @@ private:
     real m_nu;
     real m_kappa;
 
-    std::string m_dir_vel = "";
+    std::string m_dir_vel;
 
     static void control();
 

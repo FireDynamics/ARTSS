@@ -10,20 +10,35 @@
 #include "interfaces/ISolver.h"
 #include "interfaces/ISource.h"
 #include "utility/GlobalMacrosTypes.h"
+#include "solver/SolverController.h"
+
+#ifndef BENCHMARKING
+
 #include "analysis/Analysis.h"
+#include "analysis/Solution.h"
+#include "visualisation/Visual.h"
+#include "adaption/Adaption.h"
+
+#endif
 
 class TimeIntegration {
 public:
-  explicit TimeIntegration(ISolver *isolv);
-
-  void run();
+    explicit TimeIntegration(SolverController *sc);
+    void run();
 
 private:
-  ISolver* m_solver;
-  real m_dt;
-  real m_t_end;
-  real m_t_cur;
-  size_t m_size = 0;
+    void set_up();
+
+    real m_dt;
+    real m_t_end;
+    real m_t_cur;
+
+    FieldController *m_field_controller;
+    SolverController *m_solver_controller;
+    Adaption *m_adaption;
+    Visual *m_visual;
+    Solution *m_solution;
+    Analysis *m_analysis;
 };
 
 #endif /* ARTSS_TIMEINTEGRATION_H_ */

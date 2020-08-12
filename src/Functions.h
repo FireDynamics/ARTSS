@@ -7,7 +7,7 @@
 #ifndef ARTSS_FUNCTIONS_H_
 #define ARTSS_FUNCTIONS_H_
 
-#include "Field.h"
+#include "field/Field.h"
 
 struct FunctionNames{
     static const std::string Beltrami;
@@ -20,7 +20,6 @@ struct FunctionNames{
     static const std::string Hat;
     static const std::string McDermott;
     static const std::string RandomC;
-    static const std::string RampTanh;
     static const std::string SinSinSin;
     static const std::string Uniform;
     static const std::string Vortex;

@@ -8,15 +8,15 @@
 #define ARTSS_VISUALISATION_CSVWRITER_H
 
 #include <string>
-#include "../interfaces/ISolver.h"
 #include "../analysis/Solution.h"
+#include "../field/FieldController.h"
 
 class CSVWriter {
 public:
-    static void write_numerical(ISolver *solver, const std::string& filename);
+    static void write_numerical(FieldController *field_controller, const std::string& filename);
     static void write_analytical(Solution *solution, const std::string& filename);
 
-    static void write_data(std::string *data_titles, real **data, size_t size_data, std::string filename);
+    static void write_data(std::string *data_titles, real **data, size_t size_data, const std::string& filename);
 
 private:
     static void csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t, read_ptr S_T);

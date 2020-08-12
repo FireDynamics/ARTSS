@@ -12,26 +12,28 @@
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../field/FieldController.h"
 
 class NSSolver : public ISolver {
 public:
-  NSSolver();
+    NSSolver(FieldController *field_controller);
+    ~NSSolver();
 
-  ~NSSolver() override;
-
-  void do_step(real t, bool sync) override;
+    void do_step(real t, bool sync) override;
 
 private:
-  IAdvection *adv_vel;
-  IDiffusion *dif_vel;
-  IPressure *pres;
-  ISource *sou;
+    FieldController *m_field_controller;
 
-  real m_nu;
+    IAdvection *adv_vel;
+    IDiffusion *dif_vel;
+    IPressure *pres;
+    ISource *sou;
 
-  static void control();
+    real m_nu;
 
-  std::string m_sourceFct;
+    static void control();
+
+    std::string m_sourceFct;
 };
 
 #endif /* ARTSS_SOLVER_NSSOLVER_H_ */

@@ -20,7 +20,7 @@
     <turbulence type = "ConstSmagorinsky">
       <Cs> 0.2 </Cs>
     </turbulence>
-    <source type = "ExplicitEuler" force_fct="Buoyancy" dir="y"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    <source type="ExplicitEuler" force_fct="Buoyancy" dir="y"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>
     <pressure type = "VCycleMG" field = "p">
       <n_level> 6 </n_level>  <!-- number of restriction levels -->
@@ -45,15 +45,15 @@
       <turbulence include = "Yes">
         <Pr_T> 0.5 </Pr_T>
       </turbulence>
-      <source type = "ExplicitEuler" temp_fct="GaussST" ramp_fct= "RampTanh" dissipation="No">
+      <source type="ExplicitEuler" temp_fct="GaussST" ramp_fct= "RampTanh" dissipation="No">
         <HRR> 2500. </HRR>      <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 0.  </x0>
         <y0> 1. </y0>
         <z0> 0.1 </z0>
-        <sigmax> 0.1 </sigmax>
-        <sigmay> 0.1 </sigmay>
-        <sigmaz> 0.1 </sigmaz>
+        <sigma_x> 0.1 </sigma_x>
+        <sigma_y> 0.1 </sigma_y>
+        <sigma_z> 0.1 </sigma_z>
         <tau> 5. </tau>
       </source>
     </temperature>
@@ -94,7 +94,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Uniform" random = "No">
+  <initial_conditions usr_fct="Uniform" random="No">
     <val> 303.64 </val>
   </initial_conditions>
 

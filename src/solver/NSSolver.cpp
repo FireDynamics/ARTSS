@@ -13,7 +13,8 @@
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 
-NSSolver::NSSolver() {
+NSSolver::NSSolver(FieldController *field_controller) {
+    m_field_controller = field_controller;
 
     auto params = Parameters::getInstance();
 
@@ -29,7 +30,7 @@ NSSolver::NSSolver() {
 
     //Pressure
     std::string pressureType = params->get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(&pres, pressureType, p, rhs);
+    SolverSelection::SetPressureSolver(&pres, pressureType, m_field_controller->field_p, m_field_controller->field_rhs);
 
     //Source
     std::string sourceType = params->get("solver/source/type");
@@ -55,21 +56,21 @@ NSSolver::~NSSolver() {
 void NSSolver::do_step(real t, bool sync) {
 
 // local variables and parameters for GPU
-    auto u = ISolver::u;
-    auto v = ISolver::v;
-    auto w = ISolver::w;
-    auto u0 = ISolver::u0;
-    auto v0 = ISolver::v0;
-    auto w0 = ISolver::w0;
-    auto u_tmp = ISolver::u_tmp;
-    auto v_tmp = ISolver::v_tmp;
-    auto w_tmp = ISolver::w_tmp;
-    auto p = ISolver::p;
-    auto p0 = ISolver::p0;
-    auto rhs = ISolver::rhs;
-    auto f_x = ISolver::f_x;
-    auto f_y = ISolver::f_y;
-    auto f_z = ISolver::f_z;
+    auto u = m_field_controller->field_u;
+    auto v = m_field_controller->field_v;
+    auto w = m_field_controller->field_w;
+    auto u0 = m_field_controller->field_u0;
+    auto v0 = m_field_controller->field_v0;
+    auto w0 = m_field_controller->field_w0;
+    auto u_tmp = m_field_controller->field_u_tmp;
+    auto v_tmp = m_field_controller->field_v_tmp;
+    auto w_tmp = m_field_controller->field_w_tmp;
+    auto p = m_field_controller->field_p;
+    auto p0 = m_field_controller->field_p0;
+    auto rhs = m_field_controller->field_rhs;
+    auto f_x = m_field_controller->field_force_x;
+    auto f_y = m_field_controller->field_force_y;
+    auto f_z = m_field_controller->field_force_z;
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -87,7 +88,7 @@ void NSSolver::do_step(real t, bool sync) {
     auto d_fy = f_y->data;
     auto d_fz = f_z->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->get_level());
 
     auto nu = m_nu;
 
@@ -104,7 +105,7 @@ void NSSolver::do_step(real t, bool sync) {
 
 
 // Couple velocity to prepare for diffusion
-        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve diffusion equation
         if (nu != 0.) {
@@ -117,7 +118,7 @@ void NSSolver::do_step(real t, bool sync) {
             dif_vel->diffuse(w, w0, w_tmp, nu, sync);
 
             // Couple data to prepare for adding source
-            ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 3. Add force
@@ -128,7 +129,7 @@ void NSSolver::do_step(real t, bool sync) {
 #endif
             sou->add_source(u, v, w, f_x, f_y, f_z, sync);
             // Couple data
-            ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 4. Solve pressure equation and project

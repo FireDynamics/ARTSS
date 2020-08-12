@@ -8,7 +8,7 @@
 #define ARTSS_SOURCE_EXPLICITEULERSOURCE_H_
 
 #include "../interfaces/ISource.h"
-#include "../Field.h"
+#include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 
 class ExplicitEulerSource: public ISource {

@@ -483,27 +483,27 @@ void ISolver::set_up_boundary(bool sync) {
 
     auto boundary = BoundaryController::getInstance();
     // TODO necessary?
-    boundary->applyBoundary(u0->data, u0->GetType(), sync);
-    boundary->applyBoundary(v0->data, v0->GetType(), sync);
-    boundary->applyBoundary(w0->data, w0->GetType(), sync);
-    boundary->applyBoundary(T0->data, T0->GetType(), sync);
-    boundary->applyBoundary(p0->data, p0->GetType(), sync);
-    boundary->applyBoundary(concentration0->data, concentration0->GetType(), sync);
+    boundary->applyBoundary(u0->data, u0->get_type(), sync);
+    boundary->applyBoundary(v0->data, v0->get_type(), sync);
+    boundary->applyBoundary(w0->data, w0->get_type(), sync);
+    boundary->applyBoundary(T0->data, T0->get_type(), sync);
+    boundary->applyBoundary(p0->data, p0->get_type(), sync);
+    boundary->applyBoundary(concentration0->data, concentration0->get_type(), sync);
 
-    boundary->applyBoundary(u->data, u->GetType(), sync);
-    boundary->applyBoundary(v->data, v->GetType(), sync);
-    boundary->applyBoundary(w->data, w->GetType(), sync);
-    boundary->applyBoundary(p->data, p->GetType(), sync);
-    boundary->applyBoundary(T->data, T->GetType(), sync);
-    boundary->applyBoundary(concentration->data, concentration->GetType(), sync);
+    boundary->applyBoundary(u->data, u->get_type(), sync);
+    boundary->applyBoundary(v->data, v->get_type(), sync);
+    boundary->applyBoundary(w->data, w->get_type(), sync);
+    boundary->applyBoundary(p->data, p->get_type(), sync);
+    boundary->applyBoundary(T->data, T->get_type(), sync);
+    boundary->applyBoundary(concentration->data, concentration->get_type(), sync);
 
     // TODO necessary?
-    boundary->applyBoundary(u_tmp->data, u_tmp->GetType(), sync);
-    boundary->applyBoundary(v_tmp->data, v_tmp->GetType(), sync);
-    boundary->applyBoundary(w_tmp->data, w_tmp->GetType(), sync);
-    boundary->applyBoundary(T_tmp->data, T_tmp->GetType(), sync);
-    boundary->applyBoundary(T_ambient->data, T_ambient->GetType(), sync);
-    boundary->applyBoundary(concentration_tmp->data, concentration_tmp->GetType(), sync);
+    boundary->applyBoundary(u_tmp->data, u_tmp->get_type(), sync);
+    boundary->applyBoundary(v_tmp->data, v_tmp->get_type(), sync);
+    boundary->applyBoundary(w_tmp->data, w_tmp->get_type(), sync);
+    boundary->applyBoundary(T_tmp->data, T_tmp->get_type(), sync);
+    boundary->applyBoundary(T_ambient->data, T_ambient->get_type(), sync);
+    boundary->applyBoundary(concentration_tmp->data, concentration_tmp->get_type(), sync);
 }
 
 //======================================== Couple velocity ====================================
@@ -533,7 +533,7 @@ void ISolver::couple_vector(const Field *a, Field *a0, Field *a_tmp, const Field
     auto d_c0 = c0->data;
     auto d_c_tmp = c_tmp->data;
 
-    auto size = Domain::getInstance()->get_size(a0->GetLevel());
+    auto size = Domain::getInstance()->get_size(a0->get_level());
 
     auto boundary = BoundaryController::getInstance();
 
@@ -605,7 +605,7 @@ void ISolver::couple_scalar(const Field *a, Field *a0, Field *a_tmp, bool sync) 
     auto d_a0 = a0->data;
     auto d_a_tmp = a_tmp->data;
 
-    auto size = Domain::getInstance()->get_size(a0->GetLevel());
+    auto size = Domain::getInstance()->get_size(a0->get_level());
 
     auto boundary = BoundaryController::getInstance();
 

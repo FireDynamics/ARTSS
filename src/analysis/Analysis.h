@@ -7,17 +7,17 @@
 #ifndef ARTSS_ANALYSIS_ANALYSIS_H_
 #define ARTSS_ANALYSIS_ANALYSIS_H_
 
-#include "../interfaces/ISolver.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "Solution.h"
+#include "../field/FieldController.h"
 
 class Analysis {
 public:
     explicit Analysis(Solution *solution);
 
-    void analyse(ISolver *solver, real t);
+    void analyse(FieldController *solver, real t);
 
-    void calc_L2_norm_mid_point(ISolver *solver, real t, real *sum);
+    void calc_L2_norm_mid_point(FieldController *solver, real t, real *sum);
     void calc_RMS_error(real sum_u, real sum_p, real sum_T);
 
     bool check_time_step_VN(Field *u, real dt);
@@ -25,7 +25,7 @@ public:
 
     real set_DT_with_CFL(Field *u, Field *v, Field *w);
 
-    void save_variables_in_file(ISolver *solv);
+    void save_variables_in_file(FieldController *solv);
 
 private:
     real m_tol = 1e-7;

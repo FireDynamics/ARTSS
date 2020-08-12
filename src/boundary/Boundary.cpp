@@ -5,7 +5,7 @@
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Boundary.h"
-#include "../Field.h"
+#include "../field/Field.h"
 #include "../Domain.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include <cmath>

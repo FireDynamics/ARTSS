@@ -9,18 +9,19 @@
 
 #include "../analysis/Solution.h"
 #include "../interfaces/ISolver.h"
+#include "../field/FieldController.h"
 
 class Visual {
 public:
     explicit Visual(Solution* solution);
 
-    void visualise(ISolver *solver, real t);
+    void visualise(FieldController *field_controller, real t);
 
     static void initialise_grid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
 
     static void prepare_fields(read_ptr *fields, float **vars, int size);
 
-    static void write_csv(ISolver *solver, std::string filename);
+    static void write_csv(FieldController *solver, std::string filename);
 
     static void write_data(std::string *data_titles, real **data, size_t size_data, std::string filename);
 

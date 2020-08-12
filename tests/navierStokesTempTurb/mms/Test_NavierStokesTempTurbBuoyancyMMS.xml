@@ -20,7 +20,7 @@
     <turbulence type = "ConstSmagorinsky">
       <Cs> 0.2 </Cs>
     </turbulence>
-    <source type = "ExplicitEuler" force_fct="Buoyancy" dir = "y"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    <source type="ExplicitEuler" force_fct="Buoyancy" dir="y"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>
     <pressure type = "VCycleMG" field = "p">
       <n_level> 4 </n_level>  <!-- number of restriction levels -->
@@ -45,7 +45,7 @@
       <turbulence include = "Yes">
         <Pr_T> 0.9 </Pr_T>
       </turbulence>
-      <source type = "ExplicitEuler" temp_fct = "BuoyancyST_MMS" dissipation="No">
+      <source type="ExplicitEuler" temp_fct="BuoyancyST_MMS" dissipation="No">
       </source>
     </temperature>
     <solution available = "No">
@@ -82,7 +82,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "BuoyancyMMS" random = "No">
+  <initial_conditions usr_fct="BuoyancyMMS"  random="No">
     <rhoa> 1. </rhoa>
   </initial_conditions>
 

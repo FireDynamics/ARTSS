@@ -13,17 +13,17 @@
 static std::string ending = ".csv";
 const static char delimiter = ',';
 
-void CSVWriter::write_numerical(ISolver *solver, const std::string& filename) {
-    auto u = solver->get_u();
-    auto v = solver->get_v();
-    auto w = solver->get_w();
-    auto p = solver->get_p();
-    auto div = solver->get_rhs();
-    auto T = solver->get_T();
-    auto C = solver->get_concentration();
-    auto s = solver->get_sight();
-    auto nu_t = solver->get_nu_t();
-    auto S_T = solver->get_S_T();
+void CSVWriter::write_numerical(FieldController *field_controller, const std::string& filename) {
+    auto u = field_controller->get_field_u_data();
+    auto v = field_controller->get_field_v_data();
+    auto w = field_controller->get_field_w_data();
+    auto p = field_controller->get_field_p_data();
+    auto div = field_controller->get_field_rhs_data();
+    auto T = field_controller->get_field_T_data();
+    auto C = field_controller->get_field_concentration_data();
+    auto s = field_controller->get_field_sight_data();
+    auto nu_t = field_controller->get_field_nu_t_data();
+    auto S_T = field_controller->get_field_source_T_data();
     CSVWriter::csvPrepareAndWrite((filename + ending).c_str(), u, v, w, p, div, T, C, s, nu_t, S_T);
 }
 
@@ -187,9 +187,9 @@ void CSVWriter::csv_write(const char *filename, float **vars, int size_vars, con
                     outputFile << coord[index] << delimiter;
                 }
                 for (int v = 0; v < size_vars - 1; v++) {
-                    outputFile << vars[v][index] << delimiter;
+                    outputFile << std::setprecision(24) << vars[v][index] << delimiter;
                 }
-                outputFile << vars[size_vars - 1][index] << std::endl;
+                outputFile << std::setprecision(24) << vars[size_vars - 1][index] << std::endl;
             }
         }
     }
@@ -200,7 +200,7 @@ void CSVWriter::csv_write(const char *filename, float **vars, int size_vars, con
     delete[] (z_centres);
 }
 
-void CSVWriter::write_data(std::string *data_titles, real **data, size_t size_data, std::string filename) {
+void CSVWriter::write_data(std::string *data_titles, real **data, size_t size_data, const std::string& filename) {
     Domain *domain = Domain::getInstance();
     int size = static_cast<int>(domain->get_size());
 

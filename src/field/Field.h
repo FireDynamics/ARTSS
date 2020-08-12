@@ -1,0 +1,44 @@
+/// \file         Field.h
+/// \brief        structure including information on cells, lengths, resolution and data for each direction
+/// \date         May 25, 2016
+/// \author       Severt
+/// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
+
+#ifndef ARTSS_FIELD_H_
+#define ARTSS_FIELD_H_
+
+#include <array>
+#include "../utility/GlobalMacrosTypes.h"
+
+#ifndef ENUM_TYPES
+#define ENUM_TYPES
+const size_t numberOfFieldTypes = 6;
+enum FieldType : size_t {
+    RHO = 0, U = 1, V = 2, W = 3, P = 4, T = 5
+};
+#endif
+
+class Field {
+public:
+    Field(FieldType type, real val);
+    Field(FieldType type, real val, size_t level);
+
+    ~Field();
+    Field(const Field &);
+
+    // getter
+    FieldType get_type() { return this->m_type; };
+    size_t get_level() { return this->m_level; };
+
+    void set_value(real val);
+    static void swap(Field *a, Field *b) { std::swap(a->data, b->data); };
+
+    real *data;
+
+private:
+    size_t m_level;
+    FieldType m_type;
+};
+
+
+#endif /* ARTSS_FIELD_H_ */

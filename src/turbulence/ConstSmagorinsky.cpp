@@ -39,7 +39,7 @@ void ConstSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Fi
 
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    auto bsize = domain->get_size(in_u->GetLevel());
+    auto bsize = domain->get_size(in_u->get_level());
 
     auto d_u = in_u->data;
     auto d_v = in_v->data;
@@ -48,12 +48,12 @@ void ConstSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Fi
 
 #pragma acc data present(d_ev[:bsize], d_u[:bsize], d_v[:bsize], d_w[:bsize])
     {
-        const size_t Nx = domain->get_Nx(in_u->GetLevel());
-        const size_t Ny = domain->get_Ny(in_v->GetLevel());
+        const size_t Nx = domain->get_Nx(in_u->get_level());
+        const size_t Ny = domain->get_Ny(in_v->get_level());
 
-        const real dx = domain->get_dx(in_u->GetLevel());
-        const real dy = domain->get_dy(in_v->GetLevel());
-        const real dz = domain->get_dz(in_w->GetLevel());
+        const real dx = domain->get_dx(in_u->get_level());
+        const real dy = domain->get_dy(in_v->get_level());
+        const real dz = domain->get_dz(in_w->get_level());
 
         const real rdx = 1. / dx;
         const real rdy = 1. / dy;

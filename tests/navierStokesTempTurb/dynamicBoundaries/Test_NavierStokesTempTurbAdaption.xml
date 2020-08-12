@@ -20,7 +20,7 @@
     <turbulence type = "ConstSmagorinsky">
       <Cs> 0.2 </Cs>
     </turbulence>
-   <source type = "ExplicitEuler" force_fct="Buoyancy" dir = "y"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+   <source type="ExplicitEuler" force_fct="Buoyancy" dir="y"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>
     <pressure type = "VCycleMG" field = "p">
       <n_level> 6 </n_level>  <!-- number of restriction levels -->
@@ -45,15 +45,15 @@
       <turbulence include = "Yes">
         <Pr_T> 0.5 </Pr_T>
       </turbulence>
-      <source type = "ExplicitEuler" temp_fct = "GaussST" ramp_fct="RampTanh" dissipation="No">
+      <source type="ExplicitEuler" temp_fct="GaussST" ramp_fct="RampTanh" dissipation="No">
         <HRR> 25000. </HRR>     <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 30.  </x0>
         <y0> -3. </y0>
         <z0> 0. </z0>
-        <sigmax> 1.0 </sigmax>
-        <sigmay> 1.5 </sigmay>
-        <sigmaz> 1.0 </sigmaz>
+        <sigma_x> 1.0 </sigma_x>
+        <sigma_y> 1.5 </sigma_y>
+        <sigma_z> 1.0 </sigma_z>
         <tau> 5. </tau>
       </source>
     </temperature>
@@ -92,7 +92,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "LayersT" dir="y" random = "No">     <!-- Layers  -->
+  <initial_conditions usr_fct="LayersT" dir="y" random="No">     <!-- Layers  -->
     <n_layers> 5 </n_layers>
     <border_1> -1.8 </border_1>  <!-- at cell face -->
     <border_2> -0.6 </border_2>  <!-- at cell face -->

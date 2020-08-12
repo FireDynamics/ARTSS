@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 #include "../utility/tinyxml2.h"
-#include "../Field.h"
+#include "../field/Field.h"
 
 const size_t numberOfPatches = 6;
 enum Patch : size_t {FRONT = 0, BACK = 1, BOTTOM = 2, TOP = 3, LEFT = 4, RIGHT = 5};

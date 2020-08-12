@@ -12,7 +12,8 @@
 #include "../Domain.h"
 #include "SolverSelection.h"
 
-AdvectionDiffusionSolver::AdvectionDiffusionSolver() {
+AdvectionDiffusionSolver::AdvectionDiffusionSolver(FieldController *field_controller) {
+    m_field_controller = field_controller;
 
     auto params = Parameters::getInstance();
     std::string advectionType = params->get("solver/advection/type");
@@ -42,15 +43,15 @@ AdvectionDiffusionSolver::~AdvectionDiffusionSolver() {
 void AdvectionDiffusionSolver::do_step(real t, bool sync) {
 
 // local variables and parameters
-    auto u = ISolver::u;
-    auto v = ISolver::v;
-    auto w = ISolver::w;
-    auto u0 = ISolver::u0;
-    auto v0 = ISolver::v0;
-    auto w0 = ISolver::w0;
-    auto u_tmp = ISolver::u_tmp;
-    auto v_tmp = ISolver::v_tmp;
-    auto w_tmp = ISolver::w_tmp;
+    auto u = m_field_controller->field_u;
+    auto v = m_field_controller->field_v;
+    auto w = m_field_controller->field_w;
+    auto u0 = m_field_controller->field_u0;
+    auto v0 = m_field_controller->field_v0;
+    auto w0 = m_field_controller->field_w0;
+    auto u_tmp = m_field_controller->field_u_tmp;
+    auto v_tmp = m_field_controller->field_v_tmp;
+    auto w_tmp = m_field_controller->field_w_tmp;
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -62,7 +63,7 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
     auto d_v_tmp = v_tmp->data;
     auto d_w_tmp = w_tmp->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->get_level());
 
     auto nu = m_nu;
 
@@ -78,7 +79,7 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
         adv->advect(w, w0, u0, v0, w0, sync);
 
 // 2. Couple data to prepare for diffusion
-        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 3. Solve diffusion equation
         if (nu != 0.) {

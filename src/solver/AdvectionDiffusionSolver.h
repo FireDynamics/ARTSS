@@ -11,19 +11,22 @@
 #include "../interfaces/IAdvection.h"
 #include "../interfaces/IDiffusion.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../field/FieldController.h"
 
 class AdvectionDiffusionSolver : public ISolver {
 public:
-  AdvectionDiffusionSolver();
-  ~AdvectionDiffusionSolver() override;
+    AdvectionDiffusionSolver(FieldController *field_controller);
+    ~AdvectionDiffusionSolver();
 
-  void do_step(real t, bool sync) override;
+    void do_step(real t, bool sync) override;
 
 private:
-  IAdvection* adv;
-  IDiffusion* dif;
+    IAdvection *adv;
+    IDiffusion *dif;
 
-  real m_nu;
+    FieldController *m_field_controller;
+
+    real m_nu;
 
     static void control();
 };

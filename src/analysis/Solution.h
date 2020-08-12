@@ -8,7 +8,7 @@
 #ifndef ARTSS_ANALYSIS_SOLUTION_H_
 #define ARTSS_ANALYSIS_SOLUTION_H_
 
-#include "../Field.h"
+#include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 
 class Solution {

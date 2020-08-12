@@ -45,7 +45,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "ExpSinusProd" random = "No">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
+  <initial_conditions usr_fct="ExpSinusProd"  random="No">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
     <l> 2.5 </l>                              <!-- wavelength -->
   </initial_conditions>
 

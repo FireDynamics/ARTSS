@@ -62,7 +62,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Vortex" random = "No">
+  <initial_conditions usr_fct="Vortex"  random="No">
     <u_lin> 0.1 </u_lin>
     <v_lin> 0 </v_lin>
     <w_lin> 0 </w_lin>

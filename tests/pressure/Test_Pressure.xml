@@ -51,7 +51,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "SinSinSin" random = "No">
+  <initial_conditions usr_fct="SinSinSin" random="No" >
     <l> 2. </l>
   </initial_conditions>
 

@@ -13,7 +13,8 @@
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 
-NSTempTurbSolver::NSTempTurbSolver() {
+NSTempTurbSolver::NSTempTurbSolver(FieldController *field_controller) {
+    m_field_controller = field_controller;
 
     auto params = Parameters::getInstance();
 
@@ -37,7 +38,7 @@ NSTempTurbSolver::NSTempTurbSolver() {
     m_kappa = params->get_real("physical_parameters/kappa");
 
     // Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), p, rhs);
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), m_field_controller->field_p, m_field_controller->field_rhs);
 
     // Source of velocity
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
@@ -76,27 +77,27 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     auto params = Parameters::getInstance();
 
     // local variables and parameters for GPU
-    auto u = ISolver::u;
-    auto v = ISolver::v;
-    auto w = ISolver::w;
-    auto u0 = ISolver::u0;
-    auto v0 = ISolver::v0;
-    auto w0 = ISolver::w0;
-    auto u_tmp = ISolver::u_tmp;
-    auto v_tmp = ISolver::v_tmp;
-    auto w_tmp = ISolver::w_tmp;
-    auto p = ISolver::p;
-    auto p0 = ISolver::p0;
-    auto rhs = ISolver::rhs;
-    auto T = ISolver::T;
-    auto T0 = ISolver::T0;
-    auto T_tmp = ISolver::T_tmp;
-    auto f_x = ISolver::f_x;
-    auto f_y = ISolver::f_y;
-    auto f_z = ISolver::f_z;
-    auto S_T = ISolver::S_T;
-    auto nu_t = ISolver::nu_t;            //nu_t - Eddy Viscosity
-    auto kappa_t = ISolver::kappa_t;     //kappa_t - Eddy thermal diffusivity
+    auto u = m_field_controller->field_u;
+    auto v = m_field_controller->field_v;
+    auto w = m_field_controller->field_w;
+    auto u0 = m_field_controller->field_u0;
+    auto v0 = m_field_controller->field_v0;
+    auto w0 = m_field_controller->field_w0;
+    auto u_tmp = m_field_controller->field_u_tmp;
+    auto v_tmp = m_field_controller->field_v_tmp;
+    auto w_tmp = m_field_controller->field_w_tmp;
+    auto p = m_field_controller->field_p;
+    auto p0 = m_field_controller->field_p0;
+    auto rhs = m_field_controller->field_rhs;
+    auto T = m_field_controller->field_T;
+    auto T0 = m_field_controller->field_T0;
+    auto T_tmp = m_field_controller->field_T_tmp;
+    auto f_x = m_field_controller->field_force_x;
+    auto f_y = m_field_controller->field_force_y;
+    auto f_z = m_field_controller->field_force_z;
+    auto S_T = m_field_controller->field_source_T;
+    auto nu_t = m_field_controller->field_nu_t;            //nu_t - Eddy Viscosity
+    auto kappa_t = m_field_controller->field_kappa_t;     //kappa_t - Eddy thermal diffusivity
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -120,7 +121,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     auto d_nu_t = nu_t->data;
     auto d_kappa_t = kappa_t->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->get_level());
 
     auto nu = m_nu;
     auto kappa = m_kappa;
@@ -140,7 +141,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         adv_vel->advect(w, w0, u0, v0, w0, sync);
 
         // Couple velocity to prepare for diffusion
-        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve turbulent diffusion equation
 #ifndef BENCHMARKING
@@ -159,7 +160,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
 
         // Couple data to prepare for adding source
-        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
@@ -170,7 +171,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
             sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
 
             // Couple data to prepare for adding source
-            ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 4. Solve pressure equation and project
@@ -183,31 +184,9 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         //TODO Logger
 #endif
         pres->pressure(p, rhs, t, sync);
-        {
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_nu_t[:bsize])
-#pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
-            Visual::write_csv(this, "test_do_step_pressure_" + std::to_string(t));
-        }
 
         // Correct
         pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p,this, t, sync);
-        {
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_nu_t[:bsize])
-#pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
-            Visual::write_csv(this, "test_do_step_project_" + std::to_string(t));
-        }
 
 // 5. Solve Temperature and link back to force
 
@@ -219,7 +198,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         adv_temp->advect(T, T0, u, v, w, sync);
 
         // Couple temperature to prepare for diffusion
-        ISolver::couple_scalar(T, T0, T_tmp, sync);
+        FieldController::couple_scalar(T, T0, T_tmp, sync);
 
         // Solve diffusion equation
         // turbulence
@@ -239,7 +218,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
             dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
 
             // Couple temperature to prepare for adding source
-            ISolver::couple_scalar(T, T0, T_tmp, sync);
+            FieldController::couple_scalar(T, T0, T_tmp, sync);
         } else {
             // no turbulence
             if (kappa != 0.) {
@@ -251,7 +230,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
                 dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
 
                 // Couple temperature to prepare for adding source
-                ISolver::couple_scalar(T, T0, T_tmp, sync);
+                FieldController::couple_scalar(T, T0, T_tmp, sync);
             }
         }
 
@@ -265,7 +244,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
             sou_temp->dissipate(T, u, v, w, sync);
 
             // Couple temperature
-            ISolver::couple_scalar(T, T0, T_tmp, sync);
+            FieldController::couple_scalar(T, T0, T_tmp, sync);
         }
 
         // Add source
@@ -277,7 +256,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
             sou_temp->add_source(T, S_T, sync);
 
             // Couple temperature
-            ISolver::couple_scalar(T, T0, T_tmp, sync);
+            FieldController::couple_scalar(T, T0, T_tmp, sync);
         }
 
 // 6. Sources updated in Solver::update_sources, TimeIntegration

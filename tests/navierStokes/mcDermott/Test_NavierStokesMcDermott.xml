@@ -62,7 +62,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "McDermott" random = "No">
+  <initial_conditions usr_fct="McDermott" random="No">
     <A> 2 </A>
   </initial_conditions>
 

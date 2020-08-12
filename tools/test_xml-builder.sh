@@ -11,7 +11,7 @@ function create_testcases {
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"dirichlet\" value=\"0.0\" />
   </boundaries>" > "${NAME}_${BFILEVAL}"
-    echo "  <initial_conditions usr_fct = \"GaussBubble\"  random = \"No\">  <!-- Gaussian function  -->
+    echo "  <initial_conditions usr_fct=\"GaussBubble\"  random=\"No\">  <!-- Gaussian function  -->
     <u_lin> 0.5 </u_lin>      <!-- x-velocity in linear case  -->
     <v_lin> 0.5 </v_lin>      <!-- y-velocity in linear case  -->
     <w_lin> 0.25 </w_lin>     <!-- z-velocity in linear case  -->
@@ -32,7 +32,7 @@ function create_testcases {
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"ExpSinusSum\" random = \"No\">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
+    echo "  <initial_conditions usr_fct=\"ExpSinusSum\" random=\"No\">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
   </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
   fi
@@ -46,7 +46,7 @@ function create_testcases {
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"dirichlet\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"ExpSinusProd\"  random = \"No\">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
+    echo "  <initial_conditions usr_fct=\"ExpSinusProd\"  random=\"No\">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
     <l> 2.5 </l>                              <!-- wavelength -->
   </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
@@ -58,7 +58,7 @@ function create_testcases {
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,bottom,top,left,right\" type=\"dirichlet\" value=\"1.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"Hat\"  random = \"No\">     <!-- 2 in [0.5;1.0]^3, 1 elsewhere -->
+    echo "  <initial_conditions usr_fct=\"Hat\"  random=\"No\">     <!-- 2 in [0.5;1.0]^3, 1 elsewhere -->
     <x1> 0.5 </x1>
     <x2> 1.0 </x2>
     <y1> 0.5 </y1>
@@ -80,7 +80,7 @@ function create_testcases {
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"dirichlet\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"ExpSinusProd\"  random = \"No\">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
+    echo "  <initial_conditions usr_fct=\"ExpSinusProd\"  random=\"No\">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
     <l> 2.5 </l>                              <!-- wavelength -->
   </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
@@ -99,7 +99,7 @@ function create_testcases {
     <boundary field=\"p\" patch=\"top\" type=\"dirichlet\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,left,right,bottom\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"Zero\"  random = \"No\">
+    echo "  <initial_conditions usr_fct=\"Zero\"  random=\"No\">
   </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
 
@@ -114,9 +114,9 @@ function create_testcases {
     <boundary field=\"p\" patch=\"left,right\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,bottom,top\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"Zero\"  random = \"No\">
+    echo "  <initial_conditions usr_fct=\"Zero\"  random=\"No\">
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "  <source type = \"ExplicitEuler\" force_fct=\"Uniform\" dir = \"x\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz)     -->
+    echo "  <source type=\"ExplicitEuler\" force_fct=\"Uniform\" dir=\"x\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz)     -->
     <val_x> 1. </val_x>
     <val_y> 0. </val_y>
     <val_z> 0. </val_z>
@@ -132,7 +132,7 @@ function create_testcases {
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"McDermott\" random = \"No\">
+    echo "  <initial_conditions usr_fct=\"McDermott\" random=\"No\">
     <A> 2 </A>
   </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
@@ -146,7 +146,7 @@ function create_testcases {
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"Vortex\"  random = \"No\">
+    echo "  <initial_conditions usr_fct=\"Vortex\"  random=\"No\">
     <u_lin> 0.1 </u_lin>
     <v_lin> 0 </v_lin>
     <w_lin> 0 </w_lin>
@@ -171,13 +171,13 @@ function create_testcases {
     <boundary field=\"T\" patch=\"right,bottom\" type=\"dirichlet\" value=\"273.14\" />
     <boundary field=\"T\" patch=\"front,back\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"Drift\"  random = \"No\">  <!-- Drift function  -->
+    echo "  <initial_conditions usr_fct=\"Drift\"  random=\"No\">  <!-- Drift function  -->
     <u_lin> 2. </u_lin>  <!-- x-velocity in linear case  -->
     <v_lin> 2. </v_lin>  <!-- y-velocity in linear case  -->
     <w_lin> 0. </w_lin>  <!-- z-velocity in linear case  -->
     <pa> 0. </pa>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type = \"ExplicitEuler\" temp_fct = \"Zero\" dissipation=\"No\">
+    echo "    <source type=\"ExplicitEuler\" temp_fct=\"Zero\" dissipation=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
 
@@ -191,10 +191,10 @@ function create_testcases {
     <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"BuoyancyMMS\"  random = \"No\">
+    echo "  <initial_conditions usr_fct=\"BuoyancyMMS\"  random=\"No\">
     <rhoa> 1. </rhoa>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type = \"ExplicitEuler\" temp_fct = \"BuoyancyST_MMS\" dissipation=\"No\">
+    echo "    <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
@@ -212,7 +212,7 @@ function create_testcases {
     <boundary field=\"p\" patch=\"left,right\" type=\"dirichlet\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"front,back,bottom,top,left,right\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"LayersT\" dir=\"y\" random = \"No\">     <!-- Layers  -->
+    echo "  <initial_conditions usr_fct=\"LayersT\" dir=\"y\" random=\"No\">     <!-- Layers  -->
     <n_layers> 5 </n_layers>
     <border_1> -1.8 </border_1>  <!-- at cell face -->
     <border_2> -0.6 </border_2>  <!-- at cell face -->
@@ -224,17 +224,17 @@ function create_testcases {
     <value_4> 308.84 </value_4>
     <value_5> 310.54 </value_5>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "   <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir = \"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type = \"ExplicitEuler\" temp_fct = \"GaussST\" ramp_fct=\"RampTanh\" dissipation=\"No\">
+    echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct=\"RampTanh\" dissipation=\"No\">
         <HRR> 25000. </HRR>     <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 30.  </x0>
         <y0> -3. </y0>
         <z0> 0. </z0>
-        <sigmax> 1.0 </sigmax>
-        <sigmay> 1.5 </sigmay>
-        <sigmaz> 1.0 </sigmaz>
+        <sigma_x> 1.0 </sigma_x>
+        <sigma_y> 1.5 </sigma_y>
+        <sigma_z> 1.0 </sigma_z>
         <tau> 5. </tau>
       </source>" > ${NAME}_$TSFILEVAL
     echo "  <adaption dynamic=\"Yes\" data_extraction=\"No\">
@@ -262,12 +262,12 @@ function create_testcases {
     <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"BuoyancyMMS\"  random = \"No\">
+    echo "  <initial_conditions usr_fct=\"BuoyancyMMS\"  random=\"No\">
     <rhoa> 1. </rhoa>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir = \"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type = \"ExplicitEuler\" temp_fct = \"BuoyancyST_MMS\" dissipation=\"No\">
+    echo "      <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\">
       </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
@@ -282,10 +282,10 @@ function create_testcases {
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"McDermott\"  random = \"No\">
+    echo "  <initial_conditions usr_fct=\"McDermott\"  random=\"No\">
     <A> 2 </A>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type = \"ExplicitEuler\" force_fct=\"Zero\" dir = \"xyz\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "    <source type=\"ExplicitEuler\" force_fct=\"Zero\" dir=\"xyz\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     ((INDEX++))
 
@@ -298,14 +298,14 @@ function create_testcases {
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"Vortex\"  random = \"No\">
+    echo "  <initial_conditions usr_fct=\"Vortex\"  random=\"No\">
     <u_lin> 0.1 </u_lin>
     <v_lin> 0 </v_lin>
     <w_lin> 0 </w_lin>
     <pa> 0. </pa>
     <rhoa> 1. </rhoa>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type = \"ExplicitEuler\" force_fct=\"Zero\" dir = \"xyz\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "    <source type=\"ExplicitEuler\" force_fct=\"Zero\" dir=\"xyz\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     ((INDEX++))
   fi
@@ -319,7 +319,7 @@ function create_testcases {
     echo "  <boundaries>
     <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"dirichlet\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"SinSinSin\" random = \"No\" >
+    echo "  <initial_conditions usr_fct=\"SinSinSin\" random=\"No\" >
     <l> 2. </l>
   </initial_conditions>" > ${NAME}_$IFILEVAL
     ((INDEX++))
@@ -337,13 +337,13 @@ function create_testcases {
     <boundary field=\"u,v,w\" patch=\"front,back,bottom,top\" type=\"neumann\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,bottom,top,left,right\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"Drift\" random = \"No\">
+    echo "  <initial_conditions usr_fct=\"Drift\" random=\"No\">
     <u_lin> 0.4 </u_lin>                        <!-- background velocity -->
     <v_lin> 0.0 </v_lin>                        <!-- background velocity -->
     <w_lin> 0.0 </w_lin>                        <!-- background velocity -->
     <pa> 0. </pa>                               <!-- ambient pressure -->
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type = \"ExplicitEuler\" force_fct=\"Zero\" dir = \"xyz\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "    <source type=\"ExplicitEuler\" force_fct=\"Zero\" dir=\"xyz\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     echo "  <obstacles enabled=\"Yes\">
     <obstacle>
@@ -367,20 +367,20 @@ function create_testcases {
     <boundary field=\"T\" patch=\"front,back,top,left,right\" type=\"neumann\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"bottom\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"Uniform\" random = \"No\">
+    echo "  <initial_conditions usr_fct=\"Uniform\" random=\"No\">
     <val> 303.64 </val>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type = \"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct= \"RampTanh\" dissipation=\"No\">
+    echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct= \"RampTanh\" dissipation=\"No\">
         <HRR> 2500. </HRR>      <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 0.  </x0>
         <y0> 1. </y0>
         <z0> 0.1 </z0>
-        <sigmax> 0.1 </sigmax>
-        <sigmay> 0.1 </sigmay>
-        <sigmaz> 0.1 </sigmaz>
+        <sigma_x> 0.1 </sigma_x>
+        <sigma_y> 0.1 </sigma_y>
+        <sigma_z> 0.1 </sigma_z>
         <tau> 5. </tau>
       </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))

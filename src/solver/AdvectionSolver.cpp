@@ -12,7 +12,8 @@
 #include "../Domain.h"
 #include "SolverSelection.h"
 
-AdvectionSolver::AdvectionSolver() {
+AdvectionSolver::AdvectionSolver(FieldController *field_controlller) {
+    m_field_controller = field_controlller;
 
     auto params = Parameters::getInstance();
     std::string advectionType = params->get("solver/advection/type");
@@ -34,7 +35,7 @@ AdvectionSolver::AdvectionSolver() {
     auto d_v_lin = v_lin->data;
     auto d_w_lin = w_lin->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u_linm->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u_linm->get_level());
 
 #pragma acc enter data copyin(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize])
     control();
@@ -47,7 +48,7 @@ AdvectionSolver::~AdvectionSolver() {
     auto d_v_lin = v_linm->data;
     auto d_w_lin = w_linm->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u_linm->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u_linm->get_level());
 
 #pragma acc exit data delete(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize])
 
@@ -64,12 +65,12 @@ AdvectionSolver::~AdvectionSolver() {
 // ***************************************************************************************
 void AdvectionSolver::do_step(real t, bool sync) {
   // local variables and parameters for GPU
-    auto u = ISolver::u;
-    auto v = ISolver::v;
-    auto w = ISolver::w;
-    auto u0 = ISolver::u0;
-    auto v0 = ISolver::v0;
-    auto w0 = ISolver::w0;
+    auto u = m_field_controller->field_u;
+    auto v = m_field_controller->field_v;
+    auto w = m_field_controller->field_w;
+    auto u0 = m_field_controller->field_u0;
+    auto v0 = m_field_controller->field_v0;
+    auto w0 = m_field_controller->field_w0;
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -86,7 +87,7 @@ void AdvectionSolver::do_step(real t, bool sync) {
     auto d_v_lin = v_lin->data;
     auto d_w_lin = w_lin->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->get_level());
 
 #pragma acc data present(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize], d_u[:bsize], d_u0[:bsize], d_v[:bsize], d_v0[:bsize], d_w[:bsize], d_w0[:bsize])
     {

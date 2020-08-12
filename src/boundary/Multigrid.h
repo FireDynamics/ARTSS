@@ -10,7 +10,7 @@
 #include "Boundary.h"
 #include "Surface.h"
 #include "Obstacle.h"
-#include "../Field.h"
+#include "../field/Field.h"
 #include "BoundaryDataController.h"
 #include <vector>
 
