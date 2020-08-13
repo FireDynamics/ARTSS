@@ -315,7 +315,7 @@ add_executable( artss_serial ${SOURCE_FILES} src/main.cpp)
 target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
 
 add_executable(artss_serial_profile ${SOURCE_FILES} src/main.cpp)
-set_target_properties(artss_serial_profile PROPERTIES COMPILE_FLAGS "-DPROFILING -DUSE_NVTX")
+set_target_properties(artss_serial_profile PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX")
 target_link_libraries(artss_serial_profile)
 target_link_libraries(artss_serial_profile PRIVATE spdlog::spdlog)
 
@@ -324,7 +324,7 @@ set_target_properties(artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=mul
 target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
 
 add_executable(artss_multicore_cpu_profile ${SOURCE_FILES} src/main.cpp)
-set_target_properties(artss_multicore_cpu_profile PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DPROFILING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore")
+set_target_properties(artss_multicore_cpu_profile PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore")
 target_link_libraries(artss_multicore_cpu_profile)
 target_link_libraries(artss_multicore_cpu_profile PRIVATE spdlog::spdlog)
 
@@ -333,7 +333,7 @@ set_target_properties(artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=
 target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
 
 add_executable(artss_gpu_profile ${SOURCE_FILES} src/main.cpp)
-set_target_properties(artss_gpu_profile PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DPROFILING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
+set_target_properties(artss_gpu_profile PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
 target_link_libraries(artss_gpu_profile)
 target_link_libraries(artss_gpu_profile PRIVATE spdlog::spdlog)
 
