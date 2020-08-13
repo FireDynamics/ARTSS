@@ -150,7 +150,6 @@ void TimeIntegration::run() {
             //iter_start = std::chrono::system_clock::now();
 #ifndef BENCHMARKING
             m_logger->info("t_cur = {:.5f}", t_cur);
-            //TODO Logger
 #endif
 
             // Calculate
