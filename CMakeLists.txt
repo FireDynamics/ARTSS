@@ -305,7 +305,8 @@ if(NOT TARGET spdlog)
     # Stand-alone build
     find_package(spdlog)
 endif()
-if(NOT TARGET spdlog) # use local fallback
+# use local fallback
+if(NOT TARGET spdlog)
     add_subdirectory(external/spdlog)
 endif()
 
@@ -314,47 +315,33 @@ endif()
 add_executable( artss_serial ${SOURCE_FILES} src/main.cpp)
 target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
 
-add_executable(artss_serial_profile ${SOURCE_FILES} src/main.cpp)
-set_target_properties(artss_serial_profile PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX")
-target_link_libraries(artss_serial_profile)
-target_link_libraries(artss_serial_profile PRIVATE spdlog::spdlog)
+add_executable( artss_serial_benchmark ${SOURCE_FILES} src/main.cpp  )
+set_target_properties( artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX" )
+target_link_libraries( artss_serial_benchmark  )
+
 
 add_executable(artss_multicore_cpu ${SOURCE_FILES} src/main.cpp)
 set_target_properties(artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=multicore" LINK_FLAGS "-acc -ta=multicore")
 target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
 
-add_executable(artss_multicore_cpu_profile ${SOURCE_FILES} src/main.cpp)
-set_target_properties(artss_multicore_cpu_profile PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore")
-target_link_libraries(artss_multicore_cpu_profile)
-target_link_libraries(artss_multicore_cpu_profile PRIVATE spdlog::spdlog)
+add_executable( artss_multicore_cpu_benchmark ${SOURCE_FILES} src/main.cpp  )
+set_target_properties( artss_multicore_cpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore" )
+target_link_libraries( artss_multicore_cpu_benchmark  )
+
 
 add_executable(artss_gpu ${SOURCE_FILES} src/main.cpp)
 set_target_properties(artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
 target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
 
-add_executable(artss_gpu_profile ${SOURCE_FILES} src/main.cpp)
-set_target_properties(artss_gpu_profile PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
-target_link_libraries(artss_gpu_profile)
-target_link_libraries(artss_gpu_profile PRIVATE spdlog::spdlog)
-
-spdlog_enable_warnings(artss_serial)
-spdlog_enable_warnings(artss_serial_profile)
-spdlog_enable_warnings(artss_multicore_cpu)
-spdlog_enable_warnings(artss_multicore_cpu_profile)
-spdlog_enable_warnings(artss_gpu)
-spdlog_enable_warnings(artss_gpu_profile)
-
-add_executable( artss_serial_benchmark ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX" )
-target_link_libraries( artss_serial_benchmark  )
-
-add_executable( artss_multicore_cpu_benchmark ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_multicore_cpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore" )
-target_link_libraries( artss_multicore_cpu_benchmark  )
-
 add_executable( artss_gpu_benchmark ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
 target_link_libraries( artss_gpu_benchmark  )
+
+
+spdlog_enable_warnings(artss_serial)
+spdlog_enable_warnings(artss_multicore_cpu)
+spdlog_enable_warnings(artss_gpu)
+
 
 enable_testing()
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests DESTINATION ${CMAKE_BINARY_DIR} )
