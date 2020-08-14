@@ -303,7 +303,7 @@ include_directories( $ENV{CUDA_INC} )
 # find spdlog lib
 if(NOT TARGET spdlog)
     # Stand-alone build
-    find_package(spdlog)
+    find_package(spdlog, QUIET)
 endif()
 # use local fallback
 if(NOT TARGET spdlog)
