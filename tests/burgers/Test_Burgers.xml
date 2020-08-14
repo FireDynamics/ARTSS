@@ -1,60 +1,53 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <ARTSS>
   <physical_parameters>
-    <t_end> 1.0 </t_end>  <!-- simulation end time -->
-    <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
-    <nu> 0.1 </nu>  <!-- kinematic viscosity -->
+    <t_end>1.0</t_end>
+    <dt>0.01</dt>
+    <nu>0.1</nu>
   </physical_parameters>
-
-  <solver description = "AdvectionDiffusionSolver" >
-    <advection type = "SemiLagrangian" field = "u,v,w">
-    </advection>
-    <diffusion type = "Jacobi" field = "u,v,w">
-      <max_iter> 100 </max_iter>  <!-- max number of iterations -->
-      <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
-      <w> 1 </w>  <!-- relaxation parameter -->
+  <solver description="AdvectionDiffusionSolver">
+    <advection type="SemiLagrangian" field="u,v,w"></advection>
+    <diffusion type="Jacobi" field="u,v,w">
+      <max_iter>100</max_iter>
+      <tol_res>1e-07</tol_res>
+      <w>1</w>
     </diffusion>
-    <solution available = "Yes">
-      <tol> 1e-03 </tol>  <!-- tolerance for further tests -->
+    <solution available="Yes">
+      <tol>1e-03</tol>
     </solution>
   </solver>
-
   <domain_parameters>
-    <X1> -3.1415926536 </X1>  <!-- physical domain -->
-    <X2> 3.1415926536 </X2>
-    <Y1> -3.1415926536 </Y1>
-    <Y2> 3.1415926536 </Y2>
-    <Z1> -3.1415926536 </Z1>
-    <Z2> 3.1415926536 </Z2>
-    <x1> -3.1415926536 </x1>  <!-- computational domain -->
-    <x2> 3.1415926536 </x2>
-    <y1> -3.1415926536 </y1>
-    <y2> 3.1415926536 </y2>
-    <z1> -3.1415926536 </z1>
-    <z2> 3.1415926536 </z2>
-    <nx> 40 </nx>  <!-- grid resolution (number of cells excl. ghost cells) -->
-    <ny> 40 </ny>
-    <nz> 1 </nz>
+    <X1>-3.1415926536</X1>
+    <X2>3.1415926536</X2>
+    <Y1>-3.1415926536</Y1>
+    <Y2>3.1415926536</Y2>
+    <Z1>-3.1415926536</Z1>
+    <Z2>3.1415926536</Z2>
+    <x1>-3.1415926536</x1>
+    <x2>3.1415926536</x2>
+    <y1>-3.1415926536</y1>
+    <y2>3.1415926536</y2>
+    <z1>-3.1415926536</z1>
+    <z2>3.1415926536</z2>
+    <nx>40</nx>
+    <ny>40</ny>
+    <nz>1</nz>
   </domain_parameters>
-
-  <adaption dynamic="No" data_extraction="No"> </adaption>
-
+  <adaption dynamic="No" data_extraction="No"></adaption>
   <boundaries>
-    <boundary field="u,v,w" patch="front,back,left,right,bottom,top" type="periodic" value="0.0" />
+    <boundary field="u,v,w"
+    patch="front,back,left,right,bottom,top" type="periodic"
+    value="0.0" />
   </boundaries>
-
-  <obstacles enabled="No"/>
-
-  <surfaces enabled="No"/>
-
-  <initial_conditions usr_fct = "ExpSinusSum" random = "No">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
+  <obstacles enabled="No" />
+  <surfaces enabled="No" />
+  <initial_conditions usr_fct="ExpSinusSum" random="No">
   </initial_conditions>
-
   <visualisation save_vtk="Yes" save_csv="No">
-    <vtk_nth_plot> 10 </vtk_nth_plot>
+    <vtk_nth_plot>10</vtk_nth_plot>
   </visualisation>
   <logging>
     <level>INFO</level>
-    <file>tmp</file>
+    <file>output_test_burgers.log</file>
   </logging>
 </ARTSS>
