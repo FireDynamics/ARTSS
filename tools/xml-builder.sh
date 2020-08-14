@@ -121,8 +121,6 @@ SURFACE=1
 
 LEADINGNO=2
 
-LOGGINGFILE=tmp
-LOGGINGLEVEL=INFO
 #------------------------------------------------------------------------------
 YELLOW='\033[1;33m'
 NC='\033[0;m'
@@ -816,11 +814,25 @@ else
     <vtk_nth_plot> $VTKPLOTS </vtk_nth_plot>"
     fi
     WRITETO=${WRITETO}"
-  </visualisation>"
-    WRITETO=${WRITETO}"
-  <logging>
-    <level>${LOGGINGLEVEL}</level>
-    <file>${LOGGINGFILE}</file>
+  </visualisation>
+    <logging>\n"
+
+    BASENAME=$(echo $NAME | cut -d '.' -f-1 | awk '{print tolower($0)}')
+    if [ -v $LOGGINGLEVEL ]
+    then
+        WRITETO="${WRITETO}      <level> INFO </level>\n"
+    else
+        WRITETO="${WRITETO}      <level> ${LOGGINGLEVEL} </level>\n"
+    fi
+
+    if [ -v $LOGGINGFILE ]
+    then
+        WRITETO="${WRITETO}      <file> output_${BASENAME}.log </file>"
+    else
+        WRITETO="${WRITETO}      <file> ${LOGGINGFILE} </file>"
+    fi
+
+    WRITETO="${WRITETO}
   </logging>
 </ARTSS>"
   echo -e "$WRITETO" >> $NAME
