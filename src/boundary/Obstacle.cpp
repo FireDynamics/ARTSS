@@ -222,9 +222,7 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
 /// \brief  Print obstacle infos
 // ***************************************************************************************
 void Obstacle::print() {
-#ifdef BENCHMARKING
-    return;
-#else
+#ifndef BENCHMARKING
     size_t strideX = getStrideX();
     size_t strideY = getStrideY();
     size_t strideZ = getStrideZ();
@@ -242,9 +240,7 @@ void Obstacle::print() {
 /// \brief  Print detailed obstacle infos
 // ***************************************************************************************
 void Obstacle::printDetails(){
-#ifdef BENCHMARKING
-    return;
-#else
+#ifndef BENCHMARKING
     Domain *domain = Domain::getInstance();
     size_t Nx = domain->get_Nx(m_level);
     size_t Ny = domain->get_Ny(m_level);

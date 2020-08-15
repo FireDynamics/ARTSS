@@ -29,9 +29,7 @@ BoundaryData::~BoundaryData() {
 /// \brief  Print boundary infos
 // *******************************************************************************
 void BoundaryData::print() {
-#ifdef BENCHMARKING
-    return;
-#else
+#ifndef BENCHMARKING
     for (size_t i = 0; i < numberOfPatches; i++) {
         std::string p = getPatchName(static_cast<Patch>(i));
         std::string bc = getBoundaryConditionName(m_boundaryConditions[i]);

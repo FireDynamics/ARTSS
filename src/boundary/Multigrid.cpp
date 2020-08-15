@@ -374,9 +374,7 @@ void Multigrid::control() {
 /// \brief  Print multigrid infos
 // ***************************************************************************************
 void Multigrid::print() {
-#ifdef BENCHMARKING
-    return;
-#else
+#ifndef BENCHMARKING
     m_logger->info("################ MULTIGRID ################");
     m_logger->info("Number of Obstacles: {}, Number of Surfaces: {}",
             m_numberOfObstacles, m_numberOfSurfaces);

@@ -93,9 +93,7 @@ Surface::~Surface() {
 }
 
 void Surface::print() {
-#ifdef BENCHMARKING
-    return;
-#else
+#ifndef BENCHMARKING
     size_t i2 = get_i2();
     size_t j2 = get_j2();
     size_t k2 = get_k2();

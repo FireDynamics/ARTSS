@@ -77,9 +77,7 @@ void Boundary::init(size_t size_obstacles){
 /// \param  size_obstacles Amount of obstacle cells
 // ***************************************************************************************
 void Boundary::print(size_t size_obstacles) {
-#ifdef BENCHMARKING
-    return;
-#else
+#ifndef BENCHMARKING
     auto m_logger = Utility::create_logger(typeid(Boundary).name());
     m_logger->info("################ BOUNDARY ################");
     m_logger->info("list size of bList: {}", m_size_boundaryList);

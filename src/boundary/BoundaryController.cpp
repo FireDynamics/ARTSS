@@ -160,9 +160,7 @@ BoundaryController *BoundaryController::getInstance() {
 /// \brief  prints boundaries (outer, inner, surfaces)
 // ***************************************************************************************
 void BoundaryController::printBoundaries() {
-#ifdef BENCHMARKING
-    return;
-#else
+#ifndef BENCHMARKING
     m_logger->info("-- Info summary");
     Domain::getInstance()->print();
     m_bdc_boundary->print();
