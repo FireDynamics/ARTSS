@@ -5,7 +5,6 @@ FILES=-1
 
 APPEND=1
 OVER=1
-VERBOSE=1
 
 DELIM="\t"
 
@@ -65,12 +64,9 @@ Other:
 
    ${YELLOW}-o${NC}
   ${YELLOW}--output${NC}    \tspecify output file
-
-   ${YELLOW}-v${NC}
-  ${YELLOW}--verbose${NC}   \tverbose - print output to screen
 \n"
 
-INIT="Initialised values: output file=$OUT, verbose=false, compile version=$COMPILE, hoster name=$HOSTNAME\n"
+INIT="Initialised values: output file=$OUT, compile version=$COMPILE, hoster name=$HOSTNAME\n"
 HELP="$OPTIONS$INIT$EXAMPLE"
 
 HEADER="Date${DELIM}Server${DELIM}Version${DELIM}Hardware${DELIM}t_end${DELIM}Nt${DELIM}dt${DELIM}nx${DELIM}ny${DELIM}nz${DELIM}dx${DELIM}dy${DELIM}dz${DELIM}RMS Error u${DELIM}RMS Error p${DELIM}RMS Error T${DELIM}Absolute Error u${DELIM}Absolute Error v${DELIM}Absolute Error w${DELIM}Absolute Error p${DELIM}Absolute Error T${DELIM}calctime[s]${DELIM}runtime[s]${DELIM}CUPS${DELIM}XML${DELIM}Output${DELIM}Obstacles${DELIM}Surfaces${DELIM}Dynamic${DELIM}Comment"
@@ -109,6 +105,7 @@ function xml_parser {
    # echo "z1=$ZSTART, z2=$ZEND, NZ=$NZ, DZ=$DZ"
 
    MAXITER=$(xmllint -xpath "string(//max_iter)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+   LOGFILE=$(xmllint -xpath "string(//ARTSS/logging/file)" $1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 }
 
 POSITIONAL=()
@@ -211,10 +208,6 @@ do
         fi
       done
       shift
-      shift
-      ;;
-    -v|--verbose)
-      VERBOSE=0
       shift
       ;;
     *)
@@ -347,32 +340,10 @@ do
     TIMEANDDATE=$(date)
     TIME=$(date +%s)
     echo -e "\n$TIMEANDDATE starting file $FILE"
-    TMP=out_${TIME}.tmp
     xml_parser $FILE
-    TMPNAME=$(echo $FILE | tr -dc '[:alnum:]' | tr '[:upper:]' '[:lower:]')
-    TMPNAME=${TMPNAME}_${TIME}_$(hostname)
 
     START=$(date +%s)
-
-    if [ $VERBOSE -eq 0 ]
-    then
-      $FILEPATH $FILE | tee $TMPNAME
-    else
-      $FILEPATH $FILE 2>> ${TMP}.error >  $TMPNAME
-    fi
-
-    if [ -f ${TMP}.error ]
-    then
-        ERRCOUNT=$( (wc -l) < ${TMP}.error)
-        if [ $ERRCOUNT -eq 0 ]
-        then
-            rm ${TMP}.error
-        else
-            ERRORMES="An error occured, please check ${TMP}.error for more information"
-            echo -e "${RED}An error occured, please check ${TMP}.error for more information${NC}" 
-        fi
-    fi
-
+    $FILEPATH $FILE
     END=$(date +%s)
 
     ERRU="-"
@@ -387,49 +358,49 @@ do
     then
       if [[ "$SOLVER" == *Advection* || "$SOLVER" == *Diffusion* ]] 
       then
-        TIME=`cat $TMPNAME | tail -n 12 | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
-        ERRU=`cat $TMPNAME | tail -n 8  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-        ERRV=`cat $TMPNAME | tail -n 5  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-        ERRW=`cat $TMPNAME | tail -n 2  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-        RMSU=`cat $TMPNAME | tail -n 18 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-        RMSP=`cat $TMPNAME | tail -n 17 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-        RMST=`cat $TMPNAME | tail -n 16 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        TIME=`cat $LOGFILE | tail -n 8  | head -1 | awk '{split($0, a, ":"); print(a[2]/1000);}'`
+        ERRU=`cat $LOGFILE | tail -n 6  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        ERRV=`cat $LOGFILE | tail -n 4  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        ERRW=`cat $LOGFILE | tail -n 2  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMSU=`cat $LOGFILE | tail -n 12 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMSP=`cat $LOGFILE | tail -n 11 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMST=`cat $LOGFILE | tail -n 10 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
       elif [[ "$SOLVER" == NS* ]]
       then
         if [[ "$SOLVER" == *Temp* ]]
         then
-          TIME=`cat $TMPNAME | tail -n 18 | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
-          ERRU=`cat $TMPNAME | tail -n 14 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          ERRV=`cat $TMPNAME | tail -n 11 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          ERRW=`cat $TMPNAME | tail -n 8  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          ERRP=`cat $TMPNAME | tail -n 5  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          ERRT=`cat $TMPNAME | tail -n 2  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          RMSU=`cat $TMPNAME | tail -n 24 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          RMSP=`cat $TMPNAME | tail -n 23 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          RMST=`cat $TMPNAME | tail -n 22 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          TIME=`cat $LOGFILE | tail -n 12 | head -1 | awk '{split($0, a, ":"); print(a[2]/1000);}'`
+          ERRU=`cat $LOGFILE | tail -n 10 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRV=`cat $LOGFILE | tail -n 8  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRW=`cat $LOGFILE | tail -n 6  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRP=`cat $LOGFILE | tail -n 4  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRT=`cat $LOGFILE | tail -n 2  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMSU=`cat $LOGFILE | tail -n 16 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMSP=`cat $LOGFILE | tail -n 15 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMST=`cat $LOGFILE | tail -n 14 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
         else
-          TIME=`cat $TMPNAME | tail -n 15 | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
-          ERRU=`cat $TMPNAME | tail -n 11 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          ERRV=`cat $TMPNAME | tail -n 8  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          ERRW=`cat $TMPNAME | tail -n 5  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          ERRP=`cat $TMPNAME | tail -n 2  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          RMSU=`cat $TMPNAME | tail -n 21 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          RMSP=`cat $TMPNAME | tail -n 20 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-          RMST=`cat $TMPNAME | tail -n 19 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          TIME=`cat $LOGFILE | tail -n 10 | head -1 | awk '{split($0, a, ":"); print(a[2]/1000);}'`
+          ERRU=`cat $LOGFILE | tail -n 8  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRV=`cat $LOGFILE | tail -n 6  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRW=`cat $LOGFILE | tail -n 4  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          ERRP=`cat $LOGFILE | tail -n 2  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMSU=`cat $LOGFILE | tail -n 14 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMSP=`cat $LOGFILE | tail -n 13 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+          RMST=`cat $LOGFILE | tail -n 12 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
         fi
       elif [[ "$SOLVER" == "PressureSolver" ]]
       then
-        TIME=`cat $TMPNAME | tail -n 5 | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
-        ERRP=`cat $TMPNAME | tail -n 1  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-        RMSU=`cat $TMPNAME | tail -n 11 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-        RMSP=`cat $TMPNAME | tail -n 10 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
-        RMST=`cat $TMPNAME | tail -n 9  | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        TIME=`cat $LOGFILE | tail -n 4 | head -1 | awk '{split($0, a, ":"); print(a[2]/1000);}'`
+        ERRP=`cat $LOGFILE | tail -n 2 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMSU=`cat $LOGFILE | tail -n 8 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMSP=`cat $LOGFILE | tail -n 7 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
+        RMST=`cat $LOGFILE | tail -n 6 | head -1 | awk '{split($0, a, "="); print(a[2]);}'`
       fi
     else
-      TIME=`cat $TMPNAME | tail -n 1  | head -1 | awk '{split($0, a, " "); print(a[3]/1000);}'`
+      TIME=`cat $LOGFILE | tail -n 1  | head -1 | awk '{split($0, a, ":"); print(a[2]/1000);}'`
     fi
 
-    NUMBEROFLINES=$(cat $TMPNAME | wc -l)
+    NUMBEROFLINES=$(cat $LOGFILE | wc -l)
     if [ "$TIME" = "0" ]
     then
       CUPS="-"
@@ -437,21 +408,10 @@ do
       CUPS=$(bc <<< "scale=2; ($NX+2) * ($NY+2) * ($NZ+2) * $NT / $TIME")
     fi
     TTIME=$(bc <<< "scale=2; $END - $START")
-    NEWNAME=$TMP
-    if [ -e $TMP ]
-    then
-      COUNTER=1
-      while [ -e ${TMP}_${COUNTER} ]
-      do
-        ((COUNTER++))
-      done
-      NEWNAME=${TMP}_${COUNTER}
-    fi
-    mv $TMPNAME $NEWNAME
-    #rmdir $DIRE
-    echo -e "$TIMEANDDATE${DELIM}$SERVER${DELIM}$COMPILE${DELIM}$HARDWARE${DELIM}$TEND${DELIM}$NT${DELIM}$DT${DELIM}$NX${DELIM}$NY${DELIM}$NZ${DELIM}$DX${DELIM}$DY${DELIM}$DZ${DELIM}$RMSU${DELIM}$RMSP${DELIM}$RMST${DELIM}$ERRU${DELIM}$ERRV${DELIM}$ERRW${DELIM}$ERRP${DELIM}$ERRT${DELIM}$TIME${DELIM}$TTIME${DELIM}$CUPS${DELIM}$FILE${DELIM}$NEWNAME${DELIM}${OBSTACLES}${DELIM}${SURFACES}${DELIM}$DYNAMIC${DELIM}$COMMENT${DELIM}$ERRORMES" >> $OUT
+    
+    echo -e "$TIMEANDDATE${DELIM}$SERVER${DELIM}$COMPILE${DELIM}$HARDWARE${DELIM}$TEND${DELIM}$NT${DELIM}$DT${DELIM}$NX${DELIM}$NY${DELIM}$NZ${DELIM}$DX${DELIM}$DY${DELIM}$DZ${DELIM}$RMSU${DELIM}$RMSP${DELIM}$RMST${DELIM}$ERRU${DELIM}$ERRV${DELIM}$ERRW${DELIM}$ERRP${DELIM}$ERRT${DELIM}$TIME${DELIM}$TTIME${DELIM}$CUPS${DELIM}$FILE${DELIM}${LOGFILE}${DELIM}${OBSTACLES}${DELIM}${SURFACES}${DELIM}$DYNAMIC${DELIM}$COMMENT${DELIM}$ERRORMES" >> $OUT
     echo -e "\tdt=$DT (t_end=$TEND) size=${NX}x${NY}x${NZ} is finished. Data file: $FILE"
     echo -e "\ttmp data file=$TMP"
     echo "$(date) endtime: $TTIME"
 done
-echo "output file=$OUT"
+echo "output file=$LOGFILE"
