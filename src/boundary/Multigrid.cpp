@@ -390,12 +390,11 @@ void Multigrid::print() {
     m_logger->debug("Total length of iList: {}", getLen_iList_joined());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->debug(
-"For Level {} bList starts at index {} and ends with index {}\
-and the corresponding indices at this position: {} | {}",
-            level, getFirstIndex_bList(level), getLastIndex_bList(level),
-            *(m_data_MG_bList_level_joined + getFirstIndex_bList(level)),
-            *(m_data_MG_bList_level_joined + getLastIndex_bList(level)));
+        m_logger->debug("For Level {} bList starts at index {} and ends with index {}",
+                level, getFirstIndex_bList(level), getLastIndex_bList(level));
+        m_logger->debug("and the corresponding indices at this position: {} | {}",
+                *(m_data_MG_bList_level_joined + getFirstIndex_bList(level)),
+                *(m_data_MG_bList_level_joined + getLastIndex_bList(level)));
     }
     m_logger->debug("Total length of bList: {}", getLen_bList_joined());
 
@@ -633,10 +632,6 @@ void Multigrid::calcSurfaces(Surface **surfaceList) {
             *(m_size_MG_sList_level + s + 1) = counter_s;
         }
         *(m_MG_sList) = sList;
-
-#ifndef BENCHMARKING
-        m_logger->info("control surface joined list: {}|{}", counter_s, *(m_size_MG_sList_level));
-#endif
     }
 }
 
@@ -687,7 +682,7 @@ void Multigrid::surfaceDominantRestriction(size_t level) {
             }
             size_t startIndex_coarse = IX(i_fine / 2, j_fine / 2, k_fine / 2, Nx, Ny);
 #ifndef BENCHMARKING
-            m_logger->info("startIndex multigrid surface: {} {}|{}",
+            m_logger->debug("startIndex multigrid surface: {} {}|{}",
                     startIndex_fine,
                     startIndex_coarse,
                     startIndex_fine / 2);
@@ -698,7 +693,7 @@ void Multigrid::surfaceDominantRestriction(size_t level) {
             size_t index = level * m_numberOfSurfaces + surfaceID + 1;
             *(m_size_MG_sList_level + index) = *(m_size_MG_sList_level + index - 1) + surface_coarse->getSize_surfaceList();
 #ifndef BENCHMARKING
-            m_logger->info("control multigrid surface index: {} {}",
+            m_logger->debug("control multigrid surface index: {} {}",
                     *(m_size_MG_sList_level + index),
                     surface_coarse->getSize_surfaceList());
 #endif
@@ -853,7 +848,7 @@ void Multigrid::sendSurfaceListsToGPU() {
         size_sList = getLen_sList_joined();
         m_data_MG_sList_level_joined = new size_t[size_sList];
 #ifndef BENCHMARKING
-        m_logger->info("control sendMGListsToGPU size surface {}", size_sList);
+        m_logger->debug("control sendMGListsToGPU size surface {}", size_sList);
 #endif
         for (size_t level = 0; level < m_levels + 1; level++) {
             Surface **surfaceList = *(m_MG_surfaceList + level);
@@ -866,7 +861,7 @@ void Multigrid::sendSurfaceListsToGPU() {
             }
         }
 #ifndef BENCHMARKING
-        m_logger->info("control sendMGListsToGPU surface {} | {}",
+        m_logger->debug("control sendMGListsToGPU surface {} | {}",
                 counter_sList, size_sList);
 #endif
 #pragma acc enter data copyin(m_data_MG_sList_level_joined[:size_sList])

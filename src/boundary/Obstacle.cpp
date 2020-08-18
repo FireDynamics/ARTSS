@@ -32,6 +32,16 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
     real oz1 = matchGrid(z1, dz, Z1);
     real oz2 = matchGrid(z2, dz, Z1);
 
+    /* ox1 and ox2 as outer boundary
+       #########################
+       #       #       #       #
+       #########################
+       ^       ^               ^
+      X1      ox1             ox2
+                   ^       ^
+                  m_i1    m_i2
+    */
+
     m_i1 = static_cast<size_t>((ox1 - X1) * rdx + 1);  // plus 1 for ghost cell
     m_j1 = static_cast<size_t>((oy1 - Y1) * rdy + 1);
     m_k1 = static_cast<size_t>((oz1 - Z1) * rdz + 1);
@@ -68,9 +78,6 @@ Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t 
 /// \param  level Multigrid level
 // ***************************************************************************************
 void Obstacle::init(size_t level) {
-#ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
-#endif
     Domain *domain = Domain::getInstance();
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
@@ -244,10 +251,18 @@ void Obstacle::printDetails(){
     Domain *domain = Domain::getInstance();
     size_t Nx = domain->get_Nx(m_level);
     size_t Ny = domain->get_Ny(m_level);
+    size_t strideX = getStrideX();
+    size_t strideY = getStrideY();
+    size_t strideZ = getStrideZ();
+
+    m_logger->debug("############### OBSTACLE ###############");
+    m_logger->debug("level: {}", m_level);
+    m_logger->debug("strides (x y z): {} {} {}", strideX, strideY, strideZ);
+    m_logger->debug("size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}", m_size_obstacleFront, m_size_obstacleBack, m_size_obstacleBottom, m_size_obstacleTop, m_size_obstacleLeft, m_size_obstacleRight);
+    m_logger->debug("size of Obstacle: {}", m_size_obstacleList);
+    m_logger->debug("coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, m_i2, m_j1, m_j2, m_k1, m_k2);
 
     std::vector<size_t> coords;
-
-
     size_t size_front = getSize_obstacleFront();
     if (size_front > 0) {
         m_logger->debug("Front: {} | {}",
@@ -345,6 +360,7 @@ void Obstacle::printDetails(){
     } else {
         m_logger->debug("Right size = 0");
     }
+    m_logger->debug("############### OBSTACLE END ###############");
 #endif
 }
 
