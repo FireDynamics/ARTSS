@@ -15,7 +15,7 @@
 
 const size_t numberOfPatches = 6;
 enum Patch : int {
-    UNKOWN_PATCH = -1,
+    UNKNOWN_PATCH = -1,
     FRONT = 0,
     BACK = 1,
     BOTTOM = 2,
@@ -26,7 +26,7 @@ enum Patch : int {
 
 const size_t numberOfBoundaryConditions = 3;
 enum BoundaryCondition : int {
-    UNKOWN_CONDITION = -1,
+    UNKNOWN_CONDITION = -1,
     NEUMANN = 0,
     DIRICHLET = 1,
     PERIODIC = 2
@@ -35,10 +35,8 @@ enum BoundaryCondition : int {
 class BoundaryData {
 public:
     BoundaryData();
-
     ~BoundaryData();
     void print();
-
 
     static std::string getFieldTypeName(FieldType f);
     static std::string getBoundaryConditionName(BoundaryCondition bc);

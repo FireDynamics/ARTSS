@@ -40,7 +40,7 @@ Domain::Domain() {
 
     calc_MG_values();
 #ifndef BENCHMARKING
-    //printDetails();
+    printDetails();
 #endif
 }
 
@@ -141,9 +141,9 @@ real Domain::calc_new_coord(real oldCoord, long shift, real cell_width) {
 /// \params shift  Amount of cells which will be resized
 /// \params startCoord_p Start coordinate of physical domain
 /// \params endCoord_p End coordinate of physical domain
-/// \params oldCoord Old coordiante of computational domain
+/// \params oldCoord Old coordinate of computational domain
 /// \params cellWidth  dx,dy,dz
-/// \params newCoord New coordiante of computational domain
+/// \params newCoord New coordinate of computational domain
 /// \return bool True if resize is valid
 // ***************************************************************************************
 bool Domain::set_new_value(long shift, real startCoord_p, real endCoord_p, real oldCoord, real cell_width, real *newCoord) {
@@ -171,40 +171,40 @@ void Domain::print() {
 
 void Domain::printDetails() {
 #ifndef BENCHMARKING
-    m_logger->info("############### Domain Parameter ###############");
+    m_logger->debug("############### Domain Parameter ###############");
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} Nx: {}, Ny: {}, Nz: {}", level,
+        m_logger->debug("For Level {} Nx: {}, Ny: {}, Nz: {}", level,
                 get_Nx(level), get_Ny(level), get_Nz(level));
     }
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} nx: {}, ny {}, nz {}", level,
+        m_logger->debug("For Level {} nx: {}, ny {}, nz {}", level,
                 get_nx(level), get_ny(level), get_nz(level));
     }
 
-    m_logger->info("X: ({}|{}) x: ({}|{})", get_X1(), get_X2(),
+    m_logger->debug("X: ({}|{}) x: ({}|{})", get_X1(), get_X2(),
                                             get_x1(), get_x2());
-    m_logger->info("Y: ({}|{}) y: ({}|{})", get_Y1(), get_Y2(),
+    m_logger->debug("Y: ({}|{}) y: ({}|{})", get_Y1(), get_Y2(),
                                             get_y1(), get_y2());
-    m_logger->info("Z: ({}|{}) z: ({}|{})", get_Z1(), get_Z2(),
+    m_logger->debug("Z: ({}|{}) z: ({}|{})", get_Z1(), get_Z2(),
                                             get_z1(), get_z2());
 
-    m_logger->info("Lx: {}, Ly: {}, Lz: {}", get_Lx(), get_Ly(), get_Lz());
-    m_logger->info("lx: {}, ly: {}, lz: {}", get_lx(), get_ly(), get_lz());
+    m_logger->debug("Lx: {}, Ly: {}, Lz: {}", get_Lx(), get_Ly(), get_Lz());
+    m_logger->debug("lx: {}, ly: {}, lz: {}", get_lx(), get_ly(), get_lz());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} dx: {}, dy: {}, dz: {}", level,
+        m_logger->debug("For Level {} dx: {}, dy: {}, dz: {}", level,
                 get_dx(level), get_dy(level), get_dz(level));
     }
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("for Level {} X: ({}|{}) Y: ({}|{}) Z: ({}|{})", level,
+        m_logger->debug("for Level {} X: ({}|{}) Y: ({}|{}) Z: ({}|{})", level,
                 get_index_x1(level), get_index_x2(level),
                 get_index_y1(level), get_index_y2(level),
                 get_index_z1(level), get_index_z2(level));
     }
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info(" For Level {} domain size: {}", level, get_size(level));
+        m_logger->debug(" For Level {} domain size: {}", level, get_size(level));
     }
 
-    m_logger->info("--------------- Domain Parameter end ---------------");
+    m_logger->debug("--------------- Domain Parameter end ---------------");
 #endif
 }

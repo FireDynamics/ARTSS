@@ -104,7 +104,7 @@ void Obstacle::init(size_t level) {
     createObstacle(Nx, Ny);
 
     control();
-    //printDetails();
+    printDetails();
 }
 
 Obstacle::~Obstacle() {
@@ -250,100 +250,100 @@ void Obstacle::printDetails(){
 
     size_t size_front = getSize_obstacleFront();
     if (size_front > 0) {
-        m_logger->info("Front: {} | {}",
+        m_logger->debug("Front: {} | {}",
                 m_obstacleFront[0],
                 m_obstacleFront[size_front - 1]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleFront[0], Nx, Ny);
-        m_logger->info("Front start: {}|{}|{}",
+        m_logger->debug("Front start: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleFront[size_front - 1], Nx, Ny);
-        m_logger->info("Front end: {}|{}|{}",
+        m_logger->debug("Front end: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
     } else {
-        m_logger->info("Front size = 0");
+        m_logger->debug("Front size = 0");
     }
 
     size_t size_back = getSize_obstacleBack();
     if (size_back > 0) {
-        m_logger->info("Back: {} | {}",
+        m_logger->debug("Back: {} | {}",
                 m_obstacleBack[0],
                 m_obstacleBack[size_back-1]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleBack[0], Nx, Ny);
-        m_logger->info("Back start: {}|{}|{}",
+        m_logger->debug("Back start: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleBack[size_back-1], Nx, Ny);
-        m_logger->info("Back end: {}|{}|{}",
+        m_logger->debug("Back end: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
     } else {
-        m_logger->info("Back size = 0");
+        m_logger->debug("Back size = 0");
     }
 
     size_t size_top = getSize_obstacleTop();
     if (size_top > 0) {
-        m_logger->info("Top: {} | {}",
+        m_logger->debug("Top: {} | {}",
                 m_obstacleTop[0], m_obstacleTop[size_top-1]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleTop[0], Nx, Ny);
-        m_logger->info("Top start: {}|{}|{}",
+        m_logger->debug("Top start: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleTop[size_top-1], Nx, Ny);
-        m_logger->info("Top end: {}|{}|{}",
+        m_logger->debug("Top end: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
     } else {
-        m_logger->info("Top size = 0");
+        m_logger->debug("Top size = 0");
     }
 
     size_t size_bottom = getSize_obstacleBottom();
     if (size_bottom > 0) {
-        m_logger->info("Bottom: {} | {}",
+        m_logger->debug("Bottom: {} | {}",
                 m_obstacleBottom[0], m_obstacleBottom[size_bottom-1]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleBottom[0], Nx, Ny);
-        m_logger->info("Bottom start: {}|{}|{}",
+        m_logger->debug("Bottom start: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleBottom[size_bottom - 1], Nx, Ny);
-        m_logger->info("Bottom end: {}|{}|{}",
+        m_logger->debug("Bottom end: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
     } else {
-        m_logger->info("Bottom size = 0");
+        m_logger->debug("Bottom size = 0");
     }
 
     size_t size_left = getSize_obstacleLeft();
     if (size_left > 0) {
-        m_logger->info("Left: {} | {}",
+        m_logger->debug("Left: {} | {}",
                 m_obstacleLeft[0], m_obstacleLeft[size_left-1]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleLeft[0], Nx, Ny);
-        m_logger->info("Left start: {}|{}|{}",
+        m_logger->debug("Left start: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleLeft[size_left-1], Nx, Ny);
-        m_logger->info("Left end: {}|{}|{}",
+        m_logger->debug("Left end: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
     } else {
-        m_logger->info("Left size = 0");
+        m_logger->debug("Left size = 0");
     }
 
     size_t size_right = getSize_obstacleRight();
     if (size_right > 0) {
-        m_logger->info("Right: {} | {}",
+        m_logger->debug("Right: {} | {}",
                 m_obstacleRight[0], m_obstacleRight[size_right-1]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleRight[0], Nx, Ny);
-        m_logger->info("Right start: {}|{}|{}",
+        m_logger->debug("Right start: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
 
         coords = Utility::coordinateFromLinearIndex(m_obstacleRight[size_right-1], Nx, Ny);
-        m_logger->info("Right end: {}|{}|{}",
+        m_logger->debug("Right end: {}|{}|{}",
                 coords[0], coords[1], coords[2]);
     } else {
-        m_logger->info("Right size = 0");
+        m_logger->debug("Right size = 0");
     }
 #endif
 }

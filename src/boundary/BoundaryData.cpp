@@ -48,9 +48,7 @@ FieldType BoundaryData::matchField(const std::string &s) {
     for (size_t fn = 0; fn < FieldTypeNames.size(); fn++) {
         if (FieldTypeNames[fn] == s) return (FieldType) fn;
     }
-
-    // unknown fieldtype => die
-    return UNKOWN_FIELD;
+    return UNKNOWN_FIELD;
 }
 
 // *******************************************************************************
@@ -61,8 +59,7 @@ Patch BoundaryData::matchPatch(const std::string &s) {
     for (size_t pn = 0; pn < PatchNames.size(); pn++) {
         if (PatchNames[pn] == s) return (Patch) pn;
     }
-
-    return UNKOWN_PATCH;
+    return UNKNOWN_PATCH;
 }
 
 // *******************************************************************************
@@ -73,8 +70,7 @@ BoundaryCondition BoundaryData::matchBoundaryCondition(const std::string &s) {
     for (size_t tn = 0; tn < BoundaryConditionNames.size(); tn++) {
         if (BoundaryConditionNames[tn] == s) return (BoundaryCondition) tn;
     }
-
-    return UNKOWN_CONDITION;
+    return UNKNOWN_CONDITION;
 }
 
 std::string BoundaryData::getFieldTypeName(FieldType f) {
