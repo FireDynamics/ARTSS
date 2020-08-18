@@ -1,4 +1,4 @@
-$1 ./Test_NavierStokesCavity.xml
+$1 ./Test_NavierStokes_Cavity.xml
 
 rm -rf *.vtk
 

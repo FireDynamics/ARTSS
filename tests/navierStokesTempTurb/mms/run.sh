@@ -1,4 +1,4 @@
-$1 ./Test_NavierStokesTempTurbBuoyancyMMS.xml
+$1 ./Test_NavierStokesTempTurb_BuoyancyMMS.xml
 
 rm -rf *.vtk
 
