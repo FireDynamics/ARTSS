@@ -86,7 +86,7 @@ void DomainBoundary::applyDirichlet(real *dataField, size_t *d_patch, Patch patc
         value = 0;
     }
     Domain* domain = Domain::getInstance();
-    size_t referenceIndex = 0;
+    int referenceIndex = 0;
     switch (patch) {
         case BACK:
             referenceIndex = -domain->get_Nx(level) * domain->get_Ny(level);
