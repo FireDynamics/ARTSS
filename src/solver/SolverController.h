@@ -22,10 +22,6 @@ public:
 
     FieldController* get_field_controller() { return m_field_controller; };
 
-    ISource *source_temperature;
-    ISource *source_velocity;
-    ISource *source_concentration;
-
 private:
     void set_up_sources(const std::string &string_solver);
     void init_solver();
@@ -40,6 +36,10 @@ private:
     ISolver *m_solver;
     ISourceFunction *m_source_function_concentration;
     ISourceFunction *m_source_function_temperature;
+
+    ISource *source_temperature;
+    ISource *source_velocity;
+    ISource *source_concentration;
 
     bool m_has_temperature = false;
     bool m_has_turbulence = false;
