@@ -103,7 +103,7 @@
   </visualisation>
 
   <logging>
-    <level> INFO </level>
-    <file> output_test_navierstokestempturb_openplume.log </file>
+      <level>trace</level>
+    <file>output_test_navierstokestempturb_openplume.log</file>
   </logging>
 </ARTSS>

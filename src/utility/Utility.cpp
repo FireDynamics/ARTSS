@@ -10,6 +10,12 @@
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
 
+#ifndef BENCHMARKING
+#include <spdlog/cfg/helpers.h>
+#include <cctype>
+#include <clocale>
+#endif
+
 // ================================= Calc i,j,k ==========================================
 // ***************************************************************************************
 /// \brief  calculates indices <i,j,k> from linear index idx
@@ -106,36 +112,30 @@ std::shared_ptr<spdlog::logger> Utility::create_logger(std::string logger_name) 
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
 
     auto params = Parameters::getInstance();
-    std::string logLevel = params->get("logging/level");
-    std::string logFile = params->get("logging/file");
+    std::string log_level = params->get("logging/level");
+    std::string log_file = params->get("logging/file");
 
     if (!stdout_sink) {
         stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        stdout_sink->set_level(spdlog::level::warn);
-    }
-
-    if (!stderr_sink) {
-        stderr_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-            "error.log",
-            true);
-        stderr_sink->set_level(spdlog::level::trace);
+        auto level = spdlog::level::from_str(log_level);
+        stdout_sink->set_level(level);
     }
 
     if (!file_sink) {
         file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-            logFile,
+            log_file,
             false);
-        file_sink->set_level(spdlog::level::info);
+        file_sink->set_level(spdlog::level::trace);
     }
 
     std::vector<spdlog::sink_ptr> sinks;
     sinks.push_back(stdout_sink);
-    sinks.push_back(stderr_sink);
     sinks.push_back(file_sink);
     auto logger = std::make_shared<spdlog::logger>(logger_name,
                                                    begin(sinks),
                                                    end(sinks));
     logger->flush_on(spdlog::level::err);
+    logger->set_level(spdlog::level::trace);
 
     return logger;
 }
