@@ -257,7 +257,7 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                 size_t index = IX(i, j, k, Nx, Ny);
                 x_centres[index] = x_coords[i] + static_cast<float> (0.5 * dx);
                 y_centres[index] = y_coords[j] + static_cast<float> (0.5 * dy);
-                z_centres[index] = z_coords[j] + static_cast<float> (0.5 * dz);
+                z_centres[index] = z_coords[k] + static_cast<float> (0.5 * dz);
                 u_vel[index] = static_cast<float>(u[index]);
                 v_vel[index] = static_cast<float>(v[index]);
                 w_vel[index] = static_cast<float>(w[index]);
