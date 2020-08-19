@@ -11,13 +11,13 @@
 #include "interfaces/ISource.h"
 #include "utility/GlobalMacrosTypes.h"
 #include "solver/SolverController.h"
+#include "adaption/Adaption.h"
 
 #ifndef BENCHMARKING
 
 #include "analysis/Analysis.h"
 #include "analysis/Solution.h"
 #include "visualisation/Visual.h"
-#include "adaption/Adaption.h"
 
 #endif
 
@@ -27,8 +27,6 @@ public:
     void run();
 
 private:
-    void set_up();
-
     real m_dt;
     real m_t_end;
     real m_t_cur;
@@ -36,9 +34,11 @@ private:
     FieldController *m_field_controller;
     SolverController *m_solver_controller;
     Adaption *m_adaption;
+#ifndef BENCHMARKING
     Visual *m_visual;
     Solution *m_solution;
     Analysis *m_analysis;
+#endif
 };
 
 #endif /* ARTSS_TIMEINTEGRATION_H_ */

@@ -35,7 +35,34 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 #endif
 }
 
-void TimeIntegration::set_up() {
+void TimeIntegration::run() {
+    Domain *domain = Domain::getInstance();
+
+    // local variables and parameters for GPU
+    auto u = m_field_controller->field_u;
+    auto v = m_field_controller->field_v;
+    auto w = m_field_controller->field_w;
+    auto p = m_field_controller->field_p;
+    auto rhs = m_field_controller->field_rhs;
+    auto T = m_field_controller->field_T;
+    auto C = m_field_controller->field_concentration;
+    auto S_T = m_field_controller->field_source_T;
+    auto S_C = m_field_controller->field_source_concentration;
+    auto nu_t = m_field_controller->field_nu_t;
+
+    auto d_u = u->data;
+    auto d_v = v->data;
+    auto d_w = w->data;
+    auto d_p = p->data;
+    auto d_rhs = rhs->data;
+    auto d_T = T->data;
+    auto d_C = C->data;
+    auto d_S_T = S_T->data;
+    auto d_S_C = S_C->data;
+    auto d_nu_t = nu_t->data;
+
+    auto bsize = domain->get_size();
+
 #ifndef BENCHMARKING
 #pragma acc update host(d_u[:bsize])
 #pragma acc update host(d_v[:bsize])
@@ -49,76 +76,13 @@ void TimeIntegration::set_up() {
     m_analysis->analyse(m_field_controller, 0.);
     m_visual->visualise(m_field_controller, 0.);
 #endif
-}
 
-void TimeIntegration::run() {
-    Domain *domain = Domain::getInstance();
-    set_up();
     std::cout << "Start calculating and timing...\n" << std::endl;
     // TODO Logger
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     {
-        // local variables and parameters for GPU
-        auto u = m_field_controller->field_u;
-        auto v = m_field_controller->field_v;
-        auto w = m_field_controller->field_w;
-        auto u0 = m_field_controller->field_u0;
-        auto v0 = m_field_controller->field_v0;
-        auto w0 = m_field_controller->field_w0;
-        auto u_tmp = m_field_controller->field_u_tmp;
-        auto v_tmp = m_field_controller->field_v_tmp;
-        auto w_tmp = m_field_controller->field_w_tmp;
-        auto p = m_field_controller->field_p;
-        auto p0 = m_field_controller->field_p0;
-        auto rhs = m_field_controller->field_rhs;
-        auto T = m_field_controller->field_T;
-        auto T0 = m_field_controller->field_T0;
-        auto T_tmp = m_field_controller->field_T_tmp;
-        auto T_a = m_field_controller->field_T_ambient;
-        auto C = m_field_controller->field_concentration;
-        auto C0 = m_field_controller->field_concentration0;
-        auto C_tmp = m_field_controller->field_concentration_tmp;
-        auto f_x = m_field_controller->field_force_x;
-        auto f_y = m_field_controller->field_force_y;
-        auto f_z = m_field_controller->field_force_z;
-        auto S_T = m_field_controller->field_source_T;
-        auto S_C = m_field_controller->field_source_concentration;
-        auto nu_t = m_field_controller->field_nu_t;
-        auto kappa_t = m_field_controller->field_kappa_t;
-        auto gamma_t = m_field_controller->field_gamma_t;
-
-        auto d_u = u->data;
-        auto d_v = v->data;
-        auto d_w = w->data;
-        auto d_u0 = u0->data;
-        auto d_v0 = v0->data;
-        auto d_w0 = w0->data;
-        auto d_u_tmp = u_tmp->data;
-        auto d_v_tmp = v_tmp->data;
-        auto d_w_tmp = w_tmp->data;
-        auto d_p = p->data;
-        auto d_p0 = p0->data;
-        auto d_rhs = rhs->data;
-        auto d_T = T->data;
-        auto d_T0 = T0->data;
-        auto d_T_tmp = T_tmp->data;
-        auto d_T_a = T_a->data;
-        auto d_C = C->data;
-        auto d_C0 = C0->data;
-        auto d_C_tmp = C_tmp->data;
-        auto d_f_x = f_x->data;
-        auto d_f_y = f_y->data;
-        auto d_f_z = f_z->data;
-        auto d_S_T = S_T->data;
-        auto d_S_C = S_C->data;
-        auto d_nu_t = nu_t->data;
-        auto d_kappa_t = kappa_t->data;
-        auto d_gamma_t = gamma_t->data;
-
-        auto bsize = domain->get_size();
-
         auto t_cur = m_t_cur;
         auto t_end = m_t_end;
         auto dt = m_dt;
@@ -128,20 +92,6 @@ void TimeIntegration::run() {
         real Sumu = 0., Sump = 0., SumT = 0.;
         real Sum[3];
         Sum[0] = Sumu, Sum[1] = Sump, Sum[2] = SumT;
-
-        /*
-        bool CFL_check = m_analysis->check_time_step_CFL(u, v, w, dt);
-        if (!CFL_check) {
-            real cfl_dt = m_analysis->set_DT_with_CFL(u, v, w);
-            std::cout << "CFL condition not met! A corresponding dt would be: " << cfl_dt << std::endl;
-            //TODO Logger warning
-        }
-        bool VN_check = m_analysis->check_time_step_VN(u, dt);
-        if (!VN_check) {
-            std::cout << "Von Neumann condition not met!" << std::endl;
-            //TODO Logger warning
-        }
-         */
 #endif
 
         int iteration_step = 1;
@@ -226,8 +176,9 @@ void TimeIntegration::run() {
 #endif
     delete m_solver_controller;
     delete m_adaption;
+#ifndef BENCHMARKING
     delete m_analysis;
     delete m_solution;
     delete m_visual;
-
+#endif
 }
