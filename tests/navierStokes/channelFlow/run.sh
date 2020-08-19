@@ -1,4 +1,4 @@
-$1 ./Test_NavierStokesChannel.xml
+$1 ./Test_NavierStokes_Channel.xml
 
 rm -rf *.vtk
 

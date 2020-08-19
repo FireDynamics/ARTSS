@@ -1,4 +1,4 @@
-$1 ./Test_NavierStokesTurbMcDermott.xml
+$1 ./Test_NavierStokesTurb_McDermott.xml
 
 rm -rf *.vtk
 

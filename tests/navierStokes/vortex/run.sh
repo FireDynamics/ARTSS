@@ -1,4 +1,4 @@
-$1 ./Test_NavierStokesVortex.xml
+$1 ./Test_NavierStokes_Vortex.xml
 
 rm -rf *.vtk
 

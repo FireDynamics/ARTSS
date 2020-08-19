@@ -1,4 +1,4 @@
-$1 ./Test_NavierStokesTempTurbAdaption.xml
+$1 ./Test_NavierStokesTempTurb_Adaption.xml
 
 rm -rf *.vtk
 

@@ -1,5 +1,5 @@
 /// \file 		Multigrid.h
-/// \brief 		Creats all lists needed for multigrid
+/// \brief 		Creates all lists needed for multigrid
 /// \date 		Oct 01, 2019
 /// \author 	My Linh Würzburger
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.

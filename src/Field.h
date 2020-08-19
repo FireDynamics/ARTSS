@@ -18,7 +18,7 @@ class Adaption;
 #define ENUM_TYPES
 const size_t numberOfFieldTypes = 6;
 enum FieldType : int {
-    UNKOWN_FIELD = -1,
+    UNKNOWN_FIELD = -1,
     RHO = 0,
     U = 1,
     V = 2,

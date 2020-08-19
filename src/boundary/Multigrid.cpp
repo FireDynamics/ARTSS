@@ -1,5 +1,5 @@
 /// \file 		Multigrid.h
-/// \brief 		Creats all lists needed for multigrid
+/// \brief 		Creates all lists needed for multigrid
 /// \date 		Oct 01, 2019
 /// \author 	My Linh Würzburger
 /// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
@@ -19,7 +19,7 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
     addMGLists();
     sendListsToGPU();
 #ifndef BENCHMARKING
-    //print();
+    print();
     control();
 #endif
     m_data_boundary_patches_joined = new size_t *[numberOfPatches];
@@ -375,133 +375,132 @@ void Multigrid::control() {
 // ***************************************************************************************
 void Multigrid::print() {
 #ifndef BENCHMARKING
-    m_logger->info("################ MULTIGRID ################");
-    m_logger->info("Number of Obstacles: {}, Number of Surfaces: {}",
+    m_logger->debug("################ MULTIGRID ################");
+    m_logger->debug("Number of Obstacles: {}, Number of Surfaces: {}",
             m_numberOfObstacles, m_numberOfSurfaces);
-    m_logger->info("Levels: {}", m_levels);
+    m_logger->debug("Levels: {}", m_levels);
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} iList starts at index {} and ends with index {}",
+        m_logger->debug("For Level {} iList starts at index {} and ends with index {}",
                 level, getFirstIndex_iList(level), getLastIndex_iList(level));
-        m_logger->info("and the corresponding indices at this position: {}|{}",
+        m_logger->debug("and the corresponding indices at this position: {}|{}",
                 *(m_data_MG_iList_level_joined + getFirstIndex_iList(level)),
                 *(m_data_MG_iList_level_joined + getLastIndex_iList(level)));
     }
-    m_logger->info("Total length of iList: {}", getLen_iList_joined());
+    m_logger->debug("Total length of iList: {}", getLen_iList_joined());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info(
-"For Level {} bList starts at index {} and ends with index {}\
-and the corresponding indices at this position: {} | {}",
-            level, getFirstIndex_bList(level), getLastIndex_bList(level),
-            *(m_data_MG_bList_level_joined + getFirstIndex_bList(level)),
-            *(m_data_MG_bList_level_joined + getLastIndex_bList(level)));
+        m_logger->debug("For Level {} bList starts at index {} and ends with index {}",
+                level, getFirstIndex_bList(level), getLastIndex_bList(level));
+        m_logger->debug("and the corresponding indices at this position: {} | {}",
+                *(m_data_MG_bList_level_joined + getFirstIndex_bList(level)),
+                *(m_data_MG_bList_level_joined + getLastIndex_bList(level)));
     }
-    m_logger->info("Total length of bList: {}", getLen_bList_joined());
+    m_logger->debug("Total length of bList: {}", getLen_bList_joined());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} bSliceZ starts at index {} and ends with index {}",
+        m_logger->debug("For Level {} bSliceZ starts at index {} and ends with index {}",
                 level, getFirstIndex_bSliceZ(level), getLastIndex_bSliceZ(level));
-        m_logger->info(" and the corresponding indices at this position for FRONT: {} | {}",
+        m_logger->debug(" and the corresponding indices at this position for FRONT: {} | {}",
                 *(m_data_MG_bFront_level_joined + getFirstIndex_bSliceZ(level)),
                 *(m_data_MG_bFront_level_joined + getLastIndex_bSliceZ(level)));
-        m_logger->info(" and the corresponding indices at this position for BACK : {} | {}",
+        m_logger->debug(" and the corresponding indices at this position for BACK : {} | {}",
                 *(m_data_MG_bBack_level_joined + getFirstIndex_bSliceZ(level)),
                 *(m_data_MG_bBack_level_joined + getLastIndex_bSliceZ(level)));
     }
-    m_logger->info("Total length of bSliceZ: {}", getLen_bSliceZ_joined());
+    m_logger->debug("Total length of bSliceZ: {}", getLen_bSliceZ_joined());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} bSliceY starts at index {} and ends with index {}",
+        m_logger->debug("For Level {} bSliceY starts at index {} and ends with index {}",
             level, getFirstIndex_bSliceY(level), getLastIndex_bSliceY(level));
-        m_logger->info(" and the corresponding indices at this position for BOTTOM: {} | {}",
+        m_logger->debug(" and the corresponding indices at this position for BOTTOM: {} | {}",
                 *(m_data_MG_bBottom_level_joined + getFirstIndex_bSliceY(level)),
                 *(m_data_MG_bBottom_level_joined + getLastIndex_bSliceY(level)));
-        m_logger->info(" and the corresponding indices at this position for TOP   : {} | {}",
+        m_logger->debug(" and the corresponding indices at this position for TOP   : {} | {}",
                 *(m_data_MG_bTop_level_joined + getFirstIndex_bSliceY(level)),
                 *(m_data_MG_bTop_level_joined + getLastIndex_bSliceY(level)));
     }
-    m_logger->info("Total length of bSliceY: {}", getLen_bSliceY_joined());
+    m_logger->debug("Total length of bSliceY: {}", getLen_bSliceY_joined());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} bSliceX starts at index {} and ends with index {}",
+        m_logger->debug("For Level {} bSliceX starts at index {} and ends with index {}",
                 level, getFirstIndex_bSliceX(level), getLastIndex_bSliceX(level));
-        m_logger->info(" and the corresponding indices at this position for LEFT : {} | {}",
+        m_logger->debug(" and the corresponding indices at this position for LEFT : {} | {}",
                 *(m_data_MG_bLeft_level_joined + getFirstIndex_bSliceX(level)),
                 *(m_data_MG_bLeft_level_joined + getLastIndex_bSliceX(level)));
-        m_logger->info(" and the corresponding indices at this position for RIGHT: {} | {}",
+        m_logger->debug(" and the corresponding indices at this position for RIGHT: {} | {}",
                 *(m_data_MG_bRight_level_joined + getFirstIndex_bSliceX(level)),
                 *(m_data_MG_bRight_level_joined + getLastIndex_bSliceX(level)));
     }
-    m_logger->info("Total length of bSliceX: {}", getLen_bSliceX_joined());
+    m_logger->debug("Total length of bSliceX: {}", getLen_bSliceX_joined());
 
     for (size_t level = 0; level < m_levels; level++) {
-        m_logger->info("For Level {} obstacleList has {} elements",
+        m_logger->debug("For Level {} obstacleList has {} elements",
                 level, getSize_oList(level));
     }
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} oFront starts at index {} and ends with index {} with length {}",
+        m_logger->debug("For Level {} oFront starts at index {} and ends with index {} with length {}",
                 level ,
                 getFirstIndex_oFront(level, 0),
                 getLastIndex_oFront(level, m_numberOfObstacles - 1) ,
                 getLen_oFront(level));
     }
-    m_logger->info("Total length of oFront: ", getLen_oFront_joined());
+    m_logger->debug("Total length of oFront: ", getLen_oFront_joined());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} oBack starts at index {} and ends with index {} with length {}",
+        m_logger->debug("For Level {} oBack starts at index {} and ends with index {} with length {}",
                 level,
                 getFirstIndex_oBack(level, 0),
                 getLastIndex_oBack(level, m_numberOfObstacles - 1),
                 getLen_oBack(level));
     }
-    m_logger->info("Total length of oBack: {}", getLen_oBack_joined());
+    m_logger->debug("Total length of oBack: {}", getLen_oBack_joined());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} oBottom starts at index {} and ends with index {} with length {}",
+        m_logger->debug("For Level {} oBottom starts at index {} and ends with index {} with length {}",
                 level,
                 getFirstIndex_oBottom(level, 0),
                 getLastIndex_oBottom(level, m_numberOfObstacles - 1),
                 getLen_oBottom(level));
     }
-    m_logger->info("Total length of oBottom: {}", getLen_oBottom_joined());
+    m_logger->debug("Total length of oBottom: {}", getLen_oBottom_joined());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} oTop starts at index {} and ends with index {} with length {}",
+        m_logger->debug("For Level {} oTop starts at index {} and ends with index {} with length {}",
                 level,
                 getFirstIndex_oTop(level, 0),
                 getLastIndex_oTop(level, m_numberOfObstacles - 1),
                 getLen_oTop(level));
     }
-    m_logger->info("Total length of oTop: {}", getLen_oTop_joined());
+    m_logger->debug("Total length of oTop: {}", getLen_oTop_joined());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} oLeft starts at index {} and ends with index {} with length {}",
+        m_logger->debug("For Level {} oLeft starts at index {} and ends with index {} with length {}",
                 level,
                 getFirstIndex_oLeft(level, 0),
                 getLastIndex_oLeft(level, m_numberOfObstacles - 1),
                 getLen_oLeft(level));
     }
-    m_logger->info("Total length of oLeft: {}", getLen_oLeft_joined());
+    m_logger->debug("Total length of oLeft: {}", getLen_oLeft_joined());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} oRight starts at index {} and ends with index {} with length {}",
+        m_logger->debug("For Level {} oRight starts at index {} and ends with index {} with length {}",
                 level,
                 getFirstIndex_oRight(level, 0),
                 getLastIndex_oRight(level, m_numberOfObstacles - 1),
                 getLen_oRight(level));
     }
-    m_logger->info("Total length of oRight: {}", getLen_oRight_joined());
+    m_logger->debug("Total length of oRight: {}", getLen_oRight_joined());
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->info("For Level {} sList starts at index {} and ends with index {}",
+        m_logger->debug("For Level {} sList starts at index {} and ends with index {}",
                 level,
                 getFirstIndex_sList(level),
                 getLastIndex_sList(level));
     }
-    m_logger->info("Total length of sList: {}", getLen_sList_joined());
-    m_logger->info("---------------- MULTIGRID END ----------------");
+    m_logger->debug("Total length of sList: {}", getLen_sList_joined());
+    m_logger->debug("---------------- MULTIGRID END ----------------");
 #endif
 }
 
@@ -633,10 +632,6 @@ void Multigrid::calcSurfaces(Surface **surfaceList) {
             *(m_size_MG_sList_level + s + 1) = counter_s;
         }
         *(m_MG_sList) = sList;
-
-#ifndef BENCHMARKING
-        m_logger->info("control surface joined list: {}|{}", counter_s, *(m_size_MG_sList_level));
-#endif
     }
 }
 
@@ -687,7 +682,7 @@ void Multigrid::surfaceDominantRestriction(size_t level) {
             }
             size_t startIndex_coarse = IX(i_fine / 2, j_fine / 2, k_fine / 2, Nx, Ny);
 #ifndef BENCHMARKING
-            m_logger->info("startIndex multigrid surface: {} {}|{}",
+            m_logger->debug("startIndex multigrid surface: {} {}|{}",
                     startIndex_fine,
                     startIndex_coarse,
                     startIndex_fine / 2);
@@ -698,7 +693,7 @@ void Multigrid::surfaceDominantRestriction(size_t level) {
             size_t index = level * m_numberOfSurfaces + surfaceID + 1;
             *(m_size_MG_sList_level + index) = *(m_size_MG_sList_level + index - 1) + surface_coarse->getSize_surfaceList();
 #ifndef BENCHMARKING
-            m_logger->info("control multigrid surface index: {} {}",
+            m_logger->debug("control multigrid surface index: {} {}",
                     *(m_size_MG_sList_level + index),
                     surface_coarse->getSize_surfaceList());
 #endif
@@ -853,7 +848,7 @@ void Multigrid::sendSurfaceListsToGPU() {
         size_sList = getLen_sList_joined();
         m_data_MG_sList_level_joined = new size_t[size_sList];
 #ifndef BENCHMARKING
-        m_logger->info("control sendMGListsToGPU size surface {}", size_sList);
+        m_logger->debug("control sendMGListsToGPU size surface {}", size_sList);
 #endif
         for (size_t level = 0; level < m_levels + 1; level++) {
             Surface **surfaceList = *(m_MG_surfaceList + level);
@@ -866,7 +861,7 @@ void Multigrid::sendSurfaceListsToGPU() {
             }
         }
 #ifndef BENCHMARKING
-        m_logger->info("control sendMGListsToGPU surface {} | {}",
+        m_logger->debug("control sendMGListsToGPU surface {} | {}",
                 counter_sList, size_sList);
 #endif
 #pragma acc enter data copyin(m_data_MG_sList_level_joined[:size_sList])
