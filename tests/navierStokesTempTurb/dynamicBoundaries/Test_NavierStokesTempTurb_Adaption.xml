@@ -124,7 +124,7 @@
   </visualisation>
 
   <logging>
-    <level> INFO </level>
-    <file> output_test_navierstokestempturb_adaption.log </file>
+    <level>info</level>
+    <file>output_test_navierstokestempturb_adaption.log</file>
   </logging>
 </ARTSS>

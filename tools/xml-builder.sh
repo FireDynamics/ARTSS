@@ -229,7 +229,7 @@ ${YELLOW}--ys${NC}          \tset soot yield (in %/100)
 
 ${YELLOW}--kappa${NC}         \tset physical parameter thermal diffusion (default: $KAPPA)
 
-${YELLOW}--logginglevel${NC}        \tset the logging level \{TRACE, DEBUG, INFO, WARN, ERROR\}
+${YELLOW}--logginglevel${NC}        \tset the logging level \{trace, debug, info, warn, error\} (must be lower case)
 ${YELLOW}--loggingfile${NC}         \tset the output file
 
 ${YELLOW}--maxcycle${NC}\tset number of maximal cycles for V-Cycle multigrid pre-conditioning (default: $MAXCYCLE)
@@ -810,16 +810,16 @@ else
     BASENAME=$(echo $NAME | cut -d '.' -f-1 | awk '{print tolower($0)}')
     if [ -v $LOGGINGLEVEL ]
     then
-        WRITETO="${WRITETO}    <level> INFO </level>\n"
+        WRITETO="${WRITETO}    <level>info</level>\n"
     else
-        WRITETO="${WRITETO}    <level> ${LOGGINGLEVEL} </level>\n"
+        WRITETO="${WRITETO}    <level>${LOGGINGLEVEL}</level>\n"
     fi
 
     if [ -v $LOGGINGFILE ]
     then
-        WRITETO="${WRITETO}    <file> output_${BASENAME}.log </file>"
+        WRITETO="${WRITETO}    <file>output_${BASENAME}.log</file>"
     else
-        WRITETO="${WRITETO}    <file> ${LOGGINGFILE} </file>"
+        WRITETO="${WRITETO}    <file>${LOGGINGFILE}</file>"
     fi
 
     WRITETO="${WRITETO}

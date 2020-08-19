@@ -86,7 +86,7 @@
   </visualisation>
 
   <logging>
-    <level> INFO </level>
-    <file> output_test_navierstokestemp_buoyancymms.log </file>
+    <level>info</level>
+    <file>output_test_navierstokestemp_buoyancymms.log</file>
   </logging>
 </ARTSS>

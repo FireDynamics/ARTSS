@@ -73,7 +73,7 @@
   </visualisation>
 
   <logging>
-    <level> INFO </level>
-    <file> output_test_navierstokesturb_mcdermott.log </file>
+    <level>info</level>
+    <file>output_test_navierstokesturb_mcdermott.log</file>
   </logging>
 </ARTSS>

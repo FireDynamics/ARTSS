@@ -72,7 +72,7 @@
   </visualisation>
 
   <logging>
-    <level> INFO </level>
-    <file> output_test_navierstokes_cavity.log </file>
+    <level>info</level>
+    <file>output_test_navierstokes_cavity.log</file>
   </logging>
 </ARTSS>

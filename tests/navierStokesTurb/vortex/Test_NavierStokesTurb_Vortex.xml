@@ -77,7 +77,7 @@
   </visualisation>
 
   <logging>
-    <level> INFO </level>
-    <file> output_test_navierstokesturb_vortex.log </file>
+    <level>info</level>
+    <file>output_test_navierstokesturb_vortex.log</file>
   </logging>
 </ARTSS>

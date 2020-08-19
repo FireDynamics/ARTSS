@@ -74,7 +74,7 @@
   </visualisation>
 
   <logging>
-    <level> INFO </level>
-    <file> output_test_navierstokes_channel.log </file>
+    <level>info</level>
+    <file>output_test_navierstokes_channel.log</file>
   </logging>
 </ARTSS>
