@@ -80,6 +80,8 @@ public:
 
     static void couple_vector(const Field *a, Field *a0, Field *a_tmp, const Field *b, Field *b0, Field *b_tmp, const Field *c, Field *c0, Field *c_tmp, bool sync);
     static void couple_scalar(const Field *a, Field *a0, Field *a_tmp, bool sync);
+
+    void update_device();
 };
 
 

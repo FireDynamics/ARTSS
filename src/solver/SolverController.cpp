@@ -35,12 +35,14 @@ SolverController::SolverController() {
     // TODO Logger
     set_up_sources(string_solver);
     set_up_fields(string_solver);
+    m_field_controller->update_device();
     m_field_controller->set_up_boundary();
     m_field_controller->set_up_temporary_fields();
 }
 
 SolverController::~SolverController() {
     delete m_field_controller;
+    delete m_solver;
     delete source_velocity;
     delete source_temperature;
     delete source_concentration;

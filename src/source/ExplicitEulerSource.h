@@ -20,7 +20,7 @@ public:
 
 private:
   real m_dt;
-  std::string m_dir_vel ="";
+  std::string m_dir_vel;
 };
 
 #endif /* ARTSS_SOURCE_EXPLICITEULERSOURCE_H_ */

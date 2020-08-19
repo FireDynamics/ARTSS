@@ -29,9 +29,7 @@ public:
 private:
     void set_up_sources(const std::string &string_solver);
     void init_solver();
-    void set_up_boundary();
     void set_up_fields(const std::string& string_solver);
-    void set_up_temporary_fields();
     void call_random(Field *field);
 
     void force_source();

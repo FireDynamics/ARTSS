@@ -173,12 +173,9 @@ void TimeIntegration::run() {
     // testing correct output (when changing implementation/ calculating on GPU)
     m_analysis->save_variables_in_file(m_field_controller);
     m_analysis->analyse(m_field_controller, m_t_end);
-#endif
-    delete m_solver_controller;
-    delete m_adaption;
-#ifndef BENCHMARKING
     delete m_analysis;
     delete m_solution;
     delete m_visual;
 #endif
+    delete m_adaption;
 }

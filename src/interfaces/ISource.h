@@ -12,6 +12,8 @@
 
 class ISource {
 public:
+    virtual ~ISource() = default;
+
     virtual void add_source(Field *out_x, Field *out_y, Field *out_z, Field *S_x, Field *S_y, Field *S_z, bool sync) = 0;
     virtual void add_source(Field *out, Field *S, bool sync) = 0;
 

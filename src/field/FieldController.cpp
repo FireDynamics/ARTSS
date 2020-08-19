@@ -447,3 +447,42 @@ void FieldController::couple_scalar(const Field *a, Field *a0, Field *a_tmp, boo
         }
     }//end data region
 }
+
+void FieldController::update_device() {
+    auto d_u = field_u->data;
+    auto d_v = field_v->data;
+    auto d_w = field_w->data;
+    auto d_p = field_p->data;
+    auto d_rhs = field_rhs->data;
+    auto d_T = field_T->data;
+    auto d_T_a = field_T_ambient->data;
+    auto d_C = field_concentration->data;
+    auto d_f_x = field_force_x->data;
+    auto d_f_y = field_force_y->data;
+    auto d_f_z = field_force_z->data;
+    auto d_S_T = field_source_T->data;
+    auto d_S_C = field_source_concentration->data;
+    auto d_nu_t = field_nu_t->data;
+    auto d_kappa_t = field_kappa_t->data;
+    auto d_gamma_t = field_gamma_t->data;
+
+    Domain *domain = Domain::getInstance();
+    auto bsize = domain->get_size();
+    // copyin fields
+#pragma acc update device(d_u[:bsize])
+#pragma acc update device(d_v[:bsize])
+#pragma acc update device(d_w[:bsize])
+#pragma acc update device(d_p[:bsize])
+#pragma acc update device(d_rhs[:bsize])
+#pragma acc update device(d_T[:bsize])
+#pragma acc update device(d_T_a[:bsize])
+#pragma acc update device(d_C[:bsize])
+#pragma acc update device(d_f_x[:bsize])
+#pragma acc update device(d_f_y[:bsize])
+#pragma acc update device(d_f_z[:bsize])
+#pragma acc update device(d_S_T[:bsize])
+#pragma acc update device(d_S_C[:bsize])
+#pragma acc update device(d_nu_t[:bsize])
+#pragma acc update device(d_kappa_t[:bsize])
+#pragma acc update device(d_gamma_t[:bsize]) wait    // all in one update does not work!
+}

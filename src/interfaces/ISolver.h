@@ -29,7 +29,7 @@ class ISolver {
 public:
 //    ISolver();
 
-  //  virtual ~ISolver() = default;
+    virtual ~ISolver() = default;
 
     virtual void do_step(real t, bool sync) = 0;
 };
