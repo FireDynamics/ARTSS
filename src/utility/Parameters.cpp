@@ -5,8 +5,6 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 
-#include <vector>
-
 #include "Parameters.h"
 #include "Utility.h"
 
@@ -28,7 +26,7 @@ Parameters *Parameters::getInstance() {
 // *****************************************************************************
 void Parameters::parse(const std::string& filename) {
     if (filename.empty()) {
-        // spdlog::error("no XML file specified, skip reading parameter");
+        std::cout << "no XML file specified, skip reading parameter" << std::endl;
         return;
     } else {
         // spdlog::info("read in XML file: ");
