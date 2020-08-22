@@ -108,7 +108,6 @@ std::vector<std::string> Utility::split(const char *text, char delimiter) {
 // *****************************************************************************
 std::shared_ptr<spdlog::logger> Utility::create_logger(std::string logger_name) {
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
-    static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> stderr_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
 
     auto params = Parameters::getInstance();
@@ -119,6 +118,7 @@ std::shared_ptr<spdlog::logger> Utility::create_logger(std::string logger_name) 
         stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         auto level = spdlog::level::from_str(log_level);
         stdout_sink->set_level(level);
+        stdout_sink->set_pattern("%^%-8l: %v%$");
     }
 
     if (!file_sink) {
