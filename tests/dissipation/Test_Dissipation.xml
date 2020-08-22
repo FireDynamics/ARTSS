@@ -88,9 +88,6 @@
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 200 </vtk_nth_plot>
   </visualisation>
-
-  <logging>
-    <level>info</level>
-    <file>output_test_dissipation.log</file>
+  <logging file="output_test_dissipation.log" level="info">
   </logging>
 </ARTSS>

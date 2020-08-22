@@ -803,24 +803,23 @@ else
     <vtk_nth_plot> $VTKPLOTS </vtk_nth_plot>"
     fi
     WRITETO=${WRITETO}"
-  </visualisation>
-
-  <logging>\n"
-
-    BASENAME=$(echo $NAME | cut -d '.' -f-1 | awk '{print tolower($0)}')
-    if [ -v $LOGGINGLEVEL ]
-    then
-        WRITETO="${WRITETO}    <level>info</level>\n"
-    else
-        WRITETO="${WRITETO}    <level>${LOGGINGLEVEL}</level>\n"
-    fi
+  </visualisation>\n"
 
     if [ -v $LOGGINGFILE ]
     then
-        WRITETO="${WRITETO}    <file>output_${BASENAME}.log</file>"
+        BASENAME=$(echo $NAME | cut -d '.' -f-1 | awk '{print tolower($0)}')
+        WRITETO="${WRITETO}  <logging file=\"output_${BASENAME}.log\" "
     else
-        WRITETO="${WRITETO}    <file>${LOGGINGFILE}</file>"
+        WRITETO="${WRITETO}  <logging file=\"${LOGGINGFILE}\" "
     fi
+
+    if [ -v $LOGGINGLEVEL ]
+    then
+        WRITETO="${WRITETO}level=\"info\">"
+    else
+        WRITETO="${WRITETO}level=\"${LOGGINGLEVEL}\">"
+    fi
+
 
     WRITETO="${WRITETO}
   </logging>

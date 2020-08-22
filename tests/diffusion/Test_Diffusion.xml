@@ -52,9 +52,6 @@
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 8 </vtk_nth_plot>
   </visualisation>
-
-  <logging>
-    <level>info</level>
-    <file>output_test_diffusion.log</file>
+  <logging file="output_test_diffusion.log" level="info">
   </logging>
 </ARTSS>
