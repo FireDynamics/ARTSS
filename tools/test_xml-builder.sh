@@ -631,8 +631,8 @@ if ${YELLOW}--generate${NC} and ${YELLOW}--verbose${NC} are selected, temporary 
     xsltproc strip_comments.xsl $FPATH/Test_${NAME}.xml > 2.xml
     xmllint --format 1.xml > 1_format.xml
     xmllint --format 2.xml > 2_format.xml
-    tidy -xml -iq 1_format.xml > "$GENERATED"
-    tidy -xml -iq 2_format.xml > "$EXAMPLE"
+    tidy -xml -iq -wrap 0 1_format.xml > "$GENERATED"
+    tidy -xml -iq -wrap 0 2_format.xml > "$EXAMPLE"
     if [ $VERBOSE -eq 1 ]
     then
       diff $GENERATED $EXAMPLE
