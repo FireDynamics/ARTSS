@@ -54,6 +54,8 @@ void TimeIntegration::run() {
     Visual *visual = new Visual(solution);
     visual->visualise(m_solver, 0.);
     m_logger->info("Start calculating and timing...");
+#else
+    std::cout << "Start calculating and timing..." << std::endl;
 #endif
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -216,6 +218,8 @@ void TimeIntegration::run() {
 
 #ifndef BENCHMARKING
     m_logger->info("Done calculating and timing ...");
+#else
+    std::cout << "Done calculating and timing ..." << std::endl;
 #endif
 
     // stop timer
@@ -230,6 +234,8 @@ void TimeIntegration::run() {
     // testing correct output (when changing implementation/ calculating on GPU)
     analysis->save_variables_in_file(m_solver);
     analysis->analyse(m_solver, m_t_end);
+#else
+    std::cout << "Global Time: " << ms << "ms" << std::endl;
 #endif
 
     delete (adaption);

@@ -13,6 +13,11 @@
 #include "analysis/Analysis.h"
 #include "utility/Utility.h"
 
+// only needed if no logger will be available
+#ifdef BENCHMARKING
+#include <iostream>
+#endif
+
 class TimeIntegration {
 public:
   explicit TimeIntegration(ISolver *isolv);
