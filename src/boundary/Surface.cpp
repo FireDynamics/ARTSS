@@ -155,5 +155,5 @@ size_t Surface::get_k2() {
 
 void Surface::applyBoundaryConditions(real *dataField, FieldType fieldType, size_t level, bool sync) {
     // TODO(linh)
-    // m_bdc_boundary->applyBoundaryCondition(dataField, indexFields, patch_starts, patch_ends, fieldType, level, sync);
+    // m_bdc_boundary->apply_boundary_condition(dataField, indexFields, patch_starts, patch_ends, fieldType, level, sync);
 }

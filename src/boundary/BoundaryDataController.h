@@ -18,7 +18,6 @@ public:
     void addBoundaryData(tinyxml2::XMLElement *xmlElement);
     void applyBoundaryCondition(real *data, size_t **indexFields, size_t *patch_start, size_t *patch_end, FieldType fieldType, size_t level, bool sync=false);
     void applyBoundaryConditionObstacle(real *data, size_t **indexFields, size_t *patch_start, size_t *patch_end, FieldType fieldType, size_t level, size_t id, bool sync=false);
-    //void applyBoundaryCondition(real *data, FieldType fieldType, size_t level, bool sync=false);
     void print();
 
     //void setIndexFields(size_t** indexFields);
