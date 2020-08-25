@@ -47,6 +47,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: compile
         run: |
+          git submodule update --init
           ./compile.sh --docker-build
           docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh --mb --jobs 4
   
@@ -68,6 +69,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: compile
         run: |
+          git submodule update --init
           ./compile.sh --docker-build
           docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh --jobs 4 --sb
           
