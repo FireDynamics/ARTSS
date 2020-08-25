@@ -1,8 +1,8 @@
-/// \file 		BoundaryData.h
-/// \brief 		Data class for boundary data
-/// \date 		Oct 08, 2020
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       BoundaryData.h
+/// \brief      Data class for boundary data
+/// \date       Oct 08, 2020
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_BOUNDARY_BOUNDARYDATA_H_
 #define ARTSS_BOUNDARY_BOUNDARYDATA_H_

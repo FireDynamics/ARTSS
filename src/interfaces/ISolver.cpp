@@ -932,7 +932,7 @@ void ISolver::momentum_source() {
 //======================================= read and call random function ==================================
 // ***************************************************************************************
 /// \brief  Calls random function and reads necessary input variables
-/// \param  field		field as a pointer
+/// \param  field       field as a pointer
 // ***************************************************************************************
 void ISolver::CallRandom(Field* field) {
   auto params = Parameters::getInstance();

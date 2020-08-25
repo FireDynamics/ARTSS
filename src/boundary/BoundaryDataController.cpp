@@ -1,8 +1,8 @@
-/// \file 		BoundaryDataController.h
-/// \brief 		Controll class for boundary data
-/// \date 		Dec 09, 2019
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       BoundaryDataController.h
+/// \brief      Controll class for boundary data
+/// \date       Dec 09, 2019
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "BoundaryDataController.h"
 #include "../utility/Utility.h"
@@ -29,7 +29,7 @@ BoundaryDataController::~BoundaryDataController() {
 // ================================= Add boundary data ===========================================
 // ***************************************************************************************
 /// \brief  Parses boundary data of XML tree to bounday data object
-/// \param 	xmlElement Pointer to XML element
+/// \param  xmlElement Pointer to XML element
 // ***************************************************************************************
 void BoundaryDataController::addBoundaryData(tinyxml2::XMLElement *xmlElement) {
     std::vector<std::string> fieldStrings = Utility::split(xmlElement->Attribute("field"), ',');
@@ -69,7 +69,7 @@ void BoundaryDataController::print() {
 //======================================== Apply boundary condition ====================================
 // ***************************************************************************************
 /// \brief  Applies boundary condition for domain boundary if the field is needed
-/// \param  dataField	Field
+/// \param  dataField   Field
 /// \param  indexFields List of indices for each patch
 /// \param  patch_starts List of start indices
 /// \param  patch_ends List of end indices
@@ -86,7 +86,7 @@ void BoundaryDataController::applyBoundaryCondition(real *data, size_t **indexFi
 //=========================== Apply obstacle boundary condition ==========================
 // ***************************************************************************************
 /// \brief  Applies boundary condition for obstacle boundary if the field is needed
-/// \param  dataField	Field
+/// \param  dataField   Field
 /// \param  indexFields List of indices for each patch
 /// \param  patch_starts List of start indices
 /// \param  patch_ends List of end indices

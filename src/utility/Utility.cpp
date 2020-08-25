@@ -1,8 +1,8 @@
-/// \file 		Utility.cpp
-/// \brief 		Offers some tools
-/// \date 		October 01, 2019
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       Utility.cpp
+/// \brief      Offers some tools
+/// \date       October 01, 2019
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cstring>
 #include <sstream>

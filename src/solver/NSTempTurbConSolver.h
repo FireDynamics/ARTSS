@@ -1,8 +1,8 @@
-/// \file 		NSTempTurbConSolver.h
-/// \brief 		Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
-/// \date 		Oct 02, 2017
-/// \author 	Küsters
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       NSTempTurbConSolver.h
+/// \brief      Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
+/// \date       Oct 02, 2017
+/// \author     Küsters
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 
 #ifndef NSTEMPTURBCONSOLVER_H_

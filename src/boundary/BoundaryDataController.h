@@ -1,8 +1,8 @@
-/// \file 		BoundaryDataController.h
-/// \brief 		Controll class for boundary data
-/// \date 		Dec 09, 2019
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       BoundaryDataController.h
+/// \brief      Controll class for boundary data
+/// \date       Dec 09, 2019
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_BOUNDRY_BOUNDARYDATACONTROLLER_H
 #define ARTSS_BOUNDRY_BOUNDARYDATACONTROLLER_H

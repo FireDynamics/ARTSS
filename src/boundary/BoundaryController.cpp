@@ -1,8 +1,8 @@
-/// \file 		BoundaryController.cpp
-/// \brief 		Controll class for boundary
-/// \date 		Oct 01, 2020
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       BoundaryController.cpp
+/// \brief      Controll class for boundary
+/// \date       Oct 01, 2020
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "BoundaryController.h"
 #include "../utility/Parameters.h"
@@ -44,7 +44,7 @@ void BoundaryController::readXML() {
 // ================================= Parser =============================================
 // ***************************************************************************************
 /// \brief  parses boundaries of domain from XML file
-/// \param	xmlParameter pointer to XMLElement to start with
+/// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseBoundaryParameter(tinyxml2::XMLElement *xmlParameter) {
 // BOUNDARY
@@ -58,7 +58,7 @@ void BoundaryController::parseBoundaryParameter(tinyxml2::XMLElement *xmlParamet
 // ================================= Parser =============================================
 // ***************************************************************************************
 /// \brief  parses surfaces from XML file
-/// \param	xmlParameter pointer to XMLElement to start with
+/// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseSurfaceParameter(tinyxml2::XMLElement *xmlParameter) {
 // SURFACES
@@ -80,7 +80,7 @@ void BoundaryController::parseSurfaceParameter(tinyxml2::XMLElement *xmlParamete
 // ================================= Parser =============================================
 // ***************************************************************************************
 /// \brief  parses obstacles from XML file
-/// \param	xmlParameter pointer to XMLElement to start with
+/// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParameter) {
 // OBSTACLES
@@ -196,9 +196,9 @@ void BoundaryController::applyBoundary(real *d, FieldType f, bool sync) {
 // ================================= Apply BCs in level l > 0 ===========================================
 // ***************************************************************************************
 /// \brief  applies zero-value boundary conditions to all boundaries (domain, surfaces, obstacles) for level l
-/// \param 	d 			data field
-/// \param 	level 		Multigrid level
-/// \param 	f 			type of output pointer
+/// \param  d           data field
+/// \param  level       Multigrid level
+/// \param  f           type of output pointer
 /// \param  sync    synchronization (default: false)
 // ***************************************************************************************
 void BoundaryController::applyBoundary(real *d, size_t level, FieldType f, bool sync) {

@@ -1,8 +1,8 @@
-/// \file 		NSTempTurbConSolver.cpp
-/// \brief 		Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
-/// \date 		Oct 02, 2017
-/// \author 	Küsters
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       NSTempTurbConSolver.cpp
+/// \brief      Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
+/// \date       Oct 02, 2017
+/// \author     Küsters
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "NSTempTurbConSolver.h"
 #include "../pressure/VCycleMG.h"
@@ -82,8 +82,8 @@ NSTempTurbConSolver::~NSTempTurbConSolver() {
 //====================================== do_step =================================
 // ***************************************************************************************
 /// \brief  brings all calculation steps together into one function
-/// \param	dt			time step
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
+/// \param  dt          time step
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSTempTurbConSolver::do_step(real t, bool sync) {
     auto params = Parameters::getInstance();

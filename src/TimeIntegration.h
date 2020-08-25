@@ -31,7 +31,7 @@ private:
   real m_t_cur;
   size_t m_size = 0;
 #ifndef BENCHMARKING
-	std::shared_ptr<spdlog::logger> m_logger;
+    std::shared_ptr<spdlog::logger> m_logger;
 #endif
 };
 
