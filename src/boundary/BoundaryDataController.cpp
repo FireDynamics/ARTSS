@@ -79,7 +79,7 @@ void BoundaryDataController::print() {
 // ***************************************************************************************
 void BoundaryDataController::applyBoundaryCondition(real *data, size_t **indexFields, size_t *patch_start, size_t *patch_end, FieldType fieldType, size_t level, bool sync) {
     if (!((BoundaryData *) *(m_boundaryData + fieldType))->isEmpty()) {
-        DomainBoundary::applyBoundaryCondition(data, indexFields, patch_start, patch_end, level, m_boundaryData[fieldType], sync);
+        DomainBoundary::apply_boundary_condition(data, indexFields, patch_start, patch_end, level, m_boundaryData[fieldType], sync);
     }
 }
 
