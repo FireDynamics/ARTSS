@@ -99,12 +99,11 @@ std::vector<std::string> Utility::split(const char *text, char delimiter) {
 }
 
 #ifndef BENCHMARKING
-// ==================== Split string at character ==============================
+// ======================= creates a new logger ================================
 // *****************************************************************************
 /// \brief  creates a new named logger this function is only available if
 //          BENCHMARKING is not enabled
-/// \param  loggerName name of logger, represented in log file
-//          make sure you dont call this function twice with the same loggerName
+/// \param  loggerName name of logger, written to log file
 // *****************************************************************************
 std::shared_ptr<spdlog::logger> Utility::create_logger(std::string logger_name) {
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
