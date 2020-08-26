@@ -12,6 +12,9 @@
 #include "../boundary/BoundaryData.h"
 
 NSTurbSolver::NSTurbSolver() {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
 
     auto params = Parameters::getInstance();
 
@@ -97,7 +100,6 @@ void NSTurbSolver::do_step(real t, bool sync) {
 
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(NSTurbSolver).name());
         m_logger->info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
@@ -163,26 +165,26 @@ void NSTurbSolver::do_step(real t, bool sync) {
 // ***************************************************************************************
 void NSTurbSolver::control() {
 #ifndef BENCHMARKING
-    auto m_logger = Utility::create_logger(typeid(NSTurbSolver).name());
+    auto logger = Utility::create_logger(typeid(NSTurbSolver).name());
 #endif
     auto params = Parameters::getInstance();
     if (params->get("solver/advection/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        m_logger->error("Fields not specified correctly!");
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        m_logger->error("Fields not specified correctly!");
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
 #ifndef BENCHMARKING
-        m_logger->error("Fields not specified correctly!");
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling

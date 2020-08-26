@@ -25,6 +25,9 @@ class NSTempTurbConSolver : public ISolver {
     void do_step(real t, bool sync) override;
 
  private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
     IAdvection *adv_temp;

@@ -15,6 +15,7 @@ AdvectionDiffusionSolver::AdvectionDiffusionSolver() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
+
     auto params = Parameters::getInstance();
     std::string advectionType = params->get("solver/advection/type");
     SolverSelection::SetAdvectionSolver(&this->adv, advectionType);
@@ -69,7 +70,6 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(AdvectionDiffusionSolver).name());
         m_logger->info("Advect ...");
 #endif
         adv->advect(u, u0, u0, v0, w0, sync);
@@ -103,19 +103,19 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
 void AdvectionDiffusionSolver::control() {
     auto params = Parameters::getInstance();
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(AdvectionDiffusionSolver).name());
+        auto logger = Utility::create_logger(typeid(AdvectionDiffusionSolver).name());
 #endif
 
     if (params->get("solver/advection/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        m_logger->error("Fields not specified correctly!");
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        m_logger->error("Fields not specified correctly!");
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling

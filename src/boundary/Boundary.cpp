@@ -17,6 +17,7 @@ Boundary::Boundary(size_t level) {
     innerCells();
 
 #ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(Boundary).name());
     print(0);
     control(0);
 #endif
@@ -28,6 +29,7 @@ Boundary::Boundary(Obstacle **obstacleList, size_t numberOfObstacles, size_t siz
     innerCells(obstacleList, numberOfObstacles);
 
 #ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(Boundary).name());
     print(size_obstacles);
     control(size_obstacles);
 #endif
@@ -78,7 +80,6 @@ void Boundary::init(size_t size_obstacles){
 // ***************************************************************************************
 void Boundary::print(size_t size_obstacles) {
 #ifndef BENCHMARKING
-    auto m_logger = Utility::create_logger(typeid(Boundary).name());
     m_logger->debug("################ BOUNDARY ################");
     m_logger->debug("list size of bList: {}", m_size_boundaryList);
     m_logger->debug("Boundary starts with {} and ends with {}", *(m_boundaryList + 0),
@@ -172,7 +173,6 @@ void Boundary::control(size_t size_obstacles) {
     if(!message.empty()) {
         message = "############### BOUNDARY CONTROL ###############\n-- level " + std::to_string(m_level) + "\n" + message + "--------------- END BOUNDARY CONTROL ---------------";
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(Boundary).name());
         m_logger->warn(message);
 #endif
     }

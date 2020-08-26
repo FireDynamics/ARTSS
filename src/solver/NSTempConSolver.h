@@ -17,36 +17,44 @@
 #include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-class NSTempConSolver:public ISolver {
-public:
-  NSTempConSolver();
-  ~NSTempConSolver() override;
+#ifndef BENCHMARKING
+#include "../utility/Utility.h"
+#endif
 
-  void do_step(real t, bool sync) override;
+class NSTempConSolver : public ISolver {
+ public:
+    NSTempConSolver();
+    ~NSTempConSolver() override;
 
-private:
-  IAdvection* adv_vel;
-  IDiffusion* dif_vel;
-  IAdvection* adv_temp;
-  IDiffusion* dif_temp;
-  IAdvection* adv_con;
-  IDiffusion* dif_con;
-  IPressure* pres;
-  ISource* sou_vel;
-  ISource* sou_temp;
-  ISource* sou_con;
+    void do_step(real t, bool sync) override;
 
-  real m_nu;
-  real m_kappa;
-  real m_gamma;
-  std::string m_dir_vel;
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 
-  static void control();
+    IAdvection* adv_vel;
+    IDiffusion* dif_vel;
+    IAdvection* adv_temp;
+    IDiffusion* dif_temp;
+    IAdvection* adv_con;
+    IDiffusion* dif_con;
+    IPressure* pres;
+    ISource* sou_vel;
+    ISource* sou_temp;
+    ISource* sou_con;
 
-  std::string m_forceFct;
-  bool m_hasDissipation;
-  std::string m_tempFct;
-  std::string m_conFct;
+    real m_nu;
+    real m_kappa;
+    real m_gamma;
+    std::string m_dir_vel;
+
+    static void control();
+
+    std::string m_forceFct;
+    bool m_hasDissipation;
+    std::string m_tempFct;
+    std::string m_conFct;
 };
 
 #endif /* ARTSS_SOLVER_NSTEMPCONSOLVER_H_ */

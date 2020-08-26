@@ -5,11 +5,11 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "DiffusionTurbSolver.h"
-#include "../utility/Parameters.h"
-#include "../Domain.h"
-#include "SolverSelection.h"
 
 DiffusionTurbSolver::DiffusionTurbSolver() {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
 
     auto params = Parameters::getInstance();
 
@@ -69,7 +69,6 @@ void DiffusionTurbSolver::do_step(real t, bool sync) {
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_nu_t[:bsize]) //EV
     {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(DiffusionTurbSolver).name());
         m_logger->info("Calculating Turbulent viscosity ...");
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
@@ -90,8 +89,8 @@ void DiffusionTurbSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/diffusion/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(DiffusionTurbSolver).name());
-        m_logger->error("Fields not specified correctly!");
+        auto logger = Utility::create_logger(typeid(DiffusionTurbSolver).name());
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling

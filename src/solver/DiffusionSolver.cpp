@@ -11,6 +11,9 @@
 #include "SolverSelection.h"
 
 DiffusionSolver::DiffusionSolver() {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
     std::string diffusionType = params->get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
@@ -31,7 +34,6 @@ DiffusionSolver::~DiffusionSolver() {
 // ***************************************************************************************
 void DiffusionSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
-    auto m_logger = Utility::create_logger(typeid(DiffusionSolver).name());
     m_logger->info("Diffuse ...");
 #endif
 // 1. Solve diffusion equation
@@ -74,8 +76,8 @@ void DiffusionSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/diffusion/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(DiffusionSolver).name());
-        m_logger->error("Fields not specified correctly!");
+        auto logger = Utility::create_logger(typeid(DiffusionSolver).name());
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling

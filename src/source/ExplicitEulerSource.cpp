@@ -10,7 +10,6 @@
 #include "../Domain.h"
 
 ExplicitEulerSource::ExplicitEulerSource() {
-
     auto params = Parameters::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
@@ -18,7 +17,7 @@ ExplicitEulerSource::ExplicitEulerSource() {
 
     if (m_dir_vel.find('x') == std::string::npos && m_dir_vel.find('y') == std::string::npos && m_dir_vel.find('z') == std::string::npos) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(ExplicitEulerSource).name());
+        m_logger = Utility::create_logger(typeid(ExplicitEulerSource).name());
         m_logger->error("unknown direction -> exit");
 #endif
         std::exit(1);

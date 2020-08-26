@@ -15,21 +15,22 @@
 
 class AdvectionDiffusionSolver : public ISolver {
 public:
-  AdvectionDiffusionSolver();
-  ~AdvectionDiffusionSolver() override;
+    AdvectionDiffusionSolver();
+    ~AdvectionDiffusionSolver() override;
 
-  void do_step(real t, bool sync) override;
+    void do_step(real t, bool sync) override;
 
 private:
-  IAdvection* adv;
-  IDiffusion* dif;
-
-  real m_nu;
-
-    static void control();
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+
+    IAdvection* adv;
+    IDiffusion* dif;
+
+    real m_nu;
+
+    static void control();
 };
 
 #endif /* ARTSS_SOLVER_ADVECTIONDIFFUSIONSOLVER_H_ */

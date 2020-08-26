@@ -13,6 +13,9 @@
 #include "../boundary/BoundaryData.h"
 
 NSTempTurbSolver::NSTempTurbSolver() {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
 
     auto params = Parameters::getInstance();
 
@@ -124,10 +127,6 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     auto nu = m_nu;
     auto kappa = m_kappa;
     auto dir_vel = m_dir_vel;
-
-#ifndef BENCHMARKING
-    auto m_logger = Utility::create_logger(typeid(NSTempTurbSolver).name());
-#endif
 
 #pragma acc data present(    d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], \
                             d_w0[:bsize], d_w_tmp[:bsize], d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], \
@@ -266,40 +265,40 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 void NSTempTurbSolver::control() {
     auto params = Parameters::getInstance();
 #ifndef BENCHMARKING
-    auto m_logger = Utility::create_logger(typeid(NSTempTurbSolver).name());
+    auto logger = Utility::create_logger(typeid(NSTempTurbSolver).name());
 #endif
 
     if (params->get("solver/advection/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        m_logger->error("Fields not specified correctly!");
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        m_logger->error("Fields not specified correctly!");
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/temperature/advection/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
 #ifndef BENCHMARKING
-        m_logger->error("Fields not specified correctly!");
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/temperature/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
 #ifndef BENCHMARKING
-        m_logger->error("Fields not specified correctly!");
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling
     }
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
 #ifndef BENCHMARKING
-        m_logger->error("Fields not specified correctly!");
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling

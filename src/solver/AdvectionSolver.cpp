@@ -11,6 +11,9 @@
 #include "SolverSelection.h"
 
 AdvectionSolver::AdvectionSolver() {
+#ifndef BENCHMARKING
+     m_logger = Utility::create_logger(typeid(this).name());
+#endif
 
     auto params = Parameters::getInstance();
     std::string advectionType = params->get("solver/advection/type");
@@ -90,7 +93,6 @@ void AdvectionSolver::do_step(real t, bool sync) {
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(AdvectionSolver).name());
         m_logger->info("Advect ...");
 #endif
         adv->advect(u, u0, u_lin, v_lin, w_lin, sync);
@@ -107,8 +109,8 @@ void AdvectionSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/advection/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(AdvectionSolver).name());
-        m_logger->error("Fields not specified correctly!");
+        auto logger = Utility::create_logger(typeid(AdvectionSolver).name());
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling

@@ -11,6 +11,11 @@
 #include "../interfaces/IAdvection.h"
 #include "../utility/GlobalMacrosTypes.h"
 
+#ifndef BENCHMARKING
+#include "../utility/Utility.h"
+#endif
+
+
 class AdvectionSolver : public ISolver {
 public:
     AdvectionSolver();
@@ -19,6 +24,9 @@ public:
     void do_step(real t, bool sync) override;
 
 private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     IAdvection* adv;
     Field* u_linm;
     Field* v_linm;

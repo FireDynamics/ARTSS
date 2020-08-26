@@ -15,6 +15,10 @@
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
 
+#ifndef BENCHMARKING
+#include "../utility/Utility.h"
+#endif
+
 class NSTempTurbSolver : public ISolver {
 public:
     NSTempTurbSolver();
@@ -23,6 +27,10 @@ public:
     void do_step(real t, bool sync) override;
 
 private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
+
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
     IAdvection *adv_temp;

@@ -9,6 +9,10 @@
 
 
 PressureSolver::PressureSolver() {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(PressureSolver).name());
+#endif
+
     auto params = Parameters::getInstance();
     auto p_type = params->get("solver/pressure/type");
     SolverSelection::SetPressureSolver(&this->pres, p_type, p, rhs);
@@ -27,7 +31,6 @@ PressureSolver::~PressureSolver() {
 // *****************************************************************************
 void PressureSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
-    auto m_logger = Utility::create_logger(typeid(PressureSolver).name());
     m_logger->info("Pressure ...");
 #endif
 
@@ -56,8 +59,8 @@ void PressureSolver::control() {
     auto p_field = params->get("solver/pressure/field");
     if (p_field != BoundaryData::getFieldTypeName(FieldType::P)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(PressureSolver).name());
-        m_logger->error("Fields not specified correctly!");
+        auto logger = Utility::create_logger(typeid(PressureSolver).name());
+        logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling

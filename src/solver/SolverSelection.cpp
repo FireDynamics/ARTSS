@@ -22,13 +22,12 @@
 /// \param  advectionType Name of AdvcetionSolver
 // ***************************************************************************************
 void SolverSelection::SetAdvectionSolver(IAdvection **advectionSolver, const std::string& advectionType) {
-
     if (advectionType == AdvectionMethods::SemiLagrangian) {
         *advectionSolver = new SLAdvect();
     } else {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(SolverSelection).name());
-        m_logger->error("Advection method not yet implemented! simulation stopped!");
+        auto logger = Utility::create_logger(typeid(SolverSelection).name());
+        logger->error("Advection method not yet implemented! simulation stopped!");
 #endif
         std::exit(1);
         //TODO Error handling
@@ -50,8 +49,8 @@ void SolverSelection::SetDiffusionSolver(IDiffusion **diffusionSolver, const std
         *diffusionSolver = new ExplicitDiffuse();
     } else {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(SolverSelection).name());
-        m_logger->error("Diffusion method not yet implemented! Simulation stopped!");
+        auto logger = Utility::create_logger(typeid(SolverSelection).name());
+        logger->error("Diffusion method not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);
         //TODO Error handling
@@ -69,8 +68,8 @@ void SolverSelection::SetPressureSolver(IPressure **pressureSolver, const std::s
         *pressureSolver = new VCycleMG(p, rhs);
     } else {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(SolverSelection).name());
-        m_logger->error("Pressure method not yet implemented! Simulation stopped!");
+        auto logger = Utility::create_logger(typeid(SolverSelection).name());
+        logger->error("Pressure method not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);
         //TODO Error handling
@@ -88,8 +87,8 @@ void SolverSelection::SetSourceSolver(ISource **sourceSolver, const std::string&
         *sourceSolver = new ExplicitEulerSource();
     } else {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(SolverSelection).name());
-        m_logger->error("Source method not yet implemented! Simulation stopped!");
+        auto logger = Utility::create_logger(typeid(SolverSelection).name());
+        logger->error("Source method not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);
         //TODO Error handling
@@ -109,8 +108,8 @@ void SolverSelection::SetTurbulenceSolver(ITurbulence **turbulenceSolver, const 
         *turbulenceSolver = new DynamicSmagorinsky();
     } else {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(typeid(SolverSelection).name());
-        m_logger->error("Turbulence model is not yet implemented! Simulation stopped!");
+        auto logger = Utility::create_logger(typeid(SolverSelection).name());
+        logger->error("Turbulence model is not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);
         //TODO Error handling

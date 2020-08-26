@@ -18,6 +18,7 @@
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IPressure.h"
 
+
 class PressureSolver : public ISolver {
 public:
     PressureSolver();
@@ -25,6 +26,9 @@ public:
     void do_step(real t, bool sync) override;
 
 private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     IPressure *pres;
     static void control();
 };

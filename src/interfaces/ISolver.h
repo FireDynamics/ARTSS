@@ -30,7 +30,7 @@ struct SolverTypes {
 };
 
 class ISolver {
-public:
+ public:
     ISolver();
     virtual ~ISolver();
 
@@ -102,7 +102,7 @@ public:
     ISource *source_temperature;
     ISource *source_velocity;
     ISource *source_concentration;
-protected:
+ protected:
     void set_up();
 
     void init();
@@ -115,15 +115,16 @@ protected:
 
     static void couple_scalar(const Field *a, Field *a0, Field *a_tmp, bool sync);
 
-private:
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
+
     std::string m_string_solver;
     void force_source();
     void temperature_source();
     void momentum_source();
     static void CallRandom(Field* out);
-#ifndef BENCHMARKING
-    std::shared_ptr<spdlog::logger> m_logger;
-#endif
 };
 
 #endif /* ARTSS_INTERFACES_ISOLVER_H_ */
