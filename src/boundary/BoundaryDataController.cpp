@@ -97,7 +97,7 @@ void BoundaryDataController::applyBoundaryCondition(real *data, size_t **indexFi
 // ***************************************************************************************
 void BoundaryDataController::applyBoundaryConditionObstacle(real *data, size_t **indexFields, size_t *patch_start, size_t *patch_end, FieldType fieldType, size_t level, size_t id, bool sync) {
     if (!((BoundaryData *) *(m_boundaryData + fieldType))->isEmpty()) {
-        ObstacleBoundary::applyBoundaryCondition(data, indexFields, patch_start, patch_end, level, m_boundaryData[fieldType], id, sync);
+        ObstacleBoundary::apply_boundary_condition(data, indexFields, patch_start, patch_end, level, m_boundaryData[fieldType], id, sync);
     }
 }
 
