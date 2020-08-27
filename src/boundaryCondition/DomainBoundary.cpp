@@ -40,8 +40,8 @@ void DomainBoundary::apply_boundary_condition(real *data_field, size_t **index_f
                 break;
             default:
 #ifndef BENCHMARKING
-                auto m_logger = Utility::create_logger("DomainBoundary");
-                m_logger->error("Unknown boundary condition: {}", bc);
+                auto logger = Utility::create_logger("DomainBoundary");
+                logger->error("Unknown boundary condition: {}", bc);
 #endif
                 break;
         }
@@ -112,8 +112,8 @@ void DomainBoundary::apply_dirichlet(real *data_field, size_t *d_patch, Patch pa
             break;
         default:
 #ifndef BENCHMARKING
-            auto m_logger = Utility::create_logger("DomainBoundary");
-            m_logger->error("Unknown Patch for dirichlet boundary condition: {}", patch);
+            auto logger = Utility::create_logger("DomainBoundary");
+            logger->error("Unknown Patch for dirichlet boundary condition: {}", patch);
 #endif
             break;
     }
@@ -163,8 +163,8 @@ void DomainBoundary::apply_neumann(real *data_field, size_t *d_patch, Patch patc
             break;
         default:
 #ifndef BENCHMARKING
-            auto m_logger = Utility::create_logger("DomainBoundary");
-            m_logger->error("Unknown Patch for neumann boundary condition: {}", patch);
+            auto logger = Utility::create_logger("DomainBoundary");
+            logger->error("Unknown Patch for neumann boundary condition: {}", patch);
 #endif
             break;
     }
@@ -210,8 +210,8 @@ void DomainBoundary::apply_periodic(real *data_field, size_t *d_patch, Patch pat
             break;
         default:
 #ifndef BENCHMARKING
-            auto m_logger = Utility::create_logger("DomainBoundary");
-            m_logger->error("Unknown Patch for periodic boundary condition: {}", patch);
+            auto logger = Utility::create_logger("DomainBoundary");
+            logger->error("Unknown Patch for periodic boundary condition: {}", patch);
 #endif
             break;
     }

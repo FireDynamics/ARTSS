@@ -39,8 +39,8 @@ void ObstacleBoundary::apply_boundary_condition(real *data, size_t **index_field
                 break;
             default:
 #ifndef BENCHMARKING
-                auto m_logger = Utility::create_logger("ObstacleBoundary");
-                m_logger->error("Unknown boundary condition: {}", bc);
+                auto logger = Utility::create_logger("ObstacleBoundary");
+                logger->error("Unknown boundary condition: {}", bc);
 #endif
                 break;
         }
@@ -115,8 +115,8 @@ void ObstacleBoundary::apply_dirichlet(real *data_field, size_t *d_patch, Patch 
 
         default:
 #ifndef BENCHMARKING
-            auto m_logger = Utility::create_logger("ObstacleBoundary");
-            m_logger->error("Unknown Patch for dirichlet boundary condition: {}", p);
+            auto logger = Utility::create_logger("ObstacleBoundary");
+            logger->error("Unknown Patch for dirichlet boundary condition: {}", p);
 #endif
             break;
     }
@@ -165,8 +165,8 @@ void ObstacleBoundary::apply_neumann(real *data_field, size_t *d_patch, Patch p,
             break;
         default:
 #ifndef BENCHMARKING
-            auto m_logger = Utility::create_logger("ObstacleBoundary");
-            m_logger->error("Unknown Patch for neumann boundary condition: {}", p);
+            auto logger = Utility::create_logger("ObstacleBoundary");
+            logger->error("Unknown Patch for neumann boundary condition: {}", p);
 #endif
             break;
     }
@@ -211,8 +211,8 @@ void ObstacleBoundary::apply_periodic(real *data_field, size_t *d_patch, Patch p
             break;
         default:
 #ifndef BENCHMARKING
-            auto m_logger = Utility::create_logger("ObstacleBoundary");
-            m_logger->error("Unknown Patch for periodic boundary condition: {}", p);
+            auto logger = Utility::create_logger("ObstacleBoundary");
+            logger->error("Unknown Patch for periodic boundary condition: {}", p);
 #endif
             break;
     }
