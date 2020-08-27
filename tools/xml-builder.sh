@@ -808,9 +808,11 @@ else
     if [ -v $LOGGINGFILE ]
     then
         BASENAME=$(echo $NAME | cut -d '.' -f-1 | awk '{print tolower($0)}')
-        WRITETO="${WRITETO}  <logging file=\"output_${BASENAME}.log\" "
+        WRITETO="${WRITETO}
+  <logging file=\"output_${BASENAME}.log\" "
     else
-        WRITETO="${WRITETO}  <logging file=\"${LOGGINGFILE}\" "
+        WRITETO="${WRITETO}
+  <logging file=\"${LOGGINGFILE}\" "
     fi
 
     if [ -v $LOGGINGLEVEL ]
@@ -819,8 +821,6 @@ else
     else
         WRITETO="${WRITETO}level=\"${LOGGINGLEVEL}\">"
     fi
-
-
     WRITETO="${WRITETO}
   </logging>
 </ARTSS>"
