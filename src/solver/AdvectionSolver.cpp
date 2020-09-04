@@ -4,8 +4,6 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-
 #include "AdvectionSolver.h"
 #include "../interfaces/IAdvection.h"
 #include "../utility/Parameters.h"
@@ -13,6 +11,9 @@
 #include "SolverSelection.h"
 
 AdvectionSolver::AdvectionSolver(FieldController *field_controlller) {
+#ifndef BENCHMARKING
+     m_logger = Utility::create_logger(typeid(this).name());
+#endif
     m_field_controller = field_controlller;
 
     auto params = Parameters::getInstance();
@@ -93,8 +94,7 @@ void AdvectionSolver::do_step(real t, bool sync) {
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        std::cout << "Advect ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Advect ...");
 #endif
         adv->advect(u, u0, u_lin, v_lin, w_lin, sync);
         adv->advect(v, v0, u_lin, v_lin, w_lin, sync);
@@ -109,9 +109,11 @@ void AdvectionSolver::do_step(real t, bool sync) {
 void AdvectionSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/advection/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger(typeid(AdvectionSolver).name());
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }

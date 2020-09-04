@@ -4,14 +4,12 @@
 /// \author     Suryanarayana Maddu
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-
 #include "DiffusionTurbSolver.h"
-#include "../utility/Parameters.h"
-#include "../Domain.h"
-#include "SolverSelection.h"
 
 DiffusionTurbSolver::DiffusionTurbSolver(FieldController *field_controller) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     m_field_controller = field_controller;
 
     auto params = Parameters::getInstance();
@@ -41,7 +39,6 @@ DiffusionTurbSolver::~DiffusionTurbSolver() {
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void DiffusionTurbSolver::do_step(real t, bool sync) {
-
 // 1. Solve diffusion equation
 // local variables and parameters for GPU
     auto u = m_field_controller->field_u;
@@ -73,13 +70,11 @@ void DiffusionTurbSolver::do_step(real t, bool sync) {
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_nu_t[:bsize]) //EV
     {
 #ifndef BENCHMARKING
-        std::cout << "Calculating Turbulent viscosity ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Calculating Turbulent viscosity ...");
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 #ifndef BENCHMARKING
-        std::cout << "Diffuse ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Diffuse ...");
 #endif
         dif->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif->diffuse(v, v0, v_tmp, nu, nu_t, sync);
@@ -94,9 +89,11 @@ void DiffusionTurbSolver::do_step(real t, bool sync) {
 void DiffusionTurbSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger(typeid(DiffusionTurbSolver).name());
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }

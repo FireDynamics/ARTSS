@@ -7,28 +7,32 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
-#include <iostream>
 #include <fstream>
 
 #include "Analysis.h"
 #include "../boundary/BoundaryController.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
+#include "../utility/Utility.h"
 
 Analysis::Analysis(Solution *solution) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
     has_analytic_solution = params->get("solver/solution/available") == "Yes";
     if (has_analytic_solution) {
         m_tol = params->get_real("solver/solution/tol");
     } else {
-        std::cout << "No analytical solution available!\n" << std::endl;
-        //TODO Logger
+#ifndef BENCHMARKING
+        m_logger->info("No analytical solution available!");
+#endif
     }
     m_solution = solution;
 }
 
-// ===================================== Start analysis ==================================
-// ***************************************************************************************
+// ================================ Start analysis =============================
+// *****************************************************************************
 /// \brief  starts analysis to compare numerical and analytical solutions
 /// \param  field_controller    pointer to solver
 /// \param  t     current time
@@ -44,8 +48,9 @@ void Analysis::analyse(FieldController *field_controller, real t) {
         auto curElem = xmlParameter->FirstChildElement();
 
         m_solution->calc_analytical_solution(t);
-        std::cout << "\nCompare to analytical solution:" << std::endl;
-        //TODO Logger
+#ifndef BENCHMARKING
+        m_logger->info("Compare to analytical solution:");
+#endif
 
         while (curElem) {
             std::string nodeName(curElem->Value());
@@ -67,14 +72,14 @@ void Analysis::analyse(FieldController *field_controller, real t) {
                 if (field.find(BoundaryData::getFieldTypeName(FieldType::T)) != std::string::npos) {
                     compare_solutions(field_controller->get_field_T_data(), m_solution->GetT(), FieldType::T, t);
                 }
-            }//end if
+            }  // end if
             curElem = curElem->NextSiblingElement();
-        }//end while
+        }  // end while
     }
 }
 
-// ======================= Compare analytical and numerical solution =====================
-// ***************************************************************************************
+// ================== Compare analytical and numerical solution ================
+// *****************************************************************************
 /// \brief  compares analytical solution and numerical solution, returns true when verification passed
 /// \param  num   numerical solution
 /// \param  ana   analytical solution
@@ -89,18 +94,22 @@ bool Analysis::compare_solutions(read_ptr num, read_ptr ana, FieldType type, rea
     //real res = calc_relative_spatial_error(num, ana);
 
     if (res <= m_tol) {
-        std::cout << BoundaryData::getFieldTypeName(type) << " PASSED Test at time " << t << " with error e=" << res << std::endl;
-        //TODO Logger
+#ifndef BENCHMARKING
+        m_logger->info("{} PASSED Test at time {} with error e = {}",
+                BoundaryData::getFieldTypeName(type), t, res);
+#endif
         verification = true;
     } else {
-        std::cout << BoundaryData::getFieldTypeName(type) << " FAILED Test at time " << t << " with error e=" << res << std::endl;
-        //TODO Logger
+#ifndef BENCHMARKING
+        m_logger->warn("{} FAILED Test at time {} with error e = {}",
+                BoundaryData::getFieldTypeName(type), t, res);
+#endif
     }
     return verification;
 }
 
-// ================================== Calculate absolute error ===========================
-// ***************************************************************************************
+// ============================= Calculate absolute error ======================
+// *****************************************************************************
 /// \brief  calculates absolute spatial error based on L2-norm
 /// \param  num   numerical solution
 /// \param  ana   analytical solution
@@ -122,21 +131,22 @@ real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
     }
 
     //weight
-    real nr = size_iList;
-
+    real nr = static_cast<real>(size_iList);
     real eps = sqrt(1. / nr * sum);
 
-    std::cout << std::scientific << "\nAbsolute error ||e|| =" << eps << std::endl;
-    //TODO Logger
-    //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]    << std::endl;
-    //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]    << std::endl;
-    //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]  << std::endl;
-    //std::cout << "ana =" << ana[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]  << std::endl;
+    //TODO(n16h7) add. output
+#ifndef BENCHMARKING
+    m_logger->info("Absolute error ||e|| = {}", eps);
+#endif
+    //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
+    //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]    << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]    << std::endl;
     return eps;
 }
 
-// ================================== Calculate relative error ===========================
-// ***************************************************************************************
+// ============================= Calculate relative error ======================
+// *****************************************************************************
 /// \brief  calculates relative spatial error based on L2-norm
 /// \param  num   numerical solution
 /// \param  ana   analytical solution
@@ -156,7 +166,7 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
     }
 
     //weight
-    real nr = size_iList;
+    real nr = static_cast<real>(size_iList);
     real adenom = sqrt(1. / nr * sumr);
 
     real eps;
@@ -185,18 +195,20 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
         eps = epsa / adenom;
     }
 
-    std::cout << std::scientific << "\nRelative error ||e|| =" << eps << std::endl;
-    //TODO Logger
-    /*std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]    << std::endl;
-    std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]    << std::endl;
-    std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]  << std::endl;
-    std::cout << "ana =" << ana[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]  << std::endl;*/
+    //TODO(n16h7) add. output
+#ifndef BENCHMARKING
+    m_logger->info("Relative error ||e|| = {}", eps);
+#endif
+    //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]      << std::endl;
+    //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]  << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]  << std::endl;
 
     return eps;
 }
 
-// ============= Calculate absolute error at center to be averaged over time ==============
-// ***************************************************************************************
+// ======== Calculate absolute error at center to be averaged over time ========
+// *****************************************************************************
 /// \brief  calculates absolute spatial error at time t at midpoint based on L2-norm
 /// \param  field_controller    pointer to field_controller
 /// \param  t     current time
@@ -234,8 +246,8 @@ void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t,
     }
 }
 
-// ================================= Calculate RMS error ==================================
-// ***************************************************************************************
+// =========================== Calculate RMS error ============================
+// *****************************************************************************
 /// \brief  calculates absolute spatial error at time t at midpoint based on L2-norm
 /// \param  solver    pointer to solver
 /// \param  t     current time
@@ -249,20 +261,21 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
         real dt = params->get_real("physical_parameters/dt");
         real t_end = params->get_real("physical_parameters/t_end");
         auto Nt = static_cast<size_t>(std::round(t_end / dt));
-        real rNt = 1. / Nt;
+        real rNt = 1. / static_cast<real>(Nt);
         real epsu = sqrt(rNt * sum_u);
         real epsp = sqrt(rNt * sum_p);
         real epsT = sqrt(rNt * sum_T);
 
-        std::cout << "\nRMS error of u at domain center is e_RMS=" << epsu << std::endl;
-        std::cout << "RMS error of p at domain center is e_RMS=" << epsp << std::endl;
-        std::cout << "RMS error of T at domain center is e_RMS=" << epsT << std::endl;
-        //TODO Logger
+#ifndef BENCHMARKING
+        m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
+        m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
+        m_logger->info("RMS error of T at domain center is e_RMS = {}", epsT);
+#endif
     }
 }
 
-// =============================== Check Von Neumann condition ===========================
-// ***************************************************************************************
+// ========================== Check Von Neumann condition ======================
+// *****************************************************************************
 /// \brief  checks Von Neumann condition on time step (returns true or false)
 /// \param  u     x-velocity field
 /// \param  dt      time step size
@@ -287,13 +300,15 @@ bool Analysis::check_time_step_VN(Field *u, real dt) {
 
     VN_check = VN < 0.5;
 
-    std::cout << "VN = " << VN << std::endl;
+#ifndef BENCHMARKING
+    m_logger->info("VN = {}", VN);
+#endif
 
     return VN_check;
 }
 
-// ================================= Check CFL condition ==================================
-// ***************************************************************************************
+// =========================== Check CFL condition ============================
+// *****************************************************************************
 /// \brief  checks CFL condition on time step (returns true or false)
 /// \param  u     x-velocity field
 /// \param  v     y-velocity field
@@ -318,10 +333,10 @@ bool Analysis::check_time_step_CFL(Field *u, Field *v, Field *w, real dt) {
     auto d_v = v->data;
     auto d_w = w->data;
 
-    real max_vel[sizei];
+    real *max_vel = new real[sizei];
     real uvrdx, uvwrdx, maxvelrdx;
 
-    //TODO correct?
+    // TODO correct?
     for (size_t i = 0; i < sizei; i++) {
         size_t idx = innerList[i];
         uvrdx = std::max(fabs(d_u[idx]) / dx, fabs(d_v[idx]) / dy);
@@ -337,14 +352,15 @@ bool Analysis::check_time_step_CFL(Field *u, Field *v, Field *w, real dt) {
 
     CFL_check = CFL < 1.;
 
-    std::cout << "CFL = " << CFL << std::endl;
-    //TODO Logger
+#ifndef BENCHMARKING
+    m_logger->info("CFL = {}", CFL);
+#endif
 
     return CFL_check;
 }
 
-// =============================== Set dt based on CFL condition ========================
-// ***************************************************************************************
+// ========================== Set dt based on CFL condition ===================
+// *****************************************************************************
 /// \brief  sets time step size based on CFL=0.8 (returns dt)
 /// \param  u     x-velocity field
 /// \param  v     y-velocity field
@@ -366,10 +382,10 @@ real Analysis::set_DT_with_CFL(Field *u, Field *v, Field *w) {
     auto d_v = v->data;
     auto d_w = w->data;
 
-    real max_vel[sizei];
+    real *max_vel = new real[sizei];
     real uvrdx, uvwrdx, maxvelrdx;
 
-    //TODO correct?
+    // TODO correct?
     for (size_t i = 0; i < sizei; i++) {
         size_t idx = innerList[i];
         uvrdx = std::max(fabs(d_u[idx]) / dx, fabs(d_v[idx]) / dy);
@@ -387,8 +403,8 @@ real Analysis::set_DT_with_CFL(Field *u, Field *v, Field *w) {
     return DT;
 }
 
-// ==================================== Save variables ===================================
-// ***************************************************************************************
+// =============================== Save variables ==============================
+// *****************************************************************************
 /// \brief  saves variables in .dat files
 /// \param  field_controller    pointer to solver
 // ***************************************************************************************

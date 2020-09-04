@@ -4,22 +4,28 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <iostream>
 #include "TimeIntegration.h"
 #include "utility/tinyxml2.h"
 #include "utility/Parameters.h"
 #include "solver/SolverController.h"
 
 #ifdef _OPENACC
-#include <openacc.h>
+    #include <openacc.h>
 #endif
 
-int main(int argc, const char **argv) {
+int main(int argc, char **argv) {
     // Initialisation
     // Parameters
     std::string XML_filename;
-    if (argc > 1) XML_filename.assign(argv[1]);
     auto params = Parameters::getInstance();
-    params->parse(XML_filename);
+    if (argc > 1) {
+        XML_filename.assign(argv[1]);
+        params->parse(XML_filename);
+    } else {
+        std::cerr << "XML file missing" << std::endl;
+        std::exit(1);
+    }
 
     SolverController *sc = new SolverController();
 

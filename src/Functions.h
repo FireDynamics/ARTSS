@@ -8,6 +8,7 @@
 #define ARTSS_FUNCTIONS_H_
 
 #include "field/Field.h"
+#include <string>
 
 struct FunctionNames{
     static const std::string Beltrami;
@@ -27,7 +28,7 @@ struct FunctionNames{
     static const std::string Zero;
 };
 
-namespace Functions { //alphabetically ordered
+namespace Functions {  // alphabetically ordered
 
   void Beltrami(Field* outx, Field* outy, Field* outz, Field* outp, real t);
   void BeltramiBC_p(Field* outx);

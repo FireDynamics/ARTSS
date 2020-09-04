@@ -4,8 +4,6 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-
 #include "NSSolver.h"
 #include "../pressure/VCycleMG.h"
 #include "../utility/Parameters.h"
@@ -14,6 +12,9 @@
 #include "../boundary/BoundaryData.h"
 
 NSSolver::NSSolver(FieldController *field_controller) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     m_field_controller = field_controller;
 
     auto params = Parameters::getInstance();
@@ -54,7 +55,6 @@ NSSolver::~NSSolver() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSSolver::do_step(real t, bool sync) {
-
 // local variables and parameters for GPU
     auto u = m_field_controller->field_u;
     auto v = m_field_controller->field_v;
@@ -96,8 +96,7 @@ void NSSolver::do_step(real t, bool sync) {
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        std::cout << "Advect ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
         adv_vel->advect(v, v0, u0, v0, w0, sync);
@@ -110,8 +109,7 @@ void NSSolver::do_step(real t, bool sync) {
 // 2. Solve diffusion equation
         if (nu != 0.) {
 #ifndef BENCHMARKING
-            std::cout << "Diffuse ..." << std::endl;
-            //TODO Logger
+            m_logger->info("Diffuse ...");
 #endif
             dif_vel->diffuse(u, u0, u_tmp, nu, sync);
             dif_vel->diffuse(v, v0, v_tmp, nu, sync);
@@ -124,8 +122,7 @@ void NSSolver::do_step(real t, bool sync) {
 // 3. Add force
         if (m_sourceFct != SourceMethods::Zero) {
 #ifndef BENCHMARKING
-            std::cout << "Add source ..." << std::endl;
-            //TODO Logger
+            m_logger->info("Add source ...");
 #endif
             sou->add_source(u, v, w, f_x, f_y, f_z, sync);
             // Couple data
@@ -138,8 +135,7 @@ void NSSolver::do_step(real t, bool sync) {
 
         // Solve pressure equation
 #ifndef BENCHMARKING
-        std::cout << "Pressure ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);
 
@@ -159,24 +155,30 @@ void NSSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void NSSolver::control() {
+#ifndef BENCHMARKING
+    auto logger = Utility::create_logger(typeid(NSSolver).name());
+#endif
     auto params = Parameters::getInstance();
 
     if (params->get("solver/advection/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Eroor Handling + Logger
+        // TODO Error Handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Eroor Handling + Logger
+        // TODO Error Handling
     }
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Eroor Handling + Logger
+        // TODO Error Handling
     }
 }

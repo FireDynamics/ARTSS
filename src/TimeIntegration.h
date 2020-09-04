@@ -14,11 +14,12 @@
 #include "adaption/Adaption.h"
 
 #ifndef BENCHMARKING
-
 #include "analysis/Analysis.h"
 #include "analysis/Solution.h"
 #include "visualisation/Visual.h"
-
+#else
+// only needed if no logger will be available
+#include <iostream>
 #endif
 
 class TimeIntegration {
@@ -38,6 +39,7 @@ private:
     Visual *m_visual;
     Solution *m_solution;
     Analysis *m_analysis;
+    std::shared_ptr<spdlog::logger> m_logger;
 #endif
 };
 

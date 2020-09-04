@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ARTSS>
   <physical_parameters>
-    <t_end> 1.0 </t_end>  <!-- simulation end time -->
+    <t_end> 6.2831853072 </t_end>  <!-- simulation end time -->
     <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
-    <nu> 0. </nu>  <!-- kinematic viscosity -->
+    <nu> 0.1 </nu>  <!-- kinematic viscosity -->
   </physical_parameters>
 
-  <solver description = "NSSolver" >
-    <advection type = "SemiLagrangian" field = "u,v,w">
+  <solver description="NSSolver" >
+    <advection type="SemiLagrangian" field="u,v,w">
     </advection>
-    <diffusion type = "Jacobi" field = "u,v,w">
+    <diffusion type="Jacobi" field="u,v,w">
       <max_iter> 100 </max_iter>  <!-- max number of iterations -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
       <w> 1 </w>  <!-- relaxation parameter -->
     </diffusion>
-    <source type = "ExplicitEuler" force_fct = "Zero" dir = "xyz">  <!-- Direction of force (x,y,z or combinations xy,xz,yz,xyz) -->
+    <source type="ExplicitEuler" force_fct="Zero" dir="xyz">  <!-- Direction of force (x,y,z or combinations xy,xz,yz,xyz) -->
     </source>
-    <pressure type = "VCycleMG" field = "p">
+    <pressure type="VCycleMG" field="p">
       <n_level> 4 </n_level>  <!-- number of restriction levels -->
       <n_cycle> 2 </n_cycle> <!-- number of cycles -->
       <max_cycle> 100 </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
-      <diffusion type = "Jacobi" field = "p">
+      <diffusion type="Jacobi" field="p">
         <n_relax> 4 </n_relax>  <!-- number of iterations -->
         <max_solve> 100 </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
         <w> 0.6666666667 </w>  <!-- relaxation parameter  -->
       </diffusion>
     </pressure>
-    <solution available = "Yes">
+    <solution available="Yes">
       <tol> 1e-03 </tol>  <!-- tolerance for further tests -->
     </solution>
   </solver>
 
   <domain_parameters>
-    <X1> -0.1556 </X1>  <!-- physical domain -->
-    <X2> 0.1556 </X2>
-    <Y1> -0.1556 </Y1>
-    <Y2> 0.1556 </Y2>
-    <Z1> -0.1556 </Z1>
-    <Z2> 0.1556 </Z2>
-    <x1> -0.1556 </x1>  <!-- computational domain -->
-    <x2> 0.1556 </x2>
-    <y1> -0.1556 </y1>
-    <y2> 0.1556 </y2>
-    <z1> -0.1556 </z1>
-    <z2> 0.1556 </z2>
+    <X1> 0. </X1>  <!-- physical domain -->
+    <X2> 6.2831853072 </X2>
+    <Y1> 0. </Y1>
+    <Y2> 6.2831853072 </Y2>
+    <Z1> 0. </Z1>
+    <Z2> 6.2831853072 </Z2>
+    <x1> 0. </x1>  <!-- computational domain -->
+    <x2> 6.2831853072 </x2>
+    <y1> 0. </y1>
+    <y2> 6.2831853072 </y2>
+    <z1> 0. </z1>
+    <z2> 6.2831853072 </z2>
     <nx> 64 </nx>  <!-- grid resolution (number of cells excl. ghost cells) -->
     <ny> 64 </ny>
     <nz> 1 </nz>
@@ -62,15 +62,14 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct="Vortex"  random="No">
-    <u_lin> 0.1 </u_lin>
-    <v_lin> 0 </v_lin>
-    <w_lin> 0 </w_lin>
-    <pa> 0. </pa>
-    <rhoa> 1. </rhoa>
+  <initial_conditions usr_fct="McDermott" random="No">
+    <A> 2 </A>
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
-    <vtk_nth_plot> 10 </vtk_nth_plot>
+    <vtk_nth_plot> 63 </vtk_nth_plot>
   </visualisation>
+
+  <logging file="output_test_navierstokes_mcdermott.log" level="info">
+  </logging>
 </ARTSS>

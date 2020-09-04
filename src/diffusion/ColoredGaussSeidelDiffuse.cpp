@@ -5,17 +5,21 @@
 /// \author       My Linh Wuerzburger
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-#include<cmath>
+
+#include <cmath>
 
 #include "ColoredGaussSeidelDiffuse.h"
 #include "../boundary/BoundaryController.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
+#include "../utility/Utility.h"
 
-//=============================== Constructor ======================================
+
+// ========================== Constructor =================================
 ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
-
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
@@ -30,10 +34,10 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
         m_max_iter = 10000;
         m_tol_res = 1e-16;
     }
-};
+}
 
-//==================================== Diffuse ===========================================
-// ***************************************************************************************
+// ========================== Diffuse =================================
+// ************************************************************************
 /// \brief  solves Diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
 ///     via calculated iterations of CGS step (dependent on residual/ maximal iterations)
 /// \param  out     output pointer
@@ -43,7 +47,6 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
-
     auto domain = Domain::getInstance();
     // local parameters for GPU
     auto bsize = domain->get_size(out->get_level());
@@ -104,7 +107,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
                     - alpha_y * (d_out[i + Nx] + d_out[i - Nx])\
                     - alpha_z * (d_out[i + Nx * Ny] + d_out[i - Nx * Ny])\
                     + rbeta * d_out[i] - d_b[i]);
-            //TODO: find a way to exclude obstacle indices! Jacobi now uses res=D*(out-in)
+            // TODO: find a way to exclude obstacle indices! Jacobi now uses res=D*(out-in)
             sum += res * res;
         }
 
@@ -113,21 +116,19 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
         it++;
     } //end while
 
-    if (sync)
-{
+    if (sync) {
 //#pragma acc wait
     }
 
 #ifndef BENCHMARKING
-    std::cout << "Number of iterations:" << it << std::endl;
-    std::cout << "Colored Gauss-Seidel ||res|| = " << res << "\n";
-    //TODO Logger
+    m_logger->info("Number of iterations: {}", it);
+    m_logger->info("Colored Gauss-Seidel ||res|| = {:.5e}", res);
 #endif
 } //end data region
-};
+}
 
-//=============================== Turbulent version ======================================
-// ***************************************************************************************
+// ===================== Turbulent version ============================
+// ************************************************************************
 /// \brief  solves Diffusion equation \f$ \partial_t \phi_2 = \nu_{eff} \ nabla^2 \phi_2 \f$
 ///         via calculated iterations of CGS step (dependent on residual/ maximal iterations)
 /// \param  out         output pointer
@@ -136,9 +137,8 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 /// \param  D           diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  EV          eddy viscosity (nu_turb)
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+// ************************************************************************
 void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, const Field *EV, bool sync) {
-
     auto domain = Domain::getInstance();
     // local parameters for GPU
     auto bsize = domain->get_size(out->get_level());
@@ -210,21 +210,19 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
     } //end while
 
-    if (sync)
-{
+    if (sync) {
 //#pragma acc wait
     }
 
 #ifndef BENCHMARKING
-    std::cout << "Number of iterations:" << it << std::endl;
-    std::cout << "Colored Gauss-Seidel ||res|| = " << res << "\n";
-    //TODO Logger
+    m_logger->info("Number of iterations: {}", it);
+    m_logger->info("Colored Gauss-Seidel ||res|| = {.5e}", res);
 #endif
-} //end data region
-};
+    }  // end data region
+}
 
-//=============================== Iteration step ======================================
-// ***************************************************************************************
+//========================== Iteration step =================================
+// *****************************************************************************
 /// \brief  applies single CGS step on red-black grid
 /// \param  out      output pointer
 /// \param  b        source pointer
@@ -253,8 +251,8 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
 
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize]) async
 {
-//TODO: exclude obstacles!
-    //red
+    // TODO: exclude obstacles!
+    // red
 //#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < nz - 1; k += 2) {
         for (size_t j = 1; j < ny - 1; j += 2) {
@@ -329,10 +327,10 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
 } //end data region
 
 //#pragma acc wait
-};
+}
 
-//======================== Turbulent version of iteration step ===========================
-// ***************************************************************************************
+// ============== Turbulent version of iteration step =================
+// *****************************************************************************
 /// \brief  applies single CGS step on red-black grid
 /// \param  out      output pointer
 /// \param  b        source pointer
@@ -367,11 +365,10 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
     auto d_b    = b->data;
     auto d_EV   = EV->data;
 
-//TODO: exclude obstacles!
+// TODO: exclude obstacles!
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize], d_EV[:bsize]) async
 {
-
-    //red
+    // red
 //#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
@@ -426,11 +423,11 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
             }
         }
     }
-} //end data region
+} // end data region
 //#pragma acc wait
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize], d_EV[:bsize]) async
 {
-    //black
+    // black
 //#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
@@ -491,12 +488,12 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
             }
         }
     }
-} //end data region
+} // end data region
 //#pragma acc wait
-};
+}
 
-//=================================== CGS stencil ========================================
-// ***************************************************************************************
+// ========================= CGS stencil ==============================
+// ************************************************************************
 /// \brief  single CGS step
 /// \param  i        index in x-direction
 /// \param  j        index in y-direction

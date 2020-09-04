@@ -16,6 +16,11 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../field/FieldController.h"
 
+#ifndef BENCHMARKING
+#include "../utility/Utility.h"
+#endif
+
+
 class NSTempSolver : public ISolver {
 public:
     NSTempSolver(FieldController *field_controller);
@@ -23,7 +28,10 @@ public:
 
     void do_step(real t, bool sync) override;
 
-private:
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     FieldController *m_field_controller;
 
     IAdvection *adv_vel;

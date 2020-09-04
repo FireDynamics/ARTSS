@@ -10,8 +10,6 @@
 #include <accelmath.h>
 #endif
 
-#include <iostream>
-
 #include "ISolver.h"
 #include "../utility/Parameters.h"
 #include "../Functions.h"
@@ -19,8 +17,12 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 #include "../solver/SolverSelection.h"
+#include "../utility/Utility.h"
 
 ISolver::ISolver() {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
 
     // Variables
@@ -81,10 +83,11 @@ ISolver::ISolver() {
         if (params->get("solver/source/type") == SourceMethods::ExplicitEuler) {
             this->source_velocity = new ExplicitEulerSource();
         } else {
-            std::cout << "Source method not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+#ifndef BENCHMARKING
+            m_logger->critical("Source method not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
-            //TODO Error handling + Logger
+            // TODO Error handling
         }
     }
     if (m_string_solver == SolverTypes::NSTempSolver or \
@@ -96,10 +99,11 @@ ISolver::ISolver() {
         if (params->get("solver/temperature/source/type") == SourceMethods::ExplicitEuler) {
             this->source_temperature = new ExplicitEulerSource();
         } else {
-            std::cout << "Source method not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+#ifndef BENCHMARKING
+            m_logger->critical("Source method not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
-            //TODO Error handling + Logger
+            // TODO Error handling
         }
     }
     if (m_string_solver == SolverTypes::NSTempConSolver or \
@@ -109,10 +113,11 @@ ISolver::ISolver() {
         if (params->get("solver/concentration/source/type") == SourceMethods::ExplicitEuler) {
             this->source_concentration = new ExplicitEulerSource();
         } else {
-            std::cout << "Source method not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+#ifndef BENCHMARKING
+            m_logger->critical("Source method not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
-            //TODO Error handling + Logger
+            // TODO Error handling
         }
     }
 
@@ -175,13 +180,14 @@ ISolver::~ISolver() {
     }
 }
 
-// ==================================== Set Up ========================================
-// ***************************************************************************************
+// =============================== Set Up ===================================
+// *****************************************************************************
 /// \brief  initializes numerical and temporary solution
-// ***************************************************************************************
+// *****************************************************************************
 void ISolver::set_up() {
-    std::cout << "Start initializing....\n" << std::endl;
-    // TODO Logger
+#ifndef BENCHMARKING
+    m_logger->info("Start initializing....");
+#endif
 
     // Initialization of variables
     init();
@@ -201,12 +207,12 @@ void ISolver::set_up() {
     init_f(concentration_tmp, concentration->data);
 }
 
-//================================== 0) Initialization ===================================
-// ***************************************************************************************
+// ============================= Initialization ==============================
+// *****************************************************************************
 /// \brief  initializes variables \a u, \a v, \a p, \a d, \a T at \f$ t=0 \f$
+// *****************************************************************************
 // ***************************************************************************************
 void ISolver::init() {
-
     auto params = Parameters::getInstance();
     std::string string_init_usr_fct = params->get("initial_conditions/usr_fct");
     bool random = params->get("initial_conditions/random") == "Yes";
@@ -381,8 +387,7 @@ void ISolver::init() {
             }
         } else {
 #ifndef BENCHMARKING
-            std::cout << "Initial values all set to zero!" << std::endl;
-            //TODO Logger
+            m_logger->info("Initial values all set to zero!");
 #endif
         }
         //Random concentration
@@ -406,14 +411,13 @@ void ISolver::init() {
     }
 }
 
-// ========================================== Init =======================================
-// ***************************************************************************************
+// ===================================== Init ==================================
+// *****************************************************************************
 /// \brief  initializes variable with another field
-/// \param  out   output pointer
-/// \param  in    input pointer
-// ***************************************************************************************
+/// \param  out     output pointer
+/// \param  in      input pointer
+// *****************************************************************************
 void ISolver::init_f(Field *out, const real *in) {
-
     auto boundary = BoundaryController::getInstance();
 
     size_t *iList = boundary->get_innerList_level_joined();
@@ -440,14 +444,13 @@ void ISolver::init_f(Field *out, const real *in) {
     }
 }
 
-// ========================================== Init =======================================
-// ***************************************************************************************
+// ===================================== Init ==================================
+// *****************************************************************************
 /// \brief  initializes variable with constant
-/// \param  out   output pointer
-/// \param  in    constant real value
-// ***************************************************************************************
+/// \param  out     output pointer
+/// \param  in      constant real value
+// *****************************************************************************
 void ISolver::init_c(Field *out, real in) {
-
     auto boundary = BoundaryController::getInstance();
 
     size_t *iList = boundary->get_innerList_level_joined();
@@ -457,30 +460,29 @@ void ISolver::init_c(Field *out, real in) {
     size_t *oList = boundary->get_obstacleList();
     size_t size_oList = boundary->getSize_obstacleList();
 
-    //inner cells
+    // inner cells
     for (size_t i = 0; i < size_iList; i++) {
         size_t idx = iList[i];
         out->data[idx] = in;
     }
-    //boundary
+    // boundary
     for (size_t i = 0; i < size_bList; i++) {
         size_t idx = bList[i];
         out->data[idx] = in;
     }
-    //obstacle
+    // obstacle
     for (size_t i = 0; i < size_oList; i++) {
         size_t idx = oList[i];
         out->data[idx] = in;
     }
 }
 
-// ========================================== Set up boundary =======================================
-// ***************************************************************************************
+// ================================ Set up boundary =============================
+// *****************************************************************************
 /// \brief  initializes boundary cells
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISolver::set_up_boundary(bool sync) {
-
     auto boundary = BoundaryController::getInstance();
     // TODO necessary?
     boundary->applyBoundary(u0->data, u0->get_type(), sync);
@@ -506,8 +508,8 @@ void ISolver::set_up_boundary(bool sync) {
     boundary->applyBoundary(concentration_tmp->data, concentration_tmp->get_type(), sync);
 }
 
-//======================================== Couple velocity ====================================
-// ***************************************************************************************
+// ============================== Couple velocity ==========================
+// *****************************************************************************
 /// \brief  couples vector (sets tmp and zero-th variables to current numerical solution)
 /// \param  a   current field in x- direction (const)
 /// \param  a0    zero-th field in x- direction
@@ -521,7 +523,6 @@ void ISolver::set_up_boundary(bool sync) {
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISolver::couple_vector(const Field *a, Field *a0, Field *a_tmp, const Field *b, Field *b0, Field *b_tmp, const Field *c, Field *c0, Field *c_tmp, bool sync) {
-
     // local variables and parameters for GPU
     auto d_a = a->data;
     auto d_a0 = a0->data;
@@ -590,8 +591,8 @@ void ISolver::couple_vector(const Field *a, Field *a0, Field *a_tmp, const Field
     }//end data region
 }
 
-//======================================= Couple scalar ==================================
-// ***************************************************************************************
+// ================================== Couple scalar =============================
+// *****************************************************************************
 /// \brief  couples vector (sets tmp and zero-th variables to current numerical solution)
 /// \param  a   current field in x- direction (const)
 /// \param  a0    zero-th field in x- direction
@@ -599,7 +600,6 @@ void ISolver::couple_vector(const Field *a, Field *a0, Field *a_tmp, const Field
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISolver::couple_scalar(const Field *a, Field *a0, Field *a_tmp, bool sync) {
-
     // local variables and parameters for GPU
     auto d_a = a->data;
     auto d_a0 = a0->data;
@@ -648,13 +648,12 @@ void ISolver::couple_scalar(const Field *a, Field *a0, Field *a_tmp, bool sync) 
     }//end data region
 }
 
-//======================================= Update data ==================================
-// ***************************************************************************************
+// ================================== Update data =============================
+// *****************************************************************************
 /// \brief  Updates variables for the next iteration step or time dependent parameters such as temperature source function
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISolver::update_data(bool sync) {
-
     // local variables and parameters for GPU
     auto bsize = Domain::getInstance()->get_size();
 
@@ -754,7 +753,6 @@ void ISolver::update_data(bool sync) {
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISolver::update_sources(real t, bool sync) {
-
     auto params = Parameters::getInstance();
 
 // Momentum source
@@ -767,18 +765,17 @@ void ISolver::update_sources(real t, bool sync) {
         std::string forceFct = params->get("solver/source/force_fct");
         if (forceFct == SourceMethods::Zero or \
             forceFct == SourceMethods::Uniform) {
-
         } else if (forceFct == SourceMethods::Buoyancy) {
 #ifndef BENCHMARKING
-            std::cout << "Update f(T) ..." << std::endl;
-            //TODO Logger
+            m_logger->info("Update f(T) ...");
 #endif
             momentum_source();
         } else {
-            std::cout << "Source function not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+#ifndef BENCHMARKING
+            m_logger->critical("Source function not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
-            //TODO Error handling + Logger
+            // TODO Error handling
         }
     }
 
@@ -824,10 +821,11 @@ void ISolver::update_sources(real t, bool sync) {
                 d_S_T[idx] *= t_ramp;
             }
         } else {
-            std::cout << "Source function not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+#ifndef BENCHMARKING
+            m_logger->critical("Source function not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
-            //TODO Error handling + Logger
+            // TODO Error handling
         }
     }
 
@@ -868,16 +866,17 @@ void ISolver::update_sources(real t, bool sync) {
                 d_S_C[idx] *= t_ramp;
             }
         } else {
-            std::cout << "Source function not yet implemented! Simulation stopped!" << std::endl;
-            std::flush(std::cout);
+#ifndef BENCHMARKING
+            m_logger->critical("Source function not yet implemented! Simulation stopped!");
+#endif
             std::exit(1);
-            //TODO Error handling + Logger
+            // TODO Error handling
         }
     }
 }
 
-//======================================= Update data ==================================
-// ***************************************************************************************
+// ================================== Update data =============================
+// *****************************************************************************
 /// \brief  Updates time dependent parameters temperature source functions
 // ***************************************************************************************
 void ISolver::temperature_source() {
@@ -887,8 +886,8 @@ void ISolver::temperature_source() {
     }
 }
 
-//======================================= Update data ==================================
-// ***************************************************************************************
+// ================================== Update data =============================
+// *****************************************************************************
 /// \brief  Updates time dependent parameters force source functions
 // ***************************************************************************************
 void ISolver::force_source() {
@@ -910,8 +909,8 @@ void ISolver::force_source() {
     }
 }
 
-//======================================= Update data ==================================
-// ***************************************************************************************
+//================================== Update data =============================
+// *****************************************************************************
 /// \brief  Updates time dependent parameters momentum source functions
 // ***************************************************************************************
 void ISolver::momentum_source() {
@@ -932,7 +931,7 @@ void ISolver::momentum_source() {
 //======================================= read and call random function ==================================
 // ***************************************************************************************
 /// \brief  Calls random function and reads necessary input variables
-/// \param  field		field as a pointer
+/// \param  field       field as a pointer
 // ***************************************************************************************
 void ISolver::CallRandom(Field* field) {
   auto params = Parameters::getInstance();

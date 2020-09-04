@@ -13,8 +13,8 @@
 #ifndef ENUM_TYPES
 #define ENUM_TYPES
 const size_t numberOfFieldTypes = 6;
-enum FieldType : size_t {
-    RHO = 0, U = 1, V = 2, W = 3, P = 4, T = 5
+enum FieldType : int {
+    UNKNOWN_FIELD = -1, RHO = 0, U = 1, V = 2, W = 3, P = 4, T = 5
 };
 #endif
 

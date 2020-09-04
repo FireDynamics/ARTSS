@@ -7,6 +7,9 @@
 #ifndef ARTSS_INTERFACES_ISOLVER_H_
 #define ARTSS_INTERFACES_ISOLVER_H_
 
+#include <string>
+
+#include "../utility/Utility.h"
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "ISource.h"
@@ -26,11 +29,8 @@ struct SolverTypes {
 };
 
 class ISolver {
-public:
-//    ISolver();
-
+ public:
     virtual ~ISolver() = default;
-
     virtual void do_step(real t, bool sync) = 0;
 };
 

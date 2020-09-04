@@ -5,16 +5,18 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include <cmath>
 
 #include "JacobiDiffuse.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
+#include "../utility/Utility.h"
 
 JacobiDiffuse::JacobiDiffuse() {
-
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
@@ -25,8 +27,8 @@ JacobiDiffuse::JacobiDiffuse() {
     m_tol_res = params->get_real("solver/diffusion/tol_res");
 }
 
-//====================================== Diffuse ===============================================
-// ***************************************************************************************
+// ============================ Diffuse =====================================
+// *****************************************************************************
 /// \brief  solves diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
 ///     via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
 /// \param  out     output pointer
@@ -36,7 +38,6 @@ JacobiDiffuse::JacobiDiffuse() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
-
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto bsize = domain->get_size(out->get_level());
@@ -133,16 +134,14 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
         }
 
 #ifndef BENCHMARKING
-        std::cout << "Number of iterations:" << it << std::endl;
-        std::cout << "Jacobi ||res|| = " << res << "\n";
-        //TODO Logger
+        m_logger->info("Number of iterations: {}", it);
+        m_logger->info("Jacobi ||res|| = {:0.5e}", res);
 #endif
-
-    }//end data region
+    }  // end data region
 }
 
-//====================================== Turbulent version ===============================================
-// ***************************************************************************************
+// ======================= Turbulent version ================================
+// ************************************************************************
 /// \brief  solves turbulent diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
 ///     via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
 /// \param  out     output pointer
@@ -153,7 +152,6 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, const Field *EV, bool sync) {
-
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto bsize = domain->get_size(out->get_level());
@@ -251,15 +249,14 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 #pragma acc wait
         }
 #ifndef BENCHMARKING
-        std::cout << "Number of iterations:" << it << std::endl;
-        std::cout << "Jacobi ||res|| = " << res << "\n";
-        //TODO Logger
+        m_logger->info("Number of iterations: {}", it);
+        m_logger->info("Jacobi ||res|| = {:0.5e}", res);
 #endif
-    }//end data region
+    }  // end data region
 }
 
-//====================================== Jacobian stencil ===============================================
-// ***************************************************************************************
+// ======================= Jacobian stencil ================================
+// ************************************************************************
 /// \brief  performs one (weighted) Jacobi step \f$ x_i^{(n+1)}:=\frac1{a_{ii}}\left(b_i-\sum_{j\not=i} a_{ij}\cdot x_j^{(n)}\right), \, i=0,\dots,N_x-2 \f$
 /// \param  out   output pointer
 /// \param  in    input pointer
@@ -276,7 +273,6 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, const real alphaX, const real alphaY, const real alphaZ, const real beta, const real dsign, const real w, bool sync) {
-
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
@@ -307,8 +303,8 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
     }
 }
 
-//========================= Multigrid version for Jacobian stencil =========================
-// ***************************************************************************************
+// =============== Multigrid version for Jacobian stencil ===============
+// ************************************************************************
 /// \brief  performs one (weighted) Jacobi step at multigrid level, \f$ x_i^{(n+1)}:=\frac1{a_{ii}}\left(b_i-\sum_{j\not=i} a_{ij}\cdot x_j^{(n)}\right), \, i=0,\dots,N_x-2 \f$
 /// \param  level multigrid level
 /// \param  out   output pointer
@@ -326,7 +322,6 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const Field *b, const real alphaX, const real alphaY, const real alphaZ, const real beta, const real dsign, const real w, bool sync) {
-
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(level); //due to unnecessary parameter passing of *this
@@ -358,8 +353,8 @@ void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const 
     }
 }
 
-//========================= Turbulent version for Jacobian stencil =========================
-// ***************************************************************************************
+// =============== Turbulent version for Jacobian stencil ===============
+// ************************************************************************
 /// \brief  performs one (weighted) Jacobi step for turbulent diffusion, \f$ x_i^{(n+1)}:=\frac1{a_{ii}}\left(b_i-\sum_{j\not=i} a_{ij}\cdot x_j^{(n)}\right), \, i=0,\dots,N_x-2 \f$
 /// \param  out   output pointer
 /// \param  in    input pointer
@@ -372,7 +367,6 @@ void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const 
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, const real dsign, const real w, const real D, const Field *EV, const real dt, bool sync) {
-
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this

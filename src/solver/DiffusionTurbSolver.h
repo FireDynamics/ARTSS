@@ -7,13 +7,20 @@
 #ifndef ARTSS_SOLVER_DIFFUSIONTURBSOLVER_H_
 #define ARTSS_SOLVER_DIFFUSIONTURBSOLVER_H_
 
+#include "../Domain.h"
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IDiffusion.h"
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../field/FieldController.h"
+#include "../utility/Parameters.h"
+#include "SolverSelection.h"
 
-class DiffusionTurbSolver : public ISolver {
+#ifndef BENCHMARKING
+#include "../utility/Utility.h"
+#endif
+
+class DiffusionTurbSolver: public ISolver {
 public:
     explicit DiffusionTurbSolver(FieldController *field_controller);
     ~DiffusionTurbSolver();
@@ -21,6 +28,9 @@ public:
     void do_step(real t, bool sync) override;
 
 private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     FieldController *m_field_controller;
 
     IDiffusion *dif;

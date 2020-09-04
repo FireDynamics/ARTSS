@@ -9,6 +9,7 @@
 #define ARTSS_ANALYSIS_SOLUTION_H_
 
 #include "../field/Field.h"
+#include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 
 class Solution {
@@ -45,9 +46,12 @@ private:
     Field *u_a, *v_a, *w_a;
     Field *p_a;
     Field *T_a;
-    real m_current_time_step = -1;
-
     void (Solution::*m_init_function)(const real);
+
+    real m_current_time_step = -1;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_ANALYSIS_SOLUTION_H_ */

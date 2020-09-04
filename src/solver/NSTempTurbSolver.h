@@ -16,14 +16,21 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../visualisation/Visual.h"
 
+#ifndef BENCHMARKING
+#include "../utility/Utility.h"
+#endif
+
 class NSTempTurbSolver : public ISolver {
-public:
+ public:
     explicit NSTempTurbSolver(FieldController *fieldController);
     ~NSTempTurbSolver();
 
     void do_step(real t, bool sync) override;
 
-private:
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     FieldController *m_field_controller;
 
     IAdvection *adv_vel;

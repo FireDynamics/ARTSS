@@ -14,14 +14,22 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../field/FieldController.h"
 
+#ifdef BENCHMARKING
+#include "../utility/Utility.h"
+#endif
+
+
 class NSSolver : public ISolver {
-public:
+ public:
     NSSolver(FieldController *field_controller);
     ~NSSolver();
 
     void do_step(real t, bool sync) override;
 
-private:
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     FieldController *m_field_controller;
 
     IAdvection *adv_vel;

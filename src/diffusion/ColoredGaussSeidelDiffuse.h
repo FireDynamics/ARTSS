@@ -10,9 +10,10 @@
 
 #include "../interfaces/IDiffusion.h"
 #include "../field/Field.h"
+#include "../utility/Utility.h"
 
 class ColoredGaussSeidelDiffuse: public IDiffusion {
-public:
+ public:
     ColoredGaussSeidelDiffuse();
 
     void diffuse(Field* out, Field* in, const Field* b, const real D, bool sync = true);
@@ -21,7 +22,10 @@ public:
     static void colored_gauss_seidel_step(Field* out, const Field* b, const real dsign, const real w, const real D, const Field* EV, const real dt, bool sync = true); // turbulent version
     static void colored_gauss_seidel_stencil(size_t i, size_t j, size_t k, real* out, real* b, const real alpha_x, const real alpha_y, const real alpha_z, const real dsign, const real beta, const real w, const size_t Nx, const size_t Ny);
 
-private:
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     real m_dt;
     real m_dsign;
     real m_w;

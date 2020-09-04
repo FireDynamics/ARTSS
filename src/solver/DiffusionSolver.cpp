@@ -4,8 +4,6 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-
 #include "DiffusionSolver.h"
 #include "../interfaces/IDiffusion.h"
 #include "../utility/Parameters.h"
@@ -13,8 +11,10 @@
 #include "SolverSelection.h"
 
 DiffusionSolver::DiffusionSolver(FieldController *field_controller) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     m_field_controller = field_controller;
-
     auto params = Parameters::getInstance();
     std::string diffusionType = params->get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
@@ -34,9 +34,8 @@ DiffusionSolver::~DiffusionSolver() {
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void DiffusionSolver::do_step(real t, bool sync) {
-
 #ifndef BENCHMARKING
-    std::cout << "Diffuse ..." << std::endl;
+    m_logger->info("Diffuse ...");
 #endif
 // 1. Solve diffusion equation
     // local variables and parameters for GPU
@@ -77,9 +76,11 @@ void DiffusionSolver::do_step(real t, bool sync) {
 void DiffusionSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger(typeid(DiffusionSolver).name());
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Loggers
+        //TODO Error handling
     }
 }

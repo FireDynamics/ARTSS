@@ -4,24 +4,24 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include "ExplicitEulerSource.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 
 ExplicitEulerSource::ExplicitEulerSource() {
-
     auto params = Parameters::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
     m_dir_vel = params->get("solver/source/dir");
 
     if (m_dir_vel.find('x') == std::string::npos && m_dir_vel.find('y') == std::string::npos && m_dir_vel.find('z') == std::string::npos) {
-        std::cout << "unknown direction -> exit" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        m_logger = Utility::create_logger(typeid(ExplicitEulerSource).name());
+        m_logger->error("unknown direction -> exit");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }
 

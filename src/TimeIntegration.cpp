@@ -6,7 +6,6 @@
 
 #include <chrono>
 #include <vector>
-#include <iostream>
 
 #include "TimeIntegration.h"
 #include "utility/Parameters.h"
@@ -18,6 +17,9 @@
 /// \param  solver_controller class representative for solver
 // ***************************************************************************************
 TimeIntegration::TimeIntegration(SolverController *sc) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
@@ -75,11 +77,10 @@ void TimeIntegration::run() {
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
     m_analysis->analyse(m_field_controller, 0.);
     m_visual->visualise(m_field_controller, 0.);
-#endif
-
+    m_logger->info("Start calculating and timing...");
+#else
     std::cout << "Start calculating and timing...\n" << std::endl;
-    // TODO Logger
-
+#endif
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     {
@@ -101,8 +102,7 @@ void TimeIntegration::run() {
         while (t_cur < t_end + dt / 2) {
             //iter_start = std::chrono::system_clock::now();
 #ifndef BENCHMARKING
-            std::cout << "\nt_cur=" << t_cur << std::endl;
-            //TODO Logger
+            m_logger->info("t_cur = {:.5f}", t_cur);
 #endif
 
             // Calculate
@@ -158,15 +158,18 @@ void TimeIntegration::run() {
 
     } // end RANGE
 
-    std::cout << "\nDone calculating and timing ...\n" << std::endl;
-    //TODO Logger
+#ifndef BENCHMARKING
+    m_logger->info("Done calculating and timing ...");
+#else
+    std::cout << "Done calculating and timing ..." << std::endl;
+#endif
 
     // stop timer
     end = std::chrono::system_clock::now();
-    long ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "Global Time: " << ms << "ms" << std::endl;
-    //TODO Logger
+    long ms = std::chrono::duration_cast < std::chrono::milliseconds > (end - start).count();
+
 #ifndef BENCHMARKING
+    m_logger->info("Global Time: {}ms", ms);
     if (m_adaption->is_data_extraction_endresult_enabled()) {
         m_adaption->extractData(m_adaption->get_endresult_name());
     }
@@ -176,6 +179,8 @@ void TimeIntegration::run() {
     delete m_analysis;
     delete m_solution;
     delete m_visual;
+#else
+    std::cout << "Global Time: " << ms << "ms" << std::endl;
 #endif
     delete m_adaption;
 }

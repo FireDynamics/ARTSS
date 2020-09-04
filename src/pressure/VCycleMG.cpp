@@ -1,10 +1,9 @@
-/// \file 		VCycleMG.cpp
-/// \brief 		Defines V-cycle of geometric multigrid method
-/// \date 		Sep 14, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       VCycleMG.cpp
+/// \brief      Defines V-cycle of geometric multigrid method
+/// \date       Sep 14, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include <cmath>
 
 #include "VCycleMG.h"
@@ -14,14 +13,19 @@
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 #include "../solver/SolverSelection.h"
+#include "../utility/Utility.h"
 
-// ==================================== Constructor ====================================
-// ***************************************************************************************
+
+// =============================== Constructor ===============================
+// *****************************************************************************
 /// \brief  Constructor
-/// \param  out		pressure
-/// \param  b		rhs
-// ***************************************************************************************
+/// \param  out     pressure
+/// \param  b       rhs
+// *****************************************************************************
 VCycleMG::VCycleMG(Field *out, Field *b) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
 
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
@@ -98,7 +102,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 
 #pragma acc enter data copyin(data_residuum1[:bsize_residuum1])
 
-        //	build error1
+        //  build error1
         Field *e1 = new Field(FieldType::P, 0.0, i + 1);
         error1.push_back(e1);
 
@@ -117,7 +121,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 #pragma acc enter data copyin(data_mg_temporal_solution[:bsize_mg_temporal_solution])
     } // end level loop
 
-//	build err0
+//  build err0
     err0.resize(levels + 1);
 
     Field *e00 = new Field(FieldType::P, 0.0, error1[0]->get_level());
@@ -195,13 +199,13 @@ VCycleMG::~VCycleMG() {
     }
 }
 
-// ==================================== Update ====================================
-// ***************************************************************************************
+// =============================== Update ===============================
+// ************************************************************************
 /// \brief  Update input
-/// \param  out		pressure
-/// \param  b		rhs
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out     pressure
+/// \param  b       rhs
+/// \param  sync    synchronization boolean (true=sync (default), false=async)
+// ************************************************************************
 void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
@@ -243,16 +247,15 @@ void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
     }//end data region
 }
 
-//========================================= Pressure ======================================
-// ***************************************************************************************
+//==================================== Pressure =================================
+// *****************************************************************************
 /// \brief  solves Poisson equation \f$ \nabla^2 p = rhs\f$ via geometric multigrid (VCycle)
-/// \param  out			pressure
-/// \param	b 			rhs
-/// \param	t			current time
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         pressure
+/// \param  b           rhs
+/// \param  t           current time
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
-
     // Update first
     UpdateInput(out, b);
 
@@ -334,14 +337,13 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
     }
 }
 
-//========================================= VCycle ======================================
-// ***************************************************************************************
+//==================================== VCycle =================================
+// *****************************************************************************
 /// \brief  Conducts the V-cycle Multigrid method
-/// \param  out			pressure
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         pressure
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
-
     size_t max_level = levels;
 
     auto domain = Domain::getInstance();
@@ -560,17 +562,16 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
     }
 }
 
-//========================================= Smooth ======================================
-// ***************************************************************************************
+//==================================== Smooth =================================
+// *****************************************************************************
 /// \brief  Relaxes Ax = b using a diffusion method
-/// \param  out			output field (in size of input )
-/// \param  tmp			temporary field for JacobiStep
-/// \param	b			right hand side
-/// \param  level		Multigrid level
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         output field (in size of input )
+/// \param  tmp         temporary field for JacobiStep
+/// \param  b           right hand side
+/// \param  level       Multigrid level
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -678,10 +679,11 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
             }
         } //end data region
     } else {
-        std::cout << "Diffusion method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
 
     if (sync) {
@@ -689,17 +691,16 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
     }
 }
 
-//======================================= Residuum ====================================
-// ***************************************************************************************
+//================================== Residuum ===============================
+// ************************************************************************
 /// \brief  Calculates residuum r = b - Ax
-/// \param  out			output field (in size of input field)
-/// \param  in			input field
-/// \param	b			right hand side field
-/// \param  level		Multigrid level
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         output field (in size of input field)
+/// \param  in          input field
+/// \param  b           right hand side field
+/// \param  level       Multigrid level
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// ************************************************************************
 void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -744,16 +745,15 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync
     }//end data region
 }
 
-//======================================= Restrict ====================================
-// ***************************************************************************************
+//================================== Restrict ===============================
+// *****************************************************************************
 /// \brief  Restricts field from fine grid to coarse grid via averaging
-/// \param  out			output field (half the size of input vector)
-/// \param  in			input field (on fine grid)
-/// \param  level		Multigrid level
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         output field (half the size of input vector)
+/// \param  in          input field (on fine grid)
+/// \param  level       Multigrid level
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -779,8 +779,12 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     size_t start_i = boundary->get_innerList_level_joined_start(level + 1);
     size_t end_i = boundary->get_innerList_level_joined_end(level + 1) + 1;
 
-    if (end_i == start_i) std::cout << "Be cautious: Obstacle might fill up inner cells completely in level " << level << " with nx= " << domain->get_nx(out->get_level()) << "!" << std::endl;
-    //TODO Error handling + Logger
+#ifndef BENCHMARKING
+    if (end_i == start_i) {
+        m_logger->warn("Be cautious: Obstacle might fill up inner cells completely in level {} with nx= {}!",
+                       level, domain->get_nx(out->get_level()));
+    }
+#endif
 
     // average from eight neighboring cells
     // obstacles not used in fine grid, since coarse grid only obstacle if one of 8 fine grids was an obstacle,
@@ -814,16 +818,15 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     }// end data region
 }
 
-//======================================= Prolongate ====================================
-// ***************************************************************************************
+//================================== Prolongate ===============================
+// *****************************************************************************
 /// \brief  Prolongates field from coarse grid to fine grid (trilinear interpolation)
-/// \param  out			output field (real the size of input vector)
-/// \param  in			input field (on coarse grid)
-/// \param  level		Multigrid level
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         output field (real the size of input vector)
+/// \param  in          input field (on coarse grid)
+/// \param  level       Multigrid level
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -887,17 +890,16 @@ void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
     }// end data region
 }
 
-//========================================= Smooth ======================================
-// ***************************************************************************************
+//==================================== Smooth =================================
+// *****************************************************************************
 /// \brief  Solves Ax = b on the lowest level using a diffusion method
-/// \param  out			output field (in size of input )
-/// \param  tmp			temporary field for JacobiStep
-/// \param	b			right hand side
-/// \param  level		Multigrid level
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         output field (in size of input )
+/// \param  tmp         temporary field for JacobiStep
+/// \param  b           right hand side
+/// \param  level       Multigrid level
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -906,16 +908,20 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
     const size_t Nz = domain->get_Nz(out->get_level());
 
     if (level < levels - 1) {
-        std::cout << "Wrong level =" << level << std::endl;
+#ifndef BENCHMARKING
+        m_logger->warn("Wrong level = {}", level);
+#endif
         return;
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
 
     if (Nx <= 4 && Ny <= 4) {
-        std::cout << " Grid is too coarse with Nx = " << Nx << " and Ny = " << Ny << ". Just smooth here" << std::endl;
+#ifndef BENCHMARKING
+        m_logger->warn(" Grid is too coarse with Nx={} and Ny={}. Just smooth here", Nx, Ny);
+#endif
         Smooth(out, tmp, b, level, sync);
         return;
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
 
     const real dx = domain->get_dx(out->get_level());
@@ -946,7 +952,6 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
     size_t start_b = boundary->get_boundaryList_level_joined_start(level);
     size_t end_b = boundary->get_boundaryList_level_joined_end(level) + 1;
 
-
     boundary->applyBoundary(d_out, level, type, sync);
 
     const real rdx2 = 1. / (dx * dx);
@@ -972,19 +977,18 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             d_tmp[i] = d_out[i];
         }
 
-        //boundary
+        // boundary
 #pragma acc kernels present(d_bList[start_b:(end_b-start_b)]) async
 #pragma acc loop independent
         for (size_t j = start_b; j < end_b; ++j) {
             const size_t i = d_bList[j];
             d_tmp[i] = d_out[i];
         }
-    }//end data region
+    }  // end data region
 
 // Diffusion step
     std::string diffusionType = params->get("solver/pressure/diffusion/type");
     if (diffusionType == DiffusionMethods::Jacobi) {
-
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
             size_t it = 0;
@@ -1016,11 +1020,9 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
                 std::swap(tmp->data, out->data);
                 std::swap(d_tmp, d_out);
+            }  // end while
 
-            }// end while
-
-            if (it % 2 != 0) // swap necessary when odd number of iterations
-            {
+            if (it % 2 != 0) {  // swap necessary when odd number of iterations
 #pragma acc kernels present(d_out[:bsize], d_tmp[:bsize], d_iList[start_i:(end_i-start_i)]) async
 #pragma acc loop independent
                 // inner
@@ -1035,9 +1037,8 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
                     const size_t i = d_bList[j];
                     d_out[i] = d_tmp[i];
                 }
-
             }
-        }//end data region
+        } //end data region
     } else if (diffusionType == DiffusionMethods::ColoredGaussSeidel) {
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
@@ -1048,7 +1049,6 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             real res = 10000.;
 
             while (res > tol_res && it < max_it) {
-
                 ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync); // for res/err only Dirichlet BC
 
@@ -1066,16 +1066,15 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
 #pragma acc wait
                 res = sqrt(sum);
-
                 it++;
-
-            }// end while
-        } //end data region
+            }  // end while
+        }  // end data region
     } else {
-        std::cout << "Diffusion method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
 
     if (sync) {

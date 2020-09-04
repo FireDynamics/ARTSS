@@ -88,7 +88,7 @@ function create_testcases {
   if [ $NS -eq 1 ]
   then
     ####################NavierStokes CavityFlow####################
-    NAMEVALUES[$INDEX]=NavierStokesCavity
+    NAMEVALUES[$INDEX]=NavierStokes_Cavity
     FPATHVALUES[$INDEX]=tests/navierStokes/cavityFlow
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --ns --tend 0.5 --dt 0.001 --nu 0.1 --advectiontype SemiLagrangian --diffusiontype Jacobi  --sourcetype ExplicitEuler --forcefct Zero --forcedir xyz --pressuretype VCycleMG --nlevel 4 --ncycle 2 --maxiter 50 --pressurediffusiontype Jacobi --solavail No  --xstart 0. --xend 2. --ystart 0. --yend 2. --zstart 0. --zend 2. --nx 40 --ny 40 --nz 1 --vtkplots 50"
@@ -104,7 +104,7 @@ function create_testcases {
     ((INDEX++))
 
     ####################NavierStokes ChannelFlow####################
-    NAMEVALUES[$INDEX]=NavierStokesChannel
+    NAMEVALUES[$INDEX]=NavierStokes_Channel
     FPATHVALUES[$INDEX]=tests/navierStokes/channelFlow
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --ns --tend 10. --dt 0.01 --nu 0.1 --advectiontype SemiLagrangian --diffusiontype Jacobi --pressuretype VCycleMG --nlevel 4 --ncycle 2 --maxiter 100 --pressurediffusiontype Jacobi --solavail No  --xstart 0. --xend 2. --ystart 0. --yend 2. --zstart 0. --zend 2. --nx 40 --ny 40 --nz 1 --vtkplots 20"
@@ -124,7 +124,7 @@ function create_testcases {
     ((INDEX++))
 
     ####################NavierStokes McDermott####################
-    NAMEVALUES[$INDEX]=NavierStokesMcDermott
+    NAMEVALUES[$INDEX]=NavierStokes_McDermott
     FPATHVALUES[$INDEX]=tests/navierStokes/mcDermott
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --ns --tend 6.2831853072 --dt 0.01 --nu 0.1 --beta 0. --advectiontype SemiLagrangian --diffusiontype Jacobi  --sourcetype ExplicitEuler --forcefct Zero --forcedir xyz --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --solavail Yes  --xstart 0. --xend 6.2831853072 --ystart 0. --yend 6.2831853072 --zstart 0. --zend 6.2831853072 --nx 64 --ny 64 --nz 1 --vtkplots 63"
@@ -138,7 +138,7 @@ function create_testcases {
     ((INDEX++))
 
     ####################NavierStokes Vortex####################
-    NAMEVALUES[$INDEX]=NavierStokesVortex
+    NAMEVALUES[$INDEX]=NavierStokes_Vortex
     FPATHVALUES[$INDEX]=tests/navierStokes/vortex
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --ns --tend 1.0 --dt 0.01 --nu 0. --advectiontype SemiLagrangian --diffusiontype Jacobi  --sourcetype ExplicitEuler --forcefct Zero --forcedir xyz --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --solavail Yes  --xstart -0.1556 --xend 0.1556 --ystart -0.1556 --yend 0.1556 --zstart -0.1556 --zend 0.1556 --nx 64 --ny 64 --nz 1"
@@ -182,7 +182,7 @@ function create_testcases {
     ((INDEX++))
 
     ####################NavierStokesTemp MMS####################
-    NAMEVALUES[$INDEX]=NavierStokesTempBuoyancyMMS
+    NAMEVALUES[$INDEX]=NavierStokesTemp_BuoyancyMMS
     FPATHVALUES[$INDEX]=tests/navierStokesTemp/mms
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --nstemp --tend 1.0 --dt 0.005 --nu 0.05 --beta 1. --g -9.81 --kappa 0.05 --advectiontype SemiLagrangian --diffusiontype Jacobi --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --solavail Yes  --xstart -2. --xend 2. --ystart -2. --yend 2. --zstart -2. --zend 2. --nx 64 --ny 64 --nz 1 --forcefct Buoyancy --forcedir y --tempsourcefct BuoyancyST_MMS --vtkplots 20"
@@ -201,7 +201,7 @@ function create_testcases {
   if [ $NSTT -eq 1 ]
   then
     ####################NavierStokesTempTurb Adaption####################
-    NAMEVALUES[$INDEX]=NavierStokesTempTurbAdaption
+    NAMEVALUES[$INDEX]=NavierStokesTempTurb_Adaption
     FPATHVALUES[$INDEX]=tests/navierStokesTempTurb/dynamicBoundaries
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --nstempturb --tend 35. --dt 0.1 --nu 2.44139e-05 --beta 3.28e-3 --g -9.81 --kappa 3.31e-5 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 6 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --prt 0.5 --solavail No  --xstartp 0. --xendp 128. --xstartc 26. --xendc 34. --ystart -3. --yend 3. --zstart -4. --zend 4. --nx 64 --ny 16 --nz 32 --vtkplots 35"
@@ -229,7 +229,7 @@ function create_testcases {
     echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct=\"RampTanh\" dissipation=\"No\">
         <HRR> 25000. </HRR>     <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
-        <x0> 30.  </x0>
+        <x0> 30. </x0>
         <y0> -3. </y0>
         <z0> 0. </z0>
         <sigma_x> 1.0 </sigma_x>
@@ -253,7 +253,7 @@ function create_testcases {
   </adaption>" > ${NAME}_$AFILEVAL
     ((INDEX++))
     ####################NavierStokesTempTurb MMS####################
-    NAMEVALUES[$INDEX]=NavierStokesTempTurbBuoyancyMMS
+    NAMEVALUES[$INDEX]=NavierStokesTempTurb_BuoyancyMMS
     FPATHVALUES[$INDEX]=tests/navierStokesTempTurb/mms
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --nstempturb --tend 1.0 --dt 0.005 --nu 0.05 --beta 1. --g -9.81 --kappa 0.05 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --prt 0.9 --solavail No  --xstart -2. --xend 2. --ystart -2. --yend 2. --zstart -2. --zend 2. --nx 64 --ny 64 --nz 1 --vtkplots 20"
@@ -274,7 +274,7 @@ function create_testcases {
   if [ $NSTu -eq 1 ]
   then
     ####################NavierStokesTurb McDermott####################
-    NAMEVALUES[$INDEX]=NavierStokesTurbMcDermott
+    NAMEVALUES[$INDEX]=NavierStokesTurb_McDermott
     FPATHVALUES[$INDEX]=tests/navierStokesTurb/mcDermott
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --nsturb --tend 6.2831853072 --dt 0.01 --nu 0.1 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --solavail No  --xstart 0. --xend 6.2831853072 --ystart 0. --yend 6.2831853072 --zstart 0. --zend 6.2831853072 --nx 64 --ny 64 --nz 1 --vtkplots 63"
@@ -290,7 +290,7 @@ function create_testcases {
     ((INDEX++))
 
     ####################NavierStokesTurb Vortex####################
-    NAMEVALUES[$INDEX]=NavierStokesTurbVortex
+    NAMEVALUES[$INDEX]=NavierStokesTurb_Vortex
     FPATHVALUES[$INDEX]=tests/navierStokesTurb/vortex
     NAME=${NAMEVALUES[$INDEX]}
     BUILDER[$INDEX]="./xml-builder.sh --nsturb --tend 1.0 --dt 0.01 --nu 0. --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --solavail No  --xstart -0.1556 --xend 0.1556 --ystart -0.1556 --yend 0.1556 --zstart -0.1556 --zend 0.1556 --nx 64 --ny 64 --nz 1"
@@ -375,7 +375,7 @@ function create_testcases {
     echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct= \"RampTanh\" dissipation=\"No\">
         <HRR> 2500. </HRR>      <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
-        <x0> 0.  </x0>
+        <x0> 0. </x0>
         <y0> 1. </y0>
         <z0> 0.1 </z0>
         <sigma_x> 0.1 </sigma_x>
@@ -631,8 +631,8 @@ if ${YELLOW}--generate${NC} and ${YELLOW}--verbose${NC} are selected, temporary 
     xsltproc strip_comments.xsl $FPATH/Test_${NAME}.xml > 2.xml
     xmllint --format 1.xml > 1_format.xml
     xmllint --format 2.xml > 2_format.xml
-    tidy -xml -iq 1_format.xml > "$GENERATED"
-    tidy -xml -iq 2_format.xml > "$EXAMPLE"
+    tidy -xml -iq -wrap 0 1_format.xml > "$GENERATED"
+    tidy -xml -iq -wrap 0 2_format.xml > "$EXAMPLE"
     if [ $VERBOSE -eq 1 ]
     then
       diff $GENERATED $EXAMPLE
@@ -644,14 +644,11 @@ if ${YELLOW}--generate${NC} and ${YELLOW}--verbose${NC} are selected, temporary 
       rm $EXAMPLE $GENERATED
     else
       echo -e "${RED}failure${NC} [$NAME]\n"
+      xmllint --format $XMLNAME > Format_${XMLNAME}
       FAIL=1
     fi
-    if [ $GENERATE -eq 1 ]
+    if [ $GENERATE -eq 0 ]
     then
-      # format?
-      xmllint --format $XMLNAME > Format_${XMLNAME}
-      #mv ${XMLNAME}_2 ${XMLNAME}
-    else
       rm $XMLNAME
     fi
     if [ $GENERATE -eq 0 -o $VERBOSE -eq 0 ]
