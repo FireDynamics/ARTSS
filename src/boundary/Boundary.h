@@ -11,10 +11,7 @@
 #include <vector>
 #include "BoundaryData.h"
 #include "Obstacle.h"
-
-#ifndef BENCHMARKING
 #include "../utility/Utility.h"
-#endif
 
 
 class Boundary {

@@ -16,10 +16,8 @@
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
-
-#ifndef BENCHMARKING
 #include "../utility/Utility.h"
-#endif
+
 
 class NSTempConSolver : public ISolver {
  public:

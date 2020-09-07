@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include "../utility/GlobalMacrosTypes.h"
 #include "../boundary/BoundaryData.h"
+#include "../utility/Utility.h"
 
 class DomainBoundary {
   public:

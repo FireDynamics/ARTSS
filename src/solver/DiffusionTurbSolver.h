@@ -14,10 +14,8 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Parameters.h"
 #include "SolverSelection.h"
-
-#ifndef BENCHMARKING
 #include "../utility/Utility.h"
-#endif
+
 
 class DiffusionTurbSolver: public ISolver {
 public:

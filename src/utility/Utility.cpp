@@ -9,12 +9,10 @@
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
-
-#ifndef BENCHMARKING
 #include <spdlog/cfg/helpers.h>
 #include <cctype>
 #include <clocale>
-#endif
+
 
 // ================================= Calc i,j,k ==========================================
 // ***************************************************************************************

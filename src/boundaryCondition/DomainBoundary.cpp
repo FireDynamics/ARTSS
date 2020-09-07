@@ -6,9 +6,6 @@
 
 #include "DomainBoundary.h"
 #include "../Domain.h"
-#ifndef BENCHMARKING
-#include "../utility/Utility.h"
-#endif
 
 //======================================== Apply boundary condition ====================================
 // ***************************************************************************************
