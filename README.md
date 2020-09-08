@@ -19,6 +19,8 @@ Detailed requirements are listed in the table below (general requirements for se
 | General  | Version control system (optional)                   | git      |   >= 2.0      |
 |          | Build processor using a compiler-independent method | CMake    |   >= 2.8      |
 |          | Compiler fully supporting C++-17 (gcc or clang)     | gcc      |   >= 7.0      |
+|          | MPI wrapper for distributed memory sharing          | MPICH    |   >= 3.3.2    |
+|          |                                                     | Boost    |   >= 1.73.0   |
 |          | Visualization of output                             | vtk      |   >= 5.8      |
 |          | Testing for consistency of output while developing  | Python   |   >= 3.6      |
 | Specific | Compiler fully supporting C++-17 and OpenACC        | PGI      |   >= 19.10    |
@@ -46,15 +48,14 @@ git submodule update --init --recursive
 *Note: Without options all executables will be compiled using the PGI compiler and CUDA 10.1.*
 
 OPTIONS (selection; show all by using --help flag):
-- '-s' -> Compile serial ARTSS version
-- '-m' -> Compile multicore ARTSS version
-- '-g' -> Compile GPU ARTSS version
+- '-mpi' -> Compile standalone MPI ARTSS version
+- '-m'   -> Compile MPI and local multicore ARTSS version
+- '-g'   -> Compile multi GPU ARTSS version
 - '--jobs [tasks]' -> Specifies  the  number of tasks to run simultaneously (default $(nproc))
-- '--gcc' Use GCC as compiler
 
 EXAMPLE:
 - Compile serial version of ARTSS using 4 cores and GCC
-`./compile.sh -s --jobs 4 --gcc`
+`./compile.sh -mpi --jobs 4 `
 - Compile multicore version of ARTSS
 `./compile.sh -m`
 
