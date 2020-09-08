@@ -31,8 +31,8 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
     auto domain = Domain::getInstance();
 
     levels = domain->get_levels();
-    cycles = static_cast<size_t> (params->get_int("solver/pressure/n_cycle"));
-    relaxs = static_cast<size_t> (params->get_int("solver/pressure/diffusion/n_relax"));
+    cycles = params->get_int("solver/pressure/n_cycle");
+    relaxs = params->get_int("solver/pressure/diffusion/n_relax");
 
     m_dsign = -1.;
     m_w = 2. / 3.;
@@ -82,7 +82,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 
     //building Fields for level + sending to GPU
     // levels going up
-    for (size_t i = 0; i < levels; ++i) {
+    for (int i = 0; i < levels; ++i) {
 
         // build residuum0
         Field *r0 = new Field(FieldType::P, 0.0, i);
@@ -135,8 +135,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 
     //building Fields for level
     // levels going down
-    for (size_t i = levels; i > 0; --i) {
-
+    for (int i=levels; i>0; --i) {
         // build err0
         Field *e0 = new Field(FieldType::P, 0.0, error1[i - 1]->GetLevel());
 
@@ -265,10 +264,10 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
     const real dt = params->get_real("physical_parameters/dt");
     const size_t Nt = static_cast<size_t>(std::round(t / dt));
 
-    const size_t set_relaxs = static_cast<size_t>(params->get_int("solver/pressure/diffusion/n_relax"));
-    const size_t set_cycles = static_cast<size_t>(params->get_int("solver/pressure/n_cycle"));
+    const int set_relaxs = params->get_int("solver/pressure/diffusion/n_relax");
+    const int set_cycles = params->get_int("solver/pressure/n_cycle");
 
-    size_t act_cycles = 0;
+    int act_cycles = 0;
 
     if (Nt == 1) {
         const int max_cycles = params->get_int("solver/pressure/max_cycle");
@@ -298,9 +297,9 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
         size_t *d_iList = boundary->get_innerList_level_joined();
 
         while (r > tol_res &&
-                static_cast<int>(act_cycles) < max_cycles &&
-                static_cast<int>(relaxs) < max_relaxs) {
-            for (size_t i = 0; i < cycles; i++) {
+                act_cycles < max_cycles &&
+                relaxs < max_relaxs) {
+            for (int i=0; i<cycles; i++) {
                 VCycleMultigrid(out, sync);
                 act_cycles++;
             }
@@ -321,11 +320,8 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
             r = sqrt(sum);
 
             relaxs += set_relaxs;
-        } //end while
-    } // end if
-
-    else { // Nt > 1
-
+        }
+    } else { // Nt > 1
         cycles = set_cycles;
         relaxs = set_relaxs;
 
@@ -346,7 +342,7 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
-    size_t max_level = levels;
+    int max_level = levels;
 
     auto domain = Domain::getInstance();
     auto boundary = BoundaryController::getInstance();
@@ -372,8 +368,7 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
     } //end if
 
 //===================== levels going down ====================//
-    for (size_t i = 0; i < max_level; ++i) {
-
+    for (int i=0; i<max_level; ++i) {
         auto f_res0i = residuum0[i];
         auto f_err1i = error1[i];
         auto f_err1ip = error1[i + 1];
@@ -645,7 +640,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
-            for (size_t i = 0; i < relaxs; i++) { // fixed iteration number as in xml
+            for (int i=0; i<relaxs; i++) { // fixed iteration number as in xml
                 JacobiDiffuse::JacobiStep(level, out, tmp, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync);
 
@@ -653,8 +648,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
                 std::swap(d_tmp, d_out);
             }
 
-            if (relaxs % 2 != 0) // swap necessary when odd number of iterations
-            {
+            if (relaxs % 2 != 0) { // swap necessary when odd number of iterations
 #pragma acc kernels present(d_out[:bsize], d_tmp[:bsize], d_iList[start_i:(end_i-start_i)]) async
 #pragma acc loop independent
                 // inner
@@ -675,7 +669,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
-            for (size_t i = 0; i < relaxs; i++) {
+            for (int i=0; i<relaxs; i++) {
                 ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync); // for res/err only Dirichlet BC
             }
