@@ -21,9 +21,8 @@ Load modules:
 
 Executables:
   Production (with data output, visualization and analysis):
-   ${YELLOW}-s${NC}
-  ${YELLOW}--serial${NC} 
-  ${YELLOW}--artss_serial${NC}                  \t Executable: artss
+   ${YELLOW}-mpi${NC}
+  ${YELLOW}--artss_mpi${NC}                     \t Executable: artss_mpi
 
   ${YELLOW} -m${NC}
   ${YELLOW}--multicore${NC}
@@ -32,7 +31,7 @@ Executables:
    ${YELLOW}-g${NC}
   ${YELLOW}--gpu${NC}
   ${YELLOW}--artss_gpu${NC}                      \t Executable: artss_gpu
-----  
+----
   Benchmarking (without output, visualization, analysis):
   ${YELLOW}--sb${NC}
   ${YELLOW}--serial_benchmark${NC}
@@ -56,7 +55,6 @@ Other:
 
   ${YELLOW}--jobs${NC}                            \t set the number of recipes to execute at once (-j/--jobs flag in make)
 
-  ${YELLOW}--gcc${NC}                             \t use gcc as compiler (optional: specify version)
   ${YELLOW}--pgi${NC}                             \t use pgcc ac compiler (optional: specify version)
 
 Docker - ! cannot be combined with other commands ! (more information about docker commands in docker/README.md):
@@ -88,7 +86,7 @@ do
       shift
       ;;
     -d|--debug|--debugmode)
-      BUILDTYPE=Debug 
+      BUILDTYPE=Debug
       shift
       ;;
     --docker-build)
@@ -109,22 +107,13 @@ do
       shift
       ;;
     -g|--gpu|--artss_gpu)
-      COMPILE="$COMPILE artss_gpu" 
+      COMPILE="$COMPILE artss_gpu"
       GPU=0
       shift
       ;;
     --gb|--gpu_benchmark|--artss_gpu_benchmark)
       COMPILE="$COMPILE artss_gpu_benchmark "
       GPU=0
-      shift
-      ;;
-    --gcc)
-      COMPILER="GCC"
-      if [[ $2 != -* ]]
-      then
-        GCC_VERSION="$2"
-        shift
-      fi
       shift
       ;;
     -h|--help)
@@ -160,20 +149,17 @@ do
       fi
       shift
       ;;
-    -s|--serial|--artss_serial)
-      COMPILE="$COMPILE artss_serial"
-      shift
-      ;;
-    --sb|--serial_benchmark|--artss_serial_benchmark)
-      COMPILE="$COMPILE artss_serial_benchmark"
-      shift
-      ;;
     --jureca)
       JURECA=0
       shift
       ;;
     --p100)
       P100=0
+      shift
+      ;;
+    -mpi|--artss_mpi)
+      COMPILE="$COMPILE artss_mpi"
+      COMPILER="MPI"
       shift
       ;;
     *)
@@ -262,8 +248,8 @@ then
   CCOMPILER=pgcc
   CXXCOMPILER=pgc++
 else
-  CCOMPILER=gcc
-  CXXCOMPILER=g++
+  CCOMPILER=mpicc
+  CXXCOMPILER=mpic++
 fi
 
 if [ -z ${CUDA_VERSION} ]
