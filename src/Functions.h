@@ -7,6 +7,7 @@
 #ifndef ARTSS_FUNCTIONS_H_
 #define ARTSS_FUNCTIONS_H_
 
+#include <string>
 #include "Field.h"
 
 struct FunctionNames{
@@ -28,7 +29,7 @@ struct FunctionNames{
     static const std::string Zero;
 };
 
-namespace Functions { //alphabetically ordered
+namespace Functions {  // alphabetically ordered
 
   void Beltrami(Field* outx, Field* outy, Field* outz, Field* outp, real t);
   void BeltramiBC_p(Field* outx);
@@ -61,6 +62,9 @@ namespace Functions { //alphabetically ordered
   void SinSinSin(Field* out);
 
   void Uniform(Field* out, real val);
+
+  void Vortex(Field *outx, Field *outy, Field *outz, Field *outp);
+  void VortexY(Field *outx, Field *outy, Field *outz, Field *outp);
 
   void Vortex(Field *outx, Field *outy, Field *outz, Field *outp);
   void VortexY(Field *outx, Field *outy, Field *outz, Field *outp);

@@ -11,6 +11,12 @@
 #include "interfaces/ISource.h"
 #include "utility/GlobalMacrosTypes.h"
 #include "analysis/Analysis.h"
+#include "utility/Utility.h"
+
+// only needed if no logger will be available
+#ifdef BENCHMARKING
+#include <iostream>
+#endif
 
 class TimeIntegration {
 public:
@@ -24,6 +30,9 @@ private:
   real m_t_end;
   real m_t_cur;
   size_t m_size = 0;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_TIMEINTEGRATION_H_ */

@@ -6,7 +6,6 @@
 
 #include <chrono>
 #include <vector>
-#include <iostream>
 
 #include "TimeIntegration.h"
 #include "utility/Parameters.h"
@@ -20,13 +19,17 @@
 
 #endif
 
-// ==================================== Constructor ====================================
-// ***************************************************************************************
+// =============================== Constructor ===============================
+// *****************************************************************************
 /// \brief  Constructor
 /// \param  isolv pointer to solver
 /// \param  fname filename of xml-input (via argument)
 // ***************************************************************************************
 TimeIntegration::TimeIntegration(ISolver *isolv) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
+
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
 
@@ -50,9 +53,10 @@ void TimeIntegration::run() {
     // Visualise
     Visual *visual = new Visual(solution);
     visual->visualise(m_solver, 0.);
+    m_logger->info("Start calculating and timing...");
+#else
+    std::cout << "Start calculating and timing..." << std::endl;
 #endif
-    std::cout << "Start calculating and timing...\n" << std::endl;
-    // TODO Logger
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
@@ -147,8 +151,7 @@ void TimeIntegration::run() {
 
             //iter_start = std::chrono::system_clock::now();
 #ifndef BENCHMARKING
-            std::cout << "\nt_cur=" << t_cur << std::endl;
-            //TODO Logger
+            m_logger->info("t_cur = {:.5f}", t_cur);
 #endif
 
             // Calculate
@@ -190,8 +193,8 @@ void TimeIntegration::run() {
 #ifndef BENCHMARKING
             if (adaption->is_data_extraction_after_enabled()) adaption->extractData(adaption->get_after_name(), adaption->get_after_height(), t_cur);
 #endif
-            m_solver->update_sources(t_cur, false);
-            m_solver->update_data(false);
+        m_solver->update_sources(t_cur, false);
+        m_solver->update_data(false);
 
             // iter_end = std::chrono::system_clock::now();
             // long ms = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();
@@ -213,21 +216,27 @@ void TimeIntegration::run() {
 
     } // end RANGE
 
-    std::cout << "\nDone calculating and timing ...\n" << std::endl;
-    //TODO Logger
+#ifndef BENCHMARKING
+    m_logger->info("Done calculating and timing ...");
+#else
+    std::cout << "Done calculating and timing ..." << std::endl;
+#endif
 
     // stop timer
     end = std::chrono::system_clock::now();
-    long ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "Global Time: " << ms << "ms" << std::endl;
-    //TODO Logger
+    long ms = std::chrono::duration_cast < std::chrono::milliseconds > (end - start).count();
+
 #ifndef BENCHMARKING
+    m_logger->info("Global Time: {}ms", ms);
     if (adaption->is_data_extraction_endresult_enabled()) {
         adaption->extractData(adaption->get_endresult_name());
     }
     // testing correct output (when changing implementation/ calculating on GPU)
     analysis->save_variables_in_file(m_solver);
     analysis->analyse(m_solver, m_t_end);
+#else
+    std::cout << "Global Time: " << ms << "ms" << std::endl;
 #endif
+
     delete (adaption);
 }

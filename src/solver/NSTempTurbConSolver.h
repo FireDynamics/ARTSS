@@ -1,8 +1,8 @@
-/// \file 		NSTempTurbConSolver.h
-/// \brief 		Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
-/// \date 		Oct 02, 2017
-/// \author 	Küsters
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       NSTempTurbConSolver.h
+/// \brief      Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
+/// \date       Oct 02, 2017
+/// \author     Küsters
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 
 #ifndef NSTEMPTURBCONSOLVER_H_
@@ -15,15 +15,19 @@
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
 
 class NSTempTurbConSolver : public ISolver {
-public:
+ public:
     NSTempTurbConSolver();
     ~NSTempTurbConSolver() override;
 
     void do_step(real t, bool sync) override;
 
-private:
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
     IAdvection *adv_temp;

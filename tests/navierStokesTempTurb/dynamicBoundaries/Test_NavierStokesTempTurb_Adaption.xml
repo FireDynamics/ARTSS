@@ -9,25 +9,25 @@
     <kappa> 3.31e-5 </kappa>  <!-- thermal diffusion -->
   </physical_parameters>
 
-  <solver description = "NSTempTurbSolver" >
-    <advection type = "SemiLagrangian" field = "u,v,w">
+  <solver description="NSTempTurbSolver" >
+    <advection type="SemiLagrangian" field="u,v,w">
     </advection>
-    <diffusion type = "Jacobi" field = "u,v,w">
+    <diffusion type="Jacobi" field="u,v,w">
       <max_iter> 100 </max_iter>  <!-- max number of iterations -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
       <w> 1 </w>  <!-- relaxation parameter -->
     </diffusion>
-    <turbulence type = "ConstSmagorinsky">
+    <turbulence type="ConstSmagorinsky">
       <Cs> 0.2 </Cs>
     </turbulence>
-   <source type = "ExplicitEuler" force_fct="Buoyancy" dir = "y"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+   <source type="ExplicitEuler" force_fct="Buoyancy" dir="y"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>
-    <pressure type = "VCycleMG" field = "p">
+    <pressure type="VCycleMG" field="p">
       <n_level> 6 </n_level>  <!-- number of restriction levels -->
       <n_cycle> 2 </n_cycle> <!-- number of cycles -->
       <max_cycle> 100 </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
-      <diffusion type = "Jacobi" field = "p">
+      <diffusion type="Jacobi" field="p">
         <n_relax> 4 </n_relax>  <!-- number of iterations -->
         <max_solve> 100 </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
@@ -35,20 +35,20 @@
       </diffusion>
     </pressure>
     <temperature>
-      <advection type = "SemiLagrangian" field = "T">
+      <advection type="SemiLagrangian" field="T">
       </advection>
-      <diffusion type = "Jacobi" field = "T">
+      <diffusion type="Jacobi" field="T">
         <max_iter> 100 </max_iter>
         <tol_res> 1e-07 </tol_res>
         <w> 1 </w>
       </diffusion>
-      <turbulence include = "Yes">
+      <turbulence include="Yes">
         <Pr_T> 0.5 </Pr_T>
       </turbulence>
-      <source type = "ExplicitEuler" temp_fct = "GaussST" ramp_fct="RampTanh" dissipation="No">
+      <source type="ExplicitEuler" temp_fct="GaussST" ramp_fct="RampTanh" dissipation="No">
         <HRR> 25000. </HRR>     <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
-        <x0> 30.  </x0>
+        <x0> 30. </x0>
         <y0> -3. </y0>
         <z0> 0. </z0>
         <sigmax> 1.0 </sigmax>
@@ -57,7 +57,7 @@
         <tau> 5. </tau>
       </source>
     </temperature>
-    <solution available = "No">
+    <solution available="No">
     </solution>
   </solver>
 
@@ -79,6 +79,20 @@
     <nz> 32 </nz>
   </domain_parameters>
 
+  <adaption dynamic="Yes" data_extraction="No">
+    <class name="Layers">
+      <buffer> 14 </buffer>
+      <check_value> 335 </check_value>
+      <timestep> 1 </timestep>
+      <expansion_size> 1 </expansion_size>
+    </class>
+    <data_extraction>
+      <before enabled="No"> 2.7 </before>
+      <after enabled="No"> </after>
+      <endresult enabled="No"> </endresult>
+      <time_measuring enabled="No"> </time_measuring>
+    </data_extraction>
+  </adaption>
 
   <boundaries>
     <boundary field="u,v,w" patch="front,back,bottom,top" type="dirichlet" value="0.0" />
@@ -92,7 +106,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "LayersT" dir="y" random = "No">     <!-- Layers  -->
+  <initial_conditions usr_fct="LayersT" dir="y" random="No">     <!-- Layers  -->
     <n_layers> 5 </n_layers>
     <border_1> -1.8 </border_1>  <!-- at cell face -->
     <border_2> -0.6 </border_2>  <!-- at cell face -->
@@ -108,4 +122,7 @@
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 35 </vtk_nth_plot>
   </visualisation>
+
+  <logging file="output_test_navierstokestempturb_adaption.log" level="info">
+  </logging>
 </ARTSS>

@@ -13,25 +13,34 @@
 #include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
 
+#ifdef BENCHMARKING
+#include "../utility/Utility.h"
+#endif
+
+
 class NSSolver : public ISolver {
-public:
-  NSSolver();
+ public:
+    NSSolver();
 
-  ~NSSolver() override;
+    ~NSSolver() override;
 
-  void do_step(real t, bool sync) override;
+    void do_step(real t, bool sync) override;
 
-private:
-  IAdvection *adv_vel;
-  IDiffusion *dif_vel;
-  IPressure *pres;
-  ISource *sou;
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 
-  real m_nu;
+    IAdvection *adv_vel;
+    IDiffusion *dif_vel;
+    IPressure *pres;
+    ISource *sou;
 
-  static void control();
+    real m_nu;
 
-  std::string m_sourceFct;
+    static void control();
+
+    std::string m_sourceFct;
 };
 
 #endif /* ARTSS_SOLVER_NSSOLVER_H_ */
