@@ -6,13 +6,13 @@
     <nu> 0.001 </nu>  <!-- kinematic viscosity -->
   </physical_parameters>
 
-  <solver description = "DiffusionSolver" >
-    <diffusion type = "Jacobi" field = "u,v,w">
+  <solver description="DiffusionSolver" >
+    <diffusion type="Jacobi" field="u,v,w">
       <max_iter> 100 </max_iter>  <!-- max number of iterations -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
       <w> 1 </w>  <!-- relaxation parameter -->
     </diffusion>
-    <solution available = "Yes">
+    <solution available="Yes">
       <tol> 1e-03 </tol>  <!-- tolerance for further tests -->
     </solution>
   </solver>
@@ -45,11 +45,14 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "ExpSinusProd" random = "No">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
+  <initial_conditions usr_fct="ExpSinusProd"  random="No">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
     <l> 2.5 </l>                              <!-- wavelength -->
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 8 </vtk_nth_plot>
   </visualisation>
+
+  <logging file="output_test_diffusion.log" level="info">
+  </logging>
 </ARTSS>

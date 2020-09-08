@@ -1,0 +1,8 @@
+-   repo: local
+    hooks:
+    -   id: cpplint
+        name: cpplint
+        description: Check C++ code style using cpplint.py.
+        entry: cpplint
+        language: system
+        files: \.(c|cc|cxx|cpp|cu|h|hpp|hxx)$

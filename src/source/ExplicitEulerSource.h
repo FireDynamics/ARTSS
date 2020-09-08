@@ -10,17 +10,23 @@
 #include "../interfaces/ISource.h"
 #include "../Field.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
 
-class ExplicitEulerSource: public ISource {
-public:
-  ExplicitEulerSource();
 
-  void add_source(Field* out_x, Field* out_y, Field* out_z, Field* S_x, Field* S_y, Field* S_z, bool sync) override;
-  void add_source(Field* out, Field* S, bool sync) override;
+class ExplicitEulerSource : public ISource {
+ public:
+    ExplicitEulerSource();
 
-private:
-  real m_dt;
-  std::string m_dir_vel ="";
+    void add_source(Field* out_x, Field* out_y, Field* out_z, Field* S_x, Field* S_y, Field* S_z, bool sync) override;
+    void add_source(Field* out, Field* S, bool sync) override;
+
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
+
+    real m_dt;
+    std::string m_dir_vel ="";
 };
 
 #endif /* ARTSS_SOURCE_EXPLICITEULERSOURCE_H_ */

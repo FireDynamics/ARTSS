@@ -5,12 +5,15 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include "Solution.h"
+#include "../utility/Utility.h"
 #include "../utility/Parameters.h"
 #include "../Functions.h"
 
 Solution::Solution() {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     u_a = new Field(FieldType::U, 0.0);
     v_a = new Field(FieldType::V, 0.0);
     w_a = new Field(FieldType::W, 0.0);
@@ -54,7 +57,9 @@ void Solution::init() {
     } else if (initialCondition == FunctionNames::BuoyancyMMS) {
         m_init_function = &Solution::buoyancy_mms;
     } else {
-        std::cout << "Analytical solution set to zero!" << std::endl;
+#ifndef BENCHMARKING
+        m_logger->info("Analytical solution set to zero!");
+#endif
         m_init_function = &Solution::zero;
     }
 }

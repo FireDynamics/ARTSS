@@ -10,31 +10,31 @@
 
 Field::Field(FieldType type, real val): m_type(type){
     size_t m_size = Domain::getInstance()->get_size();
-	m_level = 0;
+    m_level = 0;
     data = new real[m_size];
     std::fill( data, data + m_size, val);
 }
 
 Field::Field(FieldType type, real val, size_t level): m_level(level), m_type(type) {
-	size_t m_size = Domain::getInstance()->get_size(level);
+    size_t m_size = Domain::getInstance()->get_size(level);
 
-	data = new real[m_size];
-	std::fill( data, data + m_size, val);
+    data = new real[m_size];
+    std::fill( data, data + m_size, val);
 }
 
 
 Field::~Field(){
-	delete[] data;
+    delete[] data;
 }
 
 
 //=============================== Copy Constructor ======================================
 Field::Field(const Field & other){
     size_t size = Domain::getInstance()->get_size(other.m_level);
-	data = new real[size];
-	for (size_t i = 0; i < size; i++){
-		data[i] = other.data[i];
-	}
-	m_type = other.m_type;
-	m_level = other.m_level;
+    data = new real[size];
+    for (size_t i = 0; i < size; i++){
+        data[i] = other.data[i];
+    }
+    m_type = other.m_type;
+    m_level = other.m_level;
 }

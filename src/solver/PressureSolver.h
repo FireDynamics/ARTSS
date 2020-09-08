@@ -7,9 +7,17 @@
 #ifndef ARTSS_SOLVER_PRESSURESOLVER_H_
 #define ARTSS_SOLVER_PRESSURESOLVER_H_
 
+#include "../pressure/VCycleMG.h"
+#include "../utility/Parameters.h"
+#include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../Domain.h"
+#include "SolverSelection.h"
+#include "../boundary/BoundaryData.h"
+
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IPressure.h"
-#include "../utility/GlobalMacrosTypes.h"
+
 
 class PressureSolver : public ISolver {
 public:
@@ -18,6 +26,9 @@ public:
     void do_step(real t, bool sync) override;
 
 private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     IPressure *pres;
     static void control();
 };

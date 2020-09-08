@@ -4,15 +4,17 @@
 /// \author   Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-
 #include "AdvectionDiffusionSolver.h"
-#include "../interfaces/IAdvection.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
+#include "../utility/Utility.h"
+
 
 AdvectionDiffusionSolver::AdvectionDiffusionSolver() {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
 
     auto params = Parameters::getInstance();
     std::string advectionType = params->get("solver/advection/type");
@@ -32,15 +34,13 @@ AdvectionDiffusionSolver::~AdvectionDiffusionSolver() {
 }
 
 
-//====================================== do_step =================================
-// ***************************************************************************************
+//================================= DoStep ============================
+// *******************************************************************
 /// \brief  brings all calculation steps together into one function
-/// \param  dt      time step
-/// \param  sync    synchronous kernel launching (true, default: false)
-// ***************************************************************************************
-
+/// \param  dt          time step
+/// \param  sync        synchronous kernel launching (true, default: false)
+// *******************************************************************
 void AdvectionDiffusionSolver::do_step(real t, bool sync) {
-
 // local variables and parameters
     auto u = ISolver::u;
     auto v = ISolver::v;
@@ -70,8 +70,7 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        std::cout << "Advect ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Advect ...");
 #endif
         adv->advect(u, u0, u0, v0, w0, sync);
         adv->advect(v, v0, u0, v0, w0, sync);
@@ -83,8 +82,7 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
 // 3. Solve diffusion equation
         if (nu != 0.) {
 #ifndef BENCHMARKING
-            std::cout << "Diffuse ..." << std::endl;
-            //TODO Logger
+            m_logger->info("Diffuse ...");
 #endif
             dif->diffuse(u, u0, u_tmp, nu, sync);
             dif->diffuse(v, v0, v_tmp, nu, sync);
@@ -98,22 +96,28 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
     }//end data
 }
 
-//======================================= Check data ==================================
-// ***************************************************************************************
+//================================== Check data =============================
+// ************************************************************************
 /// \brief  Checks if field specified correctly
-// ***************************************************************************************
+// ************************************************************************
 void AdvectionDiffusionSolver::control() {
     auto params = Parameters::getInstance();
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger(typeid(AdvectionDiffusionSolver).name());
+#endif
+
     if (params->get("solver/advection/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
 }

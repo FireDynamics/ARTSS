@@ -6,15 +6,15 @@
     <nu> 0.1 </nu>  <!-- kinematic viscosity -->
   </physical_parameters>
 
-  <solver description = "AdvectionDiffusionSolver" >
-    <advection type = "SemiLagrangian" field = "u,v,w">
+  <solver description="AdvectionDiffusionSolver" >
+    <advection type="SemiLagrangian" field="u,v,w">
     </advection>
-    <diffusion type = "Jacobi" field = "u,v,w">
+    <diffusion type="Jacobi" field="u,v,w">
       <max_iter> 100 </max_iter>  <!-- max number of iterations -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
       <w> 1 </w>  <!-- relaxation parameter -->
     </diffusion>
-    <solution available = "Yes">
+    <solution available="Yes">
       <tol> 1e-03 </tol>  <!-- tolerance for further tests -->
     </solution>
   </solver>
@@ -47,10 +47,13 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "ExpSinusSum" random = "No">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
+  <initial_conditions usr_fct="ExpSinusSum" random="No">     <!-- product of exponential and sinuses exp*sin*sin*sin -->
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 10 </vtk_nth_plot>
   </visualisation>
+
+  <logging file="output_test_burgers.log" level="info">
+  </logging>
 </ARTSS>

@@ -11,19 +11,24 @@
 #include "../interfaces/IAdvection.h"
 #include "../interfaces/IDiffusion.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
 
 class AdvectionDiffusionSolver : public ISolver {
 public:
-  AdvectionDiffusionSolver();
-  ~AdvectionDiffusionSolver() override;
+    AdvectionDiffusionSolver();
+    ~AdvectionDiffusionSolver() override;
 
-  void do_step(real t, bool sync) override;
+    void do_step(real t, bool sync) override;
 
 private:
-  IAdvection* adv;
-  IDiffusion* dif;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 
-  real m_nu;
+    IAdvection* adv;
+    IDiffusion* dif;
+
+    real m_nu;
 
     static void control();
 };

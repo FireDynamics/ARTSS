@@ -40,6 +40,9 @@ private:
 
     bool has_analytic_solution = false;
     Solution *m_solution;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_ANALYSIS_ANALYSIS_H_ */

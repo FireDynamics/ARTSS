@@ -5,10 +5,10 @@
     <dt> 0.001 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
   </physical_parameters>
 
-  <solver description = "AdvectionSolver" >
-    <advection type = "SemiLagrangian" field = "u,v,w">
+  <solver description="AdvectionSolver" >
+    <advection type="SemiLagrangian" field="u,v,w">
     </advection>
-    <solution available = "Yes">
+    <solution available="Yes">
       <tol> 1e-03 </tol>  <!-- tolerance for further tests -->
     </solution>
   </solver>
@@ -41,7 +41,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "GaussBubble" random = "No">  <!-- Gaussian function  -->
+  <initial_conditions usr_fct="GaussBubble"  random="No">  <!-- Gaussian function  -->
     <u_lin> 0.5 </u_lin>      <!-- x-velocity in linear case  -->
     <v_lin> 0.5 </v_lin>      <!-- y-velocity in linear case  -->
     <w_lin> 0.25 </w_lin>     <!-- z-velocity in linear case  -->
@@ -54,4 +54,7 @@
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 200 </vtk_nth_plot>
   </visualisation>
+
+  <logging file="output_test_advection.log" level="info">
+  </logging>
 </ARTSS>

@@ -60,6 +60,9 @@ public:
     void extractData(const std::string &filename);
 
 private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     bool isUpdateNecessary();
     void applyChanges();
 

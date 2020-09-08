@@ -14,15 +14,21 @@
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
+
 
 class NSTempSolver : public ISolver {
-public:
+ public:
     NSTempSolver();
     ~NSTempSolver() override;
 
     void do_step(real t, bool sync) override;
 
-private:
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
+
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
     IAdvection *adv_temp;

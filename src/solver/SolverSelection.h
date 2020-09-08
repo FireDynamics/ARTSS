@@ -12,6 +12,7 @@
 #include "../interfaces/IPressure.h"
 #include "../interfaces/IAdvection.h"
 #include "../interfaces/ITurbulence.h"
+#include "../utility/Utility.h"
 
 struct AdvectionMethods {
     inline static const std::string SemiLagrangian = "SemiLagrangian";
@@ -43,7 +44,7 @@ struct TurbulenceMethods {
 };
 
 class SolverSelection {
-public:
+ public:
     static void SetAdvectionSolver(IAdvection **advectionSolver, const std::string& advectionType);
 
     static void SetDiffusionSolver(IDiffusion **diffusionSolver, const std::string& diffusionType);
