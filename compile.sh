@@ -33,9 +33,6 @@ Executables:
   ${YELLOW}--artss_gpu${NC}                      \t Executable: artss_gpu
 ----
   Benchmarking (without output, visualization, analysis):
-  ${YELLOW}--sb${NC}
-  ${YELLOW}--serial_benchmark${NC}
-  ${YELLOW}--artss_benchmark${NC}                  \t Executable artss_serial_benchmark
 
   ${YELLOW}--mb${NC}
   ${YELLOW}--multicore_benchmark${NC}

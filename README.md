@@ -54,9 +54,9 @@ OPTIONS (selection; show all by using --help flag):
 - '--jobs [tasks]' -> Specifies  the  number of tasks to run simultaneously (default $(nproc))
 
 EXAMPLE:
-- Compile serial version of ARTSS using 4 cores and GCC
+- Compile standalone mpi version of ARTSS using 4 cores
 `./compile.sh -mpi --jobs 4 `
-- Compile multicore version of ARTSS
+- Compile multicore + mpi version of ARTSS
 `./compile.sh -m`
 
 Extra:
