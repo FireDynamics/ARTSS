@@ -4,26 +4,26 @@
 /// \author     Max Joseph Böhler
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include "MPI.h"
+#include "MPIHandler.h"
 #include "Parameters.h"
 
 
-MPI *MPI::single = nullptr;
+MPIHandler *MPIHandler::single = nullptr;
 
 // Singleton
-MPI *MPI::getInstance() {
+MPIHandler *MPIHandler::getInstance() {
     return single;
 }
 
 // Singleton
-MPI *MPI::getInstance(boost::mpi::communicator& MPIWORLD,
+MPIHandler *MPIHandler::getInstance(boost::mpi::communicator& MPIWORLD,
                       boost::mpi::cartesian_communicator& MPICART) {
     if (single == nullptr) {
-        single = new MPI(MPIWORLD, MPICART);
+        single = new MPIHandler(MPIWORLD, MPICART);
     }
     return single;
 }
 
-MPI::MPI(boost::mpi::communicator& MPIWORLD,
+MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
          boost::mpi::cartesian_communicator& MPICART)
          : MPIWORLD(MPIWORLD), MPICART(MPICART) {}

@@ -214,7 +214,7 @@ set(SOURCE_FILES
         "src/utility/Parameters.cpp"
         "src/utility/tinyxml2.cpp"
         "src/utility/Utility.cpp"
-        "src/utility/MPI.cpp"
+        "src/utility/MPIHandler.cpp"
 
         "src/visualisation/CSVWriter.cpp"
         "src/visualisation/Visual.cpp"
@@ -284,7 +284,7 @@ set(HEADER_FILES
         "src/utility/tinyxml2.h"
         "src/utility/Tracer.h"
         "src/utility/Utility.h"
-        "src/utility/MPI.h"
+        "src/utility/MPIHandler.h"
 
         "src/visualisation/CSVWriter.h"
         "src/visualisation/Visual.h"

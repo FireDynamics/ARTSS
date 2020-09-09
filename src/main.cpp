@@ -30,7 +30,7 @@
 #include "utility/Parameters.h"
 #include "analysis/Analysis.h"
 #include "utility/Utility.h"
-#include "utility/MPI.h"
+#include "utility/MPIHandler.h"
 
 #ifdef _OPENACC
     #include <openacc.h>
@@ -67,8 +67,7 @@ int main(int argc, char **argv) {
     boost::mpi::cartesian_dimension MPIDIM[] = {{MPIX, false}, {MPIY, false}, {MPIZ, false}};
     boost::mpi::cartesian_communicator MPICART(MPIWORLD, boost::mpi::cartesian_topology(MPIDIM), true);
 
-    auto mpi = MPI::getInstance(MPIWORLD, MPICART);
-
+    auto mpi_handler = MPIHandler::getInstance(MPIWORLD, MPICART);
 
 
     // Solver
@@ -99,14 +98,14 @@ int main(int argc, char **argv) {
     acc_device_t dev_type = acc_get_device_type();
     acc_init( dev_type );
 #endif
-// //
+//
 // //     // Integrate over time and solve numerically
 // //     // Time integration
 // //     TimeIntegration ti(solver);
 // //     ti.run();
 // //
-//     // Clean up
-//     delete solver;
+    // Clean up
+    delete solver;
 
     return 0;
 }

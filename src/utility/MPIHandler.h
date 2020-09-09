@@ -14,22 +14,23 @@
 #include <boost/mpi/cartesian_communicator.hpp>
 
 
-class MPI {
+class MPIHandler {
 
 private:
-    static MPI* single;
+    static MPIHandler* single;
 
-    MPI(boost::mpi::communicator& MPIWORLD, boost::mpi::cartesian_communicator& MPICART);
+    MPIHandler(boost::mpi::communicator& MPIWORLD, boost::mpi::cartesian_communicator& MPICART);
     boost::mpi::communicator MPIWORLD;
     boost::mpi::cartesian_communicator MPICART;
 
 public:
-    static MPI* getInstance();
-    static MPI* getInstance(boost::mpi::communicator& MPIWORLD,
+    static MPIHandler* getInstance();
+    static MPIHandler* getInstance(boost::mpi::communicator& MPIWORLD,
                             boost::mpi::cartesian_communicator& MPICART);
 
     // Getter
-    int getRank() { return MPICART.rank(); };
+    int get_rank() { return MPICART.rank(); };
+    std::vector<int> get_coords() { return MPICART.coordinates(MPICART.rank()); }
 
 };
 
