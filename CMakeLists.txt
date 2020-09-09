@@ -8,11 +8,14 @@
 # -DBUILD_CPPUNIT_TEST=ON (default OFF)
 #--------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 project(ARTSS)
 
 set(CMAKE_COLOR_MAKEFILE ON)
+
+option(ARTSS_BENCHMARK_FLAG "Flag if BENCHMARKING is enabled" OFF)
+set(ARTSS_TARGET_ARCH "SERIAL" CACHE STRING "Target arch (SERIAL, MULTICORE, GPU")
 
 if(NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release)
@@ -25,9 +28,9 @@ set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBRARY_OUTPUT_PATH  bin/lib)
 
 # Debug messages
-message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
-message( STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR} )
-message( STATUS "CMAKE_EXE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
+message(STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR})
+message(STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR})
+message(STATUS "CMAKE_EXE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH})
 
 #----------------------------------------------------------------------
 # enable as many warnings as possible
@@ -156,22 +159,12 @@ if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
 endif()
 message(STATUS "")
 
-#statically link all gcc stuffs
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
-set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
-
 
 # link cuda library for cuda features
 link_directories( $ENV{CUDA_LIB} )
 include_directories( $ENV{CUDA_INC} )
 
 # find spdlog lib
-# if(NOT TARGET spdlog)
-#     # Stand-alone build
-#     find_package(spdlog)
-# endif()
-# use local fallback
 if(NOT TARGET spdlog)
     add_subdirectory(external/spdlog)
 endif()
@@ -181,30 +174,31 @@ endif()
 add_executable(artss "src/main.cpp")
 target_link_libraries(artss PRIVATE spdlog::spdlog)
 
-# add_executable( artss_serial_benchmark ${SOURCE_FILES} src/main.cpp  )
-# set_target_properties( artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX" )
-# target_link_libraries( artss_serial_benchmark  )
-# 
-# 
-# add_executable(artss_multicore_cpu ${SOURCE_FILES} src/main.cpp)
-# set_target_properties(artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=multicore" LINK_FLAGS "-acc -ta=multicore")
-# target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
-# 
-# add_executable( artss_multicore_cpu_benchmark ${SOURCE_FILES} src/main.cpp  )
-# set_target_properties( artss_multicore_cpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore" )
-# target_link_libraries( artss_multicore_cpu_benchmark  )
-# 
-# 
-# add_executable(artss_gpu ${SOURCE_FILES} src/main.cpp)
-# set_target_properties(artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
-# target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
-# 
-# add_executable( artss_gpu_benchmark ${SOURCE_FILES} src/main.cpp  )
-# set_target_properties( artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
-# target_link_libraries( artss_gpu_benchmark  )
-
 
 spdlog_enable_warnings(artss)
+
+message(STATUS "")
+message(STATUS "ARTSS_BENCHMARK_FLAG:  ${ARTSS_BENCHMARK_FLAG}")
+message(STATUS "ARTSS_TARGET_ARCH:     ${ARTSS_TARGET_ARCH}")
+
+if(ARTSS_BENCHMARK_FLAG)
+    message(STATUS "Enabled Benchmarking")
+    target_compile_options(artss PRIVATE "-DBENCHMARKING -DUSE_NVTX")
+endif()
+
+if(ARTSS_TARGET_ARCH STREQUAL "MULTICORE")
+    message(STATUS "Enabled Multicore")
+    set_target_properties(artss PROPERTIES
+        COMPILE_FLAGS "-acc -ta=multicore"
+        LINK_FLAGS "-acc -ta=multicore")
+elseif(ARTSS_TARGET_ARCH STREQUAL "GPU")
+    message(STATUS "Enabled GPU")
+    set_target_properties(artss_gpu PROPERTIES
+        COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}"
+        LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
+else()
+    message(STATUS "Using serial version")
+endif()
 
 
 add_subdirectory(src)
