@@ -161,163 +161,16 @@ message(STATUS "")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
-# add sources and headers
-set(SOURCE_FILES
-        "src/adaption/Adaption.cpp"
-        "src/adaption/Layers.cpp"
-        "src/adaption/Vortex.cpp"
-
-        "src/advection/SLAdvect.cpp"
-
-        "src/analysis/Analysis.cpp"
-        "src/analysis/Solution.cpp"
-
-        "src/boundary/Boundary.cpp"
-        "src/boundary/BoundaryController.cpp"
-        "src/boundary/BoundaryData.cpp"
-        "src/boundary/BoundaryDataController.cpp"
-        "src/boundary/Multigrid.cpp"
-        "src/boundary/Obstacle.cpp"
-        "src/boundary/Surface.cpp"
-
-        "src/boundaryCondition/DomainBoundary.cpp"
-        "src/boundaryCondition/ObstacleBoundary.cpp"
-
-        "src/diffusion/ColoredGaussSeidelDiffuse.cpp"
-        "src/diffusion/ExplicitDiffuse.cpp"
-        "src/diffusion/JacobiDiffuse.cpp"
-
-        "src/field/Field.cpp"
-        "src/field/FieldController.cpp"
-
-        "src/interfaces/IPressure.cpp"
-        "src/interfaces/ISource.cpp"
-
-        "src/pressure/VCycleMG.cpp"
-
-        "src/solver/AdvectionSolver.cpp"
-        "src/solver/AdvectionDiffusionSolver.cpp"
-        "src/solver/DiffusionSolver.cpp"
-        "src/solver/DiffusionTurbSolver.cpp"
-        "src/solver/NSSolver.cpp"
-        "src/solver/NSTurbSolver.cpp"
-        "src/solver/NSTempSolver.cpp"
-        "src/solver/NSTempConSolver.cpp"
-        "src/solver/NSTempTurbSolver.cpp"
-        "src/solver/NSTempTurbConSolver.cpp"
-        "src/solver/PressureSolver.cpp"
-        "src/solver/SolverController.cpp"
-        "src/solver/SolverSelection.cpp"
-
-        "src/source/BuoyancyMMS.cpp"
-        "src/source/Cube.cpp"
-        "src/source/ExplicitEulerSource.cpp"
-        "src/source/GaussFunction.cpp"
-
-        "src/turbulence/ConstSmagorinsky.cpp"
-        "src/turbulence/DynamicSmagorinsky.cpp"
-
-        "src/utility/Parameters.cpp"
-        "src/utility/tinyxml2.cpp"
-        "src/utility/Utility.cpp"
-
-        "src/visualisation/CSVWriter.cpp"
-        "src/visualisation/Visual.cpp"
-        "src/visualisation/VTKWriter.cpp"
-        "src/visualisation/visit_writer.cpp"
-
-        "src/Domain.cpp"
-        "src/Functions.cpp"
-        "src/TimeIntegration.cpp"
-        )
-
-set(HEADER_FILES
-        "src/analysis/Analysis.h"
-        "src/analysis/Solution.h"
-
-        "src/adaption/Adaption.h"
-        "src/adaption/Layers.h"
-        "src/adaption/Vortex.h"
-
-        "src/advection/SLAdvect.h"
-
-        "src/boundary/Boundary.h"
-        "src/boundary/BoundaryController.h"
-        "src/boundary/BoundaryData.h"
-        "src/boundary/BoundaryDataController.cpp"
-        "src/boundary/Multigrid.h"
-        "src/boundary/Obstacle.h"
-        "src/boundary/Surface.h"
-
-        "src/boundaryCondition/DomainBoundary.h"
-        "src/boundaryCondition/ObstacleBoundary.h"
-
-        "src/diffusion/ColoredGaussSeidelDiffuse.h"
-        "src/diffusion/ExplicitDiffuse.h"
-        "src/diffusion/JacobiDiffuse.h"
-
-        "src/field/Field.h"
-        "src/field/FieldController.h"
-
-        "src/interfaces/IAdaptionFunction.h"
-        "src/interfaces/IAdvection.h"
-        "src/interfaces/IDiffusion.h"
-        "src/interfaces/IPressure.h"
-        "src/interfaces/ISolver.h"
-        "src/interfaces/ISource.h"
-        "src/interfaces/ISourceFunction.h"
-        "src/interfaces/ITurbulence.h"
-
-        "src/pressure/VCycleMG.h"
-
-        "src/solver/AdvectionSolver.h"
-        "src/solver/AdvectionDiffusionSolver.h"
-        "src/solver/DiffusionSolver.h"
-        "src/solver/DiffusionTurbSolver.h"
-        "src/solver/NSSolver.h"
-        "src/solver/NSTurbSolver.h"
-        "src/solver/NSTempSolver.h"
-        "src/solver/NSTempConSolver.h"
-        "src/solver/NSTempTurbSolver.h"
-        "src/solver/NSTempTurbConSolver.h"
-        "src/solver/PressureSolver.h"
-        "src/solver/SolverController.h"
-        "src/solver/SolverSelection.h"
-
-        "src/source/BuoyancyMMS.h"
-        "src/source/Cube.h"
-        "src/source/ExplicitEulerSource.h"
-        "src/source/GaussFunction.h"
-        "src/source/Zero.h"
-
-        "src/turbulence/ConstSmagorinsky.h"
-        "src/turbulence/DynamicSmagorinsky.h"
-
-        "src/utility/Parameters.h"
-        "src/utility/tinyxml2.h"
-        "src/utility/Tracer.h"
-        "src/utility/Utility.h"
-
-        "src/visualisation/CSVWriter.h"
-        "src/visualisation/Visual.h"
-        "src/visualisation/VTKWriter.h"
-        "src/visualisation/visit_writer.h"
-
-        "src/Domain.h"
-        "src/Functions.h"
-        "src/GlobalMacrosTyper.h"
-        "src/TimeIntegration.h"
-        )
 
 # link cuda library for cuda features
 link_directories( $ENV{CUDA_LIB} )
 include_directories( $ENV{CUDA_INC} )
 
 # find spdlog lib
-if(NOT TARGET spdlog)
-    # Stand-alone build
-    find_package(spdlog, QUIET)
-endif()
+# if(NOT TARGET spdlog)
+#     # Stand-alone build
+#     find_package(spdlog)
+# endif()
 # use local fallback
 if(NOT TARGET spdlog)
     add_subdirectory(external/spdlog)
@@ -325,35 +178,36 @@ endif()
 
 
 #Targets
-add_executable( artss_serial ${SOURCE_FILES} src/main.cpp)
-target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
+add_executable(artss "src/main.cpp")
+target_link_libraries(artss PRIVATE spdlog::spdlog)
 
-add_executable( artss_serial_benchmark ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX" )
-target_link_libraries( artss_serial_benchmark  )
+# add_executable( artss_serial_benchmark ${SOURCE_FILES} src/main.cpp  )
+# set_target_properties( artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX" )
+# target_link_libraries( artss_serial_benchmark  )
+# 
+# 
+# add_executable(artss_multicore_cpu ${SOURCE_FILES} src/main.cpp)
+# set_target_properties(artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=multicore" LINK_FLAGS "-acc -ta=multicore")
+# target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
+# 
+# add_executable( artss_multicore_cpu_benchmark ${SOURCE_FILES} src/main.cpp  )
+# set_target_properties( artss_multicore_cpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore" )
+# target_link_libraries( artss_multicore_cpu_benchmark  )
+# 
+# 
+# add_executable(artss_gpu ${SOURCE_FILES} src/main.cpp)
+# set_target_properties(artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
+# target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
+# 
+# add_executable( artss_gpu_benchmark ${SOURCE_FILES} src/main.cpp  )
+# set_target_properties( artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
+# target_link_libraries( artss_gpu_benchmark  )
 
 
-add_executable(artss_multicore_cpu ${SOURCE_FILES} src/main.cpp)
-set_target_properties(artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=multicore" LINK_FLAGS "-acc -ta=multicore")
-target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
-
-add_executable( artss_multicore_cpu_benchmark ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_multicore_cpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore" )
-target_link_libraries( artss_multicore_cpu_benchmark  )
+spdlog_enable_warnings(artss)
 
 
-add_executable(artss_gpu ${SOURCE_FILES} src/main.cpp)
-set_target_properties(artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
-target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
-
-add_executable( artss_gpu_benchmark ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
-target_link_libraries( artss_gpu_benchmark  )
-
-
-spdlog_enable_warnings(artss_serial)
-spdlog_enable_warnings(artss_multicore_cpu)
-spdlog_enable_warnings(artss_gpu)
+add_subdirectory(src)
 
 
 enable_testing()
