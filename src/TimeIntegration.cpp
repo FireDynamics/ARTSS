@@ -182,6 +182,7 @@ void TimeIntegration::run() {
             if (cfl > 1) {
 #ifndef BENCHMARKING
                 m_logger->warn("CFL condition not met. CFL={}, dt={}", cfl, dt);
+                m_logger->warn("To lower th CFL value a smaller dt must be selected. Proposed CFL value of <= 0.8 yields to dt <= {}", dt*0.8/cfl);
 #endif
             } else {
 #ifndef BENCHMARKING
