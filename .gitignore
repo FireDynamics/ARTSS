@@ -1,6 +1,7 @@
 *.dat
 *.vtk
 *.ods
+*.log
 /Debug/
 .idea/
 build/
