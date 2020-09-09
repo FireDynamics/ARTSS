@@ -166,24 +166,28 @@ message(STATUS "")
 link_directories( $ENV{CUDA_LIB} )
 include_directories( $ENV{CUDA_INC} )
 
-# find spdlog lib
-if(NOT TARGET spdlog)
-    add_subdirectory(external/spdlog)
-endif()
-
-
-#Targets
-add_executable(artss "src/main.cpp")
-target_link_libraries(artss PRIVATE spdlog::spdlog)
-
-
-spdlog_enable_warnings(artss)
 
 message(STATUS "")
 message(STATUS "ARTSS_BENCHMARK_FLAG:   ${ARTSS_BENCHMARK_FLAG}")
 message(STATUS "ARTSS_TARGET_ARCH:      ${ARTSS_TARGET_ARCH}")
 message(STATUS "ARTSS_TESTS_FLAG:       ${ARTSS_TESTS_FLAG}")
 message(STATUS "ARTSS_UTEST_FLAG:       ${ARTSS_UTEST_FLAG}")
+
+
+#Targets
+add_executable(artss "src/main.cpp")
+
+
+if(NOT ARTSS_BENCHMARK_FLAG)
+    # find spdlog lib
+    if(NOT TARGET spdlog)
+        add_subdirectory(external/spdlog)
+    endif()
+
+    target_link_libraries(artss PRIVATE spdlog::spdlog)
+    spdlog_enable_warnings(artss)
+endif()
+
 
 if(ARTSS_BENCHMARK_FLAG)
     message(STATUS "Enabled Benchmarking")
