@@ -178,7 +178,7 @@ void TimeIntegration::run() {
             // check CFL
             real cfl = analysis->calc_CFL(u, v, w, dt);
 
-            // CFL condition not met adapting dt
+            // CFL condition not met
             if (cfl > 1) {
 #ifndef BENCHMARKING
                 m_logger->warn("CFL condition not met. CFL={}, dt={}", cfl, dt);
