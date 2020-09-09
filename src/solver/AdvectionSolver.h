@@ -11,11 +11,7 @@
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IAdvection.h"
 #include "../utility/GlobalMacrosTypes.h"
-
-#ifndef BENCHMARKING
 #include "../utility/Utility.h"
-#endif
-
 
 class AdvectionSolver : public ISolver {
 public:

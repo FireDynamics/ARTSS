@@ -17,10 +17,7 @@
 #include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../field/FieldController.h"
-
-#ifndef BENCHMARKING
 #include "../utility/Utility.h"
-#endif
 
 class NSTempConSolver: public ISolver {
  public:

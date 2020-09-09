@@ -10,10 +10,7 @@
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IDiffusion.h"
 #include "../field/FieldController.h"
-
-#ifndef BENCHMARKING
 #include "../utility/Utility.h"
-#endif
 
 class DiffusionSolver: public ISolver {
  public:

@@ -7,7 +7,6 @@
 #ifndef ARTSS_SOLVER_NSTEMPSOLVER_H_
 #define ARTSS_SOLVER_NSTEMPSOLVER_H_
 
-
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IAdvection.h"
 #include "../interfaces/IDiffusion.h"
@@ -15,11 +14,7 @@
 #include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../field/FieldController.h"
-
-#ifndef BENCHMARKING
 #include "../utility/Utility.h"
-#endif
-
 
 class NSTempSolver : public ISolver {
 public:

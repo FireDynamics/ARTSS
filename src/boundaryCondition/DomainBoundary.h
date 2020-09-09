@@ -7,9 +7,9 @@
 #ifndef ARTSS_BOUNDARYCONDITION_DOMAINBOUNDARY_H
 #define ARTSS_BOUNDARYCONDITION_DOMAINBOUNDARY_H
 
-#include <cstdlib>
 #include "../utility/GlobalMacrosTypes.h"
 #include "../boundary/BoundaryData.h"
+#include "../utility/Utility.h"
 
 class DomainBoundary {
   public:

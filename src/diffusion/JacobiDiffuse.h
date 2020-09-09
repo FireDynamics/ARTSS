@@ -13,6 +13,8 @@
 
 #include "../utility/Utility.h"
 
+#include "../utility/Utility.h"
+
 class JacobiDiffuse : public IDiffusion {
 public:
     JacobiDiffuse();

@@ -15,10 +15,7 @@
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../visualisation/Visual.h"
-
-#ifndef BENCHMARKING
 #include "../utility/Utility.h"
-#endif
 
 class NSTempTurbSolver : public ISolver {
  public:

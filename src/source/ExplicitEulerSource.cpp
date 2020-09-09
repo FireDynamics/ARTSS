@@ -7,7 +7,6 @@
 #include "ExplicitEulerSource.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
-#include "../Domain.h"
 
 ExplicitEulerSource::ExplicitEulerSource() {
     auto params = Parameters::getInstance();

@@ -7,7 +7,6 @@
 #ifndef ARTSS_SOLVERCONTROLLER_H
 #define ARTSS_SOLVERCONTROLLER_H
 
-
 #include "../interfaces/ISolver.h"
 #include "../interfaces/ISourceFunction.h"
 #include "../field/FieldController.h"

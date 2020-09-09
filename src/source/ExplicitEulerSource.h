@@ -10,11 +10,7 @@
 #include "../interfaces/ISource.h"
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
-
-#ifndef BENCHMARKING
 #include "../utility/Utility.h"
-#endif
-
 
 class ExplicitEulerSource : public ISource {
  public:

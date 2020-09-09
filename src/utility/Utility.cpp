@@ -4,7 +4,6 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <cstring>
 #include <sstream>
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
@@ -12,7 +11,6 @@
 
 #ifndef BENCHMARKING
 #include <spdlog/cfg/helpers.h>
-#include <cctype>
 #include <clocale>
 #endif
 
@@ -35,42 +33,6 @@ std::vector<size_t> Utility::coordinateFromLinearIndex(size_t idx, size_t Nx, si
 
     return coord;
 }
-
-// ================================= Calculate coordinate i ==========================================
-// ***************************************************************************************
-/// \brief  Calculates the i coordinate
-/// \param  idx     linear (global) index
-/// \param  Nx      number of cells in x-direction of physical domain
-/// \param  Ny      number of cells in y-direction of physical domain
-/// \param  j       index of <i,j,k>
-/// \param  k       index of <i,j,k>
-// ***************************************************************************************
-//size_t Utility::getCoordinateI(size_t idx, size_t Nx, size_t Ny, size_t j, size_t k) {
-//    return idx - k * Nx * Ny - j * Nx;
-//}
-
-// ================================= Calculate coordinate j ==========================================
-// ***************************************************************************************
-/// \brief  Calculates the j coordinate
-/// \param  idx     linear (global) index
-/// \param  Nx      number of cells in x-direction of physical domain
-/// \param  Ny      number of cells in y-direction of physical domain
-/// \param  k       index of <i,j,k>
-// ***************************************************************************************
-//size_t Utility::getCoordinateJ(size_t idx, size_t Nx, size_t Ny, size_t k) {
-//    return (idx - k * Nx * Ny) / Nx;
-//}
-
-// ================================= Calculate coordinate k ==========================================
-// ***************************************************************************************
-/// \brief  Calculates the k coordinate
-/// \param  idx     linear (global) index
-/// \param  Nx      number of cells in x-direction of physical domain
-/// \param  Ny      number of cells in y-direction of physical domain
-// ***************************************************************************************
-//size_t Utility::getCoordinateK(size_t idx, size_t Nx, size_t Ny) {
-//    return idx / (Nx * Ny);
-//}
 
 // ================================= Split string at character ==========================================
 // ***************************************************************************************
