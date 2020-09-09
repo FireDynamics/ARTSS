@@ -25,8 +25,11 @@
 #include "TimeIntegration.h"
 #include "utility/tinyxml2.h"
 #include "utility/Parameters.h"
+
+#ifndef BENCHMARKING
 #include "analysis/Analysis.h"
 #include "utility/Utility.h"
+#endif
 
 #ifdef _OPENACC
     #include <openacc.h>

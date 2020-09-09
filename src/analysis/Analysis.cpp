@@ -310,66 +310,19 @@ bool Analysis::check_time_step_VN(Field *u, real dt) {
     return VN_check;
 }
 
-// =========================== Check CFL condition ============================
+// ================================ Calc CFL ===================================
 // *****************************************************************************
-/// \brief  checks CFL condition on time step (returns true or false)
+/// \brief  Returns the max CFL overall cells
 /// \param  u     x-velocity field
 /// \param  v     y-velocity field
 /// \param  w     z-velocity field
 /// \param  dt      time step size
-// ***************************************************************************************
-bool Analysis::check_time_step_CFL(Field *u, Field *v, Field *w, real dt) {
-    bool CFL_check;
-
-    auto boundary = BoundaryController::getInstance();
-    auto domain = Domain::getInstance();
-
-    // local variables and parameters
-    size_t *innerList = boundary->get_innerList_level_joined();
-    size_t sizei = boundary->getSize_innerList();
-
-    real dx = domain->get_dx(u->GetLevel());
-    real dy = domain->get_dy(u->GetLevel());
-    real dz = domain->get_dz(u->GetLevel());
-
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-
-    real *max_vel = new real[sizei];
-    real uvrdx, uvwrdx, maxvelrdx;
-
-    // TODO correct?
-    for (size_t i = 0; i < sizei; i++) {
-        size_t idx = innerList[i];
-        uvrdx = std::max(fabs(d_u[idx]) / dx, fabs(d_v[idx]) / dy);
-        uvwrdx = std::max(uvrdx, fabs(d_w[idx]) / dz);
-
-        max_vel[i] = uvwrdx;
-        ++i;
-    }
-
-    maxvelrdx = *(std::max_element(max_vel, max_vel + sizei));
-
-    real CFL = dt * maxvelrdx;
-
-    CFL_check = CFL < 1.;
-
-#ifndef BENCHMARKING
-    m_logger->info("CFL = {}", CFL);
-#endif
-
-    return CFL_check;
-}
-
-// ========================== Set dt based on CFL condition ===================
 // *****************************************************************************
-/// \brief  sets time step size based on CFL=0.8 (returns dt)
-/// \param  u     x-velocity field
-/// \param  v     y-velocity field
-/// \param  w     z-velocity field
-// ***************************************************************************************
-real Analysis::set_DT_with_CFL(Field *u, Field *v, Field *w) {
+real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
+    real cfl_max = 0;  // heighest seen C. C is always positiv, so 0 is a lower
+                       // bound
+    real cfl_local;    // C in the local cell
+
     auto boundary = BoundaryController::getInstance();
     auto domain = Domain::getInstance();
 
@@ -385,25 +338,20 @@ real Analysis::set_DT_with_CFL(Field *u, Field *v, Field *w) {
     auto d_v = v->data;
     auto d_w = w->data;
 
-    real *max_vel = new real[sizei];
-    real uvrdx, uvwrdx, maxvelrdx;
-
-    // TODO correct?
-    for (size_t i = 0; i < sizei; i++) {
+    // calc C for every cell and get the maximum
+    for (size_t i=0; i < sizei; i++) {
         size_t idx = innerList[i];
-        uvrdx = std::max(fabs(d_u[idx]) / dx, fabs(d_v[idx]) / dy);
-        uvwrdx = std::max(uvrdx, fabs(d_w[idx]) / dz);
-        max_vel[i] = uvwrdx;
-        ++i;
+        // \frac{C}{\Delta t} = \frac{\Delta u}{\Delta x} +
+        //                      \frac{\Delta v}{\Delta y} +
+        //                      \frac{\Delta w}{\Delta z} +
+        // https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition#The_two_and_general_n-dimensional_case
+        cfl_local = std::fabs(d_u[idx]) / dx +
+                    std::fabs(d_v[idx]) / dy +
+                    std::fabs(d_w[idx]) / dz;
+        cfl_max = std::max(cfl_max, cfl_local);
     }
 
-    maxvelrdx = *(std::max_element(max_vel, max_vel + sizei));
-
-    real CFL = 0.8;
-
-    real DT = CFL / maxvelrdx;
-
-    return DT;
+    return dt*cfl_max;
 }
 
 // =============================== Save variables ==============================
