@@ -330,9 +330,9 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
     size_t *innerList = boundary->get_innerList_level_joined();
     size_t sizei = boundary->getSize_innerList();
 
-    real dx = domain->get_dx(u->GetLevel());
-    real dy = domain->get_dy(u->GetLevel());
-    real dz = domain->get_dz(u->GetLevel());
+    real dx = domain->get_dx();
+    real dy = domain->get_dy();
+    real dz = domain->get_dz();
 
     auto d_u = u->data;
     auto d_v = v->data;
