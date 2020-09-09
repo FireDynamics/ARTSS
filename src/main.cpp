@@ -8,6 +8,11 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#include <boost/mpi/communicator.hpp>
+#include <boost/mpi/collectives.hpp>
+#include <boost/mpi/environment.hpp>
+#include <boost/mpi/cartesian_communicator.hpp>
+
 #include <iostream>
 
 #include "interfaces/ISolver.h"
@@ -34,6 +39,10 @@
 
 
 int main(int argc, char **argv) {
+
+    boost::mpi::environment MPIENV;
+    boost::mpi::communicator MPIWORLD;
+
     // Initialization
     // Parameters
     std::string XML_filename;
@@ -45,6 +54,13 @@ int main(int argc, char **argv) {
         std::cerr << "XML file missing" << std::endl;
         std::exit(1);
     }
+
+    const int MPIX{params->get_int("domain_parameters/MESHX")};
+    const int MPIY{params->get_int("domain_parameters/MESHY")};
+    const int MPIZ{params->get_int("domain_parameters/MESHZ")};
+
+    boost::mpi::cartesian_dimension MPIDIM[] = {{MPIX, false}, {MPIY, false}, {MPIZ, false}};
+    boost::mpi::cartesian_communicator MPICART(MPIWORLD, boost::mpi::cartesian_topology(MPIDIM), true);
 
     // Solver
     ISolver *solver;
@@ -74,12 +90,12 @@ int main(int argc, char **argv) {
     acc_device_t dev_type = acc_get_device_type();
     acc_init( dev_type );
 #endif
-
-    // Integrate over time and solve numerically
-    // Time integration
-    TimeIntegration ti(solver);
-    ti.run();
-
+//
+//     // Integrate over time and solve numerically
+//     // Time integration
+//     TimeIntegration ti(solver);
+//     ti.run();
+//
     // Clean up
     delete solver;
     return 0;
