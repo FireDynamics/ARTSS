@@ -20,7 +20,7 @@
 
 class NSSolver : public ISolver {
  public:
-    NSSolver();
+    NSSolver(boost::mpi::cartesian_communicator& MPICART);
 
     ~NSSolver() override;
 

@@ -1,4 +1,4 @@
-/// \file       NSTempConSolver.cpp 
+/// \file       NSTempConSolver.cpp
 /// \brief      Navier-Stokes Solver with force f(T)
 /// \details    Defines the steps to solve advection, diffusion, pressure and add sources (dependent on T), solves temperature and concentration equation
 /// \date       Sep 27, 2017
@@ -21,7 +21,7 @@
 
 class NSTempConSolver : public ISolver {
  public:
-    NSTempConSolver();
+    NSTempConSolver(boost::mpi::cartesian_communicator& MPICART);
     ~NSTempConSolver() override;
 
     void do_step(real t, bool sync) override;

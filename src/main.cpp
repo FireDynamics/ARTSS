@@ -59,23 +59,30 @@ int main(int argc, char **argv) {
     const int MPIY{params->get_int("domain_parameters/MESHY")};
     const int MPIZ{params->get_int("domain_parameters/MESHZ")};
 
+    if (MPIWORLD.size() != MPIX*MPIY*MPIZ) {
+       if (MPIWORLD.rank() == 0) std::cerr << "Number of meshes does not match the number of defined MPI processes!" << std::endl;
+       MPIENV.abort(1);
+    }
+
     boost::mpi::cartesian_dimension MPIDIM[] = {{MPIX, false}, {MPIY, false}, {MPIZ, false}};
     boost::mpi::cartesian_communicator MPICART(MPIWORLD, boost::mpi::cartesian_topology(MPIDIM), true);
+
+
 
     // Solver
     ISolver *solver;
     std::string string_solver = params->get("solver/description");
-    if (string_solver == SolverTypes::DiffusionSolver) solver = new DiffusionSolver();
-    else if (string_solver == SolverTypes::AdvectionSolver) solver = new AdvectionSolver();
-    else if (string_solver == SolverTypes::AdvectionDiffusionSolver) solver = new AdvectionDiffusionSolver();
-    else if (string_solver == SolverTypes::PressureSolver) solver = new PressureSolver();
-    else if (string_solver == SolverTypes::DiffusionTurbSolver) solver = new DiffusionTurbSolver();
-    else if (string_solver == SolverTypes::NSSolver) solver = new NSSolver();
-    else if (string_solver == SolverTypes::NSTurbSolver) solver = new NSTurbSolver();
-    else if (string_solver == SolverTypes::NSTempSolver) solver = new NSTempSolver();
-    else if (string_solver == SolverTypes::NSTempTurbSolver) solver = new NSTempTurbSolver();
-    else if (string_solver == SolverTypes::NSTempConSolver) solver = new NSTempConSolver();
-    else if (string_solver == SolverTypes::NSTempTurbConSolver) solver = new NSTempTurbConSolver();
+    if (string_solver == SolverTypes::DiffusionSolver) solver = new DiffusionSolver(MPICART);
+    else if (string_solver == SolverTypes::AdvectionSolver) solver = new AdvectionSolver(MPICART);
+    else if (string_solver == SolverTypes::AdvectionDiffusionSolver) solver = new AdvectionDiffusionSolver(MPICART);
+    else if (string_solver == SolverTypes::PressureSolver) solver = new PressureSolver(MPICART);
+    else if (string_solver == SolverTypes::DiffusionTurbSolver) solver = new DiffusionTurbSolver(MPICART);
+    else if (string_solver == SolverTypes::NSSolver) solver = new NSSolver(MPICART);
+    else if (string_solver == SolverTypes::NSTurbSolver) solver = new NSTurbSolver(MPICART);
+    else if (string_solver == SolverTypes::NSTempSolver) solver = new NSTempSolver(MPICART);
+    else if (string_solver == SolverTypes::NSTempTurbSolver) solver = new NSTempTurbSolver(MPICART);
+    else if (string_solver == SolverTypes::NSTempConSolver) solver = new NSTempConSolver(MPICART);
+    else if (string_solver == SolverTypes::NSTempTurbConSolver) solver = new NSTempTurbConSolver(MPICART);
 
     else {
 #ifndef BENCHMARKING

@@ -21,7 +21,7 @@
 
 class PressureSolver : public ISolver {
 public:
-    PressureSolver();
+    PressureSolver(boost::mpi::cartesian_communicator& MPICART);
     ~PressureSolver() override;
     void do_step(real t, bool sync) override;
 

@@ -11,7 +11,7 @@
 #include "../utility/Utility.h"
 
 
-AdvectionDiffusionSolver::AdvectionDiffusionSolver() {
+AdvectionDiffusionSolver::AdvectionDiffusionSolver(boost::mpi::cartesian_communicator& MPICART) : ISolver(MPICART) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif

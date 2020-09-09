@@ -10,10 +10,12 @@
 #include "../Domain.h"
 #include "SolverSelection.h"
 
-DiffusionSolver::DiffusionSolver() {
+DiffusionSolver::DiffusionSolver(boost::mpi::cartesian_communicator& MPICART) : ISolver(MPICART) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
+
+    std::cout << MPICART.rank() << '\n';
     auto params = Parameters::getInstance();
     std::string diffusionType = params->get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);

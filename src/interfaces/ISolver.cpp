@@ -19,7 +19,7 @@
 #include "../solver/SolverSelection.h"
 #include "../utility/Utility.h"
 
-ISolver::ISolver() {
+ISolver::ISolver(boost::mpi::cartesian_communicator& MPICART) : MPICART(MPICART) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif

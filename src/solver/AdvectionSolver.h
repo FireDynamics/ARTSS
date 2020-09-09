@@ -15,7 +15,7 @@
 
 class AdvectionSolver : public ISolver {
 public:
-    AdvectionSolver();
+    AdvectionSolver(boost::mpi::cartesian_communicator& MPICART);
     ~AdvectionSolver() override;
 
     void do_step(real t, bool sync) override;
