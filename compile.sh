@@ -161,7 +161,7 @@ do
       shift
       ;;
     -s|--serial|--artss_serial)
-      COMPILE="$COMPILE artss_serial"
+      COMPILE="$COMPILE artss"
       shift
       ;;
     --sb|--serial_benchmark|--artss_serial_benchmark)
