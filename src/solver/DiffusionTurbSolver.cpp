@@ -6,7 +6,7 @@
 
 #include "DiffusionTurbSolver.h"
 
-DiffusionTurbSolver::DiffusionTurbSolver(boost::mpi::cartesian_communicator& MPICART) : ISolver(MPICART) {
+DiffusionTurbSolver::DiffusionTurbSolver() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif

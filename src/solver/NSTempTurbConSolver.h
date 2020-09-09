@@ -19,7 +19,7 @@
 
 class NSTempTurbConSolver : public ISolver {
  public:
-    NSTempTurbConSolver(boost::mpi::cartesian_communicator& MPICART);
+    NSTempTurbConSolver();
     ~NSTempTurbConSolver() override;
 
     void do_step(real t, bool sync) override;

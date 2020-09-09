@@ -10,7 +10,7 @@
 #include "../Domain.h"
 #include "SolverSelection.h"
 
-AdvectionSolver::AdvectionSolver(boost::mpi::cartesian_communicator& MPICART) : ISolver(MPICART) {
+AdvectionSolver::AdvectionSolver() {
 #ifndef BENCHMARKING
      m_logger = Utility::create_logger(typeid(this).name());
 #endif

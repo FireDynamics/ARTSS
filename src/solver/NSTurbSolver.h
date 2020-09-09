@@ -17,7 +17,7 @@
 
 class NSTurbSolver : public ISolver {
  public:
-    NSTurbSolver(boost::mpi::cartesian_communicator& MPICART);
+    NSTurbSolver();
     ~NSTurbSolver() override;
 
     void do_step(real t, bool sync) override;

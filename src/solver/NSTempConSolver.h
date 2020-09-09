@@ -21,7 +21,7 @@
 
 class NSTempConSolver : public ISolver {
  public:
-    NSTempConSolver(boost::mpi::cartesian_communicator& MPICART);
+    NSTempConSolver();
     ~NSTempConSolver() override;
 
     void do_step(real t, bool sync) override;

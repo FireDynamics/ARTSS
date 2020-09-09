@@ -9,8 +9,6 @@
 
 #include <string>
 
-#include <boost/mpi/cartesian_communicator.hpp>
-
 #include "../Field.h"
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
@@ -33,7 +31,7 @@ struct SolverTypes {
 
 class ISolver {
  public:
-    ISolver(boost::mpi::cartesian_communicator& MPICART);
+    ISolver();
     virtual ~ISolver();
 
     virtual void do_step(real t, bool sync) = 0;
@@ -121,8 +119,6 @@ class ISolver {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-
-    boost::mpi::cartesian_communicator MPICART;
 
     std::string m_string_solver;
     void force_source();

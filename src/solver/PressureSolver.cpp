@@ -8,7 +8,7 @@
 #include "PressureSolver.h"
 
 
-PressureSolver::PressureSolver(boost::mpi::cartesian_communicator& MPICART) : ISolver(MPICART) {
+PressureSolver::PressureSolver() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(PressureSolver).name());
 #endif

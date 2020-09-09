@@ -14,7 +14,7 @@
 
 class DiffusionSolver: public ISolver {
  public:
-    DiffusionSolver(boost::mpi::cartesian_communicator& MPICART);
+    DiffusionSolver();
     ~DiffusionSolver() override;
 
     void do_step(real t, bool sync) override;

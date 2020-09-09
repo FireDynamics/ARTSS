@@ -11,7 +11,7 @@
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 
-NSTempSolver::NSTempSolver(boost::mpi::cartesian_communicator& MPICART) : ISolver(MPICART) {
+NSTempSolver::NSTempSolver() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
