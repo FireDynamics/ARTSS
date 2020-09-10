@@ -12,22 +12,22 @@
 #include "../field/FieldController.h"
 
 class Analysis {
-public:
+ public:
     explicit Analysis(Solution *solution);
 
     void analyse(FieldController *solver, real t);
 
     void calc_L2_norm_mid_point(FieldController *solver, real t, real *sum);
     void calc_RMS_error(real sum_u, real sum_p, real sum_T);
+    real calc_CFL(Field *u, Field *v, Field *w, real dt);
 
     bool check_time_step_VN(Field *u, real dt);
-    bool check_time_step_CFL(Field *u, Field *v, Field *w, real dt);
 
     real set_DT_with_CFL(Field *u, Field *v, Field *w);
 
     void save_variables_in_file(FieldController *solv);
 
-private:
+ private:
     real m_tol = 1e-7;
 
     bool compare_solutions(read_ptr num, read_ptr ana, FieldType type, real t);

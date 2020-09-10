@@ -124,6 +124,24 @@ void TimeIntegration::run() {
             // Error Calculation
             // RMS error at midposize_t at each time step Nt
             m_analysis->calc_L2_norm_mid_point(m_field_controller, t_cur, Sum);
+
+            // check CFL
+            real cfl = m_analysis->calc_CFL(u, v, w, dt);
+
+            // CFL condition not met
+            if (cfl > 1) {
+#ifndef BENCHMARKING
+                m_logger->warn("CFL condition not met. CFL={}, dt={}", cfl, dt);
+                m_logger->warn("To lower th CFL value a smaller dt must be selected. Proposed CFL value of <= 0.8 yields to dt <= {}", dt*0.8/cfl);
+#endif
+            } else {
+#ifndef BENCHMARKING
+                m_logger->info("CFL = {}", cfl);
+#endif
+            }
+            // bool VN_check = ana.check_time_step_VN(u, dt);
+            // if(!VN_check)
+            //     std::cout<<"Von Neumann condition not met!"<<std::endl;
 #endif
             // update
             m_adaption->run(t_cur);
