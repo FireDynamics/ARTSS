@@ -6,8 +6,6 @@
 
 #include <cmath>
 
-#include <cmath>
-
 #ifdef _OPENACC
 #include <accelmath.h>
 #endif

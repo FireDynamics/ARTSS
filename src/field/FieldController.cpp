@@ -27,7 +27,7 @@ FieldController::FieldController() {
 
     // Temperature
     field_T = new Field(FieldType::T, 0.0);
-    field_T_ambient = new Field(FieldType::T, 0);
+    field_T_ambient = new Field(FieldType::T, 300);
 
     // Concentration
     field_concentration = new Field(FieldType::RHO, 0.0);

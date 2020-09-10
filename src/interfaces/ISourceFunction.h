@@ -4,15 +4,11 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_ISOURCEFUNCTION_H
-#define ARTSS_ISOURCEFUNCTION_H
+#ifndef ARTSS_INTERFACES_ISOURCEFUNCTION_H
+#define ARTSS_INTERFACES_ISOURCEFUNCTION_H
 
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
-
-struct SourceFunctionNames{
-    inline static const std::string RampTanh = "RampTanh";
-};
 
 class ISourceFunction {
 public:
@@ -20,4 +16,4 @@ public:
 };
 
 
-#endif /* ARTSS_ISOURCEFUNCTION_H */
+#endif /* ARTSS_INTERFACES_ISOURCEFUNCTION_H */

@@ -4,12 +4,13 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_SOLVERCONTROLLER_H
-#define ARTSS_SOLVERCONTROLLER_H
+#ifndef ARTSS_SOLVER_SOLVERCONTROLLER_H
+#define ARTSS_SOLVER_SOLVERCONTROLLER_H
 
 #include "../interfaces/ISolver.h"
 #include "../interfaces/ISourceFunction.h"
 #include "../field/FieldController.h"
+#include "../utility/Utility.h"
 
 class SolverController {
 public:
@@ -41,10 +42,13 @@ private:
     ISource *source_concentration;
 
     bool m_has_temperature = false;
+    bool m_has_momentum_source = false;
     bool m_has_turbulence = false;
     bool m_has_concentration = false;
-    bool m_has_momentum_source = false;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 
-#endif /* ARTSS_SOLVERCONTROLLER_H */
+#endif /* ARTSS_SOLVER_SOLVERCONTROLLER_H */

@@ -38,7 +38,6 @@ Analysis::Analysis(Solution *solution) {
 /// \param  t     current time
 // ***************************************************************************************
 void Analysis::analyse(FieldController *field_controller, real t) {
-    //TODO statement t == 0.
     if (has_analytic_solution) {
         m_solution->calc_analytical_solution(t);
 
@@ -47,8 +46,7 @@ void Analysis::analyse(FieldController *field_controller, real t) {
         tinyxml2::XMLElement *xmlParameter = params->get_first_child("boundaries");
         auto curElem = xmlParameter->FirstChildElement();
 
-        m_solution->calc_analytical_solution(t);
-#ifndef BENCHMARKING
+        #ifndef BENCHMARKING
         m_logger->info("Compare to analytical solution:");
 #endif
 

@@ -85,5 +85,7 @@ typedef const real* const aliased_read_ptr;
 #define NEGATIVE_SIGN (-1)
 #define POSITIVE_SIGN (1)
 
+#define XML_TRUE ("Yes")
+#define XML_FALSE ("No")
 
 #endif /* ARTSS_UTILITY_GLOBALMACROSTYPES_H_ */

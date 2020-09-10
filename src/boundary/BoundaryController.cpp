@@ -62,7 +62,7 @@ void BoundaryController::parseBoundaryParameter(tinyxml2::XMLElement *xmlParamet
 // ***************************************************************************************
 void BoundaryController::parseSurfaceParameter(tinyxml2::XMLElement *xmlParameter) {
 // SURFACES
-//TODO
+//TODO surfaces
     m_hasSurfaces = (Parameters::getInstance()->get("surfaces/enabled") == "Yes");
     if (m_hasSurfaces) {
         std::vector<Surface *> surfaces;
