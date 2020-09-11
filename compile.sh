@@ -146,7 +146,7 @@ do
       shift
       ;;
     -m|--multicore|--artss_multicore_cpu)
-      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TARGET_ARCH=MUTICORE" 
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TARGET_ARCH=MULTICORE" 
       GPU=0
       shift
       ;;
