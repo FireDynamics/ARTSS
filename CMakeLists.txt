@@ -159,6 +159,10 @@ endif()
 if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
   message(STATUS "    Configuration: "  ${CMAKE_BUILD_TYPE})
 endif()
+message(STATUS "    ARTSS_BENCHMARK_FLAG:   ${ARTSS_BENCHMARK_FLAG}")
+message(STATUS "    ARTSS_TARGET_ARCH:      ${ARTSS_TARGET_ARCH}")
+message(STATUS "    ARTSS_TESTS_FLAG:       ${ARTSS_TESTS_FLAG}")
+message(STATUS "    ARTSS_UNITTEST_FLAG:    ${ARTSS_UNITTEST_FLAG}")
 message(STATUS "")
 
 
@@ -168,10 +172,6 @@ include_directories( $ENV{CUDA_INC} )
 
 
 message(STATUS "")
-message(STATUS "ARTSS_BENCHMARK_FLAG:   ${ARTSS_BENCHMARK_FLAG}")
-message(STATUS "ARTSS_TARGET_ARCH:      ${ARTSS_TARGET_ARCH}")
-message(STATUS "ARTSS_TESTS_FLAG:       ${ARTSS_TESTS_FLAG}")
-message(STATUS "ARTSS_UNITTEST_FLAG:       ${ARTSS_UNITTEST_FLAG}")
 
 
 #Targets
