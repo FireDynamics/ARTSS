@@ -82,7 +82,7 @@ jobs:
         run: |
           git submodule update --init
           ./compile.sh --docker-build
-          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "./compile.sh --jobs 4 -s -d && cd build && make test"
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "./compile.sh --jobs 4 -s -d -t && cd build && make test"
           
   test-xml:
     
