@@ -7,3 +7,4 @@ target_sources(artss
         ${CMAKE_CURRENT_LIST_DIR}/JacobiDiffuse.cpp
         ${CMAKE_CURRENT_LIST_DIR}/JacobiDiffuse.h
 )
+
