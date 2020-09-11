@@ -67,7 +67,7 @@ Docker - ! cannot be combined with other commands ! (more information about dock
 "
 
 HELP="$DESCRIPTION$OPTIONS"
-COMPILE=""
+CMAKE_FLAGS=""
 DOCKERRUN=1
 DOCKERBUILD=1
 DOCKERHOST=docker_$(hostname)
@@ -109,12 +109,13 @@ do
       shift
       ;;
     -g|--gpu|--artss_gpu)
-      COMPILE="$COMPILE artss_gpu" 
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TARGET_ARCH=GPU" 
       GPU=0
       shift
       ;;
     --gb|--gpu_benchmark|--artss_gpu_benchmark)
-      COMPILE="$COMPILE artss_gpu_benchmark "
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TARGET_ARCH=GPU" 
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_BENCHMARK_FLAG=ON"
       GPU=0
       shift
       ;;
@@ -142,12 +143,13 @@ do
       shift
       ;;
     -m|--multicore|--artss_multicore_cpu)
-      COMPILE="$COMPILE artss_multicore_cpu"
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TARGET_ARCH=MUTICORE" 
       GPU=0
       shift
       ;;
     --mb|--multicore_benchmark|--artss_multicore_cpu_benchmark)
-      COMPILE="$COMPILE artss_multicore_cpu_benchmark"
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TARGET_ARCH=MUTICORE" 
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_BENCHMARK_FLAG=ON"
       GPU=0
       shift
       ;;
@@ -161,11 +163,12 @@ do
       shift
       ;;
     -s|--serial|--artss_serial)
-      COMPILE="$COMPILE artss"
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TARGET_ARCH=SERIAL" 
       shift
       ;;
     --sb|--serial_benchmark|--artss_serial_benchmark)
-      COMPILE="$COMPILE artss_serial_benchmark"
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TARGET_ARCH=SERIAL" 
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_BENCHMARK_FLAG=ON"
       shift
       ;;
     --jureca)
@@ -268,15 +271,15 @@ fi
 
 if [ -z ${CUDA_VERSION} ]
 then
-  cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=${BUILDTYPE} -DCMAKE_C_COMPILER=${CCOMPILER} -DCMAKE_CXX_COMPILER=${CXXCOMPILER} ..
+  cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=${BUILDTYPE} -DCMAKE_C_COMPILER=${CCOMPILER} -DCMAKE_CXX_COMPILER=${CXXCOMPILER} ${CMAKE_FLAGS} ..
 else
-  cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=${BUILDTYPE} -DCMAKE_C_COMPILER=${CCOMPILER} -DCMAKE_CXX_COMPILER=${CXXCOMPILER} -DGPU_CC=${GPU_CC} -DCUDA_VERSION=${CUDA_VERSION} ..
+  cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=${BUILDTYPE} -DCMAKE_C_COMPILER=${CCOMPILER} -DCMAKE_CXX_COMPILER=${CXXCOMPILER} -DGPU_CC=${GPU_CC} -DCUDA_VERSION=${CUDA_VERSION} ${CMAKE_FLAGS} ..
 fi
 
 if [ "$PROCS" -le 0 ]
 then
-  make $COMPILE
+  make artss
 else
   echo "-- Parallel execution with $PROCS processing units"
-  make $COMPILE -j"$PROCS"
+  make artss -j"$PROCS"
 fi

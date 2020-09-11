@@ -201,7 +201,7 @@ if(ARTSS_TARGET_ARCH STREQUAL "MULTICORE")
         LINK_FLAGS "-acc -ta=multicore")
 elseif(ARTSS_TARGET_ARCH STREQUAL "GPU")
     message(STATUS "Enabled GPU")
-    set_target_properties(artss_gpu PROPERTIES
+    set_target_properties(artss PROPERTIES
         COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}"
         LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
 else()
