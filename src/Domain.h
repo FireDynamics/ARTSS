@@ -16,6 +16,7 @@
 #include "utility/GlobalMacrosTypes.h"
 #include "utility/Parameters.h"
 #include "utility/Utility.h"
+#include "utility/MPIHandler.h"
 
 class Domain {
  public:

@@ -17,26 +17,44 @@ Domain::Domain() {
     if (solver.find("NS") != std::string::npos || solver.find("Pressure") != std::string::npos) {
         m_levels = static_cast<size_t> (params->get_int("solver/pressure/n_level"));
     }
+
+    auto mpi_handler = MPIHandler::getInstance();
+
     m_nx = new size_t[m_levels + 1];
     m_ny = new size_t[m_levels + 1];
     m_nz = new size_t[m_levels + 1];
 
-    m_nx[0] = static_cast<size_t> (params->get_int("domain_parameters/nx")) + 2;
-    m_ny[0] = static_cast<size_t> (params->get_int("domain_parameters/ny")) + 2;
-    m_nz[0] = static_cast<size_t> (params->get_int("domain_parameters/nz")) + 2;
+    m_nx[0] = static_cast<size_t> (mpi_handler->convert_grid("domain_parameters/nx", 0)) + 2;
+    m_ny[0] = static_cast<size_t> (mpi_handler->convert_grid("domain_parameters/ny", 1)) + 2;
+    m_nz[0] = static_cast<size_t> (mpi_handler->convert_grid("domain_parameters/nz", 2)) + 2;
 
     m_x1 = params->get_real("domain_parameters/x1");
     m_x2 = params->get_real("domain_parameters/x2");
+    mpi_handler->convert_domain(m_x1, m_x2, 0);
+
     m_y1 = params->get_real("domain_parameters/y1");
     m_y2 = params->get_real("domain_parameters/y2");
+    mpi_handler->convert_domain(m_y1, m_y2, 1);
+
     m_z1 = params->get_real("domain_parameters/z1");
     m_z2 = params->get_real("domain_parameters/z2");
+    mpi_handler->convert_domain(m_y1, m_y2, 2);
+
     m_X1 = params->get_real("domain_parameters/X1");
     m_X2 = params->get_real("domain_parameters/X2");
+    mpi_handler->convert_domain(m_X1, m_X2, 0);
+
     m_Y1 = params->get_real("domain_parameters/Y1");
     m_Y2 = params->get_real("domain_parameters/Y2");
+    mpi_handler->convert_domain(m_Y1, m_Y2, 1);
+
     m_Z1 = params->get_real("domain_parameters/Z1");
     m_Z2 = params->get_real("domain_parameters/Z2");
+    mpi_handler->convert_domain(m_Y1, m_Y2, 2);
+
+    // std::cout << "Rank: " << mpi_handler->get_rank() << ": x1 -> " << m_x1 << " x2 -> " << m_x2 << '\n' << std::flush;
+    // std::cout << "Rank: " << mpi_handler->get_rank() << ": y1 -> " << m_y1 << " y2 -> " << m_y2 << '\n' << std::flush;
+    // std::cout << "Rank: " << mpi_handler->get_rank() << ": z1 -> " << m_z1 << " z2 -> " << m_z2 << '\n' << std::flush;
 
     calc_MG_values();
 #ifndef BENCHMARKING
