@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-COMPILE=""
 GPU=1
 JURECA=1
 P100=1
@@ -216,7 +215,7 @@ then
   if [ "$HOSTNAME" = "ias7139" ]; then P100=0; fi
 fi
 
-if [ "$COMPILE" = "" ]
+if [ "$CMAKE_FLAGS" = "" ]
 then
   GPU=0
 fi
