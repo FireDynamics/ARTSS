@@ -55,7 +55,7 @@ Other:
   ${YELLOW}-t${NC}
   ${YELLOW}--test${NC}                            \t enables the test target for make 
   ${YELLOW}-u${NC}
-  ${YELLOW}--utest${NC}                           \t enables the unit test target for make 
+  ${YELLOW}--unittest${NC}                           \t enables the unittest target for make 
 
   ${YELLOW}--jobs${NC}
 
@@ -178,7 +178,7 @@ do
       CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TESTS_FLAG=ON" 
       shift
       ;;
-    -u|--utest)
+    -u|--unittest)
       CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_UTEST_FLAG=ON" 
       shift
       ;;
