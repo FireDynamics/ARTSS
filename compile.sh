@@ -46,14 +46,18 @@ Executables:
   ${YELLOW}--artss_gpu_benchmark${NC}               \t Executable artss_gpu_benchmark
 
 Other:
-   ${YELLOW}-c${NC}
+  ${YELLOW}-c${NC}
   ${YELLOW}--cudaversion${NC}                     \t set CUDA Version
   ${YELLOW}--cc${NC}
   ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (30|35|50|60|70|75)
-   ${YELLOW}-d${NC}
-   ${YELLOW}--debugmode${NC}                      \t set debug flag for build type (default: ${BUILDTYPE})
+  ${YELLOW}-d${NC}
+  ${YELLOW}--debugmode${NC}                       \t set debug flag for build type (default: ${BUILDTYPE})
+  ${YELLOW}-t${NC}
+  ${YELLOW}--test${NC}                            \t enables the test target for make 
+  ${YELLOW}-u${NC}
+  ${YELLOW}--utest${NC}                           \t enables the unit test target for make 
 
-  ${YELLOW}--jobs${NC}                            \t set the number of recipes to execute at once (-j/--jobs flag in make)
+  ${YELLOW}--jobs${NC}
 
   ${YELLOW}--gcc${NC}                             \t use gcc as compiler (optional: specify version)
   ${YELLOW}--pgi${NC}                             \t use pgcc ac compiler (optional: specify version)
@@ -168,6 +172,14 @@ do
     --sb|--serial_benchmark|--artss_serial_benchmark)
       CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TARGET_ARCH=SERIAL" 
       CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_BENCHMARK_FLAG=ON"
+      shift
+      ;;
+    -t|--test)
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TESTS_FLAG=ON" 
+      shift
+      ;;
+    -u|--utest)
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_UTEST_FLAG=ON" 
       shift
       ;;
     --jureca)
