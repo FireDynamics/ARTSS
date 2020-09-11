@@ -205,6 +205,7 @@ elseif(ARTSS_TARGET_ARCH STREQUAL "GPU")
     set(OUTPUT_FILE "${OUTPUT_FILE}_gpu")
 else()
     message(STATUS "Using serial version")
+    set(OUTPUT_FILE "${OUTPUT_FILE}_serial")
 endif()
 
 if(ARTSS_BENCHMARK_FLAG)
@@ -214,6 +215,8 @@ if(ARTSS_BENCHMARK_FLAG)
 endif()
 
 
+string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE_LOWER)
+set(OUTPUT_FILE "${OUTPUT_FILE}_${BUILD_TYPE_LOWER}")
 add_custom_command(TARGET artss POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:artss> ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/${OUTPUT_FILE})
 
