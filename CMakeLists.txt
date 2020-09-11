@@ -16,7 +16,7 @@ set(CMAKE_COLOR_MAKEFILE ON)
 
 option(ARTSS_BENCHMARK_FLAG "Flag if BENCHMARKING is enabled" OFF)
 option(ARTSS_TESTS_FLAG "Flag if testing is enabled" OFF)
-option(ARTSS_UTEST_FLAG "Flag if unit testing is enabled" OFF)
+option(ARTSS_UNITTEST_FLAG "Flag if unit testing is enabled" OFF)
 set(ARTSS_TARGET_ARCH "SERIAL" CACHE STRING "Target arch (SERIAL, MULTICORE, GPU")
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -171,7 +171,7 @@ message(STATUS "")
 message(STATUS "ARTSS_BENCHMARK_FLAG:   ${ARTSS_BENCHMARK_FLAG}")
 message(STATUS "ARTSS_TARGET_ARCH:      ${ARTSS_TARGET_ARCH}")
 message(STATUS "ARTSS_TESTS_FLAG:       ${ARTSS_TESTS_FLAG}")
-message(STATUS "ARTSS_UTEST_FLAG:       ${ARTSS_UTEST_FLAG}")
+message(STATUS "ARTSS_UNITTEST_FLAG:       ${ARTSS_UNITTEST_FLAG}")
 
 
 #Targets
