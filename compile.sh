@@ -151,7 +151,7 @@ do
       shift
       ;;
     --mb|--multicore_benchmark|--artss_multicore_cpu_benchmark)
-      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TARGET_ARCH=MUTICORE" 
+      CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_TARGET_ARCH=MULTICORE" 
       CMAKE_FLAGS="$CMAKE_FLAGS -DARTSS_BENCHMARK_FLAG=ON"
       GPU=0
       shift
