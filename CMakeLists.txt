@@ -189,24 +189,33 @@ if(NOT ARTSS_BENCHMARK_FLAG)
 endif()
 
 
-if(ARTSS_BENCHMARK_FLAG)
-    message(STATUS "Enabled Benchmarking")
-    target_compile_options(artss PRIVATE "-DBENCHMARKING -DUSE_NVTX")
-endif()
+set(OUTPUT_FILE "artss")
 
 if(ARTSS_TARGET_ARCH STREQUAL "MULTICORE")
     message(STATUS "Enabled Multicore")
     set_target_properties(artss PROPERTIES
         COMPILE_FLAGS "-acc -ta=multicore"
         LINK_FLAGS "-acc -ta=multicore")
+    set(OUTPUT_FILE "${OUTPUT_FILE}_multicore_cpu")
 elseif(ARTSS_TARGET_ARCH STREQUAL "GPU")
     message(STATUS "Enabled GPU")
     set_target_properties(artss PROPERTIES
         COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}"
         LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
+    set(OUTPUT_FILE "${OUTPUT_FILE}_gpu")
 else()
     message(STATUS "Using serial version")
 endif()
+
+if(ARTSS_BENCHMARK_FLAG)
+    message(STATUS "Enabled Benchmarking")
+    target_compile_options(artss PRIVATE "-DBENCHMARKING -DUSE_NVTX")
+    set(OUTPUT_FILE "${OUTPUT_FILE}_benchmark")
+endif()
+
+
+add_custom_command(TARGET artss POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:artss> ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH}/${OUTPUT_FILE})
 
 
 add_subdirectory(src)
