@@ -20,7 +20,7 @@ Load modules:
 
 Executables:
   Production (with data output, visualization and analysis):
-   ${YELLOW}-s${NC}
+  ${YELLOW} -s${NC}
   ${YELLOW}--serial${NC} 
   ${YELLOW}--artss_serial${NC}                  \t Executable: artss
 
@@ -28,7 +28,7 @@ Executables:
   ${YELLOW}--multicore${NC}
   ${YELLOW}--artss_multicore_cpu${NC}           \t Executable: artss_multicore_cpu
 
-   ${YELLOW}-g${NC}
+  ${YELLOW} -g${NC}
   ${YELLOW}--gpu${NC}
   ${YELLOW}--artss_gpu${NC}                      \t Executable: artss_gpu
 ----  
@@ -46,15 +46,15 @@ Executables:
   ${YELLOW}--artss_gpu_benchmark${NC}               \t Executable artss_gpu_benchmark
 
 Other:
-  ${YELLOW}-c${NC}
+  ${YELLOW} -c${NC}
   ${YELLOW}--cudaversion${NC}                     \t set CUDA Version
   ${YELLOW}--cc${NC}
   ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (30|35|50|60|70|75)
-  ${YELLOW}-d${NC}
+  ${YELLOW} -d${NC}
   ${YELLOW}--debugmode${NC}                       \t set debug flag for build type (default: ${BUILDTYPE})
-  ${YELLOW}-t${NC}
+  ${YELLOW} -t${NC}
   ${YELLOW}--test${NC}                            \t enables the test target for make 
-  ${YELLOW}-u${NC}
+  ${YELLOW} -u${NC}
   ${YELLOW}--unittest${NC}                           \t enables the unittest target for make 
 
   ${YELLOW}--jobs${NC}
