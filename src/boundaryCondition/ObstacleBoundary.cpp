@@ -8,6 +8,8 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
+
+namespace ObstacleBoundary {
 //======================================== Apply boundary condition ====================================
 // ***************************************************************************************
 /// \brief  Applies boundary condition for obstacle boundary
@@ -20,7 +22,7 @@
 /// \param  id ID of obstacle
 /// \param  sync synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void ObstacleBoundary::apply_boundary_condition(real *data, size_t **index_fields, const size_t *patch_starts, const size_t *patch_ends, size_t level, BoundaryData *boundary_data, size_t id, bool sync) {
+void apply_boundary_condition(real *data, size_t **index_fields, const size_t *patch_starts, const size_t *patch_ends, size_t level, BoundaryData *boundary_data, size_t id, bool sync) {
     for (size_t i = 0; i < numberOfPatches; i++) {
         size_t *d_patch = *(index_fields + i);
         size_t patch_start = *(patch_starts + i);
@@ -63,7 +65,7 @@ void ObstacleBoundary::apply_boundary_condition(real *data, size_t **index_field
 /// \param  value Value of boundary condition
 /// \param  sign Sign of boundary condition (POSITIVE_SIGN or NEGATIVE_SIGN)
 // ***************************************************************************************
-void ObstacleBoundary::apply_boundary_condition(real *data_field, const size_t *d_patch, size_t patch_start, size_t patch_end, size_t level, int8_t sign_reference_index, size_t reference_index, real value, int8_t sign) {
+void apply_boundary_condition(real *data_field, const size_t *d_patch, size_t patch_start, size_t patch_end, size_t level, int8_t sign_reference_index, size_t reference_index, real value, int8_t sign) {
     Domain *domain = Domain::getInstance();
     size_t b_size = domain->get_size(level);
 #pragma acc data present(data_field[:b_size])
@@ -88,7 +90,7 @@ void ObstacleBoundary::apply_boundary_condition(real *data_field, const size_t *
 /// \param  level Multigrid level
 /// \param  value Value of boundary condition
 // ***************************************************************************************
-void ObstacleBoundary::apply_dirichlet(real *data_field, size_t *d_patch, Patch p, size_t patch_start, size_t patch_end, size_t level, real value) {
+void apply_dirichlet(real *data_field, size_t *d_patch, Patch p, size_t patch_start, size_t patch_end, size_t level, real value) {
     if (level > 0) {
         value = 0;
     }
@@ -138,7 +140,7 @@ void ObstacleBoundary::apply_dirichlet(real *data_field, size_t *d_patch, Patch 
 /// \param  level Multigrid level
 /// \param  value Value of boundary condition
 // ***************************************************************************************
-void ObstacleBoundary::apply_neumann(real *data_field, size_t *d_patch, Patch p, size_t patch_start, size_t patch_end, size_t level, real value) {
+void apply_neumann(real *data_field, size_t *d_patch, Patch p, size_t patch_start, size_t patch_end, size_t level, real value) {
     if (level > 0) {
         value = 0;
     }
@@ -188,7 +190,7 @@ void ObstacleBoundary::apply_neumann(real *data_field, size_t *d_patch, Patch p,
 /// \param  patch_end End index of patch
 /// \param  level Multigrid level
 // ***************************************************************************************
-void ObstacleBoundary::apply_periodic(real *data_field, size_t *d_patch, Patch p, size_t patch_start, size_t patch_end, size_t level, size_t id) {
+void apply_periodic(real *data_field, size_t *d_patch, Patch p, size_t patch_start, size_t patch_end, size_t level, size_t id) {
     Domain *domain = Domain::getInstance();
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
@@ -222,3 +224,4 @@ void ObstacleBoundary::apply_periodic(real *data_field, size_t *d_patch, Patch p
     }
     apply_boundary_condition(data_field, d_patch, patch_start, patch_end, level, sign_reference_index, reference_index, 0, POSITIVE_SIGN);
 }
+}  // namespace ObstacleBoundary
