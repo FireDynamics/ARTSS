@@ -7,6 +7,7 @@
 #include "DomainBoundary.h"
 #include "../Domain.h"
 
+namespace DomainBoundary {
 //======================================== Apply boundary condition ====================================
 // ***************************************************************************************
 /// \brief  Applies boundary condition for domain boundary
@@ -18,7 +19,7 @@
 /// \param  boundary_data Boundary data_field object of Domain
 /// \param  sync synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void DomainBoundary::apply_boundary_condition(real *data_field, size_t **index_fields, const size_t *patch_starts, const size_t *patch_ends, size_t level, BoundaryData *boundary_data, bool sync) {
+void apply_boundary_condition(real *data_field, size_t **index_fields, const size_t *patch_starts, const size_t *patch_ends, size_t level, BoundaryData *boundary_data, bool sync) {
     for (size_t i = 0; i < numberOfPatches; i++) {
         size_t *d_patch = *(index_fields + i);
         size_t patch_start = *(patch_starts + i);
@@ -61,7 +62,7 @@ void DomainBoundary::apply_boundary_condition(real *data_field, size_t **index_f
 /// \param  value Value of boundary condition
 /// \param  sign Sign of boundary condition ( POSITIVE_SIGN or NEGATIVE_SIGN )
 // ***************************************************************************************
-void DomainBoundary::apply_boundary_condition(real *data_field, const size_t *d_patch, size_t patch_start, size_t patch_end, size_t level, int8_t sign_reference_index, size_t reference_index, real value, int8_t sign) {
+void apply_boundary_condition(real *data_field, const size_t *d_patch, size_t patch_start, size_t patch_end, size_t level, int8_t sign_reference_index, size_t reference_index, real value, int8_t sign) {
     Domain *domain = Domain::getInstance();
     size_t b_size = domain->get_size(level);
 #pragma acc data present(data_field[:b_size])
@@ -86,7 +87,7 @@ void DomainBoundary::apply_boundary_condition(real *data_field, const size_t *d_
 /// \param  level Multigrid level
 /// \param  value Value of boundary condition
 // ***************************************************************************************
-void DomainBoundary::apply_dirichlet(real *data_field, size_t *d_patch, Patch patch, size_t patch_start, size_t patch_end, size_t level, real value) {
+void apply_dirichlet(real *data_field, size_t *d_patch, Patch patch, size_t patch_start, size_t patch_end, size_t level, real value) {
     if (level > 0) {
         value = 0;
     }
@@ -135,7 +136,7 @@ void DomainBoundary::apply_dirichlet(real *data_field, size_t *d_patch, Patch pa
 /// \param  level Multigrid level
 /// \param  value Value of boundary condition
 // ***************************************************************************************
-void DomainBoundary::apply_neumann(real *data_field, size_t *d_patch, Patch patch, size_t patch_start, size_t patch_end, size_t level, real value) {
+void apply_neumann(real *data_field, size_t *d_patch, Patch patch, size_t patch_start, size_t patch_end, size_t level, real value) {
     if (level > 0) {
         value = 0;
     }
@@ -184,7 +185,7 @@ void DomainBoundary::apply_neumann(real *data_field, size_t *d_patch, Patch patc
 /// \param  patch_end End index of patch
 /// \param  level Multigrid level
 // ***************************************************************************************
-void DomainBoundary::apply_periodic(real *data_field, size_t *d_patch, Patch patch, size_t patch_start, size_t patch_end, size_t level) {
+void apply_periodic(real *data_field, size_t *d_patch, Patch patch, size_t patch_start, size_t patch_end, size_t level) {
     Domain *domain = Domain::getInstance();
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
@@ -221,3 +222,4 @@ void DomainBoundary::apply_periodic(real *data_field, size_t *d_patch, Patch pat
             data_field, d_patch, patch_start, patch_end,
             level, sign_reference_index, reference_index, 0, POSITIVE_SIGN);
 }
+}  // namespace DomainBoundary
