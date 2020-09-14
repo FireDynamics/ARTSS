@@ -17,6 +17,7 @@
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
 #include "Utility.h"
+#include "../Domain.h"
 
 
 class MPIHandler {
@@ -31,6 +32,8 @@ class MPIHandler {
 
     void convert_domain(real& x1, real& x2, int direction);
     int  convert_grid(std::string param, int direction);
+    bool convert_obstacle(real& x1, real& x2, int direction);
+    bool has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& oz1, real& oz2);
 
 private:
 #ifndef BENCHMARKING
