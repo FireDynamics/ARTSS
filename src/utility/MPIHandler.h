@@ -36,9 +36,6 @@ class MPIHandler {
     bool has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& oz1, real& oz2);
 
 private:
-#ifndef BENCHMARKING
-    std::shared_ptr<spdlog::logger> m_logger;
-#endif
     static MPIHandler* single;
 
     MPIHandler(boost::mpi::communicator& MPIWORLD, boost::mpi::cartesian_communicator& MPICART);

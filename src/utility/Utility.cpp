@@ -7,6 +7,7 @@
 #include <cstring>
 #include <sstream>
 #include "Utility.h"
+#include "MPIHandler.h"
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
 #include <cctype>
@@ -107,12 +108,16 @@ std::vector<std::string> Utility::split(const char *text, char delimiter) {
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
 std::shared_ptr<spdlog::logger> Utility::create_logger(std::string logger_name) {
+    auto mpi_handler = MPIHandler::getInstance();
+
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
 
     auto params = Parameters::getInstance();
     std::string log_level = params->get("logging/level");
     std::string log_file = params->get("logging/file");
+
+    log_file.insert(0, std::to_string(mpi_handler->get_rank()) + "_");
 
     if (!stdout_sink) {
         stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();

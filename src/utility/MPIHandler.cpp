@@ -27,11 +27,7 @@ MPIHandler *MPIHandler::getInstance(boost::mpi::communicator& MPIWORLD,
 
 MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
                        boost::mpi::cartesian_communicator& MPICART) :
-                       m_MPIWORLD(MPIWORLD), m_MPICART(MPICART), m_dimensions(MPICART.topology().stl()) {
-                         #ifndef BENCHMARKING
-                             m_logger = Utility::create_logger(typeid(this).name());
-                         #endif
-                       }
+                       m_MPIWORLD(MPIWORLD), m_MPICART(MPICART), m_dimensions(MPICART.topology().stl()) {}
 
 void MPIHandler::convert_domain(real& x1, real& x2, int direction) {
     int  dimension      { m_dimensions[direction].size };
