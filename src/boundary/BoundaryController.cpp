@@ -121,7 +121,6 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
                 curElem = curElem->NextSiblingElement();
             }
             if (rankHasBoundary) {
-                std::cout << ox1 << ", " << ox2 << ", " << oy1 << ", " << oy2 << ", " << oz1 << ", " << oz2 << '\n';
                 Obstacle *o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2);
                 obstacles.push_back(o);
                 bdc_obstacles.push_back(bdc);
