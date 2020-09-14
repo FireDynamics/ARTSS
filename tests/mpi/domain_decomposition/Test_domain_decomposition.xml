@@ -2,7 +2,7 @@
 <ARTSS>
   <physical_parameters>
     <t_end> 1.0 </t_end>  <!-- simulation end time -->
-    <dt> 0.0125 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
+    <dt> 0.5 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
     <nu> 0.001 </nu>  <!-- kinematic viscosity -->
   </physical_parameters>
 
@@ -26,16 +26,16 @@
     <Y1> 0. </Y1>
     <Y2> 2.0 </Y2>
     <Z1> 0. </Z1>
-    <Z2> 1.0 </Z2>
+    <Z2> 2.0 </Z2>
     <x1> 0. </x1>  <!-- computational domain -->
     <x2> 2.0 </x2>
     <y1> 0. </y1>
     <y2> 2.0 </y2>
     <z1> 0. </z1>
-    <z2> 1.0 </z2>
+    <z2> 2.0 </z2>
     <nx> 40 </nx>  <!-- grid resolution (number of cells excl. ghost cells) -->
     <ny> 40 </ny>
-    <nz> 1 </nz>
+    <nz> 40 </nz>
   </domain_parameters>
 
   <adaption dynamic="No" data_extraction="No"> </adaption>
@@ -44,7 +44,13 @@
     <boundary field="u,v,w" patch="front,back,left,right,bottom,top" type="dirichlet" value="0.0" />
   </boundaries>
 
-  <obstacles enabled="No"/>
+  <obstacles enabled="Yes">
+    <obstacle>
+      <geometry ox1="0.5" ox2="1.5" oy1="0.5" oy2="1.5" oz1="0.5" oz2="1.5"/>
+      <boundary field="u,v,w" patch="front,back,left,right,bottom,top" type="dirichlet" value="0.0" />
+      <boundary field="p" patch="front,back,left,right,bottom,top" type="neumann" value="0.0" />
+    </obstacle>
+  </obstacles>
 
   <surfaces enabled="No"/>
 
@@ -53,9 +59,9 @@
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
-    <vtk_nth_plot> 8 </vtk_nth_plot>
+    <vtk_nth_plot> 1 </vtk_nth_plot>
   </visualisation>
 
-  <logging file="output_test_diffusion.log" level="info">
+  <logging file="Test_domain_decomposition.log" level="info">
   </logging>
 </ARTSS>
