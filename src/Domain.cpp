@@ -160,8 +160,8 @@ void Domain::print() {
 #ifndef BENCHMARKING
     m_logger->info("-- Domain");
     m_logger->info("Domain size inner cells: ({}|{}|{})", get_nx() - 2,
-                                                         get_ny() - 2,
-                                                         get_nz() - 2);
+                                                          get_ny() - 2,
+                                                          get_nz() - 2);
     m_logger->info("step size (x|y|z): ({}|{}|{})", get_dx(),
                                                     get_dy(),
                                                     get_dz());
