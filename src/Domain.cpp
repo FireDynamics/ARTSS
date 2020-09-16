@@ -159,7 +159,7 @@ bool Domain::set_new_value(long shift, real startCoord_p, real endCoord_p, real 
 void Domain::print() {
 #ifndef BENCHMARKING
     m_logger->info("-- Domain");
-    m_logger->info("Domain size inner cells: ({}|{}{})", get_nx() - 2,
+    m_logger->info("Domain size inner cells: ({}|{}|{})", get_nx() - 2,
                                                          get_ny() - 2,
                                                          get_nz() - 2);
     m_logger->info("step size (x|y|z): ({}|{}|{})", get_dx(),
