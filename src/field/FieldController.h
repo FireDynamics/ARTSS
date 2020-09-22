@@ -82,6 +82,7 @@ public:
     static void couple_scalar(const Field *a, Field *a0, Field *a_tmp, bool sync);
 
     void update_device();
+    void update_host();
 };
 
 

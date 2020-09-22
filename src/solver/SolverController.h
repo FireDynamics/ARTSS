@@ -24,7 +24,7 @@ public:
 
 private:
     void set_up_sources(const std::string &string_solver);
-    void init_solver();
+    void init_solver(const std::string& string_solver);
     void set_up_fields(const std::string& string_solver);
     void call_random(Field *field);
 

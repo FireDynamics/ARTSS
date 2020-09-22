@@ -220,20 +220,20 @@ void FieldController::update_data(bool sync) {
     const auto d_u = field_u->data;                        //due to const correctness
     const auto d_v = field_v->data;
     const auto d_w = field_w->data;
-    auto d_u0 = field_u0->data;
-    auto d_v0 = field_v0->data;
-    auto d_w0 = field_w0->data;
-    auto d_u_tmp = field_u_tmp->data;
-    auto d_v_tmp = field_v_tmp->data;
-    auto d_w_tmp = field_w_tmp->data;
+    const auto d_u0 = field_u0->data;
+    const auto d_v0 = field_v0->data;
+    const auto d_w0 = field_w0->data;
+    const auto d_u_tmp = field_u_tmp->data;
+    const auto d_v_tmp = field_v_tmp->data;
+    const auto d_w_tmp = field_w_tmp->data;
     const auto d_p = field_p->data;
-    auto d_p0 = field_p0->data;
+    const auto d_p0 = field_p0->data;
     const auto d_T = field_T->data;
-    auto d_T0 = field_T0->data;
-    auto d_T_tmp = field_T_tmp->data;
+    const auto d_T0 = field_T0->data;
+    const auto d_T_tmp = field_T_tmp->data;
     const auto d_C = field_concentration->data;
-    auto d_C0 = field_concentration0->data;
-    auto d_C_tmp = field_concentration_tmp->data;
+    const auto d_C0 = field_concentration0->data;
+    const auto d_C_tmp = field_concentration_tmp->data;
 
     auto boundary = BoundaryController::getInstance();
 
@@ -485,4 +485,43 @@ void FieldController::update_device() {
 #pragma acc update device(d_nu_t[:bsize])
 #pragma acc update device(d_kappa_t[:bsize])
 #pragma acc update device(d_gamma_t[:bsize]) wait    // all in one update does not work!
+}
+
+void FieldController::update_host(){
+    auto d_u = field_u->data;
+    auto d_v = field_v->data;
+    auto d_w = field_w->data;
+    auto d_p = field_p->data;
+    auto d_rhs = field_rhs->data;
+    auto d_T = field_T->data;
+    auto d_T_a = field_T_ambient->data;
+    auto d_C = field_concentration->data;
+    auto d_f_x = field_force_x->data;
+    auto d_f_y = field_force_y->data;
+    auto d_f_z = field_force_z->data;
+    auto d_S_T = field_source_T->data;
+    auto d_S_C = field_source_concentration->data;
+    auto d_nu_t = field_nu_t->data;
+    auto d_kappa_t = field_kappa_t->data;
+    auto d_gamma_t = field_gamma_t->data;
+
+    Domain *domain = Domain::getInstance();
+    auto bsize = domain->get_size();
+    // copyin fields
+#pragma acc update host(d_u[:bsize])
+#pragma acc update host(d_v[:bsize])
+#pragma acc update host(d_w[:bsize])
+#pragma acc update host(d_p[:bsize])
+#pragma acc update host(d_rhs[:bsize])
+#pragma acc update host(d_T[:bsize])
+#pragma acc update host(d_T_a[:bsize])
+#pragma acc update host(d_C[:bsize])
+#pragma acc update host(d_f_x[:bsize])
+#pragma acc update host(d_f_y[:bsize])
+#pragma acc update host(d_f_z[:bsize])
+#pragma acc update host(d_S_T[:bsize])
+#pragma acc update host(d_S_C[:bsize])
+#pragma acc update host(d_nu_t[:bsize])
+#pragma acc update host(d_kappa_t[:bsize])
+#pragma acc update host(d_gamma_t[:bsize]) wait    // all in one update does not work!
 }
