@@ -12,7 +12,7 @@
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
       <w> 1 </w>  <!-- relaxation parameter -->
     </diffusion>
-    <solution available="Yes">
+    <solution available="No">
       <tol> 1e-03 </tol>  <!-- tolerance for further tests -->
     </solution>
   </solver>
