@@ -63,8 +63,6 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     real dy = domain->get_dy();
     real dz = domain->get_dz();
 
-    int size = static_cast<int>(domain->get_size());
-
 // Initialize variables
     int size_vars = 13; // Number of variables
     int var_dims[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}; // Dimensions of variables (x,y,z,u,v,w,p,div,T,C,s,nu_t)
@@ -79,24 +77,26 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                               "turb_visc",
                               "source_T"};
 
-    int dims[] = {Nx + 1, Ny + 1, Nz + 1};            // Dimensions of the rectilinear array (+1 for zonal values)
+    int dims[] = {Nx - 1, Ny - 1, Nz - 1};            // Dimensions of the rectilinear array (+1 for zonal values)
 
-    auto *x_coords = new float[(Nx + 1)];
-    auto *y_coords = new float[(Ny + 1)];
-    auto *z_coords = new float[(Nz + 1)];
+    int size = static_cast<int>(dims[0]*dims[1]*dims[2]);
+
+    auto *x_coords = new float[dims[0]];
+    auto *y_coords = new float[dims[1]];
+    auto *z_coords = new float[dims[2]];
 
     // Initialize grid
     // faces of the grid cells
-    for (int i = 0; i < Nx + 1; i++) {
-        x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
+    for (int i = 1; i < Nx; i++) {
+        x_coords[i-1] = static_cast<float> (X1 + (i - 1) * dx);
     }
 
-    for (int j = 0; j < Ny + 1; j++) {
-        y_coords[j] = static_cast<float> (Y1 + (j - 1) * dy);
+    for (int j = 1; j < Ny; j++) {
+        y_coords[j-1] = static_cast<float> (Y1 + (j - 1) * dy);
     }
 
-    for (int k = 0; k < Nz + 1; k++) {
-        z_coords[k] = static_cast<float> (Z1 + (k - 1) * dz);
+    for (int k = 1; k < Nz; k++) {
+        z_coords[k-1] = static_cast<float> (Z1 + (k - 1) * dz);
     }
 
     // centers of the grid cells
@@ -124,23 +124,24 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     auto source_T = new float[size];
 
 // Cast variables to floats
-    for (int k = 0; k < Nz; k++) {
-        for (int j = 0; j < Ny; j++) {
-            for (int i = 0; i < Nx; i++) {
-                size_t index = IX(i, j, k, Nx, Ny);
-                x_centres[index] = x_coords[i] + static_cast<float> (0.5 * dx);
-                y_centres[index] = y_coords[j] + static_cast<float> (0.5 * dy);
-                z_centres[index] = z_coords[k] + static_cast<float> (0.5 * dz);
-                u_vel[index] = static_cast<float>(u[index]);
-                v_vel[index] = static_cast<float>(v[index]);
-                w_vel[index] = static_cast<float>(w[index]);
-                pres[index] = static_cast<float>(p[index]);
-                vel_div[index] = static_cast<float>(div[index]);
-                Temp[index] = static_cast<float>(T[index]);
-                Con[index] = static_cast<float>(C[index]);
-                Sight[index] = static_cast<float>(s[index]);
-                turb_visc[index] = static_cast<float>(nu_t[index]);
-                source_T[index] = static_cast<float>(S_T[index]);
+    for (int k = 1; k < Nz - 1; k++) {
+        for (int j = 1; j < Ny - 1; j++) {
+            for (int i = 1; i < Nx - 1; i++) {
+                size_t indexData = IX(i, j, k, Nx, Ny);
+                size_t indesVTK = IX(i - 1, j - 1, k - 1, Nx - 2, Ny - 2);
+                x_centres[indesVTK] = x_coords[i] + static_cast<float> (0.5 * dx);
+                y_centres[indesVTK] = y_coords[j] + static_cast<float> (0.5 * dy);
+                z_centres[indesVTK] = z_coords[k] + static_cast<float> (0.5 * dz);
+                u_vel[indesVTK] = static_cast<float>(u[indexData]);
+                v_vel[indesVTK] = static_cast<float>(v[indexData]);
+                w_vel[indesVTK] = static_cast<float>(w[indexData]);
+                pres[indesVTK] = static_cast<float>(p[indexData]);
+                vel_div[indesVTK] = static_cast<float>(div[indexData]);
+                Temp[indesVTK] = static_cast<float>(T[indexData]);
+                Con[indesVTK] = static_cast<float>(C[indexData]);
+                Sight[indesVTK] = static_cast<float>(s[indexData]);
+                turb_visc[indesVTK] = static_cast<float>(nu_t[indexData]);
+                source_T[indesVTK] = static_cast<float>(S_T[indexData]);
             }
         }
     }
