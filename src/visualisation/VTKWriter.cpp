@@ -6,6 +6,7 @@
 
 #include "VTKWriter.h"
 #include "../Domain.h"
+#include "../utility/MPIHandler.h"
 #include "visit_writer.h"  //( https://wci.llnl.gov/codes/visit/ )
 
 static std::string ending = ".vtk";
@@ -51,6 +52,7 @@ void VTKWriter::write_analytical(Solution *solution, const std::string& filename
 // ***************************************************************************************
 void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t, read_ptr S_T) {
     Domain *domain = Domain::getInstance();
+    MPIHandler *mpi_handler = MPIHandler::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
     real Z1 = domain->get_Z1();
@@ -77,7 +79,15 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                               "turb_visc",
                               "source_T"};
 
-    int dims[] = {Nx - 1, Ny - 1, Nz - 1};            // Dimensions of the rectilinear array (+1 for zonal values)
+    std::vector<int> rank_has_boundary {mpi_handler->get_boundary_controller()};
+    int bx0{rank_has_boundary.at(0)};
+    int bx1{rank_has_boundary.at(1)};
+    int by0{rank_has_boundary.at(2)};
+    int by1{rank_has_boundary.at(3)};
+    int bz0{rank_has_boundary.at(4)};
+    int bz1{rank_has_boundary.at(5)};
+
+    int dims[] = {Nx + 1 - bx0 - bx1, Ny + 1 - by0 - by1, Nz + 1 - bz0 - bz1};            // Dimensions of the rectilinear array (+1 for zonal values)
 
     int size = static_cast<int>(dims[0]*dims[1]*dims[2]);
 
@@ -87,16 +97,16 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
 
     // Initialize grid
     // faces of the grid cells
-    for (int i = 1; i < Nx; i++) {
-        x_coords[i-1] = static_cast<float> (X1 + (i - 1) * dx);
+    for (int i = bx0; i < Nx + 1 - bx1; i++) {
+        x_coords[i-bx0] = static_cast<float> (X1 + (i - 1) * dx);
     }
 
-    for (int j = 1; j < Ny; j++) {
-        y_coords[j-1] = static_cast<float> (Y1 + (j - 1) * dy);
+    for (int j = by0; j < Ny + 1 - by1; j++) {
+        y_coords[j-by0] = static_cast<float> (Y1 + (j - 1) * dy);
     }
 
-    for (int k = 1; k < Nz; k++) {
-        z_coords[k-1] = static_cast<float> (Z1 + (k - 1) * dz);
+    for (int k = bz0; k < Nz + 1 - bz1; k++) {
+        z_coords[k-bz0] = static_cast<float> (Z1 + (k - 1) * dz);
     }
 
     // centers of the grid cells
@@ -124,24 +134,24 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     auto source_T = new float[size];
 
 // Cast variables to floats
-    for (int k = 1; k < Nz - 1; k++) {
-        for (int j = 1; j < Ny - 1; j++) {
-            for (int i = 1; i < Nx - 1; i++) {
+    for (int k = bz0; k < Nz - bz1; k++) {
+        for (int j = by0; j < Ny - by1; j++) {
+            for (int i = bx0; i < Nx - bx1; i++) {
                 size_t indexData = IX(i, j, k, Nx, Ny);
-                size_t indesVTK = IX(i - 1, j - 1, k - 1, Nx - 2, Ny - 2);
-                x_centres[indesVTK] = x_coords[i - 1] + static_cast<float> (0.5 * dx);
-                y_centres[indesVTK] = y_coords[j - 1] + static_cast<float> (0.5 * dy);
-                z_centres[indesVTK] = z_coords[k - 1] + static_cast<float> (0.5 * dz);
-                u_vel[indesVTK] = static_cast<float>(u[indexData]);
-                v_vel[indesVTK] = static_cast<float>(v[indexData]);
-                w_vel[indesVTK] = static_cast<float>(w[indexData]);
-                pres[indesVTK] = static_cast<float>(p[indexData]);
-                vel_div[indesVTK] = static_cast<float>(div[indexData]);
-                Temp[indesVTK] = static_cast<float>(T[indexData]);
-                Con[indesVTK] = static_cast<float>(C[indexData]);
-                Sight[indesVTK] = static_cast<float>(s[indexData]);
-                turb_visc[indesVTK] = static_cast<float>(nu_t[indexData]);
-                source_T[indesVTK] = static_cast<float>(S_T[indexData]);
+                size_t indexVTK = IX(i - bx0, j - by0, k - bz0, Nx - bx0 - bx1, Ny - by0 - by1);
+                x_centres[indexVTK] = x_coords[i - bx0] + static_cast<float> (0.5 * dx);
+                y_centres[indexVTK] = y_coords[j - by0] + static_cast<float> (0.5 * dy);
+                z_centres[indexVTK] = z_coords[k - bz0] + static_cast<float> (0.5 * dz);
+                u_vel[indexVTK] = static_cast<float>(u[indexData]);
+                v_vel[indexVTK] = static_cast<float>(v[indexData]);
+                w_vel[indexVTK] = static_cast<float>(w[indexData]);
+                pres[indexVTK] = static_cast<float>(p[indexData]);
+                vel_div[indexVTK] = static_cast<float>(div[indexData]);
+                Temp[indexVTK] = static_cast<float>(T[indexData]);
+                Con[indexVTK] = static_cast<float>(C[indexData]);
+                Sight[indexVTK] = static_cast<float>(s[indexData]);
+                turb_visc[indexVTK] = static_cast<float>(nu_t[indexData]);
+                source_T[indexVTK] = static_cast<float>(S_T[indexData]);
             }
         }
     }
@@ -197,6 +207,7 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
 // ***************************************************************************************
 void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr T) {
     Domain *domain = Domain::getInstance();
+    MPIHandler *mpi_handler = MPIHandler::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
     real Z1 = domain->get_Z1();
@@ -209,32 +220,40 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     real dy = domain->get_dy();
     real dz = domain->get_dz();
 
-    int size = static_cast<int>(domain->get_size());
-
     // Initialize variables
     int size_vars = 8; // Number of variables
     int var_dims[] = {1, 1, 1, 1, 1, 1, 1, 1}; // Dimensions of variables (x,y,z,u,v,w,p,div,T)
     int centering[] = {0, 0, 0, 0, 0, 0, 0, 0}; // Whether the variables are centered in a cell: 0 for zonal!
     const char *var_names[] = {"x-coords", "y-coords", "z-coords", "x-velocity", "y-velocity", "z-velocity", "pressure", "temperature"};
 
-    int dims[] = {Nx + 1, Ny + 1, Nz + 1}; // Dimensions of the rectilinear array (+1 for zonal values)
+    std::vector<int> rank_has_boundary {mpi_handler->get_boundary_controller()};
+    int bx0{rank_has_boundary.at(0)};
+    int bx1{rank_has_boundary.at(1)};
+    int by0{rank_has_boundary.at(2)};
+    int by1{rank_has_boundary.at(3)};
+    int bz0{rank_has_boundary.at(4)};
+    int bz1{rank_has_boundary.at(5)};
 
-    auto x_coords = new float[(Nx + 1)];
-    auto y_coords = new float[(Ny + 1)];
-    auto z_coords = new float[(Nz + 1)];
+    int dims[] = {Nx + 1 - bx0 - bx1, Ny + 1 - by0 - by1, Nz + 1 - bz0 - bz1};            // Dimensions of the rectilinear array (+1 for zonal values)
 
-// Initialize grid
+    int size = static_cast<int>(dims[0]*dims[1]*dims[2]);
+
+    auto x_coords = new float[dims[0]];
+    auto y_coords = new float[dims[1]];
+    auto z_coords = new float[dims[2]];
+
+    // Initialize grid
     // faces of the grid cells
-    for (int i = 0; i < Nx + 1; i++) {
-        x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
+    for (int i = bx0; i < Nx + 1 - bx1; i++) {
+        x_coords[i-bx0] = static_cast<float> (X1 + (i - 1) * dx);
     }
 
-    for (int j = 0; j < Ny + 1; j++) {
-        y_coords[j] = static_cast<float> (Y1 + (j - 1) * dy);
+    for (int j = by0; j < Ny + 1 - by1; j++) {
+        y_coords[j-by0] = static_cast<float> (Y1 + (j - 1) * dy);
     }
 
-    for (int k = 0; k < Nz + 1; k++) {
-        z_coords[k] = static_cast<float> (Z1 + (k - 1) * dz);
+    for (int k = bz0; k < Nz + 1 - bz1; k++) {
+        z_coords[k-bz0] = static_cast<float> (Z1 + (k - 1) * dz);
     }
 
     // centers of the grid cells
@@ -252,18 +271,19 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     auto Temp = new float[size];
 
     // Cast variables to floats
-    for (int k = 0; k < Nz; k++) {
-        for (int j = 0; j < Ny; j++) {
-            for (int i = 0; i < Nx; i++) {
-                size_t index = IX(i, j, k, Nx, Ny);
-                x_centres[index] = x_coords[i] + static_cast<float> (0.5 * dx);
-                y_centres[index] = y_coords[j] + static_cast<float> (0.5 * dy);
-                z_centres[index] = z_coords[j] + static_cast<float> (0.5 * dz);
-                u_vel[index] = static_cast<float>(u[index]);
-                v_vel[index] = static_cast<float>(v[index]);
-                w_vel[index] = static_cast<float>(w[index]);
-                pres[index] = static_cast<float>(p[index]);
-                Temp[index] = static_cast<float>(T[index]);
+  for (int k = bz0; k < Nz - bz1; k++) {
+        for (int j = by0; j < Ny - by1; j++) {
+            for (int i = bx0; i < Nx - bx1; i++) {
+                size_t indexData = IX(i, j, k, Nx, Ny);
+                size_t indexVTK = IX(i - bx0, j - by0, k - bz0, Nx - bx0 - bx1, Ny - by0 - by1);
+                x_centres[indexVTK] = x_coords[i - bx0] + static_cast<float> (0.5 * dx);
+                y_centres[indexVTK] = y_coords[j - by0] + static_cast<float> (0.5 * dy);
+                z_centres[indexVTK] = z_coords[k - bz0] + static_cast<float> (0.5 * dz);
+                u_vel[indexVTK] = static_cast<float>(u[indexData]);
+                v_vel[indexVTK] = static_cast<float>(v[indexData]);
+                w_vel[indexVTK] = static_cast<float>(w[indexData]);
+                pres[indexVTK] = static_cast<float>(p[indexData]);
+                Temp[indexVTK] = static_cast<float>(T[indexData]);
             }
         }
     }
