@@ -38,7 +38,7 @@ Domain::Domain() {
 
     m_z1 = params->get_real("domain_parameters/z1");
     m_z2 = params->get_real("domain_parameters/z2");
-    mpi_handler->convert_domain(m_y1, m_y2, 2);
+    mpi_handler->convert_domain(m_z1, m_z2, 2);
 
     m_X1 = params->get_real("domain_parameters/X1");
     m_X2 = params->get_real("domain_parameters/X2");
@@ -50,11 +50,7 @@ Domain::Domain() {
 
     m_Z1 = params->get_real("domain_parameters/Z1");
     m_Z2 = params->get_real("domain_parameters/Z2");
-    mpi_handler->convert_domain(m_Y1, m_Y2, 2);
-
-    // std::cout << "Rank: " << mpi_handler->get_rank() << ": x1 -> " << m_x1 << " x2 -> " << m_x2 << '\n' << std::flush;
-    // std::cout << "Rank: " << mpi_handler->get_rank() << ": y1 -> " << m_y1 << " y2 -> " << m_y2 << '\n' << std::flush;
-    // std::cout << "Rank: " << mpi_handler->get_rank() << ": z1 -> " << m_z1 << " z2 -> " << m_z2 << '\n' << std::flush;
+    mpi_handler->convert_domain(m_Z1, m_Z2, 2);
 
     calc_MG_values();
 #ifndef BENCHMARKING
