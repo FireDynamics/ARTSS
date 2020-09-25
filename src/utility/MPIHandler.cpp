@@ -27,7 +27,27 @@ MPIHandler *MPIHandler::getInstance(boost::mpi::communicator& MPIWORLD,
 
 MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
                        boost::mpi::cartesian_communicator& MPICART) :
-                       m_MPIWORLD(MPIWORLD), m_MPICART(MPICART), m_dimensions(MPICART.topology().stl()) {}
+                       m_MPIWORLD(MPIWORLD), m_MPICART(MPICART), m_dimensions(MPICART.topology().stl()), m_boundary_controller(6,0)  {
+                           m_Xdim = m_dimensions.at(0).size; 
+                           m_Ydim = m_dimensions.at(1).size; 
+                           m_Zdim = m_dimensions.at(2).size; 
+                           
+                           create_boundary_controller();
+                       }
+
+void MPIHandler::create_boundary_controller() {
+    std::vector<int> rank_coordinates;
+    rank_coordinates = get_coords();
+
+    m_boundary_controller.at(0) = (rank_coordinates.at(0) == 0) ? 0 : 1;
+    m_boundary_controller.at(1) = (rank_coordinates.at(0) == m_Xdim - 1) ? 0 : 1;
+
+    m_boundary_controller.at(2) = (rank_coordinates.at(1) == 0) ? 0 : 1;
+    m_boundary_controller.at(3) = (rank_coordinates.at(1) == m_Ydim - 1) ? 0 : 1;
+
+    m_boundary_controller.at(4) = (rank_coordinates.at(2) == 0) ? 0 : 1;
+    m_boundary_controller.at(5) = (rank_coordinates.at(2) == m_Zdim - 1) ? 0 : 1;
+}
 
 void MPIHandler::convert_domain(real& x1, real& x2, int direction) {
     int  dimension      { m_dimensions[direction].size };

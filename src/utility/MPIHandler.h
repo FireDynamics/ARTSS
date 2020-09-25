@@ -29,6 +29,7 @@ class MPIHandler {
     // Getter
     int get_rank() { return m_MPICART.rank(); };
     std::vector<int> get_coords() { return m_MPICART.coordinates(m_MPICART.rank()); }
+    std::vector<int> get_boundary_controller() { return m_boundary_controller; }
 
     void convert_domain(real& x1, real& x2, int direction);
     int  convert_grid(std::string param, int direction);
@@ -42,6 +43,15 @@ private:
     boost::mpi::communicator m_MPIWORLD;
     boost::mpi::cartesian_communicator m_MPICART;
     std::vector< boost::mpi::cartesian_dimension > m_dimensions;
+
+    int m_Xdim;
+    int m_Ydim;
+    int m_Zdim;
+
+    void create_boundary_controller();
+
+    std::vector<int> m_boundary_controller;
+
 };
 
 #endif /* ARTSS_UTILITY_MPI_H */
