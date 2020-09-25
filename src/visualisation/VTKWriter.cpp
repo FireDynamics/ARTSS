@@ -129,9 +129,9 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
             for (int i = 1; i < Nx - 1; i++) {
                 size_t indexData = IX(i, j, k, Nx, Ny);
                 size_t indesVTK = IX(i - 1, j - 1, k - 1, Nx - 2, Ny - 2);
-                x_centres[indesVTK] = x_coords[i] + static_cast<float> (0.5 * dx);
-                y_centres[indesVTK] = y_coords[j] + static_cast<float> (0.5 * dy);
-                z_centres[indesVTK] = z_coords[k] + static_cast<float> (0.5 * dz);
+                x_centres[indesVTK] = x_coords[i - 1] + static_cast<float> (0.5 * dx);
+                y_centres[indesVTK] = y_coords[j - 1] + static_cast<float> (0.5 * dy);
+                z_centres[indesVTK] = z_coords[k - 1] + static_cast<float> (0.5 * dz);
                 u_vel[indesVTK] = static_cast<float>(u[indexData]);
                 v_vel[indesVTK] = static_cast<float>(v[indexData]);
                 w_vel[indesVTK] = static_cast<float>(w[indexData]);
