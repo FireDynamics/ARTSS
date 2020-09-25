@@ -98,12 +98,12 @@ int main(int argc, char **argv) {
     acc_device_t dev_type = acc_get_device_type();
     acc_init( dev_type );
 #endif
-//
-// //     // Integrate over time and solve numerically
-// //     // Time integration
-// //     TimeIntegration ti(solver);
-// //     ti.run();
-// //
+
+    // Integrate over time and solve numerically
+    // Time integration
+    TimeIntegration ti(solver);
+    ti.run();
+
     // Clean up
     delete solver;
 
