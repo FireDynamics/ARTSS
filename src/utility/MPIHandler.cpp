@@ -84,11 +84,11 @@ bool MPIHandler::convert_obstacle(real& x1, real& x2, int direction) {
       return true;
   } else if (x1 >= domain_start && x2 <= domain_end) {
       return true;
-  } else if (x1 >= domain_start && x2 > domain_end && x1 > domain_end) {
+  } else if (x1 == domain_start && x2 > domain_end) {
       x1 = domain_start;
       x2 = domain_end;
       return true;
-  } else if (x1 < domain_start && x2 <= domain_end && x2 > domain_start) {
+  } else if (x1 < domain_start && x2 == domain_end) {
       x1 = domain_start;
       x2 = domain_end;
       return true;
