@@ -60,29 +60,37 @@ void MPIHandler::convert_domain(real& x1, real& x2, int direction) {
 
 bool MPIHandler::convert_obstacle(real& x1, real& x2, int direction) {
     auto domain   = Domain::getInstance();
-    real domainX1, domainX2;
+    real domain_start, domain_end;
     if (direction == 0) {
-        domainX1 = domain->get_X1();
-        domainX2 = domain->get_X2();
+        domain_start = domain->get_X1();
+        domain_end = domain->get_X2();
     } else if (direction == 1) {
-        domainX1 = domain->get_Y1();
-        domainX2 = domain->get_Y2();
+        domain_start = domain->get_Y1();
+        domain_end = domain->get_Y2();
     } else {
-        domainX1 = domain->get_Z1();
-        domainX2 = domain->get_Z2();
+        domain_start = domain->get_Z1();
+        domain_end = domain->get_Z2();
     }
 
-    if (x1 < domainX1 && x2 > domainX2 ) {
-      x1 = domainX1;
-      x2 = domainX2;
+    if (x1 < domain_start && x2 > domain_end ) {
+      x1 = domain_start;
+      x2 = domain_end;
       return true;
-  } else if (x1 < domainX1 && x2 > domainX1 && x2 < domainX2) {
-      x1 = domainX1;
+  } else if (x1 < domain_start && x2 > domain_start && x2 < domain_end) {
+      x1 = domain_start;
       return true;
-  } else if (x1 > domainX1 && x1 < domainX2 && x2 > domainX2) {
-      x2 = domainX2;
+  } else if (x1 > domain_start && x1 < domain_end && x2 > domain_end) {
+      x2 = domain_end;
       return true;
-  } else if (x1 >= domainX1 && x2 <= domainX2) {
+  } else if (x1 >= domain_start && x2 <= domain_end) {
+      return true;
+  } else if (x1 >= domain_start && x2 > domain_end && x1 > domain_end) {
+      x1 = domain_start;
+      x2 = domain_end;
+      return true;
+  } else if (x1 < domain_start && x2 <= domain_end && x2 > domain_start) {
+      x1 = domain_start;
+      x2 = domain_end;
       return true;
   } else {
       return false;
@@ -96,7 +104,7 @@ bool MPIHandler::has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& 
     checkZ = convert_obstacle(oz1, oz2, 2);
 
     if (checkX == false || checkY == false || checkZ == false) return false;
-
+     
     return true;
 }
 
