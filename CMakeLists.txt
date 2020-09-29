@@ -210,6 +210,7 @@ set(SOURCE_FILES
         "src/solver/SolverSelection.cpp"
 
         "src/source/BuoyancyMMS.cpp"
+        "src/source/Cube.cpp"
         "src/source/ExplicitEulerSource.cpp"
         "src/source/GaussFunction.cpp"
 
@@ -284,6 +285,7 @@ set(HEADER_FILES
         "src/solver/SolverSelection.h"
 
         "src/source/BuoyancyMMS.h"
+        "src/source/Cube.h"
         "src/source/ExplicitEulerSource.h"
         "src/source/GaussFunction.h"
         "src/source/Zero.h"

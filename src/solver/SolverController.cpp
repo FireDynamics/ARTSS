@@ -26,6 +26,7 @@
 #include "../source/GaussFunction.h"
 #include "../source/BuoyancyMMS.h"
 #include "../source/Zero.h"
+#include "../source/Cube.h"
 
 SolverController::SolverController() {
 #ifndef BENCHMARKING
@@ -89,6 +90,15 @@ void SolverController::set_up_sources(const std::string &string_solver) {
             m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
         } else if (temp_fct == SourceMethods::BuoyancyST_MMS) {
             m_source_function_temperature = new BuoyancyMMS();
+        } else if (temp_fct == SourceMethods::Cube){
+            real x_start = params->get_real("solver/temperature/source/x_start");
+            real y_start = params->get_real("solver/temperature/source/y_start");
+            real z_start = params->get_real("solver/temperature/source/z_start");
+            real x_end = params->get_real("solver/temperature/source/x_end");
+            real y_end = params->get_real("solver/temperature/source/y_end");
+            real z_end = params->get_real("solver/temperature/source/z_end");
+            real val = params->get_real("solver/temperature/source/value");
+            m_source_function_temperature = new Cube(val, x_start, y_start, z_start, x_end, y_end, z_end);
         } else if (temp_fct == SourceMethods::Zero) {
             m_source_function_temperature = new Zero();
         } else {
