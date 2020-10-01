@@ -108,7 +108,13 @@ void GaussFunction::create_spatial_values(real HRR, real cp, real x0, real y0, r
         auto y_j = (yj(j, Y1, dy) - y0);
         auto z_k = (zk(k, Z1, dz) - z0);
         real expr = std::exp(-(r_sigma_x_2 * x_i * x_i + r_sigma_y_2 * y_j * y_j + r_sigma_z_2 * z_k * z_k));
-        d_out[idx] = HRRrV * rcp * expr;
+        real tmp = HRRrV * rcp * expr;
+        if (tmp > 1500){
+            d_out[idx] = 1500;
+        }else{
+            d_out[idx] = 0;
+        }
+
     }
 
 #pragma acc enter data copyin(d_out[:bsize])

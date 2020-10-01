@@ -314,7 +314,7 @@ bool Analysis::check_time_step_VN(Field *u, real dt) {
 /// \param  dt      time step size
 // *****************************************************************************
 real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
-    real cfl_max = 0;  // heighest seen C. C is always positiv, so 0 is a lower
+    real cfl_max = 0;  // highest seen C. C is always positiv, so 0 is a lower
                        // bound
     real cfl_local;    // C in the local cell
 

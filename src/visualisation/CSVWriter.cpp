@@ -14,29 +14,29 @@ static std::string ending = ".csv";
 const static char delimiter = ',';
 
 void CSVWriter::write_numerical(FieldController *field_controller, const std::string& filename) {
-    auto u = field_controller->get_field_u_data();
-    auto v = field_controller->get_field_v_data();
-    auto w = field_controller->get_field_w_data();
-    auto p = field_controller->get_field_p_data();
-    auto div = field_controller->get_field_rhs_data();
-    auto T = field_controller->get_field_T_data();
-    auto C = field_controller->get_field_concentration_data();
-    auto s = field_controller->get_field_sight_data();
-    auto nu_t = field_controller->get_field_nu_t_data();
-    auto S_T = field_controller->get_field_source_T_data();
+    auto u = field_controller->field_u->data;
+    auto v = field_controller->field_v->data;
+    auto w = field_controller->field_w->data;
+    auto p = field_controller->field_p->data;
+    auto div = field_controller->field_rhs->data;
+    auto T = field_controller->field_T->data;
+    auto C = field_controller->field_concentration->data;
+    auto s = field_controller->sight->data;
+    auto nu_t = field_controller->field_nu_t->data;
+    auto S_T = field_controller->field_source_T->data;
     CSVWriter::csvPrepareAndWrite((filename + ending).c_str(), u, v, w, p, div, T, C, s, nu_t, S_T);
 }
 
 void CSVWriter::write_analytical(Solution *solution, const std::string& filename) {
-    auto u = solution->GetU();
-    auto v = solution->GetV();
-    auto w = solution->GetW();
-    auto p = solution->GetP();
-    auto T = solution->GetT();
+    auto u = solution->GetU_data();
+    auto v = solution->GetV_data();
+    auto w = solution->GetW_data();
+    auto p = solution->GetP_data();
+    auto T = solution->GetT_data();
     CSVWriter::csvPrepareAndWrite((filename + ending).c_str(), u, v, w, p, T);
 }
 
-void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t, read_ptr S_T) {
+void CSVWriter::csvPrepareAndWrite(const char *filename, real *u, real *v, real *w, real *p, real *div, real *T, real *C, real *s, real *nu_t, real *S_T) {
     Domain *domain = Domain::getInstance();
     int size = static_cast<int>(domain->get_size());
 
@@ -52,39 +52,37 @@ void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                                "temperature source (K/s)"};
 
     // velocities
-    auto *u_vel = new float[size];
-    auto *v_vel = new float[size];
-    auto *w_vel = new float[size];
+    auto *u_vel = new real[size];
+    auto *v_vel = new real[size];
+    auto *w_vel = new real[size];
     // pressure
-    auto *pres = new float[size];
+    auto *pres = new real[size];
     // divergence
-    auto *vel_div = new float[size];
+    auto *vel_div = new real[size];
     // temperature
-    auto *Temp = new float[size];
+    auto *Temp = new real[size];
     // smoke concentration
-    auto *Con = new float[size];
+    auto *Con = new real[size];
     // boundary sight
-    auto *Sight = new float[size];
+    auto *Sight = new real[size];
     // turbulent viscosity
-    auto *turb_visc = new float[size];
+    auto *turb_visc = new real[size];
     // energy source
-    auto *source_T = new float[size];
+    auto *source_T = new real[size];
 
     // Summarize pointers to variables in an array
-    float *vars[] = {static_cast<float *> (u_vel),
-                     static_cast<float *> (v_vel),
-                     static_cast<float *> (w_vel),
-                     static_cast<float *> (pres),
-                     static_cast<float *> (vel_div),
-                     static_cast<float *> (Temp),
-                     static_cast<float *> (Con),
-                     static_cast<float *> (Sight),
-                     static_cast<float *> (turb_visc),
-                     static_cast<float *> (source_T)};
-    read_ptr fields[] = {u, v, w, p, div, T, C, s, nu_t, S_T};
-    Visual::prepare_fields(fields, vars, size_vars);
-
-    CSVWriter::csv_write(filename, vars, size_vars, var_names);
+    real *vars[] = {static_cast<real *> (u_vel),
+                     static_cast<real *> (v_vel),
+                     static_cast<real *> (w_vel),
+                     static_cast<real *> (pres),
+                     static_cast<real *> (vel_div),
+                     static_cast<real *> (Temp),
+                     static_cast<real *> (Con),
+                     static_cast<real *> (Sight),
+                     static_cast<real *> (turb_visc),
+                     static_cast<real *> (source_T)};
+    real* fields[] = {u, v, w, p, div, T, C, s, nu_t, S_T};
+    CSVWriter::csv_write(filename, fields, size_vars, var_names);
 
     // Clean up
     delete[] (u_vel);
@@ -99,7 +97,7 @@ void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     delete[] (source_T);
 }
 
-void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr T) {
+void CSVWriter::csvPrepareAndWrite(const char *filename, real *u, real *v, real *w, real *p, real *T) {
     Domain *domain = Domain::getInstance();
     int size = static_cast<int>(domain->get_size());
 
@@ -110,24 +108,18 @@ void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                                "temperature (Celsius)"};
 
     // velocities
-    auto *u_vel = new float[size];
-    auto *v_vel = new float[size];
-    auto *w_vel = new float[size];
+    auto *u_vel = new real[size];
+    auto *v_vel = new real[size];
+    auto *w_vel = new real[size];
     // pressure
-    auto *pres = new float[size];
+    auto *pres = new real[size];
     // temperature
-    auto *Temp = new float[size];
+    auto *Temp = new real[size];
 
     // Summarize pointers to variables in an array
-    float *vars[] = {static_cast<float *> (u_vel),
-                     static_cast<float *> (v_vel),
-                     static_cast<float *> (w_vel),
-                     static_cast<float *> (pres),
-                     static_cast<float *> (Temp)};
-    read_ptr fields[] = {u, v, w, p, T};
+    real* fields[] = {u, v, w, p, T};
 
-    Visual::prepare_fields(fields, vars, size_vars);
-    CSVWriter::csv_write(filename, vars, size_vars, var_names);
+    CSVWriter::csv_write(filename, fields, size_vars, var_names);
 
     // Clean up
     delete[] (u_vel);
@@ -137,7 +129,7 @@ void CSVWriter::csvPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     delete[] (Temp);
 }
 
-void CSVWriter::csv_write(const char *filename, float **vars, int size_vars, const char **var_names) {
+void CSVWriter::csv_write(const char *filename, real **vars, int size_vars, const char **var_names) {
     Domain *domain = Domain::getInstance();
 
     int Nx = static_cast<int>(domain->get_Nx());
@@ -205,18 +197,10 @@ void CSVWriter::write_data(std::string *data_titles, real **data, size_t size_da
     int size = static_cast<int>(domain->get_size());
 
     const char *var_names[size_data];
-    float *vars[size_data];
     for (size_t i = 0; i < size_data; i++){
         var_names[i] = data_titles[i].c_str();
-        vars[i] = new float[size];
     }
 
-    Visual::prepare_fields(data, vars, size_data);
-    CSVWriter::csv_write((filename+ending).c_str(), vars, size_data, var_names);
-
-    // Clean up
-    for (size_t i = 0; i < size_data; i++){
-        delete[] vars[i];
-    }
+    CSVWriter::csv_write((filename+ending).c_str(), data, size_data, var_names);
 }
 

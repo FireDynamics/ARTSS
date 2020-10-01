@@ -32,6 +32,9 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
 }
 
 Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numberOfObstacles, Obstacle **obstacleList, BoundaryDataController *bdc_boundary, BoundaryDataController **bdc_obstacles) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     m_bdc_boundary = bdc_boundary;
     m_numberOfSurfaces = numberOfSurfaces;
     m_numberOfObstacles = numberOfObstacles;

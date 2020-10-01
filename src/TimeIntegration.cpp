@@ -150,6 +150,8 @@ void TimeIntegration::run() {
 #endif
             m_solver_controller->update_sources(t_cur, false);
             m_field_controller->update_data(false);
+#pragma acc update host(d_u[:bsize])
+            m_logger->error("ende: iter: {}", d_u[IX(8,12,9, Domain::getInstance()->get_Nx(), Domain::getInstance()->get_Ny())]);
 
             // iter_end = std::chrono::system_clock::now();
             // long ms = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();
