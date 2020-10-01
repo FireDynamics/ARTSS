@@ -323,7 +323,6 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
                        // bound
     real cfl_local;    // C in the local cell
 
-
     auto boundary = BoundaryController::getInstance();
     auto domain = Domain::getInstance();
 
