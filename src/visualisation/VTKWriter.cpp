@@ -79,7 +79,7 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                               "turb_visc",
                               "source_T"};
 
-    std::vector<int> rank_has_boundary {mpi_handler->get_boundary_controller()};
+    std::vector<int> rank_has_boundary {mpi_handler->get_mpi_neighbour()};
     int bx0{rank_has_boundary.at(0)};
     int bx1{rank_has_boundary.at(1)};
     int by0{rank_has_boundary.at(2)};
@@ -226,7 +226,7 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     int centering[] = {0, 0, 0, 0, 0, 0, 0, 0}; // Whether the variables are centered in a cell: 0 for zonal!
     const char *var_names[] = {"x-coords", "y-coords", "z-coords", "x-velocity", "y-velocity", "z-velocity", "pressure", "temperature"};
 
-    std::vector<int> rank_has_boundary {mpi_handler->get_boundary_controller()};
+    std::vector<int> rank_has_boundary {mpi_handler->get_mpi_neighbour()};
     int bx0{rank_has_boundary.at(0)};
     int bx1{rank_has_boundary.at(1)};
     int by0{rank_has_boundary.at(2)};
