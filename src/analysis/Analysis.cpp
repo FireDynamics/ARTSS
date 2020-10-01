@@ -323,10 +323,12 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
                        // bound
     real cfl_local;    // C in the local cell
 
+
     auto boundary = BoundaryController::getInstance();
     auto domain = Domain::getInstance();
 
     // local variables and parameters
+    size_t bsize = domain->get_size(u->GetLevel());
     size_t *innerList = boundary->get_innerList_level_joined();
     size_t sizei = boundary->getSize_innerList();
 
@@ -339,6 +341,8 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
     auto d_w = w->data;
 
     // calc C for every cell and get the maximum
+#pragma acc parallel loop reduction(max:cfl_max)
+#pragma acc data present(d_u[:bsize], d_v[:bsize], d_w[:bsize])
     for (size_t i=0; i < sizei; i++) {
         size_t idx = innerList[i];
         // \frac{C}{\Delta t} = \frac{\Delta u}{\Delta x} +
