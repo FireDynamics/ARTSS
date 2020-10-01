@@ -46,9 +46,22 @@ void MPIHandler::exchange_data(real *data_field, size_t direction, size_t* d_pat
     else if (direction == 4) idx_inner = m_inner_boundary_z1;
     else if (direction == 5) idx_inner = m_inner_boundary_z2;
 
-   for (size_t i = 0; i < idx_inner.size(); i++)
+    std::vector< real > mpi_send_vec;
+    std::vector< real > mpi_recv_vec;
+
+    // extract data from field
+    for (size_t i = 0; i < idx_inner.size(); i++)
     {
-        data_field[d_patch[i]] = data_field[idx_inner.at(i)];
+        mpi_send_vec.push_back(data_field[idx_inner.at(i)]);
+        mpi_recv_vec.push_back(0.0);
+    }
+
+    //TODO: MPI SEND AND RECV
+
+   // insert exchanged data into field
+   for (size_t i = 0; i < mpi_recv_vec.size(); i++)
+    {
+        data_field[d_patch[i]] = mpi_recv_vec.at(i);
     }
 }
 
