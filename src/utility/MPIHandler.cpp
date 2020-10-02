@@ -51,19 +51,19 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch) {
     switch (p) {
             case Patch::FRONT:
                 idx_inner = m_inner_front;
-                patchIDX = 2;
+                patchIDX = 4;
                 break;
             case Patch::BACK:
                 idx_inner = m_inner_back;
-                patchIDX = 3;
+                patchIDX = 5;
                 break;
             case Patch::BOTTOM:
                 idx_inner = m_inner_bottom;
-                patchIDX = 4;
+                patchIDX = 2;
                 break;
             case Patch::TOP:
                 idx_inner = m_inner_top;
-                patchIDX = 5;
+                patchIDX = 3;
                 break;
             case Patch::LEFT:
                 idx_inner = m_inner_left;
@@ -91,8 +91,8 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch) {
     reqs[1] = m_MPICART.irecv(shifted_ranks.first, 0, &mpi_recv_vec[0], mpi_recv_vec.size());
     boost::mpi::wait_all(reqs, reqs + 2);
 
-   // insert exchanged data into field
-   for (size_t i = 0; i < mpi_recv_vec.size(); i++)
+    // insert exchanged data into field
+    for (size_t i = 0; i < mpi_recv_vec.size(); i++)
     {
         data_field[d_patch[i]] = mpi_recv_vec.at(i);
     }
