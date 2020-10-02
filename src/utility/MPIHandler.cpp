@@ -9,8 +9,6 @@
 
 #include "GlobalMacrosTypes.h"
 
-
-
 MPIHandler *MPIHandler::single = nullptr;
 
 // Singleton
@@ -29,22 +27,53 @@ MPIHandler *MPIHandler::getInstance(boost::mpi::communicator& MPIWORLD,
 
 MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
                        boost::mpi::cartesian_communicator& MPICART) :
-                       m_MPIWORLD(MPIWORLD), m_MPICART(MPICART), m_dimensions(MPICART.topology().stl()), m_mpi_neighbour(6,0)  {
+                       m_MPIWORLD(MPIWORLD), m_MPICART(MPICART), m_dimensions(MPICART.topology().stl()), m_mpi_neighbour(6,0), m_mpi_neighbour_rank_offset(6,std::pair <int,int>(0,0))  {
                            m_Xdim = m_dimensions.at(0).size; 
                            m_Ydim = m_dimensions.at(1).size; 
                            m_Zdim = m_dimensions.at(2).size; 
+
+                           m_mpi_neighbour_rank_offset.at(0) = std::pair <int,int>( 1,0);
+                           m_mpi_neighbour_rank_offset.at(1) = std::pair <int,int>(-1,0);
+                           m_mpi_neighbour_rank_offset.at(2) = std::pair <int,int>( 1,1);
+                           m_mpi_neighbour_rank_offset.at(3) = std::pair <int,int>(-1,1);
+                           m_mpi_neighbour_rank_offset.at(4) = std::pair <int,int>( 1,2);
+                           m_mpi_neighbour_rank_offset.at(5) = std::pair <int,int>(-1,2);
                            
                            check_mpi_neighbour();
                        }
 
-void MPIHandler::exchange_data(real *data_field, size_t direction, size_t* d_patch) {
+void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch) {
     std::vector< size_t > idx_inner;
-    if      (direction == 0) idx_inner = m_inner_boundary_x1;
-    else if (direction == 1) idx_inner = m_inner_boundary_x2;
-    else if (direction == 2) idx_inner = m_inner_boundary_y1;
-    else if (direction == 3) idx_inner = m_inner_boundary_y2;
-    else if (direction == 4) idx_inner = m_inner_boundary_z1;
-    else if (direction == 5) idx_inner = m_inner_boundary_z2;
+    std::pair < int, int > shifted_ranks;
+    boost::mpi::request reqs[2];
+    int patchIDX;
+
+    switch (p) {
+            case Patch::FRONT:
+                idx_inner = m_inner_front;
+                patchIDX = 2;
+                break;
+            case Patch::BACK:
+                idx_inner = m_inner_back;
+                patchIDX = 3;
+                break;
+            case Patch::BOTTOM:
+                idx_inner = m_inner_bottom;
+                patchIDX = 4;
+                break;
+            case Patch::TOP:
+                idx_inner = m_inner_top;
+                patchIDX = 5;
+                break;
+            case Patch::LEFT:
+                idx_inner = m_inner_left;
+                patchIDX = 0;
+                break;
+            case Patch::RIGHT:
+                idx_inner = m_inner_right;
+                patchIDX = 1;
+                break;
+    }
 
     std::vector< real > mpi_send_vec;
     std::vector< real > mpi_recv_vec;
@@ -56,7 +85,11 @@ void MPIHandler::exchange_data(real *data_field, size_t direction, size_t* d_pat
         mpi_recv_vec.push_back(0.0);
     }
 
-    //TODO: MPI SEND AND RECV
+    shifted_ranks = m_MPICART.shifted_ranks(m_mpi_neighbour_rank_offset.at(patchIDX).second, m_mpi_neighbour_rank_offset.at(patchIDX).first);
+
+    reqs[0] = m_MPICART.isend(shifted_ranks.first, 0, &mpi_send_vec[0], mpi_send_vec.size());
+    reqs[1] = m_MPICART.irecv(shifted_ranks.first, 0, &mpi_recv_vec[0], mpi_recv_vec.size());
+    boost::mpi::wait_all(reqs, reqs + 2);
 
    // insert exchanged data into field
    for (size_t i = 0; i < mpi_recv_vec.size(); i++)
@@ -81,22 +114,22 @@ void MPIHandler::get_inner_index(){
 
     for (size_t k = k1; k <= k2; ++k) {
         for (size_t j = j1; j <= j2; ++j) {
-            m_inner_boundary_x1.push_back(IX(i1 + 1, j, k, Nx, Ny));
-            m_inner_boundary_x2.push_back(IX(i2 - 1, j, k, Nx, Ny));
+            m_inner_left.push_back(IX(i1 + 1, j, k, Nx, Ny));
+            m_inner_right.push_back(IX(i2 - 1, j, k, Nx, Ny));
         }
     }
 
     for (size_t k = k1; k <= k2; ++k) {
         for (size_t i = i1; i <= i2; ++i) {
-            m_inner_boundary_y1.push_back(IX(i, j1 + 1, k, Nx, Ny));
-            m_inner_boundary_y2.push_back(IX(i, j2 - 1, k, Nx, Ny));
+            m_inner_bottom.push_back(IX(i, j1 + 1, k, Nx, Ny));
+            m_inner_top.push_back(IX(i, j2 - 1, k, Nx, Ny));
         }
     }
 
     for (size_t j = j1; j <= j2; ++j) {
         for (size_t i = i1; i <= i2; ++i) {
-            m_inner_boundary_z1.push_back(IX(i, j, k1 + 1, Nx, Ny));
-            m_inner_boundary_z2.push_back(IX(i, j, k2 - 1, Nx, Ny));
+            m_inner_front.push_back(IX(i, j, k1 + 1, Nx, Ny));
+            m_inner_back.push_back(IX(i, j, k2 - 1, Nx, Ny));
         }
     }
 }
@@ -105,14 +138,14 @@ void MPIHandler::check_mpi_neighbour() {
     std::vector<int> rank_coordinates;
     rank_coordinates = get_coords();
 
-    m_mpi_neighbour.at(0) = (rank_coordinates.at(0) == 0) ? 0 : 1;
-    m_mpi_neighbour.at(1) = (rank_coordinates.at(0) == m_Xdim - 1) ? 0 : 1;
+    m_mpi_neighbour.at(0) = (rank_coordinates.at(2) == 0) ? 0 : 1;
+    m_mpi_neighbour.at(1) = (rank_coordinates.at(2) == m_Zdim - 1) ? 0 : 1;
 
     m_mpi_neighbour.at(2) = (rank_coordinates.at(1) == 0) ? 0 : 1;
     m_mpi_neighbour.at(3) = (rank_coordinates.at(1) == m_Ydim - 1) ? 0 : 1;
 
-    m_mpi_neighbour.at(4) = (rank_coordinates.at(2) == 0) ? 0 : 1;
-    m_mpi_neighbour.at(5) = (rank_coordinates.at(2) == m_Zdim - 1) ? 0 : 1;
+    m_mpi_neighbour.at(4) = (rank_coordinates.at(0) == 0) ? 0 : 1;
+    m_mpi_neighbour.at(5) = (rank_coordinates.at(0) == m_Xdim - 1) ? 0 : 1;
 }
 
 void MPIHandler::convert_domain(real& x1, real& x2, int direction) {

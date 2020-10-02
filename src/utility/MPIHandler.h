@@ -13,11 +13,13 @@
 
 #include <boost/mpi/collectives.hpp>
 #include <boost/mpi/cartesian_communicator.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
 #include "Utility.h"
 #include "../Domain.h"
+#include "../boundary/BoundaryData.h"
 
 
 class MPIHandler {
@@ -36,7 +38,9 @@ class MPIHandler {
     bool convert_obstacle(real& x1, real& x2, int direction);
     bool has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& oz1, real& oz2);
     void get_inner_index();
-    void exchange_data(real *data_field, size_t direction, size_t* d_patch);
+    void exchange_data(real *data_field, Patch p, size_t* d_patch);
+
+    void set_barrier() { return m_MPICART.barrier(); }
 
 private:
     static MPIHandler* single;
@@ -45,12 +49,12 @@ private:
     boost::mpi::communicator m_MPIWORLD;
     boost::mpi::cartesian_communicator m_MPICART;
     std::vector< boost::mpi::cartesian_dimension > m_dimensions;
-    std::vector< size_t > m_inner_boundary_x1;
-    std::vector< size_t > m_inner_boundary_x2;
-    std::vector< size_t > m_inner_boundary_y1;
-    std::vector< size_t > m_inner_boundary_y2;
-    std::vector< size_t > m_inner_boundary_z1;
-    std::vector< size_t > m_inner_boundary_z2;
+    std::vector< size_t > m_inner_left;
+    std::vector< size_t > m_inner_right;
+    std::vector< size_t > m_inner_bottom;
+    std::vector< size_t > m_inner_top;
+    std::vector< size_t > m_inner_front;
+    std::vector< size_t > m_inner_back;
 
     int m_Xdim;
     int m_Ydim;
@@ -59,6 +63,7 @@ private:
     void check_mpi_neighbour();
 
     std::vector<int> m_mpi_neighbour;
+    std::vector< std::pair <int, int > > m_mpi_neighbour_rank_offset;
 
 };
 

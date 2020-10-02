@@ -80,12 +80,12 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                               "source_T"};
 
     std::vector<int> rank_has_boundary {mpi_handler->get_mpi_neighbour()};
-    int bx0{rank_has_boundary.at(0)};
-    int bx1{rank_has_boundary.at(1)};
+    int bz0{rank_has_boundary.at(0)};
+    int bz1{rank_has_boundary.at(1)};
     int by0{rank_has_boundary.at(2)};
     int by1{rank_has_boundary.at(3)};
-    int bz0{rank_has_boundary.at(4)};
-    int bz1{rank_has_boundary.at(5)};
+    int bx0{rank_has_boundary.at(4)};
+    int bx1{rank_has_boundary.at(5)};
 
     int dims[] = {Nx + 1 - bx0 - bx1, Ny + 1 - by0 - by1, Nz + 1 - bz0 - bz1};            // Dimensions of the rectilinear array (+1 for zonal values)
 
