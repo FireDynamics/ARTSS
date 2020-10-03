@@ -85,32 +85,42 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch) {
         mpi_recv_vec.push_back(0.0);
     }
 
+        std::cout << "Size: " << mpi_send_vec.size() << ", ";
+
     shifted_ranks = m_MPICART.shifted_ranks(m_mpi_neighbour_rank_offset.at(patchIDX).second, m_mpi_neighbour_rank_offset.at(patchIDX).first);
 
     reqs[0] = m_MPICART.isend(shifted_ranks.first, 0, &mpi_send_vec[0], mpi_send_vec.size());
     reqs[1] = m_MPICART.irecv(shifted_ranks.first, 0, &mpi_recv_vec[0], mpi_recv_vec.size());
     boost::mpi::wait_all(reqs, reqs + 2);
 
+    size_t ctr{0};
     // insert exchanged data into field
     for (size_t i = 0; i < mpi_recv_vec.size(); i++)
     {
+        ctr++;
         data_field[d_patch[i]] = mpi_recv_vec.at(i);
     }
 }
 
-void MPIHandler::get_inner_index(){
+void MPIHandler::calc_inner_index(size_t level){
+    m_inner_left.clear();
+    m_inner_right.clear();
+    m_inner_top.clear();
+    m_inner_bottom.clear();
+    m_inner_front.clear();
+    m_inner_back.clear();
+
     Domain *domain = Domain::getInstance();
-    size_t i1 = domain->get_index_x1() - 1;
-    size_t j1 = domain->get_index_y1() - 1;
-    size_t k1 = domain->get_index_z1() - 1;
+    size_t i1 = domain->get_index_x1(level) - 1;
+    size_t j1 = domain->get_index_y1(level) - 1;
+    size_t k1 = domain->get_index_z1(level) - 1;
 
-    size_t i2 = domain->get_index_x2() + 1;
-    size_t j2 = domain->get_index_y2() + 1;
-    size_t k2 = domain->get_index_z2() + 1;
+    size_t i2 = domain->get_index_x2(level) + 1;
+    size_t j2 = domain->get_index_y2(level) + 1;
+    size_t k2 = domain->get_index_z2(level) + 1;
    
-    size_t Nx = domain->get_Nx();
-    size_t Ny = domain->get_Ny();
-
+    size_t Nx = domain->get_Nx(level);
+    size_t Ny = domain->get_Ny(level);
 
     for (size_t k = k1; k <= k2; ++k) {
         for (size_t j = j1; j <= j2; ++j) {

@@ -15,10 +15,6 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
     m_numberOfSurfaces = 0;
     m_numberOfObstacles = 0;
 
-    auto mpi_handler = MPIHandler::getInstance();
-    //TODO: get_inner_index must be implemented after adaption
-    mpi_handler->get_inner_index();
-
     init();
     addMGLists();
     sendListsToGPU();
@@ -42,11 +38,6 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
     m_bdc_boundary = bdc_boundary;
     m_numberOfSurfaces = numberOfSurfaces;
     m_numberOfObstacles = numberOfObstacles;
-
-    auto mpi_handler = MPIHandler::getInstance();
-    //TODO: get_inner_index must be implemented after adaption
-    mpi_handler->get_inner_index();
-
 
     m_levels = Domain::getInstance()->get_levels(); //multigrid level, 0 otherwise
 

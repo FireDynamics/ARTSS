@@ -37,7 +37,7 @@ class MPIHandler {
     int  convert_grid(std::string param, int direction);
     bool convert_obstacle(real& x1, real& x2, int direction);
     bool has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& oz1, real& oz2);
-    void get_inner_index();
+    void calc_inner_index(size_t level);
     void exchange_data(real *data_field, Patch p, size_t* d_patch);
 
     void set_barrier() { return m_MPICART.barrier(); }
