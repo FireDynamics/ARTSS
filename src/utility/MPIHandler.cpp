@@ -78,6 +78,7 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch) {
     std::vector< real > mpi_send_vec;
     std::vector< real > mpi_recv_vec;
 
+
     // extract data from field
     for (size_t i = 0; i < idx_inner.size(); i++)
     {
@@ -91,11 +92,9 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch) {
     reqs[1] = m_MPICART.irecv(shifted_ranks.first, 0, &mpi_recv_vec[0], mpi_recv_vec.size());
     boost::mpi::wait_all(reqs, reqs + 2);
 
-    size_t ctr{0};
     // insert exchanged data into field
     for (size_t i = 0; i < mpi_recv_vec.size(); i++)
     {
-        ctr++;
         data_field[d_patch[i]] = mpi_recv_vec.at(i);
     }
 }
