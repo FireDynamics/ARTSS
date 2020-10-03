@@ -85,8 +85,6 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch) {
         mpi_recv_vec.push_back(0.0);
     }
 
-        std::cout << "Size: " << mpi_send_vec.size() << ", ";
-
     shifted_ranks = m_MPICART.shifted_ranks(m_mpi_neighbour_rank_offset.at(patchIDX).second, m_mpi_neighbour_rank_offset.at(patchIDX).first);
 
     reqs[0] = m_MPICART.isend(shifted_ranks.first, 0, &mpi_send_vec[0], mpi_send_vec.size());
