@@ -42,7 +42,7 @@ MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
                            check_mpi_neighbour();
                        }
 
-void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch, const size_t patch_start) {
+void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch, const size_t patch_start, size_t level) {
     std::vector< size_t > idx_inner;
     std::pair < int, int > shifted_ranks;
     boost::mpi::request reqs[2];
@@ -88,8 +88,8 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch, const
 
     shifted_ranks = m_MPICART.shifted_ranks(m_mpi_neighbour_rank_offset.at(patchIDX).second, m_mpi_neighbour_rank_offset.at(patchIDX).first);
 
-    reqs[0] = m_MPICART.isend(shifted_ranks.first, 0, &mpi_send_vec[0], mpi_send_vec.size());
-    reqs[1] = m_MPICART.irecv(shifted_ranks.first, 0, &mpi_recv_vec[0], mpi_recv_vec.size());
+    reqs[0] = m_MPICART.isend(shifted_ranks.first, level, mpi_send_vec);
+    reqs[1] = m_MPICART.irecv(shifted_ranks.first, level, mpi_recv_vec);
     boost::mpi::wait_all(reqs, reqs + 2);
 
     // insert exchanged data into field

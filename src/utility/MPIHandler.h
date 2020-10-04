@@ -38,7 +38,7 @@ class MPIHandler {
     bool convert_obstacle(real& x1, real& x2, int direction);
     bool has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& oz1, real& oz2);
     void calc_inner_index(size_t level);
-    void exchange_data(real *data_field, Patch p, size_t* d_patch, const size_t patch_starts);
+    void exchange_data(real *data_field, Patch p, size_t* d_patch, const size_t patch_starts, size_t level);
 
     void set_barrier() { return m_MPICART.barrier(); }
 
