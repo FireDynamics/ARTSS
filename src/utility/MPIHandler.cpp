@@ -42,7 +42,7 @@ MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
                            check_mpi_neighbour();
                        }
 
-void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch) {
+void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch, const size_t patch_start) {
     std::vector< size_t > idx_inner;
     std::pair < int, int > shifted_ranks;
     boost::mpi::request reqs[2];
@@ -95,7 +95,7 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch) {
     // insert exchanged data into field
     for (size_t i = 0; i < mpi_recv_vec.size(); i++)
     {
-        data_field[d_patch[i]] = mpi_recv_vec.at(i);
+        data_field[d_patch[patch_start+i]] = mpi_recv_vec.at(i);
     }
 }
 
