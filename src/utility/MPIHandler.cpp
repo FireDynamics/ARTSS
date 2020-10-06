@@ -143,7 +143,7 @@ void MPIHandler::calc_inner_index(size_t level){
     }
 }
 
-double MPIHandler::get_max_val(double val, int rootRank){
+double MPIHandler::get_max_val(double val){
     double max_val;
     boost::mpi::all_reduce(m_MPICART, val, max_val, boost::mpi::maximum<double>());
 
