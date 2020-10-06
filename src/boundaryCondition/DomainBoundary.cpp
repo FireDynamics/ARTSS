@@ -22,7 +22,6 @@ void DomainBoundary::apply_boundary_condition(real *data_field, size_t **index_f
 
     auto mpi_handler = MPIHandler::getInstance();
     std::vector<int> rank_has_neighbour{mpi_handler->get_mpi_neighbour()};
-    mpi_handler->calc_inner_index(level);
 
     for (size_t i = 0; i < numberOfPatches; i++) {
         size_t *d_patch = *(index_fields + i);
@@ -49,6 +48,7 @@ void DomainBoundary::apply_boundary_condition(real *data_field, size_t **index_f
         }
 
         if(rank_has_neighbour.at(i) == 1) {
+            mpi_handler->calc_inner_index(level);
             mpi_handler->exchange_data(data_field, p, d_patch, patch_start, level);
             mpi_handler->set_barrier();
         }
