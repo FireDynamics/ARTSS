@@ -259,6 +259,7 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
     UpdateInput(out, b);
 
     // solve more accurately, in first time step
+    auto mpi_handler = MPIHandler::getInstance();
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
     const real dt = params->get_real("physical_parameters/dt");
@@ -320,6 +321,9 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
             r = sqrt(sum);
 
             relaxs += set_relaxs;
+
+            r = mpi_handler->get_max_val(r);
+            mpi_handler->set_barrier();
         }
     } else { // Nt > 1
         cycles = set_cycles;
@@ -1017,7 +1021,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
                 std::swap(tmp->data, out->data);
                 std::swap(d_tmp, d_out);
 
-                res = mpi_handler->get_max_val(res, 0);
+                res = mpi_handler->get_max_val(res);
                 mpi_handler->set_barrier();
             }  // end while
 
@@ -1067,7 +1071,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
                 res = sqrt(sum);
                 it++;
 
-                res = mpi_handler->get_max_val(res, 0);
+                res = mpi_handler->get_max_val(res);
                 mpi_handler->set_barrier();
             }  // end while
         }  // end data region
