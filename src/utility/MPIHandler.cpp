@@ -165,12 +165,15 @@ void MPIHandler::check_mpi_neighbour() {
 }
 
 void MPIHandler::convert_domain(real& x1, real& x2, int direction) {
+    real temp_x1, temp_x2;
     int  dimension      { m_dimensions[direction].size };
     real local_size     { (x2 - x1) /  dimension};
     int  rank_dimension { m_MPICART.coordinates(m_MPICART.rank())[direction] };
-
-    x1 =+ rank_dimension * local_size;
-    x2 =+ (rank_dimension + 1) * local_size;
+    temp_x1 = x1 + rank_dimension * local_size;
+    temp_x2 = x1 + ((rank_dimension + 1) * local_size);
+    
+    x1 = temp_x1;
+    x2 = temp_x2;
 }
 
 bool MPIHandler::convert_obstacle(real& x1, real& x2, int direction) {
