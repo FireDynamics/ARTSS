@@ -37,7 +37,7 @@ class MPIHandler {
     int  convert_grid(std::string param, int direction);
     bool convert_obstacle(real& x1, real& x2, int direction);
     bool has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& oz1, real& oz2);
-    void calc_inner_index(size_t level);
+    void calc_inner_index();
     void exchange_data(real *data_field, Patch p, size_t* d_patch, const size_t patch_starts, size_t level);
 
     void set_barrier() { return m_MPICART.barrier(); }
@@ -51,12 +51,14 @@ private:
     boost::mpi::communicator m_MPIWORLD;
     boost::mpi::cartesian_communicator m_MPICART;
     std::vector< boost::mpi::cartesian_dimension > m_dimensions;
-    std::vector< size_t > m_inner_left;
-    std::vector< size_t > m_inner_right;
-    std::vector< size_t > m_inner_bottom;
-    std::vector< size_t > m_inner_top;
-    std::vector< size_t > m_inner_front;
-    std::vector< size_t > m_inner_back;
+    std::vector< std::vector<size_t> > m_inner_left;
+    std::vector< std::vector<size_t> > m_inner_right;
+    std::vector< std::vector<size_t> > m_inner_bottom;
+    std::vector< std::vector<size_t> > m_inner_top;
+    std::vector< std::vector<size_t> > m_inner_front;
+    std::vector< std::vector<size_t> > m_inner_back;
+
+    int sendrecv_ctr;
 
     int m_Xdim;
     int m_Ydim;

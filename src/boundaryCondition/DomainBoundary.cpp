@@ -48,7 +48,6 @@ void DomainBoundary::apply_boundary_condition(real *data_field, size_t **index_f
         }
 
         if(rank_has_neighbour.at(i) == 1) {
-            mpi_handler->calc_inner_index(level);
             mpi_handler->exchange_data(data_field, p, d_patch, patch_start, level);
             mpi_handler->set_barrier();
         }

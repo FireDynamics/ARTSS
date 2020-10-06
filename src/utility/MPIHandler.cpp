@@ -41,6 +41,7 @@ MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
                            m_mpi_neighbour_rank_offset.at(4) = std::pair <int,int>( 1,2);
                            m_mpi_neighbour_rank_offset.at(5) = std::pair <int,int>(-1,2);
                            
+                           sendrecv_ctr = 0;
                            check_mpi_neighbour();
                        }
 
@@ -52,30 +53,32 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch, const
 
     switch (p) {
             case Patch::FRONT:
-                idx_inner = m_inner_front;
+                idx_inner = m_inner_front.at(level);
                 patchIDX = 4;
                 break;
             case Patch::BACK:
-                idx_inner = m_inner_back;
+                idx_inner = m_inner_back.at(level);
                 patchIDX = 5;
                 break;
             case Patch::BOTTOM:
-                idx_inner = m_inner_bottom;
+                idx_inner = m_inner_bottom.at(level);
                 patchIDX = 2;
                 break;
             case Patch::TOP:
-                idx_inner = m_inner_top;
+                idx_inner = m_inner_top.at(level);
                 patchIDX = 3;
                 break;
             case Patch::LEFT:
-                idx_inner = m_inner_left;
+                idx_inner = m_inner_left.at(level);
                 patchIDX = 0;
                 break;
             case Patch::RIGHT:
-                idx_inner = m_inner_right;
+                idx_inner = m_inner_right.at(level);
                 patchIDX = 1;
                 break;
     }
+
+    sendrecv_ctr++;
 
     std::vector< real > mpi_send_vec;
     std::vector< real > mpi_recv_vec;
@@ -90,8 +93,8 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch, const
 
     shifted_ranks = m_MPICART.shifted_ranks(m_mpi_neighbour_rank_offset.at(patchIDX).second, m_mpi_neighbour_rank_offset.at(patchIDX).first);
 
-    reqs[0] = m_MPICART.isend(shifted_ranks.first, level, mpi_send_vec);
-    reqs[1] = m_MPICART.irecv(shifted_ranks.first, level, mpi_recv_vec);
+    reqs[0] = m_MPICART.isend(shifted_ranks.first, sendrecv_ctr, mpi_send_vec);
+    reqs[1] = m_MPICART.irecv(shifted_ranks.first, sendrecv_ctr, mpi_recv_vec);
     boost::mpi::wait_all(reqs, reqs + 2);
 
     // insert exchanged data into field
@@ -101,46 +104,65 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch, const
     }
 }
 
-void MPIHandler::calc_inner_index(size_t level){
-    m_inner_left.clear();
-    m_inner_right.clear();
-    m_inner_top.clear();
-    m_inner_bottom.clear();
-    m_inner_front.clear();
-    m_inner_back.clear();
+void MPIHandler::calc_inner_index(){
+
+    std::vector<size_t> inner_left;
+    std::vector<size_t> inner_right;
+    std::vector<size_t> inner_bottom;
+    std::vector<size_t> inner_top;
+    std::vector<size_t> inner_front;
+    std::vector<size_t> inner_back;
 
     Domain *domain = Domain::getInstance();
-    size_t i1 = domain->get_index_x1(level) - 1;
-    size_t j1 = domain->get_index_y1(level) - 1;
-    size_t k1 = domain->get_index_z1(level) - 1;
 
-    size_t i2 = domain->get_index_x2(level) + 1;
-    size_t j2 = domain->get_index_y2(level) + 1;
-    size_t k2 = domain->get_index_z2(level) + 1;
-   
-    size_t Nx = domain->get_Nx(level);
-    size_t Ny = domain->get_Ny(level);
+    for (size_t level = 0; level <= domain->get_levels(); level++) {
+    
+        size_t i1 = domain->get_index_x1(level) - 1;
+        size_t j1 = domain->get_index_y1(level) - 1;
+        size_t k1 = domain->get_index_z1(level) - 1;
 
-    for (size_t k = k1; k <= k2; ++k) {
+        size_t i2 = domain->get_index_x2(level) + 1;
+        size_t j2 = domain->get_index_y2(level) + 1;
+        size_t k2 = domain->get_index_z2(level) + 1;
+    
+        size_t Nx = domain->get_Nx(level);
+        size_t Ny = domain->get_Ny(level);
+
+        for (size_t k = k1; k <= k2; ++k) {
+            for (size_t j = j1; j <= j2; ++j) {
+                inner_left.push_back(IX(i1 + 1, j, k, Nx, Ny));
+                inner_right.push_back(IX(i2 - 1, j, k, Nx, Ny));
+            }
+        }
+
+        for (size_t k = k1; k <= k2; ++k) {
+            for (size_t i = i1; i <= i2; ++i) {
+                inner_bottom.push_back(IX(i, j1 + 1, k, Nx, Ny));
+                inner_top.push_back(IX(i, j2 - 1, k, Nx, Ny));
+            }
+        }
+
         for (size_t j = j1; j <= j2; ++j) {
-            m_inner_left.push_back(IX(i1 + 1, j, k, Nx, Ny));
-            m_inner_right.push_back(IX(i2 - 1, j, k, Nx, Ny));
+            for (size_t i = i1; i <= i2; ++i) {
+                inner_front.push_back(IX(i, j, k1 + 1, Nx, Ny));
+                inner_back.push_back(IX(i, j, k2 - 1, Nx, Ny));
+            }
         }
-    }
 
-    for (size_t k = k1; k <= k2; ++k) {
-        for (size_t i = i1; i <= i2; ++i) {
-            m_inner_bottom.push_back(IX(i, j1 + 1, k, Nx, Ny));
-            m_inner_top.push_back(IX(i, j2 - 1, k, Nx, Ny));
-        }
-    }
+        m_inner_left.push_back(inner_left);
+        m_inner_right.push_back(inner_right);
+        m_inner_bottom.push_back(inner_bottom);
+        m_inner_top.push_back(inner_top);
+        m_inner_front.push_back(inner_front);
+        m_inner_back.push_back(inner_back);
 
-    for (size_t j = j1; j <= j2; ++j) {
-        for (size_t i = i1; i <= i2; ++i) {
-            m_inner_front.push_back(IX(i, j, k1 + 1, Nx, Ny));
-            m_inner_back.push_back(IX(i, j, k2 - 1, Nx, Ny));
-        }
-    }
+        inner_left.clear();
+        inner_right.clear();
+        inner_bottom.clear();
+        inner_top.clear();
+        inner_front.clear();
+        inner_back.clear();
+    }   
 }
 
 double MPIHandler::get_max_val(double val){
