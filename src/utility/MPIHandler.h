@@ -42,6 +42,8 @@ class MPIHandler {
 
     void set_barrier() { return m_MPICART.barrier(); }
 
+    double get_max_val(double val, int rootRank);
+
 private:
     static MPIHandler* single;
 

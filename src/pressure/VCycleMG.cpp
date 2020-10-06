@@ -895,6 +895,7 @@ void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) {
+    auto mpi_handler = MPIHandler::getInstance();
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -1015,6 +1016,9 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
                 std::swap(tmp->data, out->data);
                 std::swap(d_tmp, d_out);
+
+                res = mpi_handler->get_max_val(res, 0);
+                mpi_handler->set_barrier();
             }  // end while
 
             if (it % 2 != 0) {  // swap necessary when odd number of iterations
@@ -1062,6 +1066,9 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 #pragma acc wait
                 res = sqrt(sum);
                 it++;
+
+                res = mpi_handler->get_max_val(res, 0);
+                mpi_handler->set_barrier();
             }  // end while
         }  // end data region
     } else {

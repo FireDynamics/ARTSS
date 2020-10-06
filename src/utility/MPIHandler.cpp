@@ -4,6 +4,8 @@
 /// \author     Max Joseph Böhler
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <boost/mpi/operations.hpp>
+
 #include "MPIHandler.h"
 #include "Parameters.h"
 
@@ -139,6 +141,13 @@ void MPIHandler::calc_inner_index(size_t level){
             m_inner_back.push_back(IX(i, j, k2 - 1, Nx, Ny));
         }
     }
+}
+
+double MPIHandler::get_max_val(double val, int rootRank){
+    double max_val;
+    boost::mpi::all_reduce(m_MPICART, val, max_val, boost::mpi::maximum<double>());
+
+    return max_val;
 }
 
 void MPIHandler::check_mpi_neighbour() {
