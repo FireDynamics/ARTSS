@@ -1,10 +1,12 @@
-/// \file       MPI.h
+/// \file       MPIHandler.h
 /// \brief      Custom MPI handler
-/// \date       Sep 01, 2020
+/// \date       October, 2020
 /// \author     Max Joseph Böhler
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <boost/mpi/operations.hpp>
+#include <boost/mpi/collectives.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include "MPIHandler.h"
 #include "Parameters.h"
@@ -29,22 +31,37 @@ MPIHandler *MPIHandler::getInstance(boost::mpi::communicator& MPIWORLD,
 
 MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
                        boost::mpi::cartesian_communicator& MPICART) :
-                       m_MPIWORLD(MPIWORLD), m_MPICART(MPICART), m_dimensions(MPICART.topology().stl()), m_mpi_neighbour(6,0), m_mpi_neighbour_rank_offset(6,std::pair <int,int>(0,0))  {
-                           m_Xdim = m_dimensions.at(0).size; 
-                           m_Ydim = m_dimensions.at(1).size; 
-                           m_Zdim = m_dimensions.at(2).size; 
+                            m_MPIWORLD(MPIWORLD), m_MPICART(MPICART), 
+                            m_dimensions(MPICART.topology().stl()), 
+                            m_mpi_neighbour(6,0),
+                            m_mpi_neighbour_rank_offset(6,std::pair <int,int>(0,0))  {
 
-                           m_mpi_neighbour_rank_offset.at(0) = std::pair <int,int>( 1,0);
-                           m_mpi_neighbour_rank_offset.at(1) = std::pair <int,int>(-1,0);
-                           m_mpi_neighbour_rank_offset.at(2) = std::pair <int,int>( 1,1);
-                           m_mpi_neighbour_rank_offset.at(3) = std::pair <int,int>(-1,1);
-                           m_mpi_neighbour_rank_offset.at(4) = std::pair <int,int>( 1,2);
-                           m_mpi_neighbour_rank_offset.at(5) = std::pair <int,int>(-1,2);
+                            // Procs in x,y,z direction -> Warning: here x = left, right; y = front, back; z = top, bottom
+                            m_Xdim = m_dimensions.at(0).size; 
+                            m_Ydim = m_dimensions.at(1).size; 
+                            m_Zdim = m_dimensions.at(2).size; 
+
+                             // pair.first: postive/negative direction of neighbour, pair.second = dimension (x=0,y=1,z=2)
+                            m_mpi_neighbour_rank_offset.at(0) = std::pair <int,int>( 1,0);
+                            m_mpi_neighbour_rank_offset.at(1) = std::pair <int,int>(-1,0);
+                            m_mpi_neighbour_rank_offset.at(2) = std::pair <int,int>( 1,1);
+                            m_mpi_neighbour_rank_offset.at(3) = std::pair <int,int>(-1,1);
+                            m_mpi_neighbour_rank_offset.at(4) = std::pair <int,int>( 1,2);
+                            m_mpi_neighbour_rank_offset.at(5) = std::pair <int,int>(-1,2);
                            
-                           sendrecv_ctr = 0;
-                           check_mpi_neighbour();
+                            sendrecv_ctr = 0;
+                            check_mpi_neighbour();
                        }
 
+// =================================== Exchange data field  ============================
+// ***************************************************************************************
+/// \brief  Extrats data at boundary and sends it to neighbour
+/// \param data_field  Field
+/// \param p Patch
+/// \param d_patch List of indices for given patch
+/// \param  patch_start Start Index of Patch
+/// \param  level Multigrid level
+// ***************************************************************************************
 void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch, const size_t patch_start, size_t level) {
     std::vector< size_t > idx_inner;
     std::pair < int, int > shifted_ranks;
@@ -104,6 +121,10 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch, const
     }
 }
 
+// ======================= Calculate index of boundary-1 index  ==========================
+// ***************************************************************************************
+/// \brief  Calculates the index at index(boundary) - 1
+// ***************************************************************************************
 void MPIHandler::calc_inner_index(){
 
     std::vector<size_t> inner_left;
@@ -165,6 +186,13 @@ void MPIHandler::calc_inner_index(){
     }   
 }
 
+
+// ================================ Get maximal value ====================================
+// ***************************************************************************************
+/// \brief Gets the maximal vaule of all procs and returns it to all procs
+/// \param val Value of each proc
+/// \return maximal value of all procs
+// ***************************************************************************************
 double MPIHandler::get_max_val(double val){
     double max_val;
     boost::mpi::all_reduce(m_MPICART, val, max_val, boost::mpi::maximum<double>());
@@ -172,6 +200,10 @@ double MPIHandler::get_max_val(double val){
     return max_val;
 }
 
+// ================================== Check Neighbour ====================================
+// ***************************************************************************************
+/// \brief Checks if proc has neighbour in positiv or negative direction in all dimensions
+// ***************************************************************************************
 void MPIHandler::check_mpi_neighbour() {
     std::vector<int> rank_coordinates;
     rank_coordinates = get_coords();
@@ -186,6 +218,13 @@ void MPIHandler::check_mpi_neighbour() {
     m_mpi_neighbour.at(5) = (rank_coordinates.at(0) == m_Xdim - 1) ? 0 : 1;
 }
 
+// ================================== Convert domain =====================================
+// ***************************************************************************************
+/// \brief Checks if proc has neighbour in positiv or negative direction in all dimensions
+/// \param x1 physical start value
+/// \param x2 physical end value
+/// \param direction dimension (x=0, y=1, z=2)
+// ***************************************************************************************
 void MPIHandler::convert_domain(real& x1, real& x2, int direction) {
     real temp_x1, temp_x2;
     int  dimension      { m_dimensions[direction].size };
@@ -198,6 +237,13 @@ void MPIHandler::convert_domain(real& x1, real& x2, int direction) {
     x2 = temp_x2;
 }
 
+// ================================ Converts obstacle ====================================
+// ***************************************************************************************
+/// \brief Convert obstacle into corresponding indicies of proc
+/// \param x1 physical start value
+/// \param x2 physical end value
+/// \param direction dimension (x=0, y=1, z=2)
+// ***************************************************************************************
 bool MPIHandler::convert_obstacle(real& x1, real& x2, int direction) {
     auto domain   = Domain::getInstance();
     real domain_start, domain_end;
@@ -237,6 +283,16 @@ bool MPIHandler::convert_obstacle(real& x1, real& x2, int direction) {
   }
 }
 
+// ================================= Check if obstacle ===================================
+// ***************************************************************************************
+/// \brief Checks if proc has obstacle
+/// \param ox1 physical start value in x-direction
+/// \param ox2 physical end value in x-direction
+/// \param oy1 physical start value in y-direction
+/// \param oy2 physical end value in y-direction
+/// \param oz1 physical start value in z-direction
+/// \param oz2 physical end value in z-direction
+// ***************************************************************************************
 bool MPIHandler::has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& oz1, real& oz2) {
     bool checkX, checkY, checkZ;
     checkX = convert_obstacle(ox1, ox2, 0);
@@ -248,6 +304,12 @@ bool MPIHandler::has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& 
     return true;
 }
 
+// ================================== Convert Nx Ny Nz ===================================
+// ***************************************************************************************
+/// \brief Divides grid 
+/// \param param xml string 
+/// \param direction dimension (x=0, y=1, z=2)
+// ***************************************************************************************
 int MPIHandler::convert_grid(std::string param, int direction) {
     auto params = Parameters::getInstance();
     int local_size = params->get_real(param) / m_dimensions[direction].size;

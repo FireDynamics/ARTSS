@@ -1,19 +1,17 @@
-/// \file       MPI.h
+/// \file       MPIHandler.h
 /// \brief      Custom MPI handler
-/// \date       Sep 01, 2020
+/// \date       October, 2020
 /// \author     Max Joseph Böhler
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 
-#ifndef ARTSS_UTILITY_MPI_H
-#define ARTSS_UTILITY_MPI_H
+#ifndef ARTSS_UTILITY_MPIHANDLER_H
+#define ARTSS_UTILITY_MPIHANDLER_H
 
 #include <iostream>
 #include <string>
 
-#include <boost/mpi/collectives.hpp>
 #include <boost/mpi/cartesian_communicator.hpp>
-#include <boost/serialization/vector.hpp>
 
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
@@ -71,4 +69,4 @@ private:
 
 };
 
-#endif /* ARTSS_UTILITY_MPI_H */
+#endif /* ARTSS_UTILITY_MPIHANDLER_H */
