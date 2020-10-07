@@ -259,28 +259,29 @@ bool MPIHandler::convert_obstacle(real& x1, real& x2, int direction) {
     }
 
     if (x1 < domain_start && x2 > domain_end ) {
-      x1 = domain_start;
-      x2 = domain_end;
-      return true;
-  } else if (x1 < domain_start && x2 > domain_start && x2 < domain_end) {
-      x1 = domain_start;
-      return true;
-  } else if (x1 > domain_start && x1 < domain_end && x2 > domain_end) {
-      x2 = domain_end;
-      return true;
-  } else if (x1 >= domain_start && x2 <= domain_end) {
-      return true;
-  } else if (x1 == domain_start && x2 > domain_end) {
-      x1 = domain_start;
-      x2 = domain_end;
-      return true;
-  } else if (x1 < domain_start && x2 == domain_end) {
-      x1 = domain_start;
-      x2 = domain_end;
-      return true;
-  } else {
-      return false;
-  }
+        x1 = domain_start;
+        x2 = domain_end;
+        return true;
+    } else if (x1 < domain_start && x2 > domain_start && x2 < domain_end) {
+        x1 = domain_start;
+        return true;
+    } else if (x1 > domain_start && x1 < domain_end && x2 > domain_end) {
+        x2 = domain_end;
+        return true;
+    } else if (x1 >= domain_start && x2 <= domain_end) {
+        return true;
+    } else if (x1 == domain_start && x2 > domain_end) {
+        x1 = domain_start;
+        x2 = domain_end;
+        return true;
+    } else if (x1 < domain_start && x2 == domain_end) {
+        x1 = domain_start;
+        x2 = domain_end;
+        return true;
+    } 
+      
+    return false;
+  
 }
 
 // ================================= Check if obstacle ===================================
@@ -299,9 +300,7 @@ bool MPIHandler::has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& 
     checkY = convert_obstacle(oy1, oy2, 1);
     checkZ = convert_obstacle(oz1, oz2, 2);
 
-    if (checkX == false || checkY == false || checkZ == false) return false;
-     
-    return true;
+    return !(checkX == false || checkY == false || checkZ == false);
 }
 
 // ================================== Convert Nx Ny Nz ===================================

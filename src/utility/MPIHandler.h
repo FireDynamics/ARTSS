@@ -27,7 +27,7 @@ class MPIHandler {
                             boost::mpi::cartesian_communicator& MPICART);
 
     // Getter
-    int get_rank() { return m_MPICART.rank(); };
+    int get_rank() { return m_MPICART.rank(); }
     std::vector<int> get_coords() { return m_MPICART.coordinates(m_MPICART.rank()); }
     std::vector<int> get_mpi_neighbour() { return m_mpi_neighbour; }
 
