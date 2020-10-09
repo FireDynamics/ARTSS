@@ -6,8 +6,11 @@
 
 #include "VTKWriter.h"
 #include "../Domain.h"
-#include "../utility/MPIHandler.h"
 #include "visit_writer.h"  //( https://wci.llnl.gov/codes/visit/ )
+
+#ifdef USEMPI
+    #include "../utility/MPIHandler.h"
+#endif
 
 static std::string ending = ".vtk";
 
@@ -51,8 +54,10 @@ void VTKWriter::write_analytical(Solution *solution, const std::string& filename
 /// \author Severt
 // ***************************************************************************************
 void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t, read_ptr S_T) {
+#ifdef USEMPI
+    auto mpi_handler = MPIHandler::getInstance();
+#endif
     Domain *domain = Domain::getInstance();
-    MPIHandler *mpi_handler = MPIHandler::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
     real Z1 = domain->get_Z1();
@@ -78,7 +83,7 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                               "sight",
                               "turb_visc",
                               "source_T"};
-
+#ifdef USEMPI
     std::vector<int> rank_has_boundary {mpi_handler->get_mpi_neighbour()};
     int bz0{rank_has_boundary.at(0)};
     int bz1{rank_has_boundary.at(1)};
@@ -86,6 +91,14 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     int by1{rank_has_boundary.at(3)};
     int bx0{rank_has_boundary.at(4)};
     int bx1{rank_has_boundary.at(5)};
+#else
+    int bz0{0};
+    int bz1{0};
+    int by0{0};
+    int by1{0};
+    int bx0{0};
+    int bx1{0};
+#endif
 
     int dims[] = {Nx + 1 - bx0 - bx1, Ny + 1 - by0 - by1, Nz + 1 - bz0 - bz1};            // Dimensions of the rectilinear array (+1 for zonal values)
 
@@ -206,8 +219,10 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
 /// \author Severt
 // ***************************************************************************************
 void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr T) {
+#ifdef USEMPI
+    auto mpi_handler = MPIHandler::getInstance();
+#endif
     Domain *domain = Domain::getInstance();
-    MPIHandler *mpi_handler = MPIHandler::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
     real Z1 = domain->get_Z1();
@@ -226,13 +241,22 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     int centering[] = {0, 0, 0, 0, 0, 0, 0, 0}; // Whether the variables are centered in a cell: 0 for zonal!
     const char *var_names[] = {"x-coords", "y-coords", "z-coords", "x-velocity", "y-velocity", "z-velocity", "pressure", "temperature"};
 
+#ifdef USEMPI
     std::vector<int> rank_has_boundary {mpi_handler->get_mpi_neighbour()};
-    int bx0{rank_has_boundary.at(0)};
-    int bx1{rank_has_boundary.at(1)};
+    int bz0{rank_has_boundary.at(0)};
+    int bz1{rank_has_boundary.at(1)};
     int by0{rank_has_boundary.at(2)};
     int by1{rank_has_boundary.at(3)};
-    int bz0{rank_has_boundary.at(4)};
-    int bz1{rank_has_boundary.at(5)};
+    int bx0{rank_has_boundary.at(4)};
+    int bx1{rank_has_boundary.at(5)};
+#else
+    int bz0{0};
+    int bz1{0};
+    int by0{0};
+    int by1{0};
+    int bx0{0};
+    int bx1{0};
+#endif
 
     int dims[] = {Nx + 1 - bx0 - bx1, Ny + 1 - by0 - by1, Nz + 1 - bz0 - bz1};            // Dimensions of the rectilinear array (+1 for zonal values)
 

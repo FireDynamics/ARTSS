@@ -18,13 +18,17 @@
 
 Visual::Visual(Solution *solution) {
     auto params = Parameters::getInstance();
-    auto mpi_handler = MPIHandler::getInstance();
-    std::vector<int> cords = mpi_handler->get_coords();
 
     m_filename = remove_extension(params->get_filename());
+
+#ifdef USEMPI
+    auto mpi_handler = MPIHandler::getInstance();
+    std::vector<int> cords = mpi_handler->get_coords();
     m_filename.insert(0, std::to_string(cords.at(2)) + "_");
     m_filename.insert(0, std::to_string(cords.at(1)));
     m_filename.insert(0, std::to_string(cords.at(0)));
+#endif
+
 
     m_save_csv = (params->get("visualisation/save_csv") == "Yes");
     m_save_vtk = (params->get("visualisation/save_vtk") == "Yes");

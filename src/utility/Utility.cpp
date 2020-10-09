@@ -7,11 +7,14 @@
 #include <cstring>
 #include <sstream>
 #include "Utility.h"
-#include "MPIHandler.h"
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
 #include <cctype>
 #include <clocale>
+
+#ifdef USEMPI
+    #include "utility/MPIHandler.h"
+#endif
 
 #ifndef BENCHMARKING
 #include <spdlog/cfg/helpers.h>
@@ -108,7 +111,9 @@ std::vector<std::string> Utility::split(const char *text, char delimiter) {
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
 std::shared_ptr<spdlog::logger> Utility::create_logger(std::string logger_name) {
+#ifdef USEMPI
     auto mpi_handler = MPIHandler::getInstance();
+#endif
 
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
@@ -117,7 +122,9 @@ std::shared_ptr<spdlog::logger> Utility::create_logger(std::string logger_name) 
     std::string log_level = params->get("logging/level");
     std::string log_file = params->get("logging/file");
 
+#ifdef USEMPI
     log_file.insert(0, std::to_string(mpi_handler->get_rank()) + "_");
+#endif
 
     if (!stdout_sink) {
         stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();

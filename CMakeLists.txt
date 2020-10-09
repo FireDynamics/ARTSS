@@ -214,7 +214,6 @@ set(SOURCE_FILES
         "src/utility/Parameters.cpp"
         "src/utility/tinyxml2.cpp"
         "src/utility/Utility.cpp"
-        "src/utility/MPIHandler.cpp"
 
         "src/visualisation/CSVWriter.cpp"
         "src/visualisation/Visual.cpp"
@@ -284,7 +283,6 @@ set(HEADER_FILES
         "src/utility/tinyxml2.h"
         "src/utility/Tracer.h"
         "src/utility/Utility.h"
-        "src/utility/MPIHandler.h"
 
         "src/visualisation/CSVWriter.h"
         "src/visualisation/Visual.h"
@@ -297,6 +295,11 @@ set(HEADER_FILES
         "src/GlobalMacrosTyper.h"
         "src/TimeIntegration.h"
         )
+
+if(USE_MPI)
+   list(APPEND SOURCE_FILES "src/utility/MPIHandler.cpp")
+   list(APPEND HEADER_FILES "src/utility/MPIHandler.h")
+endif()
 
 # link cuda library for cuda features
 link_directories( $ENV{CUDA_LIB} )
@@ -312,15 +315,26 @@ if(NOT TARGET spdlog)
     add_subdirectory(external/spdlog)
 endif()
 
-# find boost lib
-find_package( Boost COMPONENTS mpi REQUIRED)
-if(Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS})
-else()
-  message(FATAL_ERROR "No Boost library found! Please install Boost https://www.boost.org/")
+if(USE_MPI)
+  # find boost lib
+  find_package( Boost COMPONENTS mpi REQUIRED)
+  if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+  else()
+    message(FATAL_ERROR "No Boost library found! Please install Boost https://www.boost.org/")
+  endif()
 endif()
 
+
 #Targets
+add_executable( artss_serial ${SOURCE_FILES} src/main.cpp)
+target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
+
+add_executable( artss_serial_benchmark ${SOURCE_FILES} src/main.cpp  )
+set_target_properties( artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX" )
+target_link_libraries( artss_serial_benchmark  )
+
+
 add_executable(artss_multicore_cpu ${SOURCE_FILES} src/main.cpp)
 set_target_properties(artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=multicore" LINK_FLAGS "-acc -ta=multicore")
 target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
@@ -338,14 +352,20 @@ add_executable( artss_gpu_benchmark ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
 target_link_libraries( artss_gpu_benchmark  )
 
-add_executable(artss_mpi ${SOURCE_FILES} src/main.cpp)
-target_link_libraries(artss_mpi PRIVATE ${Boost_LIBRARIES})
-target_link_libraries(artss_mpi PRIVATE spdlog::spdlog)
+if(USE_MPI)
+  target_link_libraries(artss_serial PRIVATE ${Boost_LIBRARIES})
+  target_link_libraries(artss_multicore_cpu PRIVATE ${Boost_LIBRARIES})
+  target_link_libraries(artss_gpu PRIVATE ${Boost_LIBRARIES})
+
+  set_target_properties( artss_serial PROPERTIES COMPILE_FLAGS "-DUSEMPI" )
+  set_target_properties( artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-DUSEMPI" )
+  set_target_properties( artss_gpu PROPERTIES COMPILE_FLAGS "-DUSEMPI" )
+endif()
 
 
+spdlog_enable_warnings(artss_serial)
 spdlog_enable_warnings(artss_multicore_cpu)
 spdlog_enable_warnings(artss_gpu)
-spdlog_enable_warnings(artss_mpi)
 
 
 enable_testing()

@@ -86,7 +86,9 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
 // OBSTACLES
     m_hasObstacles = (Parameters::getInstance()->get("obstacles/enabled") == "Yes");
     if (m_hasObstacles) {
+#ifdef USEMPI
         auto mpi_handler = MPIHandler::getInstance();
+#endif
         std::vector<Obstacle *> obstacles;
         std::vector<BoundaryDataController *> bdc_obstacles;
         auto curElem_obstacle = xmlParameter->FirstChildElement();
@@ -111,8 +113,9 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
                     oy2 = curElem->DoubleAttribute("oy2");
                     oz1 = curElem->DoubleAttribute("oz1");
                     oz2 = curElem->DoubleAttribute("oz2");
-
+#ifdef USEMPI
                     rankHasBoundary = mpi_handler->has_obstacle(ox1, ox2, oy1, oy2, oz1, oz2);
+#endif
                 } else {
 #ifndef BENCHMARKING
                     m_logger->warn("Ignoring unknown node {}", nodeName);
@@ -120,11 +123,13 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
                 }
                 curElem = curElem->NextSiblingElement();
             }
+#ifdef USEMPI
             if (rankHasBoundary) {
                 Obstacle *o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2);
                 obstacles.push_back(o);
                 bdc_obstacles.push_back(bdc);
             }
+#endif
             curElem_obstacle = curElem_obstacle->NextSiblingElement();
         } // end while
         m_numberOfObstacles = obstacles.size();

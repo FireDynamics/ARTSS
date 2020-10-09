@@ -32,7 +32,7 @@ class MPIHandler {
     std::vector<int> get_mpi_neighbour() { return m_mpi_neighbour; }
 
     void convert_domain(real& x1, real& x2, int direction);
-    int  convert_grid(std::string param, int direction);
+    void convert_grid(size_t& n, int direction);
     bool convert_obstacle(real& x1, real& x2, int direction);
     bool has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& oz1, real& oz2);
     void calc_inner_index();

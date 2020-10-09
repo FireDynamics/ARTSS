@@ -132,8 +132,10 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
 // ***************************************************************************************
 void Multigrid::init() {
     m_levels = Domain::getInstance()->get_levels(); //multigrid level, 0 otherwise
+#ifdef USEMPI
     auto mpi_handler = MPIHandler::getInstance();
     mpi_handler->calc_inner_index();
+#endif
 
     //list of domain boundary for each level
     m_MG_boundaryList = new Boundary *[m_levels + 1];

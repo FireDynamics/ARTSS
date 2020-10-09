@@ -8,9 +8,6 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#include <boost/mpi/communicator.hpp>
-#include <boost/mpi/environment.hpp>
-
 #include <iostream>
 
 #include "interfaces/ISolver.h"
@@ -30,7 +27,12 @@
 #include "utility/Parameters.h"
 #include "analysis/Analysis.h"
 #include "utility/Utility.h"
-#include "utility/MPIHandler.h"
+
+#ifdef USEMPI
+    #include <boost/mpi/communicator.hpp>
+    #include <boost/mpi/environment.hpp>
+    #include "utility/MPIHandler.h"
+#endif
 
 #ifdef _OPENACC
     #include <openacc.h>
@@ -39,8 +41,10 @@
 
 int main(int argc, char **argv) {
 
+#ifdef USEMPI
     boost::mpi::environment MPIENV;
     boost::mpi::communicator MPIWORLD;
+#endif
 
 
     // Initialization
@@ -55,6 +59,7 @@ int main(int argc, char **argv) {
         std::exit(1);
     }
 
+#ifdef USEMPI
     const int MPIX{params->get_int("domain_parameters/MESHX")};
     const int MPIY{params->get_int("domain_parameters/MESHY")};
     const int MPIZ{params->get_int("domain_parameters/MESHZ")};
@@ -68,6 +73,7 @@ int main(int argc, char **argv) {
     boost::mpi::cartesian_communicator MPICART(MPIWORLD, boost::mpi::cartesian_topology(MPIDIM), true);
 
     auto mpi_handler = MPIHandler::getInstance(MPIWORLD, MPICART);
+#endif
 
 
     // Solver

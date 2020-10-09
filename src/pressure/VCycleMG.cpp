@@ -259,7 +259,9 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
     UpdateInput(out, b);
 
     // solve more accurately, in first time step
+#ifdef USEMPI
     auto mpi_handler = MPIHandler::getInstance();
+#endif
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
     const real dt = params->get_real("physical_parameters/dt");
@@ -322,8 +324,10 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
 
             relaxs += set_relaxs;
 
+#ifdef USEMPI
             r = mpi_handler->get_max_val(r);
             mpi_handler->set_barrier();
+#endif
         }
     } else { // Nt > 1
         cycles = set_cycles;
@@ -899,7 +903,9 @@ void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) {
+#ifdef USEMPI
     auto mpi_handler = MPIHandler::getInstance();
+#endif
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -1020,9 +1026,10 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
                 std::swap(tmp->data, out->data);
                 std::swap(d_tmp, d_out);
-
+#ifdef USEMPI
                 res = mpi_handler->get_max_val(res);
                 mpi_handler->set_barrier();
+#endif
             }  // end while
 
             if (it % 2 != 0) {  // swap necessary when odd number of iterations
@@ -1071,8 +1078,10 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
                 res = sqrt(sum);
                 it++;
 
+#ifdef USEMPI
                 res = mpi_handler->get_max_val(res);
                 mpi_handler->set_barrier();
+#endif
             }  // end while
         }  // end data region
     } else {

@@ -309,9 +309,7 @@ bool MPIHandler::has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& 
 /// \param param xml string 
 /// \param direction dimension (x=0, y=1, z=2)
 // ***************************************************************************************
-int MPIHandler::convert_grid(std::string param, int direction) {
+void MPIHandler::convert_grid(size_t& n, int direction) {
     auto params = Parameters::getInstance();
-    int local_size = params->get_real(param) / m_dimensions[direction].size;
-
-    return local_size;
+    n = ( ( n - 2 ) / m_dimensions[direction].size ) + 2;
 }
