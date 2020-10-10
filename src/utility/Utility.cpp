@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <algorithm>
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
@@ -13,7 +14,7 @@
 #include <clocale>
 
 #ifdef USEMPI
-    #include "utility/MPIHandler.h"
+    #include "MPIHandler.h"
 #endif
 
 #ifndef BENCHMARKING
@@ -39,6 +40,16 @@ std::vector<size_t> Utility::coordinateFromLinearIndex(size_t idx, size_t Nx, si
     coord.push_back(k);
 
     return coord;
+}
+
+char* Utility::get_flag(char ** begin, char ** end, const std::string & option)
+{
+    char ** itr = std::find(begin, end, option);
+    if (itr != end && ++itr != end)
+    {
+        return *itr;
+    }
+    return 0;
 }
 
 // ================================= Calculate coordinate i ==========================================

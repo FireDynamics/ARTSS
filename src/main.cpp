@@ -60,9 +60,21 @@ int main(int argc, char **argv) {
     }
 
 #ifdef USEMPI
-    const int MPIX{params->get_int("domain_parameters/MESHX")};
-    const int MPIY{params->get_int("domain_parameters/MESHY")};
-    const int MPIZ{params->get_int("domain_parameters/MESHZ")};
+    int MPIX, MPIY, MPIZ;
+
+    char * temp_x = Utility::get_flag(argv, argv + argc, "-x");
+    char * temp_y = Utility::get_flag(argv, argv + argc, "-y");
+    char * temp_z = Utility::get_flag(argv, argv + argc, "-z");
+
+    if ( !temp_x && !temp_y && !temp_z ) {
+        MPIX = params->get_int("domain_parameters/MESHX");
+        MPIY = params->get_int("domain_parameters/MESHY");
+        MPIZ = params->get_int("domain_parameters/MESHZ");
+    } else {  
+        MPIX = (temp_x) ? atoi(temp_x) : 1;
+        MPIY = (temp_y) ? atoi(temp_y) : 1;
+        MPIZ = (temp_z) ? atoi(temp_z) : 1;
+    }
 
     if (MPIWORLD.size() != MPIX*MPIY*MPIZ) {
        if (MPIWORLD.rank() == 0) std::cerr << "Number of meshes does not match the number of defined MPI processes!" << std::endl;

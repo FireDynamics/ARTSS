@@ -22,6 +22,9 @@ class Utility {
     static std::vector<size_t> coordinateFromLinearIndex(size_t idx,
                                                          size_t Nx,
                                                          size_t Ny);
+
+    static char* get_flag(char ** begin, char ** end, const std::string & option);
+
 //  static size_t getCoordinateI(size_t idx,
 //                               size_t Nx,
 //                               size_t Ny,
