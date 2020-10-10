@@ -205,11 +205,11 @@ void MPIHandler::check_mpi_neighbour() {
     m_mpi_neighbour.at(Patch::LEFT)   = (rank_coordinates.at(0) == 0) ? 0 : 1;
     m_mpi_neighbour.at(Patch::RIGHT)  = (rank_coordinates.at(0) == m_Xdim - 1) ? 0 : 1;
 
-    m_mpi_neighbour.at(Patch::TOP)    = (rank_coordinates.at(1) == 0) ? 0 : 1;
-    m_mpi_neighbour.at(Patch::BOTTOM) = (rank_coordinates.at(1) == m_Ydim - 1) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::BOTTOM)    = (rank_coordinates.at(1) == 0) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::TOP) = (rank_coordinates.at(1) == m_Ydim - 1) ? 0 : 1;
 
-    m_mpi_neighbour.at(Patch::FRONT)  = (rank_coordinates.at(2) == 0) ? 0 : 1;
-    m_mpi_neighbour.at(Patch::BACK)   = (rank_coordinates.at(2) == m_Zdim - 1) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::BACK)  = (rank_coordinates.at(2) == 0) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::FRONT)   = (rank_coordinates.at(2) == m_Zdim - 1) ? 0 : 1;
 }
 
 // ================================== Convert domain =====================================
