@@ -42,12 +42,12 @@ MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
                             m_Zdim = m_dimensions.at(2).size; 
 
                              // pair.first: postive/negative direction of neighbour, pair.second = dimension (x=0,y=1,z=2)
-                            m_mpi_neighbour_rank_offset.at(0) = std::pair <int,int>( 1,0);
-                            m_mpi_neighbour_rank_offset.at(1) = std::pair <int,int>(-1,0);
-                            m_mpi_neighbour_rank_offset.at(2) = std::pair <int,int>( 1,1);
-                            m_mpi_neighbour_rank_offset.at(3) = std::pair <int,int>(-1,1);
-                            m_mpi_neighbour_rank_offset.at(4) = std::pair <int,int>( 1,2);
-                            m_mpi_neighbour_rank_offset.at(5) = std::pair <int,int>(-1,2);
+                            m_mpi_neighbour_rank_offset.at(Patch::RIGHT)  = std::pair <int,int>( 1,0);
+                            m_mpi_neighbour_rank_offset.at(Patch::LEFT)   = std::pair <int,int>(-1,0);
+                            m_mpi_neighbour_rank_offset.at(Patch::TOP)    = std::pair <int,int>( 1,1);
+                            m_mpi_neighbour_rank_offset.at(Patch::BOTTOM) = std::pair <int,int>(-1,1);
+                            m_mpi_neighbour_rank_offset.at(Patch::FRONT)  = std::pair <int,int>( 1,2);
+                            m_mpi_neighbour_rank_offset.at(Patch::BACK)   = std::pair <int,int>(-1,2);
                            
                             sendrecv_ctr = 0;
                             check_mpi_neighbour();
@@ -66,32 +66,25 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch, const
     std::vector< size_t > idx_inner;
     std::pair < int, int > shifted_ranks;
     boost::mpi::request reqs[2];
-    int patchIDX;
 
     switch (p) {
             case Patch::FRONT:
                 idx_inner = m_inner_front.at(level);
-                patchIDX = 4;
                 break;
             case Patch::BACK:
                 idx_inner = m_inner_back.at(level);
-                patchIDX = 5;
                 break;
             case Patch::BOTTOM:
                 idx_inner = m_inner_bottom.at(level);
-                patchIDX = 2;
                 break;
             case Patch::TOP:
                 idx_inner = m_inner_top.at(level);
-                patchIDX = 3;
                 break;
             case Patch::LEFT:
                 idx_inner = m_inner_left.at(level);
-                patchIDX = 0;
                 break;
             case Patch::RIGHT:
                 idx_inner = m_inner_right.at(level);
-                patchIDX = 1;
                 break;
     }
 
@@ -108,11 +101,12 @@ void MPIHandler::exchange_data(real *data_field, Patch p, size_t* d_patch, const
         mpi_recv_vec.push_back(0.0);
     }
 
-    shifted_ranks = m_MPICART.shifted_ranks(m_mpi_neighbour_rank_offset.at(patchIDX).second, m_mpi_neighbour_rank_offset.at(patchIDX).first);
+    shifted_ranks = m_MPICART.shifted_ranks(m_mpi_neighbour_rank_offset.at(p).second, m_mpi_neighbour_rank_offset.at(p).first);
 
-    reqs[0] = m_MPICART.isend(shifted_ranks.first, sendrecv_ctr, mpi_send_vec);
-    reqs[1] = m_MPICART.irecv(shifted_ranks.first, sendrecv_ctr, mpi_recv_vec);
-    boost::mpi::wait_all(reqs, reqs + 2);
+    //std::cout << "Rank: " << get_rank() << "; Patch: " << patchIDX << ", Send/Recv: " << shifted_ranks.first << "; Size: " << mpi_send_vec.size() << "\n" << std::flush;
+
+    m_MPICART.send(shifted_ranks.second, sendrecv_ctr, mpi_send_vec);
+    m_MPICART.recv(shifted_ranks.second, sendrecv_ctr, mpi_recv_vec);
 
     // insert exchanged data into field
     for (size_t i = 0; i < mpi_recv_vec.size(); i++)
@@ -208,14 +202,14 @@ void MPIHandler::check_mpi_neighbour() {
     std::vector<int> rank_coordinates;
     rank_coordinates = get_coords();
 
-    m_mpi_neighbour.at(0) = (rank_coordinates.at(2) == 0) ? 0 : 1;
-    m_mpi_neighbour.at(1) = (rank_coordinates.at(2) == m_Zdim - 1) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::LEFT)   = (rank_coordinates.at(0) == 0) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::RIGHT)  = (rank_coordinates.at(0) == m_Xdim - 1) ? 0 : 1;
 
-    m_mpi_neighbour.at(2) = (rank_coordinates.at(1) == 0) ? 0 : 1;
-    m_mpi_neighbour.at(3) = (rank_coordinates.at(1) == m_Ydim - 1) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::TOP)    = (rank_coordinates.at(1) == 0) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::BOTTOM) = (rank_coordinates.at(1) == m_Ydim - 1) ? 0 : 1;
 
-    m_mpi_neighbour.at(4) = (rank_coordinates.at(0) == 0) ? 0 : 1;
-    m_mpi_neighbour.at(5) = (rank_coordinates.at(0) == m_Xdim - 1) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::FRONT)  = (rank_coordinates.at(2) == 0) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::BACK)   = (rank_coordinates.at(2) == m_Zdim - 1) ? 0 : 1;
 }
 
 // ================================== Convert domain =====================================

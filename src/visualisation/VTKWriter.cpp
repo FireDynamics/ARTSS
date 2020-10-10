@@ -85,12 +85,12 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                               "source_T"};
 #ifdef USEMPI
     std::vector<int> rank_has_boundary {mpi_handler->get_mpi_neighbour()};
-    int bz0{rank_has_boundary.at(0)};
-    int bz1{rank_has_boundary.at(1)};
-    int by0{rank_has_boundary.at(2)};
-    int by1{rank_has_boundary.at(3)};
-    int bx0{rank_has_boundary.at(4)};
-    int bx1{rank_has_boundary.at(5)};
+    int bx0{rank_has_boundary.at(Patch::LEFT)};
+    int bx1{rank_has_boundary.at(Patch::RIGHT)};
+    int by0{rank_has_boundary.at(Patch::BOTTOM)};
+    int by1{rank_has_boundary.at(Patch::TOP)};
+    int bz0{rank_has_boundary.at(Patch::BACK)};
+    int bz1{rank_has_boundary.at(Patch::FRONT)};
 #else
     int bz0{0};
     int bz1{0};
