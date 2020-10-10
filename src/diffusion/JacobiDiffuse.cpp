@@ -38,6 +38,9 @@ JacobiDiffuse::JacobiDiffuse() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
+#ifdef USEMPI
+    auto mpi_handler = MPIHandler::getInstance();
+#endif
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto bsize = domain->get_size(out->GetLevel());
@@ -112,6 +115,10 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
                 const size_t i = d_bList[j];
                 d_in[i] = d_out[i];
             }
+#ifdef USEMPI
+            res = mpi_handler->get_max_val(res);
+            mpi_handler->set_barrier();
+#endif
         } //end while
 
         if (it % 2 != 0) // swap necessary when odd number of iterations
@@ -152,6 +159,9 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, const Field *EV, bool sync) {
+#ifdef USEMPI
+    auto mpi_handler = MPIHandler::getInstance();
+#endif
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto bsize = domain->get_size(out->GetLevel());
@@ -228,6 +238,11 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
                 const size_t i = d_bList[j];
                 d_in[i] = d_out[i];
             }
+
+#ifdef USEMPI
+            res = mpi_handler->get_max_val(res);
+            mpi_handler->set_barrier();
+#endif
 
         } //end while
 
