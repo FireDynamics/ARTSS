@@ -114,8 +114,6 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
             for (size_t i = 0; i < mpi_recv_vec.size(); i++) {
                 data_field[d_patch[patch_start+i]] = mpi_recv_vec.at(i);
             }
-
-        std::cout << "Ctr: " << sendrecv_ctr << "; Rank: " << get_rank() << "; Patch: " << i << ", Send: " << shifted_ranks.first << ", recv: " << shifted_ranks.first << "; Size: " << mpi_recv_vec.size() << std::endl;
         }    
     }
 }
