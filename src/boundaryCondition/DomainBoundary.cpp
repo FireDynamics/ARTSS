@@ -48,13 +48,12 @@ void DomainBoundary::apply_boundary_condition(real *data_field, size_t **index_f
 #endif
                 break;
         }
-#ifdef USEMPI
-        if(rank_has_neighbour.at(i) == 1) {
-            mpi_handler->exchange_data(data_field, p, d_patch, patch_start, level);
-            mpi_handler->set_barrier();
-        }
-#endif
     }
+
+#ifdef USEMPI
+        mpi_handler->exchange_data(data_field, index_fields, patch_starts, level);
+        mpi_handler->set_barrier();
+#endif
 
     if (sync) {
 #pragma acc wait
