@@ -24,8 +24,8 @@ X=1
 Y=1
 Z=1
 MPI=0
-COMPILE="mpi"
-while getopts ":x:y:z:hgmM" opt; do
+COMPILE="serial"
+while getopts ":x:y:z:hgm" opt; do
   case $opt in
     x)
       X=$OPTARG
@@ -48,9 +48,6 @@ while getopts ":x:y:z:hgmM" opt; do
     m)
       COMPILE="multicore_cpu"
       ;;
-    M)
-      COMPILE="mpi"
-      ;;
     :)
       echo "Option -$OPTARG requires an argument." >&2
       exit 1
@@ -70,9 +67,9 @@ for i in ${array[@]}
 do
   echo -e "\n$i"
   cd ${p}/tests/${i}
-  if [$MPI -eq 1]
+  if [ $MPI -eq 1 ]
   then
-    mpiexec -n $PROCS $build Test_*.xml -x $Xm -y $Y -z $Z
+    mpiexec -n $PROCS $build Test_*.xml -x $X -y $Y -z $Z
   else
     $build Test_*.xml
   fi
