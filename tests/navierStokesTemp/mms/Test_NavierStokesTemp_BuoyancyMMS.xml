@@ -48,9 +48,6 @@
   </solver>
 
   <domain_parameters>
-    <MESHX> 1 </MESHX>
-    <MESHY> 1 </MESHY>
-    <MESHZ> 1 </MESHZ>
     <X1> -2. </X1>  <!-- physical domain -->
     <X2> 2. </X2>
     <Y1> -2. </Y1>

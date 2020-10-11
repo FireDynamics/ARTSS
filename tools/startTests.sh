@@ -23,17 +23,21 @@ done
 X=1
 Y=1
 Z=1
+MPI=0
 COMPILE="mpi"
 while getopts ":x:y:z:hgmM" opt; do
   case $opt in
     x)
       X=$OPTARG
+      MPI=1
       ;;
     y)
       Y=$OPTARG
+      MPI=1
       ;;
     z)
       Z=$OPTARG
+      MPI=1
       ;;
     h)
       echo -e "$HELP"
@@ -66,12 +70,11 @@ for i in ${array[@]}
 do
   echo -e "\n$i"
   cd ${p}/tests/${i}
-  sed -i -e "s@<MESHX> 1 </MESHX>@<MESHX> $X </MESHX>@" Test_*.xml
-  sed -i -e "s@<MESHY> 1 </MESHY>@<MESHY> $Y </MESHY>@" Test_*.xml
-  sed -i -e "s@<MESHZ> 1 </MESHZ>@<MESHZ> $Z </MESHZ>@" Test_*.xml
-  mpiexec -n $PROCS $build Test_*.xml
+  if [$MPI -eq 1]
+  then
+    mpiexec -n $PROCS $build Test_*.xml -x $Xm -y $Y -z $Z
+  else
+    $build Test_*.xml
+  fi
   rm *.vtk *.log
-  sed -i -e "s@<MESHX> $X </MESHX>@<MESHX> 1 </MESHX>@" Test_*.xml
-  sed -i -e "s@<MESHY> $Y </MESHY>@<MESHY> 1 </MESHY>@" Test_*.xml
-  sed -i -e "s@<MESHZ> $Z </MESHZ>@<MESHZ> 1 </MESHZ>@" Test_*.xml
 done
