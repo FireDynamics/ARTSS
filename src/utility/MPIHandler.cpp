@@ -57,6 +57,7 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
     std::pair < int, int > shifted_ranks;
     size_t *d_patch;
     size_t patch_start;
+    boost::mpi::request reqs[2];
 
     for (size_t i = 0; i < m_mpi_neighbour.size(); i++) {
         if (m_mpi_neighbour.at(i) == 1) {
@@ -107,8 +108,9 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
                 mpi_send_vec.push_back(data_field[idx_inner.at(i)]);
             }
 
-            m_MPICART.send(shifted_ranks.first, sendrecv_ctr, mpi_send_vec);
-            m_MPICART.recv(shifted_ranks.first, sendrecv_ctr, mpi_recv_vec);
+            reqs[0] = m_MPICART.isend(shifted_ranks.first, sendrecv_ctr, mpi_send_vec);
+            reqs[1] = m_MPICART.irecv(shifted_ranks.first, sendrecv_ctr, mpi_recv_vec);
+            boost::mpi::wait_all(reqs, reqs + 2);
 
             // insert exchanged data into field
             for (size_t i = 0; i < mpi_recv_vec.size(); i++) {
@@ -116,6 +118,8 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
             }
         }    
     }
+
+    sendrecv_ctr++;
 }
 
 // ======================= Calculate index of boundary-1 index  ==========================
