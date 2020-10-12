@@ -64,25 +64,25 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
             switch (i) {
                 case Patch::FRONT:
                     idx_inner = m_inner_front.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(1, 1);
+                    shifted_ranks = m_MPICART.shifted_ranks(2, -1);
                     d_patch = *(index_fields + Patch::FRONT);
                     patch_start = *(patch_starts + Patch::FRONT);
                     break;
                 case Patch::BACK:
                     idx_inner = m_inner_back.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(1, -1);
+                    shifted_ranks = m_MPICART.shifted_ranks(2, 1);
                     d_patch = *(index_fields + Patch::BACK);
                     patch_start = *(patch_starts + Patch::BACK);
                     break;
                 case Patch::BOTTOM:
                     idx_inner = m_inner_bottom.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(2, 1);
+                    shifted_ranks = m_MPICART.shifted_ranks(1, 1);
                     d_patch = *(index_fields + Patch::BOTTOM);
                     patch_start = *(patch_starts + Patch::BOTTOM);
                     break;
                 case Patch::TOP:
                     idx_inner = m_inner_top.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(2, -1);
+                    shifted_ranks = m_MPICART.shifted_ranks(1, -1);
                     d_patch = *(index_fields + Patch::TOP);
                     patch_start = *(patch_starts + Patch::TOP);
                     break;
