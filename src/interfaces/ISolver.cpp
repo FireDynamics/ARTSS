@@ -802,7 +802,20 @@ void ISolver::update_sources(real t, bool sync) {
             real sigmay = params->get_real("solver/temperature/source/sigmay");
             real sigmaz = params->get_real("solver/temperature/source/sigmaz");
 
+#ifdef USEMPI
+            auto mpi_handler = MPIHandler::getInstance();
+            auto domain = Domain::getInstance();
+
+            if ((x0 > domain->get_x1() && x0 < domain->get_x2()) &&
+                (y0 > domain->get_y1() && y0 < domain->get_y2()) &&
+                (z0 > domain->get_z1() && z0 < domain->get_z2())) { 
+                    source_velocity->gauss(S_T, HRR, cp, x0, y0, z0, sigmax, sigmay, sigmaz, sync);
+            } 
+            mpi_handler->set_barrier();
+#else
             source_velocity->gauss(S_T, HRR, cp, x0, y0, z0, sigmax, sigmay, sigmaz, sync);
+#endif
+            
 
             auto d_S_T = S_T->data;
             auto bsize = Domain::getInstance()->get_size();
@@ -850,7 +863,19 @@ void ISolver::update_sources(real t, bool sync) {
             real sigmay = params->get_real("solver/concentration/source/sigmay");
             real sigmaz = params->get_real("solver/concentration/source/sigmaz");
 
+#ifdef USEMPI
+            auto mpi_handler = MPIHandler::getInstance();
+            auto domain = Domain::getInstance();
+            if ((x0 > domain->get_x1() && x0 < domain->get_x2()) &&
+                (y0 > domain->get_y1() && y0 < domain->get_y2()) &&
+                (z0 > domain->get_z1() && z0 < domain->get_z2())) { 
+                    source_concentration->gauss(S_concentration, YsHRR, Hc, x0, y0, z0, sigmax, sigmay, sigmaz, sync);
+            }
+            mpi_handler->set_barrier();
+#else
             source_concentration->gauss(S_concentration, YsHRR, Hc, x0, y0, z0, sigmax, sigmay, sigmaz, sync);
+#endif
+
             auto d_S_C = S_concentration->data;
             auto bsize = Domain::getInstance()->get_size();
 
