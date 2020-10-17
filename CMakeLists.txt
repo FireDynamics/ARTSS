@@ -356,10 +356,17 @@ if(USE_MPI)
   target_link_libraries(artss_serial PRIVATE ${Boost_LIBRARIES})
   target_link_libraries(artss_multicore_cpu PRIVATE ${Boost_LIBRARIES})
   target_link_libraries(artss_gpu PRIVATE ${Boost_LIBRARIES})
+  target_link_libraries(artss_serial_benchmark PRIVATE ${Boost_LIBRARIES})
+  target_link_libraries(artss_multicore_cpu_benchmark PRIVATE ${Boost_LIBRARIES})
+  target_link_libraries(artss_gpu_benchmark PRIVATE ${Boost_LIBRARIES})
+  
 
-  set_target_properties( artss_serial PROPERTIES COMPILE_FLAGS "-DUSEMPI" )
-  set_target_properties( artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-DUSEMPI" )
-  set_target_properties( artss_gpu PROPERTIES COMPILE_FLAGS "-DUSEMPI" )
+  set_property( TARGET artss_serial APPEND PROPERTY COMPILE_FLAGS "-DUSEMPI" )
+  set_property( TARGET artss_multicore_cpu APPEND PROPERTY COMPILE_FLAGS "-DUSEMPI" )
+  set_property( TARGET artss_gpu APPEND PROPERTY COMPILE_FLAGS "-DUSEMPI" )
+  set_property( TARGET artss_serial_benchmark APPEND_STRING PROPERTY COMPILE_FLAGS "-DUSEMPI" )
+  set_property( TARGET artss_multicore_cpu_benchmark APPEND PROPERTY COMPILE_FLAGS "-DUSEMPI" )
+  set_property( TARGET artss_gpu_benchmark APPEND PROPERTY COMPILE_FLAGS "-DUSEMPI" )
 endif()
 
 
