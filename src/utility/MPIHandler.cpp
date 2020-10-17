@@ -33,7 +33,8 @@ MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
                        boost::mpi::cartesian_communicator& MPICART) :
                             m_MPIWORLD(MPIWORLD), m_MPICART(MPICART), 
                             m_dimensions(MPICART.topology().stl()), 
-                            m_mpi_neighbour(6,0) {
+                            m_mpi_neighbour(6,0),
+                            m_mpi_neighbour_periodic(6,0) {
 
                             // Procs in x,y,z direction -> Warning: here x = left, right; y = front, back; z = top, bottom
                             m_Xdim = m_dimensions.at(0).size; 
@@ -44,7 +45,7 @@ MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
                             check_mpi_neighbour();
                        }
 
-// =================================== Exchange data field  ============================
+// ========================= Exchange data field non periodic  ===========================
 // ***************************************************************************************
 /// \brief  Extracts data at boundary and sends it to neighbour
 /// \param  data_field  Field
@@ -104,8 +105,8 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
             std::vector< real > mpi_recv_vec;
 
             // extract data from field
-            for (size_t i = 0; i < idx_inner.size(); i++){
-                mpi_send_vec.push_back(data_field[idx_inner.at(i)]);
+            for (size_t j = 0; j < idx_inner.size(); j++){
+                mpi_send_vec.push_back(data_field[idx_inner.at(j)]);
             }
 
             reqs[0] = m_MPICART.isend(shifted_ranks.first, sendrecv_ctr, mpi_send_vec);
@@ -113,10 +114,89 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
             boost::mpi::wait_all(reqs, reqs + 2);
 
             // insert exchanged data into field
-            for (size_t i = 0; i < mpi_recv_vec.size(); i++) {
-                data_field[d_patch[patch_start+i]] = mpi_recv_vec.at(i);
+            for (size_t j = 0; j < mpi_recv_vec.size(); j++) {
+                data_field[d_patch[patch_start+j]] = mpi_recv_vec.at(j);
             }
-        }    
+        }
+    }
+
+    sendrecv_ctr++;
+}
+
+// =========================== Exchange data field periodic  =============================
+// ***************************************************************************************
+/// \brief  Extracts data at boundary and sends it to neighbour
+/// \param  data_field  Field
+/// \param  index_fields List of indices for each patch
+/// \param  patch_start List of start indices
+/// \param  level Multigrid level
+/// \param  periodic Bool array for checking if patch is periodic or not
+// ***************************************************************************************
+void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const size_t *patch_starts, size_t level, std::vector<bool> periodic) {
+    std::vector< size_t > idx_inner;
+    std::pair < int, int > shifted_ranks;
+    size_t *d_patch;
+    size_t patch_start;
+    boost::mpi::request reqs[2];
+
+    for (size_t i = 0; i < m_mpi_neighbour_periodic.size(); i++) {
+        if (m_mpi_neighbour_periodic.at(i) == 1 && periodic.at(i)) {
+            switch (i) {
+                case Patch::FRONT:
+                    idx_inner = m_inner_front.at(level);
+                    shifted_ranks = m_MPICART.shifted_ranks(2, -1);
+                    d_patch = *(index_fields + Patch::FRONT);
+                    patch_start = *(patch_starts + Patch::FRONT);
+                    break;
+                case Patch::BACK:
+                    idx_inner = m_inner_back.at(level);
+                    shifted_ranks = m_MPICART.shifted_ranks(2, 1);
+                    d_patch = *(index_fields + Patch::BACK);
+                    patch_start = *(patch_starts + Patch::BACK);
+                    break;
+                case Patch::BOTTOM:
+                    idx_inner = m_inner_bottom.at(level);
+                    shifted_ranks = m_MPICART.shifted_ranks(1, 1);
+                    d_patch = *(index_fields + Patch::BOTTOM);
+                    patch_start = *(patch_starts + Patch::BOTTOM);
+                    break;
+                case Patch::TOP:
+                    idx_inner = m_inner_top.at(level);
+                    shifted_ranks = m_MPICART.shifted_ranks(1, -1);
+                    d_patch = *(index_fields + Patch::TOP);
+                    patch_start = *(patch_starts + Patch::TOP);
+                    break;
+                case Patch::LEFT:
+                    idx_inner = m_inner_left.at(level);
+                    shifted_ranks = m_MPICART.shifted_ranks(0, 1);
+                    d_patch = *(index_fields + Patch::LEFT);
+                    patch_start = *(patch_starts + Patch::LEFT);
+                    break;
+                case Patch::RIGHT:
+                    idx_inner = m_inner_right.at(level);
+                    shifted_ranks = m_MPICART.shifted_ranks(0, -1);
+                    d_patch = *(index_fields + Patch::RIGHT);
+                    patch_start = *(patch_starts + Patch::RIGHT);
+                    break;
+            }
+            
+            std::vector< real > mpi_send_vec;
+            std::vector< real > mpi_recv_vec;
+
+            // extract data from field
+            for (size_t j = 0; j < idx_inner.size(); j++){
+                mpi_send_vec.push_back(data_field[idx_inner.at(j)]);
+            }
+
+            reqs[0] = m_MPICART.isend(shifted_ranks.first, sendrecv_ctr, mpi_send_vec);
+            reqs[1] = m_MPICART.irecv(shifted_ranks.first, sendrecv_ctr, mpi_recv_vec);
+            boost::mpi::wait_all(reqs, reqs + 2);
+
+            // insert exchanged data into field
+            for (size_t j = 0; j < mpi_recv_vec.size(); j++) {
+                data_field[d_patch[patch_start+j]] = mpi_recv_vec.at(j);
+            }
+        }
     }
 
     sendrecv_ctr++;
@@ -211,12 +291,17 @@ void MPIHandler::check_mpi_neighbour() {
 
     m_mpi_neighbour.at(Patch::LEFT)   = (rank_coordinates.at(0) == 0) ? 0 : 1;
     m_mpi_neighbour.at(Patch::RIGHT)  = (rank_coordinates.at(0) == m_Xdim - 1) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::BOTTOM) = (rank_coordinates.at(1) == 0) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::TOP)    = (rank_coordinates.at(1) == m_Ydim - 1) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::BACK)   = (rank_coordinates.at(2) == 0) ? 0 : 1;
+    m_mpi_neighbour.at(Patch::FRONT)  = (rank_coordinates.at(2) == m_Zdim - 1) ? 0 : 1;
 
-    m_mpi_neighbour.at(Patch::BOTTOM)    = (rank_coordinates.at(1) == 0) ? 0 : 1;
-    m_mpi_neighbour.at(Patch::TOP) = (rank_coordinates.at(1) == m_Ydim - 1) ? 0 : 1;
-
-    m_mpi_neighbour.at(Patch::BACK)  = (rank_coordinates.at(2) == 0) ? 0 : 1;
-    m_mpi_neighbour.at(Patch::FRONT)   = (rank_coordinates.at(2) == m_Zdim - 1) ? 0 : 1;
+    m_mpi_neighbour_periodic.at(Patch::LEFT)   = (rank_coordinates.at(0) == 0 && m_Xdim > 1) ? 1 : 0;
+    m_mpi_neighbour_periodic.at(Patch::RIGHT)  = (rank_coordinates.at(0) == m_Xdim - 1 && m_Xdim > 1) ? 1 : 0;
+    m_mpi_neighbour_periodic.at(Patch::BOTTOM) = (rank_coordinates.at(1) == 0 && m_Ydim > 1) ? 1 : 0;
+    m_mpi_neighbour_periodic.at(Patch::TOP)    = (rank_coordinates.at(1) == m_Ydim - 1 && m_Ydim > 1) ? 1 : 0;
+    m_mpi_neighbour_periodic.at(Patch::BACK)   = (rank_coordinates.at(2) == 0 && m_Zdim > 1) ? 1 : 0;
+    m_mpi_neighbour_periodic.at(Patch::FRONT)  = (rank_coordinates.at(2) == m_Zdim - 1 && m_Zdim > 1) ? 1 : 0;
 }
 
 // ================================== Convert domain =====================================

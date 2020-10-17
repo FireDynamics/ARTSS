@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
        MPIENV.abort(1);
     }
 
-    boost::mpi::cartesian_dimension MPIDIM[] = {{MPIX, false}, {MPIY, false}, {MPIZ, false}};
+    boost::mpi::cartesian_dimension MPIDIM[] = {{MPIX, true}, {MPIY, true}, {MPIZ, true}};
     boost::mpi::cartesian_communicator MPICART(MPIWORLD, boost::mpi::cartesian_topology(MPIDIM), true);
 
     auto mpi_handler = MPIHandler::getInstance(MPIWORLD, MPICART);

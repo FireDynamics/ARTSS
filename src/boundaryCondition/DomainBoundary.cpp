@@ -23,6 +23,7 @@ void DomainBoundary::apply_boundary_condition(real *data_field, size_t **index_f
 #ifdef USEMPI
     auto mpi_handler = MPIHandler::getInstance();
     std::vector<int> rank_has_neighbour{mpi_handler->get_mpi_neighbour()};
+    std::vector<bool> periodic(numberOfPatches, false); 
 #endif
 
     for (size_t i = 0; i < numberOfPatches; i++) {
@@ -40,6 +41,9 @@ void DomainBoundary::apply_boundary_condition(real *data_field, size_t **index_f
                 break;
             case BoundaryCondition::PERIODIC:
                 apply_periodic(data_field, d_patch, p, patch_start, patch_end, level);
+#ifdef USEMPI
+                periodic.at(i) = true;
+#endif
                 break;
             default:
 #ifndef BENCHMARKING
@@ -52,6 +56,8 @@ void DomainBoundary::apply_boundary_condition(real *data_field, size_t **index_f
 
 #ifdef USEMPI
         mpi_handler->exchange_data(data_field, index_fields, patch_starts, level);
+        mpi_handler->set_barrier();
+        mpi_handler->exchange_data(data_field, index_fields, patch_starts, level, periodic);
         mpi_handler->set_barrier();
 #endif
 

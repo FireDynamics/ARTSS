@@ -37,6 +37,7 @@ class MPIHandler {
     bool has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& oz1, real& oz2);
     void calc_inner_index();
     void exchange_data(real *data_field, size_t** index_fields, const size_t *patch_starts, size_t level);
+    void exchange_data(real *data_field, size_t** index_fields, const size_t *patch_starts, size_t level, std::vector<bool> periodic);
 
     void set_barrier() { return m_MPICART.barrier(); }
 
@@ -48,6 +49,7 @@ private:
     MPIHandler(boost::mpi::communicator& MPIWORLD, boost::mpi::cartesian_communicator& MPICART);
     boost::mpi::communicator m_MPIWORLD;
     boost::mpi::cartesian_communicator m_MPICART;
+
     std::vector< boost::mpi::cartesian_dimension > m_dimensions;
     std::vector< std::vector<size_t> > m_inner_left;
     std::vector< std::vector<size_t> > m_inner_right;
@@ -55,17 +57,15 @@ private:
     std::vector< std::vector<size_t> > m_inner_top;
     std::vector< std::vector<size_t> > m_inner_front;
     std::vector< std::vector<size_t> > m_inner_back;
+    std::vector<int> m_mpi_neighbour;
+    std::vector<int> m_mpi_neighbour_periodic;
 
     int sendrecv_ctr;
-
     int m_Xdim;
     int m_Ydim;
     int m_Zdim;
 
     void check_mpi_neighbour();
-
-    std::vector<int> m_mpi_neighbour;
-
 };
 
 #endif /* ARTSS_UTILITY_MPIHANDLER_H */
