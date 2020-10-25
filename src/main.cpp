@@ -29,8 +29,7 @@
 #include "utility/Utility.h"
 
 #ifdef USEMPI
-    #include <boost/mpi/communicator.hpp>
-    #include <boost/mpi/environment.hpp>
+    #include <mpi.h>
     #include "utility/MPIHandler.h"
 #endif
 
@@ -42,8 +41,12 @@
 int main(int argc, char **argv) {
 
 #ifdef USEMPI
-    boost::mpi::environment MPIENV;
-    boost::mpi::communicator MPIWORLD;
+    int MPIWORLD;
+    int MPIRANK;
+
+    MPI_Init(NULL, NULL);
+    MPI_Comm_size(MPI_COMM_WORLD, &MPIWORLD);
+    MPI_Comm_rank(MPI_COMM_WORLD, &MPIRANK);
 #endif
 
 
@@ -76,15 +79,23 @@ int main(int argc, char **argv) {
         MPIZ = (temp_z) ? atoi(temp_z) : 1;
     }
 
-    if (MPIWORLD.size() != MPIX*MPIY*MPIZ) {
-       if (MPIWORLD.rank() == 0) std::cerr << "Number of meshes does not match the number of defined MPI processes!" << std::endl;
-       MPIENV.abort(1);
+    if (MPIWORLD != MPIX*MPIY*MPIZ) {
+       if (MPIRANK == 0) std::cerr << "Number of meshes does not match the number of defined MPI processes!" << std::endl;
+       MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
-    boost::mpi::cartesian_dimension MPIDIM[] = {{MPIX, true}, {MPIY, true}, {MPIZ, true}};
-    boost::mpi::cartesian_communicator MPICART(MPIWORLD, boost::mpi::cartesian_topology(MPIDIM), true);
+    MPI_Comm MPICART;
 
-    auto mpi_handler = MPIHandler::getInstance(MPIWORLD, MPICART);
+    int dimensions[3] = {MPIX, MPIY, MPIZ};
+    int periodic[3];
+
+    periodic[0] = 1;
+    periodic[1] = 1;
+    periodic[2] = 1;
+
+    MPI_Cart_create(MPI_COMM_WORLD, 3, dimensions, periodic, 1, &MPICART);
+
+    auto mpi_handler = MPIHandler::getInstance(MPICART, dimensions);
 #endif
 
 
@@ -124,6 +135,10 @@ int main(int argc, char **argv) {
 
     // Clean up
     delete solver;
+
+#ifdef USEMPI
+    MPI_Finalize();
+#endif
 
     return 0;
 }

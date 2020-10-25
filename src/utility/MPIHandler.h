@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 
-#include <boost/mpi/cartesian_communicator.hpp>
+#include <mpi.h>
 
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
@@ -23,12 +23,11 @@
 class MPIHandler {
  public:
     static MPIHandler* getInstance();
-    static MPIHandler* getInstance(boost::mpi::communicator& MPIWORLD,
-                            boost::mpi::cartesian_communicator& MPICART);
+    static MPIHandler* getInstance(MPI_Comm MPICART, int* dimensions);
 
     // Getter
-    int get_rank() { return m_MPICART.rank(); }
-    std::vector<int> get_coords() { return m_MPICART.coordinates(m_MPICART.rank()); }
+    int get_rank() { return m_CARTRANK; }
+    std::vector<int> get_coords() { return {m_XRANK, m_YRANK, m_ZRANK}; }
     std::vector<int> get_mpi_neighbour() { return m_mpi_neighbour; }
 
     void convert_domain(real& x1, real& x2, int direction);
@@ -39,18 +38,20 @@ class MPIHandler {
     void exchange_data(real *data_field, size_t** index_fields, const size_t *patch_starts, size_t level);
     void exchange_data(real *data_field, size_t** index_fields, const size_t *patch_starts, size_t level, std::vector<bool> periodic);
 
-    void set_barrier() { return m_MPICART.barrier(); }
+    int set_barrier() { return MPI_Barrier(m_MPICART); }
 
     double get_max_val(double val);
 
 private:
     static MPIHandler* single;
 
-    MPIHandler(boost::mpi::communicator& MPIWORLD, boost::mpi::cartesian_communicator& MPICART);
-    boost::mpi::communicator m_MPIWORLD;
-    boost::mpi::cartesian_communicator m_MPICART;
+    MPIHandler(MPI_Comm MPICART, int* dimensions);
+    MPI_Comm m_MPICART;
+    MPI_Comm m_XCOM;
+    MPI_Comm m_YCOM;
+    MPI_Comm m_ZCOM;
 
-    std::vector< boost::mpi::cartesian_dimension > m_dimensions;
+
     std::vector< std::vector<size_t> > m_inner_left;
     std::vector< std::vector<size_t> > m_inner_right;
     std::vector< std::vector<size_t> > m_inner_bottom;
@@ -59,11 +60,16 @@ private:
     std::vector< std::vector<size_t> > m_inner_back;
     std::vector<int> m_mpi_neighbour;
     std::vector<int> m_mpi_neighbour_periodic;
+    std::vector<int> m_dimensions;
 
-    int sendrecv_ctr;
+    int m_sendrecv_ctr;
     int m_Xdim;
     int m_Ydim;
     int m_Zdim;
+    int m_CARTRANK;
+    int m_XRANK;
+    int m_YRANK;
+    int m_ZRANK;
 
     void check_mpi_neighbour();
 };

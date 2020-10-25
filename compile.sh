@@ -266,8 +266,14 @@ cd build || exit
 
 if [[ $GPU -eq 0 ]] || [[ $COMPILER = "PGI" ]]
 then
-  CCOMPILER=pgcc
-  CXXCOMPILER=pgc++
+  if [ $MPI -eq 1 ]
+  then
+    CCOMPILER=mpicc
+    CXXCOMPILER=mpic++
+  else
+    CCOMPILER=pgcc
+    CXXCOMPILER=pgc++
+  fi
 elif [ $MPI -eq 1 ]
 then
   CCOMPILER=mpicc

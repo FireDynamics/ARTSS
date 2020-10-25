@@ -4,10 +4,6 @@
 /// \author     Max Joseph Böhler
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <boost/mpi/operations.hpp>
-#include <boost/mpi/collectives.hpp>
-#include <boost/serialization/vector.hpp>
-
 #include "MPIHandler.h"
 #include "Parameters.h"
 
@@ -21,29 +17,47 @@ MPIHandler *MPIHandler::getInstance() {
 }
 
 // Singleton
-MPIHandler *MPIHandler::getInstance(boost::mpi::communicator& MPIWORLD,
-                      boost::mpi::cartesian_communicator& MPICART) {
+MPIHandler *MPIHandler::getInstance(MPI_Comm MPIWORLD, int* dimensions) {
     if (single == nullptr) {
-        single = new MPIHandler(MPIWORLD, MPICART);
+        single = new MPIHandler(MPIWORLD, dimensions);
     }
     return single;
 }
 
-MPIHandler::MPIHandler(boost::mpi::communicator& MPIWORLD,
-                       boost::mpi::cartesian_communicator& MPICART) :
-                            m_MPIWORLD(MPIWORLD), m_MPICART(MPICART), 
-                            m_dimensions(MPICART.topology().stl()), 
-                            m_mpi_neighbour(6,0),
-                            m_mpi_neighbour_periodic(6,0) {
+MPIHandler::MPIHandler(MPI_Comm MPICART,
+                       int* dimensions) :
+            m_MPICART(MPICART),
+            m_dimensions(3,0), 
+            m_mpi_neighbour(6,0),
+            m_mpi_neighbour_periodic(6,0) {
+    
+            // Procs in x,y,z direction -> Warning: here x = left, right; y = front, back; z = top, bottom
+            m_Xdim = dimensions[0]; 
+            m_Ydim = dimensions[1]; 
+            m_Zdim = dimensions[2]; 
 
-                            // Procs in x,y,z direction -> Warning: here x = left, right; y = front, back; z = top, bottom
-                            m_Xdim = m_dimensions.at(0).size; 
-                            m_Ydim = m_dimensions.at(1).size; 
-                            m_Zdim = m_dimensions.at(2).size; 
-                           
-                            sendrecv_ctr = 0;
-                            check_mpi_neighbour();
-                       }
+            m_dimensions.at(0) = dimensions[0];
+            m_dimensions.at(1) = dimensions[1];
+            m_dimensions.at(2) = dimensions[2];
+
+            MPI_Comm_rank(MPICART, &m_CARTRANK);
+
+            int remain_dims_x[3] = {1,0,0};
+            int remain_dims_y[3] = {0,1,0};
+            int remain_dims_z[3] = {0,0,1};
+            MPI_Cart_sub(m_MPICART, remain_dims_x, &m_XCOM);
+            MPI_Cart_sub(m_MPICART, remain_dims_y, &m_YCOM);
+            MPI_Cart_sub(m_MPICART, remain_dims_z, &m_ZCOM);
+
+            MPI_Comm_rank(m_XCOM, &m_XRANK); 
+            MPI_Comm_rank(m_YCOM, &m_YRANK); 
+            MPI_Comm_rank(m_ZCOM, &m_ZRANK); 
+
+
+            m_sendrecv_ctr = 0;
+            check_mpi_neighbour();
+
+        }
 
 // ========================= Exchange data field non periodic  ===========================
 // ***************************************************************************************
@@ -58,44 +72,45 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
     std::pair < int, int > shifted_ranks;
     size_t *d_patch;
     size_t patch_start;
-    boost::mpi::request reqs[2];
+    MPI_Request request;
+    MPI_Status status;
 
     for (size_t i = 0; i < m_mpi_neighbour.size(); i++) {
         if (m_mpi_neighbour.at(i) == 1) {
             switch (i) {
                 case Patch::FRONT:
                     idx_inner = m_inner_front.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(2, -1);
+                    MPI_Cart_shift(m_MPICART, 2, -1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::FRONT);
                     patch_start = *(patch_starts + Patch::FRONT);
                     break;
                 case Patch::BACK:
                     idx_inner = m_inner_back.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(2, 1);
+                    MPI_Cart_shift(m_MPICART, 2, 1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::BACK);
                     patch_start = *(patch_starts + Patch::BACK);
                     break;
                 case Patch::BOTTOM:
                     idx_inner = m_inner_bottom.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(1, 1);
+                    MPI_Cart_shift(m_MPICART, 1, 1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::BOTTOM);
                     patch_start = *(patch_starts + Patch::BOTTOM);
                     break;
                 case Patch::TOP:
                     idx_inner = m_inner_top.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(1, -1);
+                    MPI_Cart_shift(m_MPICART, 1, -1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::TOP);
                     patch_start = *(patch_starts + Patch::TOP);
                     break;
                 case Patch::LEFT:
                     idx_inner = m_inner_left.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(0, 1);
+                    MPI_Cart_shift(m_MPICART, 0, 1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::LEFT);
                     patch_start = *(patch_starts + Patch::LEFT);
                     break;
                 case Patch::RIGHT:
                     idx_inner = m_inner_right.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(0, -1);
+                    MPI_Cart_shift(m_MPICART, 0, -1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::RIGHT);
                     patch_start = *(patch_starts + Patch::RIGHT);
                     break;
@@ -107,11 +122,12 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
             // extract data from field
             for (size_t j = 0; j < idx_inner.size(); j++){
                 mpi_send_vec.push_back(data_field[idx_inner.at(j)]);
+                mpi_recv_vec.push_back(0.0);
             }
 
-            reqs[0] = m_MPICART.isend(shifted_ranks.first, sendrecv_ctr, mpi_send_vec);
-            reqs[1] = m_MPICART.irecv(shifted_ranks.first, sendrecv_ctr, mpi_recv_vec);
-            boost::mpi::wait_all(reqs, reqs + 2);
+            MPI_Isend(&mpi_send_vec[0], mpi_send_vec.size(), MPI_DOUBLE, shifted_ranks.first, m_sendrecv_ctr, m_MPICART, &request);
+            MPI_Irecv(&mpi_recv_vec[0], mpi_recv_vec.size(), MPI_DOUBLE, shifted_ranks.first, m_sendrecv_ctr, m_MPICART, &request);
+            MPI_Wait(&request, &status);
 
             // insert exchanged data into field
             for (size_t j = 0; j < mpi_recv_vec.size(); j++) {
@@ -120,7 +136,7 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
         }
     }
 
-    sendrecv_ctr++;
+    m_sendrecv_ctr++;
 }
 
 // =========================== Exchange data field periodic  =============================
@@ -137,44 +153,45 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
     std::pair < int, int > shifted_ranks;
     size_t *d_patch;
     size_t patch_start;
-    boost::mpi::request reqs[2];
+    MPI_Request request;
+    MPI_Status status;
 
     for (size_t i = 0; i < m_mpi_neighbour_periodic.size(); i++) {
         if (m_mpi_neighbour_periodic.at(i) == 1 && periodic.at(i)) {
             switch (i) {
                 case Patch::FRONT:
                     idx_inner = m_inner_front.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(2, -1);
+                    MPI_Cart_shift(m_MPICART, 2, -1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::FRONT);
                     patch_start = *(patch_starts + Patch::FRONT);
                     break;
                 case Patch::BACK:
                     idx_inner = m_inner_back.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(2, 1);
+                    MPI_Cart_shift(m_MPICART, 2, 1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::BACK);
                     patch_start = *(patch_starts + Patch::BACK);
                     break;
                 case Patch::BOTTOM:
                     idx_inner = m_inner_bottom.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(1, 1);
+                    MPI_Cart_shift(m_MPICART, 1, 1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::BOTTOM);
                     patch_start = *(patch_starts + Patch::BOTTOM);
                     break;
                 case Patch::TOP:
                     idx_inner = m_inner_top.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(1, -1);
+                    MPI_Cart_shift(m_MPICART, 1, -1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::TOP);
                     patch_start = *(patch_starts + Patch::TOP);
                     break;
                 case Patch::LEFT:
                     idx_inner = m_inner_left.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(0, 1);
+                    MPI_Cart_shift(m_MPICART, 0, 1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::LEFT);
                     patch_start = *(patch_starts + Patch::LEFT);
                     break;
                 case Patch::RIGHT:
                     idx_inner = m_inner_right.at(level);
-                    shifted_ranks = m_MPICART.shifted_ranks(0, -1);
+                    MPI_Cart_shift(m_MPICART, 0, -1, &shifted_ranks.first,  &shifted_ranks.second);
                     d_patch = *(index_fields + Patch::RIGHT);
                     patch_start = *(patch_starts + Patch::RIGHT);
                     break;
@@ -186,11 +203,12 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
             // extract data from field
             for (size_t j = 0; j < idx_inner.size(); j++){
                 mpi_send_vec.push_back(data_field[idx_inner.at(j)]);
+                mpi_recv_vec.push_back(0.0);
             }
 
-            reqs[0] = m_MPICART.isend(shifted_ranks.first, sendrecv_ctr, mpi_send_vec);
-            reqs[1] = m_MPICART.irecv(shifted_ranks.first, sendrecv_ctr, mpi_recv_vec);
-            boost::mpi::wait_all(reqs, reqs + 2);
+            MPI_Isend(&mpi_send_vec[0], mpi_send_vec.size(), MPI_DOUBLE, shifted_ranks.first, m_sendrecv_ctr, m_MPICART, &request);
+            MPI_Irecv(&mpi_recv_vec[0], mpi_recv_vec.size(), MPI_DOUBLE, shifted_ranks.first, m_sendrecv_ctr, m_MPICART, &request);
+            MPI_Wait(&request, &status);
 
             // insert exchanged data into field
             for (size_t j = 0; j < mpi_recv_vec.size(); j++) {
@@ -199,7 +217,7 @@ void MPIHandler::exchange_data(real *data_field, size_t** index_fields, const si
         }
     }
 
-    sendrecv_ctr++;
+    m_sendrecv_ctr++;
 }
 
 // ======================= Calculate index of boundary-1 index  ==========================
@@ -276,7 +294,7 @@ void MPIHandler::calc_inner_index(){
 // ***************************************************************************************
 double MPIHandler::get_max_val(double val){
     double max_val;
-    boost::mpi::all_reduce(m_MPICART, val, max_val, boost::mpi::maximum<double>());
+    MPI_Allreduce(&val, &max_val, 1, MPI_DOUBLE, MPI_MAX, m_MPICART);
 
     return max_val;
 }
@@ -313,9 +331,9 @@ void MPIHandler::check_mpi_neighbour() {
 // ***************************************************************************************
 void MPIHandler::convert_domain(real& x1, real& x2, int direction) {
     real temp_x1, temp_x2;
-    int  dimension      { m_dimensions[direction].size };
+    int  dimension      { m_dimensions.at(direction) };
     real local_size     { (x2 - x1) /  dimension};
-    int  rank_dimension { m_MPICART.coordinates(m_MPICART.rank())[direction] };
+    int  rank_dimension { get_coords()[direction] };
     temp_x1 = x1 + rank_dimension * local_size;
     temp_x2 = x1 + ((rank_dimension + 1) * local_size);
     
@@ -397,5 +415,5 @@ bool MPIHandler::has_obstacle(real& ox1, real& ox2, real& oy1, real& oy2, real& 
 // ***************************************************************************************
 void MPIHandler::convert_grid(size_t& n, int direction) {
     auto params = Parameters::getInstance();
-    n = ( ( n - 2 ) / m_dimensions[direction].size ) + 2;
+    n = ( ( n - 2 ) / m_dimensions.at(direction) ) + 2;
 }
