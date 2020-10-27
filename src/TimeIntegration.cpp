@@ -170,7 +170,12 @@ void TimeIntegration::run() {
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
 
             visual->visualise(m_solver, t_cur);
-            if (adaption->is_data_extraction_before_enabled()) adaption->extractData(adaption->get_before_name(), adaption->get_before_height(), t_cur);
+            if (adaption->is_data_extraction_before_enabled()) {
+                adaption->extractData(adaption->get_before_name(),
+                                      adaption->get_before_height(),
+                                      t_cur);
+            }
+
             // Error Calculation
             // RMS error at midposize_t at each time step Nt
             analysis->calc_L2_norm_mid_point(m_solver, t_cur, Sum);
@@ -180,14 +185,10 @@ void TimeIntegration::run() {
 
             // CFL condition not met
             if (cfl > 1) {
-#ifndef BENCHMARKING
                 m_logger->warn("CFL condition not met. CFL={}, dt={}", cfl, dt);
                 m_logger->warn("To lower th CFL value a smaller dt must be selected. Proposed CFL value of <= 0.8 yields to dt <= {}", dt*0.8/cfl);
-#endif
             } else {
-#ifndef BENCHMARKING
                 m_logger->info("CFL = {}", cfl);
-#endif
             }
             // bool VN_check = ana.check_time_step_VN(u, dt);
             // if(!VN_check)
@@ -196,18 +197,21 @@ void TimeIntegration::run() {
             // update
             adaption->run(t_cur);
 #ifndef BENCHMARKING
-            if (adaption->is_data_extraction_after_enabled()) adaption->extractData(adaption->get_after_name(), adaption->get_after_height(), t_cur);
+            if (adaption->is_data_extraction_after_enabled()) {
+                adaption->extractData(adaption->get_after_name(),
+                                      adaption->get_after_height(),
+                                      t_cur);
+            }
 #endif
-        m_solver->update_sources(t_cur, false);
-        m_solver->update_data(false);
+            m_solver->update_sources(t_cur, false);
+            m_solver->update_data(false);
 
             // iter_end = std::chrono::system_clock::now();
             // long ms = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();
             // file << "t_cur: "<<t_cur << " runtime: " << ms << " microsec\n";
             iteration_step++;
             t_cur = iteration_step * dt;
-
-        } // end while
+        }
         // file.close();
         // Sum up RMS error
 #ifndef BENCHMARKING
