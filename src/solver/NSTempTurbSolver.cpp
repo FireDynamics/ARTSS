@@ -75,9 +75,6 @@ NSTempTurbSolver::~NSTempTurbSolver() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSTempTurbSolver::do_step(real t, bool sync) {
-    size_t Nx = Domain::getInstance()->get_Nx();
-    size_t Ny = Domain::getInstance()->get_Ny();
-    size_t index = IX(8,12,19, Nx, Ny);
 
     auto params = Parameters::getInstance();
 
@@ -138,10 +135,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        m_logger->error("timestep: {}", t);
         m_logger->info("Advect ...");
-#pragma acc update host(d_u[:bsize])
-        m_logger->error("vor: advect: {}", d_u[index]);
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
         adv_vel->advect(v, v0, u0, v0, w0, sync);
@@ -153,16 +147,12 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 // 2. Solve turbulent diffusion equation
 #ifndef BENCHMARKING
         m_logger->info("Calculating Turbulent viscosity ...");
-#pragma acc update host(d_u[:bsize])
-        m_logger->error("vor: visc: {}", d_u[IX(8,12,9, Nx, Ny)]);
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 
 
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
-#pragma acc update host(d_u[:bsize])
-        m_logger->error("vor: turb: {}", d_u[IX(8,12,9, Nx, Ny)]);
 #endif
         dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
@@ -175,8 +165,6 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         if (m_forceFct != SourceMethods::Zero) {
 #ifndef BENCHMARKING
             m_logger->info("Add momentum source ...");
-#pragma acc update host(d_u[:bsize])
-            m_logger->error("vor: source: {}", d_u[IX(8,12,9, Nx, Ny)]);
 #endif
             sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
 
@@ -186,8 +174,6 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 
 // 4. Solve pressure equation and project
         // Calculate divergence of u
-#pragma acc update host(d_u_tmp[:bsize])
-        m_logger->error("vor: divergence: {}", d_u_tmp[IX(8,12,9, Nx, Ny)]);
         pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
@@ -197,19 +183,13 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         pres->pressure(p, rhs, t, sync);
 
         // Correct
-#ifndef BENCHMARKING
-#pragma acc update host(d_u_tmp[:bsize])
-        m_logger->error("vor: projection: {}", d_u_tmp[IX(8,12,9, Nx, Ny)]);
-#endif
-        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p,this, t, sync);
+        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
 
 // 5. Solve Temperature and link back to force
 
         // Solve advection equation
 #ifndef BENCHMARKING
         m_logger->info("Advect Temperature ...");
-#pragma acc update host(d_u[:bsize])
-        m_logger->error("vor: temp: {}", d_u[IX(8,12,9, Nx, Ny)]);
 #endif
         adv_temp->advect(T, T0, u, v, w, sync);
 
@@ -253,8 +233,6 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 
 #ifndef BENCHMARKING
             m_logger->info("Add dissipation ...");
-#pragma acc update host(d_u[:bsize])
-            m_logger->error("vor: dissp: {}", d_u[IX(8,12,9, Nx, Ny)]);
 #endif
             sou_temp->dissipate(T, u, v, w, sync);
 
@@ -275,10 +253,6 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 
 // 6. Sources updated in Solver::update_sources, TimeIntegration
 
-#ifndef BENCHMARKING
-#pragma acc update host(d_u[:bsize])
-        m_logger->error("ende: solver: {}", d_u[IX(8,12,9, Nx, Ny)]);
-#endif
         if (sync) {
 #pragma acc wait
         }
