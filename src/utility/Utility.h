@@ -21,13 +21,6 @@ namespace Utility {
     std::vector<size_t> coordinateFromLinearIndex(size_t idx,
                                                          size_t Nx,
                                                          size_t Ny);
-//  size_t getCoordinateI(size_t idx,
-//                          size_t Nx,
-//                          size_t Ny,
-//                          size_t j,
-//                          size_t k);
-//  size_t getCoordinateJ(size_t idx, size_t Nx, size_t Ny, size_t k);
-//  size_t getCoordinateK(size_t idx, size_t Nx, size_t Ny);
     std::vector<std::string> split(const char* text, char delimiter);
     std::vector<std::string> split(const std::string& text,
                                           char delimiter);
