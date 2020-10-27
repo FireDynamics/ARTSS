@@ -10,9 +10,6 @@
 
 #include "../interfaces/IDiffusion.h"
 #include "../field/Field.h"
-
-#include "../utility/Utility.h"
-
 #include "../utility/Utility.h"
 
 class JacobiDiffuse : public IDiffusion {
