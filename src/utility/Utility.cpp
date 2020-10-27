@@ -8,6 +8,7 @@
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
+#include <cmath>
 
 #ifndef BENCHMARKING
 #include <spdlog/cfg/helpers.h>
