@@ -170,10 +170,11 @@ void TimeIntegration::run() {
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
 
             visual->visualise(m_solver, t_cur);
-            if (adaption->is_data_extraction_before_enabled())
+            if (adaption->is_data_extraction_before_enabled()) {
                 adaption->extractData(adaption->get_before_name(),
                                       adaption->get_before_height(),
                                       t_cur);
+            }
 
             // Error Calculation
             // RMS error at midposize_t at each time step Nt
@@ -196,10 +197,11 @@ void TimeIntegration::run() {
             // update
             adaption->run(t_cur);
 #ifndef BENCHMARKING
-            if (adaption->is_data_extraction_after_enabled())
+            if (adaption->is_data_extraction_after_enabled()) {
                 adaption->extractData(adaption->get_after_name(),
                                       adaption->get_after_height(),
                                       t_cur);
+            }
 #endif
             m_solver->update_sources(t_cur, false);
             m_solver->update_data(false);
