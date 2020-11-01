@@ -19,20 +19,18 @@
 
 #endif
 
-class Utility {
-public:
-    static std::vector<size_t> coordinateFromLinearIndex(size_t idx, size_t Nx, size_t Ny);
-    static std::vector<std::string> split(const char *text, char delimiter);
-    static std::vector<std::string> split(const std::string &text, char delimiter);
-    static size_t get_index(double physical_coordinate, double spacing, double start_coordinate);
+namespace Utility {
+    std::vector<size_t> coordinateFromLinearIndex(size_t idx,
+                                                         size_t Nx,
+                                                         size_t Ny);
+    std::vector<std::string> split(const char* text, char delimiter);
+    std::vector<std::string> split(const std::string& text,
+                                          char delimiter);
 
 #ifndef BENCHMARKING
-    static std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
+    std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
 #endif
-
-private:
-    Utility() = default;
-};
+} // namespace Utility
 
 
 #endif /* ARTSS_UTILITY_UTILITY_H_ */

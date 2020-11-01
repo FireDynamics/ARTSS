@@ -16,18 +16,7 @@
 #endif
 
 
-//======================================== get index =====================================
-// ***************************************************************************************
-/// \brief  Snaps value to grid discretisation
-/// \param  physical_coordinate physical coordinate
-/// \param  spacing dx/dy/dz
-/// \param  start_coordinate X1/Y1/Z1
-/// \return real Calculated index (i/j/k) in (x/y/z)-direction
-// ***************************************************************************************
-size_t Utility::get_index(real physical_coordinate, real spacing, real start_coordinate) {
-    return std::round((-start_coordinate + physical_coordinate) / spacing) + 1;
-}
-
+namespace Utility {
 // ================================= Calc i,j,k ==========================================
 // ***************************************************************************************
 /// \brief  calculates indices <i,j,k> from linear index idx
@@ -35,7 +24,7 @@ size_t Utility::get_index(real physical_coordinate, real spacing, real start_coo
 /// \param  Nx      number of cells in x-direction of physical domain
 /// \param  Ny      number of cells in y-direction of physical domain
 // ***************************************************************************************
-std::vector<size_t> Utility::coordinateFromLinearIndex(size_t idx, size_t Nx, size_t Ny) {
+std::vector<size_t> coordinateFromLinearIndex(size_t idx, size_t Nx, size_t Ny) {
     std::vector<size_t> coord;
     size_t k = getCoordinateK(idx, Nx, Ny);
     size_t j = getCoordinateJ(idx, Nx, Ny, k);
@@ -48,13 +37,49 @@ std::vector<size_t> Utility::coordinateFromLinearIndex(size_t idx, size_t Nx, si
     return coord;
 }
 
+// ================================= Calculate coordinate i ==========================================
+// ***************************************************************************************
+/// \brief  Calculates the i coordinate
+/// \param  idx     linear (global) index
+/// \param  Nx      number of cells in x-direction of physical domain
+/// \param  Ny      number of cells in y-direction of physical domain
+/// \param  j       index of <i,j,k>
+/// \param  k       index of <i,j,k>
+// ***************************************************************************************
+//size_t getCoordinateI(size_t idx, size_t Nx, size_t Ny, size_t j, size_t k) {
+//    return idx - k * Nx * Ny - j * Nx;
+//}
+
+// ================================= Calculate coordinate j ==========================================
+// ***************************************************************************************
+/// \brief  Calculates the j coordinate
+/// \param  idx     linear (global) index
+/// \param  Nx      number of cells in x-direction of physical domain
+/// \param  Ny      number of cells in y-direction of physical domain
+/// \param  k       index of <i,j,k>
+// ***************************************************************************************
+//size_t getCoordinateJ(size_t idx, size_t Nx, size_t Ny, size_t k) {
+//    return (idx - k * Nx * Ny) / Nx;
+//}
+
+// ================================= Calculate coordinate k ==========================================
+// ***************************************************************************************
+/// \brief  Calculates the k coordinate
+/// \param  idx     linear (global) index
+/// \param  Nx      number of cells in x-direction of physical domain
+/// \param  Ny      number of cells in y-direction of physical domain
+// ***************************************************************************************
+//size_t getCoordinateK(size_t idx, size_t Nx, size_t Ny) {
+//    return idx / (Nx * Ny);
+//}
+
 // ================================= Split string at character ==========================================
 // ***************************************************************************************
 /// \brief  Splits a string at a defined char
 /// \param  text     String
 /// \param  delimiter Where to split
 // ***************************************************************************************
-std::vector<std::string> Utility::split(const std::string &text, char delimiter) {
+std::vector<std::string> split(const std::string &text, char delimiter) {
     return split(text.c_str(), delimiter);
 }
 
@@ -64,7 +89,7 @@ std::vector<std::string> Utility::split(const std::string &text, char delimiter)
 /// \param  text     String
 /// \param  delimiter Where to split
 // ***************************************************************************************
-std::vector<std::string> Utility::split(const char *text, char delimiter) {
+std::vector<std::string> split(const char *text, char delimiter) {
     std::vector<std::string> tokens;
     std::string token;
     std::istringstream tokenStream(text);
@@ -81,7 +106,7 @@ std::vector<std::string> Utility::split(const char *text, char delimiter) {
 //          BENCHMARKING is not enabled
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
-std::shared_ptr<spdlog::logger> Utility::create_logger(std::string logger_name) {
+std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
 
@@ -115,3 +140,4 @@ std::shared_ptr<spdlog::logger> Utility::create_logger(std::string logger_name) 
     return logger;
 }
 #endif
+}  // namespace Utility

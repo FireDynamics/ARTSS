@@ -44,17 +44,16 @@ struct TurbulenceMethods {
     inline static const std::string DynamicSmagorinsky = "DynamicSmagorinsky";
 };
 
-class SolverSelection {
- public:
-    static void SetAdvectionSolver(IAdvection **advectionSolver, const std::string& advectionType);
+namespace SolverSelection {
+    void SetAdvectionSolver(IAdvection **advectionSolver, const std::string& advectionType);
 
-    static void SetDiffusionSolver(IDiffusion **diffusionSolver, const std::string& diffusionType);
+    void SetDiffusionSolver(IDiffusion **diffusionSolver, const std::string& diffusionType);
 
-    static void SetPressureSolver(IPressure **pressureSolver, const std::string& pressureType, Field *p, Field *rhs);
+    void SetPressureSolver(IPressure **pressureSolver, const std::string& pressureType, Field *p, Field *rhs);
 
-    static void SetSourceSolver(ISource **sourceSolver, const std::string& sourceType);
+    void SetSourceSolver(ISource **sourceSolver, const std::string& sourceType);
 
-    static void SetTurbulenceSolver(ITurbulence **tubulenceSolver, const std::string& turbulenceType);
+    void SetTurbulenceSolver(ITurbulence **tubulenceSolver, const std::string& turbulenceType);
 };
 
 
