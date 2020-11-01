@@ -322,7 +322,7 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
     auto domain = Domain::getInstance();
 
     // local variables and parameters
-    size_t bsize = domain->get_size(u->GetLevel());
+    size_t bsize = domain->get_size(u->get_level());
     size_t *innerList = boundary->get_innerList_level_joined();
     size_t sizei = boundary->getSize_innerList();
 

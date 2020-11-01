@@ -119,10 +119,10 @@ void TimeIntegration::run() {
 #pragma acc update host(d_nu_t[:bsize])
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
 
-            visual->visualise(m_solver, t_cur);
-            if (adaption->is_data_extraction_before_enabled()) {
-                adaption->extractData(adaption->get_before_name(),
-                                      adaption->get_before_height(),
+            m_visual->visualise(m_field_controller, t_cur);
+            if (m_adaption->is_data_extraction_before_enabled()) {
+                m_adaption->extractData(m_adaption->get_before_name(),
+                                      m_adaption->get_before_height(),
                                       t_cur);
             }
 
@@ -147,14 +147,14 @@ void TimeIntegration::run() {
             // update
             m_adaption->run(t_cur);
 #ifndef BENCHMARKING
-            if (adaption->is_data_extraction_after_enabled()) {
-                adaption->extractData(adaption->get_after_name(),
-                                      adaption->get_after_height(),
+            if (m_adaption->is_data_extraction_after_enabled()) {
+                m_adaption->extractData(m_adaption->get_after_name(),
+                                      m_adaption->get_after_height(),
                                       t_cur);
             }
 #endif
-            m_solver->update_sources(t_cur, false);
-            m_solver->update_data(false);
+            m_solver_controller->update_sources(t_cur, false);
+            m_field_controller->update_data(false);
 
             // iter_end = std::chrono::system_clock::now();
             // long ms = std::chrono::duration_cast<std::chrono::microseconds>(iter_end - iter_start).count();
