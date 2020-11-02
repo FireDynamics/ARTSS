@@ -122,8 +122,8 @@ void TimeIntegration::run() {
             m_visual->visualise(m_field_controller, t_cur);
             if (m_adaption->is_data_extraction_before_enabled()) {
                 m_adaption->extractData(m_adaption->get_before_name(),
-                                      m_adaption->get_before_height(),
-                                      t_cur);
+                                        m_adaption->get_before_height(),
+                                        t_cur);
             }
 
             // Error Calculation
@@ -148,9 +148,7 @@ void TimeIntegration::run() {
             m_adaption->run(t_cur);
 #ifndef BENCHMARKING
             if (m_adaption->is_data_extraction_after_enabled()) {
-                m_adaption->extractData(m_adaption->get_after_name(),
-                                      m_adaption->get_after_height(),
-                                      t_cur);
+                m_adaption->extractData(m_adaption->get_after_name(), m_adaption->get_after_height(), t_cur);
             }
 #endif
             m_solver_controller->update_sources(t_cur, false);
