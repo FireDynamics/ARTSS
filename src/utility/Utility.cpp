@@ -4,20 +4,31 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <cstring>
 #include <sstream>
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
-#include <cctype>
-#include <clocale>
+#include <cmath>
 
 #ifndef BENCHMARKING
 #include <spdlog/cfg/helpers.h>
+#include <clocale>
 #endif
 
 
 namespace Utility {
+//======================================== get index =====================================
+// ***************************************************************************************
+/// \brief  Snaps value to grid discretisation
+/// \param  physical_coordinate physical coordinate
+/// \param  spacing dx/dy/dz
+/// \param  start_coordinate X1/Y1/Z1
+/// \return real Calculated index (i/j/k) in (x/y/z)-direction
+// ***************************************************************************************
+size_t get_index(real physical_coordinate, real spacing, real start_coordinate) {
+    return std::round((-start_coordinate + physical_coordinate) / spacing) + 1;
+}
+
 // ================================= Calc i,j,k ==========================================
 // ***************************************************************************************
 /// \brief  calculates indices <i,j,k> from linear index idx

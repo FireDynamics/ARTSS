@@ -10,27 +10,35 @@
 #include "interfaces/ISolver.h"
 #include "interfaces/ISource.h"
 #include "utility/GlobalMacrosTypes.h"
-#include "analysis/Analysis.h"
-#include "utility/Utility.h"
+#include "solver/SolverController.h"
+#include "adaption/Adaption.h"
 
+#ifndef BENCHMARKING
+#include "analysis/Analysis.h"
+#include "analysis/Solution.h"
+#include "visualisation/Visual.h"
+#else
 // only needed if no logger will be available
-#ifdef BENCHMARKING
 #include <iostream>
 #endif
 
 class TimeIntegration {
 public:
-  explicit TimeIntegration(ISolver *isolv);
-
-  void run();
+    explicit TimeIntegration(SolverController *sc);
+    void run();
 
 private:
-  ISolver* m_solver;
-  real m_dt;
-  real m_t_end;
-  real m_t_cur;
-  size_t m_size = 0;
+    real m_dt;
+    real m_t_end;
+    real m_t_cur;
+
+    FieldController *m_field_controller;
+    SolverController *m_solver_controller;
+    Adaption *m_adaption;
 #ifndef BENCHMARKING
+    Visual *m_visual;
+    Solution *m_solution;
+    Analysis *m_analysis;
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
 };

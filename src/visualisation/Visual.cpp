@@ -34,7 +34,7 @@ Visual::Visual(Solution *solution) {
     m_solution = solution;
 }
 
-void Visual::visualise(ISolver *solver, const real t) {
+void Visual::visualise(FieldController *field_controller, const real t) {
     int n = static_cast<int> (std::round(t / m_dt));
     if (m_has_analytical_solution) {
         m_solution->calc_analytical_solution(t);
@@ -43,7 +43,7 @@ void Visual::visualise(ISolver *solver, const real t) {
     std::string filename = create_filename(m_filename, static_cast<int>(std::round(t / m_dt)), false);
     if (m_save_vtk) {
         if (fmod(n, m_vtk_plots) == 0 || t >= m_t_end) {
-            VTKWriter::write_numerical(solver, filename);
+            VTKWriter::write_numerical(field_controller, filename);
             if (m_has_analytical_solution) {
                 VTKWriter::write_analytical(m_solution, create_filename(m_filename, static_cast<int>(t/m_dt), true));
             }
@@ -52,12 +52,20 @@ void Visual::visualise(ISolver *solver, const real t) {
 
     if (m_save_csv) {
         if (fmod(n, m_csv_plots) == 0 || t >= m_t_end) {
-            CSVWriter::write_numerical(solver, filename);
+            CSVWriter::write_numerical(field_controller, filename);
             if (m_has_analytical_solution) {
                 CSVWriter::write_analytical(m_solution, create_filename(m_filename, static_cast<int>(t/m_dt), true));
             }
         }
     }
+}
+
+void Visual::write_csv(FieldController *solver, std::string filename){
+    CSVWriter::write_numerical(solver, filename);
+}
+
+void Visual::write_data(std::string *data_titles, real **data, size_t size_data, std::string filename){
+    CSVWriter::write_data(data_titles, data, size_data, filename);
 }
 
 void Visual::initialise_grid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {

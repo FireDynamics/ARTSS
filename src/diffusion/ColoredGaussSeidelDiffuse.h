@@ -9,7 +9,7 @@
 #define ARTSS_DIFFUSION_COLOREDGAUSSSEIDEL_H
 
 #include "../interfaces/IDiffusion.h"
-#include "../Field.h"
+#include "../field/Field.h"
 #include "../utility/Utility.h"
 
 class ColoredGaussSeidelDiffuse: public IDiffusion {

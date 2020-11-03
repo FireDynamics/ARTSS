@@ -24,7 +24,6 @@ const std::string FunctionNames::GaussBubble = "GaussBubble";
 const std::string FunctionNames::Hat = "Hat";
 const std::string FunctionNames::McDermott = "McDermott";
 const std::string FunctionNames::RandomC = "RandomC";
-const std::string FunctionNames::RampTanh = "RampTanh";
 const std::string FunctionNames::SinSinSin = "SinSinSin";
 const std::string FunctionNames::Uniform = "Uniform";
 const std::string FunctionNames::Vortex = "Vortex";
@@ -36,25 +35,25 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC =================================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - Beltrami
-/// \param  outx  x-velocity
-/// \param  outy  y-velocity
-/// \param  outz  z-velocity
-/// \param  outp  pressure
+/// \param  outx  x-velocity
+/// \param  outy  y-velocity
+/// \param  outz  z-velocity
+/// \param  outp  pressure
 /// \param  t time
 // ***************************************************************************************
     void Beltrami(Field *outx, Field *outy, Field *outz, Field *outp, real t) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->GetLevel());
-        size_t Ny = domain->get_Ny(outx->GetLevel());
+        size_t Nx = domain->get_Nx(outx->get_level());
+        size_t Ny = domain->get_Ny(outx->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->GetLevel());
-        real dy = domain->get_dy(outx->GetLevel());
-        real dz = domain->get_dz(outx->GetLevel());
+        real dx = domain->get_dx(outx->get_level());
+        real dy = domain->get_dy(outx->get_level());
+        real dz = domain->get_dz(outx->get_level());
 
         auto params = Parameters::getInstance();
 
@@ -115,21 +114,21 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC for p ==========================
 // ***************************************************************************************
 /// \brief  Initial pressure set up for NS Test - Beltrami
-/// \param  outx  pressure
+/// \param  outx  pressure
 // ***************************************************************************************
     void BeltramiBC_p(Field *outx) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->GetLevel());
-        size_t Ny = domain->get_Ny(outx->GetLevel());
+        size_t Nx = domain->get_Nx(outx->get_level());
+        size_t Ny = domain->get_Ny(outx->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->GetLevel());
-        real dy = domain->get_dy(outx->GetLevel());
-        real dz = domain->get_dz(outx->GetLevel());
+        real dx = domain->get_dx(outx->get_level());
+        real dy = domain->get_dy(outx->get_level());
+        real dz = domain->get_dz(outx->get_level());
 
         auto params = Parameters::getInstance();
 
@@ -174,22 +173,22 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC for u ==========================
 // ***************************************************************************************
 /// \brief  Initial x-velocity set up for NS Test - Beltrami
-/// \param  outx  x-velocity
+/// \param  outx  x-velocity
 /// \param  t time
 // ***************************************************************************************
     void BeltramiBC_u(Field *outx, real t) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->GetLevel());
-        size_t Ny = domain->get_Ny(outx->GetLevel());
+        size_t Nx = domain->get_Nx(outx->get_level());
+        size_t Ny = domain->get_Ny(outx->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->GetLevel());
-        real dy = domain->get_dy(outx->GetLevel());
-        real dz = domain->get_dz(outx->GetLevel());
+        real dx = domain->get_dx(outx->get_level());
+        real dy = domain->get_dy(outx->get_level());
+        real dz = domain->get_dz(outx->get_level());
 
         auto params = Parameters::getInstance();
 
@@ -230,22 +229,22 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC for v ==========================
 // ***************************************************************************************
 /// \brief  Initial y-velocity set up for NS Test - Beltrami
-/// \param  outy  y-velocity
+/// \param  outy  y-velocity
 /// \param  t time
 // ***************************************************************************************
     void BeltramiBC_v(Field *outx, real t) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->GetLevel());
-        size_t Ny = domain->get_Ny(outx->GetLevel());
+        size_t Nx = domain->get_Nx(outx->get_level());
+        size_t Ny = domain->get_Ny(outx->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->GetLevel());
-        real dy = domain->get_dy(outx->GetLevel());
-        real dz = domain->get_dz(outx->GetLevel());
+        real dx = domain->get_dx(outx->get_level());
+        real dy = domain->get_dy(outx->get_level());
+        real dz = domain->get_dz(outx->get_level());
 
         auto params = Parameters::getInstance();
 
@@ -286,22 +285,22 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC for w ==========================
 // ***************************************************************************************
 /// \brief  Initial z-velocity set up for NS Test - Beltrami
-/// \param  outz  z-velocity
+/// \param  outz  z-velocity
 /// \param  t time
 // ***************************************************************************************
     void BeltramiBC_w(Field *outx, real t) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->GetLevel());
-        size_t Ny = domain->get_Ny(outx->GetLevel());
+        size_t Nx = domain->get_Nx(outx->get_level());
+        size_t Ny = domain->get_Ny(outx->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->GetLevel());
-        real dy = domain->get_dy(outx->GetLevel());
-        real dz = domain->get_dz(outx->GetLevel());
+        real dx = domain->get_dx(outx->get_level());
+        real dy = domain->get_dy(outx->get_level());
+        real dz = domain->get_dz(outx->get_level());
 
         auto params = Parameters::getInstance();
 
@@ -342,7 +341,7 @@ namespace Functions {
 // ===================================== Buoyancy Force ==================================
 // ***************************************************************************************
 /// \brief  Buoyancy Force
-/// \param  out   force
+/// \param  out   force
 /// \param  T   Temperature
 /// \param  Ta    Ambient temperature
 // ***************************************************************************************
@@ -380,24 +379,24 @@ namespace Functions {
 // ================== NSTemp Test - MMS IC for u,v,w,p,T with buoyancy ===================
 // ***************************************************************************************
 /// \brief  Initial set up for NSTemp Test - MMS with buoyant force
-/// \param  outx  x-velocity
-/// \param  outy  y-velocity
-/// \param  outz  z-velocity
-/// \param  outp  pressure
-/// \param  outT  temperature
+/// \param  outx  x-velocity
+/// \param  outy  y-velocity
+/// \param  outz  z-velocity
+/// \param  outp  pressure
+/// \param  outT  temperature
 /// \param  t   time
 // ***************************************************************************************
     void BuoyancyMMS(Field *outx, Field *outy, Field *outz, Field *outp, Field *outT, real t) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->GetLevel());
-        size_t Ny = domain->get_Ny(outx->GetLevel());
+        size_t Nx = domain->get_Nx(outx->get_level());
+        size_t Ny = domain->get_Ny(outx->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx->GetLevel());
-        real dy = domain->get_dy(outx->GetLevel());
+        real dx = domain->get_dx(outx->get_level());
+        real dy = domain->get_dy(outx->get_level());
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -447,20 +446,20 @@ namespace Functions {
 // ========== NSTemp Test - MMS source term for temperature equation with buoyancy ========
 // ***************************************************************************************
 /// \brief  Source term for NSTemp Test - MMS with buoyant force
-/// \param  out force
+/// \param  out force
 /// \param  t time
 // ***************************************************************************************
     void BuoyancyST_MMS(Field *out, real t) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->GetLevel());
-        size_t Ny = domain->get_Ny(out->GetLevel());
+        size_t Nx = domain->get_Nx(out->get_level());
+        size_t Ny = domain->get_Ny(out->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(out->GetLevel());
-        real dy = domain->get_dy(out->GetLevel());
+        real dx = domain->get_dx(out->get_level());
+        real dy = domain->get_dy(out->get_level());
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -506,10 +505,10 @@ namespace Functions {
 // ===================================== NS Test - IC for u,v,w,p ========================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - Flow around cube or Channel flow with Drift
-/// \param  outx  x-velocity
-/// \param  outy  y-velocity
-/// \param  outz  z-velocity
-/// \param  outp  pressure
+/// \param  outx  x-velocity
+/// \param  outy  y-velocity
+/// \param  outz  z-velocity
+/// \param  outp  pressure
 // ***************************************************************************************
     void Drift(Field *outx, Field *outy, Field *outz, Field *outp) {
 
@@ -550,22 +549,22 @@ namespace Functions {
 // ================================ Diffusion Test - IC for u,v,w ========================
 // ***************************************************************************************
 /// \brief  Initial set up for Diffusion Test (c*exp*sin*sin*sin)
-/// \param  out velocity
+/// \param  out velocity
 /// \param  t   time
 // ***************************************************************************************
     void ExpSinusProd(Field *out, real t) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->GetLevel());
-        size_t Ny = domain->get_Ny(out->GetLevel());
+        size_t Nx = domain->get_Nx(out->get_level());
+        size_t Ny = domain->get_Ny(out->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->GetLevel());
-        real dy = domain->get_dy(out->GetLevel());
-        real dz = domain->get_dz(out->GetLevel());
+        real dx = domain->get_dx(out->get_level());
+        real dy = domain->get_dy(out->get_level());
+        real dz = domain->get_dz(out->get_level());
 
         auto params = Parameters::getInstance();
 
@@ -608,25 +607,25 @@ namespace Functions {
 // ============================ Burgers Test - IC for u,v,w ==============================
 // ***************************************************************************************
 /// \brief  Initial set up for Burgers Test (c*exp*sin(x+y+z))
-/// \param  outx  x-velocity
-/// \param  outy  y-velocity
-/// \param  outz  z-velocity
+/// \param  outx  x-velocity
+/// \param  outy  y-velocity
+/// \param  outz  z-velocity
 /// \param  t   time
 // ***************************************************************************************
     void ExpSinusSum(Field *outx, Field *outy, Field *outz, real t) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->GetLevel());
-        size_t Ny = domain->get_Ny(outx->GetLevel());
-        size_t Nz = domain->get_Nz(outx->GetLevel());
+        size_t Nx = domain->get_Nx(outx->get_level());
+        size_t Ny = domain->get_Ny(outx->get_level());
+        size_t Nz = domain->get_Nz(outx->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->GetLevel());
-        real dy = domain->get_dy(outx->GetLevel());
-        real dz = domain->get_dz(outx->GetLevel());
+        real dx = domain->get_dx(outx->get_level());
+        real dy = domain->get_dy(outx->get_level());
+        real dz = domain->get_dz(outx->get_level());
 
         auto params = Parameters::getInstance();
 
@@ -699,21 +698,21 @@ namespace Functions {
 // ============================= Diffusion Test - IC for u,v,w ===========================
 // ***************************************************************************************
 /// \brief  Initial set up for Diffusion Test (c*sin*sin*sin)
-/// \param  out velocity
+/// \param  out velocity
 // ***************************************************************************************
     void FacSinSinSin(Field *out) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->GetLevel());
-        size_t Ny = domain->get_Ny(out->GetLevel());
+        size_t Nx = domain->get_Nx(out->get_level());
+        size_t Ny = domain->get_Ny(out->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->GetLevel());
-        real dy = domain->get_dy(out->GetLevel());
-        real dz = domain->get_dz(out->GetLevel());
+        real dx = domain->get_dx(out->get_level());
+        real dy = domain->get_dy(out->get_level());
+        real dz = domain->get_dz(out->get_level());
 
         auto params = Parameters::getInstance();
 
@@ -754,22 +753,22 @@ namespace Functions {
 // ============================= Advection Test - IC for u,v,w ===========================
 // ***************************************************************************************
 /// \brief  Initial set up for Advection Test
-/// \param  out velocity
+/// \param  out velocity
 /// \param  t time
 // ***************************************************************************************
     void GaussBubble(Field *out, real t) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->GetLevel());
-        size_t Ny = domain->get_Ny(out->GetLevel());
+        size_t Nx = domain->get_Nx(out->get_level());
+        size_t Ny = domain->get_Ny(out->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->GetLevel());
-        real dy = domain->get_dy(out->GetLevel());
-        real dz = domain->get_dz(out->GetLevel());
+        real dx = domain->get_dx(out->get_level());
+        real dy = domain->get_dy(out->get_level());
+        real dz = domain->get_dz(out->get_level());
 
         auto params = Parameters::getInstance();
 
@@ -824,7 +823,7 @@ namespace Functions {
 // ======================== Layers (e.g. for temperature in PIV experiments) =============
 // ***************************************************************************************
 /// \brief  Initial set up as layers throughout the domain
-/// \param  out temperature
+/// \param  out temperature
 // ***************************************************************************************
     void Layers(Field *out) {
 
@@ -881,16 +880,16 @@ namespace Functions {
         }
 
         //set values into layers
-        size_t Nx = domain->get_Nx(out->GetLevel());
-        size_t Ny = domain->get_Ny(out->GetLevel());
+        size_t Nx = domain->get_Nx(out->get_level());
+        size_t Ny = domain->get_Ny(out->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->GetLevel());
-        real dy = domain->get_dy(out->GetLevel());
-        real dz = domain->get_dz(out->GetLevel());
+        real dx = domain->get_dx(out->get_level());
+        real dy = domain->get_dy(out->get_level());
+        real dz = domain->get_dz(out->get_level());
 
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
@@ -997,21 +996,21 @@ namespace Functions {
 // ============================= Diffusion Test - IC for u,v,w ===========================
 // ***************************************************************************************
 /// \brief  Initial set up for Diffusion Test
-/// \param  out velocity
+/// \param  out velocity
 // ***************************************************************************************
     void Hat(Field *out) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->GetLevel());
-        size_t Ny = domain->get_Ny(out->GetLevel());
+        size_t Nx = domain->get_Nx(out->get_level());
+        size_t Ny = domain->get_Ny(out->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->GetLevel());
-        real dy = domain->get_dy(out->GetLevel());
-        real dz = domain->get_dz(out->GetLevel());
+        real dx = domain->get_dx(out->get_level());
+        real dy = domain->get_dy(out->get_level());
+        real dz = domain->get_dz(out->get_level());
 
         auto params = Parameters::getInstance();
         real start_x = params->get_real("initial_conditions/x1");
@@ -1067,23 +1066,23 @@ namespace Functions {
 // ========================== NS Test - McDermott IC for u,v,w,p =========================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - McDermott
-/// \param  outx  x-velocity
-/// \param  outy  y-velocity
-/// \param  outz  z-velocity
-/// \param  outp  pressure
-/// \param  t   time
+/// \param  outx  x-velocity
+/// \param  outy  y-velocity
+/// \param  outz  z-velocity
+/// \param  outp  pressure
+/// \param  t   time
 // ***************************************************************************************
     void McDermott(Field *outx, Field *outy, Field *outz, Field *outp, real t) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->GetLevel());
-        size_t Ny = domain->get_Ny(outx->GetLevel());
+        size_t Nx = domain->get_Nx(outx->get_level());
+        size_t Ny = domain->get_Ny(outx->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx->GetLevel());
-        real dy = domain->get_dy(outx->GetLevel());
+        real dx = domain->get_dx(outx->get_level());
+        real dy = domain->get_dy(outx->get_level());
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -1125,29 +1124,14 @@ namespace Functions {
         }
     }
 
-// ============================= Ramp up function for HRR source =========================
-// ***************************************************************************************
-/// \brief  Ramp up function (in time) for Gaussian temperature source in energy equation
-/// \param  t time
-// ***************************************************************************************
-    real RampTanh(real t) {
-        auto params = Parameters::getInstance();
-        real tau = params->get_real("solver/temperature/source/tau");
-
-        real rt = t / tau;
-        real result = tanh(rt);
-
-        return result;
-    }
-
 // === Random Function - Superposition of field values with random values ===
 // ***************************************************************************************
 /// \brief  Creates random absolute/relative noise on given field
-/// \param  out     field
-/// \param  range   range of random numbers
-/// \param  is_absolute    Check if random number is relative (multiply) or absolute (additive)
-/// \param  seed    custom seed if given, else seed <= 0
-/// \param  step_size interval steps of random numbers
+/// \param  out          field
+/// \param  range        range of random numbers
+/// \param  is_absolute  check if random number is relative (multiply) or absolute (additive)
+/// \param  seed         custom seed if given, else seed <= 0
+/// \param  step_size    interval steps of random numbers
 // ***************************************************************************************
     void Random(Field *out, real range, bool is_absolute, int seed, real step_size) {
         auto boundary = BoundaryController::getInstance();
@@ -1172,10 +1156,11 @@ namespace Functions {
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
             // generate secret number between -range and range:
+            double no = dist(mt) * step_size;
             if (is_absolute) {
-                out->data[idx] += (dist(mt)*step_size);
+                out->data[idx] += (no);
             } else {
-                out->data[idx] *= (1 + dist(mt)*step_size);
+                out->data[idx] *= (1 + no);
             }
         }
         // boundary cells
@@ -1203,20 +1188,20 @@ namespace Functions {
 // ================================= Pressure Test - IC for p ============================
 // ***************************************************************************************
 /// \brief  Initial set up for Pressure Test (sin*sin*sin)
-/// \param  out   pressure
+/// \param  out   pressure
 // ***************************************************************************************
     void SinSinSin(Field *out) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->GetLevel());
-        size_t Ny = domain->get_Ny(out->GetLevel());
+        size_t Nx = domain->get_Nx(out->get_level());
+        size_t Ny = domain->get_Ny(out->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->GetLevel());
-        real dy = domain->get_dy(out->GetLevel());
-        real dz = domain->get_dz(out->GetLevel());
+        real dx = domain->get_dx(out->get_level());
+        real dy = domain->get_dy(out->get_level());
+        real dz = domain->get_dz(out->get_level());
 
         auto params = Parameters::getInstance();
         real l = params->get_real("initial_conditions/l"); //2;
@@ -1254,7 +1239,7 @@ namespace Functions {
 // ======================= uniform distribution (eg. for force) ==========================
 // ***************************************************************************************
 /// \brief  Initial uniform set up
-/// \param  out   force
+/// \param  out   force
 /// \param  val   value of uniform distribution
 // ***************************************************************************************
     void Uniform(Field *out, real val) {
@@ -1280,22 +1265,22 @@ namespace Functions {
 // ============================= NS Test - Vortex IC for u,v,w,p =========================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - Vertex
-/// \param  outx    x-velocity
-/// \param  outy    y-velocity
-/// \param  outz    z-velocity
-/// \param  outp    pressure
+/// \param  outx    x-velocity
+/// \param  outy    y-velocity
+/// \param  outz    z-velocity
+/// \param  outp    pressure
 // ***************************************************************************************
     void Vortex(Field *outx, Field *outy, Field *outz, Field *outp) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->GetLevel());
-        size_t Ny = domain->get_Ny(outx->GetLevel());
+        size_t Nx = domain->get_Nx(outx->get_level());
+        size_t Ny = domain->get_Ny(outx->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx->GetLevel());
-        real dy = domain->get_dy(outx->GetLevel());
+        real dx = domain->get_dx(outx->get_level());
+        real dy = domain->get_dy(outx->get_level());
 
         auto params = Parameters::getInstance();
 
@@ -1354,14 +1339,14 @@ namespace Functions {
     void VortexY(Field *outx, Field *outy, Field *outz, Field *outp) {
 
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->GetLevel());
-        size_t Ny = domain->get_Ny(outx->GetLevel());
+        size_t Nx = domain->get_Nx(outx->get_level());
+        size_t Ny = domain->get_Ny(outx->get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx->GetLevel());
-        real dy = domain->get_dy(outx->GetLevel());
+        real dx = domain->get_dx(outx->get_level());
+        real dy = domain->get_dy(outx->get_level());
 
         auto params = Parameters::getInstance();
 

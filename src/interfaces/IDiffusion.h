@@ -7,7 +7,7 @@
 #ifndef ARTSS_INTERFACES_IDIFFUSION_H_
 #define ARTSS_INTERFACES_IDIFFUSION_H_
 
-#include "../Field.h"
+#include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 
 class IDiffusion {

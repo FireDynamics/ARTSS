@@ -12,10 +12,11 @@
 #include "../boundary/BoundaryData.h"
 #include "SolverSelection.h"
 
-NSTempConSolver::NSTempConSolver() {
+NSTempConSolver::NSTempConSolver(FieldController *field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
+    m_field_controller = field_controller;
 
     auto params = Parameters::getInstance();
 
@@ -44,7 +45,7 @@ NSTempConSolver::NSTempConSolver() {
     m_gamma = params->get_real("solver/concentration/diffusion/gamma");
 
     // Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), p, rhs);
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), m_field_controller->field_p, m_field_controller->field_rhs);
 
     // Source of velocity
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
@@ -87,29 +88,29 @@ NSTempConSolver::~NSTempConSolver() {
 void NSTempConSolver::do_step(real t, bool sync) {
 
     // local variables and parameters for GPU
-    auto u = ISolver::u;
-    auto v = ISolver::v;
-    auto w = ISolver::w;
-    auto u0 = ISolver::u0;
-    auto v0 = ISolver::v0;
-    auto w0 = ISolver::w0;
-    auto u_tmp = ISolver::u_tmp;
-    auto v_tmp = ISolver::v_tmp;
-    auto w_tmp = ISolver::w_tmp;
-    auto p = ISolver::p;
-    auto p0 = ISolver::p0;
-    auto rhs = ISolver::rhs;
-    auto T = ISolver::T;
-    auto T0 = ISolver::T0;
-    auto T_tmp = ISolver::T_tmp;
-    auto C = ISolver::concentration;
-    auto C0 = ISolver::concentration0;
-    auto C_tmp = ISolver::concentration_tmp;
-    auto f_x = ISolver::f_x;
-    auto f_y = ISolver::f_y;
-    auto f_z = ISolver::f_z;
-    auto S_T = ISolver::S_T;
-    auto S_C = ISolver::S_concentration;
+    auto u = m_field_controller->field_u;
+    auto v = m_field_controller->field_v;
+    auto w = m_field_controller->field_w;
+    auto u0 = m_field_controller->field_u0;
+    auto v0 = m_field_controller->field_v0;
+    auto w0 = m_field_controller->field_w0;
+    auto u_tmp = m_field_controller->field_u_tmp;
+    auto v_tmp = m_field_controller->field_v_tmp;
+    auto w_tmp = m_field_controller->field_w_tmp;
+    auto p = m_field_controller->field_p;
+    auto p0 = m_field_controller->field_p0;
+    auto rhs = m_field_controller->field_rhs;
+    auto T = m_field_controller->field_T;
+    auto T0 = m_field_controller->field_T0;
+    auto T_tmp = m_field_controller->field_T_tmp;
+    auto C = m_field_controller->field_concentration;
+    auto C0 = m_field_controller->field_concentration0;
+    auto C_tmp = m_field_controller->field_concentration_tmp;
+    auto f_x = m_field_controller->field_force_x;
+    auto f_y = m_field_controller->field_force_y;
+    auto f_z = m_field_controller->field_force_z;
+    auto S_T = m_field_controller->field_source_T;
+    auto S_C = m_field_controller->field_source_concentration;
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -135,7 +136,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
     auto d_S_T = S_T->data;
     auto d_S_C = S_C->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->get_level());
 
     auto nu = m_nu;
     auto kappa = m_kappa;
@@ -153,7 +154,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
         adv_vel->advect(w, w0, u0, v0, w0, sync);
 
         // Couple velocity to prepare for diffusion
-        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve diffusion equation
         if (nu != 0.) {
@@ -165,7 +166,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
             dif_vel->diffuse(w, w0, w_tmp, nu, sync);
 
             // Couple data to prepare for adding source
-            ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 3. Add force
@@ -176,7 +177,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
             sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
 
             // Couple data to prepare for adding source
-            ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 4. Solve pressure equation and project
@@ -200,7 +201,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
         adv_temp->advect(T, T0, u, v, w, sync);
 
         // Couple temperature to prepare for diffusion
-        ISolver::couple_scalar(T, T0, T_tmp, sync);
+        FieldController::couple_scalar(T, T0, T_tmp, sync);
 
         // Solve diffusion equation
         if (kappa != 0.) {
@@ -210,7 +211,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
             dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
 
             // Couple temperature to prepare for adding source
-            ISolver::couple_scalar(T, T0, T_tmp, sync);
+            FieldController::couple_scalar(T, T0, T_tmp, sync);
         }
 
         // Add dissipation
@@ -221,7 +222,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
             sou_temp->dissipate(T, u, v, w, sync);
 
             // Couple temperature
-            ISolver::couple_scalar(T, T0, T_tmp, sync);
+            FieldController::couple_scalar(T, T0, T_tmp, sync);
         }
 
         // Add source
@@ -232,7 +233,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
             sou_temp->add_source(T, S_T, sync);
 
             // Couple temperature
-            ISolver::couple_scalar(T, T0, T_tmp, sync);
+            FieldController::couple_scalar(T, T0, T_tmp, sync);
         }
 
 // 6. Solve for concentration
@@ -243,7 +244,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
         adv_con->advect(C, C0, u, v, w, sync);
 
         // Couple concentration to prepare for diffusion
-        ISolver::couple_scalar(C, C0, C_tmp, sync);
+        FieldController::couple_scalar(C, C0, C_tmp, sync);
 
         // Solve diffusion equation
         if (gamma != 0.) {
@@ -253,7 +254,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
             dif_con->diffuse(C, C0, C_tmp, gamma, sync);
 
             // Couple concentration to prepare for adding source
-            ISolver::couple_scalar(C, C0, C_tmp, sync);
+            FieldController::couple_scalar(C, C0, C_tmp, sync);
         }
 
         // Add source
@@ -264,7 +265,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
             sou_con->add_source(C, S_C, sync);
 
             // Couple concentration
-            ISolver::couple_scalar(C, C0, C_tmp, sync);
+            FieldController::couple_scalar(C, C0, C_tmp, sync);
         }
 
 // 7. Sources updated in Solver::update_sources, TimeIntegration
@@ -291,7 +292,7 @@ void NSTempConSolver::control() {
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
 
     if (params->get("solver/diffusion/field") != "u,v,w") {
@@ -299,41 +300,41 @@ void NSTempConSolver::control() {
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
     if (params->get("solver/temperature/advection/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
     if (params->get("solver/temperature/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
     if (params->get("solver/concentration/advection/field") != BoundaryData::getFieldTypeName(FieldType::RHO)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
     if (params->get("solver/concentration/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::RHO)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
     if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
 }

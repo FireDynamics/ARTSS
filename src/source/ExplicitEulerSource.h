@@ -8,10 +8,9 @@
 #define ARTSS_SOURCE_EXPLICITEULERSOURCE_H_
 
 #include "../interfaces/ISource.h"
-#include "../Field.h"
+#include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
-
 
 class ExplicitEulerSource : public ISource {
  public:
@@ -26,7 +25,7 @@ class ExplicitEulerSource : public ISource {
 #endif
 
     real m_dt;
-    std::string m_dir_vel ="";
+    std::string m_dir_vel;
 };
 
 #endif /* ARTSS_SOURCE_EXPLICITEULERSOURCE_H_ */

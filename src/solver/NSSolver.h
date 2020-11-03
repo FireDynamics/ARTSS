@@ -12,6 +12,7 @@
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../field/FieldController.h"
 
 #ifdef BENCHMARKING
 #include "../utility/Utility.h"
@@ -20,9 +21,8 @@
 
 class NSSolver : public ISolver {
  public:
-    NSSolver();
-
-    ~NSSolver() override;
+    NSSolver(FieldController *field_controller);
+    ~NSSolver();
 
     void do_step(real t, bool sync) override;
 
@@ -30,6 +30,7 @@ class NSSolver : public ISolver {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+    FieldController *m_field_controller;
 
     IAdvection *adv_vel;
     IDiffusion *dif_vel;

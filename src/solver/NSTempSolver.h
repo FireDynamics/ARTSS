@@ -7,20 +7,19 @@
 #ifndef ARTSS_SOLVER_NSTEMPSOLVER_H_
 #define ARTSS_SOLVER_NSTEMPSOLVER_H_
 
-
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IAdvection.h"
 #include "../interfaces/IDiffusion.h"
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../field/FieldController.h"
 #include "../utility/Utility.h"
 
-
 class NSTempSolver : public ISolver {
- public:
-    NSTempSolver();
-    ~NSTempSolver() override;
+public:
+    NSTempSolver(FieldController *field_controller);
+    ~NSTempSolver();
 
     void do_step(real t, bool sync) override;
 
@@ -28,6 +27,7 @@ class NSTempSolver : public ISolver {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+    FieldController *m_field_controller;
 
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
@@ -39,7 +39,7 @@ class NSTempSolver : public ISolver {
 
     real m_nu;
     real m_kappa;
-    std::string m_dir_vel = "";
+    std::string m_dir_vel;
 
     static void control();
 

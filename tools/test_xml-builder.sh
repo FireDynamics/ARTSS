@@ -191,9 +191,11 @@ function create_testcases {
     <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct=\"BuoyancyMMS\"  random=\"No\">
+    echo "  <initial_conditions usr_fct=\"BuoyancyMMS\" random=\"No\">
     <rhoa> 1. </rhoa>
   </initial_conditions>" > ${NAME}_$IFILEVAL
+    echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    </source>" > ${NAME}_$SFILEVAL
     echo "    <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
@@ -224,7 +226,7 @@ function create_testcases {
     <value_4> 308.84 </value_4>
     <value_5> 310.54 </value_5>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct=\"RampTanh\" dissipation=\"No\">
         <HRR> 25000. </HRR>     <!-- Total heat release rate (in kW) -->
@@ -232,9 +234,9 @@ function create_testcases {
         <x0> 30. </x0>
         <y0> -3. </y0>
         <z0> 0. </z0>
-        <sigmax> 1.0 </sigmax>
-        <sigmay> 1.5 </sigmay>
-        <sigmaz> 1.0 </sigmaz>
+        <sigma_x> 1.0 </sigma_x>
+        <sigma_y> 1.5 </sigma_y>
+        <sigma_z> 1.0 </sigma_z>
         <tau> 5. </tau>
       </source>" > ${NAME}_$TSFILEVAL
     echo "  <adaption dynamic=\"Yes\" data_extraction=\"No\">
@@ -265,7 +267,7 @@ function create_testcases {
     echo "  <initial_conditions usr_fct=\"BuoyancyMMS\"  random=\"No\">
     <rhoa> 1. </rhoa>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     echo "      <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\">
       </source>" > ${NAME}_$TSFILEVAL
@@ -358,7 +360,7 @@ function create_testcases {
     NAMEVALUES[$INDEX]=NavierStokesTempTurb_OpenPlume
     FPATHVALUES[$INDEX]=examples
     NAME=${NAMEVALUES[$INDEX]}
-    BUILDER[$INDEX]="./xml-builder.sh --nstt --tend 4. --dt 0.01 --nu 2.44139e-05 --beta 3.28e-3 --g -9.81 --kappa 3.31e-5 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 6 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --prt 0.5 --solavail No  --xstart -1. --xend 1. --ystart 0. --yend 4. --zstart -1. --zend 1. --nx 64 --ny 128 --nz 64 --vtkplots 40"
+    BUILDER[$INDEX]="./xml-builder.sh --nstt --tend 4. --dt 0.01 --nu 2.44139e-05 --beta 3.28e-3 --g -9.81 --kappa 3.31e-5 --advectiontype SemiLagrangian --diffusiontype Explicit --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 6 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Explicit --prt 0.5 --solavail No  --xstart -1. --xend 1. --ystart 0. --yend 4. --zstart -1. --zend 1. --nx 64 --ny 128 --nz 64 --vtkplots 40"
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"bottom\" type=\"dirichlet\" value=\"0.0\" />
     <boundary field=\"u,v,w\" patch=\"front,back,top,left,right\" type=\"neumann\" value=\"0.0\" />
@@ -367,10 +369,16 @@ function create_testcases {
     <boundary field=\"T\" patch=\"front,back,top,left,right\" type=\"neumann\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"bottom\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct=\"Uniform\" random=\"No\">
+    echo "  <initial_conditions usr_fct=\"Uniform\" random=\"Yes\">
+      <random custom_seed=\"Yes\" custom_steps=\"Yes\" absolute=\"Yes\">
+        <seed> 1 </seed>
+        <step_size> 1 </step_size>
+        <range> 10 </range>
+      </random>
     <val> 303.64 </val>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"No\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+      <ambient_temperature_value> 300 </ambient_temperature_value>
     </source>" > ${NAME}_$SFILEVAL
     echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct= \"RampTanh\" dissipation=\"No\">
         <HRR> 2500. </HRR>      <!-- Total heat release rate (in kW) -->
@@ -378,9 +386,9 @@ function create_testcases {
         <x0> 0. </x0>
         <y0> 1. </y0>
         <z0> 0.1 </z0>
-        <sigmax> 0.1 </sigmax>
-        <sigmay> 0.1 </sigmay>
-        <sigmaz> 0.1 </sigmaz>
+        <sigma_x> 0.1 </sigma_x>
+        <sigma_y> 0.1 </sigma_y>
+        <sigma_z> 0.1 </sigma_z>
         <tau> 5. </tau>
       </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))

@@ -34,7 +34,7 @@ ExplicitDiffuse::ExplicitDiffuse() {
 void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
 
     // local variables and parameters for GPU
-    FieldType type = out->GetType();
+    FieldType type = out->get_type();
 
     auto d_out = out->data;
 
@@ -57,8 +57,8 @@ void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real 
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto bsize = domain->get_size(out->GetLevel());
-    FieldType type = out->GetType();
+    auto bsize = domain->get_size(out->get_level());
+    FieldType type = out->get_type();
 
     auto d_out = out->data;
 
@@ -73,10 +73,10 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, bo
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->get_level());
 
-    auto bsize = domain->get_size(out->GetLevel());
+    auto bsize = domain->get_size(out->get_level());
 
     auto d_out = out->data;
     auto d_in = in->data;
@@ -86,9 +86,9 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, bo
     size_t *d_iList = boundary->get_innerList_level_joined();
     auto bsize_i = boundary->getSize_innerList();
 
-    real rdx = D / (domain->get_dx(out->GetLevel()) * domain->get_dx(out->GetLevel()));
-    real rdy = D / (domain->get_dy(out->GetLevel()) * domain->get_dy(out->GetLevel()));
-    real rdz = D / (domain->get_dz(out->GetLevel()) * domain->get_dz(out->GetLevel()));
+    real rdx = D / (domain->get_dx(out->get_level()) * domain->get_dx(out->get_level()));
+    real rdy = D / (domain->get_dy(out->get_level()) * domain->get_dy(out->get_level()));
+    real rdz = D / (domain->get_dz(out->get_level()) * domain->get_dz(out->get_level()));
 
 #pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_iList[:bsize_i]) async
     for (size_t ii = 0; ii < bsize_i; ++ii) {
@@ -116,10 +116,10 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, co
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->get_level());
 
-    auto bsize = domain->get_size(out->GetLevel());
+    auto bsize = domain->get_size(out->get_level());
 
     auto d_out = out->data;
     auto d_in = in->data;

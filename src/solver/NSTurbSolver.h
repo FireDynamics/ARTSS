@@ -14,11 +14,12 @@
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../field/FieldController.h"
 
 class NSTurbSolver : public ISolver {
  public:
-    NSTurbSolver();
-    ~NSTurbSolver() override;
+    NSTurbSolver(FieldController *field_controller);
+    ~NSTurbSolver();
 
     void do_step(real t, bool sync) override;
 
@@ -33,6 +34,7 @@ class NSTurbSolver : public ISolver {
     ISource *sou_vel;
     ITurbulence *mu_tub;
 
+    FieldController *m_field_controller;
     real m_nu;
 
     static void control();

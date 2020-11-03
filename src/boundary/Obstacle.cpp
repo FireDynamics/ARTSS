@@ -393,11 +393,11 @@ bool Obstacle::isObstacleCell(size_t i, size_t j, size_t k) {
 
 //======================================== Match grid ====================================
 // ***************************************************************************************
-/// \brief  Snaps value to grid discretization
+/// \brief  Snaps value to grid discretisation
 /// \param  obstacleCoordinate Coordinate of obstacle
 /// \param  spacing dx/dy/dz
 /// \param  startCoordinate X1/Y1/Z1
-/// \return real Calculated real grid coordiante
+/// \return real Calculated real grid coordinate
 // ***************************************************************************************
 real Obstacle::matchGrid(double obstacleCoordinate, real spacing, real startCoordinate) {
     return std::round((-startCoordinate + obstacleCoordinate) / spacing) * spacing + startCoordinate;

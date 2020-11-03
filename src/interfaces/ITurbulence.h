@@ -7,7 +7,7 @@
 #ifndef ARTSS_INTERFACES_ITURBULENCE_H_
 #define ARTSS_INTERFACES_ITURBULENCE_H_
 
-#include "../Field.h"
+#include "../field/Field.h"
 
 class ITurbulence {
 

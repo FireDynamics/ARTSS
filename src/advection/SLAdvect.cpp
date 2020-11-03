@@ -43,8 +43,8 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    size_t bsize = domain->get_size(out->GetLevel());
-    FieldType type = out->GetType();
+    size_t bsize = domain->get_size(out->get_level());
+    FieldType type = out->get_type();
 
     auto d_out = out->data;
     auto d_in = in->data;
@@ -59,12 +59,12 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
 
 #pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize])
     {
-        const size_t Nx = domain->get_Nx(out->GetLevel());    // due to unnecessary parameter passing of *this
-        const size_t Ny = domain->get_Ny(out->GetLevel());
+        const size_t Nx = domain->get_Nx(out->get_level());    // due to unnecessary parameter passing of *this
+        const size_t Ny = domain->get_Ny(out->get_level());
 
-        const real dx = domain->get_dx(out->GetLevel());    // due to unnecessary parameter passing of *this
-        const real dy = domain->get_dy(out->GetLevel());
-        const real dz = domain->get_dz(out->GetLevel());
+        const real dx = domain->get_dx(out->get_level());    // due to unnecessary parameter passing of *this
+        const real dy = domain->get_dy(out->get_level());
+        const real dz = domain->get_dz(out->get_level());
 
         const real rdx = 1. / dx;        // due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;

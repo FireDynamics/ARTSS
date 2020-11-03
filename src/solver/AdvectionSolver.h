@@ -7,16 +7,16 @@
 #ifndef ARTSS_SOLVER_ADVECTIONSOLVER_H_
 #define ARTSS_SOLVER_ADVECTIONSOLVER_H_
 
+#include "../field/FieldController.h"
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IAdvection.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
 
-
 class AdvectionSolver : public ISolver {
 public:
-    AdvectionSolver();
-    ~AdvectionSolver() override;
+    explicit AdvectionSolver(FieldController *field_controller);
+    ~AdvectionSolver();
 
     void do_step(real t, bool sync) override;
 
@@ -24,10 +24,12 @@ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    IAdvection* adv;
-    Field* u_linm;
-    Field* v_linm;
-    Field* w_linm;
+    FieldController *m_field_controller;
+
+    IAdvection *adv;
+    Field *u_linm;
+    Field *v_linm;
+    Field *w_linm;
 
     static void control();
 };

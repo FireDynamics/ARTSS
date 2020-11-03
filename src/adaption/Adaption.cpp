@@ -19,8 +19,8 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-Adaption::Adaption(ISolver *solver) {
-    m_solver = solver;
+Adaption::Adaption(FieldController *field_controller) {
+    m_field_controller = field_controller;
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
     m_dynamic = (params->get("adaption/dynamic") == "Yes");
@@ -38,9 +38,9 @@ Adaption::Adaption(ISolver *solver) {
     if (m_dynamic) {
         std::string init = params->get("adaption/class/name");
         if (init == "Layers") {
-            func = new Layers(solver);
+            func = new Layers(m_field_controller);
         } else if (init == "Vortex" || init == "VortexY") {
-            func = new Vortex(solver);
+            func = new Vortex(m_field_controller);
         } else {
 #ifndef BENCHMARKING
             m_logger->critical("Type {} is not defined", init);
@@ -103,13 +103,13 @@ void Adaption::extractData(const std::string &filename, real height, real time) 
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
-    real *data_temp = m_solver->T->data;
-    real *data_tempA = m_solver->T_ambient->data;
-    real *data_u = m_solver->u->data;
-    real *data_v = m_solver->v->data;
-    real *data_w = m_solver->w->data;
-    real *data_nu = m_solver->nu_t->data;
-    real *data_kappa = m_solver->kappa_t->data;
+    real *data_temp = m_field_controller->field_T->data;
+    real *data_tempA = m_field_controller->field_T_ambient->data;
+    real *data_u = m_field_controller->field_u->data;
+    real *data_v = m_field_controller->field_v->data;
+    real *data_w = m_field_controller->field_w->data;
+    real *data_nu = m_field_controller->field_nu_t->data;
+    real *data_kappa = m_field_controller->field_kappa_t->data;
 
     std::ofstream file;
     file.open(filename, std::ios::app);
@@ -137,10 +137,10 @@ void Adaption::extractData(const std::string &filename) {
     size_t y_end = Ny;
     size_t z_end = domain->get_Nz();
 
-    real *data_temp = m_solver->T->data;
-    real *data_u = m_solver->u->data;
-    real *data_v = m_solver->v->data;
-    real *data_w = m_solver->w->data;
+    real *data_temp = m_field_controller->field_T->data;
+    real *data_u = m_field_controller->field_u->data;
+    real *data_v = m_field_controller->field_v->data;
+    real *data_w = m_field_controller->field_w->data;
 
     std::ofstream file;
     file.open(filename, std::ios::app);
