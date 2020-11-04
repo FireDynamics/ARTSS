@@ -4,6 +4,7 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <algorithm>
 #include "Multigrid.h"
 
 
