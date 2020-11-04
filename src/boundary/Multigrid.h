@@ -1,8 +1,8 @@
-/// \file 		Multigrid.h
-/// \brief 		Creats all lists needed for multigrid
-/// \date 		Oct 01, 2019
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       Multigrid.h
+/// \brief      Creates all lists needed for multigrid
+/// \date       Oct 01, 2019
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_BOUNDARY_MULTIGRID_H_
 #define ARTSS_BOUNDARY_MULTIGRID_H_
@@ -10,7 +10,9 @@
 #include "Boundary.h"
 #include "Surface.h"
 #include "Obstacle.h"
-#include "../Field.h"
+#include "../Domain.h"
+#include "../field/Field.h"
+#include "../utility/Utility.h"
 #include "BoundaryDataController.h"
 #include <vector>
 
@@ -44,6 +46,9 @@ public:
     size_t getObstacleStrideZ(size_t id, size_t level);
 
 private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     std::vector<BoundaryData*> m_boundaryData;
     size_t m_levels;
     // all surfaces divided by level

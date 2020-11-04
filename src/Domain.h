@@ -12,10 +12,13 @@
 #include <accelmath.h>
 #endif
 #include <cstddef>
+
 #include "utility/GlobalMacrosTypes.h"
+#include "utility/Parameters.h"
+#include "utility/Utility.h"
 
 class Domain {
-public:
+ public:
     Domain();
 
     static Domain *getInstance();
@@ -89,6 +92,9 @@ public:
     void printDetails();
 
 private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     static Domain *single; //Singleton
     void calc_MG_values();
 

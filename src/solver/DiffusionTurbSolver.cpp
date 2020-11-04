@@ -4,14 +4,13 @@
 /// \author     Suryanarayana Maddu
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-
 #include "DiffusionTurbSolver.h"
-#include "../utility/Parameters.h"
-#include "../Domain.h"
-#include "SolverSelection.h"
 
-DiffusionTurbSolver::DiffusionTurbSolver() {
+DiffusionTurbSolver::DiffusionTurbSolver(FieldController *field_controller) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
+    m_field_controller = field_controller;
 
     auto params = Parameters::getInstance();
 
@@ -40,19 +39,18 @@ DiffusionTurbSolver::~DiffusionTurbSolver() {
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void DiffusionTurbSolver::do_step(real t, bool sync) {
-
 // 1. Solve diffusion equation
 // local variables and parameters for GPU
-    auto u = ISolver::u;
-    auto v = ISolver::v;
-    auto w = ISolver::w;
-    auto u0 = ISolver::u0;
-    auto v0 = ISolver::v0;
-    auto w0 = ISolver::w0;
-    auto u_tmp = ISolver::u_tmp;
-    auto v_tmp = ISolver::v_tmp;
-    auto w_tmp = ISolver::w_tmp;
-    auto nu_t = ISolver::nu_t;     //Eddy Viscosity
+    auto u = m_field_controller->field_u;
+    auto v = m_field_controller->field_v;
+    auto w = m_field_controller->field_w;
+    auto u0 = m_field_controller->field_u0;
+    auto v0 = m_field_controller->field_v0;
+    auto w0 = m_field_controller->field_w0;
+    auto u_tmp = m_field_controller->field_u_tmp;
+    auto v_tmp = m_field_controller->field_v_tmp;
+    auto w_tmp = m_field_controller->field_w_tmp;
+    auto nu_t = m_field_controller->field_nu_t;     //Eddy Viscosity
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -65,20 +63,18 @@ void DiffusionTurbSolver::do_step(real t, bool sync) {
     auto d_w_tmp = w_tmp->data;
     auto d_nu_t = nu_t->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->get_level());
 
     auto nu = m_nu;
 
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_nu_t[:bsize]) //EV
     {
 #ifndef BENCHMARKING
-        std::cout << "Calculating Turbulent viscosity ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Calculating Turbulent viscosity ...");
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 #ifndef BENCHMARKING
-        std::cout << "Diffuse ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Diffuse ...");
 #endif
         dif->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif->diffuse(v, v0, v_tmp, nu, nu_t, sync);
@@ -93,9 +89,11 @@ void DiffusionTurbSolver::do_step(real t, bool sync) {
 void DiffusionTurbSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger(typeid(DiffusionTurbSolver).name());
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }

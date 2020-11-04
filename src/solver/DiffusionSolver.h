@@ -9,17 +9,24 @@
 
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IDiffusion.h"
+#include "../field/FieldController.h"
+#include "../utility/Utility.h"
 
 class DiffusionSolver: public ISolver {
-public:
-  DiffusionSolver();
-  ~DiffusionSolver() override;
+ public:
+    DiffusionSolver(FieldController *field_controller);
+    ~DiffusionSolver();
 
-  void do_step(real t, bool sync) override;
+    void do_step(real t, bool sync) override;
 
-private:
-  IDiffusion* dif;
-  real m_nu;
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
+
+    FieldController *m_field_controller;
+    IDiffusion *dif;
+    real m_nu;
 
     static void control();
 };

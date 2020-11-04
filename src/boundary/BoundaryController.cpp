@@ -1,21 +1,23 @@
-/// \file 		BoundaryController.cpp
-/// \brief 		Controll class for boundary
-/// \date 		Oct 01, 2020
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       BoundaryController.cpp
+/// \brief      Controll class for boundary
+/// \date       Oct 01, 2020
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "BoundaryController.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include <tuple>
+#include "../utility/Utility.h"
 #include <algorithm>
-#include <iostream>
 
 BoundaryController *BoundaryController::singleton = nullptr; // Singleton
 
 
 BoundaryController::BoundaryController() {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     m_bdc_boundary = new BoundaryDataController();
     readXML();
     if (m_numberOfObstacles + m_numberOfSurfaces > 0) {
@@ -42,7 +44,7 @@ void BoundaryController::readXML() {
 // ================================= Parser =============================================
 // ***************************************************************************************
 /// \brief  parses boundaries of domain from XML file
-/// \param	xmlParameter pointer to XMLElement to start with
+/// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseBoundaryParameter(tinyxml2::XMLElement *xmlParameter) {
 // BOUNDARY
@@ -56,11 +58,11 @@ void BoundaryController::parseBoundaryParameter(tinyxml2::XMLElement *xmlParamet
 // ================================= Parser =============================================
 // ***************************************************************************************
 /// \brief  parses surfaces from XML file
-/// \param	xmlParameter pointer to XMLElement to start with
+/// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseSurfaceParameter(tinyxml2::XMLElement *xmlParameter) {
 // SURFACES
-//TODO
+//TODO surfaces
     m_hasSurfaces = (Parameters::getInstance()->get("surfaces/enabled") == "Yes");
     if (m_hasSurfaces) {
         std::vector<Surface *> surfaces;
@@ -78,7 +80,7 @@ void BoundaryController::parseSurfaceParameter(tinyxml2::XMLElement *xmlParamete
 // ================================= Parser =============================================
 // ***************************************************************************************
 /// \brief  parses obstacles from XML file
-/// \param	xmlParameter pointer to XMLElement to start with
+/// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParameter) {
 // OBSTACLES
@@ -97,10 +99,10 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
             real oz1;
             real oz2;
             while (curElem) {
-                std::string nodename = curElem->Value();
-                if (nodename == "boundary") {
+                std::string nodeName = curElem->Value();
+                if (nodeName == "boundary") {
                     bdc->addBoundaryData(curElem);
-                } else if (nodename == "geometry") {
+                } else if (nodeName == "geometry") {
                     ox1 = curElem->DoubleAttribute("ox1");
                     ox2 = curElem->DoubleAttribute("ox2");
                     oy1 = curElem->DoubleAttribute("oy1");
@@ -108,7 +110,9 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
                     oz1 = curElem->DoubleAttribute("oz1");
                     oz2 = curElem->DoubleAttribute("oz2");
                 } else {
-                    std::cout << "Ignoring unknown node " << nodename << std::endl;
+#ifndef BENCHMARKING
+                    m_logger->warn("Ignoring unknown node {}", nodeName);
+#endif
                 }
                 curElem = curElem->NextSiblingElement();
             }
@@ -156,7 +160,8 @@ BoundaryController *BoundaryController::getInstance() {
 /// \brief  prints boundaries (outer, inner, surfaces)
 // ***************************************************************************************
 void BoundaryController::printBoundaries() {
-    std::cout << "-- Info summary" << std::endl;
+#ifndef BENCHMARKING
+    m_logger->info("-- Info summary");
     Domain::getInstance()->print();
     m_bdc_boundary->print();
     for (size_t i = 0; i < m_numberOfObstacles; i++) {
@@ -166,6 +171,7 @@ void BoundaryController::printBoundaries() {
     for (size_t i = 0; i < m_numberOfSurfaces; i++) {
         m_surfaceList[i]->print();
     }
+#endif
 }
 
 //======================================== Update lists ====================================
@@ -190,9 +196,9 @@ void BoundaryController::applyBoundary(real *d, FieldType f, bool sync) {
 // ================================= Apply BCs in level l > 0 ===========================================
 // ***************************************************************************************
 /// \brief  applies zero-value boundary conditions to all boundaries (domain, surfaces, obstacles) for level l
-/// \param 	d 			data field
-/// \param 	level 		Multigrid level
-/// \param 	f 			type of output pointer
+/// \param  d           data field
+/// \param  level       Multigrid level
+/// \param  f           type of output pointer
 /// \param  sync    synchronization (default: false)
 // ***************************************************************************************
 void BoundaryController::applyBoundary(real *d, size_t level, FieldType f, bool sync) {

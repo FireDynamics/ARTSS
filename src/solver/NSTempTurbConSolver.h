@@ -1,12 +1,12 @@
-/// \file 		NSTempTurbConSolver.h
-/// \brief 		Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
-/// \date 		Oct 02, 2017
-/// \author 	Küsters
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       NSTempTurbConSolver.h
+/// \brief      Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
+/// \date       Oct 02, 2017
+/// \author     Küsters
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 
-#ifndef NSTEMPTURBCONSOLVER_H_
-#define NSTEMPTURBCONSOLVER_H_
+#ifndef ARTSS_SOLVER_NSTEMPTURBCONSOLVER_H_
+#define ARTSS_SOLVER_NSTEMPTURBCONSOLVER_H_
 
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IAdvection.h"
@@ -15,15 +15,22 @@
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
+#include "../field/FieldController.h"
 
 class NSTempTurbConSolver : public ISolver {
-public:
-    NSTempTurbConSolver();
-    ~NSTempTurbConSolver() override;
+ public:
+    NSTempTurbConSolver(FieldController *field_controller);
+    ~NSTempTurbConSolver();
 
     void do_step(real t, bool sync) override;
 
-private:
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
+    FieldController *m_field_controller;
+
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
     IAdvection *adv_temp;
@@ -39,7 +46,7 @@ private:
     real m_nu;
     real m_kappa;
     real m_gamma;
-    std::string m_dir_vel = "";
+    std::string m_dir_vel;
 
     static void control();
 
@@ -51,4 +58,4 @@ private:
     std::string m_conFct;
 };
 
-#endif /* NSTEMPTURBCONSOLVER_H_ */
+#endif /* ARTSS_SOLVER_NSTEMPTURBCONSOLVER_H_ */

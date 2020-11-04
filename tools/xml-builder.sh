@@ -9,25 +9,16 @@ DOMAINOBSTACLES=""
 # leave empty if not necessary - do not forget to escape "
 BOUNDARYCONDITIONS="
     <boundaries>
-       <boundary field=\"u,v,w\" patch=\"front,back,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
-       <boundary field=\"u,v,w\" patch=\"left,right\" type=\"neumann\" value=\"0.0\" />
-       <boundary field=\"p\" patch=\"front,back,top,bottom\" type=\"neumann\" value=\"0.0\" />
-       <boundary field=\"p\" patch=\"left,right\" type=\"dirichlet\" value=\"0.0\" />
-       <boundary field=\"T\" patch=\"front,back,left,right,top\" type=\"dirichlet\" value=\"304.64\" />
-       <boundary field=\"T\" patch=\"bottom\" type=\"neumann\" value=\"0.0\" />
+      <boundary field=\"u,v,w\" patch=\"front,back,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
+      <boundary field=\"u,v,w\" patch=\"left,right\" type=\"neumann\" value=\"0.0\" />
+      <boundary field=\"p\" patch=\"front,back,top,bottom\" type=\"neumann\" value=\"0.0\" />
+      <boundary field=\"p\" patch=\"left,right\" type=\"dirichlet\" value=\"0.0\" />
+      <boundary field=\"T\" patch=\"front,back,left,right,top\" type=\"dirichlet\" value=\"304.64\" />
+      <boundary field=\"T\" patch=\"bottom\" type=\"neumann\" value=\"0.0\" />
     </boundaries>"
 INITIALCONDITION="
-    <initial_conditions usr_fct = \"LayersT\" dir=\"y\">  <!-- Layers  -->
-	<n_layers> 5 </n_layers>
-        <border_1> 1. </border_1>  <!-- at cell face -->
-        <border_2> 2. </border_2>  <!-- at cell face -->
-        <border_3> 3. </border_3>  <!-- at cell face -->
-        <border_4> 4. </border_4>  <!-- at cell face -->
-        <value_1> 303.64 </value_1>
-        <value_2> 304.04 </value_2>
-        <value_3> 305.24 </value_3>
-        <value_4> 308.84 </value_4>
-        <value_5> 310.54 </value_5>
+    <initial_conditions usr_fct=\"Uniform\">
+      <val> 300 </val>
     </initial_conditions>"
 
 SOURCE="
@@ -120,6 +111,7 @@ OBSTACLE=1
 SURFACE=1
 
 LEADINGNO=2
+
 #------------------------------------------------------------------------------
 YELLOW='\033[1;33m'
 NC='\033[0;m'
@@ -236,6 +228,9 @@ ${YELLOW}--initialconditions${NC} \tgive initial conditions in file
 ${YELLOW}--ys${NC}          \tset soot yield (in %/100)
 
 ${YELLOW}--kappa${NC}         \tset physical parameter thermal diffusion (default: $KAPPA)
+
+${YELLOW}--logginglevel${NC}        \tset the logging level \{trace, debug, info, warn, error\} (must be lower case)
+${YELLOW}--loggingfile${NC}         \tset the output file
 
 ${YELLOW}--maxcycle${NC}\tset number of maximal cycles for V-Cycle multigrid pre-conditioning (default: $MAXCYCLE)
 
@@ -465,63 +460,63 @@ else
   if [ $ADV -eq 0 ]
   then
     WRITETO="$WRITETO
-  <solver description = \"AdvectionSolver\" >"
+  <solver description=\"AdvectionSolver\" >"
   elif [ $BUR -eq 0 ]
   then
     WRITETO="$WRITETO
-  <solver description = \"AdvectionDiffusionSolver\" >"
+  <solver description=\"AdvectionDiffusionSolver\" >"
   elif [ $DIFF -eq 0 ]
   then
     WRITETO="$WRITETO
-  <solver description = \"DiffusionSolver\" >"
+  <solver description=\"DiffusionSolver\" >"
   elif [ $DIFFT -eq 0 ]
   then
     WRITETO="$WRITETO
-  <solver description = \"DiffusionTurbSolver\" >"
+  <solver description=\"DiffusionTurbSolver\" >"
   elif [ $NS -eq 0 ]
   then
     WRITETO="$WRITETO
-  <solver description = \"NSSolver\" >"
+  <solver description=\"NSSolver\" >"
   elif [ $NSTu -eq 0 ]
   then
     WRITETO="$WRITETO
-  <solver description = \"NSTurbSolver\" >"
+  <solver description=\"NSTurbSolver\" >"
   elif [ $NSTe -eq 0 ]
   then
     WRITETO="$WRITETO
-  <solver description = \"NSTempSolver\" >"
+  <solver description=\"NSTempSolver\" >"
   elif [ $NSTT -eq 0 ]
   then
     WRITETO="$WRITETO
-  <solver description = \"NSTempTurbSolver\" >"
+  <solver description=\"NSTempTurbSolver\" >"
   elif [ $NSTC -eq 0 ]
   then
     WRITETO="$WRITETO
-  <solver description = \"NSTempConSolver\" >"
+  <solver description=\"NSTempConSolver\" >"
   elif [ $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-  <solver description = \"NSTempTurbConSolver\" >"
+  <solver description=\"NSTempTurbConSolver\" >"
   elif [ $PRE -eq 0 ]
   then
     WRITETO="$WRITETO
-  <solver description = \"PressureSolver\" >"
+  <solver description=\"PressureSolver\" >"
   else
     WRITETO="$WRITETO
-  <solver description = \"$SOLVER\" >"
+  <solver description=\"$SOLVER\" >"
   fi
 #-------advection------
   if [ $ADV -eq 0 -o $BUR -eq 0 -o $NS -eq 0 -o $NSTu -eq 0 -o $NSTe -eq 0 -o $NSTT -eq 0 -o $NSTC -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-    <advection type = \"$ADVECTIONTYPE\" field = \"u,v,w\">
+    <advection type=\"$ADVECTIONTYPE\" field=\"u,v,w\">
     </advection>"
   fi
 #-------diffusion-------
   if [ $DIFF -eq 0 -o $DIFFT -eq 0 -o $BUR -eq 0 -o $NS -eq 0 -o $NSTu -eq 0 -o $NSTe -eq 0 -o $NSTT -eq 0 -o $NSTC -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-    <diffusion type = \"$DIFFUSIONTYPE\" field = \"u,v,w\">
+    <diffusion type=\"$DIFFUSIONTYPE\" field=\"u,v,w\">
       <max_iter> $MAXITER </max_iter>  <!-- max number of iterations -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
       <w> 1 </w>  <!-- relaxation parameter -->
@@ -531,7 +526,7 @@ else
   if [ $DIFFT -eq 0 -o $NSTu -eq 0 -o $NSTT -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-    <turbulence type = \"$TURBULENCETYPE\">
+    <turbulence type=\"$TURBULENCETYPE\">
       <Cs> $CS </Cs>
     </turbulence>"
   fi
@@ -543,7 +538,7 @@ else
       WRITETO=${WRITETO}"\n"$(cat $SFILE)
     else
       WRITETO="$WRITETO
-    <source type = \"$SOURCETYPE\" force_fct = \"$FORCEFCT\" dir = \"$FORCEDIR\">  <!-- Direction of force (x,y,z or combinations xy,xz,yz,xyz) -->
+    <source type=\"$SOURCETYPE\" force_fct=\"$FORCEFCT\" dir=\"$FORCEDIR\">  <!-- Direction of force (x,y,z or combinations xy,xz,yz,xyz) -->
     </source>"
     fi
   fi
@@ -551,12 +546,12 @@ else
   if [ $PRE -eq 0 -o $NS -eq 0 -o $NSTu -eq 0 -o $NSTe -eq 0 -o $NSTT -eq 0 -o $NSTC -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-    <pressure type = \"$PRESSURETYPE\" field = \"p\">
+    <pressure type=\"$PRESSURETYPE\" field=\"p\">
       <n_level> $NLEVEL </n_level>  <!-- number of restriction levels -->
       <n_cycle> $NCYCLE </n_cycle> <!-- number of cycles -->
       <max_cycle> $MAXCYCLE </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
-      <diffusion type = \"$PRESSUREDIFFUSIONTYPE\" field = \"p\">
+      <diffusion type=\"$PRESSUREDIFFUSIONTYPE\" field=\"p\">
         <n_relax> 4 </n_relax>  <!-- number of iterations -->
         <max_solve> $MAXSOLVE </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
@@ -569,9 +564,9 @@ else
   then
     WRITETO="$WRITETO
     <temperature>
-      <advection type = \"$TEMPADVECTIONTYPE\" field = \"T\">
+      <advection type=\"$TEMPADVECTIONTYPE\" field=\"T\">
       </advection>
-      <diffusion type = \"$TEMPDIFFUSIONTYPE\" field = \"T\">
+      <diffusion type=\"$TEMPDIFFUSIONTYPE\" field=\"T\">
         <max_iter> $MAXITER </max_iter>
         <tol_res> 1e-07 </tol_res>
         <w> 1 </w>
@@ -580,7 +575,7 @@ else
   if [ $NSTT -eq 0 -o $NSTTC -eq 0 ]
   then
     WRITETO="$WRITETO
-      <turbulence include = \"Yes\">
+      <turbulence include=\"Yes\">
         <Pr_T> $PRT </Pr_T>
       </turbulence>"
   fi
@@ -593,21 +588,21 @@ else
       if [ "$TEMPSOURCEFCT" == "Zero" ]
       then
         WRITETO="$WRITETO
-      <source type = \"$TEMPSOURCETYPE\" temp_fct = \"$TEMPSOURCEFCT\" dissipation = \"No\">
+      <source type=\"$TEMPSOURCETYPE\" temp_fct=\"$TEMPSOURCEFCT\" dissipation=\"No\">
       </source>"
       fi
       if [ \"$TEMPSOURCEFCT\" == \"GaussST\" ]
       then
         WRITETO="$WRITETO
-      <source type = \"$TEMPSOURCETYPE\" temp_fct = \"GaussST\" ramp_fct = \"RampTanh\" dissipation = \"No\">
+      <source type=\"$TEMPSOURCETYPE\" temp_fct=\"GaussST\" ramp_fct=\"RampTanh\" dissipation=\"No\">
         <HRR> $HRR </HRR>  <!-- total heat release rate (in kW) -->
         <cp> $CP </cp>  <!-- specific heat capacity (in kJ/kgK)-->
-        <x0> $GAUSSX0  </x0>
+        <x0> $GAUSSX0 </x0>
         <y0> $GAUSSY0 </y0>
         <z0> $GAUSSZ0 </z0>
-        <sigmax> $SIGMAX </sigmax>
-        <sigmay> $SIGMAY </sigmay>
-        <sigmaz> $SIGMAZ </sigmaz>
+        <sigma_x> $SIGMAX </sigma_x>
+        <sigma_y> $SIGMAY </sigma_y>
+        <sigma_z> $SIGMAZ </sigma_z>
         <tau> $TAU </tau>
       </source>"
       fi
@@ -620,9 +615,9 @@ else
   then
     WRITETO="$WRITETO
     <concentration>
-      <advection type = \"$CONADVECTIONTYPE\" field = \"rho\">
+      <advection type=\"$CONADVECTIONTYPE\" field=\"rho\">
       </advection>
-      <diffusion type = \"$CONDIFFUSIONTYPE\" field = \"rho\">
+      <diffusion type=\"$CONDIFFUSIONTYPE\" field=\"rho\">
         <gamma> $GAMMA </gamma>  <!-- concentration diffussion -->
         <max_iter> $MAXITER </max_iter>  <!-- max number of iterations -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
@@ -631,28 +626,28 @@ else
     if [ $NSTTC -eq 0 ]
     then
       WRITETO="$WRITETO
-        <turbulence include = \"Yes\">
+        <turbulence include=\"Yes\">
           <Sc_T> $SCT </Sc_T>
         </turbulence>"
     fi
     if [ $CONFORCEFCT == "Zero" ]
     then
       WRITETO="$WRITETO
-        <source type = \"$CONSOURCETYPE\" con_fct = \"Zero\">
+        <source type=\"$CONSOURCETYPE\" con_fct=\"Zero\">
         </source>"
     elif [ $CONFORCEFCT == "GaussSC" ]
     then
       WRITETO="$WRITETO
-        <source type = \"$CONSOURCETYPE\" con_fct = \"GaussSC\" ramp_fct = \"RampTanh\">
+        <source type=\"$CONSOURCETYPE\" con_fct=\"GaussSC\" ramp_fct=\"RampTanh\">
           <HRR> $HRR </HRR>  <!-- total heat release rate (in kW) -->
           <Hc> $HC </Hc>  <!-- Heating value (in kJ/kg) -->
           <Ys> $YS </Ys>  <!-- Soot yield -->
           <x0> $GAUSSX0 </x0>
           <y0> $GAUSSY0 </y0>
           <z0> $GAUSSZ0 </z0>
-          <sigmax> $SIGMAX </sigmax>
-          <sigmay> $SIGMAY </sigmay>
-          <sigmaz> $SIGMAZ </sigmaz>
+          <sigma_x> $SIGMAX </sigma_x>
+          <sigma_y> $SIGMAY </sigma_y>
+          <sigma_z> $SIGMAZ </sigma_z>
           <tau> $TAU </tau>
         </source>"
     fi
@@ -661,7 +656,7 @@ else
 
   fi
   WRITETO="$WRITETO
-    <solution available = \"$SOLAVAIL\">"
+    <solution available=\"$SOLAVAIL\">"
   if [ "$SOLAVAIL" == "Yes" ]
   then
     WRITETO="$WRITETO
@@ -693,7 +688,7 @@ else
 
     if [ $ADAPT_PAR -eq 0 ]
     then
-      ATEMP="\n$(cat $AFILE)\n"
+      WRITETO=${WRITETO}"\n"$(cat $AFILE)
     else
       WRITETO="${WRITETO}
   <adaption dynamic="
@@ -701,7 +696,6 @@ else
       then
         WRITETO="$WRITETO\"No\" data_extraction=\"No\"> </adaption>"
       else
-        unset ATEMP
         if [[ $ADAPTION == "Yes" ]]
         then
           WRITETO="$WRITETO\"Yes\""
@@ -711,7 +705,6 @@ else
         if [[ $ADAPT_DATA == "Yes" ]]
         then
           WRITETO="$WRITETO data_extraction=\"Yes\">
-        $ATEMP
     <data_extraction>"
           if [[ $ADAPT_BEFORE == "No" ]]
           then
@@ -749,7 +742,7 @@ else
     </data_extraction>
   </adaption>"
         else
-          WRITETO="$WRITETO data_extraction=\"No\">$ATEMP </adaption>"
+          WRITETO="$WRITETO data_extraction=\"No\"> </adaption>"
         fi
       fi
     fi
@@ -810,7 +803,26 @@ else
     <vtk_nth_plot> $VTKPLOTS </vtk_nth_plot>"
     fi
     WRITETO=${WRITETO}"
-  </visualisation>
+  </visualisation>\n"
+
+    if [ -v $LOGGINGFILE ]
+    then
+        BASENAME=$(echo $NAME | cut -d '.' -f-1 | awk '{print tolower($0)}')
+        WRITETO="${WRITETO}
+  <logging file=\"output_${BASENAME}.log\" "
+    else
+        WRITETO="${WRITETO}
+  <logging file=\"${LOGGINGFILE}\" "
+    fi
+
+    if [ -v $LOGGINGLEVEL ]
+    then
+        WRITETO="${WRITETO}level=\"info\">"
+    else
+        WRITETO="${WRITETO}level=\"${LOGGINGLEVEL}\">"
+    fi
+    WRITETO="${WRITETO}
+  </logging>
 </ARTSS>"
   echo -e "$WRITETO" >> $NAME
   fi
@@ -1010,6 +1022,16 @@ do
       ;;
     --kappa)
       KAPPA=$2
+      shift
+      shift
+      ;;
+    --logginglevel)
+      LOGGINGLEVEL=$2
+      shift
+      shift
+      ;;
+    --loggingfile)
+      LOGGINGFILE=$2
       shift
       shift
       ;;

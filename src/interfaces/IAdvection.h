@@ -7,7 +7,7 @@
 #ifndef ARTSS_INTERFACES_IADVECTION_H_
 #define ARTSS_INTERFACES_IADVECTION_H_
 
-#include "../Field.h"
+#include "../field/Field.h"
 
 class IAdvection {
 public:

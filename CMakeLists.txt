@@ -79,7 +79,14 @@ endif()
 
 # Initialize CXXFLAGS.
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -std=c++17")
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  add_compile_options(-Wno-unused-parameter)
+  add_compile_options(-Wno-unused-variable)
+  add_compile_options(-Wno-unknown-pragmas)
+  add_compile_options(-Wno-cpp)
+  add_compile_options(-Wno-shadow)
+
   set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} ${warning_flags} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wshadow -Wunused -DTRACE_LOGGING")
   set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -w -DNDEBUG")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI" OR CMAKE_C_COMPILER_ID STREQUAL "PGI")
@@ -87,6 +94,12 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI" OR CMAKE_C_COMPILER_ID STREQUAL "PGI
   set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
   set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -fast -w -DNDEBUG")
 endif()
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+  set(CMAKE_CXX11_STANDARD_COMPILE_OPTION  --c++11)
+  set(CMAKE_CXX14_STANDARD_COMPILE_OPTION  --c++14)
+  set(CMAKE_CXX17_STANDARD_COMPILE_OPTION  --c++17)
+ endif()
 
 #--------------------
 if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
@@ -174,8 +187,10 @@ set(SOURCE_FILES
         "src/diffusion/ExplicitDiffuse.cpp"
         "src/diffusion/JacobiDiffuse.cpp"
 
+        "src/field/Field.cpp"
+        "src/field/FieldController.cpp"
+
         "src/interfaces/IPressure.cpp"
-        "src/interfaces/ISolver.cpp"
         "src/interfaces/ISource.cpp"
 
         "src/pressure/VCycleMG.cpp"
@@ -191,9 +206,13 @@ set(SOURCE_FILES
         "src/solver/NSTempTurbSolver.cpp"
         "src/solver/NSTempTurbConSolver.cpp"
         "src/solver/PressureSolver.cpp"
+        "src/solver/SolverController.cpp"
         "src/solver/SolverSelection.cpp"
 
+        "src/source/BuoyancyMMS.cpp"
+        "src/source/Cube.cpp"
         "src/source/ExplicitEulerSource.cpp"
+        "src/source/GaussFunction.cpp"
 
         "src/turbulence/ConstSmagorinsky.cpp"
         "src/turbulence/DynamicSmagorinsky.cpp"
@@ -208,7 +227,6 @@ set(SOURCE_FILES
         "src/visualisation/visit_writer.cpp"
 
         "src/Domain.cpp"
-        "src/Field.cpp"
         "src/Functions.cpp"
         "src/TimeIntegration.cpp"
         )
@@ -238,12 +256,16 @@ set(HEADER_FILES
         "src/diffusion/ExplicitDiffuse.h"
         "src/diffusion/JacobiDiffuse.h"
 
+        "src/field/Field.h"
+        "src/field/FieldController.h"
+
         "src/interfaces/IAdaptionFunction.h"
         "src/interfaces/IAdvection.h"
         "src/interfaces/IDiffusion.h"
         "src/interfaces/IPressure.h"
         "src/interfaces/ISolver.h"
         "src/interfaces/ISource.h"
+        "src/interfaces/ISourceFunction.h"
         "src/interfaces/ITurbulence.h"
 
         "src/pressure/VCycleMG.h"
@@ -259,9 +281,14 @@ set(HEADER_FILES
         "src/solver/NSTempTurbSolver.h"
         "src/solver/NSTempTurbConSolver.h"
         "src/solver/PressureSolver.h"
+        "src/solver/SolverController.h"
         "src/solver/SolverSelection.h"
 
+        "src/source/BuoyancyMMS.h"
+        "src/source/Cube.h"
         "src/source/ExplicitEulerSource.h"
+        "src/source/GaussFunction.h"
+        "src/source/Zero.h"
 
         "src/turbulence/ConstSmagorinsky.h"
         "src/turbulence/DynamicSmagorinsky.h"
@@ -277,7 +304,6 @@ set(HEADER_FILES
         "src/visualisation/visit_writer.h"
 
         "src/Domain.h"
-        "src/Field.h"
         "src/Functions.h"
         "src/GlobalMacrosTyper.h"
         "src/TimeIntegration.h"
@@ -287,26 +313,48 @@ set(HEADER_FILES
 link_directories( $ENV{CUDA_LIB} )
 include_directories( $ENV{CUDA_INC} )
 
+# find spdlog lib
+if(NOT TARGET spdlog)
+    # Stand-alone build
+    find_package(spdlog, QUIET)
+endif()
+# use local fallback
+if(NOT TARGET spdlog)
+    add_subdirectory(external/spdlog)
+endif()
+
+
 #Targets
 add_executable( artss_serial ${SOURCE_FILES} src/main.cpp)
+target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
 
 add_executable( artss_serial_benchmark ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX" )
 target_link_libraries( artss_serial_benchmark  )
 
-add_executable( artss_multicore_cpu ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=multicore" LINK_FLAGS "-acc -ta=multicore" )
+
+add_executable(artss_multicore_cpu ${SOURCE_FILES} src/main.cpp)
+set_target_properties(artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=multicore" LINK_FLAGS "-acc -ta=multicore")
+target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
 
 add_executable( artss_multicore_cpu_benchmark ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_multicore_cpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore" )
 target_link_libraries( artss_multicore_cpu_benchmark  )
 
-add_executable( artss_gpu ${SOURCE_FILES} src/main.cpp  )
-set_target_properties( artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
+
+add_executable(artss_gpu ${SOURCE_FILES} src/main.cpp)
+set_target_properties(artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
+target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
 
 add_executable( artss_gpu_benchmark ${SOURCE_FILES} src/main.cpp  )
 set_target_properties( artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
 target_link_libraries( artss_gpu_benchmark  )
+
+
+spdlog_enable_warnings(artss_serial)
+spdlog_enable_warnings(artss_multicore_cpu)
+spdlog_enable_warnings(artss_gpu)
+
 
 enable_testing()
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests DESTINATION ${CMAKE_BINARY_DIR} )

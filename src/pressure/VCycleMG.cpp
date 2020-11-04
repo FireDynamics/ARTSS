@@ -1,10 +1,9 @@
-/// \file 		VCycleMG.cpp
-/// \brief 		Defines V-cycle of geometric multigrid method
-/// \date 		Sep 14, 2016
-/// \author 	Severt
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       VCycleMG.cpp
+/// \brief      Defines V-cycle of geometric multigrid method
+/// \date       Sep 14, 2016
+/// \author     Severt
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include <cmath>
 
 #include "VCycleMG.h"
@@ -14,21 +13,26 @@
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 #include "../solver/SolverSelection.h"
+#include "../utility/Utility.h"
 
-// ==================================== Constructor ====================================
-// ***************************************************************************************
+
+// =============================== Constructor ===============================
+// *****************************************************************************
 /// \brief  Constructor
-/// \param  out		pressure
-/// \param  b		rhs
-// ***************************************************************************************
+/// \param  out     pressure
+/// \param  b       rhs
+// *****************************************************************************
 VCycleMG::VCycleMG(Field *out, Field *b) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
 
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
 
     levels = domain->get_levels();
-    cycles = static_cast<size_t> (params->get_int("solver/pressure/n_cycle"));
-    relaxs = static_cast<size_t> (params->get_int("solver/pressure/diffusion/n_relax"));
+    cycles = params->get_int("solver/pressure/n_cycle");
+    relaxs = params->get_int("solver/pressure/diffusion/n_relax");
 
     m_dsign = -1.;
     m_w = 2. / 3.;
@@ -36,11 +40,11 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 
     // copies of out and b to prevent aliasing
     auto d_out = out->data;
-    auto s_out = domain->get_size(out->GetLevel());
-    auto t_out = out->GetType();
+    auto s_out = domain->get_size(out->get_level());
+    auto t_out = out->get_type();
     auto d_b = b->data;
-    auto s_b = domain->get_size(b->GetLevel());
-    auto t_b = b->GetType();
+    auto s_b = domain->get_size(b->get_level());
+    auto t_b = b->get_type();
 
     Field *out_err1 = new Field(t_out, 0.0);
     Field *out_tmp = new Field(t_out, 0.0);
@@ -57,35 +61,35 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 // residuum
     residuum1.push_back(b_res1);
     auto data_residuum1 = residuum1.back()->data;
-    size_t bsize_residuum1 = domain->get_size(residuum1.back()->GetLevel());
+    size_t bsize_residuum1 = domain->get_size(residuum1.back()->get_level());
 
 #pragma acc enter data copyin(data_residuum1[:bsize_residuum1])
 
 // error
     error1.push_back(out_err1);
     auto data_err1 = error1.back()->data;
-    size_t bsize_err1 = domain->get_size(error1.back()->GetLevel());
+    size_t bsize_err1 = domain->get_size(error1.back()->get_level());
 
 #pragma acc enter data copyin(data_err1[:bsize_err1])
 
 // temporal solution
     mg_temporal_solution.push_back(out_tmp);
     auto data_mg_temporal_solution = mg_temporal_solution.back()->data;
-    size_t bsize_mg_temporal_solution = domain->get_size(mg_temporal_solution.back()->GetLevel());
+    size_t bsize_mg_temporal_solution = domain->get_size(mg_temporal_solution.back()->get_level());
 
 #pragma acc enter data copyin(data_mg_temporal_solution[:bsize_mg_temporal_solution])
 
 
     //building Fields for level + sending to GPU
     // levels going up
-    for (size_t i = 0; i < levels; ++i) {
+    for (int i = 0; i < levels; ++i) {
 
         // build residuum0
         Field *r0 = new Field(FieldType::P, 0.0, i);
         residuum0.push_back(r0);
 
         auto data_residuum0 = r0->data;
-        size_t bsize_residuum0 = domain->get_size(r0->GetLevel());
+        size_t bsize_residuum0 = domain->get_size(r0->get_level());
 
 #pragma acc enter data copyin(data_residuum0[:bsize_residuum0])
 
@@ -94,16 +98,16 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
         residuum1.push_back(r1);
 
         auto data_residuum1 = r1->data;
-        size_t bsize_residuum1 = domain->get_size(r1->GetLevel());
+        size_t bsize_residuum1 = domain->get_size(r1->get_level());
 
 #pragma acc enter data copyin(data_residuum1[:bsize_residuum1])
 
-        //	build error1
+        //  build error1
         Field *e1 = new Field(FieldType::P, 0.0, i + 1);
         error1.push_back(e1);
 
         auto d_err1 = e1->data;
-        size_t bsize_err1 = domain->get_size(e1->GetLevel());
+        size_t bsize_err1 = domain->get_size(e1->get_level());
 
 #pragma acc enter data copyin(d_err1[:bsize_err1])
 
@@ -112,34 +116,33 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
         mg_temporal_solution.push_back(mg);
 
         auto data_mg_temporal_solution = mg->data;
-        size_t bsize_mg_temporal_solution = domain->get_size(mg->GetLevel());
+        size_t bsize_mg_temporal_solution = domain->get_size(mg->get_level());
 
 #pragma acc enter data copyin(data_mg_temporal_solution[:bsize_mg_temporal_solution])
     } // end level loop
 
-//	build err0
+//  build err0
     err0.resize(levels + 1);
 
-    Field *e00 = new Field(FieldType::P, 0.0, error1[0]->GetLevel());
+    Field *e00 = new Field(FieldType::P, 0.0, error1[0]->get_level());
 
     err0[0] = e00;
 
     auto d_err00 = e00->data;
-    size_t bsize_err00 = domain->get_size(e00->GetLevel());
+    size_t bsize_err00 = domain->get_size(e00->get_level());
 
 #pragma acc enter data copyin(d_err00[:bsize_err00])
 
     //building Fields for level
     // levels going down
-    for (size_t i = levels; i > 0; --i) {
-
+    for (int i=levels; i>0; --i) {
         // build err0
-        Field *e0 = new Field(FieldType::P, 0.0, error1[i - 1]->GetLevel());
+        Field *e0 = new Field(FieldType::P, 0.0, error1[i - 1]->get_level());
 
         err0[i] = e0;
 
         auto d_err0 = err0[i]->data;
-        size_t bsize_err0 = domain->get_size(err0[i]->GetLevel());
+        size_t bsize_err0 = domain->get_size(err0[i]->get_level());
 
 #pragma acc enter data copyin(d_err0[:bsize_err0])
     }
@@ -151,7 +154,7 @@ VCycleMG::~VCycleMG() {
     while (residuum0.size() > 0) {
         auto field = residuum0.back();
         auto data = residuum0.back()->data;
-        size_t bsize = domain->get_size(residuum0.back()->GetLevel());
+        size_t bsize = domain->get_size(residuum0.back()->get_level());
 #pragma acc exit data delete(data[:bsize])
         delete field;
         field = nullptr;
@@ -160,7 +163,7 @@ VCycleMG::~VCycleMG() {
     while (residuum1.size() > 0) {
         auto field = residuum1.back();
         auto data = residuum1.back()->data;
-        size_t bsize = domain->get_size(residuum1.back()->GetLevel());
+        size_t bsize = domain->get_size(residuum1.back()->get_level());
 #pragma acc exit data delete(data[:bsize])
         delete field;
         field = nullptr;
@@ -169,7 +172,7 @@ VCycleMG::~VCycleMG() {
     while (err0.size() > 0) {
         auto field = err0.back();
         auto data = err0.back()->data;
-        size_t bsize = domain->get_size(err0.back()->GetLevel());
+        size_t bsize = domain->get_size(err0.back()->get_level());
 #pragma acc exit data delete(data[:bsize])
         delete field;
         field = nullptr;
@@ -178,7 +181,7 @@ VCycleMG::~VCycleMG() {
     while (error1.size() > 0) {
         auto field = error1.back();
         auto data = error1.back()->data;
-        size_t bsize = domain->get_size(error1.back()->GetLevel());
+        size_t bsize = domain->get_size(error1.back()->get_level());
 #pragma acc exit data delete(data[:bsize])
         delete field;
         field = nullptr;
@@ -187,7 +190,7 @@ VCycleMG::~VCycleMG() {
     while (mg_temporal_solution.size() > 0) {
         auto field = mg_temporal_solution.back();
         auto data = mg_temporal_solution.back()->data;
-        size_t bsize = domain->get_size(mg_temporal_solution.back()->GetLevel());
+        size_t bsize = domain->get_size(mg_temporal_solution.back()->get_level());
 #pragma acc exit data delete(data[:bsize])
         delete field;
         field = nullptr;
@@ -195,20 +198,20 @@ VCycleMG::~VCycleMG() {
     }
 }
 
-// ==================================== Update ====================================
-// ***************************************************************************************
+// =============================== Update ===============================
+// ************************************************************************
 /// \brief  Update input
-/// \param  out		pressure
-/// \param  b		rhs
-/// \param  sync	synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out     pressure
+/// \param  b       rhs
+/// \param  sync    synchronization boolean (true=sync (default), false=async)
+// ************************************************************************
 void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto d_out = out->data;
-    auto s_out = domain->get_size(out->GetLevel());
+    auto s_out = domain->get_size(out->get_level());
     auto d_b = b->data;
-    auto s_b = domain->get_size(b->GetLevel());
+    auto s_b = domain->get_size(b->get_level());
 
     auto f_err1 = error1[0];
     auto f_mg_tmp = mg_temporal_solution[0];
@@ -218,9 +221,9 @@ void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
     auto d_mg_tmp = mg_temporal_solution[0]->data;
     auto d_res1 = residuum1[0]->data;
 
-    auto s_err1 = domain->get_size(error1[0]->GetLevel());
-    auto s_mg_tmp = domain->get_size(mg_temporal_solution[0]->GetLevel());
-    auto s_res1 = domain->get_size(residuum1[0]->GetLevel());
+    auto s_err1 = domain->get_size(error1[0]->get_level());
+    auto s_mg_tmp = domain->get_size(mg_temporal_solution[0]->get_level());
+    auto s_res1 = domain->get_size(residuum1[0]->get_level());
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
@@ -243,16 +246,15 @@ void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
     }//end data region
 }
 
-//========================================= Pressure ======================================
-// ***************************************************************************************
+//==================================== Pressure =================================
+// *****************************************************************************
 /// \brief  solves Poisson equation \f$ \nabla^2 p = rhs\f$ via geometric multigrid (VCycle)
-/// \param  out			pressure
-/// \param	b 			rhs
-/// \param	t			current time
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         pressure
+/// \param  b           rhs
+/// \param  t           current time
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
-
     // Update first
     UpdateInput(out, b);
 
@@ -262,10 +264,10 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
     const real dt = params->get_real("physical_parameters/dt");
     const size_t Nt = static_cast<size_t>(std::round(t / dt));
 
-    const size_t set_relaxs = static_cast<size_t>(params->get_int("solver/pressure/diffusion/n_relax"));
-    const size_t set_cycles = static_cast<size_t>(params->get_int("solver/pressure/n_cycle"));
+    const int set_relaxs = params->get_int("solver/pressure/diffusion/n_relax");
+    const int set_cycles = params->get_int("solver/pressure/n_cycle");
 
-    size_t act_cycles = 0;
+    int act_cycles = 0;
 
     if (Nt == 1) {
         const int max_cycles = params->get_int("solver/pressure/max_cycle");
@@ -294,8 +296,10 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
         auto bsize_i = boundary->getSize_innerList();
         size_t *d_iList = boundary->get_innerList_level_joined();
 
-        while (r > tol_res && act_cycles < max_cycles && relaxs < max_relaxs) {
-            for (size_t i = 0; i < cycles; i++) {
+        while (r > tol_res &&
+                act_cycles < max_cycles &&
+                relaxs < max_relaxs) {
+            for (int i=0; i<cycles; i++) {
                 VCycleMultigrid(out, sync);
                 act_cycles++;
             }
@@ -316,11 +320,8 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
             r = sqrt(sum);
 
             relaxs += set_relaxs;
-        } //end while
-    } // end if
-
-    else { // Nt > 1
-
+        }
+    } else { // Nt > 1
         cycles = set_cycles;
         relaxs = set_relaxs;
 
@@ -334,15 +335,14 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
     }
 }
 
-//========================================= VCycle ======================================
-// ***************************************************************************************
+//==================================== VCycle =================================
+// *****************************************************************************
 /// \brief  Conducts the V-cycle Multigrid method
-/// \param  out			pressure
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         pressure
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
-
-    size_t max_level = levels;
+    int max_level = levels;
 
     auto domain = Domain::getInstance();
     auto boundary = BoundaryController::getInstance();
@@ -356,8 +356,8 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
         auto d_mg_tmpi = mg_temporal_solution[0]->data;
         auto d_res1i = residuum1[0]->data;
         auto d_out = out->data;
-        auto s_mg_tmpi = domain->get_size(mg_temporal_solution[0]->GetLevel());
-        auto s_res1i = domain->get_size(residuum1[0]->GetLevel());
+        auto s_mg_tmpi = domain->get_size(mg_temporal_solution[0]->get_level());
+        auto s_res1i = domain->get_size(residuum1[0]->get_level());
         auto s_out = domain->get_size();
 
 #pragma acc data present(d_out[:s_out], d_mg_tmpi[:s_mg_tmpi], d_res1i[:s_res1i])
@@ -368,8 +368,7 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
     } //end if
 
 //===================== levels going down ====================//
-    for (size_t i = 0; i < max_level; ++i) {
-
+    for (int i=0; i<max_level; ++i) {
         auto f_res0i = residuum0[i];
         auto f_err1i = error1[i];
         auto f_err1ip = error1[i + 1];
@@ -385,17 +384,17 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
         auto d_res1ip = residuum1[i + 1]->data;
         auto d_out = out->data;
 
-        auto s_res0i = domain->get_size(residuum0[i]->GetLevel());
-        auto s_err1i = domain->get_size(error1[i]->GetLevel());
-        auto s_err1ip = domain->get_size(error1[i + 1]->GetLevel());
-        auto s_mg_tmpi = domain->get_size(mg_temporal_solution[i]->GetLevel());
-        auto s_res1i = domain->get_size(residuum1[i]->GetLevel());
-        auto s_res1ip = domain->get_size(residuum1[i + 1]->GetLevel());
-        auto s_out = domain->get_size(out->GetLevel());
+        auto s_res0i = domain->get_size(residuum0[i]->get_level());
+        auto s_err1i = domain->get_size(error1[i]->get_level());
+        auto s_err1ip = domain->get_size(error1[i + 1]->get_level());
+        auto s_mg_tmpi = domain->get_size(mg_temporal_solution[i]->get_level());
+        auto s_res1i = domain->get_size(residuum1[i]->get_level());
+        auto s_res1ip = domain->get_size(residuum1[i + 1]->get_level());
+        auto s_out = domain->get_size(out->get_level());
 
-        FieldType type_r0 = f_res0i->GetType();
+        FieldType type_r0 = f_res0i->get_type();
 
-        FieldType type_r1 = residuum1[i + 1]->GetType();
+        FieldType type_r1 = residuum1[i + 1]->get_type();
 
         //auto bsize_i = boundary->get_MGiList_Size(i+1);
         //auto bsize_b = boundary->get_MGbList_Size(i+1);
@@ -468,22 +467,22 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
         auto d_res1im = residuum1[i - 1]->data;
         auto d_out = out->data;
 
-        auto s_err0i = domain->get_size(err0[i]->GetLevel());
-        auto s_err1i = domain->get_size(error1[i]->GetLevel());
-        auto s_err1im = domain->get_size(error1[i - 1]->GetLevel());
-        auto s_mg_tmpim = domain->get_size(mg_temporal_solution[i - 1]->GetLevel());
-        auto s_res1im = domain->get_size(residuum1[i - 1]->GetLevel());
-        auto s_out = domain->get_size(out->GetLevel());
+        auto s_err0i = domain->get_size(err0[i]->get_level());
+        auto s_err1i = domain->get_size(error1[i]->get_level());
+        auto s_err1im = domain->get_size(error1[i - 1]->get_level());
+        auto s_mg_tmpim = domain->get_size(mg_temporal_solution[i - 1]->get_level());
+        auto s_res1im = domain->get_size(residuum1[i - 1]->get_level());
+        auto s_out = domain->get_size(out->get_level());
 
-        size_t Nx_e0 = domain->get_Nx(f_err0i->GetLevel());
-        size_t Ny_e0 = domain->get_Ny(f_err0i->GetLevel());
-        size_t Nz_e0 = domain->get_Nz(f_err0i->GetLevel());
+        size_t Nx_e0 = domain->get_Nx(f_err0i->get_level());
+        size_t Ny_e0 = domain->get_Ny(f_err0i->get_level());
+        size_t Nz_e0 = domain->get_Nz(f_err0i->get_level());
 
-        real dx_e0 = domain->get_dx(f_err0i->GetLevel());
-        real dy_e0 = domain->get_dy(f_err0i->GetLevel());
-        real dz_e0 = domain->get_dz(f_err0i->GetLevel());
+        real dx_e0 = domain->get_dx(f_err0i->get_level());
+        real dy_e0 = domain->get_dy(f_err0i->get_level());
+        real dz_e0 = domain->get_dz(f_err0i->get_level());
 
-        FieldType type_e0 = f_err0i->GetType();
+        FieldType type_e0 = f_err0i->get_type();
 
         // inner start/ end index of level i - 1
         size_t start_i = boundary->get_innerList_level_joined_start(i - 1);
@@ -551,7 +550,7 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
     // set boundaries
 
     auto d_out = out->data;
-    FieldType type = out->GetType();
+    FieldType type = out->get_type();
 
     boundary->applyBoundary(d_out, type, sync);
 
@@ -560,23 +559,22 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
     }
 }
 
-//========================================= Smooth ======================================
-// ***************************************************************************************
+//==================================== Smooth =================================
+// *****************************************************************************
 /// \brief  Relaxes Ax = b using a diffusion method
-/// \param  out			output field (in size of input )
-/// \param  tmp			temporary field for JacobiStep
-/// \param	b			right hand side
-/// \param  level		Multigrid level
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         output field (in size of input )
+/// \param  tmp         temporary field for JacobiStep
+/// \param  b           right hand side
+/// \param  level       Multigrid level
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    const real dx = domain->get_dx(out->GetLevel());
-    const real dy = domain->get_dy(out->GetLevel());
-    const real dz = domain->get_dz(out->GetLevel());
+    const real dx = domain->get_dx(out->get_level());
+    const real dy = domain->get_dy(out->get_level());
+    const real dz = domain->get_dz(out->get_level());
 
     auto d_out = out->data;
     auto d_tmp = tmp->data;
@@ -584,8 +582,8 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 
     auto params = Parameters::getInstance();
 
-    size_t bsize = domain->get_size(out->GetLevel());
-    FieldType type = out->GetType();
+    size_t bsize = domain->get_size(out->get_level());
+    FieldType type = out->get_type();
 
     auto boundary = BoundaryController::getInstance();
 
@@ -642,7 +640,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
-            for (size_t i = 0; i < relaxs; i++) { // fixed iteration number as in xml
+            for (int i=0; i<relaxs; i++) { // fixed iteration number as in xml
                 JacobiDiffuse::JacobiStep(level, out, tmp, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync);
 
@@ -650,8 +648,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
                 std::swap(d_tmp, d_out);
             }
 
-            if (relaxs % 2 != 0) // swap necessary when odd number of iterations
-            {
+            if (relaxs % 2 != 0) { // swap necessary when odd number of iterations
 #pragma acc kernels present(d_out[:bsize], d_tmp[:bsize], d_iList[start_i:(end_i-start_i)]) async
 #pragma acc loop independent
                 // inner
@@ -672,16 +669,17 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
-            for (size_t i = 0; i < relaxs; i++) {
+            for (int i=0; i<relaxs; i++) {
                 ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync); // for res/err only Dirichlet BC
             }
         } //end data region
     } else {
-        std::cout << "Diffusion method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
 
     if (sync) {
@@ -689,26 +687,25 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
     }
 }
 
-//======================================= Residuum ====================================
-// ***************************************************************************************
+//================================== Residuum ===============================
+// ************************************************************************
 /// \brief  Calculates residuum r = b - Ax
-/// \param  out			output field (in size of input field)
-/// \param  in			input field
-/// \param	b			right hand side field
-/// \param  level		Multigrid level
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         output field (in size of input field)
+/// \param  in          input field
+/// \param  b           right hand side field
+/// \param  level       Multigrid level
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// ************************************************************************
 void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(in->GetLevel());
-    const size_t Ny = domain->get_Ny(in->GetLevel());
+    const size_t Nx = domain->get_Nx(in->get_level());
+    const size_t Ny = domain->get_Ny(in->get_level());
 
-    const real dx = domain->get_dx(in->GetLevel());
-    const real dy = domain->get_dy(in->GetLevel());
-    const real dz = domain->get_dz(in->GetLevel());
+    const real dx = domain->get_dx(in->get_level());
+    const real dy = domain->get_dy(in->get_level());
+    const real dz = domain->get_dz(in->get_level());
 
     const real rdx2 = 1. / (dx * dx);
     const real rdy2 = 1. / (dy * dy);
@@ -718,7 +715,7 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync
     auto d_in = in->data;
     auto d_b = b->data;
 
-    size_t bsize = domain->get_size(out->GetLevel());
+    size_t bsize = domain->get_size(out->get_level());
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
@@ -744,32 +741,31 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync
     }//end data region
 }
 
-//======================================= Restrict ====================================
-// ***************************************************************************************
+//================================== Restrict ===============================
+// *****************************************************************************
 /// \brief  Restricts field from fine grid to coarse grid via averaging
-/// \param  out			output field (half the size of input vector)
-/// \param  in			input field (on fine grid)
-/// \param  level		Multigrid level
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         output field (half the size of input vector)
+/// \param  in          input field (on fine grid)
+/// \param  level       Multigrid level
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
     // coarse grid
-    const size_t Nx = domain->get_Nx(out->GetLevel());
-    const size_t Ny = domain->get_Ny(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level());
+    const size_t Ny = domain->get_Ny(out->get_level());
 
     // fine grid
-    const size_t nx = domain->get_Nx(in->GetLevel());
-    const size_t ny = domain->get_Ny(in->GetLevel());
+    const size_t nx = domain->get_Nx(in->get_level());
+    const size_t ny = domain->get_Ny(in->get_level());
 
     auto d_out = out->data;
     auto d_in = in->data;
 
-    size_t bsize_out = domain->get_size(out->GetLevel());
-    size_t bsize_in = domain->get_size(in->GetLevel());
+    size_t bsize_out = domain->get_size(out->get_level());
+    size_t bsize_in = domain->get_size(in->get_level());
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
@@ -779,8 +775,12 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     size_t start_i = boundary->get_innerList_level_joined_start(level + 1);
     size_t end_i = boundary->get_innerList_level_joined_end(level + 1) + 1;
 
-    if (end_i == start_i) std::cout << "Be cautious: Obstacle might fill up inner cells completely in level " << level << " with nx= " << domain->get_nx(out->GetLevel()) << "!" << std::endl;
-    //TODO Error handling + Logger
+#ifndef BENCHMARKING
+    if (end_i == start_i) {
+        m_logger->warn("Be cautious: Obstacle might fill up inner cells completely in level {} with nx= {}!",
+                       level, domain->get_nx(out->get_level()));
+    }
+#endif
 
     // average from eight neighboring cells
     // obstacles not used in fine grid, since coarse grid only obstacle if one of 8 fine grids was an obstacle,
@@ -814,32 +814,31 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     }// end data region
 }
 
-//======================================= Prolongate ====================================
-// ***************************************************************************************
+//================================== Prolongate ===============================
+// *****************************************************************************
 /// \brief  Prolongates field from coarse grid to fine grid (trilinear interpolation)
-/// \param  out			output field (real the size of input vector)
-/// \param  in			input field (on coarse grid)
-/// \param  level		Multigrid level
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         output field (real the size of input vector)
+/// \param  in          input field (on coarse grid)
+/// \param  level       Multigrid level
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
     // fine grid
-    const size_t nx = domain->get_Nx(out->GetLevel());
-    const size_t ny = domain->get_Ny(out->GetLevel());
+    const size_t nx = domain->get_Nx(out->get_level());
+    const size_t ny = domain->get_Ny(out->get_level());
 
     // coarse grid
-    const size_t Nx = domain->get_Nx(in->GetLevel());
-    const size_t Ny = domain->get_Ny(in->GetLevel());
+    const size_t Nx = domain->get_Nx(in->get_level());
+    const size_t Ny = domain->get_Ny(in->get_level());
 
     auto d_out = out->data;
     auto d_in = in->data;
 
-    size_t bsize_out = domain->get_size(out->GetLevel());
-    size_t bsize_in = domain->get_size(in->GetLevel());
+    size_t bsize_out = domain->get_size(out->get_level());
+    size_t bsize_in = domain->get_size(in->get_level());
 
     auto boundary = BoundaryController::getInstance();
 
@@ -887,40 +886,43 @@ void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
     }// end data region
 }
 
-//========================================= Smooth ======================================
-// ***************************************************************************************
+//==================================== Smooth =================================
+// *****************************************************************************
 /// \brief  Solves Ax = b on the lowest level using a diffusion method
-/// \param  out			output field (in size of input )
-/// \param  tmp			temporary field for JacobiStep
-/// \param	b			right hand side
-/// \param  level		Multigrid level
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+/// \param  out         output field (in size of input )
+/// \param  tmp         temporary field for JacobiStep
+/// \param  b           right hand side
+/// \param  level       Multigrid level
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
+// *****************************************************************************
 void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out->GetLevel());
-    const size_t Ny = domain->get_Ny(out->GetLevel());
-    const size_t Nz = domain->get_Nz(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level());
+    const size_t Ny = domain->get_Ny(out->get_level());
+    const size_t Nz = domain->get_Nz(out->get_level());
 
     if (level < levels - 1) {
-        std::cout << "Wrong level =" << level << std::endl;
+#ifndef BENCHMARKING
+        m_logger->warn("Wrong level = {}", level);
+#endif
         return;
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
 
     if (Nx <= 4 && Ny <= 4) {
-        std::cout << " Grid is too coarse with Nx = " << Nx << " and Ny = " << Ny << ". Just smooth here" << std::endl;
+#ifndef BENCHMARKING
+        m_logger->warn(" Grid is too coarse with Nx={} and Ny={}. Just smooth here", Nx, Ny);
+#endif
         Smooth(out, tmp, b, level, sync);
         return;
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
 
-    const real dx = domain->get_dx(out->GetLevel());
-    const real dy = domain->get_dy(out->GetLevel());
-    const real dz = domain->get_dz(out->GetLevel());
+    const real dx = domain->get_dx(out->get_level());
+    const real dy = domain->get_dy(out->get_level());
+    const real dz = domain->get_dz(out->get_level());
 
     auto d_out = out->data;
     auto d_tmp = tmp->data;
@@ -928,8 +930,8 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
     auto params = Parameters::getInstance();
 
-    size_t bsize = domain->get_size(out->GetLevel());
-    FieldType type = out->GetType();
+    size_t bsize = domain->get_size(out->get_level());
+    FieldType type = out->get_type();
 
     auto boundary = BoundaryController::getInstance();
 
@@ -945,7 +947,6 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
     size_t end_i = boundary->get_innerList_level_joined_end(level) + 1;
     size_t start_b = boundary->get_boundaryList_level_joined_start(level);
     size_t end_b = boundary->get_boundaryList_level_joined_end(level) + 1;
-
 
     boundary->applyBoundary(d_out, level, type, sync);
 
@@ -972,19 +973,18 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             d_tmp[i] = d_out[i];
         }
 
-        //boundary
+        // boundary
 #pragma acc kernels present(d_bList[start_b:(end_b-start_b)]) async
 #pragma acc loop independent
         for (size_t j = start_b; j < end_b; ++j) {
             const size_t i = d_bList[j];
             d_tmp[i] = d_out[i];
         }
-    }//end data region
+    }  // end data region
 
 // Diffusion step
     std::string diffusionType = params->get("solver/pressure/diffusion/type");
     if (diffusionType == DiffusionMethods::Jacobi) {
-
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
             size_t it = 0;
@@ -1016,11 +1016,9 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
                 std::swap(tmp->data, out->data);
                 std::swap(d_tmp, d_out);
+            }  // end while
 
-            }// end while
-
-            if (it % 2 != 0) // swap necessary when odd number of iterations
-            {
+            if (it % 2 != 0) {  // swap necessary when odd number of iterations
 #pragma acc kernels present(d_out[:bsize], d_tmp[:bsize], d_iList[start_i:(end_i-start_i)]) async
 #pragma acc loop independent
                 // inner
@@ -1035,9 +1033,8 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
                     const size_t i = d_bList[j];
                     d_out[i] = d_tmp[i];
                 }
-
             }
-        }//end data region
+        } //end data region
     } else if (diffusionType == DiffusionMethods::ColoredGaussSeidel) {
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
@@ -1048,7 +1045,6 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             real res = 10000.;
 
             while (res > tol_res && it < max_it) {
-
                 ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync); // for res/err only Dirichlet BC
 
@@ -1066,16 +1062,15 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
 #pragma acc wait
                 res = sqrt(sum);
-
                 it++;
-
-            }// end while
-        } //end data region
+            }  // end while
+        }  // end data region
     } else {
-        std::cout << "Diffusion method not yet implemented! Simulation stopped!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
 
     if (sync) {

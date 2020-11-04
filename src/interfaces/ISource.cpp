@@ -31,7 +31,7 @@ void ISource::buoyancy_force(Field *out, const Field *in, const Field *in_temper
     auto d_in = in->data;
     auto d_ina = in_temperature_ambient->data;
 
-    auto bsize = Domain::getInstance()->get_size(out->GetLevel());
+    auto bsize = Domain::getInstance()->get_size(out->get_level());
 
     auto params = Parameters::getInstance();
 
@@ -72,168 +72,6 @@ void ISource::buoyancy_force(Field *out, const Field *in, const Field *in_temper
     }// end data region
 }
 
-//===================================== Energy Source ====================================
-// ***************************************************************************************
-/// \brief  Manufactured (MMS) energy source in energy equation
-/// \param  out   energy source
-/// \param  t   time
-/// \param  sync  synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
-void ISource::buoyancy_ST_MMS(Field *out, real t, bool sync) {
-    auto domain = Domain::getInstance();
-    // local variables and parameters for GPU
-    auto d_out = out->data;
-    auto bsize = domain->get_size(out->GetLevel());
-
-    size_t Nx = domain->get_Nx(out->GetLevel());
-    size_t Ny = domain->get_Ny(out->GetLevel());
-
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_Y1();
-
-    real dx = domain->get_dx(out->GetLevel());
-    real dy = domain->get_dy(out->GetLevel());
-
-    auto params = Parameters::getInstance();
-
-    real nu = params->get_real("physical_parameters/nu");
-    real beta = params->get_real("physical_parameters/beta");
-    real kappa = params->get_real("physical_parameters/kappa");
-    real g = params->get_real("physical_parameters/g");
-    real rhoa = params->get_real("initial_conditions/rhoa");
-    real rbeta = 1. / beta;
-    real rg = 1. / g;
-    real c_nu = 2 * nu * M_PI * M_PI - 1;
-    real c_kappa = 2 * kappa * M_PI * M_PI - 1;
-
-    auto boundary = BoundaryController::getInstance();
-
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
-
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
-
-    size_t i, j, k;
-
-    // inner cells
-#pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], d_out[:bsize])
-    {
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t l = 0; l < bsize_i; ++l) {
-            const size_t idx = d_iList[l];
-            k = idx / (Nx * Ny);
-            j = (idx - k * Nx * Ny) / Nx;
-            i = idx - k * Nx * Ny - j * Nx;
-            d_out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
-        }
-
-        // boundary cells
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t l = 0; l < bsize_b; ++l) {
-            const size_t idx = d_bList[l];
-            k = idx / (Nx * Ny);
-            j = (idx - k * Nx * Ny) / Nx;
-            i = idx - k * Nx * Ny - j * Nx;
-            d_out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
-        }
-        if (sync) {
-#pragma acc wait
-        }
-    }// end data region
-}
-
-// ***************************************************************************************
-/// \brief  Volumetric Gaussian temperature source in energy equation
-/// \param  out   energy source
-/// \param  HRR   total heat release rate
-/// \param  cp    heat capacity
-/// \param  x0    center of Gaussian (x-direction)
-/// \param  y0    center of Gaussian (y-direction)
-/// \param  z0    center of Gaussian (z-direction)
-/// \param  sigma Radius of Gaussian
-/// \param  sync  synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
-void ISource::gauss(Field *out, real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z, bool sync) {
-
-    auto domain = Domain::getInstance();
-    // local variables and parameters for GPU
-    auto d_out = out->data;
-    auto bsize = domain->get_size(out->GetLevel());
-
-    size_t Nx = domain->get_Nx(out->GetLevel());
-    size_t Ny = domain->get_Ny(out->GetLevel());
-
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_Y1();
-    real Z1 = domain->get_Z1();
-
-    real dx = domain->get_dx(out->GetLevel());
-    real dy = domain->get_dy(out->GetLevel());
-    real dz = domain->get_dz(out->GetLevel());
-
-    //get parameters for Gaussian
-    real sigma_x_2 = 2 * sigma_x * sigma_x;
-    real r_sigma_x_2 = 1. / sigma_x_2;
-    real sigma_y_2 = 2 * sigma_y * sigma_y;
-    real r_sigma_y_2 = 1. / sigma_y_2;
-    real sigma_z_2 = 2 * sigma_z * sigma_z;
-    real r_sigma_z_2 = 1. / sigma_z_2;
-
-    //set Gaussian to cells
-    auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-
-    auto bsize_i = boundary->getSize_innerList();
-
-    size_t i, j, k;
-    real V = 0.;
-    real HRRrV;
-
-    // inner cells
-#pragma acc data present(d_iList[:bsize_i], d_out[:bsize])
-    {
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t l = 0; l < bsize_i; ++l) {
-            const size_t idx = d_iList[l];
-            k = getCoordinateK(idx, Nx, Ny);
-            j = getCoordinateJ(idx, Nx, Ny, k);
-            i = getCoordinateI(idx, Nx, Ny, j, k);
-
-            real expr = std::exp(-(((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0)) / sigma_x_2
-                                    + ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0)) / sigma_y_2
-                                    + ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0)) / sigma_z_2));
-            V += expr * dx * dy * dz;
-        }
-
-#pragma acc wait
-
-        HRRrV = HRR / V;        //in case of concentration Ys*HRR
-        real rcp = 1. / cp;    // to get [K/s] for energy equation (d_t T), rho:=1, otherwise *1/rho; in case of concentration 1/Hc to get kg/m^3s
-
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t l = 0; l < bsize_i; ++l) {
-            const size_t idx = d_iList[l];
-            k = getCoordinateK(idx, Nx, Ny);
-            j = getCoordinateJ(idx, Nx, Ny, k);
-            i = getCoordinateI(idx, Nx, Ny, j, k);
-
-            real expr = std::exp(-(((xi(i, X1, dx) - x0) * (xi(i, X1, dx) - x0)) / sigma_x_2
-                                    + ((yj(j, Y1, dy) - y0) * (yj(j, Y1, dy) - y0)) / sigma_y_2
-                                    + ((zk(k, Z1, dz) - z0) * (zk(k, Z1, dz) - z0)) / sigma_z_2));
-            d_out[idx] = HRRrV * rcp * expr;
-        }
-
-        if (sync) {
-#pragma acc wait
-        }
-    } //end data region
-}
-
 //======================================== Dissipation ====================================
 // ***************************************************************************************
 /// \brief  Adding dissipation (e.g. via friction) into the equation
@@ -252,12 +90,12 @@ void ISource::dissipate(Field *out, const Field *in_u, const Field *in_v, const 
     auto d_inw = in_w->data;
 
     auto domain = Domain::getInstance();
-    size_t Nx = domain->get_Nx(out->GetLevel());
-    size_t Ny = domain->get_Ny(out->GetLevel());
+    size_t Nx = domain->get_Nx(out->get_level());
+    size_t Ny = domain->get_Ny(out->get_level());
 
-    real dx = domain->get_dx(out->GetLevel());
-    real dy = domain->get_dy(out->GetLevel());
-    real dz = domain->get_dz(out->GetLevel());
+    real dx = domain->get_dx(out->get_level());
+    real dy = domain->get_dy(out->get_level());
+    real dz = domain->get_dz(out->get_level());
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
@@ -267,8 +105,8 @@ void ISource::dissipate(Field *out, const Field *in_u, const Field *in_v, const 
     real dt = params->get_real("physical_parameters/dt");
     real nu = params->get_real("physical_parameters/nu");
 
-    auto size = Domain::getInstance()->get_size(out->GetLevel());
-    auto type = out->GetType();
+    auto size = Domain::getInstance()->get_size(out->get_level());
+    auto type = out->get_type();
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();

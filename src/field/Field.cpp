@@ -6,27 +6,30 @@
 
 #include <cmath>
 #include "Field.h"
-#include "Domain.h"
+#include "../Domain.h"
 
 Field::Field(FieldType type, real val): m_type(type){
-    size_t m_size = Domain::getInstance()->get_size();
+    size_t size = Domain::getInstance()->get_size();
 	m_level = 0;
-    data = new real[m_size];
-    std::fill( data, data + m_size, val);
+    data = new real[size];
+    std::fill( data, data + size, val);
 }
 
 Field::Field(FieldType type, real val, size_t level): m_level(level), m_type(type) {
-	size_t m_size = Domain::getInstance()->get_size(level);
+	size_t size = Domain::getInstance()->get_size(level);
 
-	data = new real[m_size];
-	std::fill( data, data + m_size, val);
+	data = new real[size];
+	std::fill( data, data + size, val);
 }
 
+void Field::set_value(real val){
+    size_t size = Domain::getInstance()->get_size(m_level);
+    std::fill(data, data + size, val);
+}
 
 Field::~Field(){
 	delete[] data;
 }
-
 
 //=============================== Copy Constructor ======================================
 Field::Field(const Field & other){

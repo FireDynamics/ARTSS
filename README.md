@@ -34,6 +34,11 @@ git clone https://github.com/FireDynamics/ARTSS.git
 cd ARTSS
 ```
 
+if you already have a local copy of ARTSS and are missing spdlog do a recursive submodul init.
+```
+git submodule update --init --recursive
+```
+
 2. Compiling the code
 ```
 ./compile.sh [OPTIONS]
@@ -80,4 +85,4 @@ ARTSS
 
 ### Contributing
 
-We are working constantly on this project, which above all means we are not finished yet: continuous improvements are made, new features are implemented and bugs getting fixed. If you find any errors or you have a suggestions, please feel free to write an issue [here](https://github.com/FireDynamics/ARTSS/issues). If you want to work on the project, please refer to the [contributing guidlines](https://github.com/FireDynamics/ARTSS/tree/master/CONTRIBUTING.md).
+We are working constantly on this project, which above all means we are not finished yet: continuous improvements are made, new features are implemented and bugs getting fixed. If you find any errors or you have a suggestions, please feel free to write an issue [here](https://github.com/FireDynamics/ARTSS/issues). If you want to work on the project, please refer to the [contributing guidelines](https://github.com/FireDynamics/ARTSS/tree/master/CONTRIBUTING.md).

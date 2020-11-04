@@ -8,9 +8,14 @@
 #define ARTSS_BOUNDARY_OBSTACLE_H
 
 #include <cmath>
+#include <vector>
+
 #include "../utility/tinyxml2.h"
 #include "BoundaryData.h"
 #include "BoundaryDataController.h"
+#include "../Domain.h"
+#include "../utility/Utility.h"
+
 
 class Obstacle {
 public:
@@ -53,6 +58,9 @@ public:
     bool removeCellsFacingAnotherObstacle(Obstacle *o);
     void control();
 private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     size_t m_i1, m_j1, m_k1;
     size_t m_i2, m_j2, m_k2;
 

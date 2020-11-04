@@ -8,10 +8,11 @@
 #define ARTSS_ADAPTION_ADAPTION_H_
 
 
-#include "../Field.h"
+#include "../field/Field.h"
 #include "../interfaces/IAdaptionFunction.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../interfaces/ISolver.h"
+#include "../solver/SolverController.h"
 
 /* enum for different types of dynamic adaption:
  * NO = adaption impossible/no changes
@@ -28,7 +29,7 @@ class IAdaptionFunction;
 
 class Adaption {
 public:
-    explicit Adaption(ISolver *solver);
+    explicit Adaption(FieldController *field_controller);
 
     bool inline is_data_extraction_enabled() { return m_has_data_extraction; };
     bool inline is_data_extraction_before_enabled() { return m_has_data_extraction_before; }
@@ -60,6 +61,9 @@ public:
     void extractData(const std::string &filename);
 
 private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     bool isUpdateNecessary();
     void applyChanges();
 
@@ -79,7 +83,7 @@ private:
 
     std::string m_filename;
 
-    ISolver *m_solver;
+    FieldController *m_field_controller;
     IAdaptionFunction *func;
 };
 
