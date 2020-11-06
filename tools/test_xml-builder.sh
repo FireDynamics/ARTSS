@@ -413,7 +413,8 @@ function create_testcases {
       <range> 1 </range>
     </random>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"No\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+      <ambient_temperature_value> 299.14 </ambient_temperature_value>
     </source>" > ${NAME}_$SFILEVAL
     echo "      <source type = \"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct= \"RampTanh\" dissipation=\"No\">
         <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
@@ -421,9 +422,9 @@ function create_testcases {
         <x0> 0. </x0>
         <y0> 0.016640625 </y0>
         <z0> 0. </z0>
-        <sigmax> 0.25 </sigmax>
-        <sigmay> 0.6 </sigmay>
-        <sigmaz> 0.25 </sigmaz>
+        <sigma_x> 0.25 </sigma_x>
+        <sigma_y> 0.6 </sigma_y>
+        <sigma_z> 0.25 </sigma_z>
         <tau> 5. </tau>
       </source>" > ${NAME}_$TSFILEVAL
 
