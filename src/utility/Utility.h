@@ -22,7 +22,7 @@
 
 
 namespace Utility {
-    static char* get_flag(char ** begin, char ** end, const std::string & option);
+    char* get_flag(char** begin, char** end, const std::string & option);
     size_t get_index(real physical_coordinate, real spacing, real start_coordinate);
     std::vector<size_t> coordinateFromLinearIndex(size_t idx, size_t Nx, size_t Ny);
     std::vector<std::string> split(const char* text, char delimiter);

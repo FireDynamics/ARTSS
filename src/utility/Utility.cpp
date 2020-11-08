@@ -54,11 +54,16 @@ std::vector<size_t> coordinateFromLinearIndex(size_t idx, size_t Nx, size_t Ny) 
     return coord;
 }
 
-char* get_flag(char ** begin, char ** end, const std::string & option)
-{
+// =================================== Command parser ====================================
+// ***************************************************************************************
+/// \brief  Reads values from command line 
+/// \param  begin     Begin of argv
+/// \param  end       End of argv
+/// \param  option    Flag to extract
+// ***************************************************************************************
+char* get_flag(char** begin, char** end, const std::string & option) {
     char ** itr = std::find(begin, end, option);
-    if (itr != end && ++itr != end)
-    {
+    if (itr != end && ++itr != end) {
         return *itr;
     }
     return 0;

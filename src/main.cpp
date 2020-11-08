@@ -7,6 +7,7 @@
 #include <iostream>
 #include "TimeIntegration.h"
 #include "utility/tinyxml2.h"
+#include "utility/Utility.h"
 #include "utility/Parameters.h"
 #include "solver/SolverController.h"
 
@@ -45,10 +46,10 @@ int main(int argc, char **argv) {
 #ifdef USEMPI
     int MPIX, MPIY, MPIZ;
 
-    char * temp_x = Utility::get_flag(argv, argv + argc, "-x");
-    char * temp_y = Utility::get_flag(argv, argv + argc, "-y");
-    char * temp_z = Utility::get_flag(argv, argv + argc, "-z");
-
+    char* temp_x = Utility::get_flag(argv, argv + argc, "-x");
+    char* temp_y = Utility::get_flag(argv, argv + argc, "-y");
+    char* temp_z = Utility::get_flag(argv, argv + argc, "-z");
+    
     if ( !temp_x && !temp_y && !temp_z ) {
         MPIX = params->get_int("domain_parameters/MESHX");
         MPIY = params->get_int("domain_parameters/MESHY");
