@@ -7,7 +7,8 @@
 #ifndef ARTSS_INTERFACES_IPRESSURE_H_
 #define ARTSS_INTERFACES_IPRESSURE_H_
 
-#include "../Field.h"
+#include "../field/Field.h"
+#include "ISolver.h"
 
 class IPressure {
 public:

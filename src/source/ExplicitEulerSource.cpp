@@ -7,7 +7,6 @@
 #include "ExplicitEulerSource.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
-#include "../Domain.h"
 
 ExplicitEulerSource::ExplicitEulerSource() {
     auto params = Parameters::getInstance();
@@ -40,9 +39,9 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    size_t level = out_x->GetLevel();
+    size_t level = out_x->get_level();
     size_t bsize = domain->get_size(level);
-    FieldType type = out_x->GetType();
+    FieldType type = out_x->get_type();
 
     auto d_outx = out_x->data;
     auto d_outy = out_y->data;
@@ -110,9 +109,9 @@ void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    size_t level = out->GetLevel();
+    size_t level = out->get_level();
     auto bsize = domain->get_size(level);
-    FieldType type = out->GetType();
+    FieldType type = out->get_type();
 
     auto d_out = out->data;
     auto d_S = S->data;

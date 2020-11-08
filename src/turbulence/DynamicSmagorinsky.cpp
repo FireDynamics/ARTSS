@@ -166,7 +166,7 @@ DynamicSmagorinsky::DynamicSmagorinsky() {
 
     auto d_Cs = Cs->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u_f->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u_f->get_level());
 
 #pragma acc enter data copyin(d_u_f[:bsize], d_v_f[:bsize], d_w_f[:bsize])
 #pragma acc enter data copyin(d_uu[:bsize], d_vv[:bsize], d_ww[:bsize], d_uv[:bsize], d_uw[:bsize], d_vw[:bsize])
@@ -259,7 +259,7 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
 
     auto d_Cs = Cs->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u_f->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u_f->get_level());
 
 #pragma acc exit data delete(d_u_f[:bsize], d_v_f[:bsize], d_w_f[:bsize])
     delete u_f;
@@ -451,15 +451,15 @@ void DynamicSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, 
     auto d_Cs = Cs->data;
 
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(in_u->GetLevel());
-    const size_t Ny = domain->get_Ny(in_v->GetLevel());
-    const size_t Nz = domain->get_Nz(in_w->GetLevel());
+    const size_t Nx = domain->get_Nx(in_u->get_level());
+    const size_t Ny = domain->get_Ny(in_v->get_level());
+    const size_t Nz = domain->get_Nz(in_w->get_level());
 
-    const real dx = domain->get_dx(in_u->GetLevel());
-    const real dy = domain->get_dy(in_v->GetLevel());
-    const real dz = domain->get_dz(in_w->GetLevel());
+    const real dx = domain->get_dx(in_u->get_level());
+    const real dy = domain->get_dy(in_v->get_level());
+    const real dz = domain->get_dz(in_w->get_level());
 
-    size_t bsize = domain->get_size(in_u->GetLevel());
+    size_t bsize = domain->get_size(in_u->get_level());
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -669,9 +669,9 @@ void DynamicSmagorinsky::ExplicitFiltering(Field *out, const Field *in, bool syn
     auto d_out = out->data;
     auto d_in = in->data;
 
-    const size_t Nx = domain->get_Nx(out->GetLevel());
-    const size_t Ny = domain->get_Ny(out->GetLevel());
-    const size_t bsize = domain->get_size(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level());
+    const size_t Ny = domain->get_Ny(out->get_level());
+    const size_t bsize = domain->get_size(out->get_level());
     real sum = 0;
 
     //Implement a discrete filter by trapezoidal or simpsons rule.

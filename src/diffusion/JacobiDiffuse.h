@@ -9,8 +9,7 @@
 #define ARTSS_DIFFUSION_JACOBIDIFFUSE_H_
 
 #include "../interfaces/IDiffusion.h"
-#include "../Field.h"
-
+#include "../field/Field.h"
 #include "../utility/Utility.h"
 
 class JacobiDiffuse : public IDiffusion {

@@ -8,7 +8,7 @@
 #define ARTSS_ADVECTION_SLADVECT_H_
 
 #include "../interfaces/IAdvection.h"
-#include "../Field.h"
+#include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 
 class SLAdvect : public IAdvection {

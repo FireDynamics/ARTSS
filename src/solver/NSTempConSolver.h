@@ -16,31 +16,32 @@
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../field/FieldController.h"
 #include "../utility/Utility.h"
 
-
-class NSTempConSolver : public ISolver {
+class NSTempConSolver: public ISolver {
  public:
-    NSTempConSolver();
+    NSTempConSolver(FieldController *field_controller);
     ~NSTempConSolver() override;
 
     void do_step(real t, bool sync) override;
 
- private:
+private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+    IAdvection *adv_vel;
+    IDiffusion *dif_vel;
+    IAdvection *adv_temp;
+    IDiffusion *dif_temp;
+    IAdvection *adv_con;
+    IDiffusion *dif_con;
+    IPressure *pres;
+    ISource *sou_vel;
+    ISource *sou_temp;
+    ISource *sou_con;
 
-    IAdvection* adv_vel;
-    IDiffusion* dif_vel;
-    IAdvection* adv_temp;
-    IDiffusion* dif_temp;
-    IAdvection* adv_con;
-    IDiffusion* dif_con;
-    IPressure* pres;
-    ISource* sou_vel;
-    ISource* sou_temp;
-    ISource* sou_con;
+    FieldController *m_field_controller;
 
     real m_nu;
     real m_kappa;

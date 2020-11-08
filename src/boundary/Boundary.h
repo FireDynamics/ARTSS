@@ -13,7 +13,6 @@
 #include "Obstacle.h"
 #include "../utility/Utility.h"
 
-
 class Boundary {
  public:
     ~Boundary();

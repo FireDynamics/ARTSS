@@ -7,8 +7,8 @@
 #ifndef ARTSS_FUNCTIONS_H_
 #define ARTSS_FUNCTIONS_H_
 
+#include "field/Field.h"
 #include <string>
-#include "Field.h"
 
 struct FunctionNames{
     static const std::string Beltrami;
@@ -21,7 +21,6 @@ struct FunctionNames{
     static const std::string Hat;
     static const std::string McDermott;
     static const std::string RandomC;
-    static const std::string RampTanh;
     static const std::string SinSinSin;
     static const std::string Uniform;
     static const std::string Vortex;
@@ -62,9 +61,6 @@ namespace Functions {  // alphabetically ordered
   void SinSinSin(Field* out);
 
   void Uniform(Field* out, real val);
-
-  void Vortex(Field *outx, Field *outy, Field *outz, Field *outp);
-  void VortexY(Field *outx, Field *outy, Field *outz, Field *outp);
 
   void Vortex(Field *outx, Field *outy, Field *outz, Field *outp);
   void VortexY(Field *outx, Field *outy, Field *outz, Field *outp);

@@ -187,8 +187,10 @@ set(SOURCE_FILES
         "src/diffusion/ExplicitDiffuse.cpp"
         "src/diffusion/JacobiDiffuse.cpp"
 
+        "src/field/Field.cpp"
+        "src/field/FieldController.cpp"
+
         "src/interfaces/IPressure.cpp"
-        "src/interfaces/ISolver.cpp"
         "src/interfaces/ISource.cpp"
 
         "src/pressure/VCycleMG.cpp"
@@ -204,9 +206,13 @@ set(SOURCE_FILES
         "src/solver/NSTempTurbSolver.cpp"
         "src/solver/NSTempTurbConSolver.cpp"
         "src/solver/PressureSolver.cpp"
+        "src/solver/SolverController.cpp"
         "src/solver/SolverSelection.cpp"
 
+        "src/source/BuoyancyMMS.cpp"
+        "src/source/Cube.cpp"
         "src/source/ExplicitEulerSource.cpp"
+        "src/source/GaussFunction.cpp"
 
         "src/turbulence/ConstSmagorinsky.cpp"
         "src/turbulence/DynamicSmagorinsky.cpp"
@@ -221,7 +227,6 @@ set(SOURCE_FILES
         "src/visualisation/visit_writer.cpp"
 
         "src/Domain.cpp"
-        "src/Field.cpp"
         "src/Functions.cpp"
         "src/TimeIntegration.cpp"
         )
@@ -251,12 +256,16 @@ set(HEADER_FILES
         "src/diffusion/ExplicitDiffuse.h"
         "src/diffusion/JacobiDiffuse.h"
 
+        "src/field/Field.h"
+        "src/field/FieldController.h"
+
         "src/interfaces/IAdaptionFunction.h"
         "src/interfaces/IAdvection.h"
         "src/interfaces/IDiffusion.h"
         "src/interfaces/IPressure.h"
         "src/interfaces/ISolver.h"
         "src/interfaces/ISource.h"
+        "src/interfaces/ISourceFunction.h"
         "src/interfaces/ITurbulence.h"
 
         "src/pressure/VCycleMG.h"
@@ -272,9 +281,14 @@ set(HEADER_FILES
         "src/solver/NSTempTurbSolver.h"
         "src/solver/NSTempTurbConSolver.h"
         "src/solver/PressureSolver.h"
+        "src/solver/SolverController.h"
         "src/solver/SolverSelection.h"
 
+        "src/source/BuoyancyMMS.h"
+        "src/source/Cube.h"
         "src/source/ExplicitEulerSource.h"
+        "src/source/GaussFunction.h"
+        "src/source/Zero.h"
 
         "src/turbulence/ConstSmagorinsky.h"
         "src/turbulence/DynamicSmagorinsky.h"
@@ -290,7 +304,6 @@ set(HEADER_FILES
         "src/visualisation/visit_writer.h"
 
         "src/Domain.h"
-        "src/Field.h"
         "src/Functions.h"
         "src/GlobalMacrosTyper.h"
         "src/TimeIntegration.h"

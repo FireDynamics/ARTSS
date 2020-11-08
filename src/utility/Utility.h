@@ -9,14 +9,18 @@
 
 #include <string>
 #include <vector>
+#include "GlobalMacrosTypes.h"
 
 #ifndef BENCHMARKING
 #define FMT_USE_UDL_TEMPLATE 0
+
 #include "spdlog/logger.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
+
 #endif
 
+<<<<<<< HEAD
 class Utility {
  public:
     static std::vector<size_t> coordinateFromLinearIndex(size_t idx,
@@ -35,14 +39,19 @@ class Utility {
     static std::vector<std::string> split(const char* text, char delimiter);
     static std::vector<std::string> split(const std::string& text,
                                           char delimiter);
+=======
+
+namespace Utility {
+    size_t get_index(real physical_coordinate, real spacing, real start_coordinate);
+    std::vector<size_t> coordinateFromLinearIndex(size_t idx, size_t Nx, size_t Ny);
+    std::vector<std::string> split(const char* text, char delimiter);
+    std::vector<std::string> split(const std::string& text, char delimiter);
+>>>>>>> master
 
 #ifndef BENCHMARKING
-    static std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
+    std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
 #endif
-
- private:
-    Utility() = default;
-};
+} // namespace Utility
 
 
 #endif /* ARTSS_UTILITY_UTILITY_H_ */

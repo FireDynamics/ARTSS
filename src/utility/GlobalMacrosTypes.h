@@ -35,7 +35,7 @@ typedef double real;  // data type for solver (float, double, ...)
 // looks like PGI uses __restrict
 // https://www.auburn.edu/cosam/departments/physics/department/comp-resources/files/pgi/pgicdkrn.pdf
 // p. 14
-// nontheless this only a c99 keyword and should not be used
+// nonetheless this only a c99 keyword and should not be used
 #ifdef __PGI
     typedef const real* __restrict const read_ptr;  // readable for GPU version
     typedef real* __restrict const write_ptr;       // writable ptr GPU version
@@ -85,5 +85,7 @@ typedef const real* const aliased_read_ptr;
 #define NEGATIVE_SIGN (-1)
 #define POSITIVE_SIGN (1)
 
+#define XML_TRUE ("Yes")
+#define XML_FALSE ("No")
 
 #endif /* ARTSS_UTILITY_GLOBALMACROSTYPES_H_ */

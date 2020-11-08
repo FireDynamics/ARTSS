@@ -14,17 +14,17 @@
 
 static std::string ending = ".vtk";
 
-void VTKWriter::write_numerical(ISolver *solver, const std::string& filename) {
-    auto u = solver->get_u();
-    auto v = solver->get_v();
-    auto w = solver->get_w();
-    auto p = solver->get_p();
-    auto div = solver->get_rhs();
-    auto T = solver->get_T();
-    auto C = solver->get_concentration();
-    auto s = solver->get_sight();
-    auto nu_t = solver->get_nu_t();
-    auto S_T = solver->get_S_T();
+void VTKWriter::write_numerical(FieldController *field_controller, const std::string& filename) {
+    auto u = field_controller->get_field_u_data();
+    auto v = field_controller->get_field_v_data();
+    auto w = field_controller->get_field_w_data();
+    auto p = field_controller->get_field_p_data();
+    auto div = field_controller->get_field_rhs_data();
+    auto T = field_controller->get_field_T_data();
+    auto C = field_controller->get_field_concentration_data();
+    auto s = field_controller->get_field_sight_data();
+    auto nu_t = field_controller->get_field_nu_t_data();
+    auto S_T = field_controller->get_field_source_T_data();
     VTKWriter::vtkPrepareAndWrite((filename + ending).c_str(), u, v, w, p, div, T, C, s, nu_t, S_T);
 }
 
@@ -295,7 +295,7 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     auto Temp = new float[size];
 
     // Cast variables to floats
-  for (int k = bz0; k < Nz - bz1; k++) {
+    for (int k = bz0; k < Nz - bz1; k++) {
         for (int j = by0; j < Ny - by1; j++) {
             for (int i = bx0; i < Nx - bx1; i++) {
                 size_t indexData = IX(i, j, k, Nx, Ny);

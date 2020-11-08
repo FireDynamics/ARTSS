@@ -8,44 +8,34 @@
 #define ARTSS_FIELD_H_
 
 #include <array>
-#include <utility>
-
-#include "utility/GlobalMacrosTypes.h"
-
-class Adaption;
+#include "../utility/GlobalMacrosTypes.h"
 
 #ifndef ENUM_TYPES
 #define ENUM_TYPES
 const size_t numberOfFieldTypes = 6;
 enum FieldType : int {
-    UNKNOWN_FIELD = -1,
-    RHO = 0,
-    U = 1,
-    V = 2,
-    W = 3,
-    P = 4,
-    T = 5
+    UNKNOWN_FIELD = -1, RHO = 0, U = 1, V = 2, W = 3, P = 4, T = 5
 };
 #endif
 
 class Field {
- public:
+public:
     Field(FieldType type, real val);
     Field(FieldType type, real val, size_t level);
 
     ~Field();
-
     Field(const Field &);
 
     // getter
-    FieldType GetType() {return this->m_type;}
-    size_t GetLevel() {return this->m_level;}
+    FieldType get_type() { return this->m_type; };
+    size_t get_level() { return this->m_level; };
 
-    static void Swap(Field* a, Field* b) {std::swap(a->data, b->data);}
+    void set_value(real val);
+    static void swap(Field *a, Field *b) { std::swap(a->data, b->data); };
 
-    real* data;
+    real *data;
 
- private:
+private:
     size_t m_level;
     FieldType m_type;
 };

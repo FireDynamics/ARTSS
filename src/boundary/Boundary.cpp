@@ -7,7 +7,7 @@
 #include <cmath>
 
 #include "Boundary.h"
-#include "../Field.h"
+#include "../field/Field.h"
 #include "../Domain.h"
 #include "../utility/GlobalMacrosTypes.h"
 

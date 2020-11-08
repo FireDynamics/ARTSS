@@ -49,8 +49,8 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
 void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    auto bsize = domain->get_size(out->GetLevel());
-    FieldType type = out->GetType();
+    auto bsize = domain->get_size(out->get_level());
+    FieldType type = out->get_type();
 
     auto d_out = out->data;
     auto d_b = b->data;
@@ -65,13 +65,13 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize])
 {
-    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out->GetLevel());
-    const size_t Nz = domain->get_Nz(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->get_level());
+    const size_t Nz = domain->get_Nz(out->get_level());
 
-    const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out->GetLevel());
-    const real dz = domain->get_dz(out->GetLevel());
+    const real dx = domain->get_dx(out->get_level()); //due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out->get_level());
+    const real dz = domain->get_dz(out->get_level());
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -141,8 +141,8 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, const Field *EV, bool sync) {
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    auto bsize = domain->get_size(out->GetLevel());
-    FieldType type = out->GetType();
+    auto bsize = domain->get_size(out->get_level());
+    FieldType type = out->get_type();
 
     auto d_out  = out->data;
     auto d_b    = b->data;
@@ -158,13 +158,13 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize], d_EV[:bsize])
 {
-    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out->GetLevel());
-    const size_t Nz = domain->get_Nz(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->get_level());
+    const size_t Nz = domain->get_Nz(out->get_level());
 
-    const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out->GetLevel());
-    const real dz = domain->get_dz(out->GetLevel());
+    const real dx = domain->get_dx(out->get_level()); //due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out->get_level());
+    const real dz = domain->get_dz(out->get_level());
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -240,11 +240,11 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
 
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    const size_t nx = domain->get_Nx(out->GetLevel());
-    const size_t ny = domain->get_Ny(out->GetLevel());
-    const size_t nz = domain->get_Nz(out->GetLevel());
+    const size_t nx = domain->get_Nx(out->get_level());
+    const size_t ny = domain->get_Ny(out->get_level());
+    const size_t nz = domain->get_Nz(out->get_level());
 
-    const size_t bsize = domain->get_size(out->GetLevel());
+    const size_t bsize = domain->get_size(out->get_level());
 
     auto d_out = out->data;
     auto d_b = b->data;
@@ -345,19 +345,19 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
 
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    const size_t Nx = domain->get_Nx(out->GetLevel());
-    const size_t Ny = domain->get_Ny(out->GetLevel());
-    const size_t Nz = domain->get_Nz(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level());
+    const size_t Ny = domain->get_Ny(out->get_level());
+    const size_t Nz = domain->get_Nz(out->get_level());
 
-    const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out->GetLevel());
-    const real dz = domain->get_dz(out->GetLevel());
+    const real dx = domain->get_dx(out->get_level()); //due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out->get_level());
+    const real dz = domain->get_dz(out->get_level());
 
     const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
     const real rdy = 1. / dy;
     const real rdz = 1. / dz;
 
-    size_t bsize = domain->get_size(out->GetLevel());
+    size_t bsize = domain->get_size(out->get_level());
 
     real aX, aY, aZ, bb, rb; //multipliers calculated
 

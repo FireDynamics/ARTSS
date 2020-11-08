@@ -11,7 +11,7 @@
 #include <vector>
 #include "../utility/Utility.h"
 #include "../utility/tinyxml2.h"
-#include "../Field.h"
+#include "../field/Field.h"
 
 const size_t numberOfPatches = 6;
 enum Patch : int {

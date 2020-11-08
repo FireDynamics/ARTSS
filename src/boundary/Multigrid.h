@@ -10,12 +10,11 @@
 #include "Boundary.h"
 #include "Surface.h"
 #include "Obstacle.h"
-#include "../Field.h"
 #include "../Domain.h"
+#include "../field/Field.h"
 #include "../utility/Utility.h"
 #include "BoundaryDataController.h"
 #include <vector>
-
 
 class Multigrid {
 public:

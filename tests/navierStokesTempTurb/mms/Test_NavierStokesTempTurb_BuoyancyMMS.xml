@@ -20,7 +20,7 @@
     <turbulence type="ConstSmagorinsky">
       <Cs> 0.2 </Cs>
     </turbulence>
-    <source type="ExplicitEuler" force_fct="Buoyancy" dir="y"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    <source type="ExplicitEuler" force_fct="Buoyancy" dir="y" use_init_values="Yes"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>
     <pressure type="VCycleMG" field="p">
       <n_level> 4 </n_level>  <!-- number of restriction levels -->

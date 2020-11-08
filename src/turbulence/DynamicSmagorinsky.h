@@ -8,7 +8,7 @@
 #define ARTSS_TURBULENCE_DYNAMICSMAGORINSKY_H_
 
 #include "../interfaces/ITurbulence.h"
-#include "../Field.h"
+#include "../field/Field.h"
 
 class DynamicSmagorinsky : public ITurbulence {
 public:

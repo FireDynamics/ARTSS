@@ -4,18 +4,17 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-
 #include "PressureSolver.h"
 
 
-PressureSolver::PressureSolver() {
+PressureSolver::PressureSolver(FieldController *field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(PressureSolver).name());
 #endif
-
+    m_field_controller = field_controller;
     auto params = Parameters::getInstance();
     auto p_type = params->get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(&this->pres, p_type, p, rhs);
+    SolverSelection::SetPressureSolver(&this->pres, p_type, m_field_controller->field_p, m_field_controller->field_rhs);
     control();
 }
 
@@ -37,12 +36,12 @@ void PressureSolver::do_step(real t, bool sync) {
 // 1. Solve pressure Poisson equation
 
     // local variables and parameters for GPU
-    auto p = ISolver::p;
-    auto rhs = ISolver::rhs;
+    auto p = m_field_controller->field_p;
+    auto rhs = m_field_controller->field_rhs;
     auto d_p = p->data;
     auto d_rhs = rhs->data;
 
-    size_t bsize = Domain::getInstance()->get_size(p->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(p->get_level());
 
 #pragma acc data present(d_p[:bsize], d_rhs[:bsize])
     {
