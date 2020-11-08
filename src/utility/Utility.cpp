@@ -54,7 +54,7 @@ std::vector<size_t> coordinateFromLinearIndex(size_t idx, size_t Nx, size_t Ny) 
     return coord;
 }
 
-char* Utility::get_flag(char ** begin, char ** end, const std::string & option)
+char* get_flag(char ** begin, char ** end, const std::string & option)
 {
     char ** itr = std::find(begin, end, option);
     if (itr != end && ++itr != end)

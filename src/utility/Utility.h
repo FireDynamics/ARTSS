@@ -20,33 +20,13 @@
 
 #endif
 
-<<<<<<< HEAD
-class Utility {
- public:
-    static std::vector<size_t> coordinateFromLinearIndex(size_t idx,
-                                                         size_t Nx,
-                                                         size_t Ny);
-
-    static char* get_flag(char ** begin, char ** end, const std::string & option);
-
-//  static size_t getCoordinateI(size_t idx,
-//                               size_t Nx,
-//                               size_t Ny,
-//                               size_t j,
-//                               size_t k);
-//  static size_t getCoordinateJ(size_t idx, size_t Nx, size_t Ny, size_t k);
-//  static size_t getCoordinateK(size_t idx, size_t Nx, size_t Ny);
-    static std::vector<std::string> split(const char* text, char delimiter);
-    static std::vector<std::string> split(const std::string& text,
-                                          char delimiter);
-=======
 
 namespace Utility {
+    static char* get_flag(char ** begin, char ** end, const std::string & option);
     size_t get_index(real physical_coordinate, real spacing, real start_coordinate);
     std::vector<size_t> coordinateFromLinearIndex(size_t idx, size_t Nx, size_t Ny);
     std::vector<std::string> split(const char* text, char delimiter);
     std::vector<std::string> split(const std::string& text, char delimiter);
->>>>>>> master
 
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
