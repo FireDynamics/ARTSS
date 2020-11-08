@@ -14,6 +14,10 @@
 #include "../Domain.h"
 #include "../solver/SolverSelection.h"
 #include "../utility/Utility.h"
+#ifdef USEMPI
+    #include "../utility/MPIHandler.h"
+#endif
+
 
 
 // =============================== Constructor ===============================

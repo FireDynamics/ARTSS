@@ -5,6 +5,10 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Multigrid.h"
+#ifdef USEMPI
+    #include "../utility/MPIHandler.h"
+#endif
+
 
 
 Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {

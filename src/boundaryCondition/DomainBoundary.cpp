@@ -6,6 +6,10 @@
 
 #include "DomainBoundary.h"
 #include "../Domain.h"
+#ifdef USEMPI
+    #include "../utility/MPIHandler.h"
+#endif
+
 
 namespace DomainBoundary {
 namespace {

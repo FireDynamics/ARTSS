@@ -15,6 +15,10 @@
 #include "../Domain.h"
 #include "CSVWriter.h"
 #include "VTKWriter.h"
+#ifdef USEMPI
+    #include "../utility/MPIHandler.h"
+#endif
+
 
 Visual::Visual(Solution *solution) {
     auto params = Parameters::getInstance();

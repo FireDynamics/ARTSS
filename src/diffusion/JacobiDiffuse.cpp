@@ -12,6 +12,10 @@
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 #include "../utility/Utility.h"
+#ifdef USEMPI
+    #include "../utility/MPIHandler.h"
+#endif
+
 
 JacobiDiffuse::JacobiDiffuse() {
 #ifndef BENCHMARKING

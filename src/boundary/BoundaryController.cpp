@@ -10,6 +10,10 @@
 #include <tuple>
 #include "../utility/Utility.h"
 #include <algorithm>
+#ifdef USEMPI
+    #include "../utility/MPIHandler.h"
+#endif
+
 
 BoundaryController *BoundaryController::singleton = nullptr; // Singleton
 

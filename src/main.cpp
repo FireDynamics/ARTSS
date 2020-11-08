@@ -91,11 +91,10 @@ int main(int argc, char **argv) {
     TimeIntegration ti(sc);
     ti.run();
 
+    delete sc;
 
 #ifdef USEMPI
     MPI_Finalize();
 #endif
-
-    delete sc;
     return 0;
 }
