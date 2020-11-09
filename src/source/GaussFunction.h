@@ -17,9 +17,12 @@ public:
     ~GaussFunction();
     void update_source(Field *out, real t_cur) override;
 private:
-    void create_spatial_values(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z);
+    void create_spatial_values();
     Field *m_field_spatial_values;
     real m_tau;
+    real m_HRR, m_cp;
+    real m_x0, m_y0, m_z0;
+    real m_sigma_x, m_sigma_y, m_sigma_z;
     real get_time_value(real t_cur);
 };
 
