@@ -87,7 +87,22 @@ void SolverController::set_up_sources(const std::string &string_solver) {
             real sigma_y = params->get_real("solver/temperature/source/sigma_y");
             real sigma_z = params->get_real("solver/temperature/source/sigma_z");
             real tau = params->get_real("solver/temperature/source/tau");
+
+#ifdef USEMPI
+            auto mpi_handler = MPIHandler::getInstance();
+            auto domain = Domain::getInstance();
+
+            if ((x0 > domain->get_x1() && x0 < domain->get_x2()) &&
+                (y0 > domain->get_y1() && y0 < domain->get_y2()) &&
+                (z0 > domain->get_z1() && z0 < domain->get_z2())) { 
+                m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
+            } else {
+                m_has_temperature = false;
+            }
+            mpi_handler->set_barrier();
+#else
             m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
+#endif
         } else if (temp_fct == SourceMethods::BuoyancyST_MMS) {
             m_source_function_temperature = new BuoyancyMMS();
         } else if (temp_fct == SourceMethods::Cube){
@@ -98,7 +113,23 @@ void SolverController::set_up_sources(const std::string &string_solver) {
             real y_end = params->get_real("solver/temperature/source/y_end");
             real z_end = params->get_real("solver/temperature/source/z_end");
             real val = params->get_real("solver/temperature/source/value");
+
+#ifdef USEMPI
+            //TODO -> Cube MUST be inside a mesh!
+            auto mpi_handler = MPIHandler::getInstance();
+            auto domain = Domain::getInstance();
+
+            if ((x_start > domain->get_x1() && x_end < domain->get_x2()) &&
+                (y_start > domain->get_y1() && y_end < domain->get_y2()) &&
+                (z_start > domain->get_z1() && z_end < domain->get_z2())) { 
+                m_source_function_temperature = new Cube(val, x_start, y_start, z_start, x_end, y_end, z_end);
+            } else {
+                m_has_temperature = false;
+            }
+            mpi_handler->set_barrier();
+#else
             m_source_function_temperature = new Cube(val, x_start, y_start, z_start, x_end, y_end, z_end);
+#endif
         } else if (temp_fct == SourceMethods::Zero) {
             m_source_function_temperature = new Zero();
         } else {
@@ -136,7 +167,21 @@ void SolverController::set_up_sources(const std::string &string_solver) {
             real sigma_z = params->get_real("solver/concentration/source/sigma_z");
             real tau = params->get_real("solver/concentration/source/tau");
 
-            m_source_function_concentration = new GaussFunction(YsHRR, Hc, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
+#ifdef USEMPI
+            auto mpi_handler = MPIHandler::getInstance();
+            auto domain = Domain::getInstance();
+
+            if ((x0 > domain->get_x1() && x0 < domain->get_x2()) &&
+                (y0 > domain->get_y1() && y0 < domain->get_y2()) &&
+                (z0 > domain->get_z1() && z0 < domain->get_z2())) { 
+                    m_source_function_concentration = new GaussFunction(YsHRR, Hc, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
+            } 
+            mpi_handler->set_barrier();
+#else
+            m_has_concentration = false;
+#endif
+
+            
         } else if (con_fct == SourceMethods::Zero) {
             m_source_function_temperature = new Zero();
         } else {
@@ -495,7 +540,7 @@ void SolverController::update_sources(real t_cur, bool sync) {
     auto params = Parameters::getInstance();
 
 // Momentum source
-    if (m_has_momentum_source) {
+    if (m_has_momentum_source) { 
         std::string forceFct = params->get("solver/source/force_fct");
         if (forceFct == SourceMethods::Zero or \
             forceFct == SourceMethods::Uniform) {
