@@ -377,8 +377,18 @@ void Analysis::save_variables_in_file(FieldController *field_controller) {
     dataField[FieldType::P] = field_controller->get_field_p_data();
     dataField[FieldType::T] = field_controller->get_field_T_data();
 
+#ifdef USEMPI
+        auto mpi_handler = MPIHandler::getInstance();
+        std::vector<int> cords = mpi_handler->get_coords();
+#endif
     for (auto & v_field : v_fields) {
-        write_file(dataField[v_field], BoundaryData::getFieldTypeName(v_field), innerList, size_innerList, boundaryList, size_boundaryList, obstacleList, size_obstacleList);
+        std::string filename{BoundaryData::getFieldTypeName(v_field)};
+#ifdef USEMPI
+        filename.insert(0, std::to_string(cords.at(2)) + "_");
+        filename.insert(0, std::to_string(cords.at(1)));
+        filename.insert(0, std::to_string(cords.at(0)));
+#endif
+        write_file(dataField[v_field], filename, innerList, size_innerList, boundaryList, size_boundaryList, obstacleList, size_obstacleList);
     }
 }
 

@@ -249,23 +249,19 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     int by1{rank_has_boundary.at(Patch::TOP)};
     int bz0{rank_has_boundary.at(Patch::BACK)};
     int bz1{rank_has_boundary.at(Patch::FRONT)};
+    int dims[] = {Nx + 1 - bx0 - bx1, Ny + 1 - by0 - by1, Nz + 1 - bz0 - bz1}; 
+    int size = static_cast<int>(dims[0]*dims[1]*dims[2]);
 #else
-    int bz0{0};
-    int bz1{0};
-    int by0{0};
-    int by1{0};
-    int bx0{0};
-    int bx1{0};
+    int size = static_cast<int>(domain->get_size());
+    int dims[] = {Nx + 1, Ny + 1, Nz + 1}; // Dimensions of the rectilinear array (+1 for zonal values)
 #endif
 
-    int dims[] = {Nx + 1 - bx0 - bx1, Ny + 1 - by0 - by1, Nz + 1 - bz0 - bz1};            // Dimensions of the rectilinear array (+1 for zonal values)
-
-    int size = static_cast<int>(dims[0]*dims[1]*dims[2]);
-
+    
     auto x_coords = new float[dims[0]];
     auto y_coords = new float[dims[1]];
     auto z_coords = new float[dims[2]];
 
+#ifdef USEMPI
     // Initialize grid
     // faces of the grid cells
     for (int i = bx0; i < Nx + 1 - bx1; i++) {
@@ -279,6 +275,21 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     for (int k = bz0; k < Nz + 1 - bz1; k++) {
         z_coords[k-bz0] = static_cast<float> (Z1 + (k - 1) * dz);
     }
+#else
+    // Initialize grid
+    // faces of the grid cells
+    for (int i = 0; i < Nx + 1; i++) {
+        x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
+    }
+
+    for (int j = 0; j < Ny + 1; j++) {
+        y_coords[j] = static_cast<float> (Y1 + (j - 1) * dy);
+    }
+
+    for (int k = 0; k < Nz + 1; k++) {
+        z_coords[k] = static_cast<float> (Z1 + (k - 1) * dz);
+    }
+#endif
 
     // centers of the grid cells
     auto x_centres = new float[size];
@@ -294,6 +305,7 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
     // temperature
     auto Temp = new float[size];
 
+#ifdef USEMPI
     // Cast variables to floats
     for (int k = bz0; k < Nz - bz1; k++) {
         for (int j = by0; j < Ny - by1; j++) {
@@ -311,6 +323,24 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
             }
         }
     }
+#else
+    // Cast variables to floats
+    for (int k = 0; k < Nz; k++) {
+        for (int j = 0; j < Ny; j++) {
+            for (int i = 0; i < Nx; i++) {
+                size_t index = IX(i, j, k, Nx, Ny);
+                x_centres[index] = x_coords[i] + static_cast<float> (0.5 * dx);
+                y_centres[index] = y_coords[j] + static_cast<float> (0.5 * dy);
+                z_centres[index] = z_coords[k] + static_cast<float> (0.5 * dz);
+                u_vel[index] = static_cast<float>(u[index]);
+                v_vel[index] = static_cast<float>(v[index]);
+                w_vel[index] = static_cast<float>(w[index]);
+                pres[index] = static_cast<float>(p[index]);
+                Temp[index] = static_cast<float>(T[index]);
+            }
+        }
+    }
+#endif
     // Summarize pointers to variables in an array
     float *vars[] = {static_cast<float *> (x_centres),
                      static_cast<float *> (y_centres),
