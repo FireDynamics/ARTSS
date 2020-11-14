@@ -259,8 +259,8 @@ cd build || exit
 
 if [[ $GPU -eq 0 ]] || [[ $COMPILER = "PGI" ]]
 then
-  CCOMPILER=pgcc
-  CXXCOMPILER=pgc++
+  CCOMPILER=nvc
+  CXXCOMPILER=nvc++
 else
   CCOMPILER=gcc
   CXXCOMPILER=g++
