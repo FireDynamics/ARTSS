@@ -1,5 +1,12 @@
 target_sources(artss
     PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/BuoyancyMMS.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/BuoyancyMMS.h
+        ${CMAKE_CURRENT_LIST_DIR}/Cube.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/Cube.h
         ${CMAKE_CURRENT_LIST_DIR}/ExplicitEulerSource.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ExplicitEulerSource.h
+        ${CMAKE_CURRENT_LIST_DIR}/GaussFunction.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/GaussFunction.h
+        ${CMAKE_CURRENT_LIST_DIR}/Zero.h
 )

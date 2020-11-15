@@ -24,5 +24,7 @@ target_sources(artss
         ${CMAKE_CURRENT_LIST_DIR}/PressureSolver.h
         ${CMAKE_CURRENT_LIST_DIR}/SolverSelection.cpp
         ${CMAKE_CURRENT_LIST_DIR}/SolverSelection.h
+        ${CMAKE_CURRENT_LIST_DIR}/SolverController.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/SolverController.h
 )
 
