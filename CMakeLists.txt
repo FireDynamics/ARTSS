@@ -131,10 +131,10 @@ link_directories( $ENV{CUDA_LIB} )
 include_directories( $ENV{CUDA_INC} )
 
 # find spdlog lib
-# if(NOT TARGET spdlog)
-#     # Stand-alone build
-#     find_package(spdlog)
-# endif()
+if(NOT TARGET spdlog)
+    # Stand-alone build
+    find_package(spdlog QUIET)
+endif()
 # use local fallback
 if(NOT TARGET spdlog)
     add_subdirectory(external/spdlog)
@@ -172,9 +172,6 @@ target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
 add_executable( artss_gpu_benchmark ${SOURCE_FILES})
 set_target_properties( artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
 target_link_libraries( artss_gpu_benchmark  )
-
-
-spdlog_enable_warnings(artss)
 
 
 enable_testing()
