@@ -57,7 +57,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
     auto bsize_i = boundary->getSize_innerList();
     size_t *d_iList = boundary->get_innerList_level_joined();
 
-#pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize])
+#pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize], d_iList[:bsize_i])
     {
         const size_t Nx = domain->get_Nx(out->get_level());    // due to unnecessary parameter passing of *this
         const size_t Ny = domain->get_Ny(out->get_level());
