@@ -91,7 +91,7 @@ void SetSourceSolver(ISource **sourceSolver, const std::string& sourceType) {
     } else {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(solver_selection_name);
-        logger->error("Source method not yet implemented! Simulation stopped!");
+        logger->error("Source method {} not yet implemented! Simulation stopped!", sourceType);
 #endif
         std::exit(1);
         //TODO Error handling
