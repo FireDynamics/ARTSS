@@ -8,6 +8,9 @@
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
+#include "../Domain.h"
+#include "../boundary/BoundaryController.h"
+#include "../field/Field.h"
 #include <cmath>
 
 #ifndef BENCHMARKING
@@ -78,8 +81,7 @@ std::vector<std::string> split(const char *text, char delimiter) {
 #ifndef BENCHMARKING
 // ======================= creates a new logger ================================
 // *****************************************************************************
-/// \brief  creates a new named logger this function is only available if
-//          BENCHMARKING is not enabled
+/// \brief  creates a new named logger this function is only available if BENCHMARKING is not enabled
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
 std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
@@ -98,27 +100,22 @@ std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
     }
 
     if (!file_sink) {
-        file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-            log_file,
-            false);
+        file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
         file_sink->set_level(spdlog::level::trace);
     }
 
     std::vector<spdlog::sink_ptr> sinks;
     sinks.push_back(stdout_sink);
     sinks.push_back(file_sink);
-    auto logger = std::make_shared<spdlog::logger>(logger_name,
-                                                   begin(sinks),
-                                                   end(sinks));
+    auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
     logger->flush_on(spdlog::level::err);
     logger->set_level(spdlog::level::trace);
 
     return logger;
 }
 #endif
-}  // namespace Utility
 
-std::vector<size_t> Utility::mergeSortedListsToUniqueList(size_t *list1, size_t size_list1, size_t *list2, size_t size_list2) {
+std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list1, size_t *list2, size_t size_list2) {
     std::vector<size_t> result;
     size_t counter1 = 0;
     size_t counter2 = 0;
@@ -164,3 +161,70 @@ std::vector<size_t> Utility::mergeSortedListsToUniqueList(size_t *list1, size_t 
     }
     return result;
 }
+
+void log_minimum(Field *field, std::string text, std::string logger_name) {
+    auto logger = Utility::create_logger(logger_name);
+    auto data = field->data;
+    real minimum_inner = ULONG_LONG_MAX;
+    auto boundary = BoundaryController::getInstance();
+    size_t *innerList = boundary->get_innerList_level_joined();
+    size_t size_innerList = boundary->getSize_innerList();
+    for (size_t i = 0; i < size_innerList; i++){
+        size_t idx = innerList[i];
+        real value = data[idx];
+        if (value < minimum_inner){
+            minimum_inner = value;
+        }
+    }
+#ifndef BENCHMARKING
+    logger->info("minimum inner {}: {}", text, minimum_inner);
+#endif
+    real minimum_boundary = ULONG_LONG_MAX;
+    std::vector<size_t> indices;
+    size_t *boundaryList = boundary->get_boundaryList_level_joined();
+    size_t size_boundaryList = boundary->getSize_boundaryList();
+    for (size_t i = 0; i < size_boundaryList; i++){
+        size_t idx = boundaryList[i];
+        real value = data[idx];
+        if (value < minimum_boundary){
+            indices.clear();
+            indices.push_back(idx);
+            minimum_boundary = value;
+        }else if (value == minimum_boundary) {
+            indices.push_back(idx);
+        }
+    }
+    size_t Nx = Domain::getInstance()->get_Nx();
+    size_t Ny = Domain::getInstance()->get_Ny();
+    std::string index;
+    for (size_t idx: indices){
+        size_t k = getCoordinateK(idx, Nx, Ny);
+        size_t j = getCoordinateJ(idx, Nx, Ny, k);
+        size_t i = getCoordinateI(idx, Nx, Ny, j, k);
+        index += " (" + std::to_string(i) + "|" + std::to_string(j) + "|" + std::to_string(k) + ")";
+    }
+
+
+#ifndef BENCHMARKING
+    logger->info("minimum boundary {}: {}", text, minimum_boundary);
+    logger->info("indices ({}) boundary cells ({})", indices.size(), size_boundaryList);
+    logger->debug("indices ({}): {}", indices.size(), index);
+#endif
+
+    real minimum_obstacle = ULONG_LONG_MAX;
+    size_t *obstacleList = boundary->get_obstacleList();
+    size_t size_obstacleList = boundary->getSize_obstacleList();
+    for (size_t i = 0; i < size_obstacleList; i++){
+        size_t idx = obstacleList[i];
+        real value = data[idx];
+        if (value < minimum_obstacle){
+            minimum_obstacle = value;
+        }
+    }
+#ifndef BENCHMARKING
+    logger->info("minimum obstacle {}: {}", text, minimum_obstacle);
+#endif
+}
+
+}  // namespace Utility
+
