@@ -77,6 +77,8 @@ private:
     void parseBoundaryParameter(tinyxml2::XMLElement *xmlParameter);
     void parseObstacleParameter(tinyxml2::XMLElement *xmlParameter);
     void parseSurfaceParameter(tinyxml2::XMLElement *xmlParameter);
+
+    void detect_neighbouring_obstacles();
 };
 
 

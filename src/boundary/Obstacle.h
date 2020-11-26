@@ -19,8 +19,8 @@
 
 class Obstacle {
 public:
-    Obstacle(real x1, real x2, real y1, real y2, real z1, real z2);
-    Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level);
+    Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const std::string& name);
+    Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level, std::string name);
     ~Obstacle();
 
     size_t* getObstacleList() { return m_obstacleList; }
@@ -55,12 +55,19 @@ public:
     size_t getStrideY() { return m_j2 - m_j1 + 1; }
     size_t getStrideZ() { return m_k2 - m_k1 + 1; }
 
-    bool removeCellsFacingAnotherObstacle(Obstacle *o);
+    std::string get_name() { return m_name; }
+
+    bool static removeCellsFacingAnotherObstacle(Obstacle *o1, Obstacle* o2);
+    void replace_patch(size_t *indices, size_t size, Patch p);
     void control();
+
+    void set_inner_cells(Field *f, real value);
+
 private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+    std::string m_name;
     size_t m_i1, m_j1, m_k1;
     size_t m_i2, m_j2, m_k2;
 
@@ -101,6 +108,8 @@ private:
     static bool hasOverlap(size_t o1_coord1, size_t o1_coord2, size_t o2_coord1, size_t o2_coord2);
 
     size_t getSize(){return getStrideZ() * getStrideY() * getStrideX();};
+
+    void remove_patch(Patch patch);
 };
 
 #endif /* ARTSS_BOUNDARY_OBSTACLE_H */

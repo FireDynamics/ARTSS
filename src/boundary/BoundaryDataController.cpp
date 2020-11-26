@@ -78,6 +78,9 @@ void BoundaryDataController::print() {
 /// \param  sync         synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void BoundaryDataController::applyBoundaryCondition(real *data, size_t **indexFields, size_t *patch_start, size_t *patch_end, FieldType fieldType, size_t level, bool sync) {
+#ifndef BENCHMARKING
+    m_logger->debug("apply boundary conditions");
+#endif
     if (!((BoundaryData *) *(m_boundaryData + fieldType))->isEmpty()) {
         DomainBoundary::apply_boundary_condition(data, indexFields, patch_start, patch_end, level, m_boundaryData[fieldType], sync);
     }
@@ -96,6 +99,9 @@ void BoundaryDataController::applyBoundaryCondition(real *data, size_t **indexFi
 /// \param  sync          synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void BoundaryDataController::applyBoundaryConditionObstacle(real *data, size_t **indexFields, size_t *patch_start, size_t *patch_end, FieldType fieldType, size_t level, size_t id, bool sync) {
+#ifndef BENCHMARKING
+    m_logger->debug("apply obstacle boundary conditions");
+#endif
     if (!((BoundaryData *) *(m_boundaryData + fieldType))->isEmpty()) {
         ObstacleBoundary::apply_boundary_condition(data, indexFields, patch_start, patch_end, level, m_boundaryData[fieldType], id, sync);
     }

@@ -743,7 +743,7 @@ Obstacle** Multigrid::obstacleDominantRestriction(size_t level) {
         //    controlObstacleOverlap(obstacleList_coarse[c], &i1_coarse, &i2_coarse, &j1_coarse, &j2_coarse, &k1_coarse, &k2_coarse);
         //}
 
-        Obstacle *obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse, i2_coarse, j2_coarse, k2_coarse, level);
+        Obstacle *obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse, i2_coarse, j2_coarse, k2_coarse, level, obstacle_fine->get_name());
         *(obstacleList_coarse + id) = obstacle_coarse;
 
         size_t index = level * m_numberOfObstacles + id + 1;
@@ -998,10 +998,6 @@ void Multigrid::sendObstacleListsToGPU() {
 /// \param  sync synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void Multigrid::applyBoundaryCondition(real *d, size_t level, FieldType f, bool sync) {
-    size_t patch_start[] = {getFirstIndex_bSliceZ(level), getFirstIndex_bSliceZ(level), getFirstIndex_bSliceY(level), getFirstIndex_bSliceY(level), getFirstIndex_bSliceX(level), getFirstIndex_bSliceX(level)};
-    size_t patch_end[] = {getFirstIndex_bSliceZ(level + 1), getFirstIndex_bSliceZ(level + 1), getFirstIndex_bSliceY(level + 1), getFirstIndex_bSliceY(level + 1), getFirstIndex_bSliceX(level + 1), getFirstIndex_bSliceX(level + 1)};
-    m_bdc_boundary->applyBoundaryCondition(d, m_data_boundary_patches_joined, patch_start, patch_end, f, level, sync);
-
     if (m_numberOfSurfaces > 0) {
         Surface **surfaceList = *(m_MG_surfaceList + level);
         for (size_t id = 0; id < m_numberOfSurfaces; ++id) {
@@ -1018,6 +1014,10 @@ void Multigrid::applyBoundaryCondition(real *d, size_t level, FieldType f, bool 
         size_t opatch_end[] = {getFirstIndex_oFront(level+1, 0), getFirstIndex_oBack(level+1, 0), getFirstIndex_oBottom(level+1, 0), getFirstIndex_oTop(level+1, 0), getFirstIndex_oLeft(level+1, 0), getFirstIndex_oRight(level+1, 0)};
         ((BoundaryDataController *) *(m_bdc_obstacle + m_numberOfObstacles-1))->applyBoundaryConditionObstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, m_numberOfObstacles-1, sync);
     }
+
+    size_t patch_start[] = {getFirstIndex_bSliceZ(level), getFirstIndex_bSliceZ(level), getFirstIndex_bSliceY(level), getFirstIndex_bSliceY(level), getFirstIndex_bSliceX(level), getFirstIndex_bSliceX(level)};
+    size_t patch_end[] = {getFirstIndex_bSliceZ(level + 1), getFirstIndex_bSliceZ(level + 1), getFirstIndex_bSliceY(level + 1), getFirstIndex_bSliceY(level + 1), getFirstIndex_bSliceX(level + 1), getFirstIndex_bSliceX(level + 1)};
+    m_bdc_boundary->applyBoundaryCondition(d, m_data_boundary_patches_joined, patch_start, patch_end, f, level, sync);
 }
 
 //======================================== Update lists ====================================

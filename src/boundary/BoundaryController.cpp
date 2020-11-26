@@ -10,6 +10,7 @@
 #include <tuple>
 #include "../utility/Utility.h"
 #include <algorithm>
+#include <search.h>
 
 BoundaryController *BoundaryController::singleton = nullptr; // Singleton
 
@@ -38,6 +39,7 @@ void BoundaryController::readXML() {
     auto params = Parameters::getInstance();
     parseBoundaryParameter(params->get_first_child("boundaries"));
     parseObstacleParameter(params->get_first_child("obstacles"));
+    detect_neighbouring_obstacles();
     parseSurfaceParameter( params->get_first_child("surfaces"));
 }
 
@@ -90,6 +92,7 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
         std::vector<BoundaryDataController *> bdc_obstacles;
         auto curElem_obstacle = xmlParameter->FirstChildElement();
         while (curElem_obstacle) {
+            std::string name = curElem_obstacle->Attribute("name");
             BoundaryDataController *bdc = new BoundaryDataController();
             auto curElem = curElem_obstacle->FirstChildElement();
             real ox1;
@@ -116,7 +119,7 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
                 }
                 curElem = curElem->NextSiblingElement();
             }
-            Obstacle *o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2);
+            Obstacle *o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2, name);
             obstacles.push_back(o);
             bdc_obstacles.push_back(bdc);
             curElem_obstacle = curElem_obstacle->NextSiblingElement();
@@ -265,4 +268,14 @@ size_t BoundaryController::getObstacleStrideZ(size_t id, size_t level){
 
 std::vector<FieldType> BoundaryController::get_used_fields() {
     return m_bdc_boundary->get_used_fields();
+}
+
+void BoundaryController::detect_neighbouring_obstacles() {
+    for (size_t o1 = 0; o1 < m_numberOfObstacles; o1++){
+        Obstacle* obstacle1 = m_obstacleList[o1];
+        for (size_t o2 = o1 + 1; o2 < m_numberOfObstacles; o2++){
+            Obstacle* obstacle2 = m_obstacleList[o2];
+            Obstacle::removeCellsFacingAnotherObstacle(obstacle1, obstacle2);
+        }
+    }
 }
