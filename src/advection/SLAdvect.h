@@ -10,6 +10,7 @@
 #include "../interfaces/IAdvection.h"
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
 
 class SLAdvect : public IAdvection {
 public:
@@ -20,6 +21,9 @@ public:
 
 private:
     real m_dt;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_ADVECTION_SLADVECT_H_ */
