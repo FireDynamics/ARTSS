@@ -135,8 +135,8 @@ class Domain:
         self.domain_boundary_cells['back'] = back
         for i in range(self.domain_param['nx']):
             for j in range(self.domain_param['ny']):
-                front.append(self.calculate_index(i, j, self.domain_param['start z index']))
-                back.append(self.calculate_index(i, j, self.domain_param['end z index']))
+                front.append(self.calculate_index(i, j, self.domain_param['start z index']-1))
+                back.append(self.calculate_index(i, j, self.domain_param['end z index']+1))
 
         bottom = []
         self.domain_boundary_cells['bottom'] = bottom
@@ -144,8 +144,8 @@ class Domain:
         self.domain_boundary_cells['top'] = top
         for i in range(self.domain_param['nx']):
             for k in range(self.domain_param['nz']):
-                bottom.append(self.calculate_index(i, self.domain_param['start y index'], k))
-                top.append(self.calculate_index(i, self.domain_param['end y index'], k))
+                bottom.append(self.calculate_index(i, self.domain_param['start y index']-1, k))
+                top.append(self.calculate_index(i, self.domain_param['end y index']+1, k))
 
         left = []
         self.domain_boundary_cells['left'] = left
@@ -153,8 +153,8 @@ class Domain:
         self.domain_boundary_cells['right'] = right
         for j in range(self.domain_param['ny']):
             for k in range(self.domain_param['nz']):
-                left.append(self.calculate_index(self.domain_param['start x index'], j, k))
-                right.append(self.calculate_index(self.domain_param['end x index'], j, k))
+                left.append(self.calculate_index(self.domain_param['start x index']-1, j, k))
+                right.append(self.calculate_index(self.domain_param['end x index']+1, j, k))
 
     def calculate_index(self, i, j, k):
         return i + j * self.domain_param['Nx'] + k * self.domain_param['Nx'] * self.domain_param['Ny']
@@ -195,7 +195,7 @@ class Domain:
         patches = ['front', 'back', 'bottom', 'top', 'left', 'right']
         for p in patches:
             if index in self.domain_boundary_cells[p]:
-                matches.append(f'domain boundary cell ({p}')
+                matches.append(f'domain boundary cell ({p})')
         for o in self.obstacles:
             for p in patches:
                 if index in o[p]:
@@ -257,6 +257,21 @@ if __name__ == '__main__':
                     y.append(int(data[1]))
                     z.append(int(data[2]))
                 plot(x,y,z,show=True)
+        elif text.startswith('neighbo'):
+            index_original = domain.calculate_index(int(array[0]), int(array[1]), int(array[2]))
+            print(f'orig.\t' + domain.get_type(int(index_original)))
+            index_front = domain.calculate_index(int(array[0]), int(array[1]), int(array[2])-1)
+            print(f'front\t' + domain.get_type(int(index_front)))
+            index_back = domain.calculate_index(int(array[0]), int(array[1]), int(array[2])+1)
+            print(f'back\t' + domain.get_type(int(index_back)))
+            index_bottom = domain.calculate_index(int(array[0]), int(array[1])-1, int(array[2]))
+            print(f'bottom\t' + domain.get_type(int(index_bottom)))
+            index_top = domain.calculate_index(int(array[0]), int(array[1])+1, int(array[2]))
+            print(f'top\t' + domain.get_type(int(index_top)))
+            index_left = domain.calculate_index(int(array[0])-1, int(array[1]), int(array[2]))
+            print(f'left\t' + domain.get_type(int(index_left)))
+            index_right = domain.calculate_index(int(array[0])+1, int(array[1]), int(array[2]))
+            print(f'right\t' + domain.get_type(int(index_right)))
         else:
             array = text.split(' ')
             if len(array) == 3:
