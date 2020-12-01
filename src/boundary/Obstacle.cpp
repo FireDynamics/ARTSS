@@ -531,6 +531,7 @@ void Obstacle::replace_patch(size_t *indices, size_t size, Patch p) {
  * @return True/False, whether obstacles are facing each other or not
  */
 bool Obstacle::removeCellsFacingAnotherObstacle(Obstacle *o1, Obstacle *o2) {
+    // TODO remove edge/corner cell of patch facing the other obstacle, but not the cell its facing. Currently both are in the indices list
     auto domain = Domain::getInstance();
     auto Nx = domain->get_Nx();
     auto Ny = domain->get_Ny();
@@ -549,9 +550,21 @@ bool Obstacle::removeCellsFacingAnotherObstacle(Obstacle *o1, Obstacle *o2) {
             size_t o1_x1 = o1->getCoordinates_i1();
             size_t o2_x2 = o2->getCoordinates_i2();
             size_t y1 = std::max(o1->getCoordinates_j1(), o2->getCoordinates_j1());
+            if (o1->getCoordinates_j1() != o2->getCoordinates_j1()){ // make sure, that obstacle cells diagonal from the inner cells have a value (accessed by SL Advection)
+                y1++;
+            }
             size_t y2 = std::min(o1->getCoordinates_j2(), o2->getCoordinates_j2());
+            if (o1->getCoordinates_j2() != o2->getCoordinates_j2()){
+                y2--;
+            }
             size_t z1 = std::max(o1->getCoordinates_k1(), o2->getCoordinates_k1());
+            if (o1->getCoordinates_k1() != o2->getCoordinates_k1()){
+                z1++;
+            }
             size_t z2 = std::min(o1->getCoordinates_k2(), o2->getCoordinates_k2());
+            if (o1->getCoordinates_k2() != o2->getCoordinates_k2()){
+                z2--;
+            }
             logger->debug("removing indices in area ({}|{}) ({}|{}) ({}|{})", o1_x1, o2_x2, y1, y2, z1, z2);
 
             size_t size_removing_indices = (y2 + 1 - y1) * (z2 + 1 - z1);
@@ -615,9 +628,21 @@ bool Obstacle::removeCellsFacingAnotherObstacle(Obstacle *o1, Obstacle *o2) {
             size_t o1_x2 = o1->getCoordinates_i2();
             size_t o2_x1 = o2->getCoordinates_i1();
             size_t y1 = std::max(o1->getCoordinates_j1(), o2->getCoordinates_j1());
+            if (o1->getCoordinates_j1() != o2->getCoordinates_j1()){
+                y1++;
+            }
             size_t y2 = std::min(o1->getCoordinates_j2(), o2->getCoordinates_j2());
+            if (o1->getCoordinates_j2() != o2->getCoordinates_j2()){
+                y2--;
+            }
             size_t z1 = std::max(o1->getCoordinates_k1(), o2->getCoordinates_k1());
+            if (o1->getCoordinates_k1() != o2->getCoordinates_k1()){
+                z1++;
+            }
             size_t z2 = std::min(o1->getCoordinates_k2(), o2->getCoordinates_k2());
+            if (o1->getCoordinates_k2() != o2->getCoordinates_k2()){
+                z2--;
+            }
             logger->debug("removing indices in area ({}|{}) ({}|{}) ({}|{})", o1_x2, o2_x1, y1, y2, z1, z2);
 
             size_t size_removing_indices = (y2 + 1 - y1) * (z2 + 1 - z1);
@@ -679,11 +704,23 @@ bool Obstacle::removeCellsFacingAnotherObstacle(Obstacle *o1, Obstacle *o2) {
             logger->debug("obstacle {} is facing obstacle {} on the bottom side. Working on {} bottom side and on {} top side", o1->get_name(), o2->get_name(), o1->get_name(), o2->get_name());
 
             size_t x1 = std::max(o1->getCoordinates_i1(), o2->getCoordinates_i1());
+            if (o1->getCoordinates_i1() != o2->getCoordinates_i1()){
+                x1++;
+            }
             size_t x2 = std::min(o1->getCoordinates_i2(), o2->getCoordinates_i2());
+            if (o1->getCoordinates_i2() != o2->getCoordinates_i2()){
+                x2--;
+            }
             size_t o1_y1 = o1->getCoordinates_j1();
             size_t o2_y2 = o2->getCoordinates_j2();
             size_t z1 = std::max(o1->getCoordinates_k1(), o2->getCoordinates_k1());
+            if (o1->getCoordinates_k1() != o2->getCoordinates_k1()){
+                z1++;
+            }
             size_t z2 = std::min(o1->getCoordinates_k2(), o2->getCoordinates_k2());
+            if (o1->getCoordinates_k2() != o2->getCoordinates_k2()){
+                z2--;
+            }
             logger->debug("removing indices in area ({}|{}) ({}|{}) ({}|{})", x1, x2, o1_y1, o2_y2, z1, z2);
 
             size_t size_removing_indices = (x2 + 1 - x1) * (z2 + 1 - z1);
@@ -745,11 +782,23 @@ bool Obstacle::removeCellsFacingAnotherObstacle(Obstacle *o1, Obstacle *o2) {
             logger->debug("obstacle {} is facing obstacle {} on the top side. Working on {} top side and on {} bottom side", o1->get_name(), o2->get_name(), o1->get_name(), o2->get_name());
 
             size_t x1 = std::max(o1->getCoordinates_i1(), o2->getCoordinates_i1());
+            if (o1->getCoordinates_i1() != o2->getCoordinates_i1()){
+                x1++;
+            }
             size_t x2 = std::min(o1->getCoordinates_i2(), o2->getCoordinates_i2());
+            if (o1->getCoordinates_i2() != o2->getCoordinates_i2()){
+                x2--;
+            }
             size_t o1_y2 = o1->getCoordinates_j2();
             size_t o2_y1 = o2->getCoordinates_j1();
             size_t z1 = std::max(o1->getCoordinates_k1(), o2->getCoordinates_k1());
+            if (o1->getCoordinates_k1() != o2->getCoordinates_k1()){
+                z1++;
+            }
             size_t z2 = std::min(o1->getCoordinates_k2(), o2->getCoordinates_k2());
+            if (o1->getCoordinates_k2() != o2->getCoordinates_k2()){
+                z2--;
+            }
             logger->debug("removing indices in area ({}|{}) ({}|{}) ({}|{})", x1, x2, o2_y1, o1_y2, z1, z2);
 
             size_t size_removing_indices = (x2 + 1 - x1) * (z2 + 1 - z1);
@@ -811,9 +860,21 @@ bool Obstacle::removeCellsFacingAnotherObstacle(Obstacle *o1, Obstacle *o2) {
             logger->debug("obstacle {} is facing obstacle {} on the front side. Working on {} front side and on {} back side", o1->get_name(), o2->get_name(), o1->get_name(), o2->get_name());
 
             size_t x1 = std::max(o1->getCoordinates_i1(), o2->getCoordinates_i1());
+            if (o1->getCoordinates_i1() != o2->getCoordinates_i1()){
+                x1++;
+            }
             size_t x2 = std::min(o1->getCoordinates_i2(), o2->getCoordinates_i2());
+            if (o1->getCoordinates_i2() != o2->getCoordinates_i2()){
+                x2--;
+            }
             size_t y1 = std::max(o1->getCoordinates_j1(), o2->getCoordinates_j1());
+            if (o1->getCoordinates_j1() != o2->getCoordinates_j1()){
+                y1++;
+            }
             size_t y2 = std::min(o1->getCoordinates_j2(), o2->getCoordinates_j2());
+            if (o1->getCoordinates_j2() != o2->getCoordinates_j2()){
+                y2--;
+            }
             size_t o1_z1 = o1->getCoordinates_k1();
             size_t o2_z2 = o2->getCoordinates_k2();
             logger->debug("removing indices in area ({}|{}) ({}|{}) ({}|{})", x1, x2, y1, y2, o1_z1, o2_z2);
@@ -877,12 +938,24 @@ bool Obstacle::removeCellsFacingAnotherObstacle(Obstacle *o1, Obstacle *o2) {
             logger->debug("obstacle {} is facing obstacle {} on the back side. Working on {} back side and on {} front side", o1->get_name(), o2->get_name(), o1->get_name(), o2->get_name());
 
             size_t x1 = std::max(o1->getCoordinates_i1(), o2->getCoordinates_i1());
+            if (o1->getCoordinates_i1() != o2->getCoordinates_i1()){
+                x1++;
+            }
             size_t x2 = std::min(o1->getCoordinates_i2(), o2->getCoordinates_i2());
+            if (o1->getCoordinates_i2() != o2->getCoordinates_i2()){
+                x2--;
+            }
             size_t y1 = std::max(o1->getCoordinates_j1(), o2->getCoordinates_j1());
+            if (o1->getCoordinates_j1() != o2->getCoordinates_j1()){
+                y1++;
+            }
             size_t y2 = std::min(o1->getCoordinates_j2(), o2->getCoordinates_j2());
+            if (o1->getCoordinates_j2() != o2->getCoordinates_j2()){
+                y2--;
+            }
             size_t o1_z2 = o1->getCoordinates_k2();
             size_t o2_z1 = o2->getCoordinates_k1();
-            logger->debug("removing indices in area ({}|{}) ({}|{}) ({}|{})", x1, x2, y1, y2, o1_z2, o2_z1);
+            logger->debug("removing indices in area ({}|{}) ({}|{}) ({}|{}) from obstacle {}", x1, x2, y1, y2, o1_z2, o2_z1);
 
             size_t size_removing_indices = (x2 + 1 - x1) * (y2 + 1 - y1);
             std::vector<size_t> o1_removing_indices = {0}; // TODO
@@ -978,4 +1051,16 @@ void Obstacle::remove_patch(Patch patch) {
         case UNKNOWN_PATCH:
             m_logger->warn("wrong patch: {}", patch);
     }
+}
+
+bool Obstacle::is_corner_cell(size_t i, size_t j, size_t k) {
+    return (i == m_i1 || i == m_i2) && (j == m_j1 || j == m_j2) && (k == m_k1 || k == m_k2);
+}
+
+bool Obstacle::is_edge_cell(size_t i, size_t j, size_t k) {
+    bool on_x = (i == m_i1 || i == m_i2);
+    bool on_y = (j == m_j1 || j == m_j2);
+    bool on_z = (k == m_k1 || k == m_k2);
+
+    return (on_x && on_y) || (on_y || on_z) || (on_x && on_z);
 }

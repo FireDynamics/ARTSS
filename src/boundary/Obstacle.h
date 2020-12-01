@@ -63,6 +63,9 @@ public:
 
     void set_inner_cells(Field *f, real value);
 
+    bool is_corner_cell(size_t i, size_t j, size_t k);
+    bool is_edge_cell(size_t i, size_t j, size_t k);
+
 private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
