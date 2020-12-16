@@ -47,7 +47,7 @@ void ISource::buoyancy_force(Field *out, const Field *in, const Field *in_temper
     auto bsize_i = boundary->getSize_innerList();
     auto bsize_b = boundary->getSize_boundaryList();
 
-#pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], d_out[:bsize], d_in[:bsize], d_ina[:bsize])
+#pragma acc data pcopy(d_iList[:bsize_i], d_bList[:bsize_b], d_out[:bsize], d_in[:bsize], d_ina[:bsize])
     {
         // inner cells
 #pragma acc kernels async
