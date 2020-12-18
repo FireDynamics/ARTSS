@@ -180,10 +180,24 @@ class Domain:
         print(f"dx: {self.domain_param['dx']}, dy: {self.domain_param['dy']}, dz: {self.domain_param['dz']}")
         print(f"X: ({self.domain_param['start x index']}|{self.domain_param['end x index']}) Y: ({self.domain_param['start y index']}|{self.domain_param['end y index']}) Z: ({self.domain_param['start z index']}|{self.domain_param['end z index']})")
 
+    def get_ijk_from_xyz(self, coord_x, coord_y, coord_z):
+        return self.get_i_from_x(coord_x), self.get_j_from_y(coord_y), self.get_k_from_z(coord_z)
+
+    def get_i_from_x(self, coord_x):
+        return int((coord_x - self.domain_param['X1']) / self.domain_param['dx'])
+
+    def get_j_from_y(self, coord_y):
+        return int((coord_y - self.domain_param['Y1']) / self.domain_param['dy'])
+
+    def get_k_from_z(self, coord_z):
+        return int((coord_z - self.domain_param['Z1']) / self.domain_param['dz'])
+
     def get_i(self, index, k, j):
         return int(float(index) - k * self.domain_param['Nx'] * self.domain_param['Ny'] - j * self.domain_param['Nx'])
+
     def get_j(self, index, k):
         return int((float(index) - k * self.domain_param['Nx'] * self.domain_param['Ny']) / self.domain_param['Nx'])
+
     def get_k(self, index):
         return int(float(index) / (self.domain_param['Nx'] * self.domain_param['Ny']))
 
