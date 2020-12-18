@@ -17,6 +17,10 @@
 #include "utility/Parameters.h"
 #include "utility/Utility.h"
 
+enum CoordinateAxis : int {
+    UNKNOWN_DIRECTION = -1, X = 0, Y = 1, Z = 2
+};
+
 class Domain {
  public:
     Domain();
