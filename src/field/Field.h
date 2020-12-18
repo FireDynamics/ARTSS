@@ -28,7 +28,7 @@ public:
 
     // getter
     FieldType get_type() { return this->m_type; };
-    size_t get_level() { return this->m_level; };
+    size_t get_level() const { return this->m_level; };
 
     void set_value(real val);
     static void swap(Field *a, Field *b) { std::swap(a->data, b->data); };

@@ -50,7 +50,7 @@ public:
     BoundaryCondition getBoundaryCondition(Patch p){ return m_boundaryConditions[p];};
     real getValue(Patch p){ return m_values[p];};
 
-    bool isEmpty(){ return !m_hasValues; };
+    bool isEmpty() const{ return !m_hasValues; };
 private:
 
 #ifndef BENCHMARKING
