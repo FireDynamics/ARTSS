@@ -57,7 +57,7 @@ public:
 
     std::string get_name() { return m_name; }
 
-    bool static removeCellsFacingAnotherObstacle(Obstacle *o1, Obstacle* o2);
+    bool static remove_circular_constraints(Obstacle *o1, Obstacle* o2);
     void replace_patch(size_t *indices, size_t size, Patch p);
     void control();
 
@@ -113,6 +113,8 @@ private:
     size_t getSize(){return getStrideZ() * getStrideY() * getStrideX();};
 
     void remove_patch(Patch patch);
+
+    void static calculate_area_index(Obstacle *o1, Obstacle *o2, size_t *o1_coordinate, size_t *o2_coordinate, CoordinateAxis direction, bool start);
 };
 
 #endif /* ARTSS_BOUNDARY_OBSTACLE_H */
