@@ -115,6 +115,10 @@ private:
     void remove_patch(Patch patch);
 
     void static calculate_area_index(Obstacle *o1, Obstacle *o2, size_t *o1_coordinate, size_t *o2_coordinate, CoordinateAxis direction, bool start);
+
+    static bool circular_constraints_x_direction(Obstacle *o1, Obstacle *o2, std::shared_ptr<spdlog::logger> logger);
+    static bool circular_constraints_y_direction(Obstacle *o1, Obstacle *o2, std::shared_ptr<spdlog::logger> logger);
+    static bool circular_constraints_z_direction(Obstacle *o1, Obstacle *o2, std::shared_ptr<spdlog::logger> logger);
 };
 
 #endif /* ARTSS_BOUNDARY_OBSTACLE_H */
