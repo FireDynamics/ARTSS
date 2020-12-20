@@ -24,7 +24,7 @@
       <ambient_temperature_value> 299.14 </ambient_temperature_value>
     </source>
     <pressure type="VCycleMG" field="p">
-      <n_level> 3 </n_level>  <!-- number of restriction levels -->
+      <n_level> 2 </n_level>  <!-- number of restriction levels -->
       <n_cycle> 2 </n_cycle> <!-- number of cycles -->
       <max_cycle> 100 </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
@@ -89,37 +89,37 @@
     <boundary field="T" patch="bottom" type="neumann" value="0.0" />
   </boundaries>
   <obstacles enabled="Yes">
-    <obstacle> <!-- left wall -->
+    <obstacle name="left wall"> <!-- left wall -->
       <geometry ox1="-1.6625" ox2="-1.4" oy1="0." oy2="2.13" oz1="-1.4" oz2="1.4"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle> <!-- ceiling -->
+    <obstacle name="ceiling"> <!-- ceiling -->
       <geometry ox1="-1.6625" ox2="1.6625" oy1="2.13" oy2="2.3296875" oz1="-1.6625" oz2="1.6625"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle> <!-- back wall -->
+    <obstacle name="back wall"> <!-- back wall -->
       <geometry ox1="-1.6625" ox2="1.6625" oy1="0." oy2="2.13" oz1="1.4" oz2="1.6625"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle> <!-- front wall -->
+    <obstacle name="front wall"> <!-- front wall -->
       <geometry ox1="-1.6625" ox2="1.6625" oy1="0." oy2="2.13" oz1="-1.6625" oz2="-1.4"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle> <!-- right wall -->
+    <obstacle name="right wall left from door"> <!-- right wall -->
       <geometry ox1="1.4" ox2="1.6625" oy1="0." oy2="2.13" oz1="-1.4" oz2="-0.4375"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle> <!-- right wall -->
+    <obstacle name="right wall above door"> <!-- right wall -->
       <geometry ox1="1.4" ox2="1.6625" oy1="1.83" oy2="2.13" oz1="-0.4375" oz2="0.4375"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
-    <obstacle> <!-- right wall -->
+    <obstacle name="right wall right from door"> <!-- right wall -->
       <geometry ox1="1.4" ox2="1.6625" oy1="0." oy2="2.13" oz1="0.4375" oz2="1.4"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
@@ -141,6 +141,6 @@
     <vtk_nth_plot> 100 </vtk_nth_plot>
   </visualisation>
 
-  <logging file="output_test_navierstokestempturb_steckler.log" level="info">
+  <logging file="output_steckler.log" level="debug">
   </logging>
 </ARTSS>
