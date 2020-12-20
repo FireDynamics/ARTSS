@@ -607,27 +607,24 @@ bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
     auto logger = Utility::create_logger("Obstacle");
 
     bool overlap = circular_constraints_x_direction(o1, o2, logger);
-
-    if(!overlap){
-        overlap = overlap | circular_constraints_y_direction(o1, o2, logger);
+    overlap = overlap || circular_constraints_y_direction(o1, o2, logger);
+    overlap = overlap || circular_constraints_z_direction(o1, o2, logger);
+#ifndef BENCHMARKING
+    if (overlap) {
+        logger->debug("{} is next to {}", o1->get_name(), o2->get_name());
     }
-
-    if(!overlap){
-        overlap = overlap | circular_constraints_z_direction(o1, o2, logger);
-    }
+#endif
     return overlap;
 }
 
 bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2, std::shared_ptr<spdlog::logger> logger) {
     bool overlap = false;
-    bool mirror = false;
 
     auto domain = Domain::getInstance();
     auto Nx = domain->get_Nx();
     auto Ny = domain->get_Ny();
 
     if (o1->getCoordinates_i2() + 1 == o2->getCoordinates_i1()){
-        mirror = true;
         std::swap(o1, o2);
     }
 
@@ -635,7 +632,7 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2, std:
         bool j_overlap = hasOverlap(o1->getCoordinates_j1(), o1->getCoordinates_j2(), o2->getCoordinates_j1(), o2->getCoordinates_j2());
         bool k_overlap = hasOverlap(o1->getCoordinates_k1(), o1->getCoordinates_k2(), o2->getCoordinates_k1(), o2->getCoordinates_k2());
         if (j_overlap && k_overlap) {
-            logger->debug("obstacle {} is facing obstacle {} on the left side. Working on {} left side and on {} right side.", o1->get_name(), o2->get_name(), o1->get_name(), o2->get_name());
+            logger->debug("obstacles are next to each other. Working on {} left side and on {} right side.", o1->get_name(), o2->get_name());
             // another obstacle (o2) at the left side of o1
             overlap = true;
             // calculate coordinates of area which should be removed
@@ -792,23 +789,20 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2, std:
 
 bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2, std::shared_ptr<spdlog::logger> logger) {
     bool overlap = false;
-    bool mirror = false;
 
     auto domain = Domain::getInstance();
     auto Nx = domain->get_Nx();
     auto Ny = domain->get_Ny();
 
     if (o1->getCoordinates_j2() + 1 == o2->getCoordinates_j1()){
-        mirror = true;
         std::swap(o1, o2);
     }
 
-    if (o1->getCoordinates_i1() - 1 == o2->getCoordinates_i2()) {
+    if (o1->getCoordinates_j1() - 1 == o2->getCoordinates_j2()) {
         bool i_overlap = hasOverlap(o1->getCoordinates_i1(), o1->getCoordinates_i2(), o2->getCoordinates_i1(), o2->getCoordinates_i2());
         bool k_overlap = hasOverlap(o1->getCoordinates_k1(), o1->getCoordinates_k2(), o2->getCoordinates_k1(), o2->getCoordinates_k2());
         if (i_overlap && k_overlap) {
-            logger->debug("obstacle {} is facing obstacle {} on the top side. Working on {} top side and on {} bottom side", o1->get_name(), o2->get_name(), o1->get_name(), o2->get_name());
-            // another obstacle (o2) at the left side of o1
+            logger->debug("obstacles are next to each other. Working on {} bottom side and on {} top side", o1->get_name(), o2->get_name());
             overlap = true;
             // calculate coordinates of area which should be removed
             // the area is for both obstacle the same only if there are equally long
@@ -943,7 +937,7 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2, std:
             logger->debug("new size of obstacle {}: {}", o1->get_name(), o1_new_size_left);
             size_t *o1_new_data = new size_t[o1_new_size_left];
             std::copy(o1_new.begin(), o1_new.end(), o1_new_data);
-            o1->replace_patch(o1_new_data, o1_new_size_left, Patch::TOP);
+            o1->replace_patch(o1_new_data, o1_new_size_left, Patch::BOTTOM);
 
             for (; o2_counter_old < o2->getSize_obstacleLeft(); o2_counter_old++) {
                 o2_new.push_back(o2->getObstacleLeft()[o2_counter_old]);
@@ -954,7 +948,7 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2, std:
             logger->debug("new size of obstacle {}: {}", o2->get_name(), o2_new_size_left);
             size_t *o2_new_data = new size_t[o2_new_size_left];
             std::copy(o2_new.begin(), o2_new.end(), o2_new_data);
-            o2->replace_patch(o2_new_data, o2_new_size_left, Patch::BOTTOM);
+            o2->replace_patch(o2_new_data, o2_new_size_left, Patch::TOP);
         }
     }
     return overlap;
@@ -962,22 +956,20 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2, std:
 
 bool Obstacle::circular_constraints_z_direction(Obstacle *o1, Obstacle *o2, std::shared_ptr<spdlog::logger> logger) {
     bool overlap = false;
-    bool mirror = false;
 
     auto domain = Domain::getInstance();
     auto Nx = domain->get_Nx();
     auto Ny = domain->get_Ny();
 
-    if (o1->getCoordinates_j2() + 1 == o2->getCoordinates_j1()){
-        mirror = true;
+    if (o1->getCoordinates_k2() + 1 == o2->getCoordinates_k1()){
         std::swap(o1, o2);
     }
 
-    if (o1->getCoordinates_i1() - 1 == o2->getCoordinates_i2()) {
+    if (o1->getCoordinates_k1() - 1 == o2->getCoordinates_k2()) {
         bool i_overlap = hasOverlap(o1->getCoordinates_i1(), o1->getCoordinates_i2(), o2->getCoordinates_i1(), o2->getCoordinates_i2());
-        bool k_overlap = hasOverlap(o1->getCoordinates_k1(), o1->getCoordinates_k2(), o2->getCoordinates_k1(), o2->getCoordinates_k2());
-        if (i_overlap && k_overlap) {
-            logger->debug("obstacle {} is facing obstacle {} on the front side. Working on {} front side and on {} back side.", o1->get_name(), o2->get_name(), o1->get_name(), o2->get_name());
+        bool j_overlap = hasOverlap(o1->getCoordinates_j1(), o1->getCoordinates_j2(), o2->getCoordinates_j1(), o2->getCoordinates_j2());
+        if (i_overlap && j_overlap) {
+            logger->debug("obstacles are next to each other. Working on {} front side and on {} back side.", o1->get_name(), o2->get_name());
             // another obstacle (o2) at the front side of o1
             overlap = true;
             // calculate coordinates of area which should be removed

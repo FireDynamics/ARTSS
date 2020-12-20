@@ -194,21 +194,22 @@ void log_minimum(Field *field, std::string text, std::string logger_name) {
             indices.push_back(idx);
         }
     }
-    size_t Nx = Domain::getInstance()->get_Nx();
-    size_t Ny = Domain::getInstance()->get_Ny();
-    std::string index;
-    for (size_t idx: indices){
-        size_t k = getCoordinateK(idx, Nx, Ny);
-        size_t j = getCoordinateJ(idx, Nx, Ny, k);
-        size_t i = getCoordinateI(idx, Nx, Ny, j, k);
-        index += " (" + std::to_string(i) + "|" + std::to_string(j) + "|" + std::to_string(k) + ")";
-    }
+    //size_t Nx = Domain::getInstance()->get_Nx();
+    //size_t Ny = Domain::getInstance()->get_Ny();
+    //std::string index;
+    //for (size_t idx: indices){
+    //    size_t k = getCoordinateK(idx, Nx, Ny);
+    //    size_t j = getCoordinateJ(idx, Nx, Ny, k);
+    //    size_t i = getCoordinateI(idx, Nx, Ny, j, k);
+    //    index += " (" + std::to_string(i) + "|" + std::to_string(j) + "|" + std::to_string(k) + ")";
+    //}
 
 
 #ifndef BENCHMARKING
     logger->info("minimum boundary {}: {}", text, minimum_boundary);
     logger->info("indices ({}) boundary cells ({})", indices.size(), size_boundaryList);
-    logger->debug("indices ({}): {}", indices.size(), index);
+    //logger->debug("indices ({})", indices.size(), index);
+    logger->debug("indices ({})", indices.size());
 #endif
 
     real minimum_obstacle = ULONG_LONG_MAX;
