@@ -49,6 +49,7 @@ void BoundaryController::readXML() {
 /// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseBoundaryParameter(tinyxml2::XMLElement *xmlParameter) {
+    m_logger->debug("start parsing boundary parameter");
 // BOUNDARY
     auto curElem = xmlParameter->FirstChildElement();
     while (curElem) {
@@ -63,6 +64,7 @@ void BoundaryController::parseBoundaryParameter(tinyxml2::XMLElement *xmlParamet
 /// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseSurfaceParameter(tinyxml2::XMLElement *xmlParameter) {
+    m_logger->debug("start parsing surface parameter");
 // SURFACES
 //TODO surfaces
     m_hasSurfaces = (Parameters::getInstance()->get("surfaces/enabled") == "Yes");
@@ -85,6 +87,7 @@ void BoundaryController::parseSurfaceParameter(tinyxml2::XMLElement *xmlParamete
 /// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParameter) {
+    m_logger->debug("start parsing obstacle parameter");
 // OBSTACLES
     m_hasObstacles = (Parameters::getInstance()->get("obstacles/enabled") == "Yes");
     if (m_hasObstacles) {
@@ -130,6 +133,9 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
         for (size_t i = 0; i < m_numberOfObstacles; i++) {
             *(m_obstacleList + i) = obstacles[i];
             *(m_bdc_obstacles + i) = bdc_obstacles[i];
+            for (size_t j = i; j < m_numberOfObstacles; j++){
+                Obstacle::remove_circular_constraints(obstacles[i], obstacles[j]);
+            }
         }
     }
 }
@@ -271,11 +277,12 @@ std::vector<FieldType> BoundaryController::get_used_fields() {
 }
 
 void BoundaryController::detect_neighbouring_obstacles() {
+    m_logger->debug("start detecting neighbouring obstacles");
     for (size_t o1 = 0; o1 < m_numberOfObstacles; o1++){
         Obstacle* obstacle1 = m_obstacleList[o1];
         for (size_t o2 = o1 + 1; o2 < m_numberOfObstacles; o2++){
             Obstacle* obstacle2 = m_obstacleList[o2];
-            Obstacle::removeCellsFacingAnotherObstacle(obstacle1, obstacle2);
+            Obstacle::remove_circular_constraints(obstacle1, obstacle2);
         }
     }
 }
