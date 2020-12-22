@@ -353,13 +353,6 @@ void Multigrid::control() {
         Boundary *b = *(m_MG_boundaryList + level);
         b->control(getSize_oList(level));
     }
-    for (size_t level = 0; level < m_levels + 1; level++) {
-        for (size_t id = 0; id < m_numberOfObstacles; id++) {
-            Obstacle *o = m_MG_obstacleList[level][id];
-            o->control();
-        }
-    }
-
     {
         size_t bsize_inner = 0;
         for (size_t level = 0; level < m_levels + 1; level++) {
