@@ -508,7 +508,7 @@ void SolverController::update_sources(real t_cur, bool sync) {
                 int ambient_temperature_value = params->get_int("solver/source/ambient_temperature_value");
                 m_field_controller->field_T_ambient->set_value(ambient_temperature_value);
             } else {
-                m_field_controller->field_T_ambient = new Field(*m_field_controller->field_T); // TODO copy constructor?
+                m_field_controller->field_T_ambient->copy_data(*m_field_controller->field_T);
             }
             momentum_source();
         } else {
