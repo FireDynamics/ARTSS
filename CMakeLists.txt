@@ -25,9 +25,9 @@ set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBRARY_OUTPUT_PATH  bin/lib)
 
 # Debug messages
-message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
-message( STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR} )
-message( STATUS "CMAKE_EXE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
+message(STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR})
+message(STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR})
+message(STATUS "CMAKE_EXE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH})
 
 #----------------------------------------------------------------------
 # enable as many warnings as possible
@@ -69,9 +69,9 @@ if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "PGI")
-  set(CMAKE_CXX11_STANDARD_COMPILE_OPTION  --c++11)
-  set(CMAKE_CXX14_STANDARD_COMPILE_OPTION  --c++14)
-  set(CMAKE_CXX17_STANDARD_COMPILE_OPTION  --c++17)
+  set(CMAKE_CXX11_STANDARD_COMPILE_OPTION --c++11)
+  set(CMAKE_CXX14_STANDARD_COMPILE_OPTION --c++14)
+  set(CMAKE_CXX17_STANDARD_COMPILE_OPTION --c++17)
 endif()
 
 # Initialize CXXFLAGS.
@@ -85,7 +85,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} ${warning_flags} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wshadow -Wunused -DTRACE_LOGGING")
   set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -w -DNDEBUG")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI" OR CMAKE_C_COMPILER_ID STREQUAL "PGI")
-  set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -std=c++17")
   set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
   set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -fast -w -DNDEBUG")
 endif()
@@ -129,8 +128,8 @@ message(STATUS "")
 
 
 # link cuda library for cuda features
-link_directories( $ENV{CUDA_LIB} )
-include_directories( $ENV{CUDA_INC} )
+link_directories($ENV{CUDA_LIB})
+include_directories($ENV{CUDA_INC})
 
 # find spdlog lib
 if(NOT TARGET spdlog)
@@ -150,30 +149,30 @@ add_subdirectory(src)
 get_target_property(SOURCE_FILES artss SOURCES)
 
 
-add_executable( artss_serial ${SOURCE_FILES} src/main.cpp)
+add_executable(artss_serial ${SOURCE_FILES} src/main.cpp)
 target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
 
-add_executable( artss_serial_benchmark ${SOURCE_FILES})
-set_target_properties( artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX" )
-target_link_libraries( artss_serial_benchmark  )
+add_executable(artss_serial_benchmark ${SOURCE_FILES})
+set_target_properties(artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX")
+target_link_libraries(artss_serial_benchmark)
 
 
 add_executable(artss_multicore_cpu ${SOURCE_FILES})
 set_target_properties(artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=multicore" LINK_FLAGS "-acc -ta=multicore")
 target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
 
-add_executable( artss_multicore_cpu_benchmark ${SOURCE_FILES})
-set_target_properties( artss_multicore_cpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore" )
-target_link_libraries( artss_multicore_cpu_benchmark  )
+add_executable(artss_multicore_cpu_benchmark ${SOURCE_FILES})
+set_target_properties(artss_multicore_cpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore")
+target_link_libraries(artss_multicore_cpu_benchmark)
 
 
 add_executable(artss_gpu ${SOURCE_FILES})
 set_target_properties(artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
 target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
 
-add_executable( artss_gpu_benchmark ${SOURCE_FILES})
-set_target_properties( artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" )
-target_link_libraries( artss_gpu_benchmark  )
+add_executable(artss_gpu_benchmark ${SOURCE_FILES})
+set_target_properties(artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
+target_link_libraries(artss_gpu_benchmark)
 
 
 enable_testing()
