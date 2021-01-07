@@ -7,7 +7,10 @@
 #ifndef ARTSS_FIELD_H_
 #define ARTSS_FIELD_H_
 
+#include <cmath>
 #include <array>
+#include <utility>
+#include "../Domain.h"
 #include "../utility/GlobalMacrosTypes.h"
 
 #ifndef ENUM_TYPES
@@ -19,7 +22,7 @@ enum FieldType : int {
 #endif
 
 class Field {
-public:
+ public:
     Field(FieldType type, real val);
     Field(FieldType type, real val, size_t level);
 
@@ -27,15 +30,16 @@ public:
     Field(const Field &);
 
     // getter
-    FieldType get_type() { return this->m_type; };
-    size_t get_level() { return this->m_level; };
+    FieldType get_type() { return this->m_type; }
+    size_t get_level() { return this->m_level; }
 
     void set_value(real val);
-    static void swap(Field *a, Field *b) { std::swap(a->data, b->data); };
+    void copy_data(const Field &other);
+    static void swap(Field *a, Field *b) { std::swap(a->data, b->data); }
 
     real *data;
 
-private:
+ private:
     size_t m_level;
     FieldType m_type;
 };

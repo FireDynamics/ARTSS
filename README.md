@@ -21,7 +21,7 @@ Detailed requirements are listed in the table below (general requirements for se
 |          | Compiler fully supporting C++-17 (gcc or clang)     | gcc      |   >= 7.0      |
 |          | Visualization of output                             | vtk      |   >= 5.8      |
 |          | Testing for consistency of output while developing  | Python   |   >= 3.6      |
-| Specific | Compiler fully supporting C++-17 and OpenACC        | PGI      |   >= 19.10    |
+| Specific | Compiler fully supporting C++-17 and OpenACC        | NVHPC    |   >= 20.9.0   |
 
 ### Compiling the Code
 Once the code has been checked out and all required software has been installed, ARTSS
@@ -43,7 +43,7 @@ git submodule update --init --recursive
 ```
 ./compile.sh [OPTIONS]
 ```
-*Note: Without options all executables will be compiled using the PGI compiler and CUDA 10.1.*
+*Note: Without options all executables will be compiled using the NVHPC compiler and CUDA 10.1.*
 
 OPTIONS (selection; show all by using --help flag):
 - '-s' -> Compile serial ARTSS version
