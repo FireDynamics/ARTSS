@@ -11,6 +11,10 @@
 cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
 
 project(ARTSS)
+add_executable(artss "src/main.cpp")
+
+add_subdirectory(src)
+get_target_property(SOURCE_FILES artss SOURCES)
 
 set(CMAKE_COLOR_MAKEFILE ON)
 
@@ -28,23 +32,6 @@ set(LIBRARY_OUTPUT_PATH  bin/lib)
 message(STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR})
 message(STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR})
 message(STATUS "CMAKE_EXE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH})
-
-#----------------------------------------------------------------------
-# enable as many warnings as possible
-set(warning_flags "-g -Wall -Wextra")
-# issue all the warnings demanded by strict iso c and iso c++
-# set(warning_flags "${warning_flags} -pedantic")
-# treat warnings as errors
-# set(warning_flags "${warning_flags} -Werror")
-# definition shadows another
-# set(warning_flags "${warning_flags} -Wshadow")
-# do not issue warnings for system headers
-# set(warning_flags "${warning_flags} -Wno-system-headers")
-# overloaded virtual function has a different signature
-# set(warning_flags "${warning_flags} -Woverloaded-virtual")
-# make string constants const char*
-# set(warning_flags "${warning_flags} -Wwrite-strings")
-
 
 #----------------------------------------------------------------------
 #---------------------------- compiler -------------------------------
@@ -75,24 +62,28 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "PGI")
 endif()
 
 # Initialize CXXFLAGS.
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  add_compile_options(-Wno-unused-parameter)
-  add_compile_options(-Wno-unused-variable)
-  add_compile_options(-Wno-unknown-pragmas)
-  add_compile_options(-Wno-cpp)
-  add_compile_options(-Wno-shadow)
+target_compile_options(artss PUBLIC $<$<CONFIG:DEBUG>:-O0>)
+target_compile_options(artss PUBLIC $<$<CONFIG:DEBUG>:-g>)
+target_compile_options(artss PUBLIC $<$<CONFIG:DEBUG>:-Wall>)
+target_compile_options(artss PUBLIC $<$<CONFIG:DEBUG>:-Wextra>)
 
-  set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} ${warning_flags} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wshadow -Wunused -DTRACE_LOGGING")
-  set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -w -DNDEBUG")
+target_compile_options(artss PUBLIC $<$<CONFIG:RELEASE>:-O3>)
+target_compile_options(artss PUBLIC $<$<CONFIG:RELEASE>:-w>)
+target_compile_options(artss PUBLIC $<$<CONFIG:RELEASE>:-DNDEBUG>)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  target_compile_options(artss PUBLIC $<$<CONFIG:DEBUG>:-Wno-cpp>)
+  target_compile_options(artss PUBLIC $<$<CONFIG:DEBUG>:-Wno-unknown-pragmas>)
+  target_compile_options(artss PUBLIC $<$<CONFIG:DEBUG>:-DTRACE_LOGGING>)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI" OR CMAKE_C_COMPILER_ID STREQUAL "PGI")
-  set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
-  set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -fast -w -DNDEBUG")
+    target_compile_options(artss PUBLIC $<$<CONFIG:RELEASE>:-fast>)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+get_target_property(ARTSS_COMPILE_OPTIONS artss COMPILE_OPTIONS)
 
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 message("${COMPILER_SUPPORTS_CXX17}")
 
 message(STATUS "C++ Compiler: "           ${CMAKE_CXX_COMPILER})
@@ -124,6 +115,7 @@ endif()
 if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
   message(STATUS "    Configuration: "  ${CMAKE_BUILD_TYPE})
 endif()
+message("ARTSS COMPILE FLAGS: ${ARTSS_COMPILE_OPTIONS}")
 message(STATUS "")
 
 
@@ -143,35 +135,41 @@ endif()
 
 
 #Targets
-add_executable(artss "src/main.cpp")
-
-add_subdirectory(src)
-get_target_property(SOURCE_FILES artss SOURCES)
-
+set(CMAKE_VERBOSE_MAKEFILE on)
 
 add_executable(artss_serial ${SOURCE_FILES} src/main.cpp)
+target_compile_options(artss_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
 
 add_executable(artss_serial_benchmark ${SOURCE_FILES})
-set_target_properties(artss_serial_benchmark PROPERTIES COMPILE_FLAGS "-DBENCHMARKING -DUSE_NVTX")
+target_compile_options(artss_serial_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
+target_compile_options(artss_serial_benchmark PUBLIC -DBENCHMARKING -DUSE_NVTX)
 target_link_libraries(artss_serial_benchmark)
 
 
 add_executable(artss_multicore_cpu ${SOURCE_FILES})
-set_target_properties(artss_multicore_cpu PROPERTIES COMPILE_FLAGS "-acc -ta=multicore" LINK_FLAGS "-acc -ta=multicore")
+target_compile_options(artss_multicore_cpu PUBLIC ${ARTSS_COMPILE_OPTIONS})
+target_compile_options(artss_multicore_cpu PUBLIC -acc -ta=multicore)
+target_link_options(artss_multicore_cpu PUBLIC -acc -ta=multicore)
 target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
 
 add_executable(artss_multicore_cpu_benchmark ${SOURCE_FILES})
-set_target_properties(artss_multicore_cpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -ta=multicore -DBENCHMARKING -DUSE_NVTX" LINK_FLAGS "-acc -ta=multicore")
+target_compile_options(artss_multicore_cpu_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
+target_compile_options(artss_multicore_cpu_benchmark PUBLIC -acc -ta=multicore -DBENCHMARKING -DUSE_NVTX)
+target_link_options(artss_multicore_cpu PUBLIC -acc -ta=multicore)
 target_link_libraries(artss_multicore_cpu_benchmark)
 
 
 add_executable(artss_gpu ${SOURCE_FILES})
-set_target_properties(artss_gpu PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
+target_compile_options(artss_gpu PUBLIC ${ARTSS_COMPILE_OPTIONS})
+target_compile_options(artss_gpu PUBLIC -acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
+target_link_options(artss_gpu PUBLIC -acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
 
 add_executable(artss_gpu_benchmark ${SOURCE_FILES})
-set_target_properties(artss_gpu_benchmark PROPERTIES COMPILE_FLAGS "-acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}" LINK_FLAGS "-acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA}")
+target_compile_options(artss_gpu_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
+target_compile_options(artss_gpu_benchmark PUBLIC -acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
+target_link_options(artss_gpu PUBLIC -acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_libraries(artss_gpu_benchmark)
 
 
