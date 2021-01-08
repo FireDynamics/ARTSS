@@ -156,7 +156,7 @@ target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
 add_executable(artss_multicore_cpu_benchmark ${SOURCE_FILES})
 target_compile_options(artss_multicore_cpu_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_multicore_cpu_benchmark PUBLIC -acc -ta=multicore -DBENCHMARKING -DUSE_NVTX)
-target_link_options(artss_multicore_cpu PUBLIC -acc -ta=multicore)
+target_link_options(artss_multicore_cpu_benchmark PUBLIC -acc -ta=multicore)
 target_link_libraries(artss_multicore_cpu_benchmark)
 
 
