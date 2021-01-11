@@ -92,9 +92,9 @@ message(STATUS "Using ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
-  message(STATUS "Debug flags: "  ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_DEBUG} )
+  message(STATUS "Debug flags: "  ${CMAKE_CXX_FLAGS_DEBUG} " " ${CMAKE_CXX_FLAGS})
 else(CMAKE_BUILD_TYPE MATCHES Debug)
-  message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS} " ,  " ${CMAKE_CXX_FLAGS_RELEASE} )
+  message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE} " " ${CMAKE_CXX_FLAGS})
 endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # ========================== build platform ==========================
@@ -116,7 +116,7 @@ endif()
 if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
   message(STATUS "    Configuration: "  ${CMAKE_BUILD_TYPE})
 endif()
-message("ARTSS COMPILE FLAGS: ${ARTSS_COMPILE_OPTIONS}")
+message(STATUS "ARTSS COMPILE FLAGS: ${ARTSS_COMPILE_OPTIONS}")
 message(STATUS "")
 
 
@@ -136,8 +136,6 @@ endif()
 
 
 #Targets
-set(CMAKE_VERBOSE_MAKEFILE on)
-
 add_executable(artss_serial ${SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
