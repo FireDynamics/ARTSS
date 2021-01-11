@@ -1,0 +1,9 @@
+target_sources(artss
+    PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/ColoredGaussSeidelDiffuse.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/ColoredGaussSeidelDiffuse.h
+        ${CMAKE_CURRENT_LIST_DIR}/ExplicitDiffuse.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/ExplicitDiffuse.h
+        ${CMAKE_CURRENT_LIST_DIR}/JacobiDiffuse.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/JacobiDiffuse.h
+)
