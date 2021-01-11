@@ -12,6 +12,7 @@ cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
 
 project(ARTSS)
 add_executable(artss "src/main.cpp")
+set_target_properties(artss PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 add_subdirectory(src)
 get_target_property(SOURCE_FILES artss SOURCES)
