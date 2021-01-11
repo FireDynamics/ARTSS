@@ -116,7 +116,6 @@ endif()
 if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
   message(STATUS "    Configuration: "  ${CMAKE_BUILD_TYPE})
 endif()
-message(STATUS "ARTSS COMPILE FLAGS: ${ARTSS_COMPILE_OPTIONS}")
 message(STATUS "")
 
 
