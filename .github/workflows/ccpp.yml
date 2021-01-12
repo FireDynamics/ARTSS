@@ -95,8 +95,7 @@ jobs:
           mkdir build
           ./compile.sh --docker-build
           cd build
-          cmake ..
-          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "make artss_gtest && ctest -R gtest"
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "cmake .. && make artss_gtest && ctest -R gtest"
   test-xml:
     
     runs-on: ubuntu-latest
