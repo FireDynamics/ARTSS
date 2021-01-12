@@ -4,8 +4,6 @@
 # -DCMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang
 # -DCMAKE_BUILD_TYPE:STRING=Debug (default Release)
 # -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
-# -DBUILD_TESTING=ON (default OFF)
-# -DBUILD_CPPUNIT_TEST=ON (default OFF)
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
@@ -32,7 +30,6 @@ message(STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR})
 message(STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR})
 message(STATUS "CMAKE_EXE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH})
 
-#----------------------------------------------------------------------
 #---------------------------- compiler -------------------------------
 if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(GPU_CC_TA "tesla:${GPU_CC}")
