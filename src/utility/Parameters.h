@@ -26,6 +26,7 @@ private:
 public:
     static Parameters* getInstance();
     void parse(const std::string& filename);
+    void parse(std::FILE* file, const std::string& filename);
 
     // Getter
     std::string get(const std::string& raw_path);

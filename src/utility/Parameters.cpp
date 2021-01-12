@@ -36,6 +36,11 @@ void Parameters::parse(const std::string& filename) {
     m_filename = filename;
 }
 
+void Parameters::parse(std::FILE* file, const std::string& filename) {
+    tinyxml2::XMLError eResult = this->doc->LoadFile(file);
+    m_filename = filename;
+}
+
 // =================================== Getter ==================================
 // *****************************************************************************
 /// \brief  gets raw string (from xml-file)

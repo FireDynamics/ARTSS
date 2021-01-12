@@ -11,13 +11,11 @@
 cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
 
 project(ARTSS)
-add_executable(artss "src/main.cpp")
+add_executable(artss)
 set_target_properties(artss PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 add_subdirectory(src)
-get_target_property(SOURCE_FILES artss SOURCES)
-
-set(CMAKE_COLOR_MAKEFILE ON)
+get_target_property(ARTSS_SOURCE_FILES artss SOURCES)
 
 if(NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release)
@@ -133,38 +131,41 @@ if(NOT TARGET spdlog)
     add_subdirectory(external/spdlog)
 endif()
 
+if(NOT TARGET gtest)
+    add_subdirectory(external/googletest)
+endif()
 
 #Targets
-add_executable(artss_serial ${SOURCE_FILES} src/main.cpp)
+add_executable(artss_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
 
-add_executable(artss_serial_benchmark ${SOURCE_FILES})
+add_executable(artss_serial_benchmark ${ARTSS_SOURCE_FILES})
 target_compile_options(artss_serial_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_serial_benchmark PUBLIC -DBENCHMARKING -DUSE_NVTX)
 target_link_libraries(artss_serial_benchmark)
 
 
-add_executable(artss_multicore_cpu ${SOURCE_FILES})
+add_executable(artss_multicore_cpu ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_multicore_cpu PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_multicore_cpu PUBLIC -acc -ta=multicore)
 target_link_options(artss_multicore_cpu PUBLIC -acc -ta=multicore)
 target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
 
-add_executable(artss_multicore_cpu_benchmark ${SOURCE_FILES})
+add_executable(artss_multicore_cpu_benchmark ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_multicore_cpu_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_multicore_cpu_benchmark PUBLIC -acc -ta=multicore -DBENCHMARKING -DUSE_NVTX)
 target_link_options(artss_multicore_cpu_benchmark PUBLIC -acc -ta=multicore)
 target_link_libraries(artss_multicore_cpu_benchmark)
 
 
-add_executable(artss_gpu ${SOURCE_FILES})
+add_executable(artss_gpu ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_gpu PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_gpu PUBLIC -acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_options(artss_gpu PUBLIC -acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
 
-add_executable(artss_gpu_benchmark ${SOURCE_FILES})
+add_executable(artss_gpu_benchmark ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_gpu_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_gpu_benchmark PUBLIC -acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_options(artss_gpu_benchmark PUBLIC -acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
@@ -173,3 +174,4 @@ target_link_libraries(artss_gpu_benchmark)
 
 enable_testing()
 add_subdirectory(tests)
+add_subdirectory(gtests)
