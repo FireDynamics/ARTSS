@@ -140,7 +140,7 @@ add_executable(artss_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
 
-add_executable(artss_serial_benchmark ${ARTSS_SOURCE_FILES})
+add_executable(artss_serial_benchmark ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_serial_benchmark PUBLIC -DBENCHMARKING -DUSE_NVTX)
 target_link_libraries(artss_serial_benchmark)
