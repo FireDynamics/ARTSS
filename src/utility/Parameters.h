@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #include "tinyxml2.h"
 #include "GlobalMacrosTypes.h"

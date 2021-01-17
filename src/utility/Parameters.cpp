@@ -25,15 +25,35 @@ Parameters *Parameters::getInstance() {
 /// \param  filename        string (name of xml-file)
 // *****************************************************************************
 void Parameters::parse(const std::string& filename) {
+#ifndef BENCHMARKING
+    auto inpFileLogger = Utility::create_logger("XMLFile");
+#endif
+
     if (filename.empty()) {
-        std::cout << "no XML file specified, skip reading parameter" << std::endl;
+#ifndef BENCHMARKING
+        inpFileLogger->error("no XML file specified, skip reading parameter");
+#endif
         return;
-    } else {
-        // spdlog::info("read in XML file: ");
     }
 
-    tinyxml2::XMLError eResult = this->doc->LoadFile(filename.c_str()); // loads xml file
+    tinyxml2::XMLError eResult = this->doc->LoadFile(filename.c_str());
     m_filename = filename;
+
+#ifndef BENCHMARKING
+    std::ifstream inpFileStream(filename, std::ifstream::in);
+    if (inpFileStream.is_open()) {
+        std::string line;
+        while (std::getline(inpFileStream, line)) {
+            inpFileLogger->debug(line);
+        }
+
+        inpFileStream.close();
+    } else {
+        inpFileLogger->error("Can't open file: {}", filename);
+    }
+
+    inpFileLogger->debug("<!-- eResult={}, filename={} -->", eResult, filename);
+#endif
 }
 
 // =================================== Getter ==================================
