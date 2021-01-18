@@ -26,7 +26,7 @@ Parameters *Parameters::getInstance() {
 // *****************************************************************************
 void Parameters::parse(const std::string& filename) {
     if (filename.empty()) {
-        std::cout << "no XML file specified, skip reading parameter\n" << std::endl;
+        std::cout << "no XML file specified, skip reading parameter" << std::endl;
         return;
     }
 
