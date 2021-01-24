@@ -4,7 +4,7 @@ GPU=1
 JURECA=1
 P100=1
 GPU_CC="cc35"
-CUDA_VERSION=10.1
+CUDA_VERSION=10.2
 BUILDTYPE=Release
 
 YELLOW='\033[1;33m'
@@ -242,7 +242,7 @@ then
   fi
   if [ -z ${CUDA_VERSION} ]
   then
-    CUDA_VERSION=10.1
+    CUDA_VERSION=10.2
   fi
   GPU_CC=cc60
 fi
