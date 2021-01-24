@@ -50,7 +50,7 @@ Other:
    ${YELLOW}-c${NC}
   ${YELLOW}--cudaversion${NC}                     \t set CUDA Version
   ${YELLOW}--cc${NC}
-  ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (35|50|60|70|75)
+  ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (35|50|60|62|70|72|75|80)
    ${YELLOW}-d${NC}
    ${YELLOW}--debugmode${NC}                      \t set debug flag for build type (default: ${BUILDTYPE})
 
