@@ -19,6 +19,11 @@ GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real 
     m_sigma_y = sigma_y;
     m_sigma_z = sigma_z;
     m_tau = tau;
+    init();
+}
+
+void GaussFunction::init(){
+    auto params = Parameters::getInstance();
     m_field_spatial_values = new Field(FieldType::RHO, 0.);
     create_spatial_values();
 }
@@ -118,6 +123,9 @@ void GaussFunction::create_spatial_values() {
         auto z_k = (zk(k, Z1, dz) - m_z0);
         real expr = std::exp(-(r_sigma_x_2 * x_i * x_i + r_sigma_y_2 * y_j * y_j + r_sigma_z_2 * z_k * z_k));
         real tmp = HRRrV * rcp * expr;
+        if (tmp < 0.01) {
+            tmp = 0;
+        }
         d_out[idx] = tmp;
 
     }

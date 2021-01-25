@@ -11,6 +11,7 @@
 #include "../Domain.h"
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
+#include "../boundary/BoundaryController.h"
 
 NSTempTurbSolver::NSTempTurbSolver(FieldController *field_controller) {
 #ifndef BENCHMARKING
@@ -190,11 +191,12 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         // Solve advection equation
 #ifndef BENCHMARKING
         m_logger->info("Advect Temperature ...");
+        Utility::log_minimum(T, "T before advect temperature", "nstempturbsolver");
 #endif
         adv_temp->advect(T, T0, u, v, w, sync);
-
         // Couple temperature to prepare for diffusion
         FieldController::couple_scalar(T, T0, T_tmp, sync);
+        Utility::log_minimum(T, "T after advect temperature", "nstempturbsolver");
 
         // Solve diffusion equation
         // turbulence
@@ -214,6 +216,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 
             // Couple temperature to prepare for adding source
             FieldController::couple_scalar(T, T0, T_tmp, sync);
+            Utility::log_minimum(T, "T after diffuse turbulent temperature", "nstempturbsolver");
         } else {
             // no turbulence
             if (kappa != 0.) {
@@ -225,6 +228,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 
                 // Couple temperature to prepare for adding source
                 FieldController::couple_scalar(T, T0, T_tmp, sync);
+                Utility::log_minimum(T, "T after diffuse temperature", "nstempturbsolver");
             }
         }
 
@@ -238,6 +242,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);
+            Utility::log_minimum(T, "T after dissipation temperature", "nstempturbsolver");
         }
 
         // Add source
@@ -249,6 +254,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);
+            Utility::log_minimum(T, "T after adding source temperature", "nstempturbsolver");
         }
 
 // 6. Sources updated in Solver::update_sources, TimeIntegration

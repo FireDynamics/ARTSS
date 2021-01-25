@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 #include "GlobalMacrosTypes.h"
+//#include "../field/Field.h"
+
 
 #ifndef BENCHMARKING
 #define FMT_USE_UDL_TEMPLATE 0
@@ -17,10 +19,9 @@
 #include "spdlog/logger.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
-#include "../field/Field.h"
-
 #endif
 
+class Field;
 
 namespace Utility {
     size_t get_index(real physical_coordinate, real spacing, real start_coordinate);
@@ -29,7 +30,6 @@ namespace Utility {
     std::vector<std::string> split(const std::string& text, char delimiter);
     std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list1, size_t *list2, size_t size_list2);
     void log_minimum(Field *field, const std::string text, const std::string logger_name);
-
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
 #endif

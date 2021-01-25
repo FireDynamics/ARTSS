@@ -87,7 +87,13 @@ void SolverController::set_up_sources(const std::string &string_solver) {
             real sigma_y = params->get_real("solver/temperature/source/sigma_y");
             real sigma_z = params->get_real("solver/temperature/source/sigma_z");
             real tau = params->get_real("solver/temperature/source/tau");
-            m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
+            bool has_noise = false; //params->get("solver/temperature/source/noise") == XML_TRUE;
+            if (has_noise){
+                m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
+            }else{
+                m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
+                // TODO has noise
+            }
         } else if (temp_fct == SourceMethods::BuoyancyST_MMS) {
             m_source_function_temperature = new BuoyancyMMS();
         } else if (temp_fct == SourceMethods::Cube){

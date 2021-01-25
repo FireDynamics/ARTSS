@@ -145,11 +145,12 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, co
         real nu_z1 = 0.5 * (d_ev[IX(i, j, k - 1, Nx, Ny)] + d_ev[idx]);
         real nu_z2 = 0.5 * (d_ev[IX(i, j, k + 1, Nx, Ny)] + d_ev[idx]);
 
-        d_out[idx] = d_in[idx] +
+        auto tmp = d_in[idx] +
                      m_dt * (nu_x1 * (d_in[idx] - d_in[IX(i - 1, j, k, Nx, Ny)]) - nu_x2 * (d_in[IX(i + 1, j, k, Nx, Ny)] - d_in[idx])
                            + nu_y1 * (d_in[idx] - d_in[IX(i, j - 1, k, Nx, Ny)]) - nu_y2 * (d_in[IX(i, j + 1, k, Nx, Ny)] - d_in[idx])
                            + nu_z1 * (d_in[idx] - d_in[IX(i, j, k - 1, Nx, Ny)]) - nu_z2 * (d_in[IX(i, j, k + 1, Nx, Ny)] - d_in[idx])
                      );
+        d_out[idx] = tmp;
     }
 
     if (sync) {
