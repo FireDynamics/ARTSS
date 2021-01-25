@@ -1,6 +1,6 @@
 /// \file       GlobalMacrosTypes.h
-/// \brief      Defines macros and typedefs
-/// \details    This Header defines macros for indexing (\c IX(i,j)), swapping
+/// \brief      Defines macros and types
+/// \details    This header defines macros for indexing (\c IX(i,j)), swapping
 ///             values (\c SWAP(a,b)) and nested for-loops (\c FOR_EACH_CELL,
 ///             \c FOR_EACH_INNER_CELL)
 /// \date       Jun 15, 2015
@@ -30,26 +30,26 @@
 // ***************************************************************************
 
 
-typedef double real;  // data type for solver (float, double, ...)
+using real = double;  // data type for solver (float, double, ...)
 
 // looks like PGI uses __restrict
 // https://www.auburn.edu/cosam/departments/physics/department/comp-resources/files/pgi/pgicdkrn.pdf
 // p. 14
 // nonetheless this only a c99 keyword and should not be used
 #ifdef __PGI
-    typedef const real* __restrict const read_ptr;  // readable for GPU version
-    typedef real* __restrict const write_ptr;       // writable ptr GPU version
-    typedef const real* __restrict return_ptr;      // returning by class
+    using read_ptr = const real* __restrict const;  // readable for GPU version
+    using write_ptr = real* __restrict const;       // writable ptr GPU version
+    using return_ptr = const real* __restrict;      // returning by class
 // const pointer is superfluous, because non-class type
 // return values are not modifiable anyway.
 
 #else
-    typedef const real* const read_ptr;  // readable
-    typedef real* const write_ptr;       // writable
-    typedef const real* return_ptr;      // for returning by class functions.
+    using read_ptr = const real* const;  // readable
+    using write_ptr = real* const;       // writable
+    using return_ptr = const real*;      // for returning by class functions.
 #endif
 
-typedef const real* const aliased_read_ptr;
+using aliased_read_ptr = const real* const;
 
 
 //================================== Macros ==================================
