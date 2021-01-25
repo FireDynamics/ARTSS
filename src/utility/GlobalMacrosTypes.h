@@ -38,18 +38,14 @@ using real = double;  // data type for solver (float, double, ...)
 // nonetheless this only a c99 keyword and should not be used
 #ifdef __PGI
     using read_ptr = const real* __restrict const;  // readable for GPU version
-    using write_ptr = real* __restrict const;       // writable ptr GPU version
     using return_ptr = const real* __restrict;      // returning by class
 // const pointer is superfluous, because non-class type
 // return values are not modifiable anyway.
 
 #else
     using read_ptr = const real* const;  // readable
-    using write_ptr = real* const;       // writable
     using return_ptr = const real*;      // for returning by class functions.
 #endif
-
-using aliased_read_ptr = const real* const;
 
 
 //================================== Macros ==================================
