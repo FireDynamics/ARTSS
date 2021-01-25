@@ -1,9 +1,3 @@
-if [ ! -f $1 ]
-then
-    echo "File $1 not found"
-    exit 0
-fi
-
 $1 ./Test_Pressure.xml
 
 python3 ./verify.py

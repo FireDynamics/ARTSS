@@ -60,7 +60,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
     auto bsize_i = boundary->getSize_innerList();
     size_t *d_iList = boundary->get_innerList_level_joined();
 
-#pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize])
+#pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize], d_iList[:bsize_i])
     {
         const size_t Nx = domain->get_Nx(out->get_level());    // due to unnecessary parameter passing of *this
         const size_t Ny = domain->get_Ny(out->get_level());
@@ -87,7 +87,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
         auto j_end = static_cast<long int> (domain->get_index_y2());
         auto k_end = static_cast<long int> (domain->get_index_z2());
 
-#pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize], d_iList[:bsize_i]) async
+#pragma acc loop independent
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_iList[l];
             auto k = static_cast<long int> (getCoordinateK(idx, Nx, Ny));

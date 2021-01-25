@@ -3,7 +3,7 @@ COMPILE=""
 GPU=1
 JURECA=1
 P100=1
-GPU_CC="cc30"
+GPU_CC="cc35"
 CUDA_VERSION=10.1
 BUILDTYPE=Release
 
@@ -50,7 +50,7 @@ Other:
    ${YELLOW}-c${NC}
   ${YELLOW}--cudaversion${NC}                     \t set CUDA Version
   ${YELLOW}--cc${NC}
-  ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (30|35|50|60|70|75)
+  ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (35|50|60|70|75)
    ${YELLOW}-d${NC}
    ${YELLOW}--debugmode${NC}                      \t set debug flag for build type (default: ${BUILDTYPE})
 
@@ -259,8 +259,8 @@ cd build || exit
 
 if [[ $GPU -eq 0 ]] || [[ $COMPILER = "PGI" ]]
 then
-  CCOMPILER=pgcc
-  CXXCOMPILER=pgc++
+  CCOMPILER=nvc
+  CXXCOMPILER=nvc++
 else
   CCOMPILER=gcc
   CXXCOMPILER=g++

@@ -335,8 +335,8 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
     auto d_w = w->data;
 
     // calc C for every cell and get the maximum
-#pragma acc parallel loop reduction(max:cfl_max)
 #pragma acc data present(d_u[:bsize], d_v[:bsize], d_w[:bsize])
+#pragma acc parallel loop reduction(max:cfl_max)
     for (size_t i=0; i < sizei; i++) {
         size_t idx = innerList[i];
         // \frac{C}{\Delta t} = \frac{\Delta u}{\Delta x} +

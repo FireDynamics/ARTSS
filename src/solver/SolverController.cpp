@@ -451,7 +451,6 @@ void SolverController::force_source() {
     auto params = Parameters::getInstance();
     // Force
     if (params->get("solver/source/force_fct") == SourceMethods::Buoyancy) {
-
         std::string dir = params->get("solver/source/dir");
 
         if (dir.find('x') != std::string::npos) {
@@ -505,8 +504,11 @@ void SolverController::update_sources(real t_cur, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Update f(T) ...");
 #endif
-            if (params->get("solver/source/use_init_values") == XML_TRUE) {
-                m_field_controller->field_T_ambient = new Field(*m_field_controller->field_T); // TODO copy constructor?
+            if (params->get("solver/source/use_init_values") == XML_FALSE) {
+                int ambient_temperature_value = params->get_int("solver/source/ambient_temperature_value");
+                m_field_controller->field_T_ambient->set_value(ambient_temperature_value);
+            } else {
+                m_field_controller->field_T_ambient->copy_data(*m_field_controller->field_T);
             }
             momentum_source();
         } else {
