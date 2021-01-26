@@ -11,8 +11,40 @@
 
 
 class FieldTest : public testing::Test {
- protected:
 };
+
+TEST_F(FieldTest, constructor_val) {
+    size_t size = 100;
+    Field a(UNKNOWN_FIELD, 0.0, 0, size);
+    Field b(UNKNOWN_FIELD, 0.5, 0, size);
+
+    for (auto i=0; i < size; ++i) {
+        ASSERT_EQ(a.data[i], 0.0);
+        ASSERT_EQ(b.data[i], 0.5);
+    }
+}
+
+TEST_F(FieldTest, set_val) {
+    size_t size = 100;
+    Field a(UNKNOWN_FIELD, 0.0, 0, size);
+
+    a.set_value(0.5);
+    for (auto i=0; i < size; ++i) {
+        ASSERT_EQ(a.data[i], 0.5);
+    }
+}
+
+TEST_F(FieldTest, copy_data) {
+    size_t size = 100;
+    Field a(UNKNOWN_FIELD, 0.0, 0, size);
+    Field b(UNKNOWN_FIELD, 0.5, 0, size);
+
+    a.copy_data(b);
+
+    for (auto i=0; i < size; ++i) {
+        ASSERT_EQ(a.data[i], b.data[i]);
+    }
+}
 
 TEST_F(FieldTest, swap_field) {
     size_t size = 100;
