@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_FIELDCONTROLLER_H
-#define ARTSS_FIELDCONTROLLER_H
+#ifndef ARTSS_FIELD_FIELDCONTROLLER_H
+#define ARTSS_FIELD_FIELDCONTROLLER_H
 
 
 #include "../utility/GlobalMacrosTypes.h"
@@ -86,4 +86,4 @@ public:
 };
 
 
-#endif /* ARTSS_FIELDCONTROLLER_H */
+#endif /* ARTSS_FIELD_FIELDCONTROLLER_H */

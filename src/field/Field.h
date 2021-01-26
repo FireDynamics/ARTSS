@@ -4,8 +4,8 @@
 /// \author       Severt
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_FIELD_H_
-#define ARTSS_FIELD_H_
+#ifndef ARTSS_FIELD_FIELD_H_
+#define ARTSS_FIELD_FIELD_H_
 
 #include <cmath>
 #include <array>
@@ -45,4 +45,4 @@ class Field {
 };
 
 
-#endif /* ARTSS_FIELD_H_ */
+#endif /* ARTSS_FIELD_FIELD_H_ */
