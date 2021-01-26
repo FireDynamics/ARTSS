@@ -37,6 +37,7 @@ void Parameters::parse(const std::string& filename) {
 
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger("XMLFile");
+    m_logger->debug("start the simulation of \"{}\"", filename);
     this->printAllXMLAttributes("", this->doc->RootElement());
 #endif
 }
