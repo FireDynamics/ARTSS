@@ -25,9 +25,9 @@ class Field {
  public:
     Field(FieldType type, real val);
     Field(FieldType type, real val, size_t level);
+    Field(FieldType type, real val, size_t level, size_t size);
 
     ~Field();
-    Field(const Field &);
 
     // getter
     FieldType get_type() { return this->m_type; }
@@ -41,6 +41,7 @@ class Field {
 
  private:
     size_t m_level;
+    size_t m_size;
     FieldType m_type;
 };
 
