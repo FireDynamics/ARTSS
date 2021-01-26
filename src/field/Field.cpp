@@ -15,17 +15,9 @@ Field::Field(FieldType type, real val, size_t level) :
 }
 
 Field::Field(FieldType type, real val, size_t level, size_t size):
-    m_level(level), m_type(type), m_size(size) {
+    m_level(level), m_size(size), m_type(type) {
     data = new real[m_size];
     set_value(val);
-}
-
-void Field::set_value(real val) {
-    std::fill(data, data + m_size, val);
-}
-
-void Field::copy_data(const Field &other) {
-    std::copy(other.data, other.data+other.m_size, data);
 }
 
 Field::~Field() {
