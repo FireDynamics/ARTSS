@@ -40,6 +40,7 @@ private:
     Solution *m_solution;
     Analysis *m_analysis;
     std::shared_ptr<spdlog::logger> m_logger;
+    bool m_has_analytical_solution;
 #endif
 };
 

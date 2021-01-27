@@ -15,7 +15,7 @@
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
-Visual::Visual(Solution *solution) {
+Visual::Visual(const Solution &solution) : m_solution(solution) {
     auto params = Parameters::getInstance();
     m_filename = remove_extension(params->get_filename());
 
@@ -30,15 +30,10 @@ Visual::Visual(Solution *solution) {
     if (m_save_vtk) {
         m_vtk_plots = params->get_int("visualisation/vtk_nth_plot");
     }
-    m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
-    m_solution = solution;
 }
 
-void Visual::visualise(FieldController *field_controller, const real t) {
+void Visual::visualise(const FieldController& field_controller, real t) {
     int n = static_cast<int> (std::round(t / m_dt));
-    if (m_has_analytical_solution) {
-        m_solution->calc_analytical_solution(t);
-    }
 
     std::string filename = create_filename(m_filename, static_cast<int>(std::round(t / m_dt)), false);
     if (m_save_vtk) {
@@ -60,7 +55,7 @@ void Visual::visualise(FieldController *field_controller, const real t) {
     }
 }
 
-void Visual::write_csv(FieldController *solver, std::string filename){
+void Visual::write_csv(const FieldController& solver, std::string filename){
     CSVWriter::write_numerical(solver, filename);
 }
 

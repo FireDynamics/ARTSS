@@ -31,9 +31,11 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 
     m_adaption = new Adaption(m_field_controller);
 #ifndef BENCHMARKING
+    m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
+
     m_solution = new Solution();
     m_analysis = new Analysis(m_solution);
-    m_visual = new Visual(m_solution);
+    m_visual = new Visual(*m_solution);
 #endif
 }
 
@@ -76,7 +78,7 @@ void TimeIntegration::run() {
 #pragma acc update host(d_nu_t[:bsize])
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
     m_analysis->analyse(m_field_controller, 0.);
-    m_visual->visualise(m_field_controller, 0.);
+    m_visual->visualise(*m_field_controller, 0.);
     m_logger->info("Start calculating and timing...");
 #else
     std::cout << "Start calculating and timing...\n" << std::endl;
@@ -119,7 +121,11 @@ void TimeIntegration::run() {
 #pragma acc update host(d_nu_t[:bsize])
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
 
-            m_visual->visualise(m_field_controller, t_cur);
+            if (m_has_analytical_solution) {
+                m_solution->calc_analytical_solution(t_cur);
+            }
+
+            m_visual->visualise(*m_field_controller, t_cur);
             if (m_adaption->is_data_extraction_before_enabled()) {
                 m_adaption->extractData(m_adaption->get_before_name(),
                                         m_adaption->get_before_height(),
