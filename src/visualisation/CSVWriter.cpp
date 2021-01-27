@@ -4,7 +4,9 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#define FMT_STRING_ALIAS 1
 #include <fmt/os.h>
+#include <fmt/compile.h>
 #include "CSVWriter.h"
 
 static std::string ending = ".csv";
@@ -85,28 +87,30 @@ void CSVWriter::csv_write(const char *filename, real **vars, int size_vars, std:
     Visual::initialise_grid(x_centres, y_centres, z_centres, Nx, Ny, Nz, dx, dy, dz);
 
     // write data to csv
-    auto output_file = fmt::output_file(filename);
+    std::ofstream output_file(filename, std::ofstream::binary);
 
     // var_names as column titles
-    output_file.print("{}", fmt::join(coord_names, ","));
-    output_file.print("{}\n", fmt::join(var_names, delimiter));
+    output_file << fmt::format("{}", fmt::join(coord_names, delimiter));
+    output_file << fmt::format("{}\n", fmt::join(var_names, delimiter));
 
     // write variables to csv
+    std::string result;
     for (int k = 0; k < Nz; k++) {
         for (int j = 0; j < Ny; j++) {
             for (int i = 0; i < Nx; i++) {
                 size_t index = IX(i, j, k, Nx, Ny);
-                output_file.print("{0}{4}{1}{4}{2}{4}{3}{4}", i, j, k, index, delimiter);
+                result = fmt::format(FMT_COMPILE("{},{},{},{},"), i, j, k, index,
+                        coords[0][index],coords[1][index],coords[2][index]);
 
-                output_file.print("{0}{3}{1}{3}{2}{3}", coords[0][index],
-                                                          coords[1][index],
-                                                          coords[2][index],
-                                                          delimiter);
+                result.append(fmt::format(FMT_COMPILE("{},{},{},"), coords[0][index],
+                                               coords[1][index],
+                                               coords[2][index]));
 
                 for (int v = 0; v < size_vars - 1; v++) {
-                    output_file.print("{}{}", vars[v][index], delimiter);
+                    result.append(fmt::format(FMT_COMPILE("{},"), vars[v][index]));
                 }
-                output_file.print("{}\n", vars[size_vars - 1][index]);
+                result.append(fmt::format(FMT_COMPILE("{}\n"), vars[size_vars - 1][index]));
+                output_file << result;
             }
         }
     }
