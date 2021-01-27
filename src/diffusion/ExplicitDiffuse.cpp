@@ -145,10 +145,17 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, co
         real nu_z1 = 0.5 * (d_ev[IX(i, j, k - 1, Nx, Ny)] + d_ev[idx]);
         real nu_z2 = 0.5 * (d_ev[IX(i, j, k + 1, Nx, Ny)] + d_ev[idx]);
 
+        auto di0 = (d_in[idx] - d_in[IX(i - 1, j, k, Nx, Ny)]);
+        auto di1 = (d_in[IX(i + 1, j, k, Nx, Ny)] - d_in[idx]);
+        auto dj0 = (d_in[idx] - d_in[IX(i, j - 1, k, Nx, Ny)]);
+        auto dj1 = (d_in[IX(i, j + 1, k, Nx, Ny)] - d_in[idx]);
+        auto dk0 = (d_in[idx] - d_in[IX(i, j, k - 1, Nx, Ny)]);
+        auto dk1 = (d_in[IX(i, j, k + 1, Nx, Ny)] - d_in[idx]);
+
         auto tmp = d_in[idx] +
-                     m_dt * (nu_x1 * (d_in[idx] - d_in[IX(i - 1, j, k, Nx, Ny)]) - nu_x2 * (d_in[IX(i + 1, j, k, Nx, Ny)] - d_in[idx])
-                           + nu_y1 * (d_in[idx] - d_in[IX(i, j - 1, k, Nx, Ny)]) - nu_y2 * (d_in[IX(i, j + 1, k, Nx, Ny)] - d_in[idx])
-                           + nu_z1 * (d_in[idx] - d_in[IX(i, j, k - 1, Nx, Ny)]) - nu_z2 * (d_in[IX(i, j, k + 1, Nx, Ny)] - d_in[idx])
+                     m_dt * (nu_x1 * di0 - nu_x2 * di1
+                           + nu_y1 * dj0 - nu_y2 * dj1
+                           + nu_z1 * dk0 - nu_z2 * dk1
                      );
         d_out[idx] = tmp;
     }
