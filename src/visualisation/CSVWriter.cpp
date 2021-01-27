@@ -4,14 +4,11 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <fstream>
-#include <iomanip>
+#include <fmt/os.h>
 #include "CSVWriter.h"
-#include "../Domain.h"
-#include "Visual.h"
 
 static std::string ending = ".csv";
-const static char delimiter = ',';
+const static std::string_view delimiter = ",";
 
 void CSVWriter::write_numerical(FieldController *field_controller, const std::string& filename) {
     auto u = field_controller->field_u->data;
@@ -37,99 +34,35 @@ void CSVWriter::write_analytical(Solution *solution, const std::string& filename
 }
 
 void CSVWriter::csvPrepareAndWrite(const char *filename, real *u, real *v, real *w, real *p, real *div, real *T, real *C, real *s, real *nu_t, real *S_T) {
-    Domain *domain = Domain::getInstance();
-    int size = static_cast<int>(domain->get_size());
-
     // Initialize variables
     int size_vars = 10; // Number of variables
-    const char *var_names[] = {"x-velocity (m/s)", "y-velocity (m/s)", "z-velocity (m/s)",
-                               "pressure (kg/(m s^2))",
-                               "divergence (1/s)",
-                               "temperature (Celsius)",
-                               "concentration (g/m^3)",
-                               "sight",
-                               "turb viscosity (m^2/s)",
-                               "temperature source (K/s)"};
+    std::vector<std::string> var_names = {"x-velocity (m/s)", "y-velocity (m/s)", "z-velocity (m/s)",
+                                           "pressure (kg/(m s^2))",
+                                           "divergence (1/s)",
+                                           "temperature (Celsius)",
+                                           "concentration (g/m^3)",
+                                           "sight",
+                                           "turb viscosity (m^2/s)",
+                                           "temperature source (K/s)"};
 
-    // velocities
-    auto *u_vel = new real[size];
-    auto *v_vel = new real[size];
-    auto *w_vel = new real[size];
-    // pressure
-    auto *pres = new real[size];
-    // divergence
-    auto *vel_div = new real[size];
-    // temperature
-    auto *Temp = new real[size];
-    // smoke concentration
-    auto *Con = new real[size];
-    // boundary sight
-    auto *Sight = new real[size];
-    // turbulent viscosity
-    auto *turb_visc = new real[size];
-    // energy source
-    auto *source_T = new real[size];
-
-    // Summarize pointers to variables in an array
-    real *vars[] = {static_cast<real *> (u_vel),
-                     static_cast<real *> (v_vel),
-                     static_cast<real *> (w_vel),
-                     static_cast<real *> (pres),
-                     static_cast<real *> (vel_div),
-                     static_cast<real *> (Temp),
-                     static_cast<real *> (Con),
-                     static_cast<real *> (Sight),
-                     static_cast<real *> (turb_visc),
-                     static_cast<real *> (source_T)};
     real* fields[] = {u, v, w, p, div, T, C, s, nu_t, S_T};
     CSVWriter::csv_write(filename, fields, size_vars, var_names);
-
-    // Clean up
-    delete[] (u_vel);
-    delete[] (v_vel);
-    delete[] (w_vel);
-    delete[] (pres);
-    delete[] (vel_div);
-    delete[] (Temp);
-    delete[] (Con);
-    delete[] (Sight);
-    delete[] (turb_visc);
-    delete[] (source_T);
 }
 
 void CSVWriter::csvPrepareAndWrite(const char *filename, real *u, real *v, real *w, real *p, real *T) {
-    Domain *domain = Domain::getInstance();
-    int size = static_cast<int>(domain->get_size());
-
     // Initialize variables
     int size_vars = 5; // Number of variables
-    const char *var_names[] = {"x-velocity (m/s)", "y-velocity (m/s)", "z-velocity (m/s)",
-                               "pressure (kg/(m s^2))",
-                               "temperature (Celsius)"};
-
-    // velocities
-    auto *u_vel = new real[size];
-    auto *v_vel = new real[size];
-    auto *w_vel = new real[size];
-    // pressure
-    auto *pres = new real[size];
-    // temperature
-    auto *Temp = new real[size];
+    std::vector<std::string> var_names = {"x-velocity (m/s)", "y-velocity (m/s)", "z-velocity (m/s)",
+                                           "pressure (kg/(m s^2))",
+                                           "temperature (Celsius)"};
 
     // Summarize pointers to variables in an array
     real* fields[] = {u, v, w, p, T};
 
     CSVWriter::csv_write(filename, fields, size_vars, var_names);
-
-    // Clean up
-    delete[] (u_vel);
-    delete[] (v_vel);
-    delete[] (w_vel);
-    delete[] (pres);
-    delete[] (Temp);
 }
 
-void CSVWriter::csv_write(const char *filename, real **vars, int size_vars, const char **var_names) {
+void CSVWriter::csv_write(const char *filename, real **vars, int size_vars, std::vector<std::string> var_names) {
     Domain *domain = Domain::getInstance();
 
     int Nx = static_cast<int>(domain->get_Nx());
@@ -142,7 +75,8 @@ void CSVWriter::csv_write(const char *filename, real **vars, int size_vars, cons
     real dy = domain->get_dy();
     real dz = domain->get_dz();
 
-    const char *coord_names[] = {"i", "j", "k", "index", "x-coords (m)", "y-coords (m)", "z-coords (m)"};
+    std::vector<std::string> coord_names = {"i", "j", "k", "index",
+                                            "x-coords (m)", "y-coords (m)", "z-coords (m)"};
 
     auto *x_centres = new float[size];
     auto *y_centres = new float[size];
@@ -151,56 +85,30 @@ void CSVWriter::csv_write(const char *filename, real **vars, int size_vars, cons
     Visual::initialise_grid(x_centres, y_centres, z_centres, Nx, Ny, Nz, dx, dy, dz);
 
     // write data to csv
-    std::ofstream outputFile;
-    outputFile.open(filename, std::ofstream::out);
+    auto output_file = fmt::output_file(filename);
 
     // var_names as column titles
-    for (auto & coord_name : coord_names) {
-        outputFile << coord_name << delimiter;
-    }
-    for (int i = 0; i < size_vars - 1; i++) {
-        outputFile << var_names[i] << delimiter;
-    }
-    // last column
-    outputFile << var_names[size_vars - 1] << std::endl;
+    output_file.print("{}", fmt::join(coord_names, ","));
+    output_file.print("{}\n", fmt::join(var_names, delimiter));
 
     // write variables to csv
     for (int k = 0; k < Nz; k++) {
         for (int j = 0; j < Ny; j++) {
             for (int i = 0; i < Nx; i++) {
                 size_t index = IX(i, j, k, Nx, Ny);
-                outputFile << i << delimiter
-                           << j << delimiter
-                           << k << delimiter
-                           << index << delimiter
-                           << std::setprecision(24);
+                output_file.print("{0}{4}{1}{4}{2}{4}{3}{4}", i, j, k, index, delimiter);
 
-                for (auto & coord : coords) {
-                    outputFile << coord[index] << delimiter;
-                }
+                output_file.print("{0}{3}{1}{3}{2}{3}", coords[0][index],
+                                                          coords[1][index],
+                                                          coords[2][index],
+                                                          delimiter);
+
                 for (int v = 0; v < size_vars - 1; v++) {
-                    outputFile << std::setprecision(24) << vars[v][index] << delimiter;
+                    output_file.print("{}{}", vars[v][index], delimiter);
                 }
-                outputFile << std::setprecision(24) << vars[size_vars - 1][index] << std::endl;
+                output_file.print("{}\n", vars[size_vars - 1][index]);
             }
         }
     }
-    outputFile.close();
-
-    delete[] (x_centres);
-    delete[] (y_centres);
-    delete[] (z_centres);
-}
-
-void CSVWriter::write_data(std::string *data_titles, real **data, size_t size_data, const std::string& filename) {
-    Domain *domain = Domain::getInstance();
-    int size = static_cast<int>(domain->get_size());
-
-    const char *var_names[size_data];
-    for (size_t i = 0; i < size_data; i++){
-        var_names[i] = data_titles[i].c_str();
-    }
-
-    CSVWriter::csv_write((filename+ending).c_str(), data, size_data, var_names);
 }
 

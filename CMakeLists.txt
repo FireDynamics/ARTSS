@@ -133,11 +133,21 @@ if(NOT TARGET spdlog)
     add_subdirectory(external/spdlog)
 endif()
 
+if(NOT TARGET fmt)
+    # Stand-alone build
+    find_package(fmt QUIET)
+endif()
+# use local fallback
+if(NOT TARGET fmt)
+    add_subdirectory(external/fmt)
+endif()
+
 
 #Targets
 add_executable(artss_serial ${SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
+target_link_libraries(artss_serial PRIVATE fmt::fmt)
 
 add_executable(artss_serial_benchmark ${SOURCE_FILES})
 target_compile_options(artss_serial_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})

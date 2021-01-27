@@ -23,8 +23,6 @@ public:
 
     static void write_csv(FieldController *solver, std::string filename);
 
-    static void write_data(std::string *data_titles, real **data, size_t size_data, std::string filename);
-
 private:
     static std::string remove_extension(const std::string &filename);
 

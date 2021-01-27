@@ -8,6 +8,10 @@
 #define ARTSS_VISUALISATION_CSVWRITER_H
 
 #include <string>
+#include <vector>
+
+#include "Visual.h"
+#include "../Domain.h"
 #include "../analysis/Solution.h"
 #include "../field/FieldController.h"
 
@@ -16,13 +20,11 @@ public:
     static void write_numerical(FieldController *field_controller, const std::string& filename);
     static void write_analytical(Solution *solution, const std::string& filename);
 
-    static void write_data(std::string *data_titles, real **data, size_t size_data, const std::string& filename);
-
 private:
     static void csvPrepareAndWrite(const char *filename, real *u, real* v, real* w, real* p, real* div, real* T, real* C, real* s, real* nu_t, real* S_T);
     static void csvPrepareAndWrite(const char *filename, real *u, real* v, real* w, real* p, real* T);
 
-    static void csv_write(const char *filename, real **vars, int size_vars, const char **var_names);
+    static void csv_write(const char *filename, real **vars, int size_vars, std::vector<std::string> var_names);
 };
 
 #endif /* ARTSS_VISUALISATION_CSVWRITER_H */

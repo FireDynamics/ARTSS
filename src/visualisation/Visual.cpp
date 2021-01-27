@@ -64,10 +64,6 @@ void Visual::write_csv(FieldController *solver, std::string filename){
     CSVWriter::write_numerical(solver, filename);
 }
 
-void Visual::write_data(std::string *data_titles, real **data, size_t size_data, std::string filename){
-    CSVWriter::write_data(data_titles, data, size_data, filename);
-}
-
 void Visual::initialise_grid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
     Domain *domain = Domain::getInstance();
     real X1 = domain->get_X1();
