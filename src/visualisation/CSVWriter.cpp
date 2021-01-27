@@ -4,9 +4,12 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#ifndef BENCHMARKING
 #define FMT_STRING_ALIAS 1
 #include <fmt/os.h>
 #include <fmt/compile.h>
+#endif
+
 #include "CSVWriter.h"
 
 static std::string ending = ".csv";
@@ -66,6 +69,7 @@ void CSVWriter::csvPrepareAndWrite(const std::string& filename, real *u, real *v
 
 void CSVWriter::csv_write(const std::string& filename, real **vars, int size_vars,
         const std::vector<std::string>& var_names) {
+#ifndef BENCHMARKING
     Domain *domain = Domain::getInstance();
 
     int Nx = static_cast<int>(domain->get_Nx());
@@ -124,5 +128,6 @@ void CSVWriter::csv_write(const std::string& filename, real **vars, int size_var
     delete[] x_centres;
     delete[] y_centres;
     delete[] z_centres;
+#endif
 }
 
