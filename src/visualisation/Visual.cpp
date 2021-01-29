@@ -32,7 +32,7 @@ Visual::Visual(const Solution &solution) : m_solution(solution) {
     }
 }
 
-void Visual::visualise(const FieldController& field_controller, real t) {
+void Visual::visualise(const FieldController &field_controller, real t) {
     int n = static_cast<int> (std::round(t / m_dt));
 
     std::string filename = create_filename(m_filename, static_cast<int>(std::round(t / m_dt)), false);
@@ -55,7 +55,7 @@ void Visual::visualise(const FieldController& field_controller, real t) {
     }
 }
 
-void Visual::write_csv(const FieldController& solver, std::string filename){
+void Visual::write_csv(const FieldController &solver, std::string filename){
     CSVWriter::write_numerical(solver, filename);
 }
 

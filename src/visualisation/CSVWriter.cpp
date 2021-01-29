@@ -15,7 +15,7 @@
 static std::string ending = ".csv";
 const static std::string_view delimiter = ",";
 
-void CSVWriter::write_numerical(const FieldController& field_controller, const std::string& filename) {
+void CSVWriter::write_numerical(const FieldController &field_controller, const std::string &filename) {
     auto u = field_controller.field_u->data;
     auto v = field_controller.field_v->data;
     auto w = field_controller.field_w->data;
@@ -29,7 +29,7 @@ void CSVWriter::write_numerical(const FieldController& field_controller, const s
     CSVWriter::csvPrepareAndWrite(filename + ending, u, v, w, p, div, T, C, s, nu_t, S_T);
 }
 
-void CSVWriter::write_analytical(const Solution& solution, const std::string& filename) {
+void CSVWriter::write_analytical(const Solution &solution, const std::string &filename) {
     auto u = solution.GetU_data();
     auto v = solution.GetV_data();
     auto w = solution.GetW_data();
@@ -38,7 +38,7 @@ void CSVWriter::write_analytical(const Solution& solution, const std::string& fi
     CSVWriter::csvPrepareAndWrite(filename + ending, u, v, w, p, T);
 }
 
-void CSVWriter::csvPrepareAndWrite(const std::string& filename, real *u, real *v, real *w, real *p, real *div, real *T, real *C, real *s, real *nu_t, real *S_T) {
+void CSVWriter::csvPrepareAndWrite(const std::string &filename, real *u, real *v, real *w, real *p, real *div, real *T, real *C, real *s, real *nu_t, real *S_T) {
     // Initialize variables
     int size_vars = 10; // Number of variables
     std::vector<std::string> var_names = {"x-velocity (m/s)", "y-velocity (m/s)", "z-velocity (m/s)",
@@ -54,7 +54,7 @@ void CSVWriter::csvPrepareAndWrite(const std::string& filename, real *u, real *v
     CSVWriter::csv_write(filename, fields, size_vars, var_names);
 }
 
-void CSVWriter::csvPrepareAndWrite(const std::string& filename, real *u, real *v, real *w, real *p, real *T) {
+void CSVWriter::csvPrepareAndWrite(const std::string &filename, real *u, real *v, real *w, real *p, real *T) {
     // Initialize variables
     int size_vars = 5; // Number of variables
     std::vector<std::string> var_names = {"x-velocity (m/s)", "y-velocity (m/s)", "z-velocity (m/s)",
@@ -67,8 +67,8 @@ void CSVWriter::csvPrepareAndWrite(const std::string& filename, real *u, real *v
     CSVWriter::csv_write(filename, fields, size_vars, var_names);
 }
 
-void CSVWriter::csv_write(const std::string& filename, real **vars, int size_vars,
-        const std::vector<std::string>& var_names) {
+void CSVWriter::csv_write(const std::string &filename, real **vars, int size_vars,
+        const std::vector<std::string> &var_names) {
 #ifndef BENCHMARKING
     Domain *domain = Domain::getInstance();
 

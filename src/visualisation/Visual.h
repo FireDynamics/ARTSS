@@ -13,19 +13,19 @@
 
 class Visual {
 public:
-    explicit Visual(const Solution& solution);
+    explicit Visual(const Solution &solution);
 
-    void visualise(const FieldController& field_controller, real t);
+    void visualise(const FieldController &field_controller, real t);
 
     static void initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
 
-    static void write_csv(const FieldController& solver, std::string filename);
+    static void write_csv(const FieldController &solver, std::string filename);
 
 private:
     static std::string remove_extension(const std::string &filename);
 
     std::string m_filename;
-    const Solution& m_solution;
+    const Solution &m_solution;
     bool m_save_csv = false;
     int m_csv_plots = 0;
     bool m_save_vtk = false;
