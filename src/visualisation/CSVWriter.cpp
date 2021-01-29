@@ -128,6 +128,6 @@ void CSVWriter::csv_write(const std::string &filename, real **vars, int size_var
     delete[] x_centres;
     delete[] y_centres;
     delete[] z_centres;
-}
 #endif
+}
 
