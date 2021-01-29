@@ -36,7 +36,7 @@ git clone https://github.com/FireDynamics/ARTSS.git
 cd ARTSS
 ```
 
-if you already have a local copy of ARTSS and are missing spdlog, or fmt do a recursive submodul init.
+if you already have a local copy of ARTSS and are missing spdlog or fmt do a recursive submodule init.
 ```
 git submodule update --init --recursive
 ```
