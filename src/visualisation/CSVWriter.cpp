@@ -67,9 +67,9 @@ void CSVWriter::csvPrepareAndWrite(const std::string& filename, real *u, real *v
     CSVWriter::csv_write(filename, fields, size_vars, var_names);
 }
 
-#ifndef BENCHMARKING
 void CSVWriter::csv_write(const std::string& filename, real **vars, int size_vars,
         const std::vector<std::string>& var_names) {
+#ifndef BENCHMARKING
     Domain *domain = Domain::getInstance();
 
     int Nx = static_cast<int>(domain->get_Nx());
