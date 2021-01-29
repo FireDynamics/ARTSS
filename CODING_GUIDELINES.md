@@ -15,17 +15,20 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
   
   `branch: issue_15_coding_guidelines`
   
-- Naming Pull Request: Format: `Issue XY short description`
+- Pull Request:
+  - Naming Format: `Issue XY short description`
 
-  Example:
+    Example:
   
-  `Issue 15 Coding Guidelines`
+    `Issue 15 Coding Guidelines`
 
-- Naming final commit of PR (to master branch): Format: `Issue XY short description (#PR)`. This will be done automatically by GitHub if the PR is named accordingly.
+  - Naming final commit of PR (to master branch): Format: `Issue XY short description (#PR)`. This will be done automatically by GitHub if the PR is named accordingly.
 
-  Example:
+    Example:
   
-  `final commit: Issue 15 Coding Guidelines (#113) [description of changes...]`
+    `final commit: Issue 15 Coding Guidelines (#113) [description of changes...]`
+   
+  - Linking to issue. Either link PR to the issue manually or use the phrase "should close #XY" int the description for automatic linking. 
 
 - Parenthesis:
   - the opening parenthesis is in the same line as the opening statement and NOT on a separate line
