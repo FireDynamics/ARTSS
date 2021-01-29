@@ -59,7 +59,7 @@ void Visual::write_csv(const FieldController& solver, std::string filename){
     CSVWriter::write_numerical(solver, filename);
 }
 
-void Visual::initialise_grid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
+void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
     Domain *domain = Domain::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
@@ -70,23 +70,10 @@ void Visual::initialise_grid(float *x_coords, float *y_coords, float *z_coords, 
         for (int j = 0; j < Ny; j++) {
             for (int i = 0; i < Nx; i++) {
                 size_t index = IX(i, j, k, Nx, Ny);
-                x_coords[index] = static_cast<float> (X1 + (i - 0.5) * dx);
-                y_coords[index] = static_cast<float> (Y1 + (j - 0.5) * dy);
-                z_coords[index] = static_cast<float> (Z1 + (k - 0.5) * dz);
+                x_coords[index] = (X1 + (i - 0.5) * dx);
+                y_coords[index] = (Y1 + (j - 0.5) * dy);
+                z_coords[index] = (Z1 + (k - 0.5) * dz);
             }
-        }
-    }
-}
-
-void Visual::prepare_fields(read_ptr *fields, float **vars, int size) {
-    Domain *domain = Domain::getInstance();
-
-    int domain_size = static_cast<int>(domain->get_size());
-
-    // Cast variables to floats
-    for (int index = 0; index < domain_size; index++) {
-        for (int v = 0; v < size; v++) {
-            vars[v][index] = static_cast<float>(fields[v][index]);
         }
     }
 }

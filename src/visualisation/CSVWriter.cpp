@@ -67,9 +67,9 @@ void CSVWriter::csvPrepareAndWrite(const std::string& filename, real *u, real *v
     CSVWriter::csv_write(filename, fields, size_vars, var_names);
 }
 
+#ifndef BENCHMARKING
 void CSVWriter::csv_write(const std::string& filename, real **vars, int size_vars,
         const std::vector<std::string>& var_names) {
-#ifndef BENCHMARKING
     Domain *domain = Domain::getInstance();
 
     int Nx = static_cast<int>(domain->get_Nx());
@@ -85,10 +85,10 @@ void CSVWriter::csv_write(const std::string& filename, real **vars, int size_var
     std::vector<std::string> coord_names = {"i", "j", "k", "index",
                                             "x-coords (m)", "y-coords (m)", "z-coords (m)"};
 
-    auto *x_centres = new float[size];
-    auto *y_centres = new float[size];
-    auto *z_centres = new float[size];
-    float *coords[] = {x_centres, y_centres, z_centres};
+    auto *x_centres = new real[size];
+    auto *y_centres = new real[size];
+    auto *z_centres = new real[size];
+    real *coords[] = {x_centres, y_centres, z_centres};
     Visual::initialise_grid(x_centres, y_centres, z_centres,
                             Nx, Ny, Nz, dx, dy, dz);
 
@@ -128,6 +128,6 @@ void CSVWriter::csv_write(const std::string& filename, real **vars, int size_var
     delete[] x_centres;
     delete[] y_centres;
     delete[] z_centres;
-#endif
 }
+#endif
 

@@ -17,9 +17,7 @@ public:
 
     void visualise(const FieldController& field_controller, real t);
 
-    static void initialise_grid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
-
-    static void prepare_fields(read_ptr *fields, float **vars, int size);
+    static void initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
 
     static void write_csv(const FieldController& solver, std::string filename);
 
