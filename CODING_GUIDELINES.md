@@ -2,8 +2,8 @@
 
 The coding guidelines of ARTSS are mainly based on the [google coding guidelines](https://google.github.io/styleguide/cppguide.html). Accordingly, our rules are not one-to-one with the google standard, therefore we ask you to have a look at the following rules if you want to contribute to ARTSS.
 
-
-- Naming Convention: We use underscores. The main reason for this is that we have variables which have different meanings depending on upper and lower case (see class Domain.cpp).
+### Naming Convention
+- Variable Naming: We use underscores. The main reason for this is that we have variables which have different meanings depending on upper and lower case (see class Domain.cpp).
 
   Example:
   
@@ -30,6 +30,7 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
    
   - Linking to issue. Either link PR to the issue manually or use the phrase "should close #XY" int the description for automatic linking. 
 
+### Parenthesis
 - Parenthesis:
   - the opening parenthesis is in the same line as the opening statement and NOT on a separate line
   - do not drop parenthesis even if the the body of a statement consist of a single line
@@ -41,11 +42,31 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
   }
   ```
 
+### Pointers and References
 - Pointers and References: We are using the style where you emphasise the type of the pointed-to data. `someType *somePtr` rather than `someType* somePtr`. The reasoning is mainly that the pointer belongs to the data type because if you define multiple pointers in one line, you have to write: `someType *p1, *p2` while `someType* p1, p2` creates only one pointer.
 
   Example:
   
   `int *pointer1, *pointer2;`
+
+### Headers
+- Self contained: Headers should be self contained, which means it should contain all necessary imports without relying on import of other (imported) headers.
+
+  Example: `Solution.h` uses `std::vector` accordingly it has to import `std::vector`
+  
+- Include guards: Our include guards have the format ARTSS_DIRNAME_FILENAME_H
+
+  Example: `Soluction.h` in directory `analysis`
+  
+  ```
+  #ifndef ARTSS_ANALYSIS_SOLUTION_H_
+  #define ARTSS_ANALYSIS_SOLUTION_H_
+  
+  [...]
+  
+  #endif /* ARTSS_ANALYSIS_SOLUTION_H_ */
+  ```
+
 
 As we are only a small group of developers, many parts of the code are not yet compliant with our code guidelines and will be improved accordingly as we make changes. Accordingly, more rules may be added to our coding guidelines if we determine that it is necessary.
 
