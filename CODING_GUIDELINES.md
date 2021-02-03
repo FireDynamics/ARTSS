@@ -1,6 +1,6 @@
 ## Contributing Guidelines
 
-The coding guidelines of ARTSS are mainly based on the [google coding guidelines](https://google.github.io/styleguide/cppguide.html). Below there are some rules which are not defined in the google standard or we want to especially emphasise them in order to achieve the most consistent code possible.
+The coding guidelines of ARTSS are mainly based on the [google coding guidelines](https://google.github.io/styleguide/cppguide.html). Accordingly, our rules are not one-to-one with the google standard, therefore we ask you to have a look at the following rules if you want to contribute to ARTSS.
 
 
 - Naming Convention: We use underscores. The main reason for this is that we have variables which have different meanings depending on upper and lower case (see class Domain.cpp).
