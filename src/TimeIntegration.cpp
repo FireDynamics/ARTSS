@@ -121,9 +121,7 @@ void TimeIntegration::run() {
 #pragma acc update host(d_nu_t[:bsize])
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
 
-            if (m_has_analytical_solution) {
-                m_solution->calc_analytical_solution(t_cur);
-            }
+            m_solution->calc_analytical_solution(t_cur);
 
             m_visual->visualise(*m_field_controller, t_cur);
             if (m_adaption->is_data_extraction_before_enabled()) {
