@@ -34,8 +34,7 @@ BoundaryDataController::~BoundaryDataController() {
 void BoundaryDataController::addBoundaryData(tinyxml2::XMLElement *xmlElement) {
     std::vector<std::string> fieldStrings = Utility::split(xmlElement->Attribute("field"), ',');
     std::vector<std::string> patchStrings = Utility::split(xmlElement->Attribute("patch"), ',');
-    std::vector<Patch> patches;
-    patches.reserve(patchStrings.size());
+    std::vector<Patch> patches(patchStrings.size());
 
     for (const std::string &p: patchStrings) {
         patches.push_back(BoundaryData::matchPatch(p));
@@ -102,7 +101,7 @@ void BoundaryDataController::applyBoundaryConditionObstacle(real *data, size_t *
 }
 
 std::vector<FieldType> BoundaryDataController::get_used_fields() {
-    std::vector<FieldType> v_fields;
+    std::vector<FieldType> v_fields(numberOfFieldTypes);
     for (size_t fieldType = 0; fieldType < numberOfFieldTypes; fieldType++) {
         if (!((BoundaryData *) *(m_boundaryData + fieldType))->isEmpty()){
             v_fields.push_back(static_cast<FieldType>(fieldType));

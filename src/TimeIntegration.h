@@ -7,6 +7,8 @@
 #ifndef ARTSS_TIMEINTEGRATION_H_
 #define ARTSS_TIMEINTEGRATION_H_
 
+#include <chrono>
+
 #include "interfaces/ISolver.h"
 #include "interfaces/ISource.h"
 #include "utility/GlobalMacrosTypes.h"

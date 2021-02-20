@@ -9,7 +9,6 @@
 #define ARTSS_UTILITY_PARAMETERS_H
 
 #include <string>
-#include <vector>
 #include <iostream>
 #include <fstream>
 

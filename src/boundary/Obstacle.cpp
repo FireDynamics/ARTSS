@@ -263,7 +263,6 @@ void Obstacle::printDetails(){
     m_logger->debug("size of Obstacle: {}", m_size_obstacleList);
     m_logger->debug("coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, m_i2, m_j1, m_j2, m_k1, m_k2);
 
-    std::vector<size_t> coords;
     size_t size_front = getSize_obstacleFront();
     if (size_front > 0) {
         m_logger->debug("Front: {} | {}",

@@ -7,6 +7,7 @@
 #ifndef ARTSS_BOUNDRY_BOUNDARYDATACONTROLLER_H
 #define ARTSS_BOUNDRY_BOUNDARYDATACONTROLLER_H
 
+#include <vector>
 
 #include "../utility/tinyxml2.h"
 #include "BoundaryData.h"

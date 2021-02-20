@@ -4,9 +4,6 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <chrono>
-#include <vector>
-
 #include "TimeIntegration.h"
 #include "utility/Parameters.h"
 #include "Domain.h"

@@ -154,9 +154,6 @@ void Multigrid::init() {
 }
 
 Multigrid::~Multigrid() {
-    for (BoundaryData *bd: m_boundaryData) {
-        delete (bd);
-    }
     delete[] m_data_boundary_patches_joined;
     for (size_t level = 0; level < m_levels + 1; level++) {
         if (m_numberOfSurfaces > 0) {
