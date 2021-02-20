@@ -662,10 +662,9 @@ void Multigrid::surfaceDominantRestriction(size_t level) {
             size_t stride_y_fine = surface_fine->getStrideY();
             size_t stride_z_fine = surface_fine->getStrideZ();
             size_t startIndex_fine = surface_fine->getSurfaceList()[0];
-            std::vector<size_t> coords = Utility::coordinateFromLinearIndex(startIndex_fine, domain->get_Nx(level - 1), domain->get_Ny(level - 1));
-            size_t i_fine = coords[0];
-            size_t j_fine = coords[1];
-            size_t k_fine = coords[2];
+            size_t k_fine = getCoordinateK(startIndex_fine, Nx, Ny);
+            size_t j_fine = getCoordinateJ(startIndex_fine, Nx, Ny, k_fine);
+            size_t i_fine = getCoordinateI(startIndex_fine, Nx, Ny, j_fine, k_fine);
 
             size_t stride_x_coarse, stride_y_coarse, stride_z_coarse;
             if (i_fine % 2 == 0) {
