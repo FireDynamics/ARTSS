@@ -29,26 +29,6 @@ size_t get_index(real physical_coordinate, real spacing, real start_coordinate) 
     return std::round((-start_coordinate + physical_coordinate) / spacing) + 1;
 }
 
-// // ================================= Calc i,j,k ==========================================
-// // ***************************************************************************************
-// /// \brief  calculates indices <i,j,k> from linear index idx
-// /// \param  idx     linear (global) index
-// /// \param  Nx      number of cells in x-direction of physical domain
-// /// \param  Ny      number of cells in y-direction of physical domain
-// // ***************************************************************************************
-// std::vector<size_t> coordinateFromLinearIndex(size_t idx, size_t Nx, size_t Ny) {
-//     std::vector<size_t> coord;
-//     size_t k = getCoordinateK(idx, Nx, Ny);
-//     size_t j = getCoordinateJ(idx, Nx, Ny, k);
-//     size_t i = getCoordinateI(idx, Nx, Ny, j, k);
-// 
-//     coord.push_back(i);
-//     coord.push_back(j);
-//     coord.push_back(k);
-// 
-//     return coord;
-// }
-
 // ================================= Calculate coordinate i ==========================================
 // ***************************************************************************************
 /// \brief  Calculates the i coordinate
@@ -140,7 +120,7 @@ std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
         file_sink->set_level(spdlog::level::trace);
     }
 
-    std::vector<spdlog::sink_ptr> sinks;
+    std::vector<spdlog::sink_ptr> sinks(2);
     sinks.push_back(stdout_sink);
     sinks.push_back(file_sink);
     auto logger = std::make_shared<spdlog::logger>(logger_name,
