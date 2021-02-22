@@ -18,13 +18,14 @@
 
 class Multigrid {
 public:
+    Multigrid() = default;
     Multigrid(size_t numberOfSurfaces, Surface** surfaceList, size_t numberOfObstacles, Obstacle** obstacleList, BoundaryDataController* bdc_boundary, BoundaryDataController **bdc_obstacles);
     explicit Multigrid(BoundaryDataController *bdc_boundary);
     ~Multigrid();
 
     size_t getSize_innerList(size_t level = 0);
     size_t getSize_boundaryList(size_t level = 0);
-    size_t getSize_obstacleList();
+    size_t getSize_obstacleList() const;
     size_t *get_obstacleList();
 
     size_t* getInnerList_level_joined() { return m_data_MG_iList_level_joined; };
@@ -40,6 +41,9 @@ public:
     void updateLists();
 
     void applyBoundaryCondition(real* d, size_t level, FieldType f, bool sync = false);
+
+    Obstacle*** getObstacles() const { return m_MG_obstacleList; }
+    Obstacle** getObstacles(int level) const { return m_MG_obstacleList[level]; }
 
     size_t getObstacleStrideX(size_t id, size_t level);
     size_t getObstacleStrideY(size_t id, size_t level);
@@ -114,7 +118,7 @@ private:
     size_t* m_data_MG_oRight_level_joined;
     size_t* m_data_MG_oList_zero_joined;
 
-    size_t getSize_oList(size_t level);
+    size_t getSize_oList(size_t level) const;
     size_t getLastIndex_oFront( size_t level, size_t id);
     size_t getLastIndex_oBack( size_t level, size_t id);
     size_t getLastIndex_oBottom( size_t level, size_t id);

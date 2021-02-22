@@ -7,6 +7,7 @@
 #ifndef ARTSS_GAUSSFUNCTION_H
 #define ARTSS_GAUSSFUNCTION_H
 
+#include <math.h>
 
 #include "../field/Field.h"
 #include "../interfaces/ISourceFunction.h"
