@@ -50,6 +50,8 @@ public:
     size_t getObstacleStrideY(size_t id, size_t level);
     size_t getObstacleStrideZ(size_t id, size_t level);
 
+    auto getMultigrid() const { return &m_multigrid; };
+
     std::vector<FieldType> get_used_fields();
 
 private:
@@ -60,7 +62,7 @@ private:
 
     BoundaryDataController *m_bdc_boundary;
     BoundaryDataController **m_bdc_obstacles;
-    Multigrid* m_multigrid;
+    Multigrid m_multigrid;
 
     Surface** m_surfaceList;
     size_t m_numberOfSurfaces = 0;
