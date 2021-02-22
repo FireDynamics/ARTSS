@@ -21,9 +21,9 @@ BoundaryController::BoundaryController() {
     m_bdc_boundary = new BoundaryDataController();
     readXML();
     if (m_numberOfObstacles + m_numberOfSurfaces > 0) {
-        m_multigrid = Multigrid(m_numberOfSurfaces, m_surfaceList, m_numberOfObstacles, m_obstacleList, m_bdc_boundary, m_bdc_obstacles);
+        m_multigrid.init(m_numberOfSurfaces, m_surfaceList, m_numberOfObstacles, m_obstacleList, m_bdc_boundary, m_bdc_obstacles);
     } else {
-        m_multigrid = Multigrid(m_bdc_boundary);
+        m_multigrid.init(m_bdc_boundary);
     }
 #ifndef BENCHMARKING
     printBoundaries();

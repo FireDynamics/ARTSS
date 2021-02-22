@@ -19,9 +19,10 @@
 class Multigrid {
 public:
     Multigrid() = default;
-    Multigrid(size_t numberOfSurfaces, Surface** surfaceList, size_t numberOfObstacles, Obstacle** obstacleList, BoundaryDataController* bdc_boundary, BoundaryDataController **bdc_obstacles);
-    explicit Multigrid(BoundaryDataController *bdc_boundary);
     ~Multigrid();
+
+    void init(size_t numberOfSurfaces, Surface** surfaceList, size_t numberOfObstacles, Obstacle** obstacleList, BoundaryDataController* bdc_boundary, BoundaryDataController **bdc_obstacles);
+    void init(BoundaryDataController *bdc_boundary);
 
     size_t getSize_innerList(size_t level = 0);
     size_t getSize_boundaryList(size_t level = 0);

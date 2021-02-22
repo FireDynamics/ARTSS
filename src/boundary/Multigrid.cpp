@@ -7,7 +7,7 @@
 #include "Multigrid.h"
 
 
-Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
+void Multigrid::init(BoundaryDataController *bdc_boundary) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -31,7 +31,7 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
     m_data_boundary_patches_joined[Patch::RIGHT] = m_data_MG_bRight_level_joined;
 }
 
-Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numberOfObstacles, Obstacle **obstacleList, BoundaryDataController *bdc_boundary, BoundaryDataController **bdc_obstacles) {
+void Multigrid::init(size_t numberOfSurfaces, Surface **surfaceList, size_t numberOfObstacles, Obstacle **obstacleList, BoundaryDataController *bdc_boundary, BoundaryDataController **bdc_obstacles) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
