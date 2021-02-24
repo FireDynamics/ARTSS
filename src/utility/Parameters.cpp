@@ -34,6 +34,29 @@ void Parameters::parse(const std::string& filename) {
 
     tinyxml2::XMLError eResult = this->doc->LoadFile(filename.c_str()); // loads xml file
     m_filename = filename;
+
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger("XMLFile");
+    m_logger->debug("start the simulation of \"{}\"", filename);
+    this->printAllXMLAttributes("", this->doc->RootElement());
+#endif
+}
+
+void Parameters::printAllXMLAttributes(std::string prefix, tinyxml2::XMLElement *elem) {
+#ifndef BENCHMARKING
+    prefix += elem->Name();
+    for (auto i = elem->FirstAttribute(); i; i = i->Next()) {
+        m_logger->debug("{}<{} = {}>", prefix, i->Name(), i->Value());
+    }
+
+    prefix += "/";
+    for (auto i = elem->FirstChildElement(); i; i = i->NextSiblingElement()) {
+        if (i->GetText())
+            m_logger->debug("{}{} = {}", prefix, i->Name(), i->GetText());
+
+        this->printAllXMLAttributes(prefix, i);
+    }
+#endif
 }
 
 // =================================== Getter ==================================
