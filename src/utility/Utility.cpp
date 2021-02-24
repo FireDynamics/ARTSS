@@ -120,7 +120,8 @@ std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
         file_sink->set_level(spdlog::level::trace);
     }
 
-    std::vector<spdlog::sink_ptr> sinks(2);
+    std::vector<spdlog::sink_ptr> sinks;
+    sinks.reserve(2);
     sinks.push_back(stdout_sink);
     sinks.push_back(file_sink);
     auto logger = std::make_shared<spdlog::logger>(logger_name,
