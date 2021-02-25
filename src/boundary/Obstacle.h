@@ -25,7 +25,9 @@ class Obstacle {
 public:
     Obstacle(real x1, real x2, real y1, real y2, real z1, real z2);
     Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level);
+#ifndef BENCHMARKING
     Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level, std::shared_ptr<spdlog::logger> logger, const Domain &domain);
+#endif
     ~Obstacle();
 
     size_t* getObstacleList() { return m_obstacleList; }
