@@ -6,7 +6,7 @@
 
 #include "Domain.h"
 
-Domain *Domain::single = nullptr; //Singleton
+Domain *Domain::single = nullptr;  // Singleton
 
 Domain::Domain() {
 #ifndef BENCHMARKING
@@ -41,6 +41,24 @@ Domain::Domain() {
     calc_MG_values();
 #ifndef BENCHMARKING
     printDetails();
+#endif
+}
+
+Domain::Domain(real x1, real x2, real y1, real y2, real z1, real z2,
+        real X1, real X2, real Y1, real Y2, real Z1, real Z2,
+        size_t nx, size_t ny, size_t nz, int levels) :
+    m_nx(new size_t[m_levels+1]), m_ny(new size_t[m_levels+1]), m_nz(new size_t[m_levels+1]),
+    m_levels(levels),
+    m_x1(x1), m_x2(x2), m_y1(y1), m_y2(y2), m_z1(z1), m_z2(z2),
+    m_X1(X1), m_X2(X2), m_Y1(Y1), m_Y2(Y2), m_Z1(Z1), m_Z2(Z2) {
+    single = this;
+    m_nx[0] = nx + 2;
+    m_ny[0] = ny + 2;
+    m_nz[0] = nz + 2;
+
+    calc_MG_values();
+#ifndef BENCHMARKING
+    // printDetails();
 #endif
 }
 

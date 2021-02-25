@@ -7,23 +7,23 @@
 #include "Obstacle.h"
 
 
-Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
+Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) :
+    m_domain(*(Domain::getInstance())) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    Domain *domain = Domain::getInstance();
 
-    real dx = domain->get_dx();
-    real dy = domain->get_dy();
-    real dz = domain->get_dz();
+    real dx = m_domain.get_dx();
+    real dy = m_domain.get_dy();
+    real dz = m_domain.get_dz();
 
     real rdx = 1. / dx;
     real rdy = 1. / dy;
     real rdz = 1. / dz;
 
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_Y1();
-    real Z1 = domain->get_Z1();
+    real X1 = m_domain.get_X1();
+    real Y1 = m_domain.get_Y1();
+    real Z1 = m_domain.get_Z1();
 
     real ox1 = matchGrid(x1, dx, X1);
     real ox2 = matchGrid(x2, dx, X1);
@@ -54,7 +54,17 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2) {
 }
 
 
-Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level) {
+Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level, std::shared_ptr<spdlog::logger> logger, const Domain &domain) :
+    m_i1(coords_i1), m_j1(coords_j1), m_k1(coords_k1),
+    m_i2(coords_i2), m_j2(coords_j2), m_k2(coords_k2),
+    m_level(level),
+    m_domain(domain), m_logger(logger) {
+    init(m_level);
+}
+
+
+Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level) :
+    m_domain(*(Domain::getInstance())) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -78,9 +88,8 @@ Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t 
 /// \param  level Multigrid level
 // ***************************************************************************************
 void Obstacle::init(size_t level) {
-    Domain *domain = Domain::getInstance();
-    size_t Nx = domain->get_Nx(level);
-    size_t Ny = domain->get_Ny(level);
+    size_t Nx = m_domain.get_Nx(level);
+    size_t Ny = m_domain.get_Ny(level);
 
     size_t strideX = getStrideX();
     size_t strideY = getStrideY();
@@ -248,9 +257,8 @@ void Obstacle::print() {
 // ***************************************************************************************
 void Obstacle::printDetails(){
 #ifndef BENCHMARKING
-    Domain *domain = Domain::getInstance();
-    size_t Nx = domain->get_Nx(m_level);
-    size_t Ny = domain->get_Ny(m_level);
+    size_t Nx = m_domain.get_Nx(m_level);
+    size_t Ny = m_domain.get_Ny(m_level);
     size_t strideX = getStrideX();
     size_t strideY = getStrideY();
     size_t strideZ = getStrideZ();
@@ -384,7 +392,7 @@ void Obstacle::control() {
 /// \param  k z-coordinate
 /// \return  bool true if yes false if no
 // ***************************************************************************************
-bool Obstacle::isObstacleCell(size_t i, size_t j, size_t k) {
+bool Obstacle::isObstacleCell(size_t i, size_t j, size_t k) const {
     size_t i2 = getCoordinates_i2();
     size_t j2 = getCoordinates_j2();
     size_t k2 = getCoordinates_k2();
@@ -409,27 +417,26 @@ real Obstacle::matchGrid(double obstacleCoordinate, real spacing, real startCoor
 /// \param  level Multigrid level
 // ***************************************************************************************
 void Obstacle::removeCellsAtBoundary(size_t level) {
-    Domain *domain = Domain::getInstance();
     size_t i2 = getCoordinates_i2();
     size_t j2 = getCoordinates_j2();
     size_t k2 = getCoordinates_k2();
 
-    if (m_k1 <= domain->get_index_z1(level)){
+    if (m_k1 <= m_domain.get_index_z1(level)){
         m_size_obstacleFront = 0;
     }
-    if (k2 >= domain->get_index_z2(level)){
+    if (k2 >= m_domain.get_index_z2(level)){
         m_size_obstacleBack = 0;
     }
-    if (m_j1 <= domain->get_index_y1(level)){
+    if (m_j1 <= m_domain.get_index_y1(level)){
         m_size_obstacleBottom = 0;
     }
-    if (j2 >= domain->get_index_y2(level)){
+    if (j2 >= m_domain.get_index_y2(level)){
         m_size_obstacleTop = 0;
     }
-    if (m_i1 <= domain->get_index_x1(level)){
+    if (m_i1 <= m_domain.get_index_x1(level)){
         m_size_obstacleLeft = 0;
     }
-    if (i2 >= domain->get_index_x2(level)){
+    if (i2 >= m_domain.get_index_x2(level)){
         m_size_obstacleRight = 0;
     }
 }

@@ -7,6 +7,7 @@
 #ifndef ARTSS_UTILITY_UTILITY_H_
 #define ARTSS_UTILITY_UTILITY_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 #include "GlobalMacrosTypes.h"
@@ -29,6 +30,7 @@ namespace Utility {
 
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
+    std::shared_ptr<spdlog::logger> create_logger(std::string loggerName, std::string log_level, std::string log_file);
 #endif
 } // namespace Utility
 

@@ -118,13 +118,9 @@ std::vector<std::string> split(const char *text, char delimiter) {
 //          BENCHMARKING is not enabled
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
-std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
+std::shared_ptr<spdlog::logger> create_logger(std::string logger_name, std::string log_level, std::string log_file) {
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
-
-    auto params = Parameters::getInstance();
-    std::string log_level = params->get("logging/level");
-    std::string log_file = params->get("logging/file");
 
     if (!stdout_sink) {
         stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -150,6 +146,13 @@ std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
     logger->set_level(spdlog::level::trace);
 
     return logger;
+}
+
+std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
+    auto params = Parameters::getInstance();
+    std::string log_level = params->get("logging/level");
+    std::string log_file = params->get("logging/file");
+    return create_logger(logger_name, log_level, log_file);
 }
 #endif
 }  // namespace Utility

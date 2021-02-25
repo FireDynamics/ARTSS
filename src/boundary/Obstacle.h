@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <vector>
+#include <spdlog/spdlog.h>
 
 #include "../utility/tinyxml2.h"
 #include "BoundaryData.h"
@@ -21,6 +22,7 @@ class Obstacle {
 public:
     Obstacle(real x1, real x2, real y1, real y2, real z1, real z2);
     Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level);
+    Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level, std::shared_ptr<spdlog::logger> logger, const Domain &domain);
     ~Obstacle();
 
     size_t* getObstacleList() { return m_obstacleList; }
@@ -40,25 +42,26 @@ public:
     size_t getSize_obstacleLeft() { return m_size_obstacleLeft; }
     size_t getSize_obstacleRight() { return m_size_obstacleRight; }
 
-    bool isObstacleCell(size_t i, size_t j, size_t k);
+    bool isObstacleCell(size_t i, size_t j, size_t k) const;
 
     void print();
 
-    size_t getCoordinates_i1() { return m_i1; }
-    size_t getCoordinates_j1() { return m_j1; }
-    size_t getCoordinates_k1() { return m_k1; }
-    size_t getCoordinates_i2() { return m_i2; }
-    size_t getCoordinates_j2() { return m_j2; }
-    size_t getCoordinates_k2() { return m_k2; }
+    size_t getCoordinates_i1() const { return m_i1; }
+    size_t getCoordinates_j1() const { return m_j1; }
+    size_t getCoordinates_k1() const { return m_k1; }
+    size_t getCoordinates_i2() const { return m_i2; }
+    size_t getCoordinates_j2() const { return m_j2; }
+    size_t getCoordinates_k2() const { return m_k2; }
 
-    size_t getStrideX() { return m_i2 - m_i1 + 1; }
-    size_t getStrideY() { return m_j2 - m_j1 + 1; }
-    size_t getStrideZ() { return m_k2 - m_k1 + 1; }
+    size_t getStrideX() const { return m_i2 - m_i1 + 1; }
+    size_t getStrideY() const { return m_j2 - m_j1 + 1; }
+    size_t getStrideZ() const { return m_k2 - m_k1 + 1; }
 
 private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+    const Domain &m_domain;
     size_t m_i1, m_j1, m_k1;
     size_t m_i2, m_j2, m_k2;
 

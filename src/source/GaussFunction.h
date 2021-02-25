@@ -10,15 +10,27 @@
 #include <math.h>
 
 #include "../field/Field.h"
+#include "../boundary/Obstacle.h"
 #include "../interfaces/ISourceFunction.h"
 
 class GaussFunction: public ISourceFunction {
-public:
-    GaussFunction(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z, real tau);
+ public:
+    GaussFunction(real HRR, real cp,
+            real x0, real y0, real z0,
+            real sigma_x, real sigma_y, real sigma_z, real tau);
+
     ~GaussFunction();
+
     void update_source(Field *out, real t_cur) override;
-private:
-    void create_spatial_values(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z);
+
+    static bool test_obstacle_blocks(int i0, int j0, int k0,
+            int i, int j, int k,
+            const Obstacle &obst);
+    void create_spatial_values(real HRR, real cp,
+            real x0, real y0, real z0,
+            real sigma_x, real sigma_y, real sigma_z);
+
+ private:
     Field *m_field_spatial_values;
     real m_tau;
     real get_time_value(real t_cur);
