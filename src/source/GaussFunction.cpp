@@ -18,6 +18,8 @@ real constexpr det3(real a1, real a2, real a3,
         + c1 * (a2 * b3 - a3 * b2);
 }
 
+real constexpr eps = 10E-6;
+
 constexpr int cuboid_points[8][3] = {
     {0, 2, 4},
     {1, 2, 4},
@@ -32,8 +34,8 @@ constexpr int cuboid_points[8][3] = {
 constexpr int surface_points[6][3] = {
     {0, 1, 4},
     {1, 2, 5},
-    {2, 3, 6},
-    {3, 4, 7},
+    {3, 2, 6},
+    {1, 3, 7},
     {0, 1, 3},
     {4, 5, 7},
 };
@@ -96,7 +98,7 @@ void GaussFunction::create_spatial_values(real HRR, real cp,
     real dy = domain->get_dy(level);
     real dz = domain->get_dz(level);
 
-    //get parameters for Gaussian
+    // get parameters for Gaussian
     real sigma_x_2 = 2 * sigma_x * sigma_x;
     real r_sigma_x_2 = 1. / sigma_x_2;
     real sigma_y_2 = 2 * sigma_y * sigma_y;
@@ -104,12 +106,12 @@ void GaussFunction::create_spatial_values(real HRR, real cp,
     real sigma_z_2 = 2 * sigma_z * sigma_z;
     real r_sigma_z_2 = 1. / sigma_z_2;
 
-    //set Gaussian to cells
+    // set Gaussian to cells
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
 
     const auto multigrid = boundary->getMultigrid();
-    const auto obst_size = multigrid->getSize_obstacleList();
+    const auto obst_size = multigrid->getSize_NumberOfObstacles();
     const auto obst_list = multigrid->getObstacles();
     auto bsize_i = boundary->getSize_innerList();
 
@@ -120,16 +122,16 @@ void GaussFunction::create_spatial_values(real HRR, real cp,
     real V = 0.;
     for (size_t l = 0; l < bsize_i; ++l) {
         const size_t idx = d_iList[l];
-        size_t k = getCoordinateK(idx, Nx, Ny);
-        size_t j = getCoordinateJ(idx, Nx, Ny, k);
-        size_t i = getCoordinateI(idx, Nx, Ny, j, k);
+        int k = getCoordinateK(idx, Nx, Ny);
+        int j = getCoordinateJ(idx, Nx, Ny, k);
+        int i = getCoordinateI(idx, Nx, Ny, j, k);
 
-        auto di = (i - i0);
-        auto dj = (j - j0);
-        auto dk = (k - k0);
+        real di = (i0 - i);
+        real dj = (j0 - j);
+        real dk = (k0 - k);
 
         bool blocked = false;
-        for (size_t obst_id=0; obst_id < obst_size; ++obst_id) {
+        for (auto obst_id=0; obst_id < obst_size; ++obst_id) {
             auto obst = obst_list[level][obst_id];
             auto point_i1 = obst->getCoordinates_i1();
             auto point_i2 = obst->getCoordinates_i2();
@@ -137,12 +139,12 @@ void GaussFunction::create_spatial_values(real HRR, real cp,
             auto point_j2 = obst->getCoordinates_j2();
             auto point_k1 = obst->getCoordinates_k1();
             auto point_k2 = obst->getCoordinates_k2();
-            size_t indeces[6]  = {point_i1, point_i2,
-                                point_j1, point_j2,
-                                point_k1, point_k2};
+            real indeces[6]  = {static_cast<real>(point_i1), static_cast<real>(point_i2),
+                                static_cast<real>(point_j1), static_cast<real>(point_j2),
+                                static_cast<real>(point_k1), static_cast<real>(point_k2)};
 
             for (int surface_id=0; surface_id < 6; ++surface_id) {
-                auto s = surface_points[i];
+                auto s = surface_points[surface_id];
                 auto p1 = cuboid_points[s[0]];
                 auto p2 = cuboid_points[s[1]];
                 auto p3 = cuboid_points[s[2]];
@@ -164,14 +166,14 @@ void GaussFunction::create_spatial_values(real HRR, real cp,
                     -di, -dj, -dk);
 
                 // okay det is small, its never gonna meet
-                if (fabs(det_A) < 10E-10) {
+                if (fabs(det_A) < eps) {
                     continue;
                 }
 
                 // rhs of les (c - p1)
-                auto ddi1 = di - p1[0];
-                auto ddj1 = dj - p1[1];
-                auto ddk1 = dk - p1[2];
+                auto ddi1 = static_cast<real>(i) - indeces[p1[0]];
+                auto ddj1 = static_cast<real>(j) - indeces[p1[1]];
+                auto ddk1 = static_cast<real>(k) - indeces[p1[2]];
 
                 auto det_Ax = det3(ddi1, ddj1, ddk1,
                     svi2, svj2, svk2,
@@ -183,13 +185,23 @@ void GaussFunction::create_spatial_values(real HRR, real cp,
                     svi2, svj2, svk2,
                     ddi1, ddj1, ddk1);
 
-                auto sx = det_Ax / det_A;  // sx : l
-                auto sy = det_Ay / det_A;  // sy : m
-                auto sz = det_Az / det_A;  // sz : n
+                auto sx = - det_Ax / det_A;  // sx : l
+                auto sy = - det_Ay / det_A;  // sy : m
+                auto sz = - det_Az / det_A;  // sz : n
 
-                blocked = sx > 0 && sx < 1.0
-                        && sy > 0.0 && sy < 1.0
-                        && sz > 0.0 && sz < 1.0;
+                blocked = sx > -eps && sx < 1.0
+                        && sy > -eps && sy < 1.0
+                        && sz > -eps && sz < 1.0;
+                
+                // std::cout << svi1 << "," << svi2 << "," << indeces[p1[0]] << std::endl;
+                // std::cout << svj1 << "," << svj2 << "," << indeces[p1[1]] << std::endl;
+                // std::cout << svk1 << "," << svk2 << "," << indeces[p1[2]] << std::endl;
+
+                // std::cout << surface_id << std::endl;
+
+                // std::cout << sx << std::endl;
+                // std::cout << sy << std::endl;
+                // std::cout << sz << std::endl;
 
                 if (blocked) {
                     break;
@@ -206,8 +218,10 @@ void GaussFunction::create_spatial_values(real HRR, real cp,
                                 + r_sigma_z_2 * (z_k * z_k)));
 
         if (blocked) {
+            // std::cout << "XXX" << i << "," << j << "," << k << ",0" << std::endl;
             d_out[idx] = 0.0;
         } else {
+            // std::cout << "XXX" << i << "," << j << "," << k << ",1" << std::endl;
             d_out[idx] = expr;
         }
 

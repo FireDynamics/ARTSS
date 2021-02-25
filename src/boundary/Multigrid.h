@@ -27,6 +27,7 @@ public:
     size_t getSize_innerList(size_t level = 0);
     size_t getSize_boundaryList(size_t level = 0);
     size_t getSize_obstacleList() const;
+    size_t getSize_NumberOfObstacles() const { return m_numberOfObstacles; }
     size_t *get_obstacleList();
 
     size_t* getInnerList_level_joined() { return m_data_MG_iList_level_joined; };
