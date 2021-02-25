@@ -9,7 +9,10 @@
 
 #include <cmath>
 #include <vector>
+
+#ifndef BENCHMARKING
 #include <spdlog/spdlog.h>
+#endif
 
 #include "../utility/tinyxml2.h"
 #include "BoundaryData.h"
