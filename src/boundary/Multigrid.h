@@ -14,7 +14,6 @@
 #include "../field/Field.h"
 #include "../utility/Utility.h"
 #include "BoundaryDataController.h"
-#include <vector>
 
 class Multigrid {
 public:
@@ -49,7 +48,6 @@ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    std::vector<BoundaryData*> m_boundaryData;
     size_t m_levels;
     // all surfaces divided by level
     Surface*** m_MG_surfaceList; //m_MG_surfaceList[level][surfaceID]

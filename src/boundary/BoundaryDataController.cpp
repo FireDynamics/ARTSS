@@ -103,6 +103,7 @@ void BoundaryDataController::applyBoundaryConditionObstacle(real *data, size_t *
 
 std::vector<FieldType> BoundaryDataController::get_used_fields() {
     std::vector<FieldType> v_fields;
+    v_fields.reserve(numberOfFieldTypes);
     for (size_t fieldType = 0; fieldType < numberOfFieldTypes; fieldType++) {
         if (!((BoundaryData *) *(m_boundaryData + fieldType))->isEmpty()){
             v_fields.push_back(static_cast<FieldType>(fieldType));

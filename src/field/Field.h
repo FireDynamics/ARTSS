@@ -10,6 +10,7 @@
 #include <cmath>
 #include <array>
 #include <utility>
+#include <algorithm>
 #include "../Domain.h"
 #include "../utility/GlobalMacrosTypes.h"
 
@@ -25,22 +26,25 @@ class Field {
  public:
     Field(FieldType type, real val);
     Field(FieldType type, real val, size_t level);
+    Field(FieldType type, real val, size_t level, size_t size);
 
     ~Field();
-    Field(const Field &);
 
     // getter
     FieldType get_type() { return this->m_type; }
     size_t get_level() { return this->m_level; }
 
-    void set_value(real val);
-    void copy_data(const Field &other);
+    void set_value(real val) { std::fill(data, data + m_size, val); }
+    void copy_data(const Field &other) {
+        std::copy(other.data, other.data+other.m_size, data);
+    }
     static void swap(Field *a, Field *b) { std::swap(a->data, b->data); }
 
     real *data;
 
  private:
     size_t m_level;
+    size_t m_size;
     FieldType m_type;
 };
 

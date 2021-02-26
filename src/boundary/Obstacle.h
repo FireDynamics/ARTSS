@@ -8,7 +8,6 @@
 #define ARTSS_BOUNDARY_OBSTACLE_H
 
 #include <cmath>
-#include <vector>
 
 #include "../utility/tinyxml2.h"
 #include "BoundaryData.h"
