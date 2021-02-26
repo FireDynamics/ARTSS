@@ -7,7 +7,7 @@
 #include "Multigrid.h"
 
 
-Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
+void Multigrid::init(BoundaryDataController *bdc_boundary) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -31,7 +31,7 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
     m_data_boundary_patches_joined[Patch::RIGHT] = m_data_MG_bRight_level_joined;
 }
 
-Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numberOfObstacles, Obstacle **obstacleList, BoundaryDataController *bdc_boundary, BoundaryDataController **bdc_obstacles) {
+void Multigrid::init(size_t numberOfSurfaces, Surface **surfaceList, size_t numberOfObstacles, Obstacle **obstacleList, BoundaryDataController *bdc_boundary, BoundaryDataController **bdc_obstacles) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -1048,7 +1048,7 @@ void Multigrid::removeBoundaryListsFromGPU(){
 /// \param level Multigrid level
 /// \return size_t
 // ***************************************************************************************
-size_t Multigrid::getSize_oList(size_t level) {
+size_t Multigrid::getSize_oList(size_t level) const {
     size_t size_oList = 0;
     if (m_numberOfObstacles > 0) {
         size_oList = *(m_size_MG_oList_level + level);
@@ -1596,7 +1596,7 @@ size_t Multigrid::getSize_boundaryList(size_t level) {
     return getLastIndex_bList(level) - getFirstIndex_bList(level) + 1;
 }
 
-size_t Multigrid::getSize_obstacleList() {
+size_t Multigrid::getSize_obstacleList() const {
     return getSize_oList(0);
 }
 

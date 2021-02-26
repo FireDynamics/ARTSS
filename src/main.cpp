@@ -14,6 +14,11 @@
     #include <openacc.h>
 #endif
 
+#include <iostream>
+#include "source/GaussFunction.h"
+#include "boundary/BoundaryController.h"
+
+
 int main(int argc, char **argv) {
     // Initialisation
     // Parameters
@@ -39,8 +44,9 @@ int main(int argc, char **argv) {
     // Time integration
     TimeIntegration ti(sc);
     ti.run();
+    // test();
 
     // Clean up
-    delete sc;
+    // delete sc;
     return 0;
 }
