@@ -31,8 +31,6 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 
     m_adaption = new Adaption(m_field_controller);
 #ifndef BENCHMARKING
-    m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
-
     m_solution = new Solution();
     m_analysis = new Analysis(m_solution);
     m_visual = new Visual(*m_solution);

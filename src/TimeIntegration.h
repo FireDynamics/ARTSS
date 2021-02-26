@@ -23,11 +23,11 @@
 #endif
 
 class TimeIntegration {
-public:
+ public:
     explicit TimeIntegration(SolverController *sc);
     void run();
 
-private:
+ private:
     real m_dt;
     real m_t_end;
     real m_t_cur;
@@ -40,7 +40,6 @@ private:
     Solution *m_solution;
     Analysis *m_analysis;
     std::shared_ptr<spdlog::logger> m_logger;
-    bool m_has_analytical_solution;
 #endif
 };
 
