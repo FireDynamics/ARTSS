@@ -8,7 +8,6 @@
 #define ARTSS_BOUNDARY_OBSTACLE_H
 
 #include <cmath>
-#include <vector>
 
 #ifndef BENCHMARKING
 #include <spdlog/spdlog.h>

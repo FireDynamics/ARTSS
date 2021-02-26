@@ -8,7 +8,6 @@
 #define ARTSS_BOUNDARY_BOUNDARY_H_
 
 
-#include <vector>
 #include "BoundaryData.h"
 #include "Obstacle.h"
 #include "../utility/Utility.h"
