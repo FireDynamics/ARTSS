@@ -66,16 +66,14 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
                                     exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
             outy->data[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
@@ -92,10 +90,9 @@ namespace Functions {
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
                                     exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
             outy->data[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
@@ -139,16 +136,14 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] =
                     -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
  + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
@@ -158,10 +153,9 @@ namespace Functions {
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] =
                     -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
  + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
@@ -201,26 +195,23 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
                                     exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
         }
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
                                     exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
         }
@@ -257,26 +248,23 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
                                     exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
         }
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
                                     exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
         }
@@ -313,26 +301,23 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
                                     exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
         }
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
                                     exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
         }
@@ -413,15 +398,14 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
-        size_t coords_i, coords_j;
+        size_t coords_k, coords_i, coords_j;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] = exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
             outy->data[idx] = -exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
             outz->data[idx] = 0.;
@@ -432,9 +416,9 @@ namespace Functions {
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             outx->data[idx] = exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
             outy->data[idx] = -exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
             outz->data[idx] = 0.;
@@ -478,15 +462,14 @@ namespace Functions {
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
 
-        std::vector<size_t> coords;
-        size_t coords_i, coords_j;
+        size_t coords_k, coords_i, coords_j;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             out->data[idx] =
                     rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
         }
@@ -494,9 +477,9 @@ namespace Functions {
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             out->data[idx] =
                     rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
         }
@@ -579,26 +562,23 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
 
         //inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             out->data[idx] = A * exp(-kpinu * t) * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
                              sin(l * M_PI * zk(coords_k, Z1, dz));
         }
         //boundary
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             out->data[idx] = A * exp(-kpinu * t) * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
                              sin(l * M_PI * zk(coords_k, Z1, dz));
         }
@@ -636,7 +616,6 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
 
         if (Nz != 3) {
@@ -645,10 +624,9 @@ namespace Functions {
             //inner cells
             for (size_t i = 0; i < size_iList; i++) {
                 size_t idx = iList[i];
-                coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-                coords_i = coords[0];
-                coords_j = coords[1];
-                coords_k = coords[2];
+                coords_k = getCoordinateK(idx, Nx, Ny);
+                coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+                coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
                 outx->data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
                 outy->data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
@@ -657,10 +635,9 @@ namespace Functions {
             //boundary
             for (size_t i = 0; i < size_bList; i++) {
                 size_t idx = bList[i];
-                coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-                coords_i = coords[0];
-                coords_j = coords[1];
-                coords_k = coords[2];
+                coords_k = getCoordinateK(idx, Nx, Ny);
+                coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+                coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
                 outx->data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
                 outy->data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
@@ -673,9 +650,9 @@ namespace Functions {
             //inner cells
             for (size_t i = 0; i < size_iList; i++) {
                 size_t idx = iList[i];
-                coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-                coords_i = coords[0];
-                coords_j = coords[1];
+                coords_k = getCoordinateK(idx, Nx, Ny);
+                coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+                coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
                 outx->data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
                 outy->data[idx] = -exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
@@ -684,9 +661,9 @@ namespace Functions {
             //boundary
             for (size_t i = 0; i < size_bList; i++) {
                 size_t idx = bList[i];
-                coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-                coords_i = coords[0];
-                coords_j = coords[1];
+                coords_k = getCoordinateK(idx, Nx, Ny);
+                coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+                coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
                 outx->data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
                 outy->data[idx] = -exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
@@ -725,26 +702,24 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
             out->data[idx] = -rdkpi * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
                              sin(l * M_PI * zk(coords_k, Z1, dz));
         }
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
+
             out->data[idx] = -rdkpi * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
                              sin(l * M_PI * zk(coords_k, Z1, dz));
         }
@@ -785,16 +760,14 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
             real xshift2 = ((xi(coords_i, X1, dx) - xshift) / u_lin - t) * ((xi(coords_i, X1, dx) - xshift) / u_lin - t);
             real yshift2 = ((yj(coords_j, Y1, dy) - yshift) / v_lin - t) * ((yj(coords_j, Y1, dy) - yshift) / v_lin - t);
@@ -806,10 +779,9 @@ namespace Functions {
         // boundary
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
             real xshift2 = ((xi(coords_i, X1, dx) - xshift) / u_lin - t) * ((xi(coords_i, X1, dx) - xshift) / u_lin - t);
             real yshift2 = ((yj(coords_j, Y1, dy) - yshift) / v_lin - t) * ((yj(coords_j, Y1, dy) - yshift) / v_lin - t);
@@ -898,7 +870,6 @@ namespace Functions {
         size_t size_bList = boundary->getSize_boundaryList();
         size_t *oList = boundary->get_obstacleList();
         size_t size_oList = boundary->getSize_obstacleList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
         real x, y, z;
 
@@ -907,10 +878,9 @@ namespace Functions {
             //inner cells
             for (size_t i = 0; i < size_iList; i++) {
                 size_t idx = iList[i];
-                coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-                coords_i = coords[0];
-                coords_j = coords[1];
-                coords_k = coords[2];
+                coords_k = getCoordinateK(idx, Nx, Ny);
+                coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+                coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
@@ -935,10 +905,9 @@ namespace Functions {
             //boundary
             for (size_t i = 0; i < size_bList; i++) {
                 size_t idx = bList[i];
-                coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-                coords_i = coords[0];
-                coords_j = coords[1];
-                coords_k = coords[2];
+                coords_k = getCoordinateK(idx, Nx, Ny);
+                coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+                coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
@@ -963,10 +932,9 @@ namespace Functions {
             //obstacles
             for (size_t i = 0; i < size_oList; i++) {
                 size_t idx = oList[i];
-                coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-                coords_i = coords[0];
-                coords_j = coords[1];
-                coords_k = coords[2];
+                coords_k = getCoordinateK(idx, Nx, Ny);
+                coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+                coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
@@ -1027,16 +995,14 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
 
 //inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
             if ((start_x <= xi(coords_i, X1, dx) && xi(coords_i, X1, dx) <= end_x) &&
                 (start_y <= yj(coords_j, Y1, dy) && yj(coords_j, Y1, dy) <= end_y) &&
@@ -1050,10 +1016,9 @@ namespace Functions {
 //boundary
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
             if ((start_x <= xi(coords_i, X1, dx) && xi(coords_i, X1, dx) <= end_x) &&
                 (start_y <= yj(coords_j, Y1, dy) && yj(coords_j, Y1, dy) <= end_y) &&
@@ -1094,15 +1059,15 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
-        size_t coords_i, coords_j;
+        size_t coords_k, coords_i, coords_j;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
+
             outx->data[idx] = 1. - A * cos(xi(coords_i, X1, dx) - t) * sin(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
             outy->data[idx] = 1. + A * sin(xi(coords_i, X1, dx) - t) * cos(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
             outz->data[idx] = 0.;
@@ -1113,9 +1078,10 @@ namespace Functions {
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
+
             outx->data[idx] = 1. - A * cos(xi(coords_i, X1, dx) - t) * sin(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
             outy->data[idx] = 1. + A * sin(xi(coords_i, X1, dx) - t) * cos(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
             outz->data[idx] = 0.;
@@ -1211,26 +1177,25 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
+
             out->data[idx] =
                     sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
-            coords_k = coords[2];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
+
             out->data[idx] =
                     sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
@@ -1302,15 +1267,15 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
-        size_t coords_i, coords_j;
+        size_t coords_k, coords_i, coords_j;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
+
             outx->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             outy->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
@@ -1323,9 +1288,10 @@ namespace Functions {
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
+
             outx->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             outy->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
@@ -1368,15 +1334,15 @@ namespace Functions {
         size_t size_iList = boundary->getSize_innerList();
         size_t *bList = boundary->get_boundaryList_level_joined();
         size_t size_bList = boundary->getSize_boundaryList();
-        std::vector<size_t> coords;
-        size_t coords_i, coords_j;
+        size_t coords_k, coords_i, coords_j;
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
             size_t idx = iList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
+
             outx->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             outy->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
@@ -1389,9 +1355,10 @@ namespace Functions {
         // boundary cells
         for (size_t i = 0; i < size_bList; i++) {
             size_t idx = bList[i];
-            coords = Utility::coordinateFromLinearIndex(idx, Nx, Ny);
-            coords_i = coords[0];
-            coords_j = coords[1];
+            coords_k = getCoordinateK(idx, Nx, Ny);
+            coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
+            coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
+
             outx->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             outy->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *

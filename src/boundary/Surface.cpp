@@ -74,10 +74,9 @@ Surface::Surface(size_t surfaceID, size_t startIndex, size_t strideX, size_t str
     Domain* domain = Domain::getInstance();
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
-    std::vector<size_t> coords = Utility::coordinateFromLinearIndex(startIndex, Nx, Ny);
-    m_i1 = coords[0];
-    m_j1 = coords[1];
-    m_k1 = coords[2];
+    m_k1 = getCoordinateK(startIndex, Nx, Ny);
+    m_j1 = getCoordinateJ(startIndex, Nx, Ny, m_k1);
+    m_i1 = getCoordinateI(startIndex, Nx, Ny, m_j1, m_k1);
 
     init(Nx, Ny);
 #ifndef BENCHMARKING
