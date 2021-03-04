@@ -179,23 +179,9 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             auto s111 = r101 + s * (r111 - r101);
 
             auto tmp = s110 + t * (s111 - s110); // row-major
-            std::vector<real> values = {d_000, d_001, d_010, d_011, d_100, d_101, d_110, d_111};
-            std::vector<long int> coord_i = {i0, i0, i0, i0, i1, i1, i1, i1};
-            std::vector<long int> coord_j = {j0, j0, j1, j1, j0, j0, j1, j1};
-            std::vector<long int> coord_k = {k0, k1, k0, k1, k0, k1, k0, k1};
-            for (long unsigned int v = 0; v < values.size(); v++){
-                if (values[v] == 11111.){
-                    m_logger->warn("in sladvect, cell ({}|{}|{}) was used with original cell ({}|{}|{})", coord_i[v], coord_j[v], coord_k[v], i, j, k);
-                }
-            }
-            //if (d_000 == d_001 && d_000 == d_010 && d_000 == d_011 && d_000 == d_100 && d_000 == d_101 && d_000 == d_110 && d_000 == d_111) {
-            //    tmp = d_000;
-            //}
             d_out[idx] = tmp;
         }
-        Utility::log_minimum(out, "in temperature advect before boundary", "advect");
         boundary->applyBoundary(d_out, type, sync);
-        Utility::log_minimum(out, "in temperature advect after boundary", "advect");
 
         if (sync) {
 #pragma acc wait

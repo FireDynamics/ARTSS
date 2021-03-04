@@ -7,6 +7,7 @@
 #ifndef ARTSS_SOLVER_NSTEMPTURBSOLVER_H_
 #define ARTSS_SOLVER_NSTEMPTURBSOLVER_H_
 
+#include "../field/FieldController.h"
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IAdvection.h"
 #include "../interfaces/IDiffusion.h"
@@ -14,7 +15,6 @@
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
-#include "../visualisation/Visual.h"
 #include "../utility/Utility.h"
 
 class NSTempTurbSolver : public ISolver {
