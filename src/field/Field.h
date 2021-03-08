@@ -31,8 +31,14 @@ class Field {
     ~Field();
 
     // getter
-    FieldType get_type() { return this->m_type; }
-    size_t get_level() { return this->m_level; }
+    FieldType const get_type() { return m_type; }
+    return_ptr const get_data() { return data; }
+    read_ptr const get_data_ro() { return data; }
+    size_t const get_level() { return m_level; }
+    size_t const get_size() { return m_size; }
+
+    // setter
+    real& operator[](size_t i) { return data[i]; }
 
     void set_value(real val) { std::fill(data, data + m_size, val); }
     void copy_data(const Field &other) {
@@ -45,6 +51,7 @@ class Field {
  private:
     size_t m_level;
     size_t m_size;
+
     FieldType m_type;
 };
 
