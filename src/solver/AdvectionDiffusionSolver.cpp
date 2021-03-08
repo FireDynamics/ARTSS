@@ -85,9 +85,9 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse ...");
 #endif
-            dif->diffuse(u, u0, u_tmp, nu, sync);
-            dif->diffuse(v, v0, v_tmp, nu, sync);
-            dif->diffuse(w, w0, w_tmp, nu, sync);
+            dif->diffuse(u, *u0, *u_tmp, *u_tmp, *v_tmp, *w_tmp, nu, sync);
+            dif->diffuse(v, *v0, *v_tmp, *u_tmp, *v_tmp, *w_tmp, nu, sync);
+            dif->diffuse(w, *w0, *w_tmp, *u_tmp, *v_tmp, *w_tmp, nu, sync);
         }
 
 // if sync kernel launching, wait for kernel to be finished before starting next kernel launch

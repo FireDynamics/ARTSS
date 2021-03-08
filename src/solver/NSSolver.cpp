@@ -111,9 +111,9 @@ void NSSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse ...");
 #endif
-            dif_vel->diffuse(u, u0, u_tmp, nu, sync);
-            dif_vel->diffuse(v, v0, v_tmp, nu, sync);
-            dif_vel->diffuse(w, w0, w_tmp, nu, sync);
+            dif_vel->diffuse(u, *u0, *u_tmp, *u_tmp, *v_tmp, *w_tmp, nu, sync);
+            dif_vel->diffuse(v, *v0, *v_tmp, *u_tmp, *v_tmp, *w_tmp, nu, sync);
+            dif_vel->diffuse(w, *w0, *w_tmp, *u_tmp, *v_tmp, *w_tmp, nu, sync);
 
             // Couple data to prepare for adding source
             FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);

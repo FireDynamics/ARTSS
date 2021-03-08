@@ -37,15 +37,17 @@ JacobiDiffuse::JacobiDiffuse() {
 /// \param  D     diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
+void JacobiDiffuse::diffuse(Field *out, const Field &in, const Field &b,
+    const Field &u, const Field &v, const Field &w,
+    real D, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto bsize = domain->get_size(out->get_level());
     FieldType type = out->get_type();
 
     auto d_out = out->data;
-    auto d_in = in->data;
-    auto d_b = b->data;
+    auto d_in = in.data;
+    auto d_b = b.data;
 
     auto boundary = BoundaryController::getInstance();
 
@@ -151,16 +153,18 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 /// \param  EV      turbulent diffusion coefficient (eddy viscosity)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, const Field *EV, bool sync) {
+void JacobiDiffuse::diffuse(Field *out, const Field &in, const Field &b,
+            const Field &u, const Field &v, const Field &w,
+            real D, const Field &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto bsize = domain->get_size(out->get_level());
     FieldType type = out->get_type();
 
     auto d_out = out->data;
-    auto d_in = in->data;
-    auto d_b = b->data;
-    auto d_EV = EV->data;
+    auto d_in = in.data;
+    auto d_b = b.data;
+    auto d_EV = EV.data;
 
     auto boundary = BoundaryController::getInstance();
 
@@ -272,7 +276,7 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 /// \param  w   weight (1. - diffusion, 2./3. - multigrid)
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, const real alphaX, const real alphaY, const real alphaZ, const real rbeta, const real dsign, const real w, bool sync) {
+void JacobiDiffuse::JacobiStep(Field *out, const Field &in, const Field &b, real alphaX, real alphaY, real alphaZ, real rbeta, real dsign, real w, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
@@ -281,8 +285,8 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
     auto bsize = domain->get_size(out->get_level());
 
     auto d_out = out->data;
-    auto d_in = in->data;
-    auto d_b = b->data;
+    auto d_in = in.data;
+    auto d_b = b.data;
 
     auto boundary = BoundaryController::getInstance();
 
@@ -321,7 +325,7 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
 /// \param  w   weight (1. - diffusion, 2./3. - multigrid)
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const Field *b, const real alphaX, const real alphaY, const real alphaZ, const real beta, const real dsign, const real w, bool sync) {
+void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field &in, const Field &b, real alphaX, real alphaY, real alphaZ, real beta, real dsign, real w, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(level); //due to unnecessary parameter passing of *this
@@ -330,8 +334,8 @@ void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const 
     auto bsize = domain->get_size(out->get_level());
 
     auto d_out = out->data;
-    auto d_in = in->data;
-    auto d_b = b->data;
+    auto d_in = in.data;
+    auto d_b = b.data;
 
     auto boundary = BoundaryController::getInstance();
 
@@ -366,7 +370,7 @@ void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const 
 /// \param  dt    time step
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, const real dsign, const real w, const real D, const Field *EV, const real dt, bool sync) {
+void JacobiDiffuse::JacobiStep(Field *out, const Field &in, const Field &b, real dsign, real w, real D, const Field &EV, real dt, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
@@ -385,9 +389,9 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
     real aX, aY, aZ, bb, rb; //multipliers calculated
 
     auto d_out = out->data;
-    auto d_in = in->data;
-    auto d_b = b->data;
-    auto d_EV = EV->data;
+    auto d_in = in.data;
+    auto d_b = b.data;
+    auto d_EV = EV.data;
 
     auto boundary = BoundaryController::getInstance();
 

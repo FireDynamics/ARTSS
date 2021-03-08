@@ -46,19 +46,21 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
 /// \param  D     diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
+void ColoredGaussSeidelDiffuse::diffuse(Field* out, const Field &in, const Field &b,
+            const Field &u, const Field &v, const Field &w,
+            real D, bool sync) {
     auto domain = Domain::getInstance();
     // local parameters for GPU
     auto bsize = domain->get_size(out->get_level());
     FieldType type = out->get_type();
 
     auto d_out = out->data;
-    auto d_b = b->data;
+    auto d_b = b.data;
 
     auto boundary = BoundaryController::getInstance();
 
-  auto bsize_i = boundary->getSize_innerList();
-  auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->getSize_innerList();
+    auto bsize_b = boundary->getSize_boundaryList();
 
     size_t* d_iList = boundary->get_innerList_level_joined();
     size_t* d_bList = boundary->get_boundaryList_level_joined();
@@ -138,15 +140,17 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 /// \param  EV          eddy viscosity (nu_turb)
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // ************************************************************************
-void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, const Field *EV, bool sync) {
+void ColoredGaussSeidelDiffuse::diffuse(Field *out, const Field &in, const Field &b,
+    const Field &u, const Field &v, const Field &w,
+    real D, const Field &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local parameters for GPU
     auto bsize = domain->get_size(out->get_level());
     FieldType type = out->get_type();
 
     auto d_out  = out->data;
-    auto d_b    = b->data;
-    auto d_EV   = EV->data;
+    auto d_b    = b.data;
+    auto d_EV   = EV.data;
 
     auto boundary = BoundaryController::getInstance();
 
@@ -236,7 +240,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 /// \param  w        weight (1. - diffusion, 2./3. - multigrid)
 /// \param  sync     synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Field *b, const real alpha_x, const real alpha_y, const real alpha_z, const real beta, const real dsign, const real w, bool sync) {
+void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Field &b, const real alpha_x, const real alpha_y, const real alpha_z, const real beta, const real dsign, const real w, bool sync) {
 
     auto domain = Domain::getInstance();
     // local parameters for GPU
@@ -247,7 +251,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
     const size_t bsize = domain->get_size(out->get_level());
 
     auto d_out = out->data;
-    auto d_b = b->data;
+    auto d_b = b.data;
 
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize]) async
 {
@@ -341,7 +345,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
 /// \param  dt       time step
 /// \param  sync     synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Field *b, const real dsign, const real w, const real D, const Field *EV, const real dt, bool sync) {
+void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Field &b, const real dsign, const real w, const real D, const Field &EV, const real dt, bool sync) {
 
     auto domain = Domain::getInstance();
     // local parameters for GPU
@@ -362,8 +366,8 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
     real aX, aY, aZ, bb, rb; //multipliers calculated
 
     auto d_out  = out->data;
-    auto d_b    = b->data;
-    auto d_EV   = EV->data;
+    auto d_b    = b.data;
+    auto d_EV   = EV.data;
 
 // TODO: exclude obstacles!
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize], d_EV[:bsize]) async

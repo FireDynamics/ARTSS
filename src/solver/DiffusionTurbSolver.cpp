@@ -76,9 +76,9 @@ void DiffusionTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        dif->diffuse(u, u0, u_tmp, nu, nu_t, sync);
-        dif->diffuse(v, v0, v_tmp, nu, nu_t, sync);
-        dif->diffuse(w, w0, w_tmp, nu, nu_t, sync);
+        dif->diffuse(u, *u0, *u_tmp, *u_tmp, *v_tmp, *w_tmp, nu, *nu_t, sync);
+        dif->diffuse(v, *v0, *v_tmp, *u_tmp, *v_tmp, *w_tmp, nu, *nu_t, sync);
+        dif->diffuse(w, *w0, *w_tmp, *u_tmp, *v_tmp, *w_tmp, nu, *nu_t, sync);
     }//end data
 }
 

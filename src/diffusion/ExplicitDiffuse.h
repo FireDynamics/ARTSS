@@ -8,20 +8,43 @@
 #define ARTSS_DIFFUSION_EXPLICITDIFFUSE_H_
 
 #include "../interfaces/IDiffusion.h"
+
+#ifndef BENCHMARKING
+#include <memory>
+#include "../utility/Utility.h"
+#endif
+
+#include "../Domain.h"
 #include "../field/Field.h"
+#include "../utility/Parameters.h"
+#include "../boundary/BoundaryController.h"
 
 class ExplicitDiffuse : public IDiffusion {
-public:
+ public:
     ExplicitDiffuse();
+    // ExplicitDiffuse(real dt, const Domain &domain, const BoundaryController &boundary);
 
-    void diffuse(Field *out, Field *in, const Field *b, real D, bool sync) override;
-    void diffuse(Field *out, Field *in, const Field *b, real D, const Field *EV, bool sync) override;  // turbulent version
+    void diffuse(Field *out, const Field &in, const Field &b,
+            const Field &u, const Field &v, const Field &w,
+            real D, bool sync) override;
+    void diffuse(Field *out, const Field &in, const Field &b,
+            const Field &u, const Field &v, const Field &w,
+            real D, const Field &EV, bool sync) override;  // turbulent version
 
-    void ExplicitStep(Field *out, const Field *in, real D, bool sync = true);
-    void ExplicitStep(Field *out, const Field *in, real D, const Field *EV, bool sync = true);
+    void ExplicitStep(Field *out, const Field &in, real D, bool sync = true);
+    void ExplicitStep(Field *out, const Field &in,
+        const Field &u, const Field &v, const Field &w,
+        const Field &EV, real D, real C, bool sync);
 
-private:
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
+
     real m_dt;
+    real m_cs;
+    const Domain &m_domain;
+    BoundaryController *m_boundary;
 };
 
 #endif /* ARTSS_DIFFUSION_EXPLICITDIFFUSE_H_ */

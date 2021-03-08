@@ -154,9 +154,9 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(u, *u0, *u_tmp, *u_tmp, *v_tmp, *w_tmp, nu, *nu_t, sync);
+        dif_vel->diffuse(v, *v0, *v_tmp, *u_tmp, *v_tmp, *w_tmp, nu, *nu_t, sync);
+        dif_vel->diffuse(w, *w0, *w_tmp, *u_tmp, *v_tmp, *w_tmp, nu, *nu_t, sync);
 
         // Couple data to prepare for adding source
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
@@ -210,7 +210,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Temperature ...");
 #endif
-            dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
+            dif_temp->diffuse(T, *T0, *T_tmp, *u_tmp, *v_tmp, *w_tmp, kappa, *kappa_t, sync);
 
             // Couple temperature to prepare for adding source
             FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -221,7 +221,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Temperature ...");
 #endif
-                dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
+                dif_temp->diffuse(T, *T0, *T_tmp, *u_tmp, *v_tmp, *w_tmp, kappa, sync);
 
                 // Couple temperature to prepare for adding source
                 FieldController::couple_scalar(T, T0, T_tmp, sync);
