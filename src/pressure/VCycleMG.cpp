@@ -641,7 +641,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
             for (int i=0; i<relaxs; i++) { // fixed iteration number as in xml
-                JacobiDiffuse::JacobiStep(level, out, tmp, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
+                JacobiDiffuse::JacobiStep(level, out, *tmp, *b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync);
 
                 std::swap(tmp->data, out->data);
@@ -670,7 +670,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 #pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
         {
             for (int i=0; i<relaxs; i++) {
-                ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
+                ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, *b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync); // for res/err only Dirichlet BC
             }
         } //end data region
@@ -994,7 +994,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             real res = 10000.;
 
             while (res > tol_res && it < max_it) {
-                JacobiDiffuse::JacobiStep(level, out, tmp, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
+                JacobiDiffuse::JacobiStep(level, out, *tmp, *b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync);
 
                 sum = 0.;
@@ -1045,7 +1045,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             real res = 10000.;
 
             while (res > tol_res && it < max_it) {
-                ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
+                ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, *b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync); // for res/err only Dirichlet BC
 
                 sum = 0.;

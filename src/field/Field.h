@@ -30,8 +30,8 @@ class Field {
     Field(const Field &);
 
     // getter
-    FieldType get_type() { return this->m_type; }
-    size_t get_level() { return this->m_level; }
+    FieldType get_type() const { return this->m_type; }
+    size_t get_level() const { return this->m_level; }
 
     void set_value(real val);
     void copy_data(const Field &other);

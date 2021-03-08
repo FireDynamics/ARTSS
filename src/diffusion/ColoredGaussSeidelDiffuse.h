@@ -16,10 +16,16 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
  public:
     ColoredGaussSeidelDiffuse();
 
-    void diffuse(Field* out, Field* in, const Field* b, const real D, bool sync = true);
-    void diffuse(Field* out, Field* in, const Field* b, const real D, const Field* EV, bool sync = true);  // turbulent version
-    static void colored_gauss_seidel_step(Field* out, const Field* b, const real alpha_x, const real alpha_y, const real alpha_z, const real beta, const real dsign, const real w, bool sync = true);
-    static void colored_gauss_seidel_step(Field* out, const Field* b, const real dsign, const real w, const real D, const Field* EV, const real dt, bool sync = true); // turbulent version
+    void diffuse(Field *out, const Field &in, const Field &b,
+            const Field &u, const Field &v, const Field &w,
+            real D, bool sync) override;
+    void diffuse(Field *out, const Field &in, const Field &b,
+            const Field &u, const Field &v, const Field &w,
+            real D, const Field &EV, bool sync) override;  // turbulent version
+
+
+    static void colored_gauss_seidel_step(Field* out, const Field &b, const real alpha_x, const real alpha_y, const real alpha_z, const real beta, const real dsign, const real w, bool sync = true);
+    static void colored_gauss_seidel_step(Field* out, const Field &b, const real dsign, const real w, const real D, const Field &EV, const real dt, bool sync = true); // turbulent version
     static void colored_gauss_seidel_stencil(size_t i, size_t j, size_t k, real* out, real* b, const real alpha_x, const real alpha_y, const real alpha_z, const real dsign, const real beta, const real w, const size_t Nx, const size_t Ny);
 
  private:
