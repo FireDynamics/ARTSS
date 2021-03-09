@@ -28,20 +28,11 @@ FieldController::FieldController() {
     field_rhs = new Field(FieldType::P, 0.0);
 
     // Temperature
-    field_T = new Field(FieldType::T, 11111.0);
+    field_T = new Field(FieldType::T, 0.0);
     field_T_ambient = new Field(FieldType::T, 0);
 
     // Concentration
     field_concentration = new Field(FieldType::RHO, 0.0);
-    auto params = Parameters::getInstance();
-    std::string forceFct = params->get("solver/source/force_fct");
-    if (forceFct == SourceMethods::Buoyancy) {
-        if (params->get("solver/source/use_init_values") == XML_FALSE) {
-            real ambient_temperature_value = params->get_real("solver/source/ambient_temperature_value");
-            field_T->set_value(ambient_temperature_value);
-            field_T_ambient->set_value(ambient_temperature_value);
-        }
-    }
 
     // Forces
     field_force_x = new Field(FieldType::U, 0.0);
