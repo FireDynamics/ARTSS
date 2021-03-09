@@ -1,14 +1,15 @@
 /// \file       FieldController.cpp
-/// \brief      
+/// \brief      manages everything reagarding any field object
 /// \date       Aug 12, 2020
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
 #include "FieldController.h"
-#include "../utility/Parameters.h"
+#include <string>
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 #include "../solver/SolverSelection.h"
+#include "../utility/Parameters.h"
 
 FieldController::FieldController() {
     // Variables
@@ -74,15 +75,14 @@ FieldController::FieldController() {
     Domain *domain = Domain::getInstance();
     auto bsize = domain->get_size();
     // copyin fields
-#pragma acc enter data copyin(  d_u[:bsize], \
-                                d_v[:bsize], \
-                                d_w[:bsize], \
-                                d_p[:bsize], d_rhs[:bsize], \
-                                d_T[:bsize], d_T_a[:bsize], \
-                                d_C[:bsize], \
-                                d_f_x[:bsize], d_f_y[:bsize], d_f_z[:bsize], d_S_T[:bsize], d_S_C[:bsize], \
-                                d_nu_t[:bsize], d_kappa_t[:bsize], d_gamma_t[:bsize])
-
+#pragma acc enter data copyin(d_u[:bsize], \
+                              d_v[:bsize], \
+                              d_w[:bsize], \
+                              d_p[:bsize], d_rhs[:bsize], \
+                              d_T[:bsize], d_T_a[:bsize], \
+                              d_C[:bsize], \
+                              d_f_x[:bsize], d_f_y[:bsize], d_f_z[:bsize], d_S_T[:bsize], d_S_C[:bsize], \
+                              d_nu_t[:bsize], d_kappa_t[:bsize], d_gamma_t[:bsize])
 }
 
 // ==================================== Destructor ====================================
@@ -209,13 +209,12 @@ void FieldController::set_up_temporary_fields() {
     Domain *domain = Domain::getInstance();
     auto bsize = domain->get_size();
     // copyin fields
-#pragma acc enter data copyin(  d_u0[:bsize], d_u_tmp[:bsize], \
-                                d_v0[:bsize], d_v_tmp[:bsize], \
-                                d_w0[:bsize], d_w_tmp[:bsize], \
-                                d_p0[:bsize], \
-                                d_T0[:bsize], d_T_tmp[:bsize], \
-                                d_C0[:bsize], d_C_tmp[:bsize])
-
+#pragma acc enter data copyin(d_u0[:bsize], d_u_tmp[:bsize], \
+                              d_v0[:bsize], d_v_tmp[:bsize], \
+                              d_w0[:bsize], d_w_tmp[:bsize], \
+                              d_p0[:bsize], \
+                              d_T0[:bsize], d_T_tmp[:bsize], \
+                              d_C0[:bsize], d_C_tmp[:bsize])
 }
 
 //======================================= Update data ==================================
@@ -254,15 +253,18 @@ void FieldController::update_data(bool sync) {
     size_t *d_oList = boundary->get_obstacleList();
     size_t bsize_o = boundary->getSize_obstacleList();
 
-#pragma acc data present(    d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o], d_u[:bsize], d_v[:bsize], d_w[:bsize], \
-                            d_u0[:bsize], d_v0[:bsize], d_w0[:bsize], d_u_tmp[:bsize], d_v_tmp[:bsize], d_w_tmp[:bsize], \
-                            d_p[:bsize], d_p0[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize])
+#pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o], d_u[:bsize], d_v[:bsize], d_w[:bsize], \
+                         d_u0[:bsize], d_v0[:bsize], d_w0[:bsize], d_u_tmp[:bsize], d_v_tmp[:bsize], d_w_tmp[:bsize], \
+                         d_p[:bsize], d_p0[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize])
     {
         // inner
-#pragma acc parallel loop independent present(    d_iList[:bsize_i], d_u[:bsize], d_v[:bsize], d_w[:bsize], \
-                                                d_u0[:bsize], d_v0[:bsize], d_w0[:bsize], d_u_tmp[:bsize], d_v_tmp[:bsize], d_w_tmp[:bsize], \
-                                                d_p[:bsize], d_p0[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], \
-                                                d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize]) async
+#pragma acc parallel loop independent present(d_iList[:bsize_i], \
+                                              d_u[:bsize], d_v[:bsize], d_w[:bsize], \
+                                              d_u0[:bsize], d_v0[:bsize], d_w0[:bsize], \
+                                              d_u_tmp[:bsize], d_v_tmp[:bsize], d_w_tmp[:bsize], \
+                                              d_p[:bsize], d_p0[:bsize], \
+                                              d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], \
+                                              d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize]) async
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t idx = d_iList[j];
             d_u0[idx] = d_u[idx];
@@ -313,7 +315,7 @@ void FieldController::update_data(bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    } //end data region
+    }  // end data region
 }
 
 //======================================== Couple velocity ====================================
@@ -331,7 +333,6 @@ void FieldController::update_data(bool sync) {
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void FieldController::couple_vector(const Field *a, Field *a0, Field *a_tmp, const Field *b, Field *b0, Field *b_tmp, const Field *c, Field *c0, Field *c_tmp, bool sync) {
-
     // local variables and parameters for GPU
     auto d_a = a->data;
     auto d_a0 = a0->data;
@@ -354,8 +355,8 @@ void FieldController::couple_vector(const Field *a, Field *a0, Field *a_tmp, con
     size_t *d_oList = boundary->get_obstacleList();
     size_t bsize_o = boundary->getSize_obstacleList();
 
-#pragma acc data present(    d_a[:size], d_a0[:size], d_a_tmp[:size], d_b[:size], d_b0[:size], d_b_tmp[:size], \
-                            d_c[:size], d_c0[:size], d_c_tmp[:size], d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
+#pragma acc data present(d_a[:size], d_a0[:size], d_a_tmp[:size], d_b[:size], d_b0[:size], d_b_tmp[:size], \
+                         d_c[:size], d_c0[:size], d_c_tmp[:size], d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
     {
         // inner
 #pragma acc kernels async
@@ -397,7 +398,7 @@ void FieldController::couple_vector(const Field *a, Field *a0, Field *a_tmp, con
         if (sync) {
 #pragma acc wait
         }
-    }//end data region
+    }  // end data region
 }
 
 //======================================= Couple scalar ==================================
@@ -409,7 +410,6 @@ void FieldController::couple_vector(const Field *a, Field *a0, Field *a_tmp, con
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void FieldController::couple_scalar(const Field *a, Field *a0, Field *a_tmp, bool sync) {
-
     // local variables and parameters for GPU
     auto d_a = a->data;
     auto d_a0 = a0->data;
@@ -455,7 +455,7 @@ void FieldController::couple_scalar(const Field *a, Field *a0, Field *a_tmp, boo
         if (sync) {
 #pragma acc wait
         }
-    }//end data region
+    }  // end data region
 }
 
 void FieldController::update_device() {
@@ -535,3 +535,4 @@ void FieldController::update_host(){
 #pragma acc update host(d_kappa_t[:bsize])
 #pragma acc update host(d_gamma_t[:bsize]) wait    // all in one update does not work!
 }
+

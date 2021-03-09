@@ -4,20 +4,21 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_BOUNDARY_OBSTACLE_H
-#define ARTSS_BOUNDARY_OBSTACLE_H
+#ifndef ARTSS_BOUNDARY_OBSTACLE_H_
+#define ARTSS_BOUNDARY_OBSTACLE_H_
 
 #include <cmath>
+#include <string>
 
-#include "../utility/tinyxml2.h"
 #include "BoundaryData.h"
 #include "BoundaryDataController.h"
 #include "../Domain.h"
+#include "../utility/tinyxml2.h"
 #include "../utility/Utility.h"
 
 
 class Obstacle {
-public:
+ public:
     Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const std::string& name);
     Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level, const std::string& name);
     ~Obstacle();
@@ -65,7 +66,7 @@ public:
     bool is_corner_cell(size_t i, size_t j, size_t k);
     bool is_edge_cell(size_t i, size_t j, size_t k);
 
-private:
+ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -76,20 +77,20 @@ private:
     size_t m_level = 0;
 
     size_t* m_obstacleList;
-    //size_t* m_obstacleBoundaryList;
+    // size_t* m_obstacleBoundaryList;
     size_t* m_obstacleFront;
     size_t* m_obstacleBack;
     size_t* m_obstacleTop;
     size_t* m_obstacleBottom;
     size_t* m_obstacleLeft;
     size_t* m_obstacleRight;
-    //size_t* m_obstacleInner;
+    // size_t* m_obstacleInner;
 
     size_t m_size_obstacleList;
-    //size_t m_size_obstacleBoundaryList;
-    //size_t m_size_obstacleInner;
+    // size_t m_size_obstacleBoundaryList;
+    // size_t m_size_obstacleInner;
 
-    //actual size
+    // actual size
     size_t m_size_obstacleFront;
     size_t m_size_obstacleBack;
     size_t m_size_obstacleTop;
@@ -109,15 +110,16 @@ private:
 
     static bool hasOverlap(size_t o1_coord1, size_t o1_coord2, size_t o2_coord1, size_t o2_coord2);
 
-    size_t getSize(){return getStrideZ() * getStrideY() * getStrideX();};
+    size_t getSize() {return getStrideZ() * getStrideY() * getStrideX();}
 
     void remove_patch(Patch patch);
 
-    void static calculate_area_index(Obstacle *o1, Obstacle *o2, size_t *o1_coordinate, size_t *o2_coordinate, CoordinateAxis direction, bool start);
+    static void calculate_area_index(Obstacle *o1, Obstacle *o2, size_t *o1_coordinate, size_t *o2_coordinate, CoordinateAxis direction, bool start);
 
     static bool circular_constraints_x_direction(Obstacle *o1, Obstacle *o2, std::shared_ptr<spdlog::logger> logger);
     static bool circular_constraints_y_direction(Obstacle *o1, Obstacle *o2, std::shared_ptr<spdlog::logger> logger);
     static bool circular_constraints_z_direction(Obstacle *o1, Obstacle *o2, std::shared_ptr<spdlog::logger> logger);
 };
 
-#endif /* ARTSS_BOUNDARY_OBSTACLE_H */
+#endif /* ARTSS_BOUNDARY_OBSTACLE_H_ */
+

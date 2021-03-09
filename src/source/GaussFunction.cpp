@@ -22,7 +22,7 @@ GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real 
     init();
 }
 
-void GaussFunction::init(){
+void GaussFunction::init() {
     auto params = Parameters::getInstance();
     m_field_spatial_values = new Field(FieldType::RHO, 0.);
     create_spatial_values();
@@ -45,7 +45,7 @@ void GaussFunction::update_source(Field *out, real t_cur) {
     {
 #pragma acc parallel loop independent present(data_out[:size], data_spatial[:size]) async
         for (size_t i = 0; i < size; i++) {
-            data_out[i] = data_spatial[i] * time_val; // TODO * random value (5%)
+            data_out[i] = data_spatial[i] * time_val;  // TODO * random value (5%)
         }
 #pragma acc wait
     }
@@ -79,7 +79,6 @@ void GaussFunction::create_spatial_values() {
     real dy = domain->get_dy(level);
     real dz = domain->get_dz(level);
 
-    //get parameters for Gaussian
     real sigma_x_2 = 2 * m_sigma_x * m_sigma_x;
     real r_sigma_x_2 = 1. / sigma_x_2;
     real sigma_y_2 = 2 * m_sigma_y * m_sigma_y;
@@ -87,7 +86,7 @@ void GaussFunction::create_spatial_values() {
     real sigma_z_2 = 2 * m_sigma_z * m_sigma_z;
     real r_sigma_z_2 = 1. / sigma_z_2;
 
-    //set Gaussian to cells
+    // set Gaussian to cells
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
 
@@ -109,7 +108,7 @@ void GaussFunction::create_spatial_values() {
         V += expr * dx * dy * dz;
     }
 
-    HRRrV = m_HRR / V;        //in case of concentration Ys*HRR
+    HRRrV = m_HRR / V;       // in case of concentration Ys*HRR
     real rcp = 1. / m_cp;    // to get [K/s] for energy equation (d_t T), rho:=1, otherwise *1/rho; in case of concentration 1/Hc to get kg/m^3s
 
     for (size_t l = 0; l < bsize_i; ++l) {
@@ -127,7 +126,6 @@ void GaussFunction::create_spatial_values() {
             tmp = 0;
         }
         d_out[idx] = tmp;
-
     }
 
 #pragma acc enter data copyin(d_out[:bsize])
