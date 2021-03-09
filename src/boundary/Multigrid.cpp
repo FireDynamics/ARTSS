@@ -966,7 +966,7 @@ void Multigrid::sendObstacleListsToGPU() {
         //std::cout << "control sendMGListsToGPU obstacle Left " << counter_oLeft + 1 << "|" << size_oLeft << std::endl;
         //std::cout << "control sendMGListsToGPU obstacle Right " << counter_oRight + 1 << "|" << size_oRight << std::endl;
 
-        m_data_MG_oList_zero_joined = m_MG_oList[0];// TODO wrong because only one obstacle is used
+        m_data_MG_oList_zero_joined = m_MG_oList[0];// TODO wrong because only one obstacle is used ?
         size_t size_oList = getSize_obstacleList();
 #pragma acc enter data copyin(m_data_MG_oFront_level_joined[:size_oFront])
 #pragma acc enter data copyin(m_data_MG_oBack_level_joined[:size_oBack])

@@ -59,7 +59,7 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const s
 }
 
 
-Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level, std::string name) {
+Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level, const std::string& name) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif

@@ -7,15 +7,15 @@
 #ifndef ARTSS_BOUNDARY_BOUNDARYCONTROLLER_H_
 #define ARTSS_BOUNDARY_BOUNDARYCONTROLLER_H_
 
-
-#include "../field/Field.h"
-#include "Multigrid.h"
-#include "Surface.h"
-#include "Obstacle.h"
-#include "Boundary.h"
-#include "BoundaryData.h"
+#include <vector>
+#include "../utility/GlobalMacrosTypes.h"
 #include "../utility/tinyxml2.h"
+#include "../utility/Utility.h"
+#include "../field/Field.h"
 #include "BoundaryDataController.h"
+#include "Multigrid.h"
+#include "Obstacle.h"
+#include "Surface.h"
 
 class BoundaryController {
 public:

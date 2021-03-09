@@ -10,7 +10,6 @@
 #include <tuple>
 #include "../utility/Utility.h"
 #include <algorithm>
-#include <search.h>
 
 BoundaryController *BoundaryController::singleton = nullptr; // Singleton
 
