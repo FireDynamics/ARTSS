@@ -449,79 +449,40 @@ void FieldController::couple_scalar(const Field *a, Field *a0, Field *a_tmp, boo
 }
 
 void FieldController::update_device() {
-    auto d_u = field_u->data;
-    auto d_v = field_v->data;
-    auto d_w = field_w->data;
-    auto d_p = field_p->data;
-    auto d_rhs = field_rhs->data;
-    auto d_T = field_T->data;
-    auto d_T_a = field_T_ambient->data;
-    auto d_C = field_concentration->data;
-    auto d_f_x = field_force_x->data;
-    auto d_f_y = field_force_y->data;
-    auto d_f_z = field_force_z->data;
-    auto d_S_T = field_source_T->data;
-    auto d_S_C = field_source_concentration->data;
-    auto d_nu_t = field_nu_t->data;
-    auto d_kappa_t = field_kappa_t->data;
-    auto d_gamma_t = field_gamma_t->data;
-
-    Domain *domain = Domain::getInstance();
-    auto bsize = domain->get_size();
-    // copyin fields
-#pragma acc update device(d_u[:bsize])
-#pragma acc update device(d_v[:bsize])
-#pragma acc update device(d_w[:bsize])
-#pragma acc update device(d_p[:bsize])
-#pragma acc update device(d_rhs[:bsize])
-#pragma acc update device(d_T[:bsize])
-#pragma acc update device(d_T_a[:bsize])
-#pragma acc update device(d_C[:bsize])
-#pragma acc update device(d_f_x[:bsize])
-#pragma acc update device(d_f_y[:bsize])
-#pragma acc update device(d_f_z[:bsize])
-#pragma acc update device(d_S_T[:bsize])
-#pragma acc update device(d_S_C[:bsize])
-#pragma acc update device(d_nu_t[:bsize])
-#pragma acc update device(d_kappa_t[:bsize])
-#pragma acc update device(d_gamma_t[:bsize]) wait    // all in one update does not work!
+    field_u->update_dev();
+    field_v->update_dev();
+    field_w->update_dev();
+    field_p->update_dev();
+    field_rhs->update_dev();
+    field_T->update_dev();
+    field_T_ambient->update_dev();
+    field_concentration->update_dev();
+    field_force_x->update_dev();
+    field_force_y->update_dev();
+    field_force_z->update_dev();
+    field_source_T->update_dev();
+    field_source_concentration->update_dev();
+    field_nu_t->update_dev();
+    field_kappa_t->update_dev();
+    field_gamma_t->update_dev();
 }
 
 void FieldController::update_host(){
-    auto d_u = field_u->data;
-    auto d_v = field_v->data;
-    auto d_w = field_w->data;
-    auto d_p = field_p->data;
-    auto d_rhs = field_rhs->data;
-    auto d_T = field_T->data;
-    auto d_T_a = field_T_ambient->data;
-    auto d_C = field_concentration->data;
-    auto d_f_x = field_force_x->data;
-    auto d_f_y = field_force_y->data;
-    auto d_f_z = field_force_z->data;
-    auto d_S_T = field_source_T->data;
-    auto d_S_C = field_source_concentration->data;
-    auto d_nu_t = field_nu_t->data;
-    auto d_kappa_t = field_kappa_t->data;
-    auto d_gamma_t = field_gamma_t->data;
-
-    Domain *domain = Domain::getInstance();
-    auto bsize = domain->get_size();
-    // copyin fields
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_T_a[:bsize])
-#pragma acc update host(d_C[:bsize])
-#pragma acc update host(d_f_x[:bsize])
-#pragma acc update host(d_f_y[:bsize])
-#pragma acc update host(d_f_z[:bsize])
-#pragma acc update host(d_S_T[:bsize])
-#pragma acc update host(d_S_C[:bsize])
-#pragma acc update host(d_nu_t[:bsize])
-#pragma acc update host(d_kappa_t[:bsize])
-#pragma acc update host(d_gamma_t[:bsize]) wait    // all in one update does not work!
+    field_u->update_host();
+    field_v->update_host();
+    field_w->update_host();
+    field_p->update_host();
+    field_rhs->update_host();
+    field_T->update_host();
+    field_T_ambient->update_host();
+    field_concentration->update_host();
+    field_force_x->update_host();
+    field_force_y->update_host();
+    field_force_z->update_host();
+    field_source_T->update_host();
+    field_source_concentration->update_host();
+    field_nu_t->update_host();
+    field_kappa_t->update_host();
+    field_gamma_t->update_host();
+#pragma acc wait
 }

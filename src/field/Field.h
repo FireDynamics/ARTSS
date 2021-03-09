@@ -40,6 +40,15 @@ class Field {
     // setter
     real& operator[](size_t i) { return data[i]; }
 
+    // acc functions
+    void update_host() {
+        #pragma acc update host(data[:m_size])
+    }
+    void update_dev() {
+        #pragma acc update device(data[:m_size])
+    }
+
+    // basic interface to algorithm
     void set_value(real val) { std::fill(data, data + m_size, val); }
     void copy_data(const Field &other) {
         std::copy(other.data, other.data+other.m_size, data);
