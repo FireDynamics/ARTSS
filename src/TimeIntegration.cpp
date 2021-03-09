@@ -18,6 +18,7 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto params = Parameters::getInstance();
+    auto *domain = Domain::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
     m_t_end = params->get_real("physical_parameters/t_end");
@@ -28,15 +29,13 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 
     m_adaption = new Adaption(m_field_controller);
 #ifndef BENCHMARKING
-    m_solution = new Solution();
+    m_solution = new Solution(*domain, params->get("initial_conditions/usr_fct"));
     m_analysis = new Analysis(m_solution);
     m_visual = new Visual(m_solution);
 #endif
 }
 
 void TimeIntegration::run() {
-    Domain *domain = Domain::getInstance();
-
     // local variables and parameters for GPU
     auto u = m_field_controller->field_u;
     auto v = m_field_controller->field_v;
@@ -60,7 +59,7 @@ void TimeIntegration::run() {
     auto d_S_C = S_C->data;
     auto d_nu_t = nu_t->data;
 
-    auto bsize = domain->get_size();
+    auto bsize = u->get_size();
 
 #ifndef BENCHMARKING
 #pragma acc update host(d_u[:bsize])

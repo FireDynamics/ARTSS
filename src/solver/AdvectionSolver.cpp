@@ -20,13 +20,15 @@ AdvectionSolver::AdvectionSolver(FieldController *field_controlller) {
     std::string advectionType = params->get("solver/advection/type");
     SolverSelection::SetAdvectionSolver(&adv, params->get("solver/advection/type"));
 
+    auto domain = Domain::getInstance();
+
     real d_u_linm = params->get_real("initial_conditions/u_lin");
     real d_v_linm = params->get_real("initial_conditions/v_lin");
     real d_w_linm = params->get_real("initial_conditions/w_lin");
 
-    u_linm = new Field(FieldType::U, d_u_linm);
-    v_linm = new Field(FieldType::V, d_v_linm);
-    w_linm = new Field(FieldType::W, d_w_linm);
+    u_linm = new Field(FieldType::U, d_u_linm, 0, domain->get_size());
+    v_linm = new Field(FieldType::V, d_v_linm, 0, domain->get_size());
+    w_linm = new Field(FieldType::W, d_w_linm, 0, domain->get_size());
 
     auto u_lin = u_linm;
     auto v_lin = v_linm;

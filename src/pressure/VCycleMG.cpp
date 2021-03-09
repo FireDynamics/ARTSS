@@ -46,9 +46,9 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
     auto s_b = domain->get_size(b->get_level());
     auto t_b = b->get_type();
 
-    Field *out_err1 = new Field(t_out, 0.0);
-    Field *out_tmp = new Field(t_out, 0.0);
-    Field *b_res1 = new Field(t_b, 0.0);
+    Field *out_err1 = new Field(t_out, 0.0, 0, domain->get_size());
+    Field *out_tmp = new Field(t_out, 0.0, 0, domain->get_size());
+    Field *b_res1 = new Field(t_b, 0.0, 0, domain->get_size());
 
     for (size_t i = 0; i < s_out; ++i) {
         out_err1->data[i] = d_out[i];
@@ -85,7 +85,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
     for (int i = 0; i < levels; ++i) {
 
         // build residuum0
-        Field *r0 = new Field(FieldType::P, 0.0, i);
+        Field *r0 = new Field(FieldType::P, 0.0, i, domain->get_size(i));
         residuum0.push_back(r0);
 
         auto data_residuum0 = r0->data;
@@ -94,7 +94,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 #pragma acc enter data copyin(data_residuum0[:bsize_residuum0])
 
         // build residuum1
-        Field *r1 = new Field(FieldType::P, 0.0, i + 1);
+        Field *r1 = new Field(FieldType::P, 0.0, i + 1, domain->get_size(i + 1));
         residuum1.push_back(r1);
 
         auto data_residuum1 = r1->data;
@@ -103,7 +103,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 #pragma acc enter data copyin(data_residuum1[:bsize_residuum1])
 
         //  build error1
-        Field *e1 = new Field(FieldType::P, 0.0, i + 1);
+        Field *e1 = new Field(FieldType::P, 0.0, i + 1, domain->get_size(i + 1));
         error1.push_back(e1);
 
         auto d_err1 = e1->data;
@@ -112,7 +112,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 #pragma acc enter data copyin(d_err1[:bsize_err1])
 
         // build mg_temporal_solution
-        Field *mg = new Field(FieldType::P, 0.0, i + 1); //new field to prevent aliasing
+        Field *mg = new Field(FieldType::P, 0.0, i + 1, domain->get_size(i + 1)); //new field to prevent aliasing
         mg_temporal_solution.push_back(mg);
 
         auto data_mg_temporal_solution = mg->data;
@@ -124,7 +124,8 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 //  build err0
     err0.resize(levels + 1);
 
-    Field *e00 = new Field(FieldType::P, 0.0, error1[0]->get_level());
+    auto level = error1[0]->get_level();
+    Field *e00 = new Field(FieldType::P, 0.0, level, domain->get_size(level));
 
     err0[0] = e00;
 
@@ -137,7 +138,8 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
     // levels going down
     for (int i=levels; i>0; --i) {
         // build err0
-        Field *e0 = new Field(FieldType::P, 0.0, error1[i - 1]->get_level());
+        level = error1[i - 1]->get_level();
+        Field *e0 = new Field(FieldType::P, 0.0, level, domain->get_size(level));
 
         err0[i] = e0;
 

@@ -134,7 +134,7 @@ void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, lo
     real *data_temp = m_T->data;
     real *data_tempA = m_Ta->data;
 
-    size_t size = domain->get_size();
+    size_t bsize = m_Nu->get_size();
 
     if (start) {
         size_t nx_begin = static_cast<size_t> (std::round((m_x1 - domain->get_X1()) / domain->get_dx()));
@@ -200,7 +200,7 @@ void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shi
     auto domain = Domain::getInstance();
 
     auto data = m_T->data;
-    size_t size = domain->get_size();
+    size_t size = m_T->get_size();
 
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;

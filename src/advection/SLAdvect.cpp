@@ -43,7 +43,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    size_t bsize = domain->get_size(out->get_level());
+    size_t bsize = out->get_size();
     FieldType type = out->get_type();
 
     auto d_out = out->data;

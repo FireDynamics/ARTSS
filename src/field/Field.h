@@ -24,18 +24,18 @@ enum FieldType : int {
 
 class Field {
  public:
-    Field(FieldType type, real val);
-    Field(FieldType type, real val, size_t level);
+    // Field(FieldType type, real val);
+    // Field(FieldType type, real val, size_t level);
     Field(FieldType type, real val, size_t level, size_t size);
 
     ~Field();
 
     // getter
-    FieldType const get_type() { return m_type; }
-    return_ptr const get_data() { return data; }
-    read_ptr const get_data_ro() { return data; }
-    size_t const get_level() { return m_level; }
-    size_t const get_size() { return m_size; }
+    FieldType get_type() const { return m_type; }
+    return_ptr get_data() const { return data; }
+    read_ptr get_data_ro() const { return data; }
+    size_t get_level() const { return m_level; }
+    size_t get_size() const { return m_size; }
 
     // setter
     real& operator[](size_t i) { return data[i]; }

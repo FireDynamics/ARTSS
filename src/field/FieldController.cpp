@@ -12,37 +12,38 @@
 FieldController::FieldController() {
     // Variables
     // Velocities
-    field_u = new Field(FieldType::U, 0.0);
-    field_v = new Field(FieldType::V, 0.0);
-    field_w = new Field(FieldType::W, 0.0);
+    Domain *domain = Domain::getInstance();
+    field_u = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    field_v = new Field(FieldType::V, 0.0, 0, domain->get_size());
+    field_w = new Field(FieldType::W, 0.0, 0, domain->get_size());
 
     // Turbulent diffusivity
-    field_nu_t = new Field(FieldType::U, 0.0);
-    field_kappa_t = new Field(FieldType::T, 0.0);
-    field_gamma_t = new Field(FieldType::RHO, 0.0);
+    field_nu_t = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    field_kappa_t = new Field(FieldType::T, 0.0, 0, domain->get_size());
+    field_gamma_t = new Field(FieldType::RHO, 0.0, 0, domain->get_size());
 
     // Pressure
-    field_p = new Field(FieldType::P, 0.0);
-    field_rhs = new Field(FieldType::P, 0.0);
+    field_p = new Field(FieldType::P, 0.0, 0, domain->get_size());
+    field_rhs = new Field(FieldType::P, 0.0, 0, domain->get_size());
 
     // Temperature
-    field_T = new Field(FieldType::T, 0.0);
-    field_T_ambient = new Field(FieldType::T, 300);
+    field_T = new Field(FieldType::T, 0.0, 0, domain->get_size());
+    field_T_ambient = new Field(FieldType::T, 300, 0, domain->get_size());
 
     // Concentration
-    field_concentration = new Field(FieldType::RHO, 0.0);
+    field_concentration = new Field(FieldType::RHO, 0.0, 0, domain->get_size());
 
     // Forces
-    field_force_x = new Field(FieldType::U, 0.0);
-    field_force_y = new Field(FieldType::V, 0.0);
-    field_force_z = new Field(FieldType::W, 0.0);
+    field_force_x = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    field_force_y = new Field(FieldType::V, 0.0, 0, domain->get_size());
+    field_force_z = new Field(FieldType::W, 0.0, 0, domain->get_size());
 
     // Sources
-    field_source_T = new Field(FieldType::T, 0.0);
-    field_source_concentration = new Field(FieldType::RHO, 0.0);
+    field_source_T = new Field(FieldType::T, 0.0, 0, domain->get_size());
+    field_source_concentration = new Field(FieldType::RHO, 0.0, 0, domain->get_size());
 
     // Fields for sight of boundaries
-    sight = new Field(FieldType::RHO, 1.0);
+    sight = new Field(FieldType::RHO, 1.0, 0, domain->get_size());
 
     auto d_u = field_u->data;
     auto d_v = field_v->data;
@@ -61,7 +62,6 @@ FieldController::FieldController() {
     auto d_kappa_t = field_kappa_t->data;
     auto d_gamma_t = field_gamma_t->data;
 
-    Domain *domain = Domain::getInstance();
     auto bsize = domain->get_size();
     // copyin fields
 #pragma acc enter data copyin(  d_u[:bsize], \

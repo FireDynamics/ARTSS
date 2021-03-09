@@ -16,82 +16,82 @@
 #include "../boundary/BoundaryController.h"
 
 DynamicSmagorinsky::DynamicSmagorinsky() {
-
+    auto domain = Domain::getInstance();
     auto params = Parameters::getInstance();
 
     m_nu = params->get_real("physical_parameters/nu");
 
-    u_f = new Field(FieldType::U, 0.0);
-    v_f = new Field(FieldType::U, 0.0);
-    w_f = new Field(FieldType::U, 0.0);
+    u_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    v_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    w_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
-    uu = new Field(FieldType::U, 0.0);
-    vv = new Field(FieldType::U, 0.0);
-    ww = new Field(FieldType::U, 0.0);
-    uv = new Field(FieldType::U, 0.0);
-    uw = new Field(FieldType::U, 0.0);
-    vw = new Field(FieldType::U, 0.0);
+    uu = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    vv = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    ww = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    uv = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    uw = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    vw = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
-    uu_f = new Field(FieldType::U, 0.0);
-    vv_f = new Field(FieldType::U, 0.0);
-    ww_f = new Field(FieldType::U, 0.0);
-    uv_f = new Field(FieldType::U, 0.0);
-    uw_f = new Field(FieldType::U, 0.0);
-    vw_f = new Field(FieldType::U, 0.0);
+    uu_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    vv_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    ww_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    uv_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    uw_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    vw_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
-    uf_uf = new Field(FieldType::U, 0.0);
-    vf_vf = new Field(FieldType::U, 0.0);
-    wf_wf = new Field(FieldType::U, 0.0);
-    uf_vf = new Field(FieldType::U, 0.0);
-    uf_wf = new Field(FieldType::U, 0.0);
-    vf_wf = new Field(FieldType::U, 0.0);
+    uf_uf = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    vf_vf = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    wf_wf = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    uf_vf = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    uf_wf = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    vf_wf = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
-    L11 = new Field(FieldType::U, 0.0);
-    L22 = new Field(FieldType::U, 0.0);
-    L33 = new Field(FieldType::U, 0.0);
-    L12 = new Field(FieldType::U, 0.0);
-    L13 = new Field(FieldType::U, 0.0);
-    L23 = new Field(FieldType::U, 0.0);
+    L11 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    L22 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    L33 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    L12 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    L13 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    L23 = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
-    S11 = new Field(FieldType::U, 0.0);
-    S22 = new Field(FieldType::U, 0.0);
-    S33 = new Field(FieldType::U, 0.0);
-    S12 = new Field(FieldType::U, 0.0);
-    S13 = new Field(FieldType::U, 0.0);
-    S23 = new Field(FieldType::U, 0.0);
+    S11 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    S22 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    S33 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    S12 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    S13 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    S23 = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
-    S11_f = new Field(FieldType::U, 0.0);
-    S22_f = new Field(FieldType::U, 0.0);
-    S33_f = new Field(FieldType::U, 0.0);
-    S12_f = new Field(FieldType::U, 0.0);
-    S13_f = new Field(FieldType::U, 0.0);
-    S23_f = new Field(FieldType::U, 0.0);
+    S11_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    S22_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    S33_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    S12_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    S13_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    S23_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
-    P11 = new Field(FieldType::U, 0.0);
-    P22 = new Field(FieldType::U, 0.0);
-    P33 = new Field(FieldType::U, 0.0);
-    P12 = new Field(FieldType::U, 0.0);
-    P13 = new Field(FieldType::U, 0.0);
-    P23 = new Field(FieldType::U, 0.0);
+    P11 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    P22 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    P33 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    P12 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    P13 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    P23 = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
-    P11_f = new Field(FieldType::U, 0.0);
-    P22_f = new Field(FieldType::U, 0.0);
-    P33_f = new Field(FieldType::U, 0.0);
-    P12_f = new Field(FieldType::U, 0.0);
-    P13_f = new Field(FieldType::U, 0.0);
-    P23_f = new Field(FieldType::U, 0.0);
+    P11_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    P22_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    P33_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    P12_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    P13_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    P23_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
-    M11 = new Field(FieldType::U, 0.0);
-    M22 = new Field(FieldType::U, 0.0);
-    M33 = new Field(FieldType::U, 0.0);
-    M12 = new Field(FieldType::U, 0.0);
-    M13 = new Field(FieldType::U, 0.0);
-    M23 = new Field(FieldType::U, 0.0);
+    M11 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    M22 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    M33 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    M12 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    M13 = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    M23 = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
-    S_bar = new Field(FieldType::U, 0.0);
-    S_bar_f = new Field(FieldType::U, 0.0);
+    S_bar = new Field(FieldType::U, 0.0, 0, domain->get_size());
+    S_bar_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
-    Cs = new Field(FieldType::U, 0.0);
+    Cs = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
     // Variables related to Dynamic Smagorinsky
     auto d_u_f = u_f->data;

@@ -10,13 +10,14 @@
 #include "../Domain.h"
 
 BuoyancyMMS::BuoyancyMMS() {
-    m_source_field = new Field(FieldType::RHO, 0);
+    auto domain = Domain::getInstance();
+    m_source_field = new Field(FieldType::RHO, 0, 0, domain->get_size());
     set_up();
 }
 
 BuoyancyMMS::~BuoyancyMMS() {
     auto data_source = m_source_field->data;
-    size_t size = Domain::getInstance()->get_size();
+    size_t size = m_source_field->get_size();
 #pragma acc exit data delete(data_source[:size])
     delete m_source_field;
 }

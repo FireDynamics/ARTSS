@@ -11,13 +11,14 @@
 
 GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z, real tau) {
     m_tau = tau;
-    m_field_spatial_values = new Field(FieldType::RHO, 0.);
+    auto domain  = Domain::getInstance();
+    m_field_spatial_values = new Field(FieldType::RHO, 0.0, 0, domain->get_size());
     create_spatial_values(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z);
 }
 
 GaussFunction::~GaussFunction() {
     auto data_spatial = m_field_spatial_values->data;
-    size_t size = Domain::getInstance()->get_size();
+    size_t size = m_field_spatial_values->get_size();
 #pragma acc exit data delete(data_spatial[:size])
     delete m_field_spatial_values;
 }
