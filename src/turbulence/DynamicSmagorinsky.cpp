@@ -94,95 +94,77 @@ DynamicSmagorinsky::DynamicSmagorinsky() {
     Cs = new Field(FieldType::U, 0.0, 0, domain->get_size());
 
     // Variables related to Dynamic Smagorinsky
-    auto d_u_f = u_f->data;
-    auto d_v_f = v_f->data;
-    auto d_w_f = w_f->data;
+    u_f->copyin();
+    v_f->copyin();
+    w_f->copyin();
 
-    auto d_uu = uu->data;
-    auto d_vv = vv->data;
-    auto d_ww = ww->data;
-    auto d_uv = uv->data;
-    auto d_uw = uw->data;
-    auto d_vw = vw->data;
+    uu->copyin();
+    vv->copyin();
+    ww->copyin();
+    uv->copyin();
+    uw->copyin();
+    vw->copyin();
 
-    auto d_uf_uf = uf_uf->data;
-    auto d_vf_vf = vf_vf->data;
-    auto d_wf_wf = wf_wf->data;
-    auto d_uf_vf = uf_vf->data;
-    auto d_uf_wf = uf_wf->data;
-    auto d_vf_wf = vf_wf->data;
+    uf_uf->copyin();
+    vf_vf->copyin();
+    wf_wf->copyin();
+    uf_vf->copyin();
+    uf_wf->copyin();
+    vf_wf->copyin();
 
-    auto d_uu_f = uu_f->data;
-    auto d_vv_f = vv_f->data;
-    auto d_ww_f = ww_f->data;
-    auto d_uv_f = uv_f->data;
-    auto d_uw_f = uw_f->data;
-    auto d_vw_f = vw_f->data;
+    uu_f->copyin();
+    vv_f->copyin();
+    ww_f->copyin();
+    uv_f->copyin();
+    uw_f->copyin();
+    vw_f->copyin();
 
-    auto d_L11 = L11->data;
-    auto d_L22 = L22->data;
-    auto d_L33 = L33->data;
-    auto d_L12 = L12->data;
-    auto d_L13 = L13->data;
-    auto d_L23 = L23->data;
+    L11->copyin();
+    L22->copyin();
+    L33->copyin();
+    L12->copyin();
+    L13->copyin();
+    L23->copyin();
 
-    auto d_S11 = S11->data;
-    auto d_S22 = S22->data;
-    auto d_S33 = S33->data;
-    auto d_S12 = S12->data;
-    auto d_S13 = S13->data;
-    auto d_S23 = S23->data;
+    S11->copyin();
+    S22->copyin();
+    S33->copyin();
+    S12->copyin();
+    S13->copyin();
+    S23->copyin();
 
-    auto d_P11 = P11->data;
-    auto d_P22 = P22->data;
-    auto d_P33 = P33->data;
-    auto d_P12 = P12->data;
-    auto d_P13 = P13->data;
-    auto d_P23 = P23->data;
+    P11->copyin();
+    P22->copyin();
+    P33->copyin();
+    P12->copyin();
+    P13->copyin();
+    P23->copyin();
 
-    auto d_S11_f = S11_f->data;
-    auto d_S22_f = S22_f->data;
-    auto d_S33_f = S33_f->data;
-    auto d_S12_f = S12_f->data;
-    auto d_S13_f = S13_f->data;
-    auto d_S23_f = S23_f->data;
+    S11_f->copyin();
+    S22_f->copyin();
+    S33_f->copyin();
+    S12_f->copyin();
+    S13_f->copyin();
+    S23_f->copyin();
 
-    auto d_P11_f = P11_f->data;
-    auto d_P22_f = P22_f->data;
-    auto d_P33_f = P33_f->data;
-    auto d_P12_f = P12_f->data;
-    auto d_P13_f = P13_f->data;
-    auto d_P23_f = P23_f->data;
+    P11_f->copyin();
+    P22_f->copyin();
+    P33_f->copyin();
+    P12_f->copyin();
+    P13_f->copyin();
+    P23_f->copyin();
 
-    auto d_S_bar = S_bar->data;
-    auto d_S_bar_f = S_bar_f->data;
+    S_bar->copyin();
+    S_bar_f->copyin();
 
-    auto d_M11 = M11->data;
-    auto d_M22 = M22->data;
-    auto d_M33 = M33->data;
-    auto d_M12 = M12->data;
-    auto d_M13 = M13->data;
-    auto d_M23 = M23->data;
+    M11->copyin();
+    M22->copyin();
+    M33->copyin();
+    M12->copyin();
+    M13->copyin();
+    M23->copyin();
 
-    auto d_Cs = Cs->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u_f->get_level());
-
-#pragma acc enter data copyin(d_u_f[:bsize], d_v_f[:bsize], d_w_f[:bsize])
-#pragma acc enter data copyin(d_uu[:bsize], d_vv[:bsize], d_ww[:bsize], d_uv[:bsize], d_uw[:bsize], d_vw[:bsize])
-#pragma acc enter data copyin(d_uu_f[:bsize], d_vv_f[:bsize], d_ww_f[:bsize], d_uv_f[:bsize], d_uw_f[:bsize], d_vw_f[:bsize])
-#pragma acc enter data copyin(d_uf_uf[:bsize], d_vf_vf[:bsize], d_wf_wf[:bsize], d_uf_vf[:bsize], d_uf_wf[:bsize], d_vf_wf[:bsize])
-
-#pragma acc enter data copyin(d_L11[:bsize], d_L22[:bsize], d_L33[:bsize], d_L12[:bsize], d_L13[:bsize], d_L23[:bsize])
-#pragma acc enter data copyin(d_S11[:bsize], d_S22[:bsize], d_S33[:bsize], d_S12[:bsize], d_S13[:bsize], d_S23[:bsize])
-#pragma acc enter data copyin(d_S11_f[:bsize], d_S22_f[:bsize], d_S33_f[:bsize], d_S12_f[:bsize], d_S13_f[:bsize], d_S23_f[:bsize])
-#pragma acc enter data copyin(d_P11[:bsize], d_P22[:bsize], d_P33[:bsize], d_P12[:bsize], d_P13[:bsize], d_P23[:bsize])
-#pragma acc enter data copyin(d_P11_f[:bsize], d_P22_f[:bsize], d_P33_f[:bsize], d_P12_f[:bsize], d_P13_f[:bsize], d_P23_f[:bsize])
-#pragma acc enter data copyin(d_M11[:bsize], d_M22[:bsize], d_M33[:bsize], d_M12[:bsize], d_M13[:bsize], d_M23[:bsize])
-
-#pragma acc enter data copyin(d_S_bar[:bsize], d_S_bar_f[:bsize])
-
-#pragma acc enter data copyin(d_Cs[:bsize])
+    Cs->copyin();
 }
 
 DynamicSmagorinsky::~DynamicSmagorinsky() {

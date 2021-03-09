@@ -34,13 +34,10 @@ AdvectionSolver::AdvectionSolver(FieldController *field_controlller) {
     auto v_lin = v_linm;
     auto w_lin = w_linm;
 
-    auto d_u_lin = u_lin->data;
-    auto d_v_lin = v_lin->data;
-    auto d_w_lin = w_lin->data;
+    u_lin->copyin();
+    v_lin->copyin();
+    w_lin->copyin();
 
-    size_t bsize = Domain::getInstance()->get_size(u_linm->get_level());
-
-#pragma acc enter data copyin(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize])
     control();
 }
 

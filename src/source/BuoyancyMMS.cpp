@@ -28,7 +28,6 @@ BuoyancyMMS::~BuoyancyMMS() {
 void BuoyancyMMS::set_up() {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto bsize = domain->get_size();
     auto d_out = m_source_field->data;
     auto level = m_source_field->get_level();
 
@@ -79,7 +78,7 @@ void BuoyancyMMS::set_up() {
         d_out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
     }
 
-#pragma acc enter data copyin(d_out[:bsize])
+    m_source_field->copyin();
 }
 
 void BuoyancyMMS::update_source(Field *out, real t_cur) {

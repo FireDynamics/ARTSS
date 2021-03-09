@@ -52,7 +52,6 @@ Cube::~Cube() {
 void Cube::set_up(real value, real x_start, real y_start, real z_start, real x_end, real y_end, real z_end) {
     Domain *domain = Domain::getInstance();
     real *data = m_source_field->data;
-    size_t size = domain->get_size();
 
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
@@ -80,5 +79,5 @@ void Cube::set_up(real value, real x_start, real y_start, real z_start, real x_e
             }
         }
     }
-#pragma acc enter data copyin(data[:size])
+    m_source_field->copyin();
 }

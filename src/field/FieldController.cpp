@@ -45,34 +45,22 @@ FieldController::FieldController() {
     // Fields for sight of boundaries
     sight = new Field(FieldType::RHO, 1.0, 0, domain->get_size());
 
-    auto d_u = field_u->data;
-    auto d_v = field_v->data;
-    auto d_w = field_w->data;
-    auto d_p = field_p->data;
-    auto d_rhs = field_rhs->data;
-    auto d_T = field_T->data;
-    auto d_T_a = field_T_ambient->data;
-    auto d_C = field_concentration->data;
-    auto d_f_x = field_force_x->data;
-    auto d_f_y = field_force_y->data;
-    auto d_f_z = field_force_z->data;
-    auto d_S_T = field_source_T->data;
-    auto d_S_C = field_source_concentration->data;
-    auto d_nu_t = field_nu_t->data;
-    auto d_kappa_t = field_kappa_t->data;
-    auto d_gamma_t = field_gamma_t->data;
-
-    auto bsize = domain->get_size();
-    // copyin fields
-#pragma acc enter data copyin(  d_u[:bsize], \
-                                d_v[:bsize], \
-                                d_w[:bsize], \
-                                d_p[:bsize], d_rhs[:bsize], \
-                                d_T[:bsize], d_T_a[:bsize], \
-                                d_C[:bsize], \
-                                d_f_x[:bsize], d_f_y[:bsize], d_f_z[:bsize], d_S_T[:bsize], d_S_C[:bsize], \
-                                d_nu_t[:bsize], d_kappa_t[:bsize], d_gamma_t[:bsize])
-
+    field_u->copyin();
+    field_v->copyin();
+    field_w->copyin();
+    field_p->copyin();
+    field_rhs->copyin();
+    field_T->copyin();
+    field_T_ambient->copyin();
+    field_concentration->copyin();
+    field_force_x->copyin();
+    field_force_y->copyin();
+    field_force_z->copyin();
+    field_source_T->copyin();
+    field_source_concentration->copyin();
+    field_nu_t->copyin();
+    field_kappa_t->copyin();
+    field_gamma_t->copyin();
 }
 
 // ==================================== Destructor ====================================
@@ -150,28 +138,17 @@ void FieldController::set_up_temporary_fields() {
 
     field_p0 = new Field(*field_p);
 
-    auto d_u0 = field_u0->data;
-    auto d_v0 = field_v0->data;
-    auto d_w0 = field_w0->data;
-    auto d_u_tmp = field_u_tmp->data;
-    auto d_v_tmp = field_v_tmp->data;
-    auto d_w_tmp = field_w_tmp->data;
-    auto d_p0 = field_p0->data;
-    auto d_T0 = field_T0->data;
-    auto d_T_tmp = field_T_tmp->data;
-    auto d_C0 = field_concentration0->data;
-    auto d_C_tmp = field_concentration_tmp->data;
-
-    Domain *domain = Domain::getInstance();
-    auto bsize = domain->get_size();
-    // copyin fields
-#pragma acc enter data copyin(  d_u0[:bsize], d_u_tmp[:bsize], \
-                                d_v0[:bsize], d_v_tmp[:bsize], \
-                                d_w0[:bsize], d_w_tmp[:bsize], \
-                                d_p0[:bsize], \
-                                d_T0[:bsize], d_T_tmp[:bsize], \
-                                d_C0[:bsize], d_C_tmp[:bsize])
-
+    field_u0->copyin();
+    field_v0->copyin();
+    field_w0->copyin();
+    field_u_tmp->copyin();
+    field_v_tmp->copyin();
+    field_w_tmp->copyin();
+    field_p0->copyin();
+    field_T0->copyin();
+    field_T_tmp->copyin();
+    field_concentration0->copyin();
+    field_concentration_tmp->copyin();
 }
 
 //======================================= Update data ==================================

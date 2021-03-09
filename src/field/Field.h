@@ -47,6 +47,9 @@ class Field {
     void update_dev() {
         #pragma acc update device(data[:m_size])
     }
+    void copyin() {
+        #pragma acc enter data copyin(data[:m_size])
+    }
 
     // basic interface to algorithm
     void set_value(real val) { std::fill(data, data + m_size, val); }

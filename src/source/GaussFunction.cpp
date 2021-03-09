@@ -71,7 +71,7 @@ void GaussFunction::create_spatial_values(real HRR, real cp, real x0, real y0, r
     real sigma_z_2 = 2 * sigma_z * sigma_z;
     real r_sigma_z_2 = 1. / sigma_z_2;
 
-    //set Gaussian to cells
+    // set Gaussian to cells
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
 
@@ -93,8 +93,8 @@ void GaussFunction::create_spatial_values(real HRR, real cp, real x0, real y0, r
         V += expr * dx * dy * dz;
     }
 
-    HRRrV = HRR / V;        //in case of concentration Ys*HRR
-    real rcp = 1. / cp;    // to get [K/s] for energy equation (d_t T), rho:=1, otherwise *1/rho; in case of concentration 1/Hc to get kg/m^3s
+    HRRrV = HRR / V;     // in case of concentration Ys*HRR
+    real rcp = 1. / cp;  // to get [K/s] for energy equation (d_t T), rho:=1, otherwise *1/rho; in case of concentration 1/Hc to get kg/m^3s
 
     for (size_t l = 0; l < bsize_i; ++l) {
         const size_t idx = d_iList[l];
@@ -109,13 +109,11 @@ void GaussFunction::create_spatial_values(real HRR, real cp, real x0, real y0, r
         real tmp = HRRrV * rcp * expr;
         if (tmp > 1500){
             d_out[idx] = 1500;
-        }else{
+        } else {
             d_out[idx] = 0;
         }
-
     }
-
-#pragma acc enter data copyin(d_out[:bsize])
+    m_field_spatial_values->copyin();
 }
 
 // ============================= Ramp up function for HRR source =========================
