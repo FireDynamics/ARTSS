@@ -21,9 +21,6 @@ public:
 
 private:
     real m_dt;
-#ifndef BENCHMARKING
-    std::shared_ptr<spdlog::logger> m_logger;
-#endif
 };
 
 #endif /* ARTSS_ADVECTION_SLADVECT_H_ */

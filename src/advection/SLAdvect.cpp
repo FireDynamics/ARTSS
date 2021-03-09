@@ -25,9 +25,6 @@
 // ==================================== Constructor ====================================
 // ***************************************************************************************
 SLAdvect::SLAdvect() {
-#ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
-#endif
     auto params = Parameters::getInstance();
     m_dt = params->get_real("physical_parameters/dt");
 }
