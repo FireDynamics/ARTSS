@@ -192,8 +192,8 @@ void FieldController::update_data(bool sync) {
                          field_p, field_p0, field_T, field_T0, field_T_tmp, field_C, field_C0, field_C_tmp)
     {
         // inner
-#pragma acc parallel loop independent present(d_iList[:bsize_i]),
-#pragma acc parallel loop independent present(field_u, field_v, field_w, \
+#pragma acc parallel loop independent present(d_iList[:bsize_i], \
+                                              field_u, field_v, field_w, \
                                               field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_d_w_tmp, \
                                               field_p, field_p0, field_T, field_T0, field_T_tmp, \
                                               field_C, field_C0, field_C_tmp) async
@@ -212,8 +212,8 @@ void FieldController::update_data(bool sync) {
             d_C_tmp[idx] = d_C[idx];
         }
         // boundary
-#pragma acc parallel loop independent present(d_bList[:bsize_b])
-#pragma acc parallel loop independent present(field_u, field_v, field_w, field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_w_tmp, \
+#pragma acc parallel loop independent present(d_bList[:bsize_b], \
+                                              field_u, field_v, field_w, field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_w_tmp, \
                                               field_p, field_p0, field_T, field_T0, field_T_tmp, field_C, field_C0, field_C_tmp) async
         for (size_t j = 0; j < bsize_b; ++j) {
             const size_t idx = d_bList[j];
@@ -230,8 +230,8 @@ void FieldController::update_data(bool sync) {
             d_C_tmp[idx] = d_C[idx];
         }
         // obstacles
-#pragma acc parallel loop independent present(d_oList[:bsize_o])
-#pragma acc parallel loop independent present(field_u, field_v, field_w, field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_w_tmp, \
+#pragma acc parallel loop independent present(d_bList[:bsize_b], \
+                                              field_u, field_v, field_w, field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_w_tmp, \
                                               field_p, field_p0, field_T, field_T0, field_T_tmp, field_C, field_C0, field_C_tmp) async
         for (size_t j = 0; j < bsize_o; ++j) {
             const size_t idx = d_oList[j];
