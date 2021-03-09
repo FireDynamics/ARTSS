@@ -397,7 +397,7 @@ function create_testcases {
     NAMEVALUES[$INDEX]=NavierStokesTempTurb_Steckler
     FPATHVALUES[$INDEX]=examples
     NAME=${NAMEVALUES[$INDEX]}
-    BUILDER[$INDEX]="./xml-builder.sh --nstt --tend 1800. --dt 0.05 --nu 3.1e-5 --beta 3.34e-3 --g -9.81 --kappa 4.2e-5 --advectiontype SemiLagrangian --diffusiontype Explicit --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 3 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Explicit --prt 0.5 --solavail No  --xstart -2.8 --xend 4.2 --ystart 0. --yend 4.26 --zstart -2.8 --zend 2.8 --nx 160 --ny 128 --nz 128 --vtkplots 100"
+    BUILDER[$INDEX]="./xml-builder.sh --nstt --tend 1800. --dt 0.05 --nu 3.1e-5 --beta 3.34e-3 --g -9.81 --kappa 4.2e-5 --advectiontype SemiLagrangian --diffusiontype Explicit --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 2 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Explicit --prt 0.5 --solavail No  --xstart -2.8 --xend 4.2 --ystart 0. --yend 4.26 --zstart -2.8 --zend 2.8 --nx 160 --ny 128 --nz 128 --vtkplots 100"
 
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,bottom,top,left,right\" type=\"dirichlet\" value=\"0.0\" />        
@@ -429,37 +429,37 @@ function create_testcases {
       </source>" > ${NAME}_$TSFILEVAL
 
     echo "  <obstacles enabled=\"Yes\">
-    <obstacle> <!-- left wall -->
+    <obstacle name=\"left wall\"> <!-- left wall -->
       <geometry ox1=\"-1.6625\" ox2=\"-1.4\" oy1=\"0.\" oy2=\"2.13\" oz1=\"-1.4\" oz2=\"1.4\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle> <!-- ceiling -->
+    <obstacle name=\"ceiling\"> <!-- ceiling -->
       <geometry ox1=\"-1.6625\" ox2=\"1.6625\" oy1=\"2.13\" oy2=\"2.3296875\" oz1=\"-1.6625\" oz2=\"1.6625\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle> <!-- back wall -->
+    <obstacle name=\"back wall\"> <!-- back wall -->
       <geometry ox1=\"-1.6625\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"1.4\" oz2=\"1.6625\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle> <!-- front wall -->
+    <obstacle name=\"front wall\"> <!-- front wall -->
       <geometry ox1=\"-1.6625\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"-1.6625\" oz2=\"-1.4\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle> <!-- right wall -->
+    <obstacle name=\"right wall left from door\"> <!-- right wall -->
       <geometry ox1=\"1.4\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"-1.4\" oz2=\"-0.4375\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle> <!-- right wall -->
+    <obstacle name=\"right wall above door\"> <!-- right wall -->
       <geometry ox1=\"1.4\" ox2=\"1.6625\" oy1=\"1.83\" oy2=\"2.13\" oz1=\"-0.4375\" oz2=\"0.4375\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-    <obstacle> <!-- right wall -->
+    <obstacle name=\"right wall right from door\"> <!-- right wall -->
       <geometry ox1=\"1.4\" ox2=\"1.6625\" oy1=\"0.\" oy2=\"2.13\" oz1=\"0.4375\" oz2=\"1.4\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />

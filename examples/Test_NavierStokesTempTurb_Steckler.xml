@@ -141,6 +141,6 @@
     <vtk_nth_plot> 100 </vtk_nth_plot>
   </visualisation>
 
-  <logging file="output_steckler.log" level="debug">
+  <logging file="output_test_navierstokestempturb_steckler.log" level="info">
   </logging>
 </ARTSS>
