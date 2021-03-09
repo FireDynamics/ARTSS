@@ -13,7 +13,7 @@
 #include "../utility/tinyxml2.h"
 #include "../field/Field.h"
 
-const size_t numberOfPatches = 6;
+const size_t number_of_patches = 6;
 enum Patch : int {
     UNKNOWN_PATCH = -1,
     FRONT = 0,
@@ -24,7 +24,7 @@ enum Patch : int {
     RIGHT = 5
 };
 
-const size_t numberOfBoundaryConditions = 3;
+const size_t number_of_boundary_conditions = 3;
 enum BoundaryCondition : int {
     UNKNOWN_CONDITION = -1,
     NEUMANN = 0,
@@ -33,7 +33,7 @@ enum BoundaryCondition : int {
 };
 
 class BoundaryData {
-public:
+ public:
     BoundaryData();
     ~BoundaryData();
     void print();
@@ -47,12 +47,12 @@ public:
     static BoundaryCondition matchBoundaryCondition(const std::string& s);
 
     void addBoundaryCondition(const std::vector<Patch>& patches, real value, BoundaryCondition boundaryCondition);
-    BoundaryCondition getBoundaryCondition(Patch p){ return m_boundaryConditions[p];};
-    real getValue(Patch p){ return m_values[p];};
+    BoundaryCondition getBoundaryCondition(Patch p) { return m_boundaryConditions[p];}
+    real getValue(Patch p) { return m_values[p];}
 
-    bool isEmpty() const{ return !m_hasValues; };
-private:
+    bool isEmpty() const { return !m_hasValues; }
 
+ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -62,3 +62,4 @@ private:
     bool m_hasValues = false;
 };
 #endif /* ARTSS_BOUNDARY_BOUNDARYDATA_H_ */
+

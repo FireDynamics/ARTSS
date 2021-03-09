@@ -175,7 +175,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             auto s110 = r100 + s * (r110 - r100);
             auto s111 = r101 + s * (r111 - r101);
 
-            auto tmp = s110 + t * (s111 - s110); // row-major
+            auto tmp = s110 + t * (s111 - s110);  // row-major
             d_out[idx] = tmp;
         }
         boundary->applyBoundary(d_out, type, sync);
@@ -183,6 +183,6 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
         if (sync) {
 #pragma acc wait
         }
-
-    }// end data region
+    }  // end data region
 }
+

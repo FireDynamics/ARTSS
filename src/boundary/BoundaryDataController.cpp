@@ -37,14 +37,14 @@ void BoundaryDataController::addBoundaryData(tinyxml2::XMLElement *xmlElement) {
     std::vector<Patch> patches;
     patches.reserve(patchStrings.size());
 
-    for (const std::string &p: patchStrings) {
+    for (const std::string &p : patchStrings) {
         patches.push_back(BoundaryData::matchPatch(p));
     }
 
     BoundaryCondition boundaryCondition = BoundaryData::matchBoundaryCondition(xmlElement->Attribute("type"));
     auto value = xmlElement->DoubleAttribute("value");
 
-    for (const std::string &f: fieldStrings) {
+    for (const std::string &f : fieldStrings) {
         FieldType fieldType = BoundaryData::matchField(f);
         m_boundaryData[fieldType]->addBoundaryCondition(patches, value, boundaryCondition);
     }
@@ -76,9 +76,9 @@ void BoundaryDataController::print() {
 /// \param  fieldType    Type of field
 /// \param  level        Multigrid level
 /// \param  sync         synchronous kernel launching (true, default: false)
-// ***************************************************************************************
+
 void BoundaryDataController::applyBoundaryCondition(real *data, size_t **indexFields, size_t *patch_start, size_t *patch_end, FieldType fieldType, size_t level, bool sync) {
-    if (!((BoundaryData *) *(m_boundaryData + fieldType))->isEmpty()) {
+    if (!((reinterpret_cast<BoundaryData *> (*(m_boundaryData + fieldType)))->isEmpty())) {
         DomainBoundary::apply_boundary_condition(data, indexFields, patch_start, patch_end, level, m_boundaryData[fieldType], sync);
     }
 }
@@ -96,7 +96,7 @@ void BoundaryDataController::applyBoundaryCondition(real *data, size_t **indexFi
 /// \param  sync          synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void BoundaryDataController::applyBoundaryConditionObstacle(real *data, size_t **indexFields, size_t *patch_start, size_t *patch_end, FieldType fieldType, size_t level, size_t id, bool sync) {
-    if (!((BoundaryData *) *(m_boundaryData + fieldType))->isEmpty()) {
+    if (!(reinterpret_cast<BoundaryData *> (*(m_boundaryData + fieldType)))->isEmpty()) {
         ObstacleBoundary::apply_boundary_condition(data, indexFields, patch_start, patch_end, level, m_boundaryData[fieldType], id, sync);
     }
 }
@@ -105,9 +105,10 @@ std::vector<FieldType> BoundaryDataController::get_used_fields() {
     std::vector<FieldType> v_fields;
     v_fields.reserve(numberOfFieldTypes);
     for (size_t fieldType = 0; fieldType < numberOfFieldTypes; fieldType++) {
-        if (!((BoundaryData *) *(m_boundaryData + fieldType))->isEmpty()){
+        if (!(reinterpret_cast<BoundaryData *> (*(m_boundaryData + fieldType)))->isEmpty()) {
             v_fields.push_back(static_cast<FieldType>(fieldType));
         }
     }
     return v_fields;
 }
+

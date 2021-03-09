@@ -4,9 +4,10 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <algorithm>
 #include "Multigrid.h"
-
+#include <algorithm>
+#include <string>
+#include <vector>
 
 Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
 #ifndef BENCHMARKING
@@ -23,7 +24,7 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
     print();
     control();
 #endif
-    m_data_boundary_patches_joined = new size_t *[numberOfPatches];
+    m_data_boundary_patches_joined = new size_t *[number_of_patches];
     m_data_boundary_patches_joined[Patch::FRONT] = m_data_MG_bFront_level_joined;
     m_data_boundary_patches_joined[Patch::BACK] = m_data_MG_bBack_level_joined;
     m_data_boundary_patches_joined[Patch::BOTTOM] = m_data_MG_bBottom_level_joined;
@@ -40,38 +41,38 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
     m_numberOfSurfaces = numberOfSurfaces;
     m_numberOfObstacles = numberOfObstacles;
 
-    m_levels = Domain::getInstance()->get_levels(); // multigrid level, 0 otherwise
+    m_levels = Domain::getInstance()->get_levels();  // multigrid level, 0 otherwise
 
     if (m_numberOfSurfaces > 0) {
-        //list of surfaces for each level
+        // list of surfaces for each level
         m_MG_surfaceList = new Surface **[m_levels + 1];
-        *(m_MG_surfaceList) = surfaceList; //level 0
+        *(m_MG_surfaceList) = surfaceList;  // level 0
 
-        //surface indices divided by level
+        // surface indices divided by level
         m_MG_sList = new size_t *[m_levels + 1];
 
-        //start index of each surface in level joined list
+        // start index of each surface in level joined list
         m_size_MG_sList_level = new size_t[m_levels * m_numberOfSurfaces + 1];
-        //start index of first level in joined list = 0
+        // start index of first level in joined list = 0
         *(m_size_MG_sList_level) = 0;
     }
 
     if (m_numberOfObstacles > 0) {
-        //list of obstacles for each level
+        // list of obstacles for each level
         m_MG_obstacleList = new Obstacle **[m_levels + 1];
-        *(m_MG_obstacleList) = obstacleList; // level 0
+        *(m_MG_obstacleList) = obstacleList;  // level 0
         m_size_MG_oList_level = new size_t[m_levels + 1];
 
-        //obstacle indices divided by level
+        // obstacle indices divided by level
         m_MG_oList = new size_t *[m_levels + 1];
-        //m_MG_oFront = new size_t *[m_levels + 1];
-        //m_MG_oBack = new size_t *[m_levels + 1];
-        //m_MG_oBottom = new size_t *[m_levels + 1];
-        //m_MG_oTop = new size_t *[m_levels + 1];
-        //m_MG_oLeft = new size_t *[m_levels + 1];
-        //m_MG_oRight = new size_t *[m_levels + 1];
+        // m_MG_oFront = new size_t *[m_levels + 1];
+        // m_MG_oBack = new size_t *[m_levels + 1];
+        // m_MG_oBottom = new size_t *[m_levels + 1];
+        // m_MG_oTop = new size_t *[m_levels + 1];
+        // m_MG_oLeft = new size_t *[m_levels + 1];
+        // m_MG_oRight = new size_t *[m_levels + 1];
 
-        //start index of each obstacle in level joined list (SliceZ = Front/Back, SliceY = Bottom/Top, SliceX = Left/Right)
+        // start index of each obstacle in level joined list (SliceZ = Front/Back, SliceY = Bottom/Top, SliceX = Left/Right)
         m_size_MG_oFront_level = new size_t[(m_levels + 1) * m_numberOfObstacles + 1];
         m_size_MG_oBack_level = new size_t[(m_levels + 1) * m_numberOfObstacles + 1];
         m_size_MG_oTop_level = new size_t[(m_levels + 1) * m_numberOfObstacles + 1];
@@ -79,7 +80,7 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
         m_size_MG_oLeft_level = new size_t[(m_levels + 1) * m_numberOfObstacles + 1];
         m_size_MG_oRight_level = new size_t[(m_levels + 1) * m_numberOfObstacles + 1];
 
-        //size of obstacle level 0 / start index of level 1
+        // size of obstacle level 0 / start index of level 1
         m_size_MG_oFront_level[0] = 0;
         m_size_MG_oBack_level[0] = 0;
         m_size_MG_oTop_level[0] = 0;
@@ -87,7 +88,7 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
         m_size_MG_oLeft_level[0] = 0;
         m_size_MG_oRight_level[0] = 0;
         *(m_size_MG_oList_level) = 0;
-        //TODO notwendig?
+        // TODO notwendig?
         for (size_t i = 0; i < m_numberOfObstacles; i++) {
             m_size_MG_oFront_level[i + 1] = obstacleList[i]->getSize_obstacleFront() + m_size_MG_oFront_level[i];
             m_size_MG_oBack_level[i + 1] = obstacleList[i]->getSize_obstacleBack() + m_size_MG_oBack_level[i];
@@ -104,10 +105,10 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
     addMGLists();
     sendListsToGPU();
 #ifndef BENCHMARKING
-    //print();
+    // print();
     control();
 #endif
-    m_data_boundary_patches_joined = new size_t *[numberOfPatches];
+    m_data_boundary_patches_joined = new size_t *[number_of_patches];
     m_data_boundary_patches_joined[Patch::FRONT] = m_data_MG_bFront_level_joined;
     m_data_boundary_patches_joined[Patch::BACK] = m_data_MG_bBack_level_joined;
     m_data_boundary_patches_joined[Patch::BOTTOM] = m_data_MG_bBottom_level_joined;
@@ -116,14 +117,13 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
     m_data_boundary_patches_joined[Patch::RIGHT] = m_data_MG_bRight_level_joined;
 
     if (m_numberOfObstacles > 0) {
-        m_data_obstacles_patches_joined = new size_t *[numberOfPatches];
+        m_data_obstacles_patches_joined = new size_t *[number_of_patches];
         m_data_obstacles_patches_joined[Patch::FRONT] = m_data_MG_oFront_level_joined;
         m_data_obstacles_patches_joined[Patch::BACK] = m_data_MG_oBack_level_joined;
         m_data_obstacles_patches_joined[Patch::BOTTOM] = m_data_MG_oBottom_level_joined;
         m_data_obstacles_patches_joined[Patch::TOP] = m_data_MG_oTop_level_joined;
         m_data_obstacles_patches_joined[Patch::LEFT] = m_data_MG_oLeft_level_joined;
         m_data_obstacles_patches_joined[Patch::RIGHT] = m_data_MG_oRight_level_joined;
-
     }
 }
 
@@ -132,9 +132,9 @@ Multigrid::Multigrid(size_t numberOfSurfaces, Surface **surfaceList, size_t numb
 /// \brief  Initialize member variables (arrays)
 // ***************************************************************************************
 void Multigrid::init() {
-    m_levels = Domain::getInstance()->get_levels(); // multigrid level, 0 otherwise
+    m_levels = Domain::getInstance()->get_levels();  // multigrid level, 0 otherwise
 
-    //list of domain boundary for each level
+    // list of domain boundary for each level
     m_MG_boundaryList = new Boundary *[m_levels + 1];
 
     // start index of each level (difference equals size of respective element)
@@ -144,14 +144,13 @@ void Multigrid::init() {
     m_size_MG_bSliceY_level = new size_t[m_levels + 2];
     m_size_MG_bSliceX_level = new size_t[m_levels + 2];
 
-    //start index of first element = 0
+    // start index of first element = 0
     *(m_size_MG_iList_level) = 0;
     *(m_size_MG_bList_level) = 0;
 
     *(m_size_MG_bSliceZ_level) = 0;
     *(m_size_MG_bSliceY_level) = 0;
     *(m_size_MG_bSliceX_level) = 0;
-
 }
 
 Multigrid::~Multigrid() {
@@ -238,12 +237,12 @@ Multigrid::~Multigrid() {
 //        size_t size_oTop = getLen_oTop_joined();
 //        size_t size_oLeft = getLen_oLeft_joined();
 //        size_t size_oRight = getLen_oRight_joined();
-//#pragma acc exit data delete(m_data_MG_oFront_level_joined[:size_oFront])
-//#pragma acc exit data delete(m_data_MG_oBack_level_joined[:size_oBack])
-//#pragma acc exit data delete(m_data_MG_oTop_level_joined[:size_oTop])
-//#pragma acc exit data delete(m_data_MG_oBottom_level_joined[:size_oBottom])
-//#pragma acc exit data delete(m_data_MG_oLeft_level_joined[:size_oLeft])
-//#pragma acc exit data delete(m_data_MG_oRight_level_joined[:size_oRight])
+// #pragma acc exit data delete(m_data_MG_oFront_level_joined[:size_oFront])
+// #pragma acc exit data delete(m_data_MG_oBack_level_joined[:size_oBack])
+// #pragma acc exit data delete(m_data_MG_oTop_level_joined[:size_oTop])
+// #pragma acc exit data delete(m_data_MG_oBottom_level_joined[:size_oBottom])
+// #pragma acc exit data delete(m_data_MG_oLeft_level_joined[:size_oLeft])
+// #pragma acc exit data delete(m_data_MG_oRight_level_joined[:size_oRight])
         delete[] m_data_MG_oFront_level_joined;
         delete[] m_data_MG_oBack_level_joined;
         delete[] m_data_MG_oTop_level_joined;
@@ -265,7 +264,7 @@ Multigrid::~Multigrid() {
 /// \brief  Units test emergency solution
 // ***************************************************************************************
 void Multigrid::control() {
-    //TODO control
+    // TODO control
     std::string message;
     auto domain = Domain::getInstance();
     for (size_t level = 0; level < m_levels + 1; level++) {
@@ -277,49 +276,49 @@ void Multigrid::control() {
             message += "For Level " + std::to_string(level) + "\n";
             message += "size control\n";
         }
-        size_t bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_innerList();
+        size_t bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_innerList();
         size_t cLen = getLastIndex_iList(level) - getFirstIndex_iList(level) + 1;
         if (cLen != bLen) {
             size_t control = (domain->get_nx(level) - 2) * (domain->get_ny(level) - 2) * (domain->get_nz(level) - 2);
             message += "length calculated by first and last index of iList does not equals size of innerList of Boundary object " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
         }
-        bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryList();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryList();
         cLen = getLastIndex_bList(level) - getFirstIndex_bList(level) + 1;
         if (cLen != bLen) {
             size_t control = (domain->get_nx(level) * domain->get_ny(level) * 2) + (domain->get_nx(level) * (domain->get_nz(level) - 2)) * 2 + ((domain->get_ny(level) - 2) * (domain->get_nz(level) - 2)) * 2;
             message += "length calculated by first and last index of bList does not equals size of boundaryList of Boundary object " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
         }
-        bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryLeft();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryLeft();
         cLen = getLastIndex_bSliceX(level) - getFirstIndex_bSliceX(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_ny(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceX does not equals size of bSliceX of bLeft " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryRight();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryRight();
         cLen = getLastIndex_bSliceX(level) - getFirstIndex_bSliceX(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_ny(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceX does not equals size of bSliceX of bRight " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryBottom();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryBottom();
         cLen = getLastIndex_bSliceY(level) - getFirstIndex_bSliceY(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceY does not equals size of bSliceY of bBottom " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryTop();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryTop();
         cLen = getLastIndex_bSliceY(level) - getFirstIndex_bSliceY(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceY does not equals size of bSliceY of bTop " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryFront();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryFront();
         cLen = getLastIndex_bSliceZ(level) - getFirstIndex_bSliceZ(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_ny(level);
             message += "length calculated by first and last index of bSliceZ does not equals size of bSliceZ of bFront " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = ((Boundary *) *(m_MG_boundaryList + level))->getSize_boundaryBack();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryBack();
         cLen = getLastIndex_bSliceZ(level) - getFirstIndex_bSliceZ(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_ny(level);
@@ -369,14 +368,14 @@ void Multigrid::control() {
         if (v.size() != getSize_obstacleList()) {
             message += "obstacles are not allowed to overlap in level 0! difference: " + std::to_string(getSize_obstacleList()- v.size()) + "\n";
 
-            for (size_t i = 0; i < m_numberOfObstacles; i++){
+            for (size_t i = 0; i < m_numberOfObstacles; i++) {
                 Obstacle *o1 = m_MG_obstacleList[0][i];
                 size_t  size1 = o1->getSize_obstacleList();
                 for (size_t j = i+1; j < m_numberOfObstacles; j++) {
                     Obstacle *o2 = m_MG_obstacleList[0][j];
                     size_t size2 = o2->getSize_obstacleList();
                     std::vector<size_t> tmp = Utility::mergeSortedListsToUniqueList(o1->getObstacleList(), size1, o2->getObstacleList(), size2);
-                    if (tmp.size() != size1 + size2){
+                    if (tmp.size() != size1 + size2) {
                         message += "Obstacles " + std::to_string(i) + " and " + std::to_string(j) + "are overlapping\n";
                     }
                 }
@@ -531,7 +530,7 @@ void Multigrid::print() {
 /// \brief  adds lists (outer, inner, surfaces, obstacles) in case of grid restriction (dominant)
 // ***************************************************************************************
 void Multigrid::addMGLists() {
-    //create Boundary object of level 0
+    // create Boundary object of level 0
     Boundary *b;
     if (m_numberOfObstacles > 0) {
         calcObstacles(*(m_MG_obstacleList));
@@ -539,20 +538,20 @@ void Multigrid::addMGLists() {
     } else {
         b = new Boundary();
     }
-    //set size of respective lists
+    // set size of respective lists
     m_size_MG_iList_level[1] = b->getSize_innerList();
     m_size_MG_bList_level[1] = b->getSize_boundaryList();
     m_size_MG_bSliceZ_level[1] = b->getSize_boundaryFront();
     m_size_MG_bSliceY_level[1] = b->getSize_boundaryTop();
     m_size_MG_bSliceX_level[1] = b->getSize_boundaryLeft();
-    //save boundary object in multigrid list
+    // save boundary object in multigrid list
     *(m_MG_boundaryList) = b;
 
     if (m_numberOfSurfaces > 0) {
         calcSurfaces(*(m_MG_surfaceList));
     }
 
-    //create boundary object, surfaces and obstacles for each multigrid level
+    // create boundary object, surfaces and obstacles for each multigrid level
     for (size_t level = 1; level < m_levels + 1; level++) {
         surfaceDominantRestriction(level);
         Obstacle **obstacleList = obstacleDominantRestriction(level);
@@ -633,7 +632,7 @@ void Multigrid::surfaceDominantRestriction(size_t level) {
         Surface **surfaceList_fine = *(m_MG_surfaceList + (level - 1));
         Surface **surfaceList_coarse = new Surface *[m_numberOfSurfaces];
         *(m_MG_surfaceList + level) = surfaceList_coarse;
-        //loop through surfaces
+        // loop through surfaces
         for (size_t surfaceID = 0; surfaceID < m_numberOfSurfaces; ++surfaceID) {
             Surface *surface_fine = surfaceList_fine[surfaceID];
 
@@ -678,7 +677,7 @@ void Multigrid::surfaceDominantRestriction(size_t level) {
                     *(m_size_MG_sList_level + index),
                     surface_coarse->getSize_surfaceList());
 #endif
-        } //end surface id loop
+        }  // end surface id loop
     }
 }
 
@@ -694,7 +693,7 @@ Obstacle** Multigrid::obstacleDominantRestriction(size_t level) {
     if (m_numberOfObstacles == 0) {
         return nullptr;
     }
-//TODO define lists with obstacle size
+    // TODO define lists with obstacle size
     Domain *domain = Domain::getInstance();
     Obstacle **obstacleList_fine = *(m_MG_obstacleList + (level - 1));
     Obstacle **obstacleList_coarse = new Obstacle *[m_numberOfObstacles];
@@ -716,21 +715,21 @@ Obstacle** Multigrid::obstacleDominantRestriction(size_t level) {
         size_t j2_coarse = (j2_fine + 1) / 2;
         size_t k2_coarse = (k2_fine + 1) / 2;
 
-        //TODO exit?
+        // TODO exit?
 #ifndef BENCHMARKING
-        if (i2_fine - i1_fine + 1< domain->get_nx(level - 1) - 2 && i2_coarse - i1_coarse + 1 >= domain->get_nx(level) - 2){
+        if (i2_fine - i1_fine + 1< domain->get_nx(level - 1) - 2 && i2_coarse - i1_coarse + 1 >= domain->get_nx(level) - 2) {
             m_logger->warn("Be cautious! Obstacle fills up inner cells in x-direction at level {}", level);
         }
-        if (j2_fine - j1_fine +1< domain->get_ny(level - 1) - 2 && j2_coarse - j1_coarse + 1 >= domain->get_ny(level) - 2){
+        if (j2_fine - j1_fine +1< domain->get_ny(level - 1) - 2 && j2_coarse - j1_coarse + 1 >= domain->get_ny(level) - 2) {
             m_logger->warn("Be cautious! Obstacle fills up inner cells in y-direction at level {}", level);
         }
-        if (k2_fine - k1_fine +1< domain->get_nz(level - 1) - 2 && k2_coarse - k1_coarse + 1 >= domain->get_nz(level) - 2){
+        if (k2_fine - k1_fine +1< domain->get_nz(level - 1) - 2 && k2_coarse - k1_coarse + 1 >= domain->get_nz(level) - 2) {
             m_logger->warn("Be cautious! Obstacle fills up inner cells in z-direction at level {}", level);
         }
 #endif
-        //for (size_t c = 0; c < id; c++) {
-        //    controlObstacleOverlap(obstacleList_coarse[c], &i1_coarse, &i2_coarse, &j1_coarse, &j2_coarse, &k1_coarse, &k2_coarse);
-        //}
+        // for (size_t c = 0; c < id; c++) {
+        //     controlObstacleOverlap(obstacleList_coarse[c], &i1_coarse, &i2_coarse, &j1_coarse, &j2_coarse, &k1_coarse, &k2_coarse);
+        // }
 
         Obstacle *obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse, i2_coarse, j2_coarse, k2_coarse, level, obstacle_fine->get_name());
         *(obstacleList_coarse + id) = obstacle_coarse;
@@ -743,7 +742,6 @@ Obstacle** Multigrid::obstacleDominantRestriction(size_t level) {
         m_size_MG_oLeft_level[index] = obstacle_coarse->getSize_obstacleLeft() + m_size_MG_oLeft_level[index - 1];
         m_size_MG_oRight_level[index] = obstacle_coarse->getSize_obstacleRight() + m_size_MG_oRight_level[index - 1];
         *(m_size_MG_oList_level + level) += obstacle_coarse->getSize_obstacleList();
-
     } //end obstacle id loop
 
     size_t *list = obstacleList_coarse[0]->getObstacleList();
@@ -959,12 +957,6 @@ void Multigrid::sendObstacleListsToGPU() {
                 }
             }
         }
-        //std::cout << "control sendMGListsToGPU obstacle Front " << counter_oFront + 1 << "|" << size_oFront << std::endl;
-        //std::cout << "control sendMGListsToGPU obstacle Back " << counter_oBack + 1 << "|" << size_oBack << std::endl;
-        //std::cout << "control sendMGListsToGPU obstacle Bottom " << counter_oBottom + 1 << "|" << size_oBottom << std::endl;
-        //std::cout << "control sendMGListsToGPU obstacle Top " << counter_oTop + 1 << "|" << size_oTop << std::endl;
-        //std::cout << "control sendMGListsToGPU obstacle Left " << counter_oLeft + 1 << "|" << size_oLeft << std::endl;
-        //std::cout << "control sendMGListsToGPU obstacle Right " << counter_oRight + 1 << "|" << size_oRight << std::endl;
 
         m_data_MG_oList_zero_joined = m_MG_oList[0];// TODO wrong because only one obstacle is used ?
         size_t size_oList = getSize_obstacleList();
@@ -997,7 +989,7 @@ void Multigrid::applyBoundaryCondition(real *d, size_t level, FieldType f, bool 
         for (size_t id = 0; id < m_numberOfObstacles - 1; ++id) {
             size_t opatch_start[] = {getFirstIndex_oFront(level, id), getFirstIndex_oBack(level, id), getFirstIndex_oBottom(level, id), getFirstIndex_oTop(level, id), getFirstIndex_oLeft(level, id), getFirstIndex_oRight(level, id)};
             size_t opatch_end[] = {getFirstIndex_oFront(level, id+1), getFirstIndex_oBack(level, id+1), getFirstIndex_oBottom(level, id+1), getFirstIndex_oTop(level, id+1), getFirstIndex_oLeft(level, id+1), getFirstIndex_oRight(level, id+1)};
-            ((BoundaryDataController *) *(m_bdc_obstacle + id))->applyBoundaryConditionObstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, id, sync);
+            (reinterpret_cast<BoundaryDataController *> (*(m_bdc_obstacle + id)))->applyBoundaryConditionObstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, id, sync);
         }
         size_t opatch_start[] = {getFirstIndex_oFront(level, m_numberOfObstacles-1), getFirstIndex_oBack(level, m_numberOfObstacles-1), getFirstIndex_oBottom(level, m_numberOfObstacles-1), getFirstIndex_oTop(level, m_numberOfObstacles-1), getFirstIndex_oLeft(level, m_numberOfObstacles-1), getFirstIndex_oRight(level, m_numberOfObstacles-1)};
         size_t opatch_end[] = {getFirstIndex_oFront(level+1, 0), getFirstIndex_oBack(level+1, 0), getFirstIndex_oBottom(level+1, 0), getFirstIndex_oTop(level+1, 0), getFirstIndex_oLeft(level+1, 0), getFirstIndex_oRight(level+1, 0)};
@@ -1119,7 +1111,7 @@ size_t Multigrid::getLastIndex_iList(size_t level) {
     return *(m_size_MG_iList_level + level + 1) - 1;
 }
 
-//bList
+// bList
 
 // ***************************************************************************************
 /// \brief  get the index of joined inner cell list, where the first cell of of level l is
@@ -1147,7 +1139,7 @@ size_t Multigrid::getLastIndex_bList(size_t level) {
     return *(m_size_MG_bList_level + level + 1) - 1;
 }
 
-//sList
+// sList
 size_t Multigrid::getLen_sList_joined() {
     size_t len = 0;
     if (m_numberOfSurfaces > 0) {
@@ -1172,7 +1164,7 @@ size_t Multigrid::getLastIndex_sList(size_t level) {
     return index;
 }
 
-//bSlices
+// bSlices
 
 // ***************************************************************************************
 /// \brief  get length of left/right joined boundary list
@@ -1252,7 +1244,7 @@ size_t Multigrid::getLastIndex_bSliceZ(size_t level) {
     return *(m_size_MG_bSliceZ_level + level + 1) - 1;
 }
 
-//oSlices
+// oSlices
 
 // ***************************************************************************************
 /// \brief  get length of m_data_MG_oFront_level_joined
@@ -1619,7 +1611,7 @@ size_t Multigrid::getSize_obstacleList() {
     return getSize_oList(0);
 }
 
-size_t* Multigrid::get_obstacleList(){
+size_t* Multigrid::get_obstacleList() {
     if (m_numberOfObstacles > 0) {
         return m_data_MG_oList_zero_joined;
     } else {
@@ -1644,13 +1636,14 @@ size_t Multigrid::getBoundaryList_level_joined_end(size_t level) {
 }
 
 size_t Multigrid::getObstacleStrideX(size_t id, size_t level) {
-    return ((Obstacle *) m_MG_obstacleList[level][id])->getStrideX();
+    return (reinterpret_cast<Obstacle *>(m_MG_obstacleList[level][id]))->getStrideX();
 }
 
 size_t Multigrid::getObstacleStrideY(size_t id, size_t level) {
-    return ((Obstacle *) m_MG_obstacleList[level][id])->getStrideY();
+    return (reinterpret_cast<Obstacle *>(m_MG_obstacleList[level][id]))->getStrideY();
 }
 
 size_t Multigrid::getObstacleStrideZ(size_t id, size_t level) {
-    return ((Obstacle *) m_MG_obstacleList[level][id])->getStrideZ();
+    return (reinterpret_cast<Obstacle *>(m_MG_obstacleList[level][id]))->getStrideZ();
 }
+
