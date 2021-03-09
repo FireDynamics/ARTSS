@@ -25,9 +25,9 @@ void GaussFunction::update_source(Field *out, real t_cur) {
     auto data_out = out->data;
     auto data_spatial = m_field_spatial_values->data;
 
-#pragma acc data present(data_out[:size], data_spatial[:size])
+#pragma acc data present(out, spatial)
     {
-#pragma acc parallel loop independent present(data_out[:size], data_spatial[:size]) async
+#pragma acc parallel loop independent present(out, spatial) async
         for (size_t i = 0; i < size; i++) {
             data_out[i] = data_spatial[i] * get_time_value(t_cur);
         }
@@ -47,7 +47,6 @@ void GaussFunction::update_source(Field *out, real t_cur) {
 // ***************************************************************************************
 void GaussFunction::create_spatial_values(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z) {
     auto domain = Domain::getInstance();
-    auto bsize = domain->get_size();
     // local variables and parameters for GPU
     auto d_out = m_field_spatial_values->data;
     auto level = m_field_spatial_values->get_level();

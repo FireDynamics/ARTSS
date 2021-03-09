@@ -38,7 +38,7 @@ DiffusionTurbSolver::~DiffusionTurbSolver() {
 /// \param  dt      time step
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void DiffusionTurbSolver::do_step(real t, bool sync) {
+void DiffusionTurbSolver::do_step(real, bool sync) {
 // 1. Solve diffusion equation
 // local variables and parameters for GPU
     auto u = m_field_controller->field_u;
@@ -50,24 +50,11 @@ void DiffusionTurbSolver::do_step(real t, bool sync) {
     auto u_tmp = m_field_controller->field_u_tmp;
     auto v_tmp = m_field_controller->field_v_tmp;
     auto w_tmp = m_field_controller->field_w_tmp;
-    auto nu_t = m_field_controller->field_nu_t;     //Eddy Viscosity
-
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-    auto d_u_tmp = u_tmp->data;
-    auto d_v_tmp = v_tmp->data;
-    auto d_w_tmp = w_tmp->data;
-    auto d_nu_t = nu_t->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u->get_level());
+    auto nu_t = m_field_controller->field_nu_t;  // Eddy Viscosity
 
     auto nu = m_nu;
 
-#pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_nu_t[:bsize]) //EV
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, nu_t)
     {
 #ifndef BENCHMARKING
         m_logger->info("Calculating Turbulent viscosity ...");
@@ -79,7 +66,7 @@ void DiffusionTurbSolver::do_step(real t, bool sync) {
         dif->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif->diffuse(v, v0, v_tmp, nu, nu_t, sync);
         dif->diffuse(w, w0, w_tmp, nu, nu_t, sync);
-    }//end data
+    }
 }
 
 //======================================= Check data ==================================

@@ -54,7 +54,7 @@ AdvectionSolver::~AdvectionSolver() {
 /// \param  dt      time step
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void AdvectionSolver::do_step(real t, bool sync) {
+void AdvectionSolver::do_step(real, bool sync) {
   // local variables and parameters for GPU
     auto u = m_field_controller->field_u;
     auto v = m_field_controller->field_v;
@@ -63,24 +63,11 @@ void AdvectionSolver::do_step(real t, bool sync) {
     auto v0 = m_field_controller->field_v0;
     auto w0 = m_field_controller->field_w0;
 
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-
     auto u_lin = u_linm;
     auto v_lin = v_linm;
     auto w_lin = w_linm;
 
-    auto d_u_lin = u_lin->data;
-    auto d_v_lin = v_lin->data;
-    auto d_w_lin = w_lin->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u->get_level());
-
-#pragma acc data present(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize], d_u[:bsize], d_u0[:bsize], d_v[:bsize], d_v0[:bsize], d_w[:bsize], d_w0[:bsize])
+#pragma acc data present(u_lin, v_lin, w_lin, u, u0, v, v0, w, w0)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
@@ -89,7 +76,7 @@ void AdvectionSolver::do_step(real t, bool sync) {
         adv->advect(u, u0, u_lin, v_lin, w_lin, sync);
         adv->advect(v, v0, u_lin, v_lin, w_lin, sync);
         adv->advect(w, w0, u_lin, v_lin, w_lin, sync);
-    }//end data
+    }
 }
 
 //======================================= Check data ==================================

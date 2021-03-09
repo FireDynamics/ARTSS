@@ -335,7 +335,7 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
     auto d_w = w->data;
 
     // calc C for every cell and get the maximum
-#pragma acc data present(d_u[:bsize], d_v[:bsize], d_w[:bsize])
+#pragma acc data present(u, v, w)
 #pragma acc parallel loop reduction(max:cfl_max)
     for (size_t i=0; i < sizei; i++) {
         size_t idx = innerList[i];
@@ -349,7 +349,7 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
         cfl_max = std::max(cfl_max, cfl_local);
     }
 
-    return dt*cfl_max;
+    return dt * cfl_max;
 }
 
 // =============================== Save variables ==============================
@@ -358,7 +358,7 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
 /// \param  field_controller    pointer to solver
 // ***************************************************************************************
 void Analysis::save_variables_in_file(FieldController *field_controller) {
-    //TODO do not write field out if not used
+    // TODO do not write field out if not used
     auto boundary = BoundaryController::getInstance();
     size_t *innerList = boundary->get_innerList_level_joined();
     size_t size_innerList = boundary->getSize_innerList();

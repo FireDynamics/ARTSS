@@ -72,33 +72,14 @@ void NSTurbSolver::do_step(real t, bool sync) {
     auto f_x = m_field_controller->field_force_x;
     auto f_y = m_field_controller->field_force_y;
     auto f_z = m_field_controller->field_force_z;
-    auto nu_t = m_field_controller->field_nu_t;     //nu_t - Eddy Viscosity
+    auto nu_t = m_field_controller->field_nu_t;  // nu_t - Eddy Viscosity
 
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-    auto d_u_tmp = u_tmp->data;
-    auto d_v_tmp = v_tmp->data;
-    auto d_w_tmp = w_tmp->data;
-    auto d_p = p->data;
-    auto d_p0 = p0->data;
-    auto d_rhs = rhs->data;
-    auto d_fx = f_x->data;
-    auto d_fy = f_y->data;
-    auto d_fz = f_z->data;
-    auto d_nu_t = nu_t->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u->get_level());
 
     auto nu = m_nu;
 
-#pragma acc data present(    d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], \
-                            d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_nu_t[:bsize])
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, \
+                         p, p0, rhs, fx, fy, fz, nu_t)
     {
-
 // 1. Solve advection equation
 #ifndef BENCHMARKING
         m_logger->info("Advect ...");
@@ -129,7 +110,6 @@ void NSTurbSolver::do_step(real t, bool sync) {
 
 // 3. Add force
         if (m_force_function != SourceMethods::Zero) {
-
 #ifndef BENCHMARKING
             m_logger->info("Add source ...");
 #endif
@@ -157,7 +137,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    }//end data
+    }
 }
 
 //======================================= Check data ==================================

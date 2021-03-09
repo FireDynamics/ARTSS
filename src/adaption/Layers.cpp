@@ -200,7 +200,6 @@ void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shi
     auto domain = Domain::getInstance();
 
     auto data = m_T->data;
-    size_t size = m_T->get_size();
 
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;
@@ -208,24 +207,28 @@ void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shi
     bool expansion_start = (domain->get_x1() != domain->get_X1());
     bool expansion_end = (domain->get_x2() != domain->get_X2());
 
-    //copy(expansion_counter_start,expansion_counter_end)
-#pragma acc data present(data[:size]) copyout(expansion_counter_end, expansion_counter_start)
+    // copy(expansion_counter_start,expansion_counter_end)
+#pragma acc data present(m_t) copyout(expansion_counter_end, expansion_counter_start)
     {
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
-        size_t nx_begin = domain->get_index_x1();//((domain->get_x1() - domain->get_X1()) / domain->get_dx());
+        // ((domain->get_x1() - domain->get_X1()) / domain->get_dx());
+        size_t nx_begin = domain->get_index_x1();
 
-        size_t j_start = domain->get_index_y1();//((domain->get_y1() - domain->get_Y1()) / domain->get_dy());
+        // ((domain->get_y1() - domain->get_Y1()) / domain->get_dy());
+        size_t j_start = domain->get_index_y1();
         size_t j_end = j_start + domain->get_ny() - 1;
-        size_t k_start = domain->get_index_z1();//((domain->get_z1() - domain->get_Z1()) / domain->get_dz());
+
+        // ((domain->get_z1() - domain->get_Z1()) / domain->get_dz());
+        size_t k_start = domain->get_index_z1();
         size_t k_end = k_start + domain->get_nz() - 1;
 
         size_t i_start = nx_begin;
         size_t i_end = nx_begin + domain->get_nx() - 1;
 
-        //loop through left and right side of cuboid in x direction
-#pragma acc parallel loop collapse(2) present(data[:size]) reduction(+:expansion_counter_end)
+        // loop through left and right side of cuboid in x direction
+#pragma acc parallel loop collapse(2) present(m_T) reduction(+:expansion_counter_end)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 // check innermost plane of the buffer zone on the right side
@@ -234,8 +237,7 @@ void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shi
                 }
             }
         }
-//#pragma acc parallel loop collapse(2) present(data[:size]) reduction(max:expansion_counter_start)
-#pragma acc parallel loop collapse(2) present(data[:size]) reduction(+:expansion_counter_start)
+#pragma acc parallel loop collapse(2) present(m_T) reduction(+:expansion_counter_start)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 // check innermost plane of the buffer zone on the left side

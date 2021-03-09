@@ -36,11 +36,8 @@ ExplicitEulerSource::ExplicitEulerSource() {
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, Field *S_x, Field *S_y, Field *S_z, bool sync) {
-    auto domain = Domain::getInstance();
-
     // local variables and parameters for GPU
     size_t level = out_x->get_level();
-    size_t bsize = domain->get_size(level);
     FieldType type = out_x->get_type();
 
     auto d_outx = out_x->data;
@@ -57,46 +54,46 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
     size_t *d_iList = boundary->get_innerList_level_joined();
     auto bsize_i = boundary->getSize_innerList();
 
-#pragma acc data present(d_outx[:bsize], d_outy[:bsize], d_outz[:bsize], d_Sx[:bsize], d_Sy[:bsize], d_Sz[:bsize])
+#pragma acc data present(outx, outy, outz, Sx, Sy, Sz)
     {
         //check directions of source
         //x - direction
         if (dir.find('x') != std::string::npos) {
-#pragma acc parallel loop independent present(d_outx[:bsize], d_Sx[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(d_outx, d_Sx, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_iList[j];
                 d_outx[i] += dt * d_Sx[i];
             }
 
             boundary->applyBoundary(d_outx, level, type, sync);
-        } // end x- direction
+        }
 
-        //y - direction
+        // y - direction
         if (dir.find('y') != std::string::npos) {
-#pragma acc parallel loop independent present(d_outy[:bsize], d_Sy[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(d_outy, d_Sy, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_iList[j];
                 d_outy[i] += dt * d_Sy[i];
             }
 
             boundary->applyBoundary(d_outy, level, type, sync);
-        } // end y- direction
+        }
 
-        //z - direction
+        // z - direction
         if (dir.find('z') != std::string::npos) {
-#pragma acc parallel loop independent present(d_outz[:bsize], d_Sz[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(d_outz, d_Sz, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_iList[j];
                 d_outz[i] += dt * d_Sz[i];
             }
 
             boundary->applyBoundary(d_outz, level, type, sync);
-        } // end z- direction
+        }
 
         if (sync) {
 #pragma acc wait
         }
-    }//end acc data
+    }
 }
 
 // ***************************************************************************************
@@ -106,11 +103,8 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
-
-    auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     size_t level = out->get_level();
-    auto bsize = domain->get_size(level);
     FieldType type = out->get_type();
 
     auto d_out = out->data;
@@ -122,9 +116,9 @@ void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
     size_t *d_iList = boundary->get_innerList_level_joined();
     auto bsize_i = boundary->getSize_innerList();
 
-#pragma acc data present(d_out[:bsize], d_S[:bsize])
+#pragma acc data present(out, S)
     {
-#pragma acc parallel loop independent present(d_out[:bsize], d_S[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, S, d_iList[:bsize_i]) async
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_iList[j];
             d_out[i] += dt * d_S[i];
@@ -135,5 +129,5 @@ void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    }//end acc data
+    }
 }

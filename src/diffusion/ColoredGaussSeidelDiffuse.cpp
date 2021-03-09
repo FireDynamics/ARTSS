@@ -46,7 +46,7 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
 /// \param  D     diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
+void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *, const Field *b, const real D, bool sync) {
     auto domain = Domain::getInstance();
     // local parameters for GPU
     auto bsize = domain->get_size(out->get_level());
@@ -57,19 +57,18 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
     auto boundary = BoundaryController::getInstance();
 
-  auto bsize_i = boundary->getSize_innerList();
-  auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->getSize_innerList();
+    auto bsize_b = boundary->getSize_boundaryList();
 
     size_t* d_iList = boundary->get_innerList_level_joined();
     size_t* d_bList = boundary->get_boundaryList_level_joined();
 
-//#pragma acc data present(d_out[:bsize], d_b[:bsize])
 {
-    const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
+    const size_t Nx = domain->get_Nx(out->get_level());  // due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny(out->get_level());
     const size_t Nz = domain->get_Nz(out->get_level());
 
-    const real dx = domain->get_dx(out->get_level()); //due to unnecessary parameter passing of *this
+    const real dx = domain->get_dx(out->get_level());  // due to unnecessary parameter passing of *this
     const real dy = domain->get_dy(out->get_level());
     const real dz = domain->get_dz(out->get_level());
 
@@ -77,7 +76,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
     const real rdy = 1. / dy;
     const real rdz = 1. / dz;
 
-    const real alpha_x = D * m_dt * rdx * rdx; //due to better pgi handling of scalars (instead of arrays)
+    const real alpha_x = D * m_dt * rdx * rdx;  // due to better pgi handling of scalars (instead of arrays)
     const real alpha_y = D * m_dt * rdy * rdy;
     const real alpha_z = D * m_dt * rdz * rdz;
 
@@ -100,7 +99,6 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
         sum = 0;
 
-//#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_iList[:bsize_i]) async
         for (size_t j = 0; j < bsize_i; ++j){
         const size_t i = d_iList[j];
             res = ( - alpha_x * (d_out[i + 1] + d_out[i - 1])\
@@ -111,20 +109,15 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
             sum += res * res;
         }
 
-//#pragma acc wait
         res = sqrt(sum);
         it++;
     } //end while
-
-    if (sync) {
-//#pragma acc wait
-    }
 
 #ifndef BENCHMARKING
     m_logger->info("Number of iterations: {}", it);
     m_logger->info("Colored Gauss-Seidel ||res|| = {:.5e}", res);
 #endif
-} //end data region
+}
 }
 
 // ===================== Turbulent version ============================

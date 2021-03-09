@@ -116,33 +116,10 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
     auto f_z = m_field_controller->field_force_z;
     auto S_T = m_field_controller->field_source_T;
     auto S_C = m_field_controller->field_source_concentration;
-    auto nu_t = m_field_controller->field_nu_t;            //nu_t - Eddy Viscosity
-    auto kappa_t = m_field_controller->field_kappa_t;        //kappa_t - Eddy thermal diffusivity
-    auto gamma_t = m_field_controller->field_gamma_t;        //gamma_t - Eddy mass diffsusivity
+    auto nu_t = m_field_controller->field_nu_t;        // nu_t - Eddy Viscosity
+    auto kappa_t = m_field_controller->field_kappa_t;  // kappa_t - Eddy thermal diffusivity
+    auto gamma_t = m_field_controller->field_gamma_t;  // gamma_t - Eddy mass diffsusivity
 
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-    auto d_u_tmp = u_tmp->data;
-    auto d_v_tmp = v_tmp->data;
-    auto d_w_tmp = w_tmp->data;
-    auto d_p = p->data;
-    auto d_p0 = p0->data;
-    auto d_rhs = rhs->data;
-    auto d_T = T->data;
-    auto d_T0 = T0->data;
-    auto d_T_tmp = T_tmp->data;
-    auto d_C = C->data;
-    auto d_C0 = C0->data;
-    auto d_C_tmp = C_tmp->data;
-    auto d_fx = f_x->data;
-    auto d_fy = f_y->data;
-    auto d_fz = f_z->data;
-    auto d_S_T = S_T->data;
-    auto d_S_C = S_C->data;
     auto d_nu_t = nu_t->data;
     auto d_kappa_t = kappa_t->data;
     auto d_gamma_t = gamma_t->data;
@@ -154,10 +131,10 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
     auto gamma = m_gamma;
     auto dir_vel = m_dir_vel;
 
-#pragma acc data present(    d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], \
-                            d_w0[:bsize], d_w_tmp[:bsize], d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], \
-                            d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize], d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_S_T[:bsize], d_S_C[:bsize], \
-                            d_nu_t[:bsize], d_kappa_t[:bsize], d_gamma_t[:bsize])
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
+                         w0, w_tmp, p, p0, rhs, T, T0, T_tmp, \
+                         C, C0, C_tmp, fx, fy, fz, S_T, S_C, \
+                         nu_t, kappa_t, gamma_t)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
@@ -229,7 +206,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
 #pragma acc parallel loop independent present(d_kappa_t[:bsize], d_nu_t[:bsize]) async
             for (size_t i = 0; i < bsize; ++i) {
-                d_kappa_t[i] = d_nu_t[i] * rPr_T; // kappa_turb = nu_turb/Pr_turb
+                d_kappa_t[i] = d_nu_t[i] * rPr_T;  // kappa_turb = nu_turb/Pr_turb
             }
 
 #ifndef BENCHMARKING
@@ -263,11 +240,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);
-        }
-
-            // Add source
-        else if (m_tempFct != SourceMethods::Zero) {
-
+        } else if (m_tempFct != SourceMethods::Zero) {  // Add source 
 #ifndef BENCHMARKING
             m_logger->info("Add temperature source ...");
 #endif
@@ -294,7 +267,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
             real Sc_T = params->get_real("solver/concentration/turbulence/Sc_T");
             real rSc_T = 1. / Sc_T;
 
-#pragma acc parallel loop independent present(d_gamma_t[:bsize], d_nu_t[:bsize]) async
+#pragma acc parallel loop independent present(gamma_t, nu_t) async
             for (size_t i = 0; i < bsize; ++i) d_gamma_t[i] = d_nu_t[i] * rSc_T; // gamma_turb = nu_turb/Sc_turb
 
 #ifndef BENCHMARKING
@@ -319,7 +292,6 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
         // Add source
         if (m_conFct != SourceMethods::Zero) {
-
 #ifndef BENCHMARKING
             m_logger->info("Add concentration source ...");
 #endif
@@ -334,7 +306,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    }//end data
+    }
 }
 
 //======================================= Check data ==================================

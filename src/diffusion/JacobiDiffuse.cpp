@@ -55,17 +55,17 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
     size_t *d_iList = boundary->get_innerList_level_joined();
     size_t *d_bList = boundary->get_boundaryList_level_joined();
 
-#pragma acc data present(d_out[:bsize], d_in[:bsize], d_b[:bsize])
+#pragma acc data present(out, in, b)
     {
-        const real dx = domain->get_dx(out->get_level()); //due to unnecessary parameter passing of *this
+        const real dx = domain->get_dx(out->get_level());  // due to unnecessary parameter passing of *this
         const real dy = domain->get_dy(out->get_level());
         const real dz = domain->get_dz(out->get_level());
 
-        const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
+        const real rdx = 1. / dx;  // due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;
         const real rdz = 1. / dz;
 
-        const real alphaX = D * m_dt * rdx * rdx; //due to better pgi handling of scalars (instead of arrays)
+        const real alphaX = D * m_dt * rdx * rdx;  // due to better pgi handling of scalars (instead of arrays)
         const real alphaY = D * m_dt * rdy * rdy;
         const real alphaZ = D * m_dt * rdz * rdz;
 
@@ -87,10 +87,10 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 
             sum = 0.;
 
-#pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, in, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_iList[j];
-                res = rbeta * (d_out[i] - d_in[i]); // = rbeta*(beta*(b - sum_j!=i(alpha*in))) - rbeta*in = b - sum(alpha*in) = b - A*x(k)
+                res = rbeta * (d_out[i] - d_in[i]);  // = rbeta*(beta*(b - sum_j!=i(alpha*in))) - rbeta*in = b - sum(alpha*in) = b - A*x(k)
                 sum += res * res;
             }
 
@@ -101,13 +101,13 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
             it++;
 
 // swap (no pointer swap due to uncontrolled behavior in TimeIntegration Update)
-#pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, in, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_iList[j];
                 d_in[i] = d_out[i];
             }
 
-#pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_bList[:bsize_b]) async
+#pragma acc parallel loop independent present(out, in, d_bList[:bsize_b]) async
             for (size_t j = 0; j < bsize_b; ++j) {
                 const size_t i = d_bList[j];
                 d_in[i] = d_out[i];
@@ -116,13 +116,13 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 
         if (it % 2 != 0) // swap necessary when odd number of iterations
         {
-#pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, in, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_iList[j];
                 d_out[i] = d_in[i];
             }
 
-#pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_bList[:bsize_b]) async
+#pragma acc parallel loop independent present(out, in, d_bList[:bsize_b]) async
             for (size_t j = 0; j < bsize_b; ++j) {
                 const size_t i = d_bList[j];
                 d_out[i] = d_in[i];

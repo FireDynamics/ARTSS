@@ -57,16 +57,16 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
     auto bsize_i = boundary->getSize_innerList();
     size_t *d_iList = boundary->get_innerList_level_joined();
 
-#pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize], d_iList[:bsize_i])
+#pragma acc data present(out, in, u_vel, v_vel, w_vel, d_iList[:bsize_i])
     {
-        const size_t Nx = domain->get_Nx(out->get_level());    // due to unnecessary parameter passing of *this
+        const size_t Nx = domain->get_Nx(out->get_level());
         const size_t Ny = domain->get_Ny(out->get_level());
 
-        const real dx = domain->get_dx(out->get_level());    // due to unnecessary parameter passing of *this
+        const real dx = domain->get_dx(out->get_level());
         const real dy = domain->get_dy(out->get_level());
         const real dz = domain->get_dz(out->get_level());
 
-        const real rdx = 1. / dx;        // due to unnecessary parameter passing of *this
+        const real rdx = 1. / dx;
         const real rdy = 1. / dy;
         const real rdz = 1. / dz;
 
@@ -169,7 +169,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             d_out[idx] = (1. - t) * ((1. - s) * ((1. - r) * d_000 + r * d_100)
                                           + s * ((1. - r) * d_010 + r * d_110))
                               + t * ((1. - s) * ((1. - r) * d_001 + r * d_101)
-                                          + s * ((1. - r) * d_011 + r * d_111)); // row-major
+                                          + s * ((1. - r) * d_011 + r * d_111));  // row-major
         }
 
         boundary->applyBoundary(d_out, type, sync);
@@ -177,6 +177,5 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
         if (sync) {
 #pragma acc wait
         }
-
-    }// end data region
+    }  // end data region
 }

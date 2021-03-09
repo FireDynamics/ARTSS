@@ -83,12 +83,11 @@ void BuoyancyMMS::set_up() {
 
 void BuoyancyMMS::update_source(Field *out, real t_cur) {
     auto boundary = BoundaryController::getInstance();
-    size_t size = Domain::getInstance()->get_size();
 
     auto d_out = out->data;
     auto d_source = m_source_field->data;
 
-#pragma acc data present(d_out[:size], d_source[:size])
+#pragma acc data present(out, source)
     {
         size_t *d_iList = boundary->get_innerList_level_joined();
         size_t *d_bList = boundary->get_boundaryList_level_joined();
@@ -96,7 +95,7 @@ void BuoyancyMMS::update_source(Field *out, real t_cur) {
         auto bsize_i = boundary->getSize_innerList();
         auto bsize_b = boundary->getSize_boundaryList();
 
-#pragma acc parallel loop independent present(d_out[:size], d_source[:size]) async
+#pragma acc parallel loop independent present(out, source) async
         // inner cells
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_iList[l];

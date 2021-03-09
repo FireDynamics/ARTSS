@@ -8,14 +8,13 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-void Cube::update_source(Field *out, real t_cur) {
+void Cube::update_source(Field *out, real) {
     auto boundary = BoundaryController::getInstance();
-    size_t size = Domain::getInstance()->get_size();
 
     auto d_out = out->data;
     auto d_source = m_source_field->data;
 
-#pragma acc data present(d_out[:size], d_source[:size])
+#pragma acc data present(out, source)
     {
         size_t *d_iList = boundary->get_innerList_level_joined();
         size_t *d_bList = boundary->get_boundaryList_level_joined();
@@ -23,7 +22,7 @@ void Cube::update_source(Field *out, real t_cur) {
         auto bsize_i = boundary->getSize_innerList();
         auto bsize_b = boundary->getSize_boundaryList();
 
-#pragma acc parallel loop independent present(d_out[:size], d_source[:size]) async
+#pragma acc parallel loop independent present(out, source) async
         // inner cells
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_iList[l];
@@ -36,7 +35,6 @@ void Cube::update_source(Field *out, real t_cur) {
             d_out[idx] = d_source[idx];
         }
     }
-
 }
 
 Cube::Cube(real value, real x_start, real y_start, real z_start, real x_end, real y_end, real z_end) {

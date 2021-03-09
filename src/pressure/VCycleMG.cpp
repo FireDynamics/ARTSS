@@ -30,9 +30,9 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
 
-    levels = domain->get_levels();
-    cycles = params->get_int("solver/pressure/n_cycle");
-    relaxs = params->get_int("solver/pressure/diffusion/n_relax");
+    m_levels = domain->get_levels();
+    m_cycles = params->get_int("solver/pressure/n_cycle");
+    m_relaxs = params->get_int("solver/pressure/diffusion/n_relax");
 
     m_dsign = -1.;
     m_w = 2. / 3.;
@@ -72,7 +72,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 
     //building Fields for level + sending to GPU
     // levels going up
-    for (int i = 0; i < levels; ++i) {
+    for (size_t i = 0; i < m_levels; ++i) {
 
         // build residuum0
         Field *r0 = new Field(FieldType::P, 0.0, i, domain->get_size(i));
@@ -96,7 +96,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
     } // end level loop
 
 //  build err0
-    err0.resize(levels + 1);
+    err0.resize(m_levels + 1);
 
     auto level = error1[0]->get_level();
     Field *e00 = new Field(FieldType::P, 0.0, level, domain->get_size(level));
@@ -104,9 +104,9 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 
     err0[0] = e00;
 
-    //building Fields for level
+    // building Fields for level
     // levels going down
-    for (int i=levels; i>0; --i) {
+    for (int i = m_levels; i > 0; --i) {
         // build err0
         level = error1[i - 1]->get_level();
         Field *e0 = new Field(FieldType::P, 0.0, level, domain->get_size(level));
@@ -117,21 +117,21 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 }
 
 VCycleMG::~VCycleMG() {
-    for (int i = 0; i < residuum0.size(); i++) {
+    for (size_t i = 0; i < residuum0.size(); i++) {
         delete residuum0[i];
     }
-    for (int i = 0; i < residuum1.size(); i++) {
+    for (size_t i = 0; i < residuum1.size(); i++) {
         delete residuum1[i];
     }
 
-    for (int i = 0; i < err0.size(); i++) {
+    for (size_t i = 0; i < err0.size(); i++) {
         delete err0[i];
     }
-    for (int i = 0; i < error1.size(); i++) {
+    for (size_t i = 0; i < error1.size(); i++) {
         delete error1[i];
     }
 
-    for (int i = 0; i < mg_temporal_solution.size(); i++) {
+    for (size_t i = 0; i < mg_temporal_solution.size(); i++) {
         delete mg_temporal_solution[i];
     }
 }
@@ -144,32 +144,21 @@ VCycleMG::~VCycleMG() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ************************************************************************
 void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
-    auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto d_out = out->data;
-    auto s_out = domain->get_size(out->get_level());
     auto d_b = b->data;
-    auto s_b = domain->get_size(b->get_level());
-
-    auto f_err1 = error1[0];
-    auto f_mg_tmp = mg_temporal_solution[0];
-    auto f_res1 = residuum1[0];
 
     auto d_err1 = error1[0]->data;
     auto d_mg_tmp = mg_temporal_solution[0]->data;
     auto d_res1 = residuum1[0]->data;
-
-    auto s_err1 = domain->get_size(error1[0]->get_level());
-    auto s_mg_tmp = domain->get_size(mg_temporal_solution[0]->get_level());
-    auto s_res1 = domain->get_size(residuum1[0]->get_level());
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
     auto bsize_i = boundary->getSize_innerList();
 
     // use iList on level 0, since update on level 0
-#pragma acc kernels present(d_out[:s_out], d_b[:s_b], d_err1[:s_err1], \
-                            d_mg_tmp[:s_mg_tmp], d_res1[:s_res1], d_iList[:bsize_i]) async
+#pragma acc kernels present(out, b, err1, \
+                            mg_tmp, res1, d_iList[:bsize_i]) async
     {
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
@@ -181,7 +170,7 @@ void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    }//end data region
+    }
 }
 
 //==================================== Pressure =================================
@@ -205,11 +194,11 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
     const int set_relaxs = params->get_int("solver/pressure/diffusion/n_relax");
     const int set_cycles = params->get_int("solver/pressure/n_cycle");
 
-    int act_cycles = 0;
+    size_t act_cycles = 0;
 
     if (Nt == 1) {
-        const int max_cycles = params->get_int("solver/pressure/max_cycle");
-        const int max_relaxs = params->get_int("solver/pressure/diffusion/max_solve");
+        const size_t max_cycles = params->get_int("solver/pressure/max_cycle");
+        const size_t max_relaxs = params->get_int("solver/pressure/diffusion/max_solve");
 
         real r = 10000.;
         real sum = 0;
@@ -217,7 +206,6 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
 
         const size_t Nx = domain->get_Nx();
         const size_t Ny = domain->get_Ny();
-        size_t bsize = domain->get_size();
 
         const real dx = domain->get_dx();
         const real dy = domain->get_dy();
@@ -236,20 +224,20 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
 
         while (r > tol_res &&
                 act_cycles < max_cycles &&
-                relaxs < max_relaxs) {
-            for (int i=0; i<cycles; i++) {
+                m_relaxs < max_relaxs) {
+            for (size_t i = 0; i < m_cycles; i++) {
                 VCycleMultigrid(out, sync);
                 act_cycles++;
             }
             sum = 0.;
 
             // calculate residuum in inner cells
-#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, b, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_iList[j];
-                r = d_b[i] - (rdx2 * (d_out[i - 1] - 2 * d_out[i] + d_out[i + 1])\
- + rdy2 * (d_out[i - Nx] - 2 * d_out[i] + d_out[i + Nx])\
- + rdz2 * (d_out[i - Nx * Ny] - 2 * d_out[i] + d_out[i + Nx * Ny]));
+                r = d_b[i] - (rdx2 * (d_out[i - 1] - 2 * d_out[i] + d_out[i + 1])
+                     + rdy2 * (d_out[i - Nx] - 2 * d_out[i] + d_out[i + Nx])
+                     + rdz2 * (d_out[i - Nx * Ny] - 2 * d_out[i] + d_out[i + Nx * Ny]));
                 sum += r * r;
             }
 
@@ -257,15 +245,15 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
 
             r = sqrt(sum);
 
-            relaxs += set_relaxs;
+            m_relaxs += set_relaxs;
         }
     } else { // Nt > 1
-        cycles = set_cycles;
-        relaxs = set_relaxs;
+        m_cycles = set_cycles;
+        m_relaxs = set_relaxs;
 
-        for (size_t i = 0; i < cycles; i++)
+        for (size_t i = 0; i < m_cycles; i++) {
             VCycleMultigrid(out, sync);
-
+        }
     }
 
     if (sync) {
@@ -280,9 +268,7 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
-    int max_level = levels;
-
-    auto domain = Domain::getInstance();
+    size_t max_level = m_levels;
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
     size_t *d_bList = boundary->get_boundaryList_level_joined();
@@ -291,58 +277,32 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
     if (max_level == 0) {
         auto f_mg_tmpi = mg_temporal_solution[0];
         auto f_res1i = residuum1[0];
-        auto d_mg_tmpi = mg_temporal_solution[0]->data;
-        auto d_res1i = residuum1[0]->data;
-        auto d_out = out->data;
-        auto s_mg_tmpi = domain->get_size(mg_temporal_solution[0]->get_level());
-        auto s_res1i = domain->get_size(residuum1[0]->get_level());
-        auto s_out = domain->get_size();
 
-#pragma acc data present(d_out[:s_out], d_mg_tmpi[:s_mg_tmpi], d_res1i[:s_res1i])
+#pragma acc data present(out, mg_tmpi, res1i)
         {
             Solve(out, f_mg_tmpi, f_res1i, max_level, sync);
         }
         return;
-    } //end if
+    }
 
-//===================== levels going down ====================//
-    for (int i=0; i<max_level; ++i) {
+    //===================== levels going down ====================//
+    for (size_t i = 0; i < max_level; ++i) {
         auto f_res0i = residuum0[i];
         auto f_err1i = error1[i];
-        auto f_err1ip = error1[i + 1];
         auto f_mg_tmpi = mg_temporal_solution[i];
         auto f_res1i = residuum1[i];
         auto f_res1ip = residuum1[i + 1];
 
         auto d_res0i = residuum0[i]->data;
-        auto d_err1i = error1[i]->data;
         auto d_err1ip = error1[i + 1]->data;
-        auto d_mg_tmpi = mg_temporal_solution[i]->data;
-        auto d_res1i = residuum1[i]->data;
         auto d_res1ip = residuum1[i + 1]->data;
-        auto d_out = out->data;
-
-        auto s_res0i = domain->get_size(residuum0[i]->get_level());
-        auto s_err1i = domain->get_size(error1[i]->get_level());
-        auto s_err1ip = domain->get_size(error1[i + 1]->get_level());
-        auto s_mg_tmpi = domain->get_size(mg_temporal_solution[i]->get_level());
-        auto s_res1i = domain->get_size(residuum1[i]->get_level());
-        auto s_res1ip = domain->get_size(residuum1[i + 1]->get_level());
-        auto s_out = domain->get_size(out->get_level());
 
         FieldType type_r0 = f_res0i->get_type();
-
         FieldType type_r1 = residuum1[i + 1]->get_type();
 
-        //auto bsize_i = boundary->get_MGiList_Size(i+1);
-        //auto bsize_b = boundary->get_MGbList_Size(i+1);
-
-#pragma acc data present(    d_res0i[:s_res0i], d_err1i[:s_err1i], d_err1ip[:s_err1ip], \
-                            d_mg_tmpi[:s_mg_tmpi], d_res1i[:s_res1i], d_res1ip[:s_res1ip], \
-                            d_out[:s_out])
+#pragma acc data present(res0i, err1i, err1ip, mg_tmpi, res1i, res1ip, out)
         {
-            if (i == 0) // use p=out on finest grid
-            {
+            if (i == 0) {  // use p=out on finest grid
                 // smooth
                 Smooth(out, f_mg_tmpi, f_res1i, i, sync);
 
@@ -372,26 +332,25 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
             size_t start_b = boundary->get_boundaryList_level_joined_start(i + 1);
             size_t end_b = boundary->get_boundaryList_level_joined_end(i + 1) + 1;
             // inner
-#pragma acc kernels present(d_err1ip[:s_err1ip], d_iList[start_i:(end_i-start_i)]) async
+#pragma acc kernels present(err1ip, d_iList[start_i:(end_i-start_i)]) async
 #pragma acc loop independent
             for (size_t j = start_i; j < end_i; ++j) {
                 const size_t idx = d_iList[j];
                 d_err1ip[idx] = 0.0;
             }
 
-            //boundary
-#pragma acc kernels present(d_err1ip[:s_err1ip], d_bList[start_b:(end_b-start_b)]) async
+            // boundary
+#pragma acc kernels present(err1ip, d_bList[start_b:(end_b-start_b)]) async
 #pragma acc loop independent
             for (size_t j = start_b; j < end_b; ++j) {
                 const size_t idx = d_bList[j];
                 d_err1ip[idx] = 0.0;
             }
-        } //end data  region
-    } //for (levels going down)
+        }
+    }
 
 //===================== levels going up ====================//
     for (size_t i = max_level; i > 0; --i) {
-
         auto f_err0i = err0[i];
         auto f_err1i = error1[i];
         auto f_err1im = error1[i - 1];
@@ -399,26 +358,8 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
         auto f_res1im = residuum1[i - 1];
 
         auto d_err0i = err0[i]->data;
-        auto d_err1i = error1[i]->data;
         auto d_err1im = error1[i - 1]->data;
-        auto d_mg_tmpim = mg_temporal_solution[i - 1]->data;
-        auto d_res1im = residuum1[i - 1]->data;
         auto d_out = out->data;
-
-        auto s_err0i = domain->get_size(err0[i]->get_level());
-        auto s_err1i = domain->get_size(error1[i]->get_level());
-        auto s_err1im = domain->get_size(error1[i - 1]->get_level());
-        auto s_mg_tmpim = domain->get_size(mg_temporal_solution[i - 1]->get_level());
-        auto s_res1im = domain->get_size(residuum1[i - 1]->get_level());
-        auto s_out = domain->get_size(out->get_level());
-
-        size_t Nx_e0 = domain->get_Nx(f_err0i->get_level());
-        size_t Ny_e0 = domain->get_Ny(f_err0i->get_level());
-        size_t Nz_e0 = domain->get_Nz(f_err0i->get_level());
-
-        real dx_e0 = domain->get_dx(f_err0i->get_level());
-        real dy_e0 = domain->get_dy(f_err0i->get_level());
-        real dz_e0 = domain->get_dz(f_err0i->get_level());
 
         FieldType type_e0 = f_err0i->get_type();
 
@@ -429,17 +370,16 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
         size_t start_b = boundary->get_boundaryList_level_joined_start(i - 1);
         size_t end_b = boundary->get_boundaryList_level_joined_end(i - 1) + 1;
 
-#pragma acc data present(d_err0i[:s_err0i], d_err1i[:s_err1i], d_err1im[:s_err1im], d_mg_tmpim[:s_mg_tmpim], d_res1im[:s_res1im], d_out[:s_out])
+#pragma acc data present(err0i, err1i, err1im, mg_tmpim, res1im, out)
         {
             // prolongate
             Prolongate(f_err0i, f_err1i, i, sync);
             boundary->applyBoundary(d_err0i, i - 1, type_e0, sync); // for err0 only Dirichlet BC
 
             // correct
-            if (i == 1) // use p=out on finest grid
-            {
+            if (i == 1) {  // use p=out on finest grid
                 // inner
-#pragma acc kernels present(d_err0i[:s_err0i], d_out[:s_out], d_iList[start_i:(end_i-start_i)]) async
+#pragma acc kernels present(err0i, out, d_iList[start_i:(end_i-start_i)]) async
                 {
 #pragma acc loop independent
                     for (size_t j = start_i; j < end_i; ++j) {
@@ -448,7 +388,7 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
                     }
                 }
                 // boundary
-#pragma acc kernels present(d_err0i[:s_err0i], d_out[:s_out], d_bList[start_b:(end_b-start_b)]) async
+#pragma acc kernels present(err0i, out, d_bList[start_b:(end_b-start_b)]) async
                 {
 #pragma acc loop independent
                     for (size_t j = start_b; j < end_b; ++j) {
@@ -461,7 +401,7 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
             } else {
                 // correct
                 // inner
-#pragma acc kernels present(d_err0i[:s_err0i], d_err1im[:s_err1im], d_iList[start_i:(end_i-start_i)]) async
+#pragma acc kernels present(err0i, err1im, d_iList[start_i:(end_i-start_i)]) async
                 {
 #pragma acc loop independent
                     for (size_t j = start_i; j < end_i; ++j) {
@@ -470,7 +410,7 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
                     }
                 }
                 // boundary
-#pragma acc kernels present(d_err0i[:s_err0i], d_err1im[:s_err1im], d_bList[start_b:(end_b-start_b)]) async
+#pragma acc kernels present(err0i, err1im, d_bList[start_b:(end_b-start_b)]) async
                 {
 #pragma acc loop independent
                     for (size_t j = start_b; j < end_b; ++j) {
@@ -479,11 +419,14 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
                     }
                 }
                 // smooth
-                if (i - 1 == levels - 1) Solve(f_err1im, f_mg_tmpim, f_res1im, i - 1, sync);
-                else Smooth(f_err1im, f_mg_tmpim, f_res1im, i - 1, sync); // for err only Dirichlet BC
+                if (i == m_levels) {
+                    Solve(f_err1im, f_mg_tmpim, f_res1im, i - 1, sync);
+                } else {
+                    Smooth(f_err1im, f_mg_tmpim, f_res1im, i - 1, sync); // for err only Dirichlet BC
+                }
             }
-        } //end data region
-    }//for (levels going up)
+        }
+    }
 
     // set boundaries
 
@@ -516,11 +459,9 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 
     auto d_out = out->data;
     auto d_tmp = tmp->data;
-    auto d_b = b->data;
 
     auto params = Parameters::getInstance();
 
-    size_t bsize = domain->get_size(out->get_level());
     FieldType type = out->get_type();
 
     auto boundary = BoundaryController::getInstance();
@@ -552,7 +493,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
     const real rbeta = 2. * (alphaX + alphaY + alphaZ);
     const real beta = 1. / rbeta;
 
-#pragma acc data present(d_out[:bsize], d_tmp[:bsize])
+#pragma acc data present(out, tmp)
     {
         // initialization
         // inner
@@ -570,15 +511,14 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
             const size_t i = d_bList[j];
             d_tmp[i] = d_out[i];
         }
-    }//end acc data
+    }
 
     // Diffusion step
     std::string diffusionType = params->get("solver/pressure/diffusion/type");
     if (diffusionType == DiffusionMethods::Jacobi) {
-
-#pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
+#pragma acc data present(out, tmp, b)
         {
-            for (int i=0; i<relaxs; i++) { // fixed iteration number as in xml
+            for (size_t i = 0; i < m_relaxs; i++) {  // fixed iteration number as in xml
                 JacobiDiffuse::JacobiStep(level, out, tmp, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
                 boundary->applyBoundary(d_out, level, type, sync);
 
@@ -586,8 +526,8 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
                 std::swap(d_tmp, d_out);
             }
 
-            if (relaxs % 2 != 0) { // swap necessary when odd number of iterations
-#pragma acc kernels present(d_out[:bsize], d_tmp[:bsize], d_iList[start_i:(end_i-start_i)]) async
+            if (m_relaxs % 2 != 0) {  // swap necessary when odd number of iterations
+#pragma acc kernels present(out, tmp, d_iList[start_i:(end_i-start_i)]) async
 #pragma acc loop independent
                 // inner
                 for (size_t j = start_i; j < end_i; ++j) {
@@ -595,23 +535,22 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
                     d_out[i] = d_tmp[i];
                 }
                 // boundary
-#pragma acc kernels present(d_out[:bsize], d_tmp[:bsize], d_bList[start_b:(end_b-start_b)]) async
+#pragma acc kernels present(out, tmp, d_bList[start_b:(end_b-start_b)]) async
 #pragma acc loop independent
                 for (size_t j = start_b; j < end_b; ++j) {
                     const size_t i = d_bList[j];
                     d_out[i] = d_tmp[i];
                 }
             }
-        }//end data region
+        }
     } else if (diffusionType == DiffusionMethods::ColoredGaussSeidel) {
-
-#pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
+#pragma acc data present(out, tmp, b)
         {
-            for (int i=0; i<relaxs; i++) {
+            for (size_t i = 0; i < m_relaxs; i++) {
                 ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
-                boundary->applyBoundary(d_out, level, type, sync); // for res/err only Dirichlet BC
+                boundary->applyBoundary(d_out, level, type, sync);  // for res/err only Dirichlet BC
             }
-        } //end data region
+        }
     } else {
 #ifndef BENCHMARKING
         m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
@@ -653,8 +592,6 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync
     auto d_in = in->data;
     auto d_b = b->data;
 
-    size_t bsize = domain->get_size(out->get_level());
-
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
 
@@ -662,21 +599,21 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync
     // inner
     size_t start_i = boundary->get_innerList_level_joined_start(level);
     size_t end_i = boundary->get_innerList_level_joined_end(level) + 1;
-#pragma acc data present(d_b[:bsize], d_in[:bsize], d_out[:bsize], d_iList[start_i:(end_i-start_i)])
+#pragma acc data present(b, in, out, d_iList[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
 #pragma acc loop independent
         for (size_t j = start_i; j < end_i; ++j) {
             const size_t i = d_iList[j];
-            d_out[i] = d_b[i] - (rdx2 * (d_in[i - 1] - 2 * d_in[i] + d_in[i + 1])\
- + rdy2 * (d_in[i - Nx] - 2 * d_in[i] + d_in[i + Nx])\
- + rdz2 * (d_in[i - Nx * Ny] - 2 * d_in[i] + d_in[i + Nx * Ny]));
+            d_out[i] = d_b[i] - (rdx2 * (d_in[i - 1] - 2 * d_in[i] + d_in[i + 1])
+                         + rdy2 * (d_in[i - Nx] - 2 * d_in[i] + d_in[i + Nx])
+                         + rdz2 * (d_in[i - Nx * Ny] - 2 * d_in[i] + d_in[i + Nx * Ny]));
         }
 
         if (sync) {
 #pragma acc wait
         }
-    }//end data region
+    }
 }
 
 //================================== Restrict ===============================
@@ -702,9 +639,6 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     auto d_out = out->data;
     auto d_in = in->data;
 
-    size_t bsize_out = domain->get_size(out->get_level());
-    size_t bsize_in = domain->get_size(in->get_level());
-
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();
 
@@ -725,7 +659,7 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     // thus if coarse cell inner cell, then surrounding fine cells also inner cells!
     size_t i, j, k;
 
-#pragma acc data present(d_in[:bsize_in], d_out[:bsize_out], d_iList[start_i:(end_i-start_i)])
+#pragma acc data present(in, out, d_iList[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
 #pragma acc loop independent
@@ -735,21 +669,20 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
             j = (idx - k * Nx * Ny) / Nx;
             i = idx - k * Nx * Ny - j * Nx;
 
-            d_out[idx] = 0.125 * (d_in[IX(2 * i - 1, 2 * j - 1, 2 * k - 1, nx, ny)]\
- + d_in[IX(2 * i, 2 * j - 1, 2 * k - 1, nx, ny)]\
- + d_in[IX(2 * i - 1, 2 * j, 2 * k - 1, nx, ny)]\
- + d_in[IX(2 * i, 2 * j, 2 * k - 1, nx, ny)]\
- + d_in[IX(2 * i - 1, 2 * j - 1, 2 * k, nx, ny)]\
- + d_in[IX(2 * i, 2 * j - 1, 2 * k, nx, ny)]\
- + d_in[IX(2 * i - 1, 2 * j, 2 * k, nx, ny)]\
- + d_in[IX(2 * i, 2 * j, 2 * k, nx, ny)]);
-
+            d_out[idx] = 0.125 * (d_in[IX(2 * i - 1, 2 * j - 1, 2 * k - 1, nx, ny)]
+                         + d_in[IX(2 * i, 2 * j - 1, 2 * k - 1, nx, ny)]
+                         + d_in[IX(2 * i - 1, 2 * j, 2 * k - 1, nx, ny)]
+                         + d_in[IX(2 * i, 2 * j, 2 * k - 1, nx, ny)]
+                         + d_in[IX(2 * i - 1, 2 * j - 1, 2 * k, nx, ny)]
+                         + d_in[IX(2 * i, 2 * j - 1, 2 * k, nx, ny)]
+                         + d_in[IX(2 * i - 1, 2 * j, 2 * k, nx, ny)]
+                         + d_in[IX(2 * i, 2 * j, 2 * k, nx, ny)]);
         }
 
         if (sync) {
 #pragma acc wait
         }
-    }// end data region
+    }
 }
 
 //================================== Prolongate ===============================
@@ -775,9 +708,6 @@ void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
     auto d_out = out->data;
     auto d_in = in->data;
 
-    size_t bsize_out = domain->get_size(out->get_level());
-    size_t bsize_in = domain->get_size(in->get_level());
-
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_iList = boundary->get_innerList_level_joined();
@@ -790,7 +720,7 @@ void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
     // prolongate
     size_t i, j, k;
 
-#pragma acc data present(d_in[:bsize_in], d_out[:bsize_out], d_iList[start_i:(end_i-start_i)])
+#pragma acc data present(in, out, d_iList[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
 #pragma acc loop independent
@@ -821,7 +751,7 @@ void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    }// end data region
+    }
 }
 
 //==================================== Smooth =================================
@@ -841,7 +771,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
     const size_t Ny = domain->get_Ny(out->get_level());
     const size_t Nz = domain->get_Nz(out->get_level());
 
-    if (level < levels - 1) {
+    if (level < m_levels - 1) {
 #ifndef BENCHMARKING
         m_logger->warn("Wrong level = {}", level);
 #endif
@@ -868,7 +798,6 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
     auto params = Parameters::getInstance();
 
-    size_t bsize = domain->get_size(out->get_level());
     FieldType type = out->get_type();
 
     auto boundary = BoundaryController::getInstance();
@@ -900,7 +829,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
     const real rbeta = 2. * (alphaX + alphaY + alphaZ);
     const real beta = 1. / rbeta;
 
-#pragma acc data present(d_out[:bsize], d_tmp[:bsize])
+#pragma acc data present(out, tmp)
     {
         // initialization
         // inner
@@ -923,7 +852,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 // Diffusion step
     std::string diffusionType = params->get("solver/pressure/diffusion/type");
     if (diffusionType == DiffusionMethods::Jacobi) {
-#pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
+#pragma acc data present(out, tmp, b)
         {
             size_t it = 0;
             const size_t max_it = static_cast<size_t> (params->get_int("solver/pressure/diffusion/max_solve"));
@@ -937,7 +866,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
                 sum = 0.;
 
-#pragma acc parallel loop independent present(d_out[:bsize], d_tmp[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, tmp, d_iList[:bsize_i]) async
                 for (size_t j = start_i; j < end_i; ++j) {
                     const size_t i = d_iList[j];
                     res = d_b[i] - (rdx2 * (d_out[i - 1] - 2 * d_out[i] + d_out[i + 1])\
@@ -957,7 +886,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             }  // end while
 
             if (it % 2 != 0) {  // swap necessary when odd number of iterations
-#pragma acc kernels present(d_out[:bsize], d_tmp[:bsize], d_iList[start_i:(end_i-start_i)]) async
+#pragma acc kernels present(out, tmp, d_iList[start_i:(end_i-start_i)]) async
 #pragma acc loop independent
                 // inner
                 for (size_t j = start_i; j < end_i; ++j) {
@@ -965,7 +894,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
                     d_out[i] = d_tmp[i];
                 }
                 // boundary
-#pragma acc kernels present(d_out[:bsize], d_tmp[:bsize], d_bList[start_b:(end_b-start_b)]) async
+#pragma acc kernels present(out, tmp, d_bList[start_b:(end_b-start_b)]) async
 #pragma acc loop independent
                 for (size_t j = start_b; j < end_b; ++j) {
                     const size_t i = d_bList[j];
@@ -974,7 +903,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
             }
         } //end data region
     } else if (diffusionType == DiffusionMethods::ColoredGaussSeidel) {
-#pragma acc data present(d_out[:bsize], d_tmp[:bsize], d_b[:bsize])
+#pragma acc data present(out, tmp, b)
         {
             size_t it = 0;
             const size_t max_it = static_cast<size_t>(params->get_int("solver/diffusion/max_iter"));
@@ -988,7 +917,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
                 sum = 0.;
 
-#pragma acc parallel loop independent present(d_out[:bsize], d_tmp[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, tmp, d_iList[:bsize_i]) async
                 for (size_t j = start_i; j < end_i; ++j) {
                     const size_t i = d_iList[j];
                     res = d_b[i] - (rdx2 * (d_out[i - 1] - 2 * d_out[i] + d_out[i + 1])\

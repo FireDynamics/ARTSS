@@ -33,7 +33,7 @@ DiffusionSolver::~DiffusionSolver() {
 /// \param  dt      time step
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void DiffusionSolver::do_step(real t, bool sync) {
+void DiffusionSolver::do_step(real, bool sync) {
 #ifndef BENCHMARKING
     m_logger->info("Diffuse ...");
 #endif
@@ -49,24 +49,12 @@ void DiffusionSolver::do_step(real t, bool sync) {
     auto v_tmp = m_field_controller->field_v_tmp;
     auto w_tmp = m_field_controller->field_w_tmp;
 
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-    auto d_u_tmp = u_tmp->data;
-    auto d_v_tmp = v_tmp->data;
-    auto d_w_tmp = w_tmp->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u->get_level());
-
-#pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize])
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp)
     {
         dif->diffuse(u, u0, u_tmp, m_nu, sync);
         dif->diffuse(v, v0, v_tmp, m_nu, sync);
         dif->diffuse(w, w0, w_tmp, m_nu, sync);
-    }//end data
+    }
 }
 
 //======================================= Check data ==================================

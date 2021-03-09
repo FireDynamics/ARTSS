@@ -36,17 +36,15 @@ ConstSmagorinsky::ConstSmagorinsky() {
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ConstSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Field *in_w, bool sync) {
-
     auto domain = Domain::getInstance();
-    // local parameters for GPU
-    auto bsize = domain->get_size(in_u->get_level());
 
+    // local parameters for GPU
     auto d_u = in_u->data;
     auto d_v = in_v->data;
     auto d_w = in_w->data;
     auto d_ev = ev->data;
 
-#pragma acc data present(d_ev[:bsize], d_u[:bsize], d_v[:bsize], d_w[:bsize])
+#pragma acc data present(ev, u, v, w)
     {
         const size_t Nx = domain->get_Nx(in_u->get_level());
         const size_t Ny = domain->get_Ny(in_v->get_level());
@@ -59,7 +57,7 @@ void ConstSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Fi
         const real rdy = 1. / dy;
         const real rdz = 1. / dz;
 
-        const real delta_s = cbrt(dx * dy * dz); // implicit filter
+        const real delta_s = cbrt(dx * dy * dz);  // implicit filter
         real S_bar;
         real S11, S22, S33, S12, S13, S23;
         real Cs = m_Cs;
@@ -68,7 +66,7 @@ void ConstSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Fi
         size_t *d_iList = boundary->get_innerList_level_joined();
         auto bsize_i = boundary->getSize_innerList();
 
-#pragma acc parallel loop independent present(d_ev[:bsize], d_u[:bsize], d_v[:bsize], d_w[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(ev, u, v, w, d_iList[:bsize_i]) async
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_iList[j];
             S11 = (d_u[i + 1] - d_u[i - 1]) * 0.5 * rdx;
@@ -89,7 +87,7 @@ void ConstSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Fi
         if (sync) {
 #pragma acc wait
         }
-    } // end data
+    }
 }
 
 //============================ Explicit filtering =============================
@@ -99,5 +97,5 @@ void ConstSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Fi
 /// \param  in            input pointer
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ConstSmagorinsky::ExplicitFiltering(Field *out, const Field *in, bool sync) {
+void ConstSmagorinsky::ExplicitFiltering(Field *, const Field *, bool) {
 }
