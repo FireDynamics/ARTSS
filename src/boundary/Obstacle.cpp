@@ -523,8 +523,11 @@ void Obstacle::replace_patch(size_t *indices, size_t size, Patch p) {
             m_obstacleRight = indices;
             m_size_obstacleRight = size;
             break;
-        case UNKNOWN_PATCH:
+        default:
+#ifndef BENCHMARKING
             m_logger->warn("wrong patch: {}", p);
+#endif
+            break;
     }
 }
 
@@ -641,7 +644,9 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
         bool j_overlap = hasOverlap(o1->getCoordinates_j1(), o1->getCoordinates_j2(), o2->getCoordinates_j1(), o2->getCoordinates_j2());
         bool k_overlap = hasOverlap(o1->getCoordinates_k1(), o1->getCoordinates_k2(), o2->getCoordinates_k1(), o2->getCoordinates_k2());
         if (j_overlap && k_overlap) {
+#ifndef BENCHMARKING
             logger->debug("obstacles are next to each other. Working on {} left side and on {} right side.", o1->get_name(), o2->get_name());
+#endif
             // another obstacle (o2) at the left side of o1
             overlap = true;
             // calculate coordinates of area which should be removed
@@ -1218,8 +1223,11 @@ void Obstacle::remove_patch(Patch patch) {
             delete[] m_obstacleRight;
             m_size_obstacleRight = 0;
             break;
-        case UNKNOWN_PATCH:
+        default:
+#ifndef BENCHMARKING
             m_logger->warn("wrong patch: {}", patch);
+#endif
+            break;
     }
 }
 
