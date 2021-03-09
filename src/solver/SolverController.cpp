@@ -458,6 +458,11 @@ void SolverController::force_source() {
     // Force
     if (params->get("solver/source/force_fct") == SourceMethods::Buoyancy) {
         std::string dir = params->get("solver/source/dir");
+        if (params->get("solver/source/use_init_values") == XML_FALSE) {
+            real ambient_temperature_value = params->get_real("solver/source/ambient_temperature_value");
+            m_field_controller->field_T->set_value(ambient_temperature_value);
+            m_field_controller->field_T_ambient->set_value(ambient_temperature_value);
+        }
 
         if (dir.find('x') != std::string::npos) {
             Functions::BuoyancyForce(m_field_controller->field_force_x, m_field_controller->field_T, m_field_controller->field_T_ambient);
