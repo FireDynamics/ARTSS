@@ -13,14 +13,15 @@
 #include "../utility/Utility.h"
 
 class SLAdvect : public IAdvection {
-public:
+ public:
     SLAdvect();
     ~SLAdvect() override = default;
 
     void advect(Field *out, Field *in, const Field *u_vel, const Field *v_vel, const Field *w_vel, bool sync) override;
 
-private:
+ private:
     real m_dt;
 };
 
 #endif /* ARTSS_ADVECTION_SLADVECT_H_ */
+

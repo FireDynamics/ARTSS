@@ -4,22 +4,23 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_SOURCE_GAUSSFUNCTION_H
-#define ARTSS_SOURCE_GAUSSFUNCTION_H
+#ifndef ARTSS_SOURCE_GAUSSFUNCTION_H_
+#define ARTSS_SOURCE_GAUSSFUNCTION_H_
 
 
 #include "../field/Field.h"
 #include "../interfaces/ISourceFunction.h"
+#include "../utility/GlobalMacrosTypes.h"
 
 class GaussFunction: public ISourceFunction {
-public:
+ public:
     GaussFunction(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z, real tau);
 
     GaussFunction(real HRR, real cp);
 
     ~GaussFunction();
     void update_source(Field *out, real t_cur) override;
-private:
+ private:
     void create_spatial_values();
     Field *m_field_spatial_values;
     real m_tau;
@@ -32,5 +33,5 @@ private:
     void init();
 };
 
+#endif /* ARTSS_SOURCE_GAUSSFUNCTION_H_ */
 
-#endif /* ARTSS_SOURCE_GAUSSFUNCTION_H */

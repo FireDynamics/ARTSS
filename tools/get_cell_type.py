@@ -1,8 +1,8 @@
 import sys
 import xml.etree.ElementTree as ET
+import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
-import numpy as np
 
 
 class XML:
@@ -263,29 +263,29 @@ if __name__ == '__main__':
                         z.append(k)
             answer = input('draw? [y/N] ')
             answer.lower()
-            if answer == 'y' or answer == 'yes':
+            if answer in ('y', 'yes'):
                 data = input('original point: ')
                 data = data.split(' ')
                 if len(data) > 2:
                     x.append(int(data[0]))
                     y.append(int(data[1]))
                     z.append(int(data[2]))
-                plot(x,y,z,show=True)
+                plot(x, y, z, show=True)
         elif text.startswith('neighbo'):
             index_original = domain.calculate_index(int(array[0]), int(array[1]), int(array[2]))
-            print(f'orig.\t' + domain.get_type(int(index_original)))
+            print('orig.\t' + domain.get_type(int(index_original)))
             index_front = domain.calculate_index(int(array[0]), int(array[1]), int(array[2])-1)
-            print(f'front\t' + domain.get_type(int(index_front)))
+            print('front\t' + domain.get_type(int(index_front)))
             index_back = domain.calculate_index(int(array[0]), int(array[1]), int(array[2])+1)
-            print(f'back\t' + domain.get_type(int(index_back)))
+            print('back\t' + domain.get_type(int(index_back)))
             index_bottom = domain.calculate_index(int(array[0]), int(array[1])-1, int(array[2]))
-            print(f'bottom\t' + domain.get_type(int(index_bottom)))
+            print('bottom\t' + domain.get_type(int(index_bottom)))
             index_top = domain.calculate_index(int(array[0]), int(array[1])+1, int(array[2]))
-            print(f'top\t' + domain.get_type(int(index_top)))
+            print('top\t' + domain.get_type(int(index_top)))
             index_left = domain.calculate_index(int(array[0])-1, int(array[1]), int(array[2]))
-            print(f'left\t' + domain.get_type(int(index_left)))
+            print('left\t' + domain.get_type(int(index_left)))
             index_right = domain.calculate_index(int(array[0])+1, int(array[1]), int(array[2]))
-            print(f'right\t' + domain.get_type(int(index_right)))
+            print('right\t' + domain.get_type(int(index_right)))
         else:
             array = text.split(' ')
             if len(array) == 3:

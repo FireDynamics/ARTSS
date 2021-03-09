@@ -82,7 +82,7 @@ namespace {
                 break;
         }
 
-        if (p == FRONT || p == BOTTOM || p == LEFT){
+        if (p == FRONT || p == BOTTOM || p == LEFT) {
             sign_reference_index = NEGATIVE_SIGN;
         }
         apply_boundary_condition(data_field, d_patch, patch_start, patch_end, level, sign_reference_index, reference_index, value * 2, NEGATIVE_SIGN);
@@ -132,7 +132,7 @@ namespace {
                 break;
         }
 
-        if (p == FRONT || p == BOTTOM || p == LEFT){
+        if (p == FRONT || p == BOTTOM || p == LEFT) {
             sign_reference_index = NEGATIVE_SIGN;
         }
 
@@ -178,12 +178,12 @@ namespace {
                 break;
         }
 
-        if (p == BACK || p == TOP || p == RIGHT){
+        if (p == BACK || p == TOP || p == RIGHT) {
             sign_reference_index = NEGATIVE_SIGN;
         }
         apply_boundary_condition(data_field, d_patch, patch_start, patch_end, level, sign_reference_index, reference_index, 0, POSITIVE_SIGN);
     }
-}
+}  // namespace
 
 //======================================== Apply boundary condition ====================================
 // ***************************************************************************************
@@ -198,7 +198,7 @@ namespace {
 /// \param  sync synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void apply_boundary_condition(real *data, size_t **index_fields, const size_t *patch_starts, const size_t *patch_ends, size_t level, BoundaryData *boundary_data, size_t id, bool sync) {
-    for (size_t i = 0; i < numberOfPatches; i++) {
+    for (size_t i = 0; i < number_of_patches; i++) {
         size_t *d_patch = *(index_fields + i);
         size_t patch_start = *(patch_starts + i);
         size_t patch_end = *(patch_ends + i);

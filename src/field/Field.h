@@ -7,11 +7,8 @@
 #ifndef ARTSS_FIELD_FIELD_H_
 #define ARTSS_FIELD_FIELD_H_
 
-#include <cmath>
-#include <array>
-#include <utility>
 #include <algorithm>
-#include "../Domain.h"
+#include <utility>
 #include "../utility/GlobalMacrosTypes.h"
 
 #ifndef ENUM_TYPES
@@ -48,5 +45,5 @@ class Field {
     FieldType m_type;
 };
 
-
 #endif /* ARTSS_FIELD_FIELD_H_ */
+

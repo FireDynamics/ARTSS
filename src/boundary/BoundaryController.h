@@ -8,23 +8,23 @@
 #define ARTSS_BOUNDARY_BOUNDARYCONTROLLER_H_
 
 #include <vector>
+#include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/tinyxml2.h"
 #include "../utility/Utility.h"
-#include "../field/Field.h"
 #include "BoundaryDataController.h"
 #include "Multigrid.h"
 #include "Obstacle.h"
 #include "Surface.h"
 
 class BoundaryController {
-public:
+ public:
     static BoundaryController* getInstance();
     ~BoundaryController();
 
     void applyBoundary(real *d, FieldType f, bool sync = true);
     void applyBoundary(real *d, size_t level, FieldType f, bool sync = true);
-    //void applyBoundary(real *d, size_t level, FieldType f, real* val, bool sync = true); // for non-const BC
+    // void applyBoundary(real *d, size_t level, FieldType f, real* val, bool sync = true); // for non-const BC
 
     void printBoundaries();
     void updateLists();
@@ -35,12 +35,12 @@ public:
     size_t getSize_obstacleList();
 
     size_t* get_innerList_level_joined();
-    size_t getSize_innerList_level_joined(); //TODO necessary?
+    size_t getSize_innerList_level_joined(); // TODO necessary?
     size_t get_innerList_level_joined_start(size_t level);
     size_t get_innerList_level_joined_end(size_t level);
 
     size_t* get_boundaryList_level_joined();
-    size_t getSize_boundaryList_level_joined(); //TODO necessary?
+    size_t getSize_boundaryList_level_joined(); // TODO necessary?
     size_t get_boundaryList_level_joined_start(size_t level);
     size_t get_boundaryList_level_joined_end(size_t level);
 
@@ -52,7 +52,7 @@ public:
 
     std::vector<FieldType> get_used_fields();
 
-private:
+ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -81,5 +81,5 @@ private:
     void detect_neighbouring_obstacles();
 };
 
-
 #endif /* ARTSS_BOUNDARY_BOUNDARYCONTROLLER_H_ */
+

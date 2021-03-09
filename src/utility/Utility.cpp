@@ -4,6 +4,7 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <cmath>
 #include <sstream>
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
@@ -11,7 +12,6 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 #include "../field/Field.h"
-#include <cmath>
 
 #ifndef BENCHMARKING
 #include <spdlog/cfg/helpers.h>
@@ -109,11 +109,11 @@ std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list
         counter2++;
     }
     while (counter1 < size_list1 && counter2 < size_list2) {
-        if (list1[counter1] == result[result.size()-1]){
+        if (list1[counter1] == result[result.size()-1]) {
             counter1++;
             continue;
         }
-        if (list2[counter2] == result[result.size()-1]){
+        if (list2[counter2] == result[result.size()-1]) {
             counter2++;
             continue;
         }
@@ -125,18 +125,18 @@ std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list
             counter2++;
         }
     }
-    if (counter1 < size_list1){
-        if (list1[counter1] == result[result.size()-1]){
+    if (counter1 < size_list1) {
+        if (list1[counter1] == result[result.size()-1]) {
             counter1++;
         }
-        for (size_t c = counter1; c < size_list1; c++){
+        for (size_t c = counter1; c < size_list1; c++) {
             result.push_back(list1[c]);
         }
-    }else{
-        if (list2[counter2] == result[result.size()-1]){
+    } else {
+        if (list2[counter2] == result[result.size()-1]) {
             counter2++;
         }
-        for (size_t c = counter2; c < size_list2; c++){
+        for (size_t c = counter2; c < size_list2; c++) {
             result.push_back(list2[c]);
         }
     }
@@ -150,10 +150,10 @@ void log_minimum(Field *field, std::string text, std::string logger_name) {
     auto boundary = BoundaryController::getInstance();
     size_t *innerList = boundary->get_innerList_level_joined();
     size_t size_innerList = boundary->getSize_innerList();
-    for (size_t i = 0; i < size_innerList; i++){
+    for (size_t i = 0; i < size_innerList; i++) {
         size_t idx = innerList[i];
         real value = data[idx];
-        if (value < minimum_inner){
+        if (value < minimum_inner) {
             minimum_inner = value;
         }
     }
@@ -164,42 +164,42 @@ void log_minimum(Field *field, std::string text, std::string logger_name) {
     std::vector<size_t> indices;
     size_t *boundaryList = boundary->get_boundaryList_level_joined();
     size_t size_boundaryList = boundary->getSize_boundaryList();
-    for (size_t i = 0; i < size_boundaryList; i++){
+    for (size_t i = 0; i < size_boundaryList; i++) {
         size_t idx = boundaryList[i];
         real value = data[idx];
-        if (value < minimum_boundary){
+        if (value < minimum_boundary) {
             indices.clear();
             indices.push_back(idx);
             minimum_boundary = value;
-        }else if (value == minimum_boundary) {
+        } else if (value == minimum_boundary) {
             indices.push_back(idx);
         }
     }
-    //size_t Nx = Domain::getInstance()->get_Nx();
-    //size_t Ny = Domain::getInstance()->get_Ny();
-    //std::string index;
-    //for (size_t idx: indices){
-    //    size_t k = getCoordinateK(idx, Nx, Ny);
-    //    size_t j = getCoordinateJ(idx, Nx, Ny, k);
-    //    size_t i = getCoordinateI(idx, Nx, Ny, j, k);
-    //    index += " (" + std::to_string(i) + "|" + std::to_string(j) + "|" + std::to_string(k) + ")";
-    //}
+    // size_t Nx = Domain::getInstance()->get_Nx();
+    // size_t Ny = Domain::getInstance()->get_Ny();
+    // std::string index;
+    // for (size_t idx: indices) {
+    //     size_t k = getCoordinateK(idx, Nx, Ny);
+    //     size_t j = getCoordinateJ(idx, Nx, Ny, k);
+    //     size_t i = getCoordinateI(idx, Nx, Ny, j, k);
+    //     index += " (" + std::to_string(i) + "|" + std::to_string(j) + "|" + std::to_string(k) + ")";
+    // }
 
 
 #ifndef BENCHMARKING
     logger->info("minimum boundary {}: {}", text, minimum_boundary);
     logger->info("indices ({}) boundary cells ({})", indices.size(), size_boundaryList);
-    //logger->debug("indices ({})", indices.size(), index);
+    // logger->debug("indices ({})", indices.size(), index);
     logger->debug("indices ({})", indices.size());
 #endif
 
     real minimum_obstacle = ULONG_LONG_MAX;
     size_t *obstacleList = boundary->get_obstacleList();
     size_t size_obstacleList = boundary->getSize_obstacleList();
-    for (size_t i = 0; i < size_obstacleList; i++){
+    for (size_t i = 0; i < size_obstacleList; i++) {
         size_t idx = obstacleList[i];
         real value = data[idx];
-        if (value < minimum_obstacle){
+        if (value < minimum_obstacle) {
             minimum_obstacle = value;
         }
     }

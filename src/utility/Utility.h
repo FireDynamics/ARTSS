@@ -10,8 +10,6 @@
 #include <string>
 #include <vector>
 #include "GlobalMacrosTypes.h"
-//#include "../field/Field.h"
-
 
 #ifndef BENCHMARKING
 #define FMT_USE_UDL_TEMPLATE 0
@@ -32,7 +30,7 @@ namespace Utility {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
 #endif
-} // namespace Utility
-
+}  // namespace Utility
 
 #endif /* ARTSS_UTILITY_UTILITY_H_ */
+

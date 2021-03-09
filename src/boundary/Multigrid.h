@@ -8,15 +8,15 @@
 #define ARTSS_BOUNDARY_MULTIGRID_H_
 
 #include "Boundary.h"
-#include "Surface.h"
+#include "BoundaryDataController.h"
 #include "Obstacle.h"
+#include "Surface.h"
 #include "../Domain.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
-#include "BoundaryDataController.h"
 
 class Multigrid {
-public:
+ public:
     Multigrid(size_t numberOfSurfaces, Surface** surfaceList, size_t numberOfObstacles, Obstacle** obstacleList, BoundaryDataController* bdc_boundary, BoundaryDataController **bdc_obstacles);
     explicit Multigrid(BoundaryDataController *bdc_boundary);
     ~Multigrid();
@@ -26,13 +26,13 @@ public:
     size_t getSize_obstacleList();
     size_t *get_obstacleList();
 
-    size_t* getInnerList_level_joined() { return m_data_MG_iList_level_joined; };
-    size_t getSize_innerList_level_joined() { return *(m_size_MG_iList_level + m_levels + 1); };
+    size_t* getInnerList_level_joined() { return m_data_MG_iList_level_joined; }
+    size_t getSize_innerList_level_joined() { return *(m_size_MG_iList_level + m_levels + 1); }
     size_t getInnerList_level_joined_start(size_t level);
     size_t getInnerList_level_joined_end(size_t level);
 
-    size_t* getBoundaryList_level_joined() { return m_data_MG_bList_level_joined; };
-    size_t getSize_boundaryList_level_joined() { return *(m_size_MG_bList_level + m_levels + 1); };
+    size_t* getBoundaryList_level_joined() { return m_data_MG_bList_level_joined; }
+    size_t getSize_boundaryList_level_joined() { return *(m_size_MG_bList_level + m_levels + 1); }
     size_t getBoundaryList_level_joined_start(size_t level);
     size_t getBoundaryList_level_joined_end(size_t level);
 
@@ -44,23 +44,23 @@ public:
     size_t getObstacleStrideY(size_t id, size_t level);
     size_t getObstacleStrideZ(size_t id, size_t level);
 
-private:
+ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     size_t m_levels;
     // all surfaces divided by level
-    Surface*** m_MG_surfaceList; //m_MG_surfaceList[level][surfaceID]
+    Surface*** m_MG_surfaceList;  // m_MG_surfaceList[level][surfaceID]
     size_t m_numberOfSurfaces = 0;
     // all obstacles divided by level
-    Obstacle*** m_MG_obstacleList; //m_MG_obstacleList[level][obstacleID]
+    Obstacle*** m_MG_obstacleList;  // m_MG_obstacleList[level][obstacleID]
     size_t m_numberOfObstacles = 0;
     // boundary for each level
-    Boundary** m_MG_boundaryList; //m_MG_boundaryList[level]
+    Boundary** m_MG_boundaryList;  // m_MG_boundaryList[level]
 
-    //obstacle indices divided by level
+    // obstacle indices divided by level
     size_t** m_MG_oList;
-    //surface indices divided by level
+    // surface indices divided by level
     size_t** m_MG_sList;
 
     // start index of each level in level joined list
@@ -103,18 +103,18 @@ private:
     size_t* m_data_MG_oList_zero_joined;
 
     size_t getSize_oList(size_t level);
-    int getLastIndex_oFront( size_t level, size_t id);
-    int getLastIndex_oBack( size_t level, size_t id);
-    int getLastIndex_oBottom( size_t level, size_t id);
-    int getLastIndex_oTop( size_t level, size_t id);
-    int getLastIndex_oLeft( size_t level, size_t id);
-    int getLastIndex_oRight( size_t level, size_t id);
+    int getLastIndex_oFront(size_t level, size_t id);
+    int getLastIndex_oBack(size_t level, size_t id);
+    int getLastIndex_oBottom(size_t level, size_t id);
+    int getLastIndex_oTop(size_t level, size_t id);
+    int getLastIndex_oLeft(size_t level, size_t id);
+    int getLastIndex_oRight(size_t level, size_t id);
     size_t getFirstIndex_oFront(size_t level, size_t id);
-    size_t getFirstIndex_oBack( size_t level, size_t id);
-    size_t getFirstIndex_oBottom( size_t level, size_t id);
+    size_t getFirstIndex_oBack(size_t level, size_t id);
+    size_t getFirstIndex_oBottom(size_t level, size_t id);
     size_t getFirstIndex_oTop(size_t level, size_t id);
-    size_t getFirstIndex_oLeft( size_t level, size_t id);
-    size_t getFirstIndex_oRight( size_t level, size_t id);
+    size_t getFirstIndex_oLeft(size_t level, size_t id);
+    size_t getFirstIndex_oRight(size_t level, size_t id);
     size_t getLen_oFront(size_t level);
     size_t getLen_oBack(size_t level);
     size_t getLen_oBottom(size_t level);
@@ -135,12 +135,12 @@ private:
     size_t getLen_bSliceY_joined();
     size_t getLen_bSliceX_joined();
 
-    size_t getFirstIndex_bSliceZ( size_t level);
-    size_t getFirstIndex_bSliceX( size_t level);
-    size_t getFirstIndex_bSliceY( size_t level);
-    size_t getLastIndex_bSliceZ( size_t level);
-    size_t getLastIndex_bSliceX( size_t level);
-    size_t getLastIndex_bSliceY( size_t level);
+    size_t getFirstIndex_bSliceZ(size_t level);
+    size_t getFirstIndex_bSliceX(size_t level);
+    size_t getFirstIndex_bSliceY(size_t level);
+    size_t getLastIndex_bSliceZ(size_t level);
+    size_t getLastIndex_bSliceX(size_t level);
+    size_t getLastIndex_bSliceY(size_t level);
 
     size_t getLen_iList_joined();
     size_t getLen_bList_joined();
@@ -168,7 +168,7 @@ private:
     void print();
 
     size_t** m_data_boundary_patches_joined;
-    //size_t** m_data_surfaces_patches_joined;
+    // size_t** m_data_surfaces_patches_joined;
     size_t** m_data_obstacles_patches_joined;
     BoundaryDataController* m_bdc_boundary;
     BoundaryDataController** m_bdc_obstacle;
@@ -178,5 +178,5 @@ private:
     void controlObstacleOverlap(Obstacle* o, size_t *i1, size_t *i2, size_t *j1, size_t *j2, size_t *k1, size_t *k2);
 };
 
-
 #endif /* ARTSS_BOUNDARY_MULTIGRID_H_*/
+

@@ -4,16 +4,16 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <cmath>
+#include "ISource.h"
 
+#include <cmath>
 #ifdef _OPENACC
 #include <accelmath.h>
 #endif
 
-#include "ISource.h"
-#include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
+#include "../utility/Parameters.h"
 
 //======================================== Sources ====================================
 //======================================== Force ======================================
@@ -25,7 +25,6 @@
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::buoyancy_force(Field *out, const Field *in, const Field *in_temperature_ambient, bool sync) {
-
     // local variables and parameters for GPU
     auto d_out = out->data;
     auto d_in = in->data;
@@ -68,8 +67,7 @@ void ISource::buoyancy_force(Field *out, const Field *in, const Field *in_temper
         if (sync) {
 #pragma acc wait
         }
-
-    }// end data region
+    }  // end data region
 }
 
 //======================================== Dissipation ====================================
@@ -82,7 +80,6 @@ void ISource::buoyancy_force(Field *out, const Field *in, const Field *in_temper
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::dissipate(Field *out, const Field *in_u, const Field *in_v, const Field *in_w, bool sync) {
-
     // local variables and parameters for GPU
     auto d_out = out->data;
     auto d_inu = in_u->data;
@@ -137,5 +134,6 @@ void ISource::dissipate(Field *out, const Field *in_u, const Field *in_v, const 
         if (sync) {
 #pragma acc wait
         }
-    }//end data region
+    }  // end data region
 }
+
