@@ -8,7 +8,6 @@
 #define ARTSS_BOUNDARY_BOUNDARYDATACONTROLLER_H_
 
 #include <vector>
-
 #include "../utility/tinyxml2.h"
 #include "../utility/Utility.h"
 #include "BoundaryData.h"
@@ -17,17 +16,14 @@ class BoundaryDataController {
  public:
     BoundaryDataController();
     ~BoundaryDataController();
-    void addBoundaryData(tinyxml2::XMLElement *xmlElement);
-    void applyBoundaryCondition(real *data, size_t **indexFields, size_t *patch_start, size_t *patch_end, FieldType fieldType, size_t level, bool sync = false);
-    void applyBoundaryConditionObstacle(real *data, size_t **indexFields, size_t *patch_start, size_t *patch_end, FieldType fieldType, size_t level, size_t id, bool sync = false);
+    void add_boundary_data(tinyxml2::XMLElement *xml_element);
+    void apply_boundary_condition(real *data, size_t **index_fields, size_t *patch_start, size_t *patch_end, FieldType field_type, size_t level, bool sync = false);
+    void apply_boundary_condition_obstacle(real *data, size_t **index_fields, size_t *patch_start, size_t *patch_end, FieldType field_type, size_t level, size_t id, bool sync = false);
     void print();
-
-    // void setIndexFields(size_t** indexFields);
-
     std::vector<FieldType> get_used_fields();
 
  private:
-    BoundaryData** m_boundaryData;
+    BoundaryData** m_boundary_data;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

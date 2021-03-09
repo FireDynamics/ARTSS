@@ -203,13 +203,13 @@ void apply_boundary_condition(real *data, size_t **index_fields, const size_t *p
         size_t patch_start = *(patch_starts + i);
         size_t patch_end = *(patch_ends + i);
         Patch p = static_cast<Patch>(i);
-        BoundaryCondition bc = boundary_data->getBoundaryCondition(p);
+        BoundaryCondition bc = boundary_data->get_boundary_condition(p);
         switch (bc) {
             case BoundaryCondition::DIRICHLET:
-                apply_dirichlet(data, d_patch, p, patch_start, patch_end, level, boundary_data->getValue(p));
+                apply_dirichlet(data, d_patch, p, patch_start, patch_end, level, boundary_data->get_value(p));
                 break;
             case BoundaryCondition::NEUMANN:
-                apply_neumann(data, d_patch, p, patch_start, patch_end, level, boundary_data->getValue(p));
+                apply_neumann(data, d_patch, p, patch_start, patch_end, level, boundary_data->get_value(p));
                 break;
             case BoundaryCondition::PERIODIC:
                 apply_periodic(data, d_patch, p, patch_start, patch_end, level, id);

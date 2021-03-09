@@ -139,7 +139,7 @@ void Surface::createSurface(size_t Nx, size_t Ny) {
 }
 
 void Surface::setBoundaryConditions(tinyxml2::XMLElement *xmlElement) {
-    m_boundaryDataController->addBoundaryData(xmlElement);
+    m_boundaryDataController->add_boundary_data(xmlElement);
 }
 
 size_t Surface::get_i2() {

@@ -17,16 +17,16 @@
 
 class Multigrid {
  public:
-    Multigrid(size_t numberOfSurfaces, Surface** surfaceList, size_t numberOfObstacles, Obstacle** obstacleList, BoundaryDataController* bdc_boundary, BoundaryDataController **bdc_obstacles);
+    Multigrid(size_t number_of_surfaces, Surface** surface_list, size_t number_of_obstacles, Obstacle** obstacle_list, BoundaryDataController* bdc_boundary, BoundaryDataController **bdc_obstacles);
     explicit Multigrid(BoundaryDataController *bdc_boundary);
     ~Multigrid();
 
-    size_t getSize_innerList(size_t level = 0);
-    size_t getSize_boundaryList(size_t level = 0);
-    size_t getSize_obstacleList();
-    size_t *get_obstacleList();
+    size_t get_size_inner_list(size_t level = 0);
+    size_t get_size_boundary_ist(size_t level = 0);
+    size_t get_size_obstacle_list();
+    size_t *get_obstacle_list();
 
-    size_t* getInnerList_level_joined() { return m_data_MG_iList_level_joined; }
+    size_t* get_inner_list_level_joined() { return m_data_MG_inner_list_level_joined; }
     size_t getSize_innerList_level_joined() { return *(m_size_MG_iList_level + m_levels + 1); }
     size_t getInnerList_level_joined_start(size_t level);
     size_t getInnerList_level_joined_end(size_t level);
@@ -83,7 +83,7 @@ class Multigrid {
     size_t* m_size_MG_oRight_level;
 
     //---- all level joined / arrays for GPU -----
-    size_t* m_data_MG_iList_level_joined;
+    size_t* m_data_MG_inner_list_level_joined;
     size_t* m_data_MG_bList_level_joined;
     size_t* m_data_MG_sList_level_joined;
 

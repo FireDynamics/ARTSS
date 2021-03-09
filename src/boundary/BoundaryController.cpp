@@ -57,7 +57,7 @@ void BoundaryController::parse_boundary_parameter(tinyxml2::XMLElement *xmlParam
 // BOUNDARY
     auto curElem = xmlParameter->FirstChildElement();
     while (curElem) {
-        m_bdc_boundary->addBoundaryData(curElem);
+        m_bdc_boundary->add_boundary_data(curElem);
         curElem = curElem->NextSiblingElement();
     }
 #ifndef BENCHMARKING
@@ -124,7 +124,7 @@ void BoundaryController::parse_obstacle_parameter(tinyxml2::XMLElement *xmlParam
             while (cur_elem) {
                 std::string nodeName = cur_elem->Value();
                 if (nodeName == "boundary") {
-                    bdc->addBoundaryData(cur_elem);
+                    bdc->add_boundary_data(cur_elem);
                 } else if (nodeName == "geometry") {
                     ox1 = cur_elem->DoubleAttribute("ox1");
                     ox2 = cur_elem->DoubleAttribute("ox2");
@@ -240,23 +240,23 @@ size_t BoundaryController::get_size_boundary_list_level_joined() {
 }
 
 size_t* BoundaryController::get_obstacle_list() {
-    return m_multigrid->get_obstacleList();
+    return m_multigrid->get_obstacle_list();
 }
 
 size_t BoundaryController::get_size_boundary_list() {
-    return m_multigrid->getSize_boundaryList();
+    return m_multigrid->get_size_boundary_ist();
 }
 
 size_t BoundaryController::get_size_inner_list() {
-    return m_multigrid->getSize_innerList();
+    return m_multigrid->get_size_inner_list();
 }
 
 size_t BoundaryController::get_size_obstacle_list() {
-    return m_multigrid->getSize_obstacleList();
+    return m_multigrid->get_size_obstacle_list();
 }
 
 size_t *BoundaryController::get_inner_list_level_joined() {
-    return m_multigrid->getInnerList_level_joined();
+    return m_multigrid->get_inner_list_level_joined();
 }
 
 size_t BoundaryController::get_inner_list_level_joined_start(size_t level) {
