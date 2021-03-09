@@ -151,52 +151,22 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 }
 
 VCycleMG::~VCycleMG() {
-    auto domain = Domain::getInstance();
+    for (int i = 0; i < residuum0.size(); i++) {
+        delete residuum0[i];
+    }
+    for (int i = 0; i < residuum1.size(); i++) {
+        delete residuum1[i];
+    }
 
-    while (residuum0.size() > 0) {
-        auto field = residuum0.back();
-        auto data = residuum0.back()->data;
-        size_t bsize = domain->get_size(residuum0.back()->get_level());
-#pragma acc exit data delete(data[:bsize])
-        delete field;
-        field = nullptr;
-        residuum0.pop_back();
+    for (int i = 0; i < err0.size(); i++) {
+        delete err0[i];
     }
-    while (residuum1.size() > 0) {
-        auto field = residuum1.back();
-        auto data = residuum1.back()->data;
-        size_t bsize = domain->get_size(residuum1.back()->get_level());
-#pragma acc exit data delete(data[:bsize])
-        delete field;
-        field = nullptr;
-        residuum1.pop_back();
+    for (int i = 0; i < error1.size(); i++) {
+        delete error1[i];
     }
-    while (err0.size() > 0) {
-        auto field = err0.back();
-        auto data = err0.back()->data;
-        size_t bsize = domain->get_size(err0.back()->get_level());
-#pragma acc exit data delete(data[:bsize])
-        delete field;
-        field = nullptr;
-        err0.pop_back();
-    }
-    while (error1.size() > 0) {
-        auto field = error1.back();
-        auto data = error1.back()->data;
-        size_t bsize = domain->get_size(error1.back()->get_level());
-#pragma acc exit data delete(data[:bsize])
-        delete field;
-        field = nullptr;
-        error1.pop_back();
-    }
-    while (mg_temporal_solution.size() > 0) {
-        auto field = mg_temporal_solution.back();
-        auto data = mg_temporal_solution.back()->data;
-        size_t bsize = domain->get_size(mg_temporal_solution.back()->get_level());
-#pragma acc exit data delete(data[:bsize])
-        delete field;
-        field = nullptr;
-        mg_temporal_solution.pop_back();
+
+    for (int i = 0; i < mg_temporal_solution.size(); i++) {
+        delete mg_temporal_solution[i];
     }
 }
 

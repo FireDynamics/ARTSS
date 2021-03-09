@@ -16,9 +16,6 @@ BuoyancyMMS::BuoyancyMMS() {
 }
 
 BuoyancyMMS::~BuoyancyMMS() {
-    auto data_source = m_source_field->data;
-    size_t size = m_source_field->get_size();
-#pragma acc exit data delete(data_source[:size])
     delete m_source_field;
 }
 

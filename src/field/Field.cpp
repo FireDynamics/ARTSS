@@ -18,8 +18,10 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
     m_level(level), m_size(size), m_type(type) {
     data = new real[m_size];
     set_value(val);
+    #pragma acc enter data copyin(this[:1]) create(m_data[:m_size])
 }
 
 Field::~Field() {
+    #pragma acc exit data delete(m_data[:m_size])
     delete[] data;
 }

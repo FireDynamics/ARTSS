@@ -46,9 +46,6 @@ Cube::Cube(real value, real x_start, real y_start, real z_start, real x_end, rea
 }
 
 Cube::~Cube() {
-    real *data = m_source_field->data;
-    size_t size = Domain::getInstance()->get_size();
-#pragma acc exit data delete(data[:size])
     delete m_source_field;
 }
 

@@ -186,87 +186,10 @@ DynamicSmagorinsky::DynamicSmagorinsky() {
 }
 
 DynamicSmagorinsky::~DynamicSmagorinsky() {
-
-    auto d_u_f = u_f->data;
-    auto d_v_f = v_f->data;
-    auto d_w_f = w_f->data;
-
-    auto d_uu = uu->data;
-    auto d_vv = vv->data;
-    auto d_ww = ww->data;
-    auto d_uv = uv->data;
-    auto d_uw = uw->data;
-    auto d_vw = vw->data;
-
-    auto d_uf_uf = uf_uf->data;
-    auto d_vf_vf = vf_vf->data;
-    auto d_wf_wf = wf_wf->data;
-    auto d_uf_vf = uf_vf->data;
-    auto d_uf_wf = uf_wf->data;
-    auto d_vf_wf = vf_wf->data;
-
-    auto d_uu_f = uu_f->data;
-    auto d_vv_f = vv_f->data;
-    auto d_ww_f = ww_f->data;
-    auto d_uv_f = uv_f->data;
-    auto d_uw_f = uw_f->data;
-    auto d_vw_f = vw_f->data;
-
-    auto d_L11 = L11->data;
-    auto d_L22 = L22->data;
-    auto d_L33 = L33->data;
-    auto d_L12 = L12->data;
-    auto d_L13 = L13->data;
-    auto d_L23 = L23->data;
-
-    auto d_S11 = S11->data;
-    auto d_S22 = S22->data;
-    auto d_S33 = S33->data;
-    auto d_S12 = S12->data;
-    auto d_S13 = S13->data;
-    auto d_S23 = S23->data;
-
-    auto d_P11 = P11->data;
-    auto d_P22 = P22->data;
-    auto d_P33 = P33->data;
-    auto d_P12 = P12->data;
-    auto d_P13 = P13->data;
-    auto d_P23 = P23->data;
-
-    auto d_S11_f = S11_f->data;
-    auto d_S22_f = S22_f->data;
-    auto d_S33_f = S33_f->data;
-    auto d_S12_f = S12_f->data;
-    auto d_S13_f = S13_f->data;
-    auto d_S23_f = S23_f->data;
-
-    auto d_P11_f = P11_f->data;
-    auto d_P22_f = P22_f->data;
-    auto d_P33_f = P33_f->data;
-    auto d_P12_f = P12_f->data;
-    auto d_P13_f = P13_f->data;
-    auto d_P23_f = P23_f->data;
-
-    auto d_S_bar = S_bar->data;
-    auto d_S_bar_f = S_bar_f->data;
-
-    auto d_M11 = M11->data;
-    auto d_M22 = M22->data;
-    auto d_M33 = M33->data;
-    auto d_M12 = M12->data;
-    auto d_M13 = M13->data;
-    auto d_M23 = M23->data;
-
-    auto d_Cs = Cs->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u_f->get_level());
-
-#pragma acc exit data delete(d_u_f[:bsize], d_v_f[:bsize], d_w_f[:bsize])
     delete u_f;
     delete v_f;
     delete w_f;
 
-#pragma acc exit data delete(d_uu[:bsize], d_vv[:bsize], d_ww[:bsize], d_uv[:bsize], d_uw[:bsize], d_vw[:bsize])
     delete uu;
     delete vv;
     delete ww;
@@ -274,7 +197,6 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
     delete uw;
     delete vw;
 
-#pragma acc exit data delete(d_uu_f[:bsize], d_vv_f[:bsize], d_ww_f[:bsize], d_uv_f[:bsize], d_uw_f[:bsize], d_vw_f[:bsize])
     delete uu_f;
     delete vv_f;
     delete ww_f;
@@ -282,7 +204,6 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
     delete uw_f;
     delete vw_f;
 
-#pragma acc exit data delete(d_uf_uf[:bsize], d_vf_vf[:bsize], d_wf_wf[:bsize], d_uf_vf[:bsize], d_uf_wf[:bsize], d_vf_wf[:bsize])
     delete uf_uf;
     delete vf_vf;
     delete wf_wf;
@@ -290,7 +211,6 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
     delete uf_wf;
     delete vf_wf;
 
-#pragma acc exit data delete(d_L11[:bsize], d_L22[:bsize], d_L33[:bsize], d_L12[:bsize], d_L13[:bsize], d_L23[:bsize])
     delete L11;
     delete L22;
     delete L33;
@@ -298,7 +218,6 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
     delete L13;
     delete L23;
 
-#pragma acc exit data delete(d_S11[:bsize], d_S22[:bsize], d_S33[:bsize], d_S12[:bsize], d_S13[:bsize], d_S23[:bsize])
     delete S11;
     delete S22;
     delete S33;
@@ -306,7 +225,6 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
     delete S13;
     delete S23;
 
-#pragma acc exit data delete(d_S11_f[:bsize], d_S22_f[:bsize], d_S33_f[:bsize], d_S12_f[:bsize], d_S13_f[:bsize], d_S23_f[:bsize])
     delete S11_f;
     delete S22_f;
     delete S33_f;
@@ -314,7 +232,6 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
     delete S13_f;
     delete S23_f;
 
-#pragma acc exit data delete(d_P11[:bsize], d_P22[:bsize], d_P33[:bsize], d_P12[:bsize], d_P13[:bsize], d_P23[:bsize])
     delete P11;
     delete P22;
     delete P33;
@@ -322,7 +239,6 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
     delete P13;
     delete P23;
 
-#pragma acc exit data delete(d_P11_f[:bsize], d_P22_f[:bsize], d_P33_f[:bsize], d_P12_f[:bsize], d_P13_f[:bsize], d_P23_f[:bsize])
     delete P11_f;
     delete P22_f;
     delete P33_f;
@@ -330,7 +246,6 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
     delete P13_f;
     delete P23_f;
 
-#pragma acc exit data delete(d_M11[:bsize], d_M22[:bsize], d_M33[:bsize], d_M12[:bsize], d_M13[:bsize], d_M23[:bsize])
     delete M11;
     delete M22;
     delete M33;
@@ -338,11 +253,9 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
     delete M13;
     delete M23;
 
-#pragma acc exit data delete(d_S_bar[:bsize], d_S_bar_f[:bsize])
     delete S_bar;
     delete S_bar_f;
 
-#pragma acc exit data delete(d_Cs[:bsize])
     delete Cs;
 }
 
@@ -356,7 +269,6 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void DynamicSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Field *in_w, bool sync) {
-
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU

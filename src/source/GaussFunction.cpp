@@ -17,9 +17,6 @@ GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real 
 }
 
 GaussFunction::~GaussFunction() {
-    auto data_spatial = m_field_spatial_values->data;
-    size_t size = m_field_spatial_values->get_size();
-#pragma acc exit data delete(data_spatial[:size])
     delete m_field_spatial_values;
 }
 

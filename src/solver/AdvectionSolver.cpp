@@ -46,15 +46,6 @@ AdvectionSolver::AdvectionSolver(FieldController *field_controlller) {
 
 AdvectionSolver::~AdvectionSolver() {
     delete adv;
-
-    auto d_u_lin = u_linm->data;
-    auto d_v_lin = v_linm->data;
-    auto d_w_lin = w_linm->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u_linm->get_level());
-
-#pragma acc exit data delete(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize])
-
     delete u_linm;
     delete v_linm;
     delete w_linm;
