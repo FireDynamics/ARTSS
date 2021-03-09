@@ -149,8 +149,8 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, co
         real nu_z1 = 0.5 * (d_ev[IX(i, j, k - 1, Nx, Ny)] + d_ev[idx]) + D;
         real nu_z2 = 0.5 * (d_ev[IX(i, j, k + 1, Nx, Ny)] + d_ev[idx]) + D;
 
-        auto di0 = (d_in[idx] - d_in[IX(i - 1, j, k, Nx, Ny)]); // * 4 / dx;  // positiv wenn nachbarzelle niedriger // u_i - u_{i-1}
-        auto di1 = (d_in[IX(i + 1, j, k, Nx, Ny)] - d_in[idx]); // positiv wenn nachbarzelle hoeher // u_{i+1} - u_i
+        auto di0 = (d_in[idx] - d_in[IX(i - 1, j, k, Nx, Ny)]);  // u_i - u_{i-1}
+        auto di1 = (d_in[IX(i + 1, j, k, Nx, Ny)] - d_in[idx]);  // u_{i+1} - u_i
         auto dj0 = (d_in[idx] - d_in[IX(i, j - 1, k, Nx, Ny)]);
         auto dj1 = (d_in[IX(i, j + 1, k, Nx, Ny)] - d_in[idx]);
         auto dk0 = (d_in[idx] - d_in[IX(i, j, k - 1, Nx, Ny)]);
