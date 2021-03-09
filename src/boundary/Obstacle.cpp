@@ -216,8 +216,8 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
         }
     }
 
-    // INNER of OBSTACLE
-    // fill oInner list with inner indices of obstacles
+    //// INNER of OBSTACLE
+    //// fill oInner list with inner indices of obstacles
     //for (size_t k = 1; k < strideZ - 1; ++k) {
     //    for (size_t j = 1; j < strideY - 1; ++j) {
     //        for (size_t i = 1; i < strideX - 1; ++i) {
@@ -260,6 +260,7 @@ void Obstacle::printDetails() {
     size_t strideX = getStrideX();
     size_t strideY = getStrideY();
     size_t strideZ = getStrideZ();
+    size_t coords_i, coords_j, coords_k;
 
     m_logger->debug("############### OBSTACLE {} ###############", m_name);
     m_logger->debug("level: {}", m_level);
@@ -273,11 +274,15 @@ void Obstacle::printDetails() {
     if (size_front > 0) {
         m_logger->debug("Front: {} | {}", m_obstacleFront[0], m_obstacleFront[size_front - 1]);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleFront[0], Nx, Ny);
-        m_logger->debug("Front start: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleFront[0], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleFront[0], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleFront[0], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Front start: {}|{}|{}", coords_i, coords_j, coords_k);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleFront[size_front - 1], Nx, Ny);
-        m_logger->debug("Front end: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleFront[size_front - 1], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleFront[size_front - 1], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleFront[size_front - 1], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Front end: {}|{}|{}", coords_i, coords_j, coords_k);
     } else {
         m_logger->debug("Front size = 0");
     }
@@ -286,11 +291,15 @@ void Obstacle::printDetails() {
     if (size_back > 0) {
         m_logger->debug("Back: {} | {}", m_obstacleBack[0], m_obstacleBack[size_back - 1]);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleBack[0], Nx, Ny);
-        m_logger->debug("Back start: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleBack[0], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleBack[0], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleBack[0], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Back start: {}|{}|{}", coords_i, coords_j, coords_k);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleBack[size_back - 1], Nx, Ny);
-        m_logger->debug("Back end: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleBack[size_back - 1], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleBack[size_back - 1], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleBack[size_back - 1], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Back end: {}|{}|{}", coords_i, coords_j, coords_k);
     } else {
         m_logger->debug("Back size = 0");
     }
@@ -299,11 +308,15 @@ void Obstacle::printDetails() {
     if (size_top > 0) {
         m_logger->debug("Top: {} | {}", m_obstacleTop[0], m_obstacleTop[size_top - 1]);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleTop[0], Nx, Ny);
-        m_logger->debug("Top start: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleTop[0], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleTop[0], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleTop[0], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Top start: {}|{}|{}", coords_i, coords_j, coords_k);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleTop[size_top - 1], Nx, Ny);
-        m_logger->debug("Top end: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleTop[size_top - 1], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleTop[size_top - 1], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleTop[size_top - 1], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Top end: {}|{}|{}", coords_i, coords_j, coords_k);
     } else {
         m_logger->debug("Top size = 0");
     }
@@ -312,11 +325,15 @@ void Obstacle::printDetails() {
     if (size_bottom > 0) {
         m_logger->debug("Bottom: {} | {}", m_obstacleBottom[0], m_obstacleBottom[size_bottom - 1]);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleBottom[0], Nx, Ny);
-        m_logger->debug("Bottom start: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleBottom[0], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleBottom[0], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleBottom[0], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Bottom start: {}|{}|{}", coords_i, coords_j, coords_k);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleBottom[size_bottom - 1], Nx, Ny);
-        m_logger->debug("Bottom end: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleBottom[size_bottom - 1], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleBottom[size_bottom - 1], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleBottom[size_bottom - 1], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Bottom end: {}|{}|{}", coords_i, coords_j, coords_k);
     } else {
         m_logger->debug("Bottom size = 0");
     }
@@ -325,11 +342,15 @@ void Obstacle::printDetails() {
     if (size_left > 0) {
         m_logger->debug("Left: {} | {}", m_obstacleLeft[0], m_obstacleLeft[size_left - 1]);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleLeft[0], Nx, Ny);
-        m_logger->debug("Left start: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleLeft[0], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleLeft[0], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleLeft[0], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Left start: {}|{}|{}", coords_i, coords_j, coords_k);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleLeft[size_left - 1], Nx, Ny);
-        m_logger->debug("Left end: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleLeft[size_left - 1], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleLeft[size_left - 1], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleLeft[size_left - 1], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Left end: {}|{}|{}", coords_i, coords_j, coords_k);
     } else {
         m_logger->debug("Left size = 0");
     }
@@ -338,11 +359,15 @@ void Obstacle::printDetails() {
     if (size_right > 0) {
         m_logger->debug("Right: {} | {}", m_obstacleRight[0], m_obstacleRight[size_right - 1]);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleRight[0], Nx, Ny);
-        m_logger->debug("Right start: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleRight[0], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleRight[0], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleRight[0], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Right start: {}|{}|{}", coords_i, coords_j, coords_k);
 
-        coords = Utility::coordinateFromLinearIndex(m_obstacleRight[size_right - 1], Nx, Ny);
-        m_logger->debug("Right end: {}|{}|{}", coords[0], coords[1], coords[2]);
+        coords_k = getCoordinateK(m_obstacleRight[size_right - 1], Nx, Ny);
+        coords_j = getCoordinateJ(m_obstacleRight[size_right - 1], Nx, Ny, coords_k);
+        coords_i = getCoordinateI(m_obstacleRight[size_right - 1], Nx, Ny, coords_j, coords_k);
+        m_logger->debug("Right end: {}|{}|{}", coords_i, coords_j, coords_k);
     } else {
         m_logger->debug("Right size = 0");
     }
@@ -414,9 +439,10 @@ void Obstacle::control() {
         }
     }
     if (!message.empty()) {
-        // TODO Logger
         message = "################ OBSTACLE CONTROL ################\n-- name " + m_name + "\n-- level " + std::to_string(m_level) + "\n" + message + "---------------- OBSTACLE CONTROL END ----------------";
-        std::cout << message << std::endl;
+#ifndef BENCHMARKING
+        m_logger->warn(message);
+#endif
     }
 }
 

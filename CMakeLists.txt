@@ -4,20 +4,16 @@
 # -DCMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang
 # -DCMAKE_BUILD_TYPE:STRING=Debug (default Release)
 # -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
-# -DBUILD_TESTING=ON (default OFF)
-# -DBUILD_CPPUNIT_TEST=ON (default OFF)
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
 
 project(ARTSS)
-add_executable(artss "src/main.cpp")
+add_executable(artss)
 set_target_properties(artss PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 add_subdirectory(src)
-get_target_property(SOURCE_FILES artss SOURCES)
-
-set(CMAKE_COLOR_MAKEFILE ON)
+get_target_property(ARTSS_SOURCE_FILES artss SOURCES)
 
 if(NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release)
@@ -34,15 +30,14 @@ message(STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR})
 message(STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR})
 message(STATUS "CMAKE_EXE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH})
 
-#----------------------------------------------------------------------
 #---------------------------- compiler -------------------------------
 if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(GPU_CC_TA "tesla:${GPU_CC}")
   message(STATUS "GPU Compute Compatiblity: ${GPU_CC}")
 
   if (NOT CUDA_VERSION)
-    message(STATUS "Setting CUDA Version to default: 8.0")
-    set(CUDA_VERSION "8.0")
+    message(STATUS "Setting CUDA Version to default: 10.2")
+    set(CUDA_VERSION "10.2")
   endif()
 
   if( ${CUDA_VERSION} STREQUAL "9" )
@@ -50,7 +45,7 @@ if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   elseif( ${CUDA_VERSION} STREQUAL "8" )
     set(CUDA_VERSION "8.0")
   elseif( ${CUDA_VERSION} STREQUAL "10" )
-    set(CUDA_VERSION "10.0")
+    set(CUDA_VERSION "10.2")
   endif()
   set(CUDA_VERSION_TA "cuda${CUDA_VERSION}" )
   message("-- CUDA Version: ${CUDA_VERSION}" )
@@ -133,38 +128,41 @@ if(NOT TARGET spdlog)
     add_subdirectory(external/spdlog)
 endif()
 
+if(NOT TARGET gtest)
+    add_subdirectory(external/googletest)
+endif()
 
 #Targets
-add_executable(artss_serial ${SOURCE_FILES} src/main.cpp)
+add_executable(artss_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
 
-add_executable(artss_serial_benchmark ${SOURCE_FILES})
+add_executable(artss_serial_benchmark ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_serial_benchmark PUBLIC -DBENCHMARKING -DUSE_NVTX)
 target_link_libraries(artss_serial_benchmark)
 
 
-add_executable(artss_multicore_cpu ${SOURCE_FILES})
+add_executable(artss_multicore_cpu ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_multicore_cpu PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_multicore_cpu PUBLIC -acc -ta=multicore)
 target_link_options(artss_multicore_cpu PUBLIC -acc -ta=multicore)
 target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
 
-add_executable(artss_multicore_cpu_benchmark ${SOURCE_FILES})
+add_executable(artss_multicore_cpu_benchmark ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_multicore_cpu_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_multicore_cpu_benchmark PUBLIC -acc -ta=multicore -DBENCHMARKING -DUSE_NVTX)
 target_link_options(artss_multicore_cpu_benchmark PUBLIC -acc -ta=multicore)
 target_link_libraries(artss_multicore_cpu_benchmark)
 
 
-add_executable(artss_gpu ${SOURCE_FILES})
+add_executable(artss_gpu ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_gpu PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_gpu PUBLIC -acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_options(artss_gpu PUBLIC -acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
 
-add_executable(artss_gpu_benchmark ${SOURCE_FILES})
+add_executable(artss_gpu_benchmark ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_gpu_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_gpu_benchmark PUBLIC -acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_options(artss_gpu_benchmark PUBLIC -acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
@@ -173,3 +171,4 @@ target_link_libraries(artss_gpu_benchmark)
 
 enable_testing()
 add_subdirectory(tests)
+add_subdirectory(gtests)
