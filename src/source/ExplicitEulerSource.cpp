@@ -54,8 +54,8 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
     auto dir = m_dir_vel;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc data present(d_outx[:bsize], d_outy[:bsize], d_outz[:bsize], d_Sx[:bsize], d_Sy[:bsize], d_Sz[:bsize])
     {
@@ -68,7 +68,7 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
                 d_outx[i] += dt * d_Sx[i];
             }
 
-            boundary->applyBoundary(d_outx, level, type, sync);
+            boundary->apply_boundary(d_outx, level, type, sync);
         } // end x- direction
 
         //y - direction
@@ -79,7 +79,7 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
                 d_outy[i] += dt * d_Sy[i];
             }
 
-            boundary->applyBoundary(d_outy, level, type, sync);
+            boundary->apply_boundary(d_outy, level, type, sync);
         } // end y- direction
 
         //z - direction
@@ -90,7 +90,7 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
                 d_outz[i] += dt * d_Sz[i];
             }
 
-            boundary->applyBoundary(d_outz, level, type, sync);
+            boundary->apply_boundary(d_outz, level, type, sync);
         } // end z- direction
 
         if (sync) {
@@ -119,8 +119,8 @@ void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
     auto dt = m_dt;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc data present(d_out[:bsize], d_S[:bsize])
     {
@@ -130,7 +130,7 @@ void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
             d_out[i] += dt * d_S[i];
         }
 
-        boundary->applyBoundary(d_out, level, type, sync);
+        boundary->apply_boundary(d_out, level, type, sync);
 
         if (sync) {
 #pragma acc wait

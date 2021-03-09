@@ -54,8 +54,8 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
 
     auto boundary = BoundaryController::getInstance();
 
-    auto bsize_i = boundary->getSize_innerList();
-    size_t *d_iList = boundary->get_innerList_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
 
 #pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize], d_iList[:bsize_i])
     {
@@ -178,7 +178,7 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             auto tmp = s110 + t * (s111 - s110);  // row-major
             d_out[idx] = tmp;
         }
-        boundary->applyBoundary(d_out, type, sync);
+        boundary->apply_boundary(d_out, type, sync);
 
         if (sync) {
 #pragma acc wait

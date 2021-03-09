@@ -117,8 +117,8 @@ real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
     real r;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *innerList = boundary->get_innerList_level_joined();
-    size_t size_iList = boundary->getSize_innerList();
+    size_t *innerList = boundary->get_inner_list_level_joined();
+    size_t size_iList = boundary->get_size_inner_list();
 
     // weighted 2-norm
     // absolute error
@@ -154,8 +154,8 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
     real rr;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *innerList = boundary->get_innerList_level_joined();
-    size_t size_iList = boundary->getSize_innerList();
+    size_t *innerList = boundary->get_inner_list_level_joined();
+    size_t size_iList = boundary->get_size_inner_list();
 
     // relative part with norm of analytical solution as denominator
     for (size_t i = 0; i < size_iList; i++) {
@@ -214,13 +214,13 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
 // ***************************************************************************************
 void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t, real *sum) {
     auto boundary = BoundaryController::getInstance();
-    size_t *iList = boundary->get_innerList_level_joined();
+    size_t *iList = boundary->get_inner_list_level_joined();
 
     //take median of indices in iList to get center point ix
     //std::nth_element(iList.begin(), iList.begin() + iList.size()/2, iList.end());
     //size_t ix = iList[iList.size()/2];
 
-    size_t ix = iList[boundary->getSize_innerList() / 2];
+    size_t ix = iList[boundary->get_size_inner_list() / 2];
 
     auto params = Parameters::getInstance();
     if (has_analytic_solution) {
@@ -323,8 +323,8 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
 
     // local variables and parameters
     size_t bsize = domain->get_size(u->get_level());
-    size_t *innerList = boundary->get_innerList_level_joined();
-    size_t sizei = boundary->getSize_innerList();
+    size_t *innerList = boundary->get_inner_list_level_joined();
+    size_t sizei = boundary->get_size_inner_list();
 
     real dx = domain->get_dx();
     real dy = domain->get_dy();
@@ -360,12 +360,12 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
 void Analysis::save_variables_in_file(FieldController *field_controller) {
     //TODO do not write field out if not used
     auto boundary = BoundaryController::getInstance();
-    size_t *innerList = boundary->get_innerList_level_joined();
-    size_t size_innerList = boundary->getSize_innerList();
-    size_t *boundaryList = boundary->get_boundaryList_level_joined();
-    size_t size_boundaryList = boundary->getSize_boundaryList();
-    size_t *obstacleList = boundary->get_obstacleList();
-    size_t size_obstacleList = boundary->getSize_obstacleList();
+    size_t *innerList = boundary->get_inner_list_level_joined();
+    size_t size_innerList = boundary->get_size_inner_list();
+    size_t *boundaryList = boundary->get_boundary_list_level_joined();
+    size_t size_boundaryList = boundary->get_size_boundary_list();
+    size_t *obstacleList = boundary->get_obstacle_list();
+    size_t size_obstacleList = boundary->get_size_obstacle_list();
 
     std::vector<FieldType> v_fields = boundary->get_used_fields();
 

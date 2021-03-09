@@ -160,15 +160,15 @@ namespace {
         switch (p) {
             case FRONT:
             case BACK:
-                reference_index = Nx * Ny * (bdc->getObstacleStrideZ(id, level) - 2);
+                reference_index = Nx * Ny * (bdc->get_obstacle_stride_z(id, level) - 2);
                 break;
             case BOTTOM:
             case TOP:
-                reference_index = Nx * (bdc->getObstacleStrideY(id, level) - 2);
+                reference_index = Nx * (bdc->get_obstacle_stride_y(id, level) - 2);
                 break;
             case LEFT:
             case RIGHT:
-                reference_index = (bdc->getObstacleStrideX(id, level) - 2);
+                reference_index = (bdc->get_obstacle_stride_x(id, level) - 2);
                 break;
             default:
 #ifndef BENCHMARKING

@@ -15,31 +15,31 @@
 class Boundary {
  public:
     ~Boundary();
-    Boundary(Obstacle** obstacleList, size_t numberOfObstacles, size_t size_obstacles, size_t level = 0);
+    Boundary(Obstacle** obstacle_list, size_t number_of_obstacles, size_t size_obstacles, size_t level = 0);
     explicit Boundary(size_t level = 0);
     void init(size_t size_obstacles);
 
-    size_t* getBoundaryList() {return m_boundaryList;}
-    size_t* getBoundaryFront() {return m_boundaryFront;}
-    size_t* getBoundaryBack() {return m_boundaryBack;}
-    size_t* getBoundaryTop() {return m_boundaryTop;}
-    size_t* getBoundaryBottom() {return m_boundaryBottom;}
-    size_t* getBoundaryLeft() {return m_boundaryLeft;}
-    size_t* getBoundaryRight() { return m_boundaryRight;}
+    size_t* get_boundary_list() {return m_boundary_list;}
+    size_t* get_boundary_front() {return m_boundary_front;}
+    size_t* get_boundary_back() {return m_boundary_back;}
+    size_t* get_boundary_top() {return m_boundary_top;}
+    size_t* get_boundary_bottom() {return m_boundary_bottom;}
+    size_t* get_boundary_left() {return m_boundary_left;}
+    size_t* get_boundary_right() { return m_boundary_right;}
 
-    size_t* getInnerList() { return m_innerList;}
-    size_t getSize_innerList() { return m_size_innerList; }
+    size_t* get_inner_list() { return m_inner_list;}
+    size_t get_size_inner_list() { return m_size_innerList; }
 
-    size_t getSize_boundaryList() {return m_size_boundaryList;}
-    size_t getSize_boundaryFront() {return  m_size_boundaryFront;}
-    size_t getSize_boundaryBack() {return   m_size_boundaryBack;}
-    size_t getSize_boundaryTop() {return    m_size_boundaryTop;}
-    size_t getSize_boundaryBottom() {return m_size_boundaryBottom;}
-    size_t getSize_boundaryLeft() {return   m_size_boundaryLeft;}
-    size_t getSize_boundaryRight() { return m_size_boundaryRight;}
+    size_t get_size_boundary_list() {return m_size_boundary_list;}
+    size_t get_size_boundary_front() {return m_size_boundary_front;}
+    size_t get_size_boundary_back() {return m_size_boundary_back;}
+    size_t get_size_boundary_top() {return m_size_boundary_top;}
+    size_t get_size_boundary_bottom() {return m_size_boundary_bottom;}
+    size_t get_size_boundary_left() {return m_size_boundary_left;}
+    size_t get_size_boundary_right() { return m_size_boundary_right;}
 
-    void updateLists(Obstacle** obstacleList, size_t numberOfObstacles, size_t size_obstacles);
-    void updateLists();
+    void update_lists(Obstacle** obstacle_list, size_t number_of_obstacles, size_t size_obstacles);
+    void update_lists();
     void control(size_t size_obstacles);
 
  private:
@@ -49,30 +49,30 @@ class Boundary {
 
     size_t m_level;
 
-    size_t* m_boundaryList;
-    size_t* m_boundaryFront;
-    size_t* m_boundaryBack;
-    size_t* m_boundaryTop;
-    size_t* m_boundaryBottom;
-    size_t* m_boundaryLeft;
-    size_t* m_boundaryRight;
+    size_t* m_boundary_list;
+    size_t* m_boundary_front;
+    size_t* m_boundary_back;
+    size_t* m_boundary_top;
+    size_t* m_boundary_bottom;
+    size_t* m_boundary_left;
+    size_t* m_boundary_right;
 
-    size_t m_size_boundaryList;
-    size_t m_size_boundaryFront;
-    size_t m_size_boundaryBack;
-    size_t m_size_boundaryTop;
-    size_t m_size_boundaryBottom;
-    size_t m_size_boundaryLeft;
-    size_t m_size_boundaryRight;
+    size_t m_size_boundary_list;
+    size_t m_size_boundary_front;
+    size_t m_size_boundary_back;
+    size_t m_size_boundary_top;
+    size_t m_size_boundary_bottom;
+    size_t m_size_boundary_left;
+    size_t m_size_boundary_right;
 
-    size_t* m_innerList;
+    size_t* m_inner_list;
     size_t m_size_innerList;
 
-    void boundaryCells();
-    void innerCells(Obstacle** obstacleList, size_t numberOfObstacles);
-    void innerCells();
+    void boundary_cells();
+    void inner_cells(Obstacle** obstacle_list, size_t number_of_obstacles);
+    void inner_cells();
     void print(size_t size_obstacles);
-    void clearLists();
+    void clear_lists();
 };
 
 #endif /* ARTSS_BOUNDARY_BOUNDARY_H_ */

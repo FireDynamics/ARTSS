@@ -404,8 +404,8 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 
     // Sight of boundaries
     auto boundary = BoundaryController::getInstance();
-    size_t *iList = boundary->get_innerList_level_joined();
-    size_t size_iList = boundary->getSize_innerList();
+    size_t *iList = boundary->get_inner_list_level_joined();
+    size_t size_iList = boundary->get_size_inner_list();
 
     for (size_t i = 0; i < size_iList; i++) {
         size_t idx = iList[i];

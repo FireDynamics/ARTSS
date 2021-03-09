@@ -276,49 +276,49 @@ void Multigrid::control() {
             message += "For Level " + std::to_string(level) + "\n";
             message += "size control\n";
         }
-        size_t bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_innerList();
+        size_t bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->get_size_inner_list();
         size_t cLen = getLastIndex_iList(level) - getFirstIndex_iList(level) + 1;
         if (cLen != bLen) {
             size_t control = (domain->get_nx(level) - 2) * (domain->get_ny(level) - 2) * (domain->get_nz(level) - 2);
             message += "length calculated by first and last index of iList does not equals size of innerList of Boundary object " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryList();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->get_size_boundary_list();
         cLen = getLastIndex_bList(level) - getFirstIndex_bList(level) + 1;
         if (cLen != bLen) {
             size_t control = (domain->get_nx(level) * domain->get_ny(level) * 2) + (domain->get_nx(level) * (domain->get_nz(level) - 2)) * 2 + ((domain->get_ny(level) - 2) * (domain->get_nz(level) - 2)) * 2;
             message += "length calculated by first and last index of bList does not equals size of boundaryList of Boundary object " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryLeft();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->get_size_boundary_left();
         cLen = getLastIndex_bSliceX(level) - getFirstIndex_bSliceX(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_ny(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceX does not equals size of bSliceX of bLeft " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryRight();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->get_size_boundary_right();
         cLen = getLastIndex_bSliceX(level) - getFirstIndex_bSliceX(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_ny(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceX does not equals size of bSliceX of bRight " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryBottom();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->get_size_boundary_bottom();
         cLen = getLastIndex_bSliceY(level) - getFirstIndex_bSliceY(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceY does not equals size of bSliceY of bBottom " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryTop();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->get_size_boundary_top();
         cLen = getLastIndex_bSliceY(level) - getFirstIndex_bSliceY(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceY does not equals size of bSliceY of bTop " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryFront();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->get_size_boundary_front();
         cLen = getLastIndex_bSliceZ(level) - getFirstIndex_bSliceZ(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_ny(level);
             message += "length calculated by first and last index of bSliceZ does not equals size of bSliceZ of bFront " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryBack();
+        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->get_size_boundary_back();
         cLen = getLastIndex_bSliceZ(level) - getFirstIndex_bSliceZ(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_ny(level);
@@ -328,17 +328,17 @@ void Multigrid::control() {
         size_t csize_inner = (domain->get_nx(level) - 2) * (domain->get_ny(level) - 2) * (domain->get_nz(level) - 2) - getSize_oList(level);
         size_t bsize_inner = getSize_innerList(level);
         if (csize_inner != bsize_inner) {
-            message += "getSize_innerList(level) does not equal (nx-2)*(ny-2)*(nz-2) " + std::to_string(bsize_inner) + "|" + std::to_string(csize_inner) + "\n";
+            message += "get_size_inner_list(level) does not equal (nx-2)*(ny-2)*(nz-2) " + std::to_string(bsize_inner) + "|" + std::to_string(csize_inner) + "\n";
         }
         size_t cindex_inner_start = getInnerList_level_joined_start(level);
         size_t cindex_inner_end = getInnerList_level_joined_end(level);
         if (cindex_inner_end - cindex_inner_start + 1 != bsize_inner) {
-            message += "getSize_innerList(level) does not equal the difference between start and end " + std::to_string(cindex_inner_start) + "|" + std::to_string(cindex_inner_end) + "\n";
+            message += "get_size_inner_list(level) does not equal the difference between start and end " + std::to_string(cindex_inner_start) + "|" + std::to_string(cindex_inner_end) + "\n";
         }
         size_t bsize_boundary = nx * ny * nz - (nx - 2) * (ny - 2) * (nz - 2);
         size_t csize_boundary = getSize_boundaryList(level);
         if (csize_boundary != bsize_boundary) {
-            message += "getSize_boundaryList(level) does not equal size-(nx-2)*(ny-2)*(nz-2) " + std::to_string(bsize_boundary) + "|" + std::to_string(csize_boundary) + "\n";
+            message += "get_size_boundary_list(level) does not equal size-(nx-2)*(ny-2)*(nz-2) " + std::to_string(bsize_boundary) + "|" + std::to_string(csize_boundary) + "\n";
         }
 
         if (!message.empty()) {
@@ -356,7 +356,7 @@ void Multigrid::control() {
         }
         size_t csize_inner = getSize_innerList_level_joined();
         if (bsize_inner != csize_inner) {
-            message += "getSize_innerList_level_joined does not equal the sum of each inner list " + std::to_string(bsize_inner) + "|" + std::to_string(csize_inner) + "\n";
+            message += "get_size_inner_list_level_joined does not equal the sum of each inner list " + std::to_string(bsize_inner) + "|" + std::to_string(csize_inner) + "\n";
         }
     }
 
@@ -539,11 +539,11 @@ void Multigrid::addMGLists() {
         b = new Boundary();
     }
     // set size of respective lists
-    m_size_MG_iList_level[1] = b->getSize_innerList();
-    m_size_MG_bList_level[1] = b->getSize_boundaryList();
-    m_size_MG_bSliceZ_level[1] = b->getSize_boundaryFront();
-    m_size_MG_bSliceY_level[1] = b->getSize_boundaryTop();
-    m_size_MG_bSliceX_level[1] = b->getSize_boundaryLeft();
+    m_size_MG_iList_level[1] = b->get_size_inner_list();
+    m_size_MG_bList_level[1] = b->get_size_boundary_list();
+    m_size_MG_bSliceZ_level[1] = b->get_size_boundary_front();
+    m_size_MG_bSliceY_level[1] = b->get_size_boundary_top();
+    m_size_MG_bSliceX_level[1] = b->get_size_boundary_left();
     // save boundary object in multigrid list
     *(m_MG_boundaryList) = b;
 
@@ -564,11 +564,11 @@ void Multigrid::addMGLists() {
         }
         *(m_MG_boundaryList + level) = boundary;
 
-        m_size_MG_iList_level[level + 1] = m_size_MG_iList_level[level] + boundary->getSize_innerList();
-        m_size_MG_bList_level[level + 1] = m_size_MG_bList_level[level] + boundary->getSize_boundaryList();
-        m_size_MG_bSliceZ_level[level + 1] = m_size_MG_bSliceZ_level[level] + boundary->getSize_boundaryFront();
-        m_size_MG_bSliceY_level[level + 1] = m_size_MG_bSliceY_level[level] + boundary->getSize_boundaryTop();
-        m_size_MG_bSliceX_level[level + 1] = m_size_MG_bSliceX_level[level] + boundary->getSize_boundaryLeft();
+        m_size_MG_iList_level[level + 1] = m_size_MG_iList_level[level] + boundary->get_size_inner_list();
+        m_size_MG_bList_level[level + 1] = m_size_MG_bList_level[level] + boundary->get_size_boundary_list();
+        m_size_MG_bSliceZ_level[level + 1] = m_size_MG_bSliceZ_level[level] + boundary->get_size_boundary_front();
+        m_size_MG_bSliceY_level[level + 1] = m_size_MG_bSliceY_level[level] + boundary->get_size_boundary_top();
+        m_size_MG_bSliceX_level[level + 1] = m_size_MG_bSliceX_level[level] + boundary->get_size_boundary_left();
     }
 }
 
@@ -624,7 +624,7 @@ void Multigrid::calcSurfaces(Surface **surfaceList) {
 void Multigrid::surfaceDominantRestriction(size_t level) {
 // SURFACES
     if (m_numberOfSurfaces > 0) {
-// add index to m_surfaceList if any of l-1 indices building the l index was a surface (dominant restriction)
+// add index to m_surface_list if any of l-1 indices building the l index was a surface (dominant restriction)
         Domain *domain = Domain::getInstance();
         size_t Nx = domain->get_Nx(level);
         size_t Ny = domain->get_Ny(level);
@@ -834,27 +834,27 @@ void Multigrid::sendBoundaryListsToGPU() {
 
     for (size_t level = 0; level < m_levels + 1; level++) {
         Boundary *boundary = *(m_MG_boundaryList + level);
-        for (size_t i = 0; i < boundary->getSize_innerList(); i++) {
-            *(m_data_MG_iList_level_joined + counter_iList) = boundary->getInnerList()[i];
+        for (size_t i = 0; i < boundary->get_size_inner_list(); i++) {
+            *(m_data_MG_iList_level_joined + counter_iList) = boundary->get_inner_list()[i];
             counter_iList++;
         }
-        for (size_t i = 0; i < boundary->getSize_boundaryList(); i++) {
-            *(m_data_MG_bList_level_joined + counter_bList) = boundary->getBoundaryList()[i];
+        for (size_t i = 0; i < boundary->get_size_boundary_list(); i++) {
+            *(m_data_MG_bList_level_joined + counter_bList) = boundary->get_boundary_list()[i];
             counter_bList++;
         }
-        for (size_t i = 0; i < boundary->getSize_boundaryFront(); i++) {
-            *(m_data_MG_bFront_level_joined + counter_bSliceZ) = boundary->getBoundaryFront()[i];
-            *(m_data_MG_bBack_level_joined + counter_bSliceZ) = boundary->getBoundaryBack()[i];
+        for (size_t i = 0; i < boundary->get_size_boundary_front(); i++) {
+            *(m_data_MG_bFront_level_joined + counter_bSliceZ) = boundary->get_boundary_front()[i];
+            *(m_data_MG_bBack_level_joined + counter_bSliceZ) = boundary->get_boundary_back()[i];
             counter_bSliceZ++;
         }
-        for (size_t i = 0; i < boundary->getSize_boundaryTop(); i++) {
-            *(m_data_MG_bTop_level_joined + counter_bSliceY) = boundary->getBoundaryTop()[i];
-            *(m_data_MG_bBottom_level_joined + counter_bSliceY) = boundary->getBoundaryBottom()[i];
+        for (size_t i = 0; i < boundary->get_size_boundary_top(); i++) {
+            *(m_data_MG_bTop_level_joined + counter_bSliceY) = boundary->get_boundary_top()[i];
+            *(m_data_MG_bBottom_level_joined + counter_bSliceY) = boundary->get_boundary_bottom()[i];
             counter_bSliceY++;
         }
-        for (size_t i = 0; i < boundary->getSize_boundaryLeft(); i++) {
-            *(m_data_MG_bLeft_level_joined + counter_bSliceX) = boundary->getBoundaryLeft()[i];
-            *(m_data_MG_bRight_level_joined + counter_bSliceX) = boundary->getBoundaryRight()[i];
+        for (size_t i = 0; i < boundary->get_size_boundary_left(); i++) {
+            *(m_data_MG_bLeft_level_joined + counter_bSliceX) = boundary->get_boundary_left()[i];
+            *(m_data_MG_bRight_level_joined + counter_bSliceX) = boundary->get_boundary_right()[i];
             counter_bSliceX++;
         }
     }
@@ -1018,22 +1018,22 @@ void Multigrid::updateLists() {
     if (m_numberOfObstacles > 0) {
         for (size_t level = 0; level < m_levels + 1; level++) {
             Boundary *boundary = *(m_MG_boundaryList + level);
-            boundary->updateLists(*(m_MG_obstacleList + level), m_numberOfObstacles, getSize_oList(level));
-            m_size_MG_iList_level[level + 1] = m_size_MG_iList_level[level] + boundary->getSize_innerList();
-            m_size_MG_bList_level[level + 1] = m_size_MG_bList_level[level] + boundary->getSize_boundaryList();
-            m_size_MG_bSliceZ_level[level + 1] = m_size_MG_bSliceZ_level[level] + boundary->getSize_boundaryFront();
-            m_size_MG_bSliceY_level[level + 1] = m_size_MG_bSliceY_level[level] + boundary->getSize_boundaryTop();
-            m_size_MG_bSliceX_level[level + 1] = m_size_MG_bSliceX_level[level] + boundary->getSize_boundaryLeft();
+            boundary->update_lists(*(m_MG_obstacleList + level), m_numberOfObstacles, getSize_oList(level));
+            m_size_MG_iList_level[level + 1] = m_size_MG_iList_level[level] + boundary->get_size_inner_list();
+            m_size_MG_bList_level[level + 1] = m_size_MG_bList_level[level] + boundary->get_size_boundary_list();
+            m_size_MG_bSliceZ_level[level + 1] = m_size_MG_bSliceZ_level[level] + boundary->get_size_boundary_front();
+            m_size_MG_bSliceY_level[level + 1] = m_size_MG_bSliceY_level[level] + boundary->get_size_boundary_top();
+            m_size_MG_bSliceX_level[level + 1] = m_size_MG_bSliceX_level[level] + boundary->get_size_boundary_left();
         }
     } else {
         for (size_t level = 0; level < m_levels + 1; level++) {
             Boundary *boundary = *(m_MG_boundaryList + level);
-            boundary->updateLists();
-            m_size_MG_iList_level[level + 1] = m_size_MG_iList_level[level] + boundary->getSize_innerList();
-            m_size_MG_bList_level[level + 1] = m_size_MG_bList_level[level] + boundary->getSize_boundaryList();
-            m_size_MG_bSliceZ_level[level + 1] = m_size_MG_bSliceZ_level[level] + boundary->getSize_boundaryFront();
-            m_size_MG_bSliceY_level[level + 1] = m_size_MG_bSliceY_level[level] + boundary->getSize_boundaryTop();
-            m_size_MG_bSliceX_level[level + 1] = m_size_MG_bSliceX_level[level] + boundary->getSize_boundaryLeft();
+            boundary->update_lists();
+            m_size_MG_iList_level[level + 1] = m_size_MG_iList_level[level] + boundary->get_size_inner_list();
+            m_size_MG_bList_level[level + 1] = m_size_MG_bList_level[level] + boundary->get_size_boundary_list();
+            m_size_MG_bSliceZ_level[level + 1] = m_size_MG_bSliceZ_level[level] + boundary->get_size_boundary_front();
+            m_size_MG_bSliceY_level[level + 1] = m_size_MG_bSliceY_level[level] + boundary->get_size_boundary_top();
+            m_size_MG_bSliceX_level[level + 1] = m_size_MG_bSliceX_level[level] + boundary->get_size_boundary_left();
         }
     }
     sendBoundaryListsToGPU();
