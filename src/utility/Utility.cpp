@@ -144,7 +144,9 @@ std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list
 }
 
 void log_minimum(Field *field, std::string text, std::string logger_name) {
+#ifndef BENCHMARKING
     auto logger = Utility::create_logger(logger_name);
+#endif
     auto data = field->data;
     real minimum_inner = ULONG_LONG_MAX;
     auto boundary = BoundaryController::getInstance();

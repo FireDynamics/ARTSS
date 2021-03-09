@@ -523,10 +523,11 @@ void Obstacle::replace_patch(size_t *indices, size_t size, Patch p) {
             m_obstacleRight = indices;
             m_size_obstacleRight = size;
             break;
-        case UNKNOWN_PATCH:
+        default:
 #ifndef BENCHMARKING
             m_logger->warn("wrong patch: {}", p);
 #endif
+            break;
     }
 }
 
@@ -1222,10 +1223,11 @@ void Obstacle::remove_patch(Patch patch) {
             delete[] m_obstacleRight;
             m_size_obstacleRight = 0;
             break;
-        case UNKNOWN_PATCH:
+        default:
 #ifndef BENCHMARKING
             m_logger->warn("wrong patch: {}", patch);
 #endif
+            break;
     }
 }
 
