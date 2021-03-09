@@ -188,15 +188,15 @@ void FieldController::update_data(bool sync) {
     size_t bsize_o = boundary->getSize_obstacleList();
 
 #pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
-#pragma acc data present(u, v, w, u0, v0, w0, u_tmp, v_tmp, w_tmp, \
-                         p, p0, T, T0, T_tmp, C, C0, C_tmp)
+#pragma acc data present(field_u, field_v, field_w, field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_w_tmp, \
+                         field_p, field_p0, field_T, field_T0, field_T_tmp, field_C, field_C0, field_C_tmp)
     {
         // inner
 #pragma acc parallel loop independent present(d_iList[:bsize_i]),
-#pragma acc parallel loop independent present(u[:bsize], v[:bsize], w[:bsize], \
-                                              u0, v0, w0, u_tmp, v_tmp, d_w_tmp, \
-                                              p, p0, T, T0, T_tmp, \
-                                              C, C0, C_tmp) async
+#pragma acc parallel loop independent present(field_u, field_v, field_w, \
+                                              field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_d_w_tmp, \
+                                              field_p, field_p0, field_T, field_T0, field_T_tmp, \
+                                              field_C, field_C0, field_C_tmp) async
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t idx = d_iList[j];
             d_u0[idx] = d_u[idx];
@@ -213,8 +213,8 @@ void FieldController::update_data(bool sync) {
         }
         // boundary
 #pragma acc parallel loop independent present(d_bList[:bsize_b])
-#pragma acc parallel loop independent present(u, v, w, u0, v0, w0, u_tmp, v_tmp, w_tmp, \
-                                              p, p0, T, T0, T_tmp, C, C0, C_tmp) async
+#pragma acc parallel loop independent present(field_u, field_v, field_w, field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_w_tmp, \
+                                              field_p, field_p0, field_T, field_T0, field_T_tmp, field_C, field_C0, field_C_tmp) async
         for (size_t j = 0; j < bsize_b; ++j) {
             const size_t idx = d_bList[j];
             d_u0[idx] = d_u[idx];
@@ -231,8 +231,8 @@ void FieldController::update_data(bool sync) {
         }
         // obstacles
 #pragma acc parallel loop independent present(d_oList[:bsize_o])
-#pragma acc parallel loop independent present(u, v, w, u0, v0, w0, u_tmp, v_tmp, w_tmp, \
-                                              p, p0, T, T0, T_tmp, C, C0, C_tmp) async
+#pragma acc parallel loop independent present(field_u, field_v, field_w, field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_w_tmp, \
+                                              field_p, field_p0, field_T, field_T0, field_T_tmp, field_C, field_C0, field_C_tmp) async
         for (size_t j = 0; j < bsize_o; ++j) {
             const size_t idx = d_oList[j];
             d_u0[idx] = d_u[idx];
