@@ -224,25 +224,7 @@ Multigrid::~Multigrid() {
     if (m_numberOfObstacles > 0) {
         delete[] m_MG_obstacleList;
         delete[] m_MG_oList;
-     //   delete[] m_MG_oFront;
-     //   delete[] m_MG_oBack;
-     //   delete[] m_MG_oBottom;
-     //   delete[] m_MG_oTop;
-     //   delete[] m_MG_oLeft;
-     //   delete[] m_MG_oRight;
 
-//        size_t size_oFront = getLen_oFront_joined();
-//        size_t size_oBack = getLen_oBack_joined();
-//        size_t size_oBottom = getLen_oBottom_joined();
-//        size_t size_oTop = getLen_oTop_joined();
-//        size_t size_oLeft = getLen_oLeft_joined();
-//        size_t size_oRight = getLen_oRight_joined();
-// #pragma acc exit data delete(m_data_MG_oFront_level_joined[:size_oFront])
-// #pragma acc exit data delete(m_data_MG_oBack_level_joined[:size_oBack])
-// #pragma acc exit data delete(m_data_MG_oTop_level_joined[:size_oTop])
-// #pragma acc exit data delete(m_data_MG_oBottom_level_joined[:size_oBottom])
-// #pragma acc exit data delete(m_data_MG_oLeft_level_joined[:size_oLeft])
-// #pragma acc exit data delete(m_data_MG_oRight_level_joined[:size_oRight])
         delete[] m_data_MG_oFront_level_joined;
         delete[] m_data_MG_oBack_level_joined;
         delete[] m_data_MG_oTop_level_joined;
