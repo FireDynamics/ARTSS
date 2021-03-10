@@ -258,49 +258,49 @@ void Multigrid::control() {
             message += "For Level " + std::to_string(level) + "\n";
             message += "size control\n";
         }
-        size_t bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_innerList();
+        size_t bLen = (static_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_innerList();
         size_t cLen = getLastIndex_iList(level) - getFirstIndex_iList(level) + 1;
         if (cLen != bLen) {
             size_t control = (domain->get_nx(level) - 2) * (domain->get_ny(level) - 2) * (domain->get_nz(level) - 2);
             message += "length calculated by first and last index of iList does not equals size of innerList of Boundary object " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryList();
+        bLen = (static_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryList();
         cLen = getLastIndex_bList(level) - getFirstIndex_bList(level) + 1;
         if (cLen != bLen) {
             size_t control = (domain->get_nx(level) * domain->get_ny(level) * 2) + (domain->get_nx(level) * (domain->get_nz(level) - 2)) * 2 + ((domain->get_ny(level) - 2) * (domain->get_nz(level) - 2)) * 2;
             message += "length calculated by first and last index of bList does not equals size of boundaryList of Boundary object " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryLeft();
+        bLen = (static_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryLeft();
         cLen = getLastIndex_bSliceX(level) - getFirstIndex_bSliceX(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_ny(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceX does not equals size of bSliceX of bLeft " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryRight();
+        bLen = (static_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryRight();
         cLen = getLastIndex_bSliceX(level) - getFirstIndex_bSliceX(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_ny(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceX does not equals size of bSliceX of bRight " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryBottom();
+        bLen = (static_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryBottom();
         cLen = getLastIndex_bSliceY(level) - getFirstIndex_bSliceY(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceY does not equals size of bSliceY of bBottom " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryTop();
+        bLen = (static_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryTop();
         cLen = getLastIndex_bSliceY(level) - getFirstIndex_bSliceY(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_nz(level);
             message += "length calculated by first and last index of bSliceY does not equals size of bSliceY of bTop " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryFront();
+        bLen = (static_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryFront();
         cLen = getLastIndex_bSliceZ(level) - getFirstIndex_bSliceZ(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_ny(level);
             message += "length calculated by first and last index of bSliceZ does not equals size of bSliceZ of bFront " + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
-        bLen = (reinterpret_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryBack();
+        bLen = (static_cast<Boundary *>(*(m_MG_boundaryList + level)))->getSize_boundaryBack();
         cLen = getLastIndex_bSliceZ(level) - getFirstIndex_bSliceZ(level) + 1;
         if (cLen != bLen) {
             size_t control = domain->get_nx(level) * domain->get_ny(level);
@@ -969,12 +969,32 @@ void Multigrid::applyBoundaryCondition(real *d, size_t level, FieldType f, bool 
     }
     if (m_numberOfObstacles > 0) {
         for (size_t id = 0; id < m_numberOfObstacles - 1; ++id) {
-            size_t opatch_start[] = {getFirstIndex_oFront(level, id), getFirstIndex_oBack(level, id), getFirstIndex_oBottom(level, id), getFirstIndex_oTop(level, id), getFirstIndex_oLeft(level, id), getFirstIndex_oRight(level, id)};
-            size_t opatch_end[] = {getFirstIndex_oFront(level, id+1), getFirstIndex_oBack(level, id+1), getFirstIndex_oBottom(level, id+1), getFirstIndex_oTop(level, id+1), getFirstIndex_oLeft(level, id+1), getFirstIndex_oRight(level, id+1)};
-            (reinterpret_cast<BoundaryDataController *> (*(m_bdc_obstacle + id)))->applyBoundaryConditionObstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, id, sync);
+            size_t opatch_start[] = {getFirstIndex_oFront(level, id),
+                                     getFirstIndex_oBack(level, id),
+                                     getFirstIndex_oBottom(level, id),
+                                     getFirstIndex_oTop(level, id),
+                                     getFirstIndex_oLeft(level, id),
+                                     getFirstIndex_oRight(level, id)};
+            size_t opatch_end[] = {getFirstIndex_oFront(level, id + 1),
+                                   getFirstIndex_oBack(level, id + 1),
+                                   getFirstIndex_oBottom(level, id + 1),
+                                   getFirstIndex_oTop(level, id + 1),
+                                   getFirstIndex_oLeft(level, id + 1),
+                                   getFirstIndex_oRight(level, id + 1)};
+            (static_cast<BoundaryDataController *> (*(m_bdc_obstacle + id)))->applyBoundaryConditionObstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, id, sync);
         }
-        size_t opatch_start[] = {getFirstIndex_oFront(level, m_numberOfObstacles-1), getFirstIndex_oBack(level, m_numberOfObstacles-1), getFirstIndex_oBottom(level, m_numberOfObstacles-1), getFirstIndex_oTop(level, m_numberOfObstacles-1), getFirstIndex_oLeft(level, m_numberOfObstacles-1), getFirstIndex_oRight(level, m_numberOfObstacles-1)};
-        size_t opatch_end[] = {getFirstIndex_oFront(level+1, 0), getFirstIndex_oBack(level+1, 0), getFirstIndex_oBottom(level+1, 0), getFirstIndex_oTop(level+1, 0), getFirstIndex_oLeft(level+1, 0), getFirstIndex_oRight(level+1, 0)};
+        size_t opatch_start[] = {getFirstIndex_oFront(level, m_numberOfObstacles - 1),
+                                 getFirstIndex_oBack(level, m_numberOfObstacles - 1),
+                                 getFirstIndex_oBottom(level, m_numberOfObstacles - 1),
+                                 getFirstIndex_oTop(level, m_numberOfObstacles - 1),
+                                 getFirstIndex_oLeft(level, m_numberOfObstacles - 1),
+                                 getFirstIndex_oRight(level, m_numberOfObstacles - 1)};
+        size_t opatch_end[] = {getFirstIndex_oFront(level + 1, 0),
+                               getFirstIndex_oBack(level + 1, 0),
+                               getFirstIndex_oBottom(level + 1, 0),
+                               getFirstIndex_oTop(level + 1, 0),
+                               getFirstIndex_oLeft(level + 1, 0),
+                               getFirstIndex_oRight(level + 1, 0)};
         ((BoundaryDataController *) *(m_bdc_obstacle + m_numberOfObstacles-1))->applyBoundaryConditionObstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, m_numberOfObstacles-1, sync);
     }
 
@@ -1618,14 +1638,14 @@ size_t Multigrid::getBoundaryList_level_joined_end(size_t level) {
 }
 
 size_t Multigrid::getObstacleStrideX(size_t id, size_t level) {
-    return (reinterpret_cast<Obstacle *>(m_MG_obstacleList[level][id]))->getStrideX();
+    return (static_cast<Obstacle *>(m_MG_obstacleList[level][id]))->getStrideX();
 }
 
 size_t Multigrid::getObstacleStrideY(size_t id, size_t level) {
-    return (reinterpret_cast<Obstacle *>(m_MG_obstacleList[level][id]))->getStrideY();
+    return (static_cast<Obstacle *>(m_MG_obstacleList[level][id]))->getStrideY();
 }
 
 size_t Multigrid::getObstacleStrideZ(size_t id, size_t level) {
-    return (reinterpret_cast<Obstacle *>(m_MG_obstacleList[level][id]))->getStrideZ();
+    return (static_cast<Obstacle *>(m_MG_obstacleList[level][id]))->getStrideZ();
 }
 

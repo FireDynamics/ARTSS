@@ -138,7 +138,7 @@
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
-    <vtk_nth_plot> 100 </vtk_nth_plot>
+    <vtk_nth_plot> 1000 </vtk_nth_plot>
   </visualisation>
 
   <logging file="output_test_navierstokestempturb_steckler.log" level="info">

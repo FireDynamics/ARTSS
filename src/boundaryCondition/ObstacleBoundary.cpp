@@ -27,9 +27,13 @@ namespace {
     void apply_boundary_condition(real *data_field, const size_t *d_patch, size_t patch_start, size_t patch_end, size_t level, int8_t sign_reference_index, size_t reference_index, real value, int8_t sign) {
         Domain *domain = Domain::getInstance();
         size_t b_size = domain->get_size(level);
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger("ObstacleBoundary");
+        logger->debug("applying from {} to {} for length {}", patch_start, patch_end, patch_end-patch_start+1);
+#endif
 #pragma acc data present(data_field[:b_size])
         {
-#pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start+1)]) async
+#pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
             for (size_t j = patch_start; j < patch_end; ++j) {
                 const size_t index = d_patch[j];
                 data_field[index] = sign * data_field[index + sign_reference_index * static_cast<int>(reference_index)] + value;
@@ -50,6 +54,10 @@ namespace {
     /// \param  value Value of boundary condition
     // ***************************************************************************************
     void apply_dirichlet(real *data_field, size_t *d_patch, Patch p, size_t patch_start, size_t patch_end, size_t level, real value) {
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger("ObstacleBoundary");
+        logger->debug("applying dirichlet to patch {}", BoundaryData::getPatchName(static_cast<Patch>(p)));
+#endif
         if (level > 0) {
             value = 0;
         }
@@ -76,7 +84,6 @@ namespace {
 
             default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("ObstacleBoundary");
                 logger->error("Unknown Patch for dirichlet boundary condition: {}", p);
 #endif
                 break;

@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     # ARTSS
     artss = ARTSS.ARTSS()
-    i = 200  # number of csv file
+    i = 2000  # number of csv file
     xml_name='Test_NavierStokesTempTurb_Steckler'  # name of xml file (without file ending)
     artss.add_xml(xml_name+'.xml')  # add xml
 
