@@ -348,7 +348,7 @@ function create_testcases {
     echo "    <source type=\"ExplicitEuler\" force_fct=\"Zero\" dir=\"xyz\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     echo "  <obstacles enabled=\"Yes\">
-    <obstacle>
+    <obstacle name=\"Cube\">
       <geometry ox1=\"0.0273\" ox2=\"0.964\" oy1=\"0.0078\" oy2=\"0.992\" oz1=\"-0.492\" oz2=\"0.4785\"/>
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"dirichlet\" value=\"0.0\" />
       <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"neumann\" value=\"0.0\" />
