@@ -163,11 +163,11 @@ BoundaryController::~BoundaryController() {
     for (size_t i = 0; i < m_number_of_obstacles; i++) {
         delete (m_bdc_obstacles[i]);
     }
-    //for (size_t surface = 0; surface < m_number_of_surfaces; surface++) {
+    //for (size_t surface = 0; surface < m_number_of_surface_objects; surface++) {
     //    delete (*(m_surface_list + surface));
     //}
     //delete[] m_surface_list;
-    //for (size_t obstacle = 0; obstacle < m_number_of_obstacles; obstacle++) {
+    //for (size_t obstacle = 0; obstacle < m_number_of_obstacle_objects; obstacle++) {
     //    delete (*(m_obstacle_list + obstacle));
     //}
     //delete[] m_obstacle_list;
@@ -205,7 +205,7 @@ void BoundaryController::print_boundaries() {
 /// \brief  Updates lists of indices
 // ***************************************************************************************
 void BoundaryController::update_lists() {
-    m_multigrid->updateLists();
+    m_multigrid->update_lists();
 }
 
 //======================================== Update lists ====================================
@@ -228,15 +228,15 @@ void BoundaryController::apply_boundary(real *d, FieldType f, bool sync) {
 /// \param  sync    synchronization (default: false)
 // ***************************************************************************************
 void BoundaryController::apply_boundary(real *d, size_t level, FieldType f, bool sync) {
-    m_multigrid->applyBoundaryCondition(d, level, f, sync);
+    m_multigrid->apply_boundary_condition(d, level, f, sync);
 }
 
 size_t BoundaryController::get_size_inner_list_level_joined() {
-    return m_multigrid->getSize_innerList_level_joined();
+    return m_multigrid->get_size_inner_list_level_joined();
 }
 
 size_t BoundaryController::get_size_boundary_list_level_joined() {
-    return m_multigrid->getSize_boundaryList_level_joined();
+    return m_multigrid->get_size_boundary_list_level_joined();
 }
 
 size_t* BoundaryController::get_obstacle_list() {
@@ -260,33 +260,33 @@ size_t *BoundaryController::get_inner_list_level_joined() {
 }
 
 size_t BoundaryController::get_inner_list_level_joined_start(size_t level) {
-    return m_multigrid->getInnerList_level_joined_start(level);
+    return m_multigrid->get_inner_list_level_joined_start(level);
 }
 
 size_t BoundaryController::get_inner_list_level_joined_end(size_t level) {
-    return m_multigrid->getInnerList_level_joined_end(level);
+    return m_multigrid->get_inner_list_level_joined_end(level);
 }
 
 size_t *BoundaryController::get_boundary_list_level_joined() {
-    return m_multigrid->getBoundaryList_level_joined();
+    return m_multigrid->get_boundary_list_level_joined();
 }
 
 size_t BoundaryController::get_boundary_list_level_joined_start(size_t level) {
-    return m_multigrid->getBoundaryList_level_joined_start(level);
+    return m_multigrid->get_boundary_list_level_joined_start(level);
 }
 
 size_t BoundaryController::get_boundary_list_level_joined_end(size_t level) {
-    return m_multigrid->getBoundaryList_level_joined_end(level);
+    return m_multigrid->get_boundary_list_level_joined_end(level);
 }
 
 size_t BoundaryController::get_obstacle_stride_x(size_t id, size_t level) {
-    return m_multigrid->getObstacleStrideX(id, level);
+    return m_multigrid->get_obstacle_stride_x(id, level);
 }
 size_t BoundaryController::get_obstacle_stride_y(size_t id, size_t level) {
-    return m_multigrid->getObstacleStrideY(id, level);
+    return m_multigrid->get_obstacle_stride_y(id, level);
 }
 size_t BoundaryController::get_obstacle_stride_z(size_t id, size_t level) {
-    return m_multigrid->getObstacleStrideZ(id, level);
+    return m_multigrid->get_obstacle_stride_z(id, level);
 }
 
 std::vector<FieldType> BoundaryController::get_used_fields() {
