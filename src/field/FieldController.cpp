@@ -218,7 +218,7 @@ void FieldController::couple_vector(Field const &a, Field &a0, Field &a_tmp, Fie
     size_t bsize_o = boundary->getSize_obstacleList();
 
 #pragma acc data present(a, a0, a_tmp, b, b0, b_tmp,c, c0, c_tmp, \
-                            iList[:bsize_i], bList[:bsize_b], oList[:bsize_o])
+                            d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
     {
         // inner
 #pragma acc kernels async
@@ -282,7 +282,8 @@ void FieldController::couple_scalar(Field const &a, Field &a0, Field &a_tmp, boo
     size_t *d_oList = boundary->get_obstacleList();
     size_t bsize_o = boundary->getSize_obstacleList();
 
-#pragma acc data present(a, a0, a_tmp, iList[:bsize_i], bList[:bsize_b], oList[:bsize_o])
+#pragma acc data present(a, a0, a_tmp, \
+        d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
     {
         // inner
 #pragma acc kernels async

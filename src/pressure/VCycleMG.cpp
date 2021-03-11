@@ -200,9 +200,6 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
         const real rdy2 = 1. / (dy * dy);
         const real rdz2 = 1. / (dz * dz);
 
-        auto d_out = out.data;
-        auto d_b = b.data;
-
         auto boundary = BoundaryController::getInstance();
         auto bsize_i = boundary->getSize_innerList();
         size_t *d_iList = boundary->get_innerList_level_joined();
@@ -220,9 +217,9 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
 #pragma acc parallel loop independent present(out, b, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_iList[j];
-                r = d_b[i] - (rdx2 * (d_out[i - 1] - 2 * d_out[i] + d_out[i + 1])
-                     + rdy2 * (d_out[i - Nx] - 2 * d_out[i] + d_out[i + Nx])
-                     + rdz2 * (d_out[i - Nx * Ny] - 2 * d_out[i] + d_out[i + Nx * Ny]));
+                r = b[i] - (rdx2 * (out[i - 1] - 2 * out[i] + out[i + 1])
+                     + rdy2 * (out[i - Nx] - 2 * out[i] + out[i + Nx])
+                     + rdz2 * (out[i - Nx * Ny] - 2 * out[i] + out[i + Nx * Ny]));
                 sum += r * r;
             }
 
