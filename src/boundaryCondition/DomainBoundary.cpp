@@ -196,7 +196,7 @@ namespace {
 /// \param  sync synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void apply_boundary_condition(real *data_field, size_t **index_fields, const size_t *patch_starts, const size_t *patch_ends, size_t level, BoundaryData *boundary_data, bool sync) {
-    for (size_t i = 0; i < numberOfPatches; i++) {
+    for (size_t i = 0; i < number_of_patches; i++) {
         size_t *d_patch = *(index_fields + i);
         size_t patch_start = *(patch_starts + i);
         size_t patch_end = *(patch_ends + i);

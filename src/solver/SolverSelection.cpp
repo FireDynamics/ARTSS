@@ -5,6 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "SolverSelection.h"
+#include <string>
 #include "../advection/SLAdvect.h"
 #include "../diffusion/JacobiDiffuse.h"
 #include "../diffusion/ColoredGaussSeidelDiffuse.h"
@@ -33,7 +34,7 @@ void SetAdvectionSolver(IAdvection **advectionSolver, const std::string& advecti
         logger->error("Advection method not yet implemented! simulation stopped!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
 }
 
@@ -56,7 +57,7 @@ void SetDiffusionSolver(IDiffusion **diffusionSolver, const std::string& diffusi
         logger->error("Diffusion method not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
 }
 
@@ -75,7 +76,7 @@ void SetPressureSolver(IPressure **pressureSolver, const std::string& pressureTy
         logger->error("Pressure method not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
 }
 
@@ -91,10 +92,10 @@ void SetSourceSolver(ISource **sourceSolver, const std::string& sourceType) {
     } else {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(solver_selection_name);
-        logger->error("Source method not yet implemented! Simulation stopped!");
+        logger->error("Source method {} not yet implemented! Simulation stopped!", sourceType);
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
 }
 
@@ -115,7 +116,7 @@ void SetTurbulenceSolver(ITurbulence **turbulenceSolver, const std::string& turb
         logger->error("Turbulence model is not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
 }
 }  // namespace SolverSelection
