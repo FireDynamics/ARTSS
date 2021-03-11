@@ -23,12 +23,6 @@ void IPressure::divergence(Field &out,
         Field const &in_x, Field const &in_y, Field const &in_z, bool sync) {
     auto domain = Domain::getInstance();
 
-    // local variables and parameters for GPU
-    auto d_out = out.data;
-    auto d_inx = in_x.data;
-    auto d_iny = in_y.data;
-    auto d_inz = in_z.data;
-
     auto Nx = domain->get_Nx(out.get_level());
     auto Ny = domain->get_Ny(out.get_level());
     auto dx = domain->get_dx(out.get_level());
@@ -65,7 +59,7 @@ void IPressure::divergence(Field &out,
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_b; ++j) {
             const size_t i = d_bList[j];
-            d_out[i] = 0.;
+            out[i] = 0.;
         }
 
         if (sync) {
@@ -102,8 +96,6 @@ void IPressure::projection(Field &out_u, Field &out_v, Field &out_w,
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
-
-    auto size = domain->get_size(out_u.get_level());
 
     auto typeu = out_u.get_type();
     auto typev = out_v.get_type();
