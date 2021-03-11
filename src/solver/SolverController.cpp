@@ -43,6 +43,9 @@ SolverController::SolverController() {
     set_up_fields(string_solver);
     // TODO unclean, first updating device to apply boundary and then updating host to create temporary fields.
     m_field_controller->update_device();
+#ifndef BENCHMARKING
+    m_logger->debug("set up boundary");
+#endif
     m_field_controller->set_up_boundary();
     m_field_controller->update_host();
     m_field_controller->set_up_temporary_fields();

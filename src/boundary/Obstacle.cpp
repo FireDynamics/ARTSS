@@ -106,7 +106,6 @@ Obstacle::~Obstacle() {
     delete (m_obstacleBottom);
     delete (m_obstacleLeft);
     delete (m_obstacleRight);
-    // delete (m_obstacleInner);
 }
 
 //===================================== Create obstacle ==================================
@@ -193,19 +192,6 @@ void Obstacle::createObstacle(size_t Nx, size_t Ny) {
             }
         }
     }
-
-    // // INNER of OBSTACLE
-    // // fill oInner list with inner indices of obstacles
-    // for (size_t k = 1; k < strideZ - 1; ++k) {
-    //     for (size_t j = 1; j < strideY - 1; ++j) {
-    //         for (size_t i = 1; i < strideX - 1; ++i) {
-    //             size_t index = (i - 1) + (strideX - 2) * (j - 1) + (strideX - 2) * (strideY - 2) * (k - 1);
-
-    //             size_t idx = IX(i, j, k, strideX, strideY);
-    //             *(m_obstacleInner + index) = m_obstacle_list[idx];
-    //         }
-    //     }
-    // }
 }
 
 //======================================== Print ====================================

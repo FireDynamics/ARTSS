@@ -76,4 +76,3 @@ class Boundary {
 };
 
 #endif /* ARTSS_BOUNDARY_BOUNDARY_H_ */
-

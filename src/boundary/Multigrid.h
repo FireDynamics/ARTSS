@@ -54,7 +54,7 @@ class Multigrid {
     size_t m_numberOfSurfaces = 0;
     // all obstacles divided by level
     Obstacle*** m_MG_obstacleList;  // m_MG_obstacleList[level][obstacleID]
-    size_t m_numberOfObstacles = 0;
+    size_t m_number_of_obstacles = 0;
     // boundary for each level
     Boundary** m_MG_boundaryList;  // m_MG_boundaryList[level]
 

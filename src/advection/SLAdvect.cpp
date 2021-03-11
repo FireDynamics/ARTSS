@@ -59,10 +59,10 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
 
 #pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize], d_iList[:bsize_i])
     {
-        const size_t Nx = domain->get_Nx(out->get_level());    // due to unnecessary parameter passing of *this
+        const size_t Nx = domain->get_Nx(out->get_level());
         const size_t Ny = domain->get_Ny(out->get_level());
 
-        const real dx = domain->get_dx(out->get_level());    // due to unnecessary parameter passing of *this
+        const real dx = domain->get_dx(out->get_level());
         const real dy = domain->get_dy(out->get_level());
         const real dz = domain->get_dz(out->get_level());
 
@@ -105,11 +105,11 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             if (Ci > epsilon_x) {
                 i0 = std::max(i_start, (i - static_cast<long int>(Ci)));
                 i1 = i0 - 1;
-                r = fmod(Ci, 1); // closer to i1 if r is closer to 1
+                r = fmod(Ci, 1);  // closer to i1 if r is closer to 1
             } else if (Ci < -epsilon_x) {
                 i0 = std::min(i_end, i - static_cast<long int>(Ci));
                 i1 = i0 + 1;
-                r = fmod(-Ci, 1); // closer to i1 if r is closer to 1
+                r = fmod(-Ci, 1);  // closer to i1 if r is closer to 1
             }
 
             // Calculation of vertical indices and interpolation weights

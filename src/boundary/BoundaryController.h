@@ -24,7 +24,6 @@ class BoundaryController {
 
     void apply_boundary(real *d, FieldType f, bool sync = true);
     void apply_boundary(real *d, size_t level, FieldType f, bool sync = true);
-    // void apply_boundary(real *d, size_t level, FieldType f, real* val, bool sync = true); // for non-const BC
 
     void print_boundaries();
     void update_lists();
