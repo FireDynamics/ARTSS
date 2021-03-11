@@ -103,12 +103,12 @@ class Multigrid {
     size_t* m_data_MG_obstacle_list_zero_joined;
 
     size_t get_size_obstacle_index_list(size_t level);
-    int getLastIndex_oFront(size_t level, size_t id);
-    int getLastIndex_oBack(size_t level, size_t id);
-    int getLastIndex_oBottom(size_t level, size_t id);
-    int getLastIndex_oTop(size_t level, size_t id);
-    int getLastIndex_oLeft(size_t level, size_t id);
-    int getLastIndex_oRight(size_t level, size_t id);
+    size_t get_last_index_of_obstacle_front(size_t level, size_t id);
+    size_t get_last_index_of_obstacle_back(size_t level, size_t id);
+    size_t get_last_index_of_obstacle_bottom(size_t level, size_t id);
+    size_t get_last_index_of_obstacle_top(size_t level, size_t id);
+    size_t get_last_index_of_obstacle_left(size_t level, size_t id);
+    size_t get_last_index_of_obstacle_right(size_t level, size_t id);
     size_t get_first_index_of_obstacle_front(size_t level, size_t id);
     size_t get_first_index_of_obstacle_back(size_t level, size_t id);
     size_t get_first_index_of_obstacle_bottom(size_t level, size_t id);

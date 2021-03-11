@@ -455,7 +455,7 @@ void Multigrid::print() {
         m_logger->debug("For Level {} oFront starts at index {} and ends with index {} with length {}",
                         level ,
                         get_first_index_of_obstacle_front(level, 0),
-                        getLastIndex_oFront(level, m_number_of_obstacle_objects - 1) ,
+                        get_last_index_of_obstacle_front(level, m_number_of_obstacle_objects - 1) ,
                         get_length_of_obstacle_front(level));
     }
     m_logger->debug("Total length of oFront: ", get_length_of_obstacle_front_joined());
@@ -464,7 +464,7 @@ void Multigrid::print() {
         m_logger->debug("For Level {} oBack starts at index {} and ends with index {} with length {}",
                         level,
                         get_first_index_of_obstacle_back(level, 0),
-                        getLastIndex_oBack(level, m_number_of_obstacle_objects - 1),
+                        get_last_index_of_obstacle_back(level, m_number_of_obstacle_objects - 1),
                         get_length_of_obstacle_back(level));
     }
     m_logger->debug("Total length of oBack: {}", get_length_of_obstacle_back_joined());
@@ -473,7 +473,7 @@ void Multigrid::print() {
         m_logger->debug("For Level {} oBottom starts at index {} and ends with index {} with length {}",
                         level,
                         get_first_index_of_obstacle_bottom(level, 0),
-                        getLastIndex_oBottom(level, m_number_of_obstacle_objects - 1),
+                        get_last_index_of_obstacle_bottom(level, m_number_of_obstacle_objects - 1),
                         get_length_of_obstacle_bottom(level));
     }
     m_logger->debug("Total length of oBottom: {}", get_length_of_obstacle_bottom_joined());
@@ -482,7 +482,7 @@ void Multigrid::print() {
         m_logger->debug("For Level {} oTop starts at index {} and ends with index {} with length {}",
                         level,
                         get_first_index_of_obstacle_top(level, 0),
-                        getLastIndex_oTop(level, m_number_of_obstacle_objects - 1),
+                        get_last_index_of_obstacle_top(level, m_number_of_obstacle_objects - 1),
                         get_length_of_obstacle_top(level));
     }
     m_logger->debug("Total length of oTop: {}", get_length_of_obstacle_top_joined());
@@ -491,7 +491,7 @@ void Multigrid::print() {
         m_logger->debug("For Level {} oLeft starts at index {} and ends with index {} with length {}",
                         level,
                         get_first_index_of_obstacle_left(level, 0),
-                        getLastIndex_oLeft(level, m_number_of_obstacle_objects - 1),
+                        get_last_index_of_obstacle_left(level, m_number_of_obstacle_objects - 1),
                         get_length_of_obstacle_left(level));
     }
     m_logger->debug("Total length of oLeft: {}", get_length_of_obstacle_left_joined());
@@ -500,7 +500,7 @@ void Multigrid::print() {
         m_logger->debug("For Level {} oRight starts at index {} and ends with index {} with length {}",
                         level,
                         get_first_index_of_obstacle_right(level, 0),
-                        getLastIndex_oRight(level, m_number_of_obstacle_objects - 1),
+                        get_last_index_of_obstacle_right(level, m_number_of_obstacle_objects - 1),
                         get_length_of_obstacle_right(level));
     }
     m_logger->debug("Total length of oRight: {}", get_length_of_obstacle_right_joined());
@@ -1374,7 +1374,7 @@ size_t Multigrid::get_length_of_obstacle_right_joined() {
 size_t Multigrid::get_length_of_obstacle_front(size_t level) {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
-        size_t last = getLastIndex_oFront(level, m_number_of_obstacle_objects - 1);
+        size_t last = get_last_index_of_obstacle_front(level, m_number_of_obstacle_objects - 1);
         if (last > 0) {
             len = last - get_first_index_of_obstacle_front(level, 0) + 1;
         }
@@ -1390,7 +1390,7 @@ size_t Multigrid::get_length_of_obstacle_front(size_t level) {
 size_t Multigrid::get_length_of_obstacle_back(size_t level) {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
-        size_t last = getLastIndex_oBack(level, m_number_of_obstacle_objects - 1);
+        size_t last = get_last_index_of_obstacle_back(level, m_number_of_obstacle_objects - 1);
         if (last > 0) {
             len = last - get_first_index_of_obstacle_back(level, 0) + 1;
         }
@@ -1406,7 +1406,7 @@ size_t Multigrid::get_length_of_obstacle_back(size_t level) {
 size_t Multigrid::get_length_of_obstacle_bottom(size_t level) {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
-        size_t last = getLastIndex_oBottom(level, m_number_of_obstacle_objects - 1);
+        size_t last = get_last_index_of_obstacle_bottom(level, m_number_of_obstacle_objects - 1);
         if (last > 0) {
             len = last - get_first_index_of_obstacle_bottom(level, 0) + 1;
         }
@@ -1422,7 +1422,7 @@ size_t Multigrid::get_length_of_obstacle_bottom(size_t level) {
 size_t Multigrid::get_length_of_obstacle_top(size_t level) {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
-        size_t last = getLastIndex_oTop(level, m_number_of_obstacle_objects - 1);
+        size_t last = get_last_index_of_obstacle_top(level, m_number_of_obstacle_objects - 1);
         if (last > 0) {
             len = last - get_first_index_of_obstacle_top(level, 0) + 1;
         }
@@ -1438,7 +1438,7 @@ size_t Multigrid::get_length_of_obstacle_top(size_t level) {
 size_t Multigrid::get_length_of_obstacle_left(size_t level) {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
-        size_t last = getLastIndex_oLeft(level, m_number_of_obstacle_objects - 1);
+        size_t last = get_last_index_of_obstacle_left(level, m_number_of_obstacle_objects - 1);
         if (last > 0) {
             len = last - get_first_index_of_obstacle_left(level, 0) + 1;
         }
@@ -1549,8 +1549,8 @@ size_t Multigrid::get_first_index_of_obstacle_right(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // ***************************************************************************************
-int Multigrid::getLastIndex_oFront(size_t level, size_t id) {
-    int index = 0;
+size_t Multigrid::get_last_index_of_obstacle_front(size_t level, size_t id) {
+    size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_front_level[level * m_number_of_obstacle_objects + id + 1];
     }
@@ -1563,8 +1563,8 @@ int Multigrid::getLastIndex_oFront(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // ***************************************************************************************
-int Multigrid::getLastIndex_oBack(size_t level, size_t id) {
-    int index = 0;
+size_t Multigrid::get_last_index_of_obstacle_back(size_t level, size_t id) {
+    size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_back_level[level * m_number_of_obstacle_objects + id + 1];
     }
@@ -1577,7 +1577,7 @@ int Multigrid::getLastIndex_oBack(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // ***************************************************************************************
-int Multigrid::getLastIndex_oBottom(size_t level, size_t id) {
+size_t Multigrid::get_last_index_of_obstacle_bottom(size_t level, size_t id) {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_bottom_level[level * m_number_of_obstacle_objects + id + 1] - 1;
@@ -1591,8 +1591,8 @@ int Multigrid::getLastIndex_oBottom(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return int
 // ***************************************************************************************
-int Multigrid::getLastIndex_oTop(size_t level, size_t id) {
-    int index = 0;
+size_t Multigrid::get_last_index_of_obstacle_top(size_t level, size_t id) {
+    size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_top_level[level * m_number_of_obstacle_objects + id + 1] - 1;
     }
@@ -1605,8 +1605,8 @@ int Multigrid::getLastIndex_oTop(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return int
 // ***************************************************************************************
-int Multigrid::getLastIndex_oLeft(size_t level, size_t id) {
-    int index = 0;
+size_t Multigrid::get_last_index_of_obstacle_left(size_t level, size_t id) {
+    size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_left_level[level * m_number_of_obstacle_objects + id + 1];
     }
@@ -1619,8 +1619,8 @@ int Multigrid::getLastIndex_oLeft(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return int
 // ***************************************************************************************
-int Multigrid::getLastIndex_oRight(size_t level, size_t id) {
-    int index = 0;
+size_t Multigrid::get_last_index_of_obstacle_right(size_t level, size_t id) {
+    size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_right_level[level * m_number_of_obstacle_objects + id + 1];
     }
