@@ -165,14 +165,6 @@ BoundaryController::~BoundaryController() {
     for (size_t i = 0; i < m_number_of_obstacles; i++) {
         delete (m_bdc_obstacles[i]);
     }
-    //for (size_t surface = 0; surface < m_number_of_surface_objects; surface++) {
-    //    delete (*(m_surface_list + surface));
-    //}
-    //delete[] m_surface_list;
-    //for (size_t obstacle = 0; obstacle < m_number_of_obstacle_objects; obstacle++) {
-    //    delete (*(m_obstacle_list + obstacle));
-    //}
-    //delete[] m_obstacle_list;
 }
 
 
