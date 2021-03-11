@@ -56,7 +56,7 @@ namespace {
     void apply_dirichlet(real *data_field, size_t *d_patch, Patch p, size_t patch_start, size_t patch_end, size_t level, real value) {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger("ObstacleBoundary");
-        logger->debug("applying dirichlet to patch {}", BoundaryData::getPatchName(static_cast<Patch>(p)));
+        logger->debug("applying dirichlet to patch {}", BoundaryData::get_patch_name(static_cast<Patch>(p)));
 #endif
         if (level > 0) {
             value = 0;
