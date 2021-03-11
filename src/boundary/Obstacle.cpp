@@ -690,11 +690,14 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
     }
 
     if (o1->get_coordinates_i1() - 1 == o2->get_coordinates_i2()) {
-        bool j_overlap = has_overlap(o1->get_coordinates_j1(), o1->get_coordinates_j2(), o2->get_coordinates_j1(), o2->get_coordinates_j2());
-        bool k_overlap = has_overlap(o1->get_coordinates_k1(), o1->get_coordinates_k2(), o2->get_coordinates_k1(), o2->get_coordinates_k2());
+        bool j_overlap = has_overlap(o1->get_coordinates_j1(), o1->get_coordinates_j2(),
+                                     o2->get_coordinates_j1(), o2->get_coordinates_j2());
+        bool k_overlap = has_overlap(o1->get_coordinates_k1(), o1->get_coordinates_k2(),
+                                     o2->get_coordinates_k1(), o2->get_coordinates_k2());
         if (j_overlap && k_overlap) {
 #ifndef BENCHMARKING
-            logger->debug("obstacles are next to each other. Working on {} left side and on {} right side.", o1->get_name(), o2->get_name());
+            logger->debug("obstacles are next to each other. Working on {} left side and on {} right side.",
+                          o1->get_name(), o2->get_name());
 #endif
             // another obstacle (o2) at the left side of o1
             overlap = true;
@@ -720,8 +723,10 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
             Obstacle::calculate_area_index(o1, o2, &o1_z2, &o2_z2, CoordinateAxis::Z, false);
 
 #ifndef BENCHMARKING
-            logger->debug("removing indices in area ({}) ({}|{}) ({}|{}) for {}", o1_x1, o1_y1, o1_y2, o1_z1, o1_z2, o1->get_name());
-            logger->debug("removing indices in area ({}) ({}|{}) ({}|{}) for {}", o2_x2, o2_y1, o2_y2, o2_z1, o2_z2, o2->get_name());
+            logger->debug("removing indices in area ({}) ({}|{}) ({}|{}) for {}",
+                          o1_x1, o1_y1, o1_y2, o1_z1, o1_z2, o1->get_name());
+            logger->debug("removing indices in area ({}) ({}|{}) ({}|{}) for {}",
+                          o2_x2, o2_y1, o2_y2, o2_z1, o2_z2, o2->get_name());
 #endif
 
             size_t o1_size_removing_indices = (o1_y2 + 1 - o1_y1) * (o1_z2 + 1 - o1_z1);
@@ -761,8 +766,9 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
             size_t o2_current_z = o2_z1;
             size_t o2_removing_index = IX(o2_x2, o2_current_y, o2_current_z, Nx, Ny);
             bool o2_end = false;
-            for (; o1_counter_old < o1->get_size_obstacle_left() && o2_counter_old <
-                                                                            o2->get_size_obstacle_right() && !o1_end && !o2_end; o1_counter_old++, o2_counter_old++) {
+            for (; o1_counter_old < o1->get_size_obstacle_left()
+                && o2_counter_old < o2->get_size_obstacle_right() && !o1_end && !o2_end;
+                o1_counter_old++, o2_counter_old++) {
                 o1_current_index = o1->get_obstacle_left()[o1_counter_old];
                 o2_current_index = o2->get_obstacle_right()[o2_counter_old];
                 if (o1_current_index != o1_removing_index) {
@@ -838,7 +844,9 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
             size_t o1_diff_target = (o1_z2 - o1_z1 + 1) * (o1_y2 - o1_y1 + 1);
             size_t o1_diff_actual = o1->get_size_obstacle_left() - o1_new_size_left;
 #ifndef BENCHMARKING
-            logger->debug("new size of obstacle {} left patch: {} -> {} ({}|{})", o1->get_name(), o1->get_size_obstacle_left(), o1_new_size_left, o1_diff_target, o1_diff_actual);
+            logger->debug("new size of obstacle {} left patch: {} -> {} ({}|{})",
+                          o1->get_name(), o1->get_size_obstacle_left(), o1_new_size_left,
+                          o1_diff_target, o1_diff_actual);
 #endif
             size_t *o1_new_data = new size_t[o1_new_size_left];
             std::copy(o1_new.begin(), o1_new.end(), o1_new_data);
@@ -853,7 +861,9 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
             size_t o2_diff_target = (o2_z2 - o2_z1 + 1) * (o2_y2 - o2_y1 + 1);
             size_t o2_diff_actual = o2->get_size_obstacle_right() - o2_new_size_right;
 #ifndef BENCHMARKING
-            logger->debug("new size of obstacle {} right patch: {} -> {} ({}|{})", o2->get_name(), o2->get_size_obstacle_right(), o2_new_size_right, o2_diff_target, o2_diff_actual);
+            logger->debug("new size of obstacle {} right patch: {} -> {} ({}|{})",
+                          o2->get_name(), o2->get_size_obstacle_right(), o2_new_size_right,
+                          o2_diff_target, o2_diff_actual);
 #endif
             size_t *o2_new_data = new size_t[o2_new_size_right];
             std::copy(o2_new.begin(), o2_new.end(), o2_new_data);
@@ -884,11 +894,14 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2) {
     }
 
     if (o1->get_coordinates_j1() - 1 == o2->get_coordinates_j2()) {
-        bool i_overlap = has_overlap(o1->get_coordinates_i1(), o1->get_coordinates_i2(), o2->get_coordinates_i1(), o2->get_coordinates_i2());
-        bool k_overlap = has_overlap(o1->get_coordinates_k1(), o1->get_coordinates_k2(), o2->get_coordinates_k1(), o2->get_coordinates_k2());
+        bool i_overlap = has_overlap(o1->get_coordinates_i1(), o1->get_coordinates_i2(),
+                                     o2->get_coordinates_i1(), o2->get_coordinates_i2());
+        bool k_overlap = has_overlap(o1->get_coordinates_k1(), o1->get_coordinates_k2(),
+                                     o2->get_coordinates_k1(), o2->get_coordinates_k2());
         if (i_overlap && k_overlap) {
 #ifndef BENCHMARKING
-            logger->debug("obstacles are next to each other. Working on {} bottom side and on {} top side", o1->get_name(), o2->get_name());
+            logger->debug("obstacles are next to each other. Working on {} bottom side and on {} top side",
+                          o1->get_name(), o2->get_name());
 #endif
             overlap = true;
             // calculate coordinates of area which should be removed
@@ -914,8 +927,10 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2) {
             Obstacle::calculate_area_index(o1, o2, &o1_z2, &o2_z2, CoordinateAxis::Z, false);
 
 #ifndef BENCHMARKING
-            logger->debug("removing indices in area ({}|{}) ({}) ({}|{}) for {}", o1_x1, o1_x2, o1_y1, o1_z1, o1_z2, o1->get_name());
-            logger->debug("removing indices in area ({}|{}) ({}) ({}|{}) for {}", o2_x1, o2_x2, o2_y2, o2_z1, o2_z2, o2->get_name());
+            logger->debug("removing indices in area ({}|{}) ({}) ({}|{}) for {}",
+                          o1_x1, o1_x2, o1_y1, o1_z1, o1_z2, o1->get_name());
+            logger->debug("removing indices in area ({}|{}) ({}) ({}|{}) for {}",
+                          o2_x1, o2_x2, o2_y2, o2_z1, o2_z2, o2->get_name());
 #endif
 
             std::vector<size_t> o1_new;
@@ -952,8 +967,9 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2) {
             size_t o2_current_z = o2_z1;
             size_t o2_removing_index = IX(o2_current_x, o2_y2, o2_current_z, Nx, Ny);
             bool o2_end = false;
-            for (; o1_counter_old < o1->get_size_obstacle_bottom() && o2_counter_old <
-                                                                              o2->get_size_obstacle_top() && !o1_end && !o2_end; o1_counter_old++, o2_counter_old++) {
+            for (; o1_counter_old < o1->get_size_obstacle_bottom()
+                && o2_counter_old < o2->get_size_obstacle_top() && !o1_end && !o2_end;
+                o1_counter_old++, o2_counter_old++) {
                 o1_current_index = o1->get_obstacle_bottom()[o1_counter_old];
                 o2_current_index = o2->get_obstacle_top()[o2_counter_old];
                 if (o1_current_index != o1_removing_index) {
@@ -1029,7 +1045,9 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2) {
             size_t o1_diff_target = (o1_x2 - o1_x1 + 1) * (o1_z2 - o1_z1 + 1);
             size_t o1_diff_actual = o1->get_size_obstacle_bottom() - o1_new_size_bottom;
 #ifndef BENCHMARKING
-            logger->debug("new size of obstacle {} bottom patch: {} -> {} ({}|{})", o1->get_name(), o1->get_size_obstacle_bottom(), o1_new_size_bottom, o1_diff_target, o1_diff_actual);
+            logger->debug("new size of obstacle {} bottom patch: {} -> {} ({}|{})",
+                          o1->get_name(), o1->get_size_obstacle_bottom(), o1_new_size_bottom,
+                          o1_diff_target, o1_diff_actual);
 #endif
             size_t *o1_new_data = new size_t[o1_new_size_bottom];
             std::copy(o1_new.begin(), o1_new.end(), o1_new_data);
@@ -1044,7 +1062,9 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2) {
             size_t o2_diff_target = (o2_x2 - o2_x1 + 1) * (o2_z2 - o2_z1 + 1);
             size_t o2_diff_actual = o2->get_size_obstacle_top() - o2_new_size_top;
 #ifndef BENCHMARKING
-            logger->debug("new size of obstacle {} top patch: {} -> {} ({}|{})", o2->get_name(), o2->get_size_obstacle_top(), o2_new_size_top, o2_diff_target, o2_diff_actual);
+            logger->debug("new size of obstacle {} top patch: {} -> {} ({}|{})",
+                          o2->get_name(), o2->get_size_obstacle_top(), o2_new_size_top,
+                          o2_diff_target, o2_diff_actual);
 #endif
             size_t *o2_new_data = new size_t[o2_new_size_top];
             std::copy(o2_new.begin(), o2_new.end(), o2_new_data);
@@ -1231,8 +1251,8 @@ bool Obstacle::circular_constraints_z_direction(Obstacle *o1, Obstacle *o2) {
             size_t o1_diff_actual = o1->get_size_obstacle_front() - o1_new_size_front;
 #ifndef BENCHMARKING
             logger->debug("new size of obstacle {} front patch: {} -> {} ({}|{})",
-                          o1->get_name(), o1->get_size_obstacle_front(),
-                          o1_new_size_front, o1_diff_target, o1_diff_actual);
+                          o1->get_name(), o1->get_size_obstacle_front(), o1_new_size_front,
+                          o1_diff_target, o1_diff_actual);
 #endif
             size_t *o1_new_data = new size_t[o1_new_size_front];
             std::copy(o1_new.begin(), o1_new.end(), o1_new_data);
@@ -1248,8 +1268,8 @@ bool Obstacle::circular_constraints_z_direction(Obstacle *o1, Obstacle *o2) {
             size_t o2_diff_actual = o2->get_size_obstacle_back() - o2_new_size_back;
 #ifndef BENCHMARKING
             logger->debug("new size of obstacle {} back patch: {} -> {} ({}|{})",
-                          o2->get_name(), o2->get_size_obstacle_back(),
-                          o2_new_size_back, o2_diff_target, o2_diff_actual);
+                          o2->get_name(), o2->get_size_obstacle_back(), o2_new_size_back,
+                          o2_diff_target, o2_diff_actual);
 #endif
             size_t *o2_new_data = new size_t[o2_new_size_back];
             std::copy(o2_new.begin(), o2_new.end(), o2_new_data);
