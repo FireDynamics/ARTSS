@@ -17,7 +17,9 @@ BoundaryController::BoundaryController() {
     m_bdc_boundary = new BoundaryDataController();
     read_XML();
     if (m_number_of_obstacles + m_number_of_surfaces > 0) {
-        m_multigrid = new Multigrid(m_number_of_surfaces, m_surface_list, m_number_of_obstacles, m_obstacle_list, m_bdc_boundary, m_bdc_obstacles);
+        m_multigrid = new Multigrid(m_number_of_surfaces, m_surface_list,
+                                    m_number_of_obstacles, m_obstacle_list,
+                                    m_bdc_boundary, m_bdc_obstacles);
     } else {
         m_multigrid = new Multigrid(m_bdc_boundary);
     }
@@ -26,10 +28,10 @@ BoundaryController::BoundaryController() {
 #endif
 }
 
-// ================================= Read XML =============================================
-// ***************************************************************************************
+// ================================= Read XML ======================================================
+// *************************************************************************************************
 /// \brief  Reads in all parameters of boundary, obstacles and surfaces
-// ***************************************************************************************
+// *************************************************************************************************
 void BoundaryController::read_XML() {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing XML");
@@ -45,11 +47,11 @@ void BoundaryController::read_XML() {
 #endif
 }
 
-// ================================= Parser =============================================
-// ***************************************************************************************
+// ================================= Parser ========================================================
+// *************************************************************************************************
 /// \brief  parses boundaries of domain from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
-// ***************************************************************************************
+// *************************************************************************************************
 void BoundaryController::parse_boundary_parameter(tinyxml2::XMLElement *xmlParameter) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing boundary parameter");
@@ -65,11 +67,11 @@ void BoundaryController::parse_boundary_parameter(tinyxml2::XMLElement *xmlParam
 #endif
 }
 
-// ================================= Parser =============================================
-// ***************************************************************************************
+// ================================= Parser ========================================================
+// *************************************************************************************************
 /// \brief  parses surfaces from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
-// ***************************************************************************************
+// *************************************************************************************************
 void BoundaryController::parse_surface_parameter(tinyxml2::XMLElement *xmlParameter) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing surface parameter");
@@ -93,11 +95,11 @@ void BoundaryController::parse_surface_parameter(tinyxml2::XMLElement *xmlParame
 #endif
 }
 
-// ================================= Parser =============================================
-// ***************************************************************************************
+// ================================= Parser ========================================================
+// *************************************************************************************************
 /// \brief  parses obstacles from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
-// ***************************************************************************************
+// *************************************************************************************************
 void BoundaryController::parse_obstacle_parameter(tinyxml2::XMLElement *xmlParameter) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing obstacle parameter");
@@ -181,10 +183,10 @@ BoundaryController *BoundaryController::getInstance() {
     return singleton;
 }
 
-// ================================= Printer =============================================
-// ***************************************************************************************
+// ================================= Printer =======================================================
+// *************************************************************************************************
 /// \brief  prints boundaries (outer, inner, surfaces)
-// ***************************************************************************************
+// *************************************************************************************************
 void BoundaryController::print_boundaries() {
 #ifndef BENCHMARKING
     m_logger->info("-- Info summary");
@@ -200,33 +202,34 @@ void BoundaryController::print_boundaries() {
 #endif
 }
 
-//======================================== Update lists ====================================
-// ***************************************************************************************
+//======================================== Update lists ============================================
+// *************************************************************************************************
 /// \brief  Updates lists of indices
-// ***************************************************************************************
+// *************************************************************************************************
 void BoundaryController::update_lists() {
     m_multigrid->update_lists();
 }
 
-//======================================== Update lists ====================================
-// ***************************************************************************************
+//======================================== Update lists ============================================
+// *************************************************************************************************
 /// \brief  Apply boundary for level 0
 /// \param  d data field
 /// \param  f Field
 /// \param  sync synchronous kernel launching (true, default: false)
-// ***************************************************************************************
+// *************************************************************************************************
 void BoundaryController::apply_boundary(real *d, FieldType f, bool sync) {
     apply_boundary(d, 0, f, sync);
 }
 
-// ================================= Apply BCs in level l > 0 ===========================================
-// ***************************************************************************************
-/// \brief  applies zero-value boundary conditions to all boundaries (domain, surfaces, obstacles) for level l
+// ================================= Apply BCs in level l > 0 ======================================
+// *************************************************************************************************
+/// \brief  applies zero-value boundary conditions to all boundaries (domain, surfaces, obstacles)
+/// for level l
 /// \param  d           data field
 /// \param  level       Multigrid level
 /// \param  f           type of output pointer
 /// \param  sync    synchronization (default: false)
-// ***************************************************************************************
+// *************************************************************************************************
 void BoundaryController::apply_boundary(real *d, size_t level, FieldType f, bool sync) {
     m_multigrid->apply_boundary_condition(d, level, f, sync);
 }
@@ -293,6 +296,11 @@ std::vector<FieldType> BoundaryController::get_used_fields() {
     return m_bdc_boundary->get_used_fields();
 }
 
+// ================================= detect neighbouring obstacles =================================
+// *************************************************************************************************
+/// \brief  handling of neighbouring obstacles, removes cells with circular constraints which never
+/// change their value
+// *************************************************************************************************
 void BoundaryController::detect_neighbouring_obstacles() {
 #ifndef BENCHMARKING
     m_logger->debug("start detecting neighbouring obstacles");
