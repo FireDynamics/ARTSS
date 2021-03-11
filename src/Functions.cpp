@@ -1084,10 +1084,6 @@ namespace Functions {
         auto boundary = BoundaryController::getInstance();
         size_t *iList = boundary->get_innerList_level_joined();
         size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
-        size_t *oList = boundary->get_obstacleList();
-        size_t size_oList = boundary->getSize_obstacleList();
 
         std::mt19937 mt;
         double steps = range/step_size;

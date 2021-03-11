@@ -213,7 +213,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
 // ***************************************************************************************
 void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field &out, Field const &b,
         real const alpha_x, real const alpha_y, real const alpha_z,
-        real const beta, real const dsign, real const w, bool sync) {
+        real const beta, real const dsign, real const w, bool) {
     auto domain = Domain::getInstance();
     // local parameters for GPU
     const size_t nx = domain->get_Nx(out.get_level());
@@ -303,7 +303,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field &out, Field cons
 // ***************************************************************************************
 void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field &out, Field const &b,
         real const dsign, real const w, real const D,
-        Field const &EV, real const dt, bool sync) {
+        Field const &EV, real const dt, bool) {
     auto domain = Domain::getInstance();
     // local parameters for GPU
     const size_t Nx = domain->get_Nx(out.get_level());

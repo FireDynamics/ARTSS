@@ -29,8 +29,8 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
 }
 
 Field::Field(Field const &orig):
-    m_level(orig.get_level()), m_size(orig.get_size()), m_type(orig.get_type()),
-    data(new real[orig.get_size()]) {
+    data(new real[orig.get_size()]),
+    m_level(orig.get_level()), m_size(orig.get_size()), m_type(orig.get_type()) {
     this->copy_data(orig);
 #pragma acc enter data copyin(this[:1]) create(m_data[:m_size])
 }

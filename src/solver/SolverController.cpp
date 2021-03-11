@@ -510,7 +510,7 @@ void SolverController::momentum_source() {
 /// \param  t   time
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SolverController::update_sources(real t_cur, bool sync) {
+void SolverController::update_sources(real t_cur, bool) {
     auto params = Parameters::getInstance();
 
 // Momentum source

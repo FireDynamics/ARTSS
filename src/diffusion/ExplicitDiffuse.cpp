@@ -31,7 +31,7 @@ ExplicitDiffuse::ExplicitDiffuse() {
 /// \param  D       diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ExplicitDiffuse::diffuse(Field &out, Field &in, Field const &b, real const D, bool sync) {
+void ExplicitDiffuse::diffuse(Field &out, Field &in, Field const &, real const D, bool sync) {
     // local variables and parameters for GPU
     FieldType type = out.get_type();
 

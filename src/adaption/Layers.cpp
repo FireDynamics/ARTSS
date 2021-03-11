@@ -110,7 +110,7 @@ size_t Layers::getExpansionSize() {
 /// \brief  Set values for new domain in x-direction
 /// \params start x-values at x1 (start = true) or x-values at x2 (start=false)
 // ********************************************************************************
-void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2, bool start) {
+void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *, long *, long *, long *, bool start) {
     Domain *domain = Domain::getInstance();
 
     size_t Nx = domain->get_Nx();
@@ -121,14 +121,12 @@ void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, lo
     size_t k_start = static_cast<size_t> (std::round((m_z1 - domain->get_Z1()) / domain->get_dz()));
     size_t k_end = k_start + m_nz;
 
-    size_t bsize = m_Nu.get_size();
-
     if (start) {
         size_t nx_begin = static_cast<size_t> (std::round((m_x1 - domain->get_X1()) / domain->get_dx()));
         long shift = *p_shift_x1;
         size_t index;
         size_t idx;
-#pragma acc parallel loop collapse(3) present(nu, gamma, kappa, temp, tempA)
+#pragma acc parallel loop collapse(3) present(m_nu, m_gamma, m_kappa, m_T, m_Ta)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 for (int i = 0; i >= shift; i--) {
@@ -147,7 +145,7 @@ void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, lo
         long shift = *p_shift_x2;
         size_t index;
         size_t idx;
-#pragma acc parallel loop collapse(3) present(data_nu[:bsize], data_gamma[:bsize], data_kappa[:bsize], data_temp[:bsize], data_tempA[:bsize])
+#pragma acc parallel loop collapse(3) present(m_nu, m_gamma, m_kappa, m_T, m_Ta)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 for (int i = 0; i <= shift; i++) {

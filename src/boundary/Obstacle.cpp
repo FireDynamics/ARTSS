@@ -593,10 +593,6 @@ void Obstacle::calculate_area_index(Obstacle *o1, Obstacle *o2, size_t *o1_coord
  * @return True/False, whether obstacles are facing each other or not
  */
 bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
-    auto domain = Domain::getInstance();
-    auto Nx = domain->get_Nx();
-    auto Ny = domain->get_Ny();
-
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger("Obstacle");
 #endif
@@ -660,9 +656,6 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
             logger->debug("removing indices in area ({}) ({}|{}) ({}|{}) for {}", o1_x1, o1_y1, o1_y2, o1_z1, o1_z2, o1->get_name());
             logger->debug("removing indices in area ({}) ({}|{}) ({}|{}) for {}", o2_x2, o2_y1, o2_y2, o2_z1, o2_z2, o2->get_name());
 #endif
-
-            size_t o1_size_removing_indices = (o1_y2 + 1 - o1_y1) * (o1_z2 + 1 - o1_z1);
-            size_t o2_size_removing_indices = (o2_y2 + 1 - o2_y1) * (o2_z2 + 1 - o2_z1);
 
             std::vector<size_t> o1_new;
             o1_new.reserve(o1->getSize_obstacleLeft());

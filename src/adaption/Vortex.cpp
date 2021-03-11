@@ -73,7 +73,7 @@ bool Vortex::update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *
 // ********************************************************************************
 /// \brief  Set values for new domain
 // ********************************************************************************
-void Vortex::apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) {
+void Vortex::apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *, long *) {
     auto domain = Domain::getInstance();
 
     size_t i_start = domain->get_index_x1();//(x1 - X1) / dx;

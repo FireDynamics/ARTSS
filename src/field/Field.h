@@ -60,10 +60,10 @@ class Field {
     real *data;
 
  private:
-    size_t m_level;
-    size_t m_size;
+    size_t const m_level;
+    size_t const m_size;
 
-    FieldType m_type;
+    FieldType const m_type;
 };
 
 #endif /* ARTSS_FIELD_FIELD_H_ */
