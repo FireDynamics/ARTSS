@@ -10,6 +10,7 @@
 #include "../interfaces/IAdvection.h"
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
 
 class SLAdvect : public IAdvection {
  public:
@@ -24,3 +25,4 @@ class SLAdvect : public IAdvection {
 };
 
 #endif /* ARTSS_ADVECTION_SLADVECT_H_ */
+

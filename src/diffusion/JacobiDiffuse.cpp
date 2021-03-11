@@ -383,17 +383,13 @@ void JacobiDiffuse::JacobiStep(Field &out, Field const &in, Field const &b,
 #pragma acc parallel loop independent present(out, in, b, EV, d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_iList[j];
-        aX = (D + EV[i]) * dt * rdx * rdx;
-        aY = (D + EV[i]) * dt * rdy * rdy;
-        aZ = (D + EV[i]) * dt * rdz * rdz;
+      
+        auto d_aX = aX * (in[i + 1] + in[i - 1]) ;
+        auto d_aY = aY * (in[i + Nx] + in[i - Nx]) ;
+        auto d_aZ = aZ * (in[i + Nx * Ny] + in[i - Nx * Ny]);
 
-        rb = (1. + 2. * (aX + aY + aZ));
-        bb = 1. / rb;
-
-        real out_h = bb * (dsign * b[i] + aX * (in[i + 1] + in[i - 1])
-                     + aY * (in[i + Nx] + in[i - Nx])
-                     + aZ * (in[i + Nx * Ny] + in[i - Nx * Ny]));
-        out[i] = (1 - w) * in[i] + w * out_h;
+        real out_h = bb * (dsign * b[i] + d_aX + d_aY + d_aZ);
+        d_out[i] = (1 - w) * in[i] + w * out_h;
     }
 
     if (sync) {

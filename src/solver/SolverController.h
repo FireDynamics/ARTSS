@@ -4,25 +4,26 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_SOLVER_SOLVERCONTROLLER_H
-#define ARTSS_SOLVER_SOLVERCONTROLLER_H
+#ifndef ARTSS_SOLVER_SOLVERCONTROLLER_H_
+#define ARTSS_SOLVER_SOLVERCONTROLLER_H_
 
+#include <string>
 #include "../interfaces/ISolver.h"
 #include "../interfaces/ISourceFunction.h"
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
 
 class SolverController {
-public:
+ public:
     SolverController();
     ~SolverController();
 
     void solver_do_step(real t, bool sync);
     void update_sources(real t_cur, bool sync);
 
-    FieldController* get_field_controller() { return m_field_controller; };
+    FieldController* get_field_controller() { return m_field_controller; }
 
-private:
+ private:
     void set_up_sources(const std::string &string_solver);
     void init_solver(const std::string& string_solver);
     void set_up_fields(const std::string& string_solver);
@@ -50,5 +51,5 @@ private:
 #endif
 };
 
+#endif /* ARTSS_SOLVER_SOLVERCONTROLLER_H_ */
 
-#endif /* ARTSS_SOLVER_SOLVERCONTROLLER_H */

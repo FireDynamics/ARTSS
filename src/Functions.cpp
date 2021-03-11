@@ -1110,26 +1110,6 @@ namespace Functions {
                 out[idx] *= (1 + no);
             }
         }
-        // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
-            // generate secret number between -range and range:
-            if (is_absolute) {
-                out[idx] += (dist(mt)*step_size);
-            } else {
-                out[idx] *= (1 + dist(mt)*step_size);
-            }
-        }
-        // obstacles
-        for (size_t i = 0; i < size_oList; i++) {
-            size_t idx = oList[i];
-            // generate secret number between -range and range:
-            if (is_absolute) {
-                out[idx] += (dist(mt)*step_size);
-            } else {
-                out[idx] *= (1 + dist(mt)*step_size);
-            }
-        }
     }
 
 // ================================= Pressure Test - IC for p ============================

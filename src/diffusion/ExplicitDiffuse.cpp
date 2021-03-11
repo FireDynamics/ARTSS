@@ -108,7 +108,7 @@ void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bo
 void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
+    const size_t Nx = domain->get_Nx(out.get_level());  // due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny(out.get_level());
 
     auto boundary = BoundaryController::getInstance();
@@ -124,18 +124,24 @@ void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Fi
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
 
-        real nu_x1 = 0.5 * (EV[IX(i - 1, j, k, Nx, Ny)] + EV[idx]);
-        real nu_x2 = 0.5 * (EV[IX(i + 1, j, k, Nx, Ny)] + EV[idx]);
-        real nu_y1 = 0.5 * (EV[IX(i, j - 1, k, Nx, Ny)] + EV[idx]);
-        real nu_y2 = 0.5 * (EV[IX(i, j + 1, k, Nx, Ny)] + EV[idx]);
-        real nu_z1 = 0.5 * (EV[IX(i, j, k - 1, Nx, Ny)] + EV[idx]);
-        real nu_z2 = 0.5 * (EV[IX(i, j, k + 1, Nx, Ny)] + EV[idx]);
+        real nu_x1 = 0.5 * (EV[IX(i - 1, j, k, Nx, Ny)] + EV[idx]) + D;
+        real nu_x2 = 0.5 * (EV[IX(i + 1, j, k, Nx, Ny)] + EV[idx]) + D;
+        real nu_y1 = 0.5 * (EV[IX(i, j - 1, k, Nx, Ny)] + EV[idx]) + D;
+        real nu_y2 = 0.5 * (EV[IX(i, j + 1, k, Nx, Ny)] + EV[idx]) + D;
+        real nu_z1 = 0.5 * (EV[IX(i, j, k - 1, Nx, Ny)] + EV[idx]) + D;
+        real nu_z2 = 0.5 * (EV[IX(i, j, k + 1, Nx, Ny)] + EV[idx]) + D;
+
+        auto di0 = (in[idx] - in[IX(i - 1, j, k, Nx, Ny)]);  // u_i - u_{i-1}
+        auto di1 = (in[IX(i + 1, j, k, Nx, Ny)] - in[idx]);  // u_{i+1} - u_i
+        auto dj0 = (in[idx] - in[IX(i, j - 1, k, Nx, Ny)]);
+        auto dj1 = (in[IX(i, j + 1, k, Nx, Ny)] - in[idx]);
+        auto dk0 = (in[idx] - in[IX(i, j, k - 1, Nx, Ny)]);
+        auto dk1 = (in[IX(i, j, k + 1, Nx, Ny)] - in[idx]);
 
         out[idx] = in[idx] +
-                     m_dt * (nu_x1 * (in[idx] - in[IX(i - 1, j, k, Nx, Ny)]) - nu_x2 * (in[IX(i + 1, j, k, Nx, Ny)] - in[idx])
-                           + nu_y1 * (in[idx] - in[IX(i, j - 1, k, Nx, Ny)]) - nu_y2 * (in[IX(i, j + 1, k, Nx, Ny)] - in[idx])
-                           + nu_z1 * (in[idx] - in[IX(i, j, k - 1, Nx, Ny)]) - nu_z2 * (in[IX(i, j, k + 1, Nx, Ny)] - in[idx])
-                     );
+                     m_dt * ((nu_x1 * di0 - nu_x2 * di1) // dx // * 4 / dx;  // u_{i-0.5} - u_{i+0.5}
+                           + (nu_y1 * dj0 - nu_y2 * dj1) // dy
+                           + (nu_z1 * dk0 - nu_z2 * dk1) // dz
     }
 
     if (sync) {

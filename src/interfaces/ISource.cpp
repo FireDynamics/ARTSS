@@ -4,16 +4,16 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <cmath>
+#include "ISource.h"
 
+#include <cmath>
 #ifdef _OPENACC
 #include <accelmath.h>
 #endif
 
-#include "ISource.h"
-#include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
+#include "../utility/Parameters.h"
 
 //======================================== Sources ====================================
 //======================================== Force ======================================
@@ -59,7 +59,6 @@ void ISource::buoyancy_force(Field &out, Field const &in,
         if (sync) {
 #pragma acc wait
         }
-
     }
 }
 
@@ -103,16 +102,16 @@ void ISource::dissipate(Field &out,
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_iList[j];
-            real out_h = nu * (2 * (0.5 * rdx * (in_u[i + 1] - in_u[i - 1])) * (0.5 * rdx * (in_u[i + 1] - in_u[i - 1]))
-                               + 2 * (0.5 * rdy * (in_v[i + Nx] - in_v[i - Nx])) * (0.5 * rdy * (in_v[i + Nx] - in_v[i - Nx]))
-                               + 2 * (0.5 * rdz * (in_w[i + Nx * Ny] - in_w[i - Nx * Ny])) * (0.5 * rdz * (in_w[i + Nx * Ny] - in_w[i - Nx * Ny]))
-                               + ((0.5 * rdx * (in_v[i + 1] - in_v[i - 1])) + (0.5 * rdy * (in_u[i + Nx] - in_u[i - Nx])))
-                                 * ((0.5 * rdx * (in_v[i + 1] - in_v[i - 1])) + (0.5 * rdy * (in_u[i + Nx] - in_u[i - Nx])))
-                               + ((0.5 * rdy * (in_w[i + Nx] - in_w[i - Nx])) + (0.5 * rdz * (in_v[i + Nx * Ny] - in_v[i - Nx * Ny])))
-                                 * ((0.5 * rdy * (in_w[i + Nx] - in_w[i - Nx])) + (0.5 * rdz * (in_v[i + Nx * Ny] - in_v[i - Nx * Ny])))
-                               + ((0.5 * rdz * (in_u[i + Nx * Ny] - in_u[i - Nx * Ny])) + (0.5 * rdx * (in_w[i + 1] - in_w[i - 1])))
-                                 * ((0.5 * rdz * (in_u[i + Nx * Ny] - in_u[i - Nx * Ny])) + (0.5 * rdx * (in_w[i + 1] - in_w[i - 1]))));
-            out[i] += dt * out_h;
+            real out_h = nu * (2 * (0.5 * rdx * (in_u[i + 1      ] - in_u[i - 1      ])) * (0.5 * rdx * (in_u[i + 1      ] - in_u[i - 1 ]))
+                             + 2 * (0.5 * rdy * (in_v[i + Nx     ] - in_v[i - Nx     ])) * (0.5 * rdy * (in_v[i + Nx     ] - in_v[i - Nx]))
+                             + 2 * (0.5 * rdz * (in_w[i + Nx * Ny] - in_w[i - Nx * Ny])) * (0.5 * rdz * (in_w[i + Nx * Ny] - in_w[i - Nx * Ny]))
+                                + ((0.5 * rdx * (in_v[i + 1      ] - in_v[i - 1      ])) + (0.5 * rdy * (in_u[i + Nx     ] - in_u[i - Nx])))
+                                * ((0.5 * rdx * (in_v[i + 1      ] - in_v[i - 1      ])) + (0.5 * rdy * (in_u[i + Nx     ] - in_u[i - Nx])))
+                                + ((0.5 * rdy * (in_w[i + Nx     ] - in_w[i - Nx     ])) + (0.5 * rdz * (in_v[i + Nx * Ny] - in_v[i - Nx * Ny])))
+                                * ((0.5 * rdy * (in_w[i + Nx     ] - in_w[i - Nx     ])) + (0.5 * rdz * (in_v[i + Nx * Ny] - in_v[i - Nx * Ny])))
+                                + ((0.5 * rdz * (in_u[i + Nx * Ny] - in_u[i - Nx * Ny])) + (0.5 * rdx * (in_w[i + 1      ] - in_w[i - 1])))
+                                * ((0.5 * rdz * (in_u[i + Nx * Ny] - in_u[i - Nx * Ny])) + (0.5 * rdx * (in_w[i + 1      ] - in_w[i - 1]))));
+            d_out[i] += dt * out_h;
         }
 
         // boundaries
@@ -123,3 +122,4 @@ void ISource::dissipate(Field &out,
         }
     }
 }
+

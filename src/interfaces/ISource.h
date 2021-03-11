@@ -11,7 +11,7 @@
 #include "../utility/GlobalMacrosTypes.h"
 
 class ISource {
-public:
+ public:
     virtual ~ISource() = default;
 
     virtual void add_source(Field &out_x, Field &out_y, Field &out_z,
@@ -25,3 +25,4 @@ public:
 };
 
 #endif /* ARTSS_INTERFACES_ISOURCE_H_ */
+

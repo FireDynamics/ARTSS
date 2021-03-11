@@ -20,3 +20,4 @@ class IDiffusion {
 };
 
 #endif /* ARTSS_INTERFACES_IDIFFUSION_H_ */
+

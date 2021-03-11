@@ -5,7 +5,7 @@
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Field.h"
-#include <iostream>
+#include "../Domain.h"
 
 // Field::Field(FieldType type, real val) :
 //     Field::Field(type, val, 0, Domain::getInstance()->get_size()) {

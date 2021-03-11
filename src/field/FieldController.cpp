@@ -1,13 +1,15 @@
 /// \file       FieldController.cpp
-/// \brief      
+/// \brief      manages everything reagarding any field object
 /// \date       Aug 12, 2020
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
 #include "FieldController.h"
-#include "../utility/Parameters.h"
+#include <string>
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
+#include "../solver/SolverSelection.h"
+#include "../utility/Parameters.h"
 
 FieldController::FieldController(Domain const &domain):
     // Variables
@@ -38,7 +40,7 @@ FieldController::FieldController(Domain const &domain):
     field_T(Field(FieldType::T, 0.0, 0, domain.get_size())),
     field_T0(Field(FieldType::T, 0.0, 0, domain.get_size())),
     field_T_tmp(Field(FieldType::T, 0.0, 0, domain.get_size())),
-    field_T_ambient(Field(FieldType::T, 300, 0, domain.get_size())),
+    field_T_ambient(Field(FieldType::T, 0.0, 0, domain.get_size())),
 
     // Concentration
     field_concentration(Field(FieldType::RHO, 0.0, 0, domain.get_size())),
@@ -189,7 +191,7 @@ void FieldController::update_data(bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    } //end data region
+    }  // end data region
 }
 
 //======================================== Couple velocity ====================================
@@ -353,3 +355,4 @@ void FieldController::update_host(){
     field_gamma_t.update_host();
 #pragma acc wait
 }
+

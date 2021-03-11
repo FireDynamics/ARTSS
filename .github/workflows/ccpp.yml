@@ -104,4 +104,4 @@ jobs:
         run: |
           git submodule update --init
           ./compile.sh --docker-build
-          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "cd tools && pwd && ./test_xml-builder.sh"
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "cd tools && pwd && ./test_xml-builder.sh -v"

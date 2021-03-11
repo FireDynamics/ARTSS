@@ -5,12 +5,12 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "NSTempTurbSolver.h"
+#include "../Domain.h"
+#include "../boundary/BoundaryData.h"
+#include "../boundary/BoundaryController.h"
 #include "../pressure/VCycleMG.h"
 #include "../utility/Parameters.h"
-#include "../utility/Utility.h"
-#include "../Domain.h"
 #include "SolverSelection.h"
-#include "../boundary/BoundaryData.h"
 
 NSTempTurbSolver::NSTempTurbSolver(FieldController *field_controller) {
 #ifndef BENCHMARKING
@@ -75,7 +75,6 @@ NSTempTurbSolver::~NSTempTurbSolver() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSTempTurbSolver::do_step(real t, bool sync) {
-
     auto params = Parameters::getInstance();
 
     // local variables and parameters for GPU
@@ -169,7 +168,6 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         m_logger->info("Advect Temperature ...");
 #endif
         adv_temp->advect(T, T0, u, v, w, sync);
-
         // Couple temperature to prepare for diffusion
         FieldController::couple_scalar(T, T0, T_tmp, sync);
 
