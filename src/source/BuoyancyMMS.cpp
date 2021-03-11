@@ -9,14 +9,12 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 
-BuoyancyMMS::BuoyancyMMS() {
-    auto domain = Domain::getInstance();
-    m_source_field = new Field(FieldType::RHO, 0, 0, domain->get_size());
+BuoyancyMMS::BuoyancyMMS() :
+    m_source_field(FieldType::RHO, 0, 0, Domain::getInstance()->get_size()) {
     set_up();
 }
 
 BuoyancyMMS::~BuoyancyMMS() {
-    delete m_source_field;
 }
 
 //===================================== Energy Source ====================================
@@ -28,8 +26,7 @@ BuoyancyMMS::~BuoyancyMMS() {
 void BuoyancyMMS::set_up() {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto d_out = m_source_field->data;
-    auto level = m_source_field->get_level();
+    auto level = m_source_field.get_level();
 
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
@@ -66,7 +63,7 @@ void BuoyancyMMS::set_up() {
         size_t k = getCoordinateK(idx, Nx, Ny);
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
-        d_out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
+        m_source_field[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
     }
 
     // boundary cells
@@ -75,17 +72,14 @@ void BuoyancyMMS::set_up() {
         size_t k = getCoordinateK(idx, Nx, Ny);
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
-        d_out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
+        m_source_field[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
     }
 
-    m_source_field->copyin();
+    m_source_field.copyin();
 }
 
-void BuoyancyMMS::update_source(Field *out, real t_cur) {
+void BuoyancyMMS::update_source(Field &out, real t_cur) {
     auto boundary = BoundaryController::getInstance();
-
-    auto d_out = out->data;
-    auto d_source = m_source_field->data;
 
 #pragma acc data present(out, source)
     {
@@ -99,13 +93,13 @@ void BuoyancyMMS::update_source(Field *out, real t_cur) {
         // inner cells
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_iList[l];
-            d_out[idx] = d_source[idx] * exp(-t_cur);
+            out[idx] = m_source_field[idx] * exp(-t_cur);
         }
 
         // boundary cells
         for (size_t l = 0; l < bsize_b; ++l) {
             const size_t idx = d_bList[l];
-            d_out[idx] = d_source[idx] * exp(-t_cur);
+            out[idx] = m_source_field[idx] * exp(-t_cur);
         }
     }
 }

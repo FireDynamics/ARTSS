@@ -88,36 +88,35 @@ NSTempConSolver::~NSTempConSolver() {
 void NSTempConSolver::do_step(real t, bool sync) {
 
     // local variables and parameters for GPU
-    auto u = m_field_controller->field_u;
-    auto v = m_field_controller->field_v;
-    auto w = m_field_controller->field_w;
-    auto u0 = m_field_controller->field_u0;
-    auto v0 = m_field_controller->field_v0;
-    auto w0 = m_field_controller->field_w0;
-    auto u_tmp = m_field_controller->field_u_tmp;
-    auto v_tmp = m_field_controller->field_v_tmp;
-    auto w_tmp = m_field_controller->field_w_tmp;
-    auto p = m_field_controller->field_p;
-    auto p0 = m_field_controller->field_p0;
-    auto rhs = m_field_controller->field_rhs;
-    auto T = m_field_controller->field_T;
-    auto T0 = m_field_controller->field_T0;
-    auto T_tmp = m_field_controller->field_T_tmp;
-    auto C = m_field_controller->field_concentration;
-    auto C0 = m_field_controller->field_concentration0;
-    auto C_tmp = m_field_controller->field_concentration_tmp;
-    auto f_x = m_field_controller->field_force_x;
-    auto f_y = m_field_controller->field_force_y;
-    auto f_z = m_field_controller->field_force_z;
-    auto S_T = m_field_controller->field_source_T;
-    auto S_C = m_field_controller->field_source_concentration;
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &u0 = m_field_controller->get_field_u0();
+    Field &v0 = m_field_controller->get_field_v0();
+    Field &w0 = m_field_controller->get_field_w0();
+    Field &u_tmp = m_field_controller->get_field_u_tmp();
+    Field &v_tmp = m_field_controller->get_field_v_tmp();
+    Field &w_tmp = m_field_controller->get_field_w_tmp();
+    Field &p = m_field_controller->get_field_p();
+    Field &rhs = m_field_controller->get_field_rhs();
+    Field &T = m_field_controller->get_field_T();
+    Field &T0 = m_field_controller->get_field_T0();
+    Field &T_tmp = m_field_controller->get_field_T_tmp();
+    Field &C = m_field_controller->get_field_concentration();
+    Field &C0 = m_field_controller->get_field_concentration0();
+    Field &C_tmp = m_field_controller->get_field_concentration_tmp();
+    Field &f_x = m_field_controller->get_field_force_x();
+    Field &f_y = m_field_controller->get_field_force_y();
+    Field &f_z = m_field_controller->get_field_force_z();
+    Field &S_T = m_field_controller->get_field_source_T();
+    Field &S_C = m_field_controller->get_field_source_concentration();
 
     auto nu = m_nu;
     auto kappa = m_kappa;
     auto gamma = m_gamma;
     auto dir_vel = m_dir_vel;
 
-#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, p0, rhs, T, T0, T_tmp, C, C0, C_tmp, fx, fy, fz, S_T, S_C)
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, rhs, T, T0, T_tmp, C, C0, C_tmp, fx, fy, fz, S_T, S_C)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING

@@ -8,11 +8,8 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-void Cube::update_source(Field *out, real) {
+void Cube::update_source(Field &out, real) {
     auto boundary = BoundaryController::getInstance();
-
-    auto d_out = out->data;
-    auto d_source = m_source_field->data;
 
 #pragma acc data present(out, source)
     {
@@ -26,31 +23,28 @@ void Cube::update_source(Field *out, real) {
         // inner cells
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_iList[l];
-            d_out[idx] = d_source[idx];
+            out[idx] = m_source_field[idx];
         }
 
         // boundary cells
         for (size_t l = 0; l < bsize_b; ++l) {
             const size_t idx = d_bList[l];
-            d_out[idx] = d_source[idx];
+            out[idx] = m_source_field[idx];
         }
     }
 }
 
-Cube::Cube(real value, real x_start, real y_start, real z_start, real x_end, real y_end, real z_end) {
-    auto size = Domain::getInstance()->get_size();
-    m_source_field = new Field(FieldType::T, 0.0, 0, size);
+Cube::Cube(real value, real
+        x_start, real y_start, real z_start,
+        real x_end, real y_end, real z_end) :
+    m_source_field(FieldType::T, 0.0, 0, Domain::getInstance()->get_size()) {
     set_up(value, x_start, y_start, z_start, x_end, y_end, z_end);
 }
 
-Cube::~Cube() {
-    delete m_source_field;
-}
-
-void Cube::set_up(real value, real x_start, real y_start, real z_start, real x_end, real y_end, real z_end) {
+void Cube::set_up(real value,
+        real x_start, real y_start, real z_start,
+        real x_end, real y_end, real z_end) {
     Domain *domain = Domain::getInstance();
-    real *data = m_source_field->data;
-
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
@@ -73,9 +67,9 @@ void Cube::set_up(real value, real x_start, real y_start, real z_start, real x_e
         for (size_t j = index_start_y; j <= index_end_y; j++) {
             for (size_t k = index_start_z; k <= index_end_z; k++) {
                 size_t index = IX(i, j, k, Nx, Ny);
-                data[index] = value;
+                m_source_field[index] = value;
             }
         }
     }
-    m_source_field->copyin();
+    m_source_field.copyin();
 }

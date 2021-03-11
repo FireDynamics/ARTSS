@@ -14,13 +14,15 @@ ExplicitEulerSource::ExplicitEulerSource() {
     m_dt = params->get_real("physical_parameters/dt");
     m_dir_vel = params->get("solver/source/dir");
 
-    if (m_dir_vel.find('x') == std::string::npos && m_dir_vel.find('y') == std::string::npos && m_dir_vel.find('z') == std::string::npos) {
+    if (m_dir_vel.find('x') == std::string::npos &&
+            m_dir_vel.find('y') == std::string::npos &&
+            m_dir_vel.find('z') == std::string::npos) {
 #ifndef BENCHMARKING
         m_logger = Utility::create_logger(typeid(ExplicitEulerSource).name());
         m_logger->error("unknown direction -> exit");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO Error handling
     }
 }
 
@@ -35,17 +37,11 @@ ExplicitEulerSource::ExplicitEulerSource() {
 /// \param  S_z    Source pointer in z-direction
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, Field *S_x, Field *S_y, Field *S_z, bool sync) {
+void ExplicitEulerSource::add_source(Field &out_x, Field &out_y, Field &out_z,
+        Field const &s_x, Field const &s_y, Field const &s_z, bool sync) {
     // local variables and parameters for GPU
-    size_t level = out_x->get_level();
-    FieldType type = out_x->get_type();
-
-    auto d_outx = out_x->data;
-    auto d_outy = out_y->data;
-    auto d_outz = out_z->data;
-    auto d_Sx = S_x->data;
-    auto d_Sy = S_y->data;
-    auto d_Sz = S_z->data;
+    size_t level = out_x.get_level();
+    FieldType type = out_x.get_type();
 
     auto dt = m_dt;
     auto dir = m_dir_vel;
@@ -54,40 +50,40 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
     size_t *d_iList = boundary->get_innerList_level_joined();
     auto bsize_i = boundary->getSize_innerList();
 
-#pragma acc data present(outx, outy, outz, Sx, Sy, Sz)
+#pragma acc data present(out_x, out_y, out_z, s_x, s_y, s_z)
     {
-        //check directions of source
-        //x - direction
+        // check directions of source
+        // x - direction
         if (dir.find('x') != std::string::npos) {
-#pragma acc parallel loop independent present(d_outx, d_Sx, d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out_x, s_x, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_iList[j];
-                d_outx[i] += dt * d_Sx[i];
+                out_x[i] += dt * s_x[i];
             }
 
-            boundary->applyBoundary(d_outx, level, type, sync);
+            boundary->applyBoundary(out_x.data, level, type, sync);
         }
 
         // y - direction
         if (dir.find('y') != std::string::npos) {
-#pragma acc parallel loop independent present(d_outy, d_Sy, d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out_y, s_y, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_iList[j];
-                d_outy[i] += dt * d_Sy[i];
+                out_y[i] += dt * s_y[i];
             }
 
-            boundary->applyBoundary(d_outy, level, type, sync);
+            boundary->applyBoundary(out_y.data, level, type, sync);
         }
 
         // z - direction
         if (dir.find('z') != std::string::npos) {
-#pragma acc parallel loop independent present(d_outz, d_Sz, d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out_z, s_z, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_iList[j];
-                d_outz[i] += dt * d_Sz[i];
+                out_z[i] += dt * s_z[i];
             }
 
-            boundary->applyBoundary(d_outz, level, type, sync);
+            boundary->applyBoundary(out_z.data, level, type, sync);
         }
 
         if (sync) {
@@ -102,13 +98,9 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
 /// \param  S   Source pointer
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
-    // local variables and parameters for GPU
-    size_t level = out->get_level();
-    FieldType type = out->get_type();
-
-    auto d_out = out->data;
-    auto d_S = S->data;
+void ExplicitEulerSource::add_source(Field &out, Field const &s, bool sync) {
+    size_t level = out.get_level();
+    FieldType type = out.get_type();
 
     auto dt = m_dt;
 
@@ -116,15 +108,15 @@ void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
     size_t *d_iList = boundary->get_innerList_level_joined();
     auto bsize_i = boundary->getSize_innerList();
 
-#pragma acc data present(out, S)
+#pragma acc data present(out, s)
     {
-#pragma acc parallel loop independent present(out, S, d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, s, d_iList[:bsize_i]) async
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_iList[j];
-            d_out[i] += dt * d_S[i];
+            out[i] += dt * s[i];
         }
 
-        boundary->applyBoundary(d_out, level, type, sync);
+        boundary->applyBoundary(out.data, level, type, sync);
 
         if (sync) {
 #pragma acc wait

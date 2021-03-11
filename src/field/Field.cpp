@@ -5,6 +5,7 @@
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Field.h"
+#include <iostream>
 
 // Field::Field(FieldType type, real val) :
 //     Field::Field(type, val, 0, Domain::getInstance()->get_size()) {
@@ -18,6 +19,13 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
     m_level(level), m_size(size), m_type(type) {
     data = new real[m_size];
     set_value(val);
+    #pragma acc enter data copyin(this[:1]) create(m_data[:m_size])
+}
+
+Field::Field(Field const &orig):
+    m_level(orig.get_level()), m_size(orig.get_size()), m_type(orig.get_type()),
+    data(new real[orig.get_size()]) {
+    this->copy_data(orig);
     #pragma acc enter data copyin(this[:1]) create(m_data[:m_size])
 }
 

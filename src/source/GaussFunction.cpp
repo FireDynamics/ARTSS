@@ -9,27 +9,20 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z, real tau) {
-    m_tau = tau;
-    auto domain  = Domain::getInstance();
-    m_field_spatial_values = new Field(FieldType::RHO, 0.0, 0, domain->get_size());
+GaussFunction::GaussFunction(real HRR, real cp,
+        real x0, real y0, real z0,
+        real sigma_x, real sigma_y, real sigma_z, real tau) :
+    m_field_spatial_values(FieldType::RHO, 0.0, 0, Domain::getInstance()->get_size()),
+    m_tau(tau) {
     create_spatial_values(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z);
 }
 
-GaussFunction::~GaussFunction() {
-    delete m_field_spatial_values;
-}
-
-void GaussFunction::update_source(Field *out, real t_cur) {
-    size_t size = Domain::getInstance()->get_size();
-    auto data_out = out->data;
-    auto data_spatial = m_field_spatial_values->data;
-
+void GaussFunction::update_source(Field &out, real t_cur) {
 #pragma acc data present(out, spatial)
     {
 #pragma acc parallel loop independent present(out, spatial) async
-        for (size_t i = 0; i < size; i++) {
-            data_out[i] = data_spatial[i] * get_time_value(t_cur);
+        for (size_t i = 0; i < out.get_size(); i++) {
+            out[i] = m_field_spatial_values[i] * get_time_value(t_cur);
         }
 #pragma acc wait
     }
@@ -48,8 +41,8 @@ void GaussFunction::update_source(Field *out, real t_cur) {
 void GaussFunction::create_spatial_values(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto d_out = m_field_spatial_values->data;
-    auto level = m_field_spatial_values->get_level();
+    auto d_out = m_field_spatial_values.data;
+    auto level = m_field_spatial_values.get_level();
 
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
@@ -112,7 +105,7 @@ void GaussFunction::create_spatial_values(real HRR, real cp, real x0, real y0, r
             d_out[idx] = 0;
         }
     }
-    m_field_spatial_values->copyin();
+    m_field_spatial_values.copyin();
 }
 
 // ============================= Ramp up function for HRR source =========================

@@ -53,58 +53,58 @@ void Solution::init(std::string initial_condition) {
 
 void Solution::gauss_bubble(const real t) {
     // Advection test case
-    Functions::GaussBubble(&u_a, t);
-    Functions::GaussBubble(&v_a, t);
-    Functions::GaussBubble(&w_a, t);
+    Functions::GaussBubble(u_a, t);
+    Functions::GaussBubble(v_a, t);
+    Functions::GaussBubble(w_a, t);
 }
 
 void Solution::exp_sinus_prod(const real t) {
     // Diffusion test case
-    Functions::ExpSinusProd(&u_a, t);
-    Functions::ExpSinusProd(&v_a, t);
-    Functions::ExpSinusProd(&w_a, t);
+    Functions::ExpSinusProd(u_a, t);
+    Functions::ExpSinusProd(v_a, t);
+    Functions::ExpSinusProd(w_a, t);
 }
 
 void Solution::exp_sinus_sum(const real t) {
     // Diffusion test case
-    Functions::ExpSinusSum(&u_a, &v_a, &w_a, t);
+    Functions::ExpSinusSum(u_a, v_a, w_a, t);
 }
 
-void Solution::hat(const real t) {
+void Solution::hat(const real) {
     // Diffusion test case
-    Functions::Hat(&u_a); // TODO time dependency?
-    Functions::Hat(&v_a);
-    Functions::Hat(&w_a);
+    Functions::Hat(u_a);  // TODO time dependency?
+    Functions::Hat(v_a);
+    Functions::Hat(w_a);
 }
 
-void Solution::sin_sin_sin(real t) {
+void Solution::sin_sin_sin(real) {
 // Pressure test case
-    Functions::FacSinSinSin(&p_a); // TODO time dependency?
+    Functions::FacSinSinSin(p_a);  // TODO time dependency?
 }
 
 void Solution::mcDermott(const real t) {
 // NavierStokes test case
-    Functions::McDermott(&u_a, &v_a, &w_a, &p_a, t);
+    Functions::McDermott(u_a, v_a, w_a, p_a, t);
 }
 
-void Solution::vortex(const real t) {
-    Functions::Vortex(&u_a, &v_a, &w_a, &p_a); // TODO time dependency
+void Solution::vortex(const real) {
+    Functions::Vortex(u_a, v_a, w_a, p_a);  // TODO time dependency
 }
 
-void Solution::vortex_y(const real t) {
-    Functions::VortexY(&u_a, &v_a, &w_a, &p_a); // TODO time dependency
+void Solution::vortex_y(const real) {
+    Functions::VortexY(u_a, v_a, w_a, p_a);  // TODO time dependency
 }
 
 void Solution::beltrami(const real t) {
-    Functions::Beltrami(&u_a, &v_a, &w_a, &p_a, t);
+    Functions::Beltrami(u_a, v_a, w_a, p_a, t);
 }
 
-void Solution::zero(const real t) {
+void Solution::zero(const real) {
     // do nothing
 }
 
 void Solution::buoyancy_mms(const real t) {
-    Functions::BuoyancyMMS(&u_a, &v_a, &w_a, &p_a, &T_a, t);
+    Functions::BuoyancyMMS(u_a, v_a, w_a, p_a, T_a, t);
 }
 
 // =================== Calculate analytical solution based on test case ==================

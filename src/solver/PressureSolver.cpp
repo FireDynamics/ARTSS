@@ -35,8 +35,8 @@ void PressureSolver::do_step(real t, bool sync) {
 
     // 1. Solve pressure Poisson equation
     // local variables and parameters for GPU
-    auto p = m_field_controller->field_p;
-    auto rhs = m_field_controller->field_rhs;
+    Field &p = m_field_controller->get_field_p();
+    Field &rhs = m_field_controller->get_field_rhs();
 #pragma acc data present(p, rhs)
     {
         pres->pressure(p, rhs, t, sync);

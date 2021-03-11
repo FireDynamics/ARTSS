@@ -37,26 +37,26 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 
 void TimeIntegration::run() {
     // local variables and parameters for GPU
-    auto u = m_field_controller->field_u;
-    auto v = m_field_controller->field_v;
-    auto w = m_field_controller->field_w;
-    auto p = m_field_controller->field_p;
-    auto rhs = m_field_controller->field_rhs;
-    auto T = m_field_controller->field_T;
-    auto C = m_field_controller->field_concentration;
-    auto S_T = m_field_controller->field_source_T;
-    auto nu_t = m_field_controller->field_nu_t;
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &p = m_field_controller->get_field_p();
+    Field &rhs = m_field_controller->get_field_rhs();
+    Field &T = m_field_controller->get_field_T();
+    Field &C = m_field_controller->get_field_concentration();
+    Field &S_T = m_field_controller->get_field_source_T();
+    Field &nu_t = m_field_controller->get_field_nu_t();
 
 #ifndef BENCHMARKING
-    u->update_host();
-    v->update_host();
-    w->update_host();
-    p->update_host();
-    rhs->update_host();
-    T->update_host();
-    C->update_host();
-    nu_t->update_host();
-    S_T->update_host();
+    u.update_host();
+    v.update_host();
+    w.update_host();
+    p.update_host();
+    rhs.update_host();
+    T.update_host();
+    C.update_host();
+    nu_t.update_host();
+    S_T.update_host();
 #pragma acc wait
 
     m_analysis->analyse(m_field_controller, 0.);
@@ -94,15 +94,15 @@ void TimeIntegration::run() {
             m_solver_controller->solver_do_step(t_cur, false);
 #ifndef BENCHMARKING
             // Visualize
-            u->update_host();
-            v->update_host();
-            w->update_host();
-            p->update_host();
-            rhs->update_host();
-            T->update_host();
-            C->update_host();
-            nu_t->update_host();
-            S_T->update_host();
+            u.update_host();
+            v.update_host();
+            w.update_host();
+            p.update_host();
+            rhs.update_host();
+            T.update_host();
+            C.update_host();
+            nu_t.update_host();
+            S_T.update_host();
 #pragma acc wait
 
             m_visual->visualise(m_field_controller, t_cur);
@@ -153,15 +153,15 @@ void TimeIntegration::run() {
 #endif
 
 #pragma acc wait
-    u->update_host();
-    v->update_host();
-    w->update_host();
-    p->update_host();
-    rhs->update_host();
-    T->update_host();
-    C->update_host();
-    nu_t->update_host();
-    S_T->update_host();
+    u.update_host();
+    v.update_host();
+    w.update_host();
+    p.update_host();
+    rhs.update_host();
+    T.update_host();
+    C.update_host();
+    nu_t.update_host();
+    S_T.update_host();
 #pragma acc wait
     }  // end RANGE
 

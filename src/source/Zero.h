@@ -12,7 +12,7 @@
 
 class Zero: public ISourceFunction {
 public:
-    void update_source(Field *out, real t_cur) override { }
+    void update_source(Field &, real) override { }
 };
 
 

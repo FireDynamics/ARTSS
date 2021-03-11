@@ -15,230 +15,152 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-DynamicSmagorinsky::DynamicSmagorinsky() {
-    auto domain = Domain::getInstance();
-    auto params = Parameters::getInstance();
+DynamicSmagorinsky::DynamicSmagorinsky() :
+    u_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    v_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    w_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
 
+    uu(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    vv(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    ww(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    uv(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    uw(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    vw(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+
+    uu_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    vv_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    ww_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    uv_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    uw_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    vw_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+
+    uf_uf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    vf_vf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    wf_wf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    uf_vf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    uf_wf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    vf_wf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+
+    L11(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    L22(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    L33(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    L12(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    L13(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    L23(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+
+    S11(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S22(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S33(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S12(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S13(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S23(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+
+    S11_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S22_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S33_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S12_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S13_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S23_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+
+    P11(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P22(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P33(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P12(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P13(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P23(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+
+    P11_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P22_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P33_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P12_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P13_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P23_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+
+    M11(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    M22(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    M33(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    M12(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    M13(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    M23(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+
+    S_bar(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S_bar_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    Cs(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()) {
+    auto params = Parameters::getInstance();
     m_nu = params->get_real("physical_parameters/nu");
 
-    u_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    v_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    w_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
-    uu = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    vv = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    ww = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    uv = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    uw = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    vw = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
-    uu_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    vv_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    ww_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    uv_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    uw_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    vw_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
-    uf_uf = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    vf_vf = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    wf_wf = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    uf_vf = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    uf_wf = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    vf_wf = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
-    L11 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    L22 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    L33 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    L12 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    L13 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    L23 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
-    S11 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    S22 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    S33 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    S12 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    S13 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    S23 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
-    S11_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    S22_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    S33_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    S12_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    S13_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    S23_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
-    P11 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    P22 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    P33 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    P12 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    P13 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    P23 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
-    P11_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    P22_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    P33_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    P12_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    P13_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    P23_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
-    M11 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    M22 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    M33 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    M12 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    M13 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    M23 = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
-    S_bar = new Field(FieldType::U, 0.0, 0, domain->get_size());
-    S_bar_f = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
-    Cs = new Field(FieldType::U, 0.0, 0, domain->get_size());
-
     // Variables related to Dynamic Smagorinsky
-    u_f->copyin();
-    v_f->copyin();
-    w_f->copyin();
+    u_f.copyin();
+    v_f.copyin();
+    w_f.copyin();
 
-    uu->copyin();
-    vv->copyin();
-    ww->copyin();
-    uv->copyin();
-    uw->copyin();
-    vw->copyin();
+    uu.copyin();
+    vv.copyin();
+    ww.copyin();
+    uv.copyin();
+    uw.copyin();
+    vw.copyin();
 
-    uf_uf->copyin();
-    vf_vf->copyin();
-    wf_wf->copyin();
-    uf_vf->copyin();
-    uf_wf->copyin();
-    vf_wf->copyin();
+    uf_uf.copyin();
+    vf_vf.copyin();
+    wf_wf.copyin();
+    uf_vf.copyin();
+    uf_wf.copyin();
+    vf_wf.copyin();
 
-    uu_f->copyin();
-    vv_f->copyin();
-    ww_f->copyin();
-    uv_f->copyin();
-    uw_f->copyin();
-    vw_f->copyin();
+    uu_f.copyin();
+    vv_f.copyin();
+    ww_f.copyin();
+    uv_f.copyin();
+    uw_f.copyin();
+    vw_f.copyin();
 
-    L11->copyin();
-    L22->copyin();
-    L33->copyin();
-    L12->copyin();
-    L13->copyin();
-    L23->copyin();
+    L11.copyin();
+    L22.copyin();
+    L33.copyin();
+    L12.copyin();
+    L13.copyin();
+    L23.copyin();
 
-    S11->copyin();
-    S22->copyin();
-    S33->copyin();
-    S12->copyin();
-    S13->copyin();
-    S23->copyin();
+    S11.copyin();
+    S22.copyin();
+    S33.copyin();
+    S12.copyin();
+    S13.copyin();
+    S23.copyin();
 
-    P11->copyin();
-    P22->copyin();
-    P33->copyin();
-    P12->copyin();
-    P13->copyin();
-    P23->copyin();
+    P11.copyin();
+    P22.copyin();
+    P33.copyin();
+    P12.copyin();
+    P13.copyin();
+    P23.copyin();
 
-    S11_f->copyin();
-    S22_f->copyin();
-    S33_f->copyin();
-    S12_f->copyin();
-    S13_f->copyin();
-    S23_f->copyin();
+    S11_f.copyin();
+    S22_f.copyin();
+    S33_f.copyin();
+    S12_f.copyin();
+    S13_f.copyin();
+    S23_f.copyin();
 
-    P11_f->copyin();
-    P22_f->copyin();
-    P33_f->copyin();
-    P12_f->copyin();
-    P13_f->copyin();
-    P23_f->copyin();
+    P11_f.copyin();
+    P22_f.copyin();
+    P33_f.copyin();
+    P12_f.copyin();
+    P13_f.copyin();
+    P23_f.copyin();
 
-    S_bar->copyin();
-    S_bar_f->copyin();
+    S_bar.copyin();
+    S_bar_f.copyin();
 
-    M11->copyin();
-    M22->copyin();
-    M33->copyin();
-    M12->copyin();
-    M13->copyin();
-    M23->copyin();
+    M11.copyin();
+    M22.copyin();
+    M33.copyin();
+    M12.copyin();
+    M13.copyin();
+    M23.copyin();
 
-    Cs->copyin();
-}
-
-DynamicSmagorinsky::~DynamicSmagorinsky() {
-    delete u_f;
-    delete v_f;
-    delete w_f;
-
-    delete uu;
-    delete vv;
-    delete ww;
-    delete uv;
-    delete uw;
-    delete vw;
-
-    delete uu_f;
-    delete vv_f;
-    delete ww_f;
-    delete uv_f;
-    delete uw_f;
-    delete vw_f;
-
-    delete uf_uf;
-    delete vf_vf;
-    delete wf_wf;
-    delete uf_vf;
-    delete uf_wf;
-    delete vf_wf;
-
-    delete L11;
-    delete L22;
-    delete L33;
-    delete L12;
-    delete L13;
-    delete L23;
-
-    delete S11;
-    delete S22;
-    delete S33;
-    delete S12;
-    delete S13;
-    delete S23;
-
-    delete S11_f;
-    delete S22_f;
-    delete S33_f;
-    delete S12_f;
-    delete S13_f;
-    delete S23_f;
-
-    delete P11;
-    delete P22;
-    delete P33;
-    delete P12;
-    delete P13;
-    delete P23;
-
-    delete P11_f;
-    delete P22_f;
-    delete P33_f;
-    delete P12_f;
-    delete P13_f;
-    delete P23_f;
-
-    delete M11;
-    delete M22;
-    delete M33;
-    delete M12;
-    delete M13;
-    delete M23;
-
-    delete S_bar;
-    delete S_bar_f;
-
-    delete Cs;
+    Cs.copyin();
 }
 
 //============================ Calculate turbulent viscosity =============================
@@ -250,110 +172,16 @@ DynamicSmagorinsky::~DynamicSmagorinsky() {
 /// \param  in_w          input pointer of z-velocity
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void DynamicSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Field *in_w, bool sync) {
+void DynamicSmagorinsky::CalcTurbViscosity(Field &ev,
+        Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
     auto domain = Domain::getInstance();
-
     // local variables and parameters for GPU
-    auto d_u = in_u->data;
-    auto d_v = in_v->data;
-    auto d_w = in_w->data;
-    auto d_ev = ev->data;
+    const size_t Nx = domain->get_Nx(in_u.get_level());
+    const size_t Ny = domain->get_Ny(in_v.get_level());
 
-    // Variables related to Dynamic Smagorinsky
-    // filtered velocities
-    auto d_u_f = u_f->data;
-    auto d_v_f = v_f->data;
-    auto d_w_f = w_f->data;
-
-    // velocity products
-    auto d_uu = uu->data;
-    auto d_vv = vv->data;
-    auto d_ww = ww->data;
-    auto d_uv = uv->data;
-    auto d_uw = uw->data;
-    auto d_vw = vw->data;
-
-    // product of the filtered velocities
-    auto d_uu_f = uu_f->data;
-    auto d_vv_f = vv_f->data;
-    auto d_ww_f = ww_f->data;
-    auto d_uv_f = uv_f->data;
-    auto d_uw_f = uw_f->data;
-    auto d_vw_f = vw_f->data;
-
-    // filters of the velocity products
-    auto d_uf_uf = uf_uf->data;
-    auto d_vf_vf = vf_vf->data;
-    auto d_wf_wf = wf_wf->data;
-    auto d_uf_vf = uf_vf->data;
-    auto d_uf_wf = uf_wf->data;
-    auto d_vf_wf = vf_wf->data;
-
-    // Leonard stress
-    auto d_L11 = L11->data;
-    auto d_L22 = L22->data;
-    auto d_L33 = L33->data;
-    auto d_L12 = L12->data;
-    auto d_L13 = L13->data;
-    auto d_L23 = L23->data;
-
-    // strain tensor
-    auto d_S11 = S11->data;
-    auto d_S22 = S22->data;
-    auto d_S33 = S33->data;
-    auto d_S12 = S12->data;
-    auto d_S13 = S13->data;
-    auto d_S23 = S23->data;
-
-    // second filtered strain tensor
-    auto d_S11_f = S11_f->data;
-    auto d_S22_f = S22_f->data;
-    auto d_S33_f = S33_f->data;
-    auto d_S12_f = S12_f->data;
-    auto d_S13_f = S13_f->data;
-    auto d_S23_f = S23_f->data;
-
-    // Product of strain modulus and strain tensor
-    auto d_P11 = P11->data;
-    auto d_P22 = P22->data;
-    auto d_P33 = P33->data;
-    auto d_P12 = P12->data;
-    auto d_P13 = P13->data;
-    auto d_P23 = P23->data;
-
-    // second filtered product of strain modulus and strain tensor
-    auto d_P11_f = P11_f->data;
-    auto d_P22_f = P22_f->data;
-    auto d_P33_f = P33_f->data;
-    auto d_P12_f = P12_f->data;
-    auto d_P13_f = P13_f->data;
-    auto d_P23_f = P23_f->data;
-
-    // High frequency resolved terms
-    auto d_M11 = M11->data;
-    auto d_M22 = M22->data;
-    auto d_M33 = M33->data;
-    auto d_M12 = M12->data;
-    auto d_M13 = M13->data;
-    auto d_M23 = M23->data;
-
-    // modulus of strain tensor and filtered strain tensor
-    auto d_S_bar = S_bar->data;
-    auto d_S_bar_f = S_bar_f->data;
-
-    // dynamic constant
-    auto d_Cs = Cs->data;
-
-    // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(in_u->get_level());
-    const size_t Ny = domain->get_Ny(in_v->get_level());
-    const size_t Nz = domain->get_Nz(in_w->get_level());
-
-    const real dx = domain->get_dx(in_u->get_level());
-    const real dy = domain->get_dy(in_v->get_level());
-    const real dz = domain->get_dz(in_w->get_level());
-
-    size_t bsize = domain->get_size(in_u->get_level());
+    const real dx = domain->get_dx(in_u.get_level());
+    const real dy = domain->get_dy(in_v.get_level());
+    const real dz = domain->get_dz(in_w.get_level());
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -376,30 +204,30 @@ void DynamicSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, 
     ExplicitFiltering(v_f, in_v, sync);
     ExplicitFiltering(w_f, in_w, sync);
 
-#pragma acc parallel loop independent present(  d_u[:bsize], d_v[:bsize], d_w[:bsize], \
-                        d_uu[:bsize], d_vv[:bsize], d_ww[:bsize], \
-                        d_uv[:bsize], d_uw[:bsize], d_vw[:bsize], \
-                        d_u_f[:bsize], d_v_f[:bsize], d_w_f[:bsize], \
-                        d_uf_uf[:bsize], d_vf_vf[:bsize], d_wf_wf[:bsize], \
-                        d_uf_vf[:bsize], d_uf_wf[:bsize], d_vf_wf[:bsize], \
+#pragma acc parallel loop independent present(u_f, v_f, w_f, \
+                        uu, vv, ww, \
+                        uv, uw, vw, \
+                        u_f, v_f, w_f, \
+                        uf_uf, vf_vf, wf_wf, \
+                        uf_vf, uf_wf, vf_wf, \
                         d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_iList[j];
         // product of velocities
-        d_uu[i] = d_u[i] * d_u[i];
-        d_vv[i] = d_v[i] * d_v[i];
-        d_ww[i] = d_w[i] * d_w[i];
-        d_uv[i] = d_u[i] * d_v[i];
-        d_uw[i] = d_u[i] * d_w[i];
-        d_vw[i] = d_v[i] * d_w[i];
+        uu[i] = u_f[i] * u_f[i];
+        vv[i] = v_f[i] * v_f[i];
+        ww[i] = w_f[i] * w_f[i];
+        uv[i] = u_f[i] * v_f[i];
+        uw[i] = u_f[i] * w_f[i];
+        vw[i] = v_f[i] * w_f[i];
 
         // product of filtered velocities
-        d_uf_uf[i] = d_u_f[i] * d_u_f[i];
-        d_vf_vf[i] = d_v_f[i] * d_v_f[i];
-        d_wf_wf[i] = d_w_f[i] * d_w_f[i];
-        d_uf_vf[i] = d_u_f[i] * d_v_f[i];
-        d_uf_wf[i] = d_u_f[i] * d_w_f[i];
-        d_vf_wf[i] = d_v_f[i] * d_w_f[i];
+        uf_uf[i] = u_f[i] * u_f[i];
+        vf_vf[i] = v_f[i] * v_f[i];
+        wf_wf[i] = w_f[i] * w_f[i];
+        uf_vf[i] = u_f[i] * v_f[i];
+        uf_wf[i] = u_f[i] * w_f[i];
+        vf_wf[i] = v_f[i] * w_f[i];
     }
 
     if (sync) {
@@ -414,55 +242,56 @@ void DynamicSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, 
     ExplicitFiltering(vw_f, vw, sync);
     ExplicitFiltering(ww_f, ww, sync);
 
-#pragma acc parallel loop independent present(  d_L11[:bsize], d_L22[:bsize], d_L33[:bsize], d_L12[:bsize], d_L13[:bsize], d_L23[:bsize], \
-                        d_S11[:bsize], d_S22[:bsize], d_S33[:bsize], d_S12[:bsize], d_S13[:bsize], d_S23[:bsize], \
-                        d_S_bar[:bsize], \
-                        d_P11[:bsize], d_P22[:bsize], d_P33[:bsize], d_P12[:bsize], d_P13[:bsize], d_P23[:bsize], \
-                        d_uu_f[:bsize], d_vv_f[:bsize], d_ww_f[:bsize], \
-                        d_uv_f[:bsize], d_uw_f[:bsize], d_vw_f[:bsize], \
-                        d_uf_uf[:bsize], d_vf_vf[:bsize], d_wf_wf[:bsize], \
-                        d_uf_vf[:bsize], d_uf_wf[:bsize], d_vf_wf[:bsize], \
-                        d_u[:bsize], d_v[:bsize], d_w[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(  L11, L22, L33, L12, L13, L23, \
+                        S11, S22, S33, S12, S13, S23, \
+                        S_bar, \
+                        P11, P22, P33, P12, P13, P23, \
+                        uu_f, vv_f, ww_f, \
+                        uv_f, uw_f, vw_f, \
+                        uf_uf, vf_vf, wf_wf, \
+                        uf_vf, uf_wf, vf_wf, \
+                        u_f, v_f, w_f, \
+                        d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_iList[j];
 
         // Leonard stress
-        d_L11[i] = d_uu_f[i] - d_uf_uf[i];
-        d_L22[i] = d_vv_f[i] - d_vf_vf[i];
-        d_L33[i] = d_ww_f[i] - d_wf_wf[i];
-        d_L12[i] = d_uv_f[i] - d_uf_vf[i];
-        d_L13[i] = d_uw_f[i] - d_uf_wf[i];
-        d_L23[i] = d_vw_f[i] - d_vf_wf[i];
+        L11[i] = uu_f[i] - uf_uf[i];
+        L22[i] = vv_f[i] - vf_vf[i];
+        L33[i] = ww_f[i] - wf_wf[i];
+        L12[i] = uv_f[i] - uf_vf[i];
+        L13[i] = uw_f[i] - uf_wf[i];
+        L23[i] = vw_f[i] - vf_wf[i];
 
         // strain tensor
-        d_S11[i] = (d_u[i + 1] - d_u[i - 1]) * 0.5 * rdx;
-        d_S22[i] = (d_v[i + Nx] - d_v[i - Nx]) * 0.5 * rdy;
-        d_S33[i] = (d_w[i + Nx * Ny] - d_w[i - Nx * Ny]) * 0.5 * rdz;
+        S11[i] = (u_f[i + 1] - u_f[i - 1]) * 0.5 * rdx;
+        S22[i] = (v_f[i + Nx] - v_f[i - Nx]) * 0.5 * rdy;
+        S33[i] = (w_f[i + Nx * Ny] - w_f[i - Nx * Ny]) * 0.5 * rdz;
 
-        d_S12[i] = 0.5 * ((d_u[i + Nx] - d_u[i - Nx]) * 0.5 * rdy \
- + (d_v[i + 1] - d_v[i - 1]) * 0.5 * rdx);
+        S12[i] = 0.5 * ((u_f[i + Nx] - u_f[i - Nx]) * 0.5 * rdy \
+ + (v_f[i + 1] - v_f[i - 1]) * 0.5 * rdx);
 
-        d_S13[i] = 0.5 * ((d_u[i + Nx * Ny] - d_u[i - Nx * Ny]) * 0.5 * rdz  \
- + (d_w[i + 1] - d_w[i - 1]) * 0.5 * rdx);
+        S13[i] = 0.5 * ((u_f[i + Nx * Ny] - u_f[i - Nx * Ny]) * 0.5 * rdz  \
+ + (w_f[i + 1] - w_f[i - 1]) * 0.5 * rdx);
 
-        d_S23[i] = 0.5 * ((d_v[i + Nx * Ny] - d_v[i - Nx * Ny]) * 0.5 * rdz  \
- + (d_w[i + Nx] - d_w[i - Nx]) * 0.5 * rdy);
+        S23[i] = 0.5 * ((v_f[i + Nx * Ny] - v_f[i - Nx * Ny]) * 0.5 * rdz  \
+ + (w_f[i + Nx] - w_f[i - Nx]) * 0.5 * rdy);
 
         // modulus of strain tensor
-        d_S_bar[i] = sqrt(2. * (d_S11[i] * d_S11[i] \
- + d_S22[i] * d_S22[i] \
- + d_S33[i] * d_S33[i] \
- + 2. * (d_S12[i] * d_S12[i]) \
- + 2. * (d_S13[i] * d_S13[i]) \
- + 2. * (d_S23[i] * d_S23[i])));
+        S_bar[i] = sqrt(2. * (S11[i] * S11[i] \
+ + S22[i] * S22[i] \
+ + S33[i] * S33[i] \
+ + 2. * (S12[i] * S12[i]) \
+ + 2. * (S13[i] * S13[i]) \
+ + 2. * (S23[i] * S23[i])));
 
         // product of strain modulus and strain tensor
-        d_P11[i] = d_S_bar[i] * d_S11[i];
-        d_P22[i] = d_S_bar[i] * d_S22[i];
-        d_P33[i] = d_S_bar[i] * d_S33[i];
-        d_P12[i] = d_S_bar[i] * d_S12[i];
-        d_P13[i] = d_S_bar[i] * d_S13[i];
-        d_P23[i] = d_S_bar[i] * d_S23[i];
+        P11[i] = S_bar[i] * S11[i];
+        P22[i] = S_bar[i] * S22[i];
+        P33[i] = S_bar[i] * S33[i];
+        P12[i] = S_bar[i] * S12[i];
+        P13[i] = S_bar[i] * S13[i];
+        P23[i] = S_bar[i] * S23[i];
     }
 
     if (sync) {
@@ -485,40 +314,41 @@ void DynamicSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, 
     ExplicitFiltering(P13_f, P13, sync);
     ExplicitFiltering(P23_f, P23, sync);
 
-#pragma acc parallel loop independent present(  d_S_bar_f[:bsize], d_S11_f[:bsize], d_S22_f[:bsize], d_S33_f[:bsize], \
-                        d_S12_f[:bsize], d_S13_f[:bsize], d_S23_f[:bsize], \
-                        d_M11[:bsize], d_M22[:bsize], d_M33[:bsize], \
-                        d_M12[:bsize], d_M13[:bsize], d_M23[:bsize], \
-                        d_P11_f[:bsize], d_P22_f[:bsize], d_P33_f[:bsize], \
-                        d_P12_f[:bsize], d_P13_f[:bsize], d_P23_f[:bsize], \
-                        d_L11[:bsize], d_L22[:bsize], d_L33[:bsize], \
-                        d_L12[:bsize], d_L13[:bsize], d_L23[:bsize], \
-                        d_Cs[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(  S_bar_f, S11_f, S22_f, S33_f, \
+                        S12_f, S13_f, S23_f, \
+                        M11, M22, M33, \
+                        M12, M13, M23, \
+                        P11_f, P22_f, P33_f, \
+                        P12_f, P13_f, P23_f, \
+                        L11, L22, L33, \
+                        L12, L13, L23, \
+                        Cs, \
+                        d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_iList[j];
         // modulus of filtered strain tensor
-        d_S_bar_f[i] = sqrt(2. * (d_S11_f[i] * d_S11_f[i] \
- + d_S22_f[i] * d_S22_f[i] \
- + d_S33_f[i] * d_S33_f[i] \
- + 2. * (d_S12_f[i] * d_S12_f[i]) \
- + 2. * (d_S13_f[i] * d_S13_f[i]) \
- + 2. * (d_S23_f[i] * d_S23_f[i])));
+        S_bar_f[i] = sqrt(2. * (S11_f[i] * S11_f[i] \
+ + S22_f[i] * S22_f[i] \
+ + S33_f[i] * S33_f[i] \
+ + 2. * (S12_f[i] * S12_f[i]) \
+ + 2. * (S13_f[i] * S13_f[i]) \
+ + 2. * (S23_f[i] * S23_f[i])));
 
         // High frequency resolved terms
-        d_M11[i] = 2.0 * delta_s * delta_s * (d_P11_f[i] - alpha * alpha * d_S_bar_f[i] * d_S11_f[i]);
-        d_M22[i] = 2.0 * delta_s * delta_s * (d_P22_f[i] - alpha * alpha * d_S_bar_f[i] * d_S22_f[i]);
-        d_M33[i] = 2.0 * delta_s * delta_s * (d_P33_f[i] - alpha * alpha * d_S_bar_f[i] * d_S33_f[i]);
-        d_M12[i] = 2.0 * delta_s * delta_s * (d_P12_f[i] - alpha * alpha * d_S_bar_f[i] * d_S12_f[i]);
-        d_M13[i] = 2.0 * delta_s * delta_s * (d_P13_f[i] - alpha * alpha * d_S_bar_f[i] * d_S13_f[i]);
-        d_M23[i] = 2.0 * delta_s * delta_s * (d_P23_f[i] - alpha * alpha * d_S_bar_f[i] * d_S23_f[i]);
+        M11[i] = 2.0 * delta_s * delta_s * (P11_f[i] - alpha * alpha * S_bar_f[i] * S11_f[i]);
+        M22[i] = 2.0 * delta_s * delta_s * (P22_f[i] - alpha * alpha * S_bar_f[i] * S22_f[i]);
+        M33[i] = 2.0 * delta_s * delta_s * (P33_f[i] - alpha * alpha * S_bar_f[i] * S33_f[i]);
+        M12[i] = 2.0 * delta_s * delta_s * (P12_f[i] - alpha * alpha * S_bar_f[i] * S12_f[i]);
+        M13[i] = 2.0 * delta_s * delta_s * (P13_f[i] - alpha * alpha * S_bar_f[i] * S13_f[i]);
+        M23[i] = 2.0 * delta_s * delta_s * (P23_f[i] - alpha * alpha * S_bar_f[i] * S23_f[i]);
 
-        num = d_L11[i] * d_M11[i] + d_L22[i] * d_M22[i] * d_L33[i] * d_M33[i]
-              + 2.0 * d_L12[i] * d_M12[i] + 2.0 * d_L13[i] * d_M13[i] + 2.0 * d_L23[i] * d_M23[i];
-        den = d_M11[i] * d_M11[i] + d_M22[i] * d_M22[i] * d_M33[i] * d_M33[i]
-              + 2.0 * d_M12[i] * d_M12[i] + 2.0 * d_M13[i] * d_M13[i] + 2.0 * d_M23[i] * d_M23[i];
+        num = L11[i] * M11[i] + L22[i] * M22[i] * L33[i] * M33[i]
+              + 2.0 * L12[i] * M12[i] + 2.0 * L13[i] * M13[i] + 2.0 * L23[i] * M23[i];
+        den = M11[i] * M11[i] + M22[i] * M22[i] * M33[i] * M33[i]
+              + 2.0 * M12[i] * M12[i] + 2.0 * M13[i] * M13[i] + 2.0 * M23[i] * M23[i];
 
         // dynamic constant
-        d_Cs[i] = num / den;
+        Cs[i] = num / den;
     }
 
     if (sync) {
@@ -532,19 +362,19 @@ void DynamicSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, 
         for (size_t l = 0; l < 3; l++) {
             for (size_t m = 0; m < 3; m++) {
                 for (size_t n = 0; n < 3; n++) {
-                    sum = sum + d_Cs[i - 1 + l + Nx * (m - 1) + Nx * Ny * (n - 1)];
+                    sum = sum + Cs[i - 1 + l + Nx * (m - 1) + Nx * Ny * (n - 1)];
                 }
             }
         }
-        d_Cs[i] = sum / 27.0;
-        d_ev[i] = 2.0 * d_Cs[i] * delta_s * delta_s * d_S_bar[i];
+        Cs[i] = sum / 27.0;
+        ev[i] = 2.0 * Cs[i] * delta_s * delta_s * S_bar[i];
     }
 
     // negative coefficients are allowed unless they don't make the effective viscosity zero. In our case d_ev is very small to do that
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_iList[j];
-        if ((d_ev[i] + m_nu) < 0) {
-            d_ev[i] = 0;
+        if ((ev[i] + m_nu) < 0) {
+            ev[i] = 0;
         }
     }
 }
@@ -556,16 +386,11 @@ void DynamicSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, 
 /// \param  in            input pointer
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void DynamicSmagorinsky::ExplicitFiltering(Field *out, const Field *in, bool sync) {
-
+void DynamicSmagorinsky::ExplicitFiltering(Field &out, Field const &in, bool sync) {
     auto domain = Domain::getInstance();
-    // local variables and parameters for GPU
-    auto d_out = out->data;
-    auto d_in = in->data;
 
-    const size_t Nx = domain->get_Nx(out->get_level());
-    const size_t Ny = domain->get_Ny(out->get_level());
-    const size_t bsize = domain->get_size(out->get_level());
+    const size_t Nx = domain->get_Nx(out.get_level());
+    const size_t Ny = domain->get_Ny(out.get_level());
     real sum = 0;
 
     //Implement a discrete filter by trapezoidal or simpsons rule.
@@ -577,7 +402,7 @@ void DynamicSmagorinsky::ExplicitFiltering(Field *out, const Field *in, bool syn
     size_t *d_iList = boundary->get_innerList_level_joined();
     auto bsize_i = boundary->getSize_innerList();
 
-#pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], a[:3], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, in, a[:3], d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_iList[j];
         sum = 0;
@@ -585,11 +410,11 @@ void DynamicSmagorinsky::ExplicitFiltering(Field *out, const Field *in, bool syn
         for (size_t l = 0; l < 3; l++) {
             for (size_t m = 0; m < 3; m++) {
                 for (size_t n = 0; n < 3; n++) {
-                    sum = sum + a[l] * a[m] * a[n] * d_in[i - 1 + l + Nx * (m - 1) + Nx * Ny * (n - 1)];
+                    sum = sum + a[l] * a[m] * a[n] * in[i - 1 + l + Nx * (m - 1) + Nx * Ny * (n - 1)];
                 }
             }
         }
-        d_out[i] = sum;
+        out[i] = sum;
     }
 
     if (sync) {

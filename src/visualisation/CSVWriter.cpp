@@ -14,16 +14,16 @@ static std::string ending = ".csv";
 const static char delimiter = ',';
 
 void CSVWriter::write_numerical(FieldController *field_controller, const std::string& filename) {
-    auto u = field_controller->field_u->data;
-    auto v = field_controller->field_v->data;
-    auto w = field_controller->field_w->data;
-    auto p = field_controller->field_p->data;
-    auto div = field_controller->field_rhs->data;
-    auto T = field_controller->field_T->data;
-    auto C = field_controller->field_concentration->data;
-    auto s = field_controller->sight->data;
-    auto nu_t = field_controller->field_nu_t->data;
-    auto S_T = field_controller->field_source_T->data;
+    auto u = field_controller->get_field_u_data();
+    auto v = field_controller->get_field_v_data();
+    auto w = field_controller->get_field_w_data();
+    auto p = field_controller->get_field_p_data();
+    auto div = field_controller->get_field_rhs_data();
+    auto T = field_controller->get_field_T_data();
+    auto C = field_controller->get_field_concentration_data();
+    auto s = field_controller->get_field_sight_data();
+    auto nu_t = field_controller->get_field_nu_t_data();
+    auto S_T = field_controller->get_field_source_T_data();
     CSVWriter::csvPrepareAndWrite((filename + ending).c_str(), u, v, w, p, div, T, C, s, nu_t, S_T);
 }
 
@@ -71,16 +71,6 @@ void CSVWriter::csvPrepareAndWrite(const char *filename, real *u, real *v, real 
     auto *source_T = new real[size];
 
     // Summarize pointers to variables in an array
-    real *vars[] = {static_cast<real *> (u_vel),
-                     static_cast<real *> (v_vel),
-                     static_cast<real *> (w_vel),
-                     static_cast<real *> (pres),
-                     static_cast<real *> (vel_div),
-                     static_cast<real *> (Temp),
-                     static_cast<real *> (Con),
-                     static_cast<real *> (Sight),
-                     static_cast<real *> (turb_visc),
-                     static_cast<real *> (source_T)};
     real* fields[] = {u, v, w, p, div, T, C, s, nu_t, S_T};
     CSVWriter::csv_write(filename, fields, size_vars, var_names);
 
@@ -192,10 +182,8 @@ void CSVWriter::csv_write(const char *filename, real **vars, int size_vars, cons
     delete[] (z_centres);
 }
 
-void CSVWriter::write_data(std::string *data_titles, real **data, size_t size_data, const std::string& filename) {
-    Domain *domain = Domain::getInstance();
-    int size = static_cast<int>(domain->get_size());
-
+void CSVWriter::write_data(std::string *data_titles,
+        real **data, size_t size_data, const std::string& filename) {
     const char *var_names[size_data];
     for (size_t i = 0; i < size_data; i++){
         var_names[i] = data_titles[i].c_str();

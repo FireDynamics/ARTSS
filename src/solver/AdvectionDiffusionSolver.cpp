@@ -43,15 +43,15 @@ AdvectionDiffusionSolver::~AdvectionDiffusionSolver() {
 // *******************************************************************
 void AdvectionDiffusionSolver::do_step(real, bool sync) {
 // local variables and parameters
-    auto u = m_field_controller->field_u;
-    auto v = m_field_controller->field_v;
-    auto w = m_field_controller->field_w;
-    auto u0 = m_field_controller->field_u0;
-    auto v0 = m_field_controller->field_v0;
-    auto w0 = m_field_controller->field_w0;
-    auto u_tmp = m_field_controller->field_u_tmp;
-    auto v_tmp = m_field_controller->field_v_tmp;
-    auto w_tmp = m_field_controller->field_w_tmp;
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &u0 = m_field_controller->get_field_u0();
+    Field &v0 = m_field_controller->get_field_v0();
+    Field &w0 = m_field_controller->get_field_w0();
+    Field &u_tmp = m_field_controller->get_field_u_tmp();
+    Field &v_tmp = m_field_controller->get_field_v_tmp();
+    Field &w_tmp = m_field_controller->get_field_w_tmp();
 
     auto nu = m_nu;
 

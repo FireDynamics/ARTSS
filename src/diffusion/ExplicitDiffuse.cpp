@@ -31,12 +31,11 @@ ExplicitDiffuse::ExplicitDiffuse() {
 /// \param  D       diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
-
+void ExplicitDiffuse::diffuse(Field &out, Field &in, Field const &b, real const D, bool sync) {
     // local variables and parameters for GPU
-    FieldType type = out->get_type();
+    FieldType type = out.get_type();
 
-    auto d_out = out->data;
+    auto d_out = out.data;
 
     auto boundary = BoundaryController::getInstance();
 
@@ -53,14 +52,14 @@ void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real 
 /// \param  D       diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, const Field *EV, bool sync) {
-
+void ExplicitDiffuse::diffuse(Field &out, Field &in,
+        Field const &, real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto bsize = domain->get_size(out->get_level());
-    FieldType type = out->get_type();
+    auto bsize = domain->get_size(out.get_level());
+    FieldType type = out.get_type();
 
-    auto d_out = out->data;
+    auto d_out = out.data;
 
     auto boundary = BoundaryController::getInstance();
 
@@ -69,28 +68,22 @@ void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real 
 }
 
 
-void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, bool sync) {
-
+void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out->get_level());
-
-    auto bsize = domain->get_size(out->get_level());
-
-    auto d_out = out->data;
-    auto d_in = in->data;
+    const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out.get_level());
 
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_iList = boundary->get_innerList_level_joined();
     auto bsize_i = boundary->getSize_innerList();
 
-    real rdx = D / (domain->get_dx(out->get_level()) * domain->get_dx(out->get_level()));
-    real rdy = D / (domain->get_dy(out->get_level()) * domain->get_dy(out->get_level()));
-    real rdz = D / (domain->get_dz(out->get_level()) * domain->get_dz(out->get_level()));
+    real rdx = D / (domain->get_dx(out.get_level()) * domain->get_dx(out.get_level()));
+    real rdy = D / (domain->get_dy(out.get_level()) * domain->get_dy(out.get_level()));
+    real rdz = D / (domain->get_dz(out.get_level()) * domain->get_dz(out.get_level()));
 
-#pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, in, d_iList[:bsize_i]) async
     for (size_t ii = 0; ii < bsize_i; ++ii) {
         const size_t idx = d_iList[ii];
 
@@ -98,10 +91,10 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, bo
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
 
-        d_out[idx] = d_in[idx] +
-                     m_dt * ((d_in[IX(i + 1, j, k, Nx, Ny)] - 2 * d_in[idx] + d_in[IX(i - 1, j, k, Nx, Ny)]) * rdx
-                           + (d_in[IX(i, j + 1, k, Nx, Ny)] - 2 * d_in[idx] + d_in[IX(i, j - 1, k, Nx, Ny)]) * rdy
-                           + (d_in[IX(i, j, k + 1, Nx, Ny)] - 2 * d_in[idx] + d_in[IX(i, j, k - 1, Nx, Ny)]) * rdz
+        out[idx] = in[idx] +
+                     m_dt * ((in[IX(i + 1, j, k, Nx, Ny)] - 2 * in[idx] + in[IX(i - 1, j, k, Nx, Ny)]) * rdx
+                           + (in[IX(i, j + 1, k, Nx, Ny)] - 2 * in[idx] + in[IX(i, j - 1, k, Nx, Ny)]) * rdy
+                           + (in[IX(i, j, k + 1, Nx, Ny)] - 2 * in[idx] + in[IX(i, j, k - 1, Nx, Ny)]) * rdz
                      );
     }
 
@@ -112,25 +105,18 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, bo
 
 
 // Turbulent Diffuse
-void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, const Field *EV, bool sync) {
-
+void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out->get_level());
-
-    auto bsize = domain->get_size(out->get_level());
-
-    auto d_out = out->data;
-    auto d_in = in->data;
-    auto d_ev = EV->data;
+    const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out.get_level());
 
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_iList = boundary->get_innerList_level_joined();
     auto bsize_i = boundary->getSize_innerList();
 
-#pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_iList[:bsize_i], d_ev[:bsize]) async
+#pragma acc parallel loop independent present(out, in, d_iList[:bsize_i], ev) async
     for (size_t ii = 0; ii < bsize_i; ++ii) {
         const size_t idx = d_iList[ii];
 
@@ -138,17 +124,17 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, co
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
 
-        real nu_x1 = 0.5 * (d_ev[IX(i - 1, j, k, Nx, Ny)] + d_ev[idx]);
-        real nu_x2 = 0.5 * (d_ev[IX(i + 1, j, k, Nx, Ny)] + d_ev[idx]);
-        real nu_y1 = 0.5 * (d_ev[IX(i, j - 1, k, Nx, Ny)] + d_ev[idx]);
-        real nu_y2 = 0.5 * (d_ev[IX(i, j + 1, k, Nx, Ny)] + d_ev[idx]);
-        real nu_z1 = 0.5 * (d_ev[IX(i, j, k - 1, Nx, Ny)] + d_ev[idx]);
-        real nu_z2 = 0.5 * (d_ev[IX(i, j, k + 1, Nx, Ny)] + d_ev[idx]);
+        real nu_x1 = 0.5 * (EV[IX(i - 1, j, k, Nx, Ny)] + EV[idx]);
+        real nu_x2 = 0.5 * (EV[IX(i + 1, j, k, Nx, Ny)] + EV[idx]);
+        real nu_y1 = 0.5 * (EV[IX(i, j - 1, k, Nx, Ny)] + EV[idx]);
+        real nu_y2 = 0.5 * (EV[IX(i, j + 1, k, Nx, Ny)] + EV[idx]);
+        real nu_z1 = 0.5 * (EV[IX(i, j, k - 1, Nx, Ny)] + EV[idx]);
+        real nu_z2 = 0.5 * (EV[IX(i, j, k + 1, Nx, Ny)] + EV[idx]);
 
-        d_out[idx] = d_in[idx] +
-                     m_dt * (nu_x1 * (d_in[idx] - d_in[IX(i - 1, j, k, Nx, Ny)]) - nu_x2 * (d_in[IX(i + 1, j, k, Nx, Ny)] - d_in[idx])
-                           + nu_y1 * (d_in[idx] - d_in[IX(i, j - 1, k, Nx, Ny)]) - nu_y2 * (d_in[IX(i, j + 1, k, Nx, Ny)] - d_in[idx])
-                           + nu_z1 * (d_in[idx] - d_in[IX(i, j, k - 1, Nx, Ny)]) - nu_z2 * (d_in[IX(i, j, k + 1, Nx, Ny)] - d_in[idx])
+        out[idx] = in[idx] +
+                     m_dt * (nu_x1 * (in[idx] - in[IX(i - 1, j, k, Nx, Ny)]) - nu_x2 * (in[IX(i + 1, j, k, Nx, Ny)] - in[idx])
+                           + nu_y1 * (in[idx] - in[IX(i, j - 1, k, Nx, Ny)]) - nu_y2 * (in[IX(i, j + 1, k, Nx, Ny)] - in[idx])
+                           + nu_z1 * (in[idx] - in[IX(i, j, k - 1, Nx, Ny)]) - nu_z2 * (in[IX(i, j, k + 1, Nx, Ny)] - in[idx])
                      );
     }
 

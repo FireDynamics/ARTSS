@@ -27,12 +27,15 @@ class Field {
     // Field(FieldType type, real val);
     // Field(FieldType type, real val, size_t level);
     Field(FieldType type, real val, size_t level, size_t size);
+    explicit Field(Field const &orig);
 
     ~Field();
 
     // getter
     FieldType get_type() const { return m_type; }
     return_ptr get_data() const { return data; }
+    real operator[] (size_t i) const { return data[i]; }
+
     // read_ptr get_data_ro() const { return data; }
     size_t get_level() const { return m_level; }
     size_t get_size() const { return m_size; }
@@ -53,10 +56,10 @@ class Field {
 
     // basic interface to algorithm
     void set_value(real val) { std::fill(data, data + m_size, val); }
-    void copy_data(const Field &other) {
+    void copy_data(Field const &other) {
         std::copy(other.data, other.data+other.m_size, data);
     }
-    static void swap(Field *a, Field *b) { std::swap(a->data, b->data); }
+    static void swap(Field &a, Field &b) { std::swap(a.data, b.data); }
 
     real *data;
 
