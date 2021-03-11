@@ -26,11 +26,11 @@ BoundaryDataController::~BoundaryDataController() {
     delete[] m_boundary_data;
 }
 
-// ================================= Add boundary data ===========================================
-// ***************************************************************************************
+// =================================== Add boundary data ===========================================
+// *************************************************************************************************
 /// \brief  Parses boundary data of XML tree to boundary data object
 /// \param  xml_element Pointer to XML element
-// ***************************************************************************************
+// *************************************************************************************************
 void BoundaryDataController::add_boundary_data(tinyxml2::XMLElement *xml_element) {
     std::vector<std::string> fieldStrings = Utility::split(xml_element->Attribute("field"), ',');
     std::vector<std::string> patchStrings = Utility::split(xml_element->Attribute("patch"), ',');
@@ -50,24 +50,25 @@ void BoundaryDataController::add_boundary_data(tinyxml2::XMLElement *xml_element
     }
 }
 
-// ================================= Print ===========================================
-// ***************************************************************************************
+// ============================================== Print ============================================
+// *************************************************************************************************
 /// \brief  Prints info of boundary data
-// ***************************************************************************************
+// *************************************************************************************************
 void BoundaryDataController::print() {
 #ifndef BENCHMARKING
     for (size_t i = 0; i < numberOfFieldTypes; i++) {
         auto boundary = *(m_boundary_data + i);
         if (!boundary->is_empty()) {
-            m_logger->info("--- found boundary conditions for field {} ({}): ", BoundaryData::get_field_type_name(static_cast<FieldType>(i)), i);
+            m_logger->info("--- found boundary conditions for field {} ({}): ",
+                           BoundaryData::get_field_type_name(static_cast<FieldType>(i)), i);
             boundary->print();
         }
     }
 #endif
 }
 
-//======================================== Apply boundary condition ====================================
-// ***************************************************************************************
+//======================================== Apply boundary condition ================================
+// *************************************************************************************************
 /// \brief  Applies boundary condition for domain boundary if the field is needed
 /// \param  dataField     Field
 /// \param  index_fields  List of indices for each patch
@@ -76,15 +77,18 @@ void BoundaryDataController::print() {
 /// \param  field_type    Type of field
 /// \param  level         Multigrid level
 /// \param  sync          synchronous kernel launching (true, default: false)
-
-void BoundaryDataController::apply_boundary_condition(real *data, size_t **index_fields, size_t *patch_start, size_t *patch_end, FieldType field_type, size_t level, bool sync) {
+// *************************************************************************************************
+void BoundaryDataController::apply_boundary_condition(real *data, size_t **index_fields,
+                                                      size_t *patch_start, size_t *patch_end,
+                                                      FieldType field_type, size_t level, bool sync) {
     if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {
-        DomainBoundary::apply_boundary_condition(data, index_fields, patch_start, patch_end, level, m_boundary_data[field_type], sync);
+        DomainBoundary::apply_boundary_condition(data, index_fields, patch_start, patch_end, level,
+                                                 m_boundary_data[field_type], sync);
     }
 }
 
-//=========================== Apply obstacle boundary condition ==========================
-// ***************************************************************************************
+//=========================== Apply obstacle boundary condition ====================================
+// *************************************************************************************************
 /// \brief  Applies boundary condition for obstacle boundary if the field is needed
 /// \param  dataField     Field
 /// \param  index_fields  List of indices for each patch
@@ -94,16 +98,27 @@ void BoundaryDataController::apply_boundary_condition(real *data, size_t **index
 /// \param  level         Multigrid level
 /// \param  id            ID of obstacle
 /// \param  sync          synchronous kernel launching (true, default: false)
-// ***************************************************************************************
-void BoundaryDataController::apply_boundary_condition_obstacle(real *data, size_t **index_fields, size_t *patch_start, size_t *patch_end, FieldType field_type, size_t level, size_t id, bool sync) {
+// *************************************************************************************************
+void BoundaryDataController::apply_boundary_condition_obstacle(real *data, size_t **index_fields,
+                                                               size_t *patch_start, size_t *patch_end,
+                                                               FieldType field_type, size_t level,
+                                                               size_t id, bool sync) {
     if (!(static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty()) {
 #ifndef BENCHMARKING
-        m_logger->debug("apply obstacle boundary conditions of {}", BoundaryData::get_field_type_name(static_cast<FieldType>(field_type)));
+        m_logger->debug("apply obstacle boundary conditions of {}",
+                        BoundaryData::get_field_type_name(static_cast<FieldType>(field_type)));
 #endif
-        ObstacleBoundary::apply_boundary_condition(data, index_fields, patch_start, patch_end, level, m_boundary_data[field_type], id, sync);
+        ObstacleBoundary::apply_boundary_condition(data, index_fields, patch_start, patch_end, level,
+                                                   m_boundary_data[field_type], id, sync);
     }
 }
 
+//==================================== get used fields =============================================
+// *************************************************************************************************
+/// \brief returns only the fields which are use. For a pure advection case this function will only
+/// return the velocity field
+/// \return returns a vector with the used fields
+// *************************************************************************************************
 std::vector<FieldType> BoundaryDataController::get_used_fields() {
     std::vector<FieldType> v_fields;
     v_fields.reserve(numberOfFieldTypes);
@@ -114,4 +129,3 @@ std::vector<FieldType> BoundaryDataController::get_used_fields() {
     }
     return v_fields;
 }
-
