@@ -32,8 +32,6 @@ void IPressure::divergence(Field &out,
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
 
-    auto size = domain->get_size(out.get_level());
-
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_iList = boundary->get_innerList_level_joined();
