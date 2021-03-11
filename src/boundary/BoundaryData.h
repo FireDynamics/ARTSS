@@ -47,7 +47,7 @@ class BoundaryData {
     static BoundaryCondition match_boundary_condition(const std::string& string);
 
     void add_boundary_condition(const std::vector<Patch>& patches, real value, BoundaryCondition boundary_condition);
-    BoundaryCondition get_boundary_condition(Patch p) { return m_boundary_conditions[p];}
+    BoundaryCondition get_boundary_condition(Patch p) const { return m_boundary_conditions[p];}
     real get_value(Patch p) const { return m_values[p];}
 
     bool is_empty() const { return !m_has_values; }

@@ -108,7 +108,7 @@ Multigrid::Multigrid(size_t number_of_surfaces, Surface **surface_list,
     add_MG_lists();
     send_lists_to_GPU();
 #ifndef BENCHMARKING
-    // print();
+    print();
     control();
 #endif
     m_data_boundary_patches_joined = new size_t *[number_of_patches];
