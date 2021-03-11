@@ -44,7 +44,6 @@ void SLAdvect::advect(Field &out, Field const &in,
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    size_t bsize = out.get_size();
     FieldType type = out.get_type();
 
     auto boundary = BoundaryController::getInstance();
@@ -54,7 +53,6 @@ void SLAdvect::advect(Field &out, Field const &in,
 
 #pragma acc data present(out, in, u_vel, v_vel, w_vel, d_iList[:bsize_i])
     {
-
         const size_t Nx = domain->get_Nx(out.get_level());
         const size_t Ny = domain->get_Ny(out.get_level());
 
