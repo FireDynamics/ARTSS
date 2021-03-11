@@ -14,50 +14,50 @@
 FieldController::FieldController(Domain const &domain):
     // Variables
     // Velocities
-    field_u(Field(FieldType::U, 0.0, 0, domain.get_size())),
-    field_v(Field(FieldType::V, 0.0, 0, domain.get_size())),
-    field_w(Field(FieldType::W, 0.0, 0, domain.get_size())),
+    field_u(FieldType::U, 0.0, 0, domain.get_size()),
+    field_v(FieldType::V, 0.0, 0, domain.get_size()),
+    field_w(FieldType::W, 0.0, 0, domain.get_size()),
 
-    field_u0(Field(FieldType::U, 0.0, 0, domain.get_size())),
-    field_v0(Field(FieldType::V, 0.0, 0, domain.get_size())),
-    field_w0(Field(FieldType::W, 0.0, 0, domain.get_size())),
+    field_u0(FieldType::U, 0.0, 0, domain.get_size()),
+    field_v0(FieldType::V, 0.0, 0, domain.get_size()),
+    field_w0(FieldType::W, 0.0, 0, domain.get_size()),
 
-    field_u_tmp(Field(FieldType::U, 0.0, 0, domain.get_size())),
-    field_v_tmp(Field(FieldType::V, 0.0, 0, domain.get_size())),
-    field_w_tmp(Field(FieldType::W, 0.0, 0, domain.get_size())),
+    field_u_tmp(FieldType::U, 0.0, 0, domain.get_size()),
+    field_v_tmp(FieldType::V, 0.0, 0, domain.get_size()),
+    field_w_tmp(FieldType::W, 0.0, 0, domain.get_size()),
 
     // Turbulent diffusivity
-    field_nu_t(Field(FieldType::U, 0.0, 0, domain.get_size())),
-    field_kappa_t(Field(FieldType::T, 0.0, 0, domain.get_size())),
-    field_gamma_t(Field(FieldType::RHO, 0.0, 0, domain.get_size())),
+    field_nu_t(FieldType::U, 0.0, 0, domain.get_size()),
+    field_kappa_t(FieldType::T, 0.0, 0, domain.get_size()),
+    field_gamma_t(FieldType::RHO, 0.0, 0, domain.get_size()),
 
     // Pressure
-    field_p(Field(FieldType::P, 0.0, 0, domain.get_size())),
-    field_p0(Field(FieldType::P, 0.0, 0, domain.get_size())),
-    field_rhs(Field(FieldType::P, 0.0, 0, domain.get_size())),
+    field_p(FieldType::P, 0.0, 0, domain.get_size()),
+    field_p0(FieldType::P, 0.0, 0, domain.get_size()),
+    field_rhs(FieldType::P, 0.0, 0, domain.get_size()),
 
     // Temperature
-    field_T(Field(FieldType::T, 0.0, 0, domain.get_size())),
-    field_T0(Field(FieldType::T, 0.0, 0, domain.get_size())),
-    field_T_tmp(Field(FieldType::T, 0.0, 0, domain.get_size())),
-    field_T_ambient(Field(FieldType::T, 0.0, 0, domain.get_size())),
+    field_T(FieldType::T, 0.0, 0, domain.get_size()),
+    field_T0(FieldType::T, 0.0, 0, domain.get_size()),
+    field_T_tmp(FieldType::T, 0.0, 0, domain.get_size()),
+    field_T_ambient(FieldType::T, 0.0, 0, domain.get_size()),
 
     // Concentration
-    field_concentration(Field(FieldType::RHO, 0.0, 0, domain.get_size())),
-    field_concentration0(Field(FieldType::RHO, 0.0, 0, domain.get_size())),
-    field_concentration_tmp(Field(FieldType::RHO, 0.0, 0, domain.get_size())),
+    field_concentration(FieldType::RHO, 0.0, 0, domain.get_size()),
+    field_concentration0(FieldType::RHO, 0.0, 0, domain.get_size()),
+    field_concentration_tmp(FieldType::RHO, 0.0, 0, domain.get_size()),
 
     // Forces
-    field_force_x(Field(FieldType::U, 0.0, 0, domain.get_size())),
-    field_force_y(Field(FieldType::V, 0.0, 0, domain.get_size())),
-    field_force_z(Field(FieldType::W, 0.0, 0, domain.get_size())),
+    field_force_x(FieldType::U, 0.0, 0, domain.get_size()),
+    field_force_y(FieldType::V, 0.0, 0, domain.get_size()),
+    field_force_z(FieldType::W, 0.0, 0, domain.get_size()),
 
     // Sources
-    field_source_T(Field(FieldType::T, 0.0, 0, domain.get_size())),
-    field_source_concentration(Field(FieldType::RHO, 0.0, 0, domain.get_size())),
+    field_source_T(FieldType::T, 0.0, 0, domain.get_size()),
+    field_source_concentration(FieldType::RHO, 0.0, 0, domain.get_size()),
 
     // Fields for sight of boundaries
-    sight(Field(FieldType::RHO, 1.0, 0, domain.get_size())) {
+    sight(FieldType::RHO, 1.0, 0, domain.get_size()) {
     field_u.copyin();
     field_v.copyin();
     field_w.copyin();
@@ -113,85 +113,20 @@ void FieldController::set_up_temporary_fields() {
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void FieldController::update_data(bool sync) {
-    // local variables and parameters for GPU
-    auto field_C = field_concentration.data;
-    auto field_C0 = field_concentration0.data;
-    auto field_C_tmp = field_concentration_tmp.data;
+    field_v0.copy_data(field_v);
+    field_w0.copy_data(field_w);
+    field_u_tmp.copy_data(field_u);
+    field_v_tmp.copy_data(field_v);
+    field_w_tmp.copy_data(field_w);
+    field_p0.copy_data(field_p);
+    field_T0.copy_data(field_T);
+    field_T_tmp.copy_data(field_T);
+    field_concentration0.copy_data(field_concentration);
+    field_concentration_tmp.copy_data(field_concentration);
 
-    auto boundary = BoundaryController::getInstance();
-
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t bsize_i = boundary->getSize_innerList();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
-    size_t bsize_b = boundary->getSize_boundaryList();
-    size_t *d_oList = boundary->get_obstacleList();
-    size_t bsize_o = boundary->getSize_obstacleList();
-
-#pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
-#pragma acc data present(field_u, field_v, field_w, field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_w_tmp, \
-                         field_p, field_p0, field_T, field_T0, field_T_tmp, field_C, field_C0, field_C_tmp)
-    {
-        // inner
-#pragma acc parallel loop independent present(d_iList[:bsize_i], \
-                                              field_u, field_v, field_w, \
-                                              field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_d_w_tmp, \
-                                              field_p, field_p0, field_T, field_T0, field_T_tmp, \
-                                              field_C, field_C0, field_C_tmp) async
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t idx = d_iList[j];
-            field_u0[idx] = field_u[idx];
-            field_v0[idx] = field_v[idx];
-            field_w0[idx] = field_w[idx];
-            field_u_tmp[idx] = field_u[idx];
-            field_v_tmp[idx] = field_v[idx];
-            field_w_tmp[idx] = field_w[idx];
-            field_p0[idx] = field_p[idx];
-            field_T0[idx] = field_T[idx];
-            field_T_tmp[idx] = field_T[idx];
-            field_C0[idx] = field_C[idx];
-            field_C_tmp[idx] = field_C[idx];
-        }
-        // boundary
-#pragma acc parallel loop independent present(d_bList[:bsize_b], \
-                                              field_u, field_v, field_w, field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_w_tmp, \
-                                              field_p, field_p0, field_T, field_T0, field_T_tmp, field_C, field_C0, field_C_tmp) async
-        for (size_t j = 0; j < bsize_b; ++j) {
-            const size_t idx = d_bList[j];
-            field_u0[idx] = field_u[idx];
-            field_v0[idx] = field_v[idx];
-            field_w0[idx] = field_w[idx];
-            field_u_tmp[idx] = field_u[idx];
-            field_v_tmp[idx] = field_v[idx];
-            field_w_tmp[idx] = field_w[idx];
-            field_p0[idx] = field_p[idx];
-            field_T0[idx] = field_T[idx];
-            field_T_tmp[idx] = field_T[idx];
-            field_C0[idx] = field_C[idx];
-            field_C_tmp[idx] = field_C[idx];
-        }
-        // obstacles
-#pragma acc parallel loop independent present(d_bList[:bsize_b], \
-                                              field_u, field_v, field_w, field_u0, field_v0, field_w0, field_u_tmp, field_v_tmp, field_w_tmp, \
-                                              field_p, field_p0, field_T, field_T0, field_T_tmp, field_C, field_C0, field_C_tmp) async
-        for (size_t j = 0; j < bsize_o; ++j) {
-            const size_t idx = d_oList[j];
-            field_u0[idx] = field_u[idx];
-            field_v0[idx] = field_v[idx];
-            field_w0[idx] = field_w[idx];
-            field_u_tmp[idx] = field_u[idx];
-            field_v_tmp[idx] = field_v[idx];
-            field_w_tmp[idx] = field_w[idx];
-            field_p0[idx] = field_p[idx];
-            field_T0[idx] = field_T[idx];
-            field_T_tmp[idx] = field_T[idx];
-            field_C0[idx] = field_C[idx];
-            field_C_tmp[idx] = field_C[idx];
-        }
-
-        if (sync) {
+    if (sync) {
 #pragma acc wait
-        }
-    }  // end data region
+    }
 }
 
 //======================================== Couple velocity ====================================
@@ -208,60 +143,15 @@ void FieldController::update_data(bool sync) {
 /// \param  c_tmp temporal field in z- direction
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void FieldController::couple_vector(Field const &a, Field &a0, Field &a_tmp, Field const &b, Field &b0, Field &b_tmp, Field const &c, Field &c0, Field &c_tmp, bool sync) {
-    // local variables and parameters for GPU
-    auto boundary = BoundaryController::getInstance();
+void FieldController::couple_vector(Field const &a, Field &a0, Field &a_tmp,
+        Field const &b, Field &b0, Field &b_tmp,
+        Field const &c, Field &c0, Field &c_tmp, bool sync) {
+    FieldController::couple_scalar(a, a0, a_tmp, false);
+    FieldController::couple_scalar(b, b0, b_tmp, false);
+    FieldController::couple_scalar(c, c0, c_tmp, false);
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t bsize_i = boundary->getSize_innerList();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
-    size_t bsize_b = boundary->getSize_boundaryList();
-    size_t *d_oList = boundary->get_obstacleList();
-    size_t bsize_o = boundary->getSize_obstacleList();
-
-#pragma acc data present(a, a0, a_tmp, b, b0, b_tmp,c, c0, c_tmp, \
-                            d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
-    {
-        // inner
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_iList[j];
-            a0[i] = a[i];
-            b0[i] = b[i];
-            c0[i] = c[i];
-            a_tmp[i] = a[i];
-            b_tmp[i] = b[i];
-            c_tmp[i] = c[i];
-        }
-        // boundary
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_b; ++j) {
-            const size_t i = d_bList[j];
-            a0[i] = a[i];
-            b0[i] = b[i];
-            c0[i] = c[i];
-            a_tmp[i] = a[i];
-            b_tmp[i] = b[i];
-            c_tmp[i] = c[i];
-        }
-        // obstacles
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_o; ++j) {
-            const size_t i = d_oList[j];
-            a0[i] = a[i];
-            b0[i] = b[i];
-            c0[i] = c[i];
-            a_tmp[i] = a[i];
-            b_tmp[i] = b[i];
-            c_tmp[i] = c[i];
-        }
-
-        if (sync) {
+    if (sync) {
 #pragma acc wait
-        }
     }
 }
 
@@ -274,46 +164,10 @@ void FieldController::couple_vector(Field const &a, Field &a0, Field &a_tmp, Fie
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void FieldController::couple_scalar(Field const &a, Field &a0, Field &a_tmp, bool sync) {
-    // local variables and parameters for GPU
-    auto boundary = BoundaryController::getInstance();
-
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t bsize_i = boundary->getSize_innerList();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
-    size_t bsize_b = boundary->getSize_boundaryList();
-    size_t *d_oList = boundary->get_obstacleList();
-    size_t bsize_o = boundary->getSize_obstacleList();
-
-#pragma acc data present(a, a0, a_tmp, \
-        d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
-    {
-        // inner
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_iList[j];
-            a0[i] = a[i];
-            a_tmp[i] = a[i];
-        }
-        // boundary
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_b; ++j) {
-            const size_t i = d_bList[j];
-            a0[i] = a[i];
-            a_tmp[i] = a[i];
-        }
-        // obstacles
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_o; ++j) {
-            const size_t i = d_oList[j];
-            a0[i] = a[i];
-            a_tmp[i] = a[i];
-        }
-        if (sync) {
+    a0.copy_data(a);
+    a_tmp.copy_data(a);
+    if (sync) {
 #pragma acc wait
-        }
     }
 }
 

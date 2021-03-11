@@ -164,7 +164,7 @@ void JacobiDiffuse::diffuse(Field &out, Field &in, Field const &b,
     auto bsize_i = boundary->getSize_innerList();
     auto bsize_b = boundary->getSize_boundaryList();
 
-#pragma acc data present(d_out[:bsize], d_in[:bsize], d_b[:bsize], d_EV[:bsize])
+#pragma acc data present(out, in, b, EV)
     {
         const real dx = domain->get_dx(out.get_level()); //due to unnecessary parameter passing of *this
         const real dy = domain->get_dy(out.get_level());
