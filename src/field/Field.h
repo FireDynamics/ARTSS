@@ -21,8 +21,6 @@ enum FieldType : int {
 
 class Field {
  public:
-    // Field(FieldType type, real val);
-    // Field(FieldType type, real val, size_t level);
     Field(FieldType type, real val, size_t level, size_t size);
     explicit Field(Field const &orig);
 
