@@ -91,8 +91,6 @@ void Obstacle::init(size_t level) {
     m_obstacle_left = new size_t[m_size_obstacle_left];
     m_obstacle_right = new size_t[m_size_obstacle_right];
 
-    // m_size_obstacleInner = (m_strideX - 2) * (m_strideY - 2) * (m_strideZ - 2);
-    // m_obstacleInner = new size_t[m_size_obstacleInner];
     create_obstacle(Nx, Ny);
 
     control();
