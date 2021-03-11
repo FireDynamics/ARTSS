@@ -19,13 +19,13 @@ class Boundary {
     explicit Boundary(size_t level = 0);
     void init(size_t size_obstacles);
 
-    size_t* get_boundary_list() {return m_boundary_list;}
-    size_t* get_boundary_front() {return m_boundary_front;}
-    size_t* get_boundary_back() {return m_boundary_back;}
-    size_t* get_boundary_top() {return m_boundary_top;}
-    size_t* get_boundary_bottom() {return m_boundary_bottom;}
-    size_t* get_boundary_left() {return m_boundary_left;}
-    size_t* get_boundary_right() { return m_boundary_right;}
+    size_t* get_boundary_list() const {return m_boundary_list;}
+    size_t* get_boundary_front() const {return m_boundary_front;}
+    size_t* get_boundary_back() const {return m_boundary_back;}
+    size_t* get_boundary_top() const {return m_boundary_top;}
+    size_t* get_boundary_bottom() const {return m_boundary_bottom;}
+    size_t* get_boundary_left() const {return m_boundary_left;}
+    size_t* get_boundary_right() const { return m_boundary_right;}
 
     size_t* get_inner_list() { return m_inner_list;}
     size_t get_size_inner_list() const { return m_size_innerList; }
