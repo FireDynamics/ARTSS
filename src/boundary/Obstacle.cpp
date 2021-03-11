@@ -37,7 +37,8 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const s
 }
 
 
-Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2, size_t coords_j2, size_t coords_k2, size_t level, const std::string& name) {
+Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2,
+                   size_t coords_j2, size_t coords_k2, size_t level, const std::string& name) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -56,11 +57,11 @@ Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t 
 }
 
 
-//======================================== Init ====================================
-// ***************************************************************************************
+//======================================== Init ====================================================
+// *************************************************************************************************
 /// \brief  Initialize member variables (arrays)
 /// \param  level Multigrid level
-// ***************************************************************************************
+// *************************************************************************************************
 void Obstacle::init(size_t level) {
     Domain *domain = Domain::getInstance();
     size_t Nx = domain->get_Nx(level);
@@ -108,10 +109,10 @@ Obstacle::~Obstacle() {
     delete (m_obstacle_right);
 }
 
-//===================================== Create obstacle ==================================
-// ***************************************************************************************
+//===================================== Create obstacle ============================================
+// *************************************************************************************************
 /// \brief  Creates lists of indices of obstacle cells
-// ***************************************************************************************
+// *************************************************************************************************
 void Obstacle::create_obstacle(size_t Nx, size_t Ny) {
     size_t strideX = get_stride_x();
     size_t strideY = get_stride_y();
@@ -152,7 +153,8 @@ void Obstacle::create_obstacle(size_t Nx, size_t Ny) {
     }
 
     // TOP and BOTTOM of OBSTACLE
-    // fill m_obstacle_top list with top indices of obstacle and oBottom list with bottom indices of obstacle
+    // fill m_obstacle_top list with top indices of obstacle and oBottom list with bottom indices
+    // of obstacle
     if (m_size_obstacle_bottom > 0) {
         for (size_t k = 0; k < strideZ; ++k) {
             for (size_t i = 0; i < strideX; ++i) {
@@ -194,10 +196,10 @@ void Obstacle::create_obstacle(size_t Nx, size_t Ny) {
     }
 }
 
-//======================================== Print ====================================
-// ***************************************************************************************
+//======================================== Print ===================================================
+// *************************************************************************************************
 /// \brief  Print obstacle infos
-// ***************************************************************************************
+// *************************************************************************************************
 void Obstacle::print() {
 #ifndef BENCHMARKING
     size_t strideX = get_stride_x();
@@ -206,16 +208,20 @@ void Obstacle::print() {
 
     m_logger->info("-- Obstacle {}", m_name);
     m_logger->info("\t strides (x y z): {} {} {}", strideX, strideY, strideZ);
-    m_logger->info("\t size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}", m_size_obstacle_front, m_size_obstacle_back, m_size_obstacle_bottom, m_size_obstacle_top, m_size_obstacle_left, m_size_obstacle_right);
+    m_logger->info("\t size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}",
+                   m_size_obstacle_front, m_size_obstacle_back,
+                   m_size_obstacle_bottom, m_size_obstacle_top,
+                   m_size_obstacle_left, m_size_obstacle_right);
     m_logger->info("\t size of Obstacle: {}", m_size_obstacle_list);
-    m_logger->info("\t coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, m_i2, m_j1, m_j2, m_k1, m_k2);
+    m_logger->info("\t coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, m_i2, m_j1, m_j2,
+                   m_k1, m_k2);
 #endif
 }
 
-//======================================== Print ====================================
-// ***************************************************************************************
+//======================================== Print ===================================================
+// *************************************************************************************************
 /// \brief  Print detailed obstacle infos
-// ***************************************************************************************
+// *************************************************************************************************
 void Obstacle::print_details() {
 #ifndef BENCHMARKING
     Domain *domain = Domain::getInstance();
@@ -229,14 +235,19 @@ void Obstacle::print_details() {
     m_logger->debug("############### OBSTACLE {} ###############", m_name);
     m_logger->debug("level: {}", m_level);
     m_logger->debug("strides (x y z): {} {} {}", strideX, strideY, strideZ);
-    m_logger->debug("size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}", m_size_obstacle_front, m_size_obstacle_back, m_size_obstacle_bottom, m_size_obstacle_top, m_size_obstacle_left, m_size_obstacle_right);
+    m_logger->debug("size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}",
+                    m_size_obstacle_front, m_size_obstacle_back,
+                    m_size_obstacle_bottom, m_size_obstacle_top,
+                    m_size_obstacle_left, m_size_obstacle_right);
     m_logger->debug("size of Obstacle: {}", m_size_obstacle_list);
-    m_logger->debug("coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, m_i2, m_j1, m_j2, m_k1, m_k2);
+    m_logger->debug("coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_i1, m_i2, m_j1, m_j2,
+                    m_k1, m_k2);
 
     std::vector<size_t> coords;
     size_t size_front = get_size_obstacle_front();
     if (size_front > 0) {
-        m_logger->debug("Front: {} | {}", m_obstacle_front[0], m_obstacle_front[size_front - 1]);
+        m_logger->debug("Front: {} | {}", m_obstacle_front[0],
+                        m_obstacle_front[size_front - 1]);
 
         coords_k = getCoordinateK(m_obstacle_front[0], Nx, Ny);
         coords_j = getCoordinateJ(m_obstacle_front[0], Nx, Ny, coords_k);
@@ -253,7 +264,7 @@ void Obstacle::print_details() {
 
     size_t size_back = get_size_obstacle_back();
     if (size_back > 0) {
-        m_logger->debug("Back: {} | {}", m_obstacle_back[0], m_obstacle_back[size_back - 1]);
+        m_logger->debug("Back: {} | {}", m_obstacle_back[0],m_obstacle_back[size_back - 1]);
 
         coords_k = getCoordinateK(m_obstacle_back[0], Nx, Ny);
         coords_j = getCoordinateJ(m_obstacle_back[0], Nx, Ny, coords_k);
@@ -352,8 +363,10 @@ void Obstacle::control() {
     for (size_t i = 1; i < m_size_obstacle_list; i++) {
         long int diff = static_cast<long int>(m_obstacle_list[i]) - static_cast<long int>(m_obstacle_list[i - 1]);
         if (diff < 0) {
-            message += "sorting error at index " + std::to_string(i - 1) + "|" + std::to_string(i) + " with values " + std::to_string(m_obstacle_list[i - 1]) + "|" + std::to_string(m_obstacle_list[i]) +
-                       "\n";
+            message += "sorting error at index "
+                    + std::to_string(i - 1) + "|" + std::to_string(i) + " with values "
+                    + std::to_string(m_obstacle_list[i - 1]) + "|"
+                    + std::to_string(m_obstacle_list[i]) + "\n";
         }
     }
 

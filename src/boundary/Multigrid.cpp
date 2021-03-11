@@ -1675,4 +1675,3 @@ size_t Multigrid::get_obstacle_stride_y(size_t id, size_t level) {
 size_t Multigrid::get_obstacle_stride_z(size_t id, size_t level) {
     return (static_cast<Obstacle *>(m_MG_obstacle_object_list[level][id]))->get_stride_z();
 }
-

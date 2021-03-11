@@ -17,7 +17,9 @@
 
 class Multigrid {
  public:
-    Multigrid(size_t number_of_surfaces, Surface** surface_list, size_t number_of_obstacles, Obstacle** obstacle_list, BoundaryDataController* bdc_boundary, BoundaryDataController **bdc_obstacles);
+    Multigrid(size_t number_of_surfaces, Surface** surface_list, size_t number_of_obstacles,
+              Obstacle** obstacle_list, BoundaryDataController* bdc_boundary,
+              BoundaryDataController **bdc_obstacles);
     explicit Multigrid(BoundaryDataController *bdc_boundary);
     ~Multigrid();
 
@@ -69,7 +71,8 @@ class Multigrid {
     size_t* m_size_MG_obstacle_index_list_level;
     size_t* m_size_MG_surface_index_list_level;
 
-    // start index of each boundary object in level joined list (slice z = Front/Back, slice y = Bottom/Top, slice x = Left/Right)
+    // start index of each boundary object in level joined list
+    // (slice z = Front/Back, slice y = Bottom/Top, slice x = Left/Right)
     size_t* m_size_MG_boundary_slice_z_level;
     size_t* m_size_MG_boundary_slice_y_level;
     size_t* m_size_MG_boundary_slice_x_level;
@@ -175,7 +178,8 @@ class Multigrid {
 
     void remove_boundary_lists_from_GPU();
 
-    void control_obstacle_overlap(Obstacle* o, size_t *i1, size_t *i2, size_t *j1, size_t *j2, size_t *k1, size_t *k2);
+    void control_obstacle_overlap(Obstacle* o, size_t *i1, size_t *i2, size_t *j1, size_t *j2,
+                                  size_t *k1, size_t *k2);
 };
 
 #endif /* ARTSS_BOUNDARY_MULTIGRID_H_*/
