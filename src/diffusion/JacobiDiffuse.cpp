@@ -68,7 +68,6 @@ void JacobiDiffuse::diffuse(Field &out, Field &in, Field const &b,
         const real alphaZ = D * m_dt * rdz * rdz;
 
         const real rbeta = (1. + 2. * (alphaX + alphaY + alphaZ));
-        const real beta = 1. / rbeta;
 
         const real dsign = m_dsign;
         const real w = m_w;
@@ -153,7 +152,6 @@ void JacobiDiffuse::diffuse(Field &out, Field &in, Field const &b,
         real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto bsize = domain->get_size(out.get_level());
     FieldType type = out.get_type();
 
     auto d_out = out.data;
@@ -276,8 +274,6 @@ void JacobiDiffuse::JacobiStep(Field &out, Field const &in, Field const &b,
     const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny(out.get_level());
 
-    auto bsize = domain->get_size(out.get_level());
-
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_iList = boundary->get_innerList_level_joined();
@@ -323,7 +319,6 @@ void JacobiDiffuse::JacobiStep(size_t level, Field &out, Field const &in, Field 
     const size_t Nx = domain->get_Nx(level); //due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny(level);
 
-    auto bsize = domain->get_size(out.get_level());
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_iList = boundary->get_innerList_level_joined();
@@ -373,8 +368,6 @@ void JacobiDiffuse::JacobiStep(Field &out, Field const &in, Field const &b,
     const real rdy = 1. / dy;
     const real rdz = 1. / dz;
 
-    real aX, aY, aZ, bb, rb; //multipliers calculated
-
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_iList = boundary->get_innerList_level_joined();
@@ -383,6 +376,13 @@ void JacobiDiffuse::JacobiStep(Field &out, Field const &in, Field const &b,
 #pragma acc parallel loop independent present(out, in, b, EV, d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_iList[j];
+
+        auto aX = (D + EV[i]) * dt * rdx * rdx;
+        auto aY = (D + EV[i]) * dt * rdy * rdy;
+        auto aZ = (D + EV[i]) * dt * rdz * rdz;
+
+        auto rb = (1. + 2. * (aX + aY + aZ));
+        auto bb = 1. / rb;
       
         auto d_aX = aX * (in[i + 1] + in[i - 1]) ;
         auto d_aY = aY * (in[i + Nx] + in[i - Nx]) ;
