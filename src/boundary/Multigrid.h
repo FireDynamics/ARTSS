@@ -178,8 +178,10 @@ class Multigrid {
 
     void remove_boundary_lists_from_GPU();
 
-    void control_obstacle_overlap(Obstacle* o, size_t *i1, size_t *i2, size_t *j1, size_t *j2,
-                                  size_t *k1, size_t *k2);
+    static bool control_obstacle_overlap(Obstacle* o,
+                                         size_t *i1, size_t *i2,
+                                         size_t *j1, size_t *j2,
+                                         size_t *k1, size_t *k2);
 };
 
 #endif /* ARTSS_BOUNDARY_MULTIGRID_H_*/
