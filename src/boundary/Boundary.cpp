@@ -325,7 +325,7 @@ void Boundary::inner_cells(Obstacle **obstacle_list, size_t number_of_obstacles)
                 bool is_inner_cell = true;
                 //check if cell is part of an obstacle
                 for (size_t o = 0; o < number_of_obstacles && is_inner_cell; o++) {
-                    if (obstacle_list[o]->isObstacleCell(i, j, k)) {
+                    if (obstacle_list[o]->is_obstacle_cell(i, j, k)) {
                         is_inner_cell = false;
                         counter_obstacle++;
                     }
