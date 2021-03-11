@@ -9,6 +9,7 @@
 #define ARTSS_ANALYSIS_SOLUTION_H_
 
 #include <string>
+#include "../Domain.h"
 #include "../Functions.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"

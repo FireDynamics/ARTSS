@@ -389,7 +389,7 @@ void JacobiDiffuse::JacobiStep(Field &out, Field const &in, Field const &b,
         auto d_aZ = aZ * (in[i + Nx * Ny] + in[i - Nx * Ny]);
 
         real out_h = bb * (dsign * b[i] + d_aX + d_aY + d_aZ);
-        d_out[i] = (1 - w) * in[i] + w * out_h;
+        out[i] = (1 - w) * in[i] + w * out_h;
     }
 
     if (sync) {

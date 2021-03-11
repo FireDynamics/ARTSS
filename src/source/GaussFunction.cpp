@@ -13,8 +13,16 @@ GaussFunction::GaussFunction(real HRR, real cp,
         real x0, real y0, real z0,
         real sigma_x, real sigma_y, real sigma_z, real tau) :
     m_field_spatial_values(FieldType::RHO, 0.0, 0, Domain::getInstance()->get_size()),
+    m_HRR(HRR),
+    m_cp(cp),
+    m_x0(x0),
+    m_y0(y0),
+    m_z0(z0),
+    m_sigma_x(sigma_x),
+    m_sigma_y(sigma_y),
+    m_sigma_z(sigma_z),
     m_tau(tau) {
-    create_spatial_values(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z);
+    create_spatial_values();
 }
 
 void GaussFunction::update_source(Field &out, real t_cur) {
@@ -100,7 +108,7 @@ void GaussFunction::create_spatial_values() {
         if (tmp < 0.01) {
             tmp = 0;
         }
-        out[idx] = tmp;
+        m_field_spatial_values[idx] = tmp;
     }
     m_field_spatial_values.copyin();
 }

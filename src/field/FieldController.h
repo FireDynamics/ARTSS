@@ -8,6 +8,7 @@
 #define ARTSS_FIELD_FIELDCONTROLLER_H_
 
 
+#include "../Domain.h"
 #include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "Field.h"

@@ -139,9 +139,9 @@ void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Fi
         auto dk1 = (in[IX(i, j, k + 1, Nx, Ny)] - in[idx]);
 
         out[idx] = in[idx] +
-                     m_dt * ((nu_x1 * di0 - nu_x2 * di1) // dx // * 4 / dx;  // u_{i-0.5} - u_{i+0.5}
-                           + (nu_y1 * dj0 - nu_y2 * dj1) // dy
-                           + (nu_z1 * dk0 - nu_z2 * dk1) // dz
+                     m_dt * ((nu_x1 * di0 - nu_x2 * di1)   // dx // * 4 / dx;  // u_{i-0.5} - u_{i+0.5}
+                           + (nu_y1 * dj0 - nu_y2 * dj1)   // dy
+                           + (nu_z1 * dk0 - nu_z2 * dk1)); // dz
     }
 
     if (sync) {

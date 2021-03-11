@@ -111,7 +111,7 @@ void ISource::dissipate(Field &out,
                                 * ((0.5 * rdy * (in_w[i + Nx     ] - in_w[i - Nx     ])) + (0.5 * rdz * (in_v[i + Nx * Ny] - in_v[i - Nx * Ny])))
                                 + ((0.5 * rdz * (in_u[i + Nx * Ny] - in_u[i - Nx * Ny])) + (0.5 * rdx * (in_w[i + 1      ] - in_w[i - 1])))
                                 * ((0.5 * rdz * (in_u[i + Nx * Ny] - in_u[i - Nx * Ny])) + (0.5 * rdx * (in_w[i + 1      ] - in_w[i - 1]))));
-            d_out[i] += dt * out_h;
+            out[i] += dt * out_h;
         }
 
         // boundaries
