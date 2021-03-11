@@ -26,7 +26,7 @@ private:
     real m_v_lin;
     real m_w_lin;
     size_t m_minimal;
-    Field *u, *v, *w;
+    Field &m_u, &m_v, &m_w;
     bool m_reduction;
     real m_threshold;
     size_t m_buffer;

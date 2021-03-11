@@ -10,15 +10,16 @@
 #include "../interfaces/ITurbulence.h"
 
 class ConstSmagorinsky : public ITurbulence {
-public:
+ public:
     ConstSmagorinsky();
     ~ConstSmagorinsky() override = default;
 
-    void CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Field *in_w, bool sync) override;
+    void CalcTurbViscosity(Field &ev,
+            Field const &in_u, Field const &in_v, Field const &in_w, bool sync) override;
 
-    void ExplicitFiltering(Field *out, const Field *in, bool sync) override;
+    void ExplicitFiltering(Field &out, Field const &in, bool sync) override;
 
-private:
+ private:
     real m_nu;
     real m_dt;
     real m_Cs;

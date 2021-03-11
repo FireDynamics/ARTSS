@@ -67,7 +67,8 @@ void SetDiffusionSolver(IDiffusion **diffusionSolver, const std::string& diffusi
 /// \param  pressureSolver Pointer to PressureSolver
 /// \param  pressureType Name of PressureSolver
 // ***************************************************************************************
-void SetPressureSolver(IPressure **pressureSolver, const std::string& pressureType, Field *p, Field *rhs) {
+void SetPressureSolver(IPressure **pressureSolver, const std::string& pressureType,
+        Field const &p, Field const &rhs) {
     if (pressureType == PressureMethods::VCycleMG) {
         *pressureSolver = new VCycleMG(p, rhs);
     } else {

@@ -78,63 +78,36 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     auto params = Parameters::getInstance();
 
     // local variables and parameters for GPU
-    auto u = m_field_controller->field_u;
-    auto v = m_field_controller->field_v;
-    auto w = m_field_controller->field_w;
-    auto u0 = m_field_controller->field_u0;
-    auto v0 = m_field_controller->field_v0;
-    auto w0 = m_field_controller->field_w0;
-    auto u_tmp = m_field_controller->field_u_tmp;
-    auto v_tmp = m_field_controller->field_v_tmp;
-    auto w_tmp = m_field_controller->field_w_tmp;
-    auto p = m_field_controller->field_p;
-    auto p0 = m_field_controller->field_p0;
-    auto rhs = m_field_controller->field_rhs;
-    auto T = m_field_controller->field_T;
-    auto T0 = m_field_controller->field_T0;
-    auto T_tmp = m_field_controller->field_T_tmp;
-    auto f_x = m_field_controller->field_force_x;
-    auto f_y = m_field_controller->field_force_y;
-    auto f_z = m_field_controller->field_force_z;
-    auto S_T = m_field_controller->field_source_T;
-    auto nu_t = m_field_controller->field_nu_t;           // nu_t - Eddy Viscosity
-    auto kappa_t = m_field_controller->field_kappa_t;     // kappa_t - Eddy thermal diffusivity
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &u0 = m_field_controller->get_field_u0();
+    Field &v0 = m_field_controller->get_field_v0();
+    Field &w0 = m_field_controller->get_field_w0();
+    Field &u_tmp = m_field_controller->get_field_u_tmp();
+    Field &v_tmp = m_field_controller->get_field_v_tmp();
+    Field &w_tmp = m_field_controller->get_field_w_tmp();
+    Field &p = m_field_controller->get_field_p();
+    Field &rhs = m_field_controller->get_field_rhs();
+    Field &T = m_field_controller->get_field_T();
+    Field &T0 = m_field_controller->get_field_T0();
+    Field &T_tmp = m_field_controller->get_field_T_tmp();
+    Field &f_x = m_field_controller->get_field_force_x();
+    Field &f_y = m_field_controller->get_field_force_y();
+    Field &f_z = m_field_controller->get_field_force_z();
+    Field &S_T = m_field_controller->get_field_source_T();
+    Field &nu_t = m_field_controller->get_field_nu_t();        // nu_t - Eddy Viscosity
+    Field &kappa_t = m_field_controller->get_field_kappa_t();  // kappa_t - Eddy thermal diffusivity
 
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-    auto d_u_tmp = u_tmp->data;
-    auto d_v_tmp = v_tmp->data;
-    auto d_w_tmp = w_tmp->data;
-    auto d_p = p->data;
-    auto d_p0 = p0->data;
-    auto d_rhs = rhs->data;
-    auto d_T = T->data;
-    auto d_T0 = T0->data;
-    auto d_T_tmp = T_tmp->data;
-    auto d_fx = f_x->data;
-    auto d_fy = f_y->data;
-    auto d_fz = f_z->data;
-    auto d_S_T = S_T->data;
-    auto d_nu_t = nu_t->data;
-    auto d_kappa_t = kappa_t->data;
-
-    size_t bsize = Domain::getInstance()->get_size();
+    size_t bsize = Domain::getInstance()->get_size(u.get_level());
 
     auto nu = m_nu;
     auto kappa = m_kappa;
     auto dir_vel = m_dir_vel;
 
-#pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], \
-                         d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], \
-                         d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], \
-                         d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], \
-                         d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], \
-                         d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], \
-                         d_S_T[:bsize], d_nu_t[:bsize], d_kappa_t[:bsize])
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
+                         w0, w_tmp, p, p0, rhs, T, T0, T_tmp, \
+                         fx, fy, fz, S_T, nu_t, kappa_t)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
@@ -205,9 +178,9 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
             real rPr_T = 1. / Pr_T;
 
             // kappa_turb = nu_turb/Pr_turb
-#pragma acc parallel loop independent present(d_kappa_t[:bsize], d_nu_t[:bsize]) async
+#pragma acc parallel loop independent present(kappa_t, nu_t) async
             for (size_t i = 0; i < bsize; ++i) {
-                d_kappa_t[i] = d_nu_t[i] * rPr_T;
+                kappa_t[i] = nu_t[i] * rPr_T;
             }
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Temperature ...");
@@ -256,7 +229,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    }//end data
+    }
 }
 
 //======================================= Check data ==================================

@@ -12,7 +12,7 @@
 
 class ISourceFunction {
 public:
-    virtual void update_source(Field *out, real t_cur) = 0;
+    virtual void update_source(Field &out, real t_cur) = 0;
 };
 
 

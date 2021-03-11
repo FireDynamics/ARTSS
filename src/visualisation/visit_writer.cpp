@@ -362,7 +362,6 @@ void write_variables(int nvars, int *vardim, int *centering,
     char str[1024];
     int i, j, first_scalar, first_vector;
     int num_scalars, num_vectors;
-    int num_field = 0;
 
     new_section();
     sprintf(str, "CELL_DATA %d\n", ncells);
@@ -474,8 +473,6 @@ void write_variables(int nvars, int *vardim, int *centering,
             int should_write = 0;
             if (centering[i] == 0)
             {
-                int num_to_write = 0;
-
                 if (vardim[i] == 3)
                 {
                     if (first_vector == 0)
@@ -613,8 +610,6 @@ void write_variables(int nvars, int *vardim, int *centering,
             int should_write = 0;
             if (centering[i] != 0)
             {
-                int num_to_write = 0;
-
                 if (vardim[i] == 3)
                 {
                     if (first_vector == 0)
@@ -896,7 +891,7 @@ void write_rectilinear_mesh(const char *filename, int ub, int *dims,
                             int nvars, int *vardim, int *centering,
                             const char * const *varnames, float **vars)
 {
-    int   i, j;
+    int   i;
     char  str[128];
     int npts = dims[0]*dims[1]*dims[2];
     int ncX = (dims[0] - 1 < 1 ? 1 : dims[0] - 1);
@@ -1033,7 +1028,7 @@ void write_curvilinear_mesh(const char *filename, int ub, int *dims,float *pts,
                             int nvars, int *vardim, int *centering,
                             const char * const *varnames, float **vars)
 {
-    int   i, j;
+    int   i;
     char  str[128];
     int npts = dims[0]*dims[1]*dims[2];
     int ncX = (dims[0] - 1 < 1 ? 1 : dims[0] - 1);

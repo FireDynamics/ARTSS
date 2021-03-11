@@ -32,7 +32,7 @@ void Parameters::parse(const std::string& filename) {
         // spdlog::info("read in XML file: ");
     }
 
-    tinyxml2::XMLError eResult = this->doc->LoadFile(filename.c_str()); // loads xml file
+    this->doc->LoadFile(filename.c_str());  // loads xml file
     m_filename = filename;
 
 #ifndef BENCHMARKING

@@ -18,6 +18,7 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto params = Parameters::getInstance();
+    auto *domain = Domain::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
     m_t_end = params->get_real("physical_parameters/t_end");
@@ -28,52 +29,39 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 
     m_adaption = new Adaption(m_field_controller);
 #ifndef BENCHMARKING
-    m_solution = new Solution();
+    m_solution = new Solution(*domain, params->get("initial_conditions/usr_fct"));
     m_analysis = new Analysis(m_solution);
     m_visual = new Visual(m_solution);
 #endif
 }
 
 void TimeIntegration::run() {
-    Domain *domain = Domain::getInstance();
-
     // local variables and parameters for GPU
-    auto u = m_field_controller->field_u;
-    auto v = m_field_controller->field_v;
-    auto w = m_field_controller->field_w;
-    auto p = m_field_controller->field_p;
-    auto rhs = m_field_controller->field_rhs;
-    auto T = m_field_controller->field_T;
-    auto C = m_field_controller->field_concentration;
-    auto S_T = m_field_controller->field_source_T;
-    auto S_C = m_field_controller->field_source_concentration;
-    auto nu_t = m_field_controller->field_nu_t;
-
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_p = p->data;
-    auto d_rhs = rhs->data;
-    auto d_T = T->data;
-    auto d_C = C->data;
-    auto d_S_T = S_T->data;
-    auto d_S_C = S_C->data;
-    auto d_nu_t = nu_t->data;
-
-    auto bsize = domain->get_size();
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &p = m_field_controller->get_field_p();
+    Field &rhs = m_field_controller->get_field_rhs();
+    Field &T = m_field_controller->get_field_T();
+    Field &C = m_field_controller->get_field_concentration();
+    Field &S_T = m_field_controller->get_field_source_T();
+    Field &nu_t = m_field_controller->get_field_nu_t();
 
 #ifndef BENCHMARKING
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_C[:bsize])
-#pragma acc update host(d_nu_t[:bsize])
-#pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
+    u.update_host();
+    v.update_host();
+    w.update_host();
+    p.update_host();
+    rhs.update_host();
+    T.update_host();
+    C.update_host();
+    nu_t.update_host();
+    S_T.update_host();
+#pragma acc wait
+
     m_analysis->analyse(m_field_controller, 0.);
     m_visual->visualise(m_field_controller, 0.);
+
     m_logger->info("Start calculating and timing...");
 #else
     std::cout << "Start calculating and timing...\n" << std::endl;
@@ -106,15 +94,16 @@ void TimeIntegration::run() {
             m_solver_controller->solver_do_step(t_cur, false);
 #ifndef BENCHMARKING
             // Visualize
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_C[:bsize])
-#pragma acc update host(d_nu_t[:bsize])
-#pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
+            u.update_host();
+            v.update_host();
+            w.update_host();
+            p.update_host();
+            rhs.update_host();
+            T.update_host();
+            C.update_host();
+            nu_t.update_host();
+            S_T.update_host();
+#pragma acc wait
 
             m_visual->visualise(m_field_controller, t_cur);
             if (m_adaption->is_data_extraction_before_enabled()) {
@@ -164,16 +153,17 @@ void TimeIntegration::run() {
 #endif
 
 #pragma acc wait
-
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_C[:bsize]) wait
-
-    } // end RANGE
+    u.update_host();
+    v.update_host();
+    w.update_host();
+    p.update_host();
+    rhs.update_host();
+    T.update_host();
+    C.update_host();
+    nu_t.update_host();
+    S_T.update_host();
+#pragma acc wait
+    }  // end RANGE
 
 #ifndef BENCHMARKING
     m_logger->info("Done calculating and timing ...");

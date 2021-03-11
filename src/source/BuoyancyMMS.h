@@ -11,13 +11,13 @@
 #include "../interfaces/ISourceFunction.h"
 
 class BuoyancyMMS: public ISourceFunction {
-public:
+ public:
     BuoyancyMMS();
     ~BuoyancyMMS();
-    void update_source(Field *out, real t_cur) override;
-private:
+    void update_source(Field &out, real t_cur) override;
+ private:
     void set_up();
-    Field *m_source_field;
+    Field m_source_field;
 };
 
 

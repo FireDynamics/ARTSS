@@ -41,33 +41,21 @@ AdvectionDiffusionSolver::~AdvectionDiffusionSolver() {
 /// \param  dt          time step
 /// \param  sync        synchronous kernel launching (true, default: false)
 // *******************************************************************
-void AdvectionDiffusionSolver::do_step(real t, bool sync) {
+void AdvectionDiffusionSolver::do_step(real, bool sync) {
 // local variables and parameters
-    auto u = m_field_controller->field_u;
-    auto v = m_field_controller->field_v;
-    auto w = m_field_controller->field_w;
-    auto u0 = m_field_controller->field_u0;
-    auto v0 = m_field_controller->field_v0;
-    auto w0 = m_field_controller->field_w0;
-    auto u_tmp = m_field_controller->field_u_tmp;
-    auto v_tmp = m_field_controller->field_v_tmp;
-    auto w_tmp = m_field_controller->field_w_tmp;
-
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-    auto d_u_tmp = u_tmp->data;
-    auto d_v_tmp = v_tmp->data;
-    auto d_w_tmp = w_tmp->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u->get_level());
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &u0 = m_field_controller->get_field_u0();
+    Field &v0 = m_field_controller->get_field_v0();
+    Field &w0 = m_field_controller->get_field_w0();
+    Field &u_tmp = m_field_controller->get_field_u_tmp();
+    Field &v_tmp = m_field_controller->get_field_v_tmp();
+    Field &w_tmp = m_field_controller->get_field_w_tmp();
 
     auto nu = m_nu;
 
-#pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize])
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
@@ -94,7 +82,7 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    }//end data
+    }
 }
 
 //================================== Check data =============================

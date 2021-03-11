@@ -19,11 +19,11 @@ class Analysis {
 
     void calc_L2_norm_mid_point(FieldController *solver, real t, real *sum);
     void calc_RMS_error(real sum_u, real sum_p, real sum_T);
-    real calc_CFL(Field *u, Field *v, Field *w, real dt);
+    real calc_CFL(Field const &u, Field const &v, Field const &w, real dt) const;
 
     bool check_time_step_VN(Field *u, real dt);
 
-    real set_DT_with_CFL(Field *u, Field *v, Field *w);
+    real set_DT_with_CFL(Field const &u, Field const &v, Field const &w) const;
 
     void save_variables_in_file(FieldController *solv);
 
