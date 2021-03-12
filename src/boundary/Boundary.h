@@ -27,7 +27,7 @@ class Boundary {
     size_t* get_boundary_left() const {return m_boundary_left;}
     size_t* get_boundary_right() const { return m_boundary_right;}
 
-    size_t* get_inner_list() { return m_inner_list;}
+    size_t* get_inner_list() const { return m_inner_list;}
     size_t get_size_inner_list() const { return m_size_innerList; }
 
     size_t get_size_boundary_list() const {return m_size_boundary_list;}
