@@ -28,28 +28,28 @@ class BoundaryController {
     void print_boundaries();
     void update_lists();
 
-    size_t get_size_inner_list();
-    size_t get_size_boundary_list();
-    size_t* get_obstacle_list();
-    size_t get_size_obstacle_list();
+    size_t get_size_inner_list() const;
+    size_t get_size_boundary_list() const;
+    size_t* get_obstacle_list() const;
+    size_t get_size_obstacle_list() const;
 
-    size_t* get_inner_list_level_joined();
-    size_t get_size_inner_list_level_joined(); // TODO necessary?
-    size_t get_inner_list_level_joined_start(size_t level);
-    size_t get_inner_list_level_joined_end(size_t level);
+    size_t* get_inner_list_level_joined() const;
+    size_t get_size_inner_list_level_joined() const; // TODO necessary?
+    size_t get_inner_list_level_joined_start(size_t level) const;
+    size_t get_inner_list_level_joined_end(size_t level) const;
 
-    size_t* get_boundary_list_level_joined();
-    size_t get_size_boundary_list_level_joined(); // TODO necessary?
-    size_t get_boundary_list_level_joined_start(size_t level);
-    size_t get_boundary_list_level_joined_end(size_t level);
+    size_t* get_boundary_list_level_joined() const;
+    size_t get_size_boundary_list_level_joined() const; // TODO necessary?
+    size_t get_boundary_list_level_joined_start(size_t level) const;
+    size_t get_boundary_list_level_joined_end(size_t level) const;
 
-    size_t get_size_surfaceList() {return m_size_surface_list;};
+    size_t get_size_surfaceList() const {return m_size_surface_list;};
 
-    size_t get_obstacle_stride_x(size_t id, size_t level);
-    size_t get_obstacle_stride_y(size_t id, size_t level);
-    size_t get_obstacle_stride_z(size_t id, size_t level);
+    size_t get_obstacle_stride_x(size_t id, size_t level) const;
+    size_t get_obstacle_stride_y(size_t id, size_t level) const;
+    size_t get_obstacle_stride_z(size_t id, size_t level) const;
 
-    std::vector<FieldType> get_used_fields();
+    std::vector<FieldType> get_used_fields() const;
 
  private:
 #ifndef BENCHMARKING
