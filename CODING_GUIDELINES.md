@@ -54,7 +54,7 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
 
   Example: `Solution.h` uses `std::vector` accordingly it has to import `std::vector`
   
-- Include guards: Our include guards have the format ARTSS_DIRNAME_FILENAME_H
+- Include guards: Our include guards have the format ARTSS_DIRNAME_FILENAME_H_
 
   Example: `Soluction.h` in directory `analysis`
   
@@ -66,7 +66,8 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
   
   #endif /* ARTSS_ANALYSIS_SOLUTION_H_ */
   ```
-
+### Line Break/Hard Wrap
+ - 100 characters per line is the guideline here but not a rule which has to be followed everywhere. We are adding line breaks if it makes the code more readable, which in most cases means were a breaking a line out of semantic reasons. In which case the line can be much shorter than 100 characters. There are also some special cases where it is not possible to break a line.
 
 As we are only a small group of developers, many parts of the code are not yet compliant with our code guidelines and will be improved accordingly as we make changes. Accordingly, more rules may be added to our coding guidelines if we determine that it is necessary.
 
