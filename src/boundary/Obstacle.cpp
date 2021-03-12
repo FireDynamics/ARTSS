@@ -727,9 +727,6 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
                           o2_x2, o2_y1, o2_y2, o2_z1, o2_z2, o2->get_name());
 #endif
 
-            size_t o1_size_removing_indices = (o1_y2 + 1 - o1_y1) * (o1_z2 + 1 - o1_z1);
-            size_t o2_size_removing_indices = (o2_y2 + 1 - o2_y1) * (o2_z2 + 1 - o2_z1);
-
             std::vector<size_t> o1_new;
             o1_new.reserve(o1->get_size_obstacle_left());
             std::vector<size_t> o2_new;

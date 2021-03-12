@@ -4,9 +4,9 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <cmath>
-
 #include "Boundary.h"
+#include <cmath>
+#include <string>
 #include "../field/Field.h"
 #include "../Domain.h"
 #include "../utility/GlobalMacrosTypes.h"
@@ -232,24 +232,25 @@ void Boundary::boundary_cells() {
     const size_t Ny = domain->get_Ny(m_level);
 
     // DETAILED and CONCATENATED LISTS
-// BOUNDARY
+    // BOUNDARY
 
-    //TODO: boundaries for physical domain. New method for computational domain -> redefine XML usage of boundaries
+    // TODO(issue 86): boundaries for physical domain.
+    // TODO(issue 86): New method for computational domain -> redefine XML usage of boundaries
 
-    //start indices for computational domain minus 1 for ghost cells
+    // start indices for computational domain minus 1 for ghost cells
     size_t x1 = domain->get_index_x1(m_level) - 1;
     size_t y1 = domain->get_index_y1(m_level) - 1;
     size_t z1 = domain->get_index_z1(m_level) - 1;
 
-    //end indices for computational domain plus 1 for ghost cells
+    // end indices for computational domain plus 1 for ghost cells
     size_t x2 = domain->get_index_x2(m_level) + 1;
     size_t y2 = domain->get_index_y2(m_level) + 1;
     size_t z2 = domain->get_index_z2(m_level) + 1;
 
     // fill boundaryList with boundary indices of computational domain (sorted)
     size_t counter = 0;
-    //go through computational domain in z slices
-    //front
+    // go through computational domain in z slices
+    // front
     for (size_t j = y1; j <= y2; ++j) {
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, j, z1, Nx, Ny);
@@ -257,15 +258,15 @@ void Boundary::boundary_cells() {
             counter++;
         }
     }
-    //left, right, bottom, top
+    // left, right, bottom, top
     for (size_t k = z1 + 1; k < z2; ++k) {
-        //bottom stride
+        // bottom stride
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, y1, k, Nx, Ny);
             *(m_boundary_list + counter) = idx;
             counter++;
         }
-        //cell on the left and on the right
+        // cell on the left and on the right
         for (size_t j = y1 + 1; j < y2; ++j) {
             size_t idx = IX(x1, j, k, Nx, Ny);
             *(m_boundary_list + counter) = idx;
@@ -275,14 +276,14 @@ void Boundary::boundary_cells() {
             *(m_boundary_list + counter) = idx;
             counter++;
         }
-        //top stride
+        // top stride
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, y2, k, Nx, Ny);
             *(m_boundary_list + counter) = idx;
             counter++;
         }
     }
-    //back
+    // back
     for (size_t j = y1; j <= y2; ++j) {
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, j, z2, Nx, Ny);
@@ -355,7 +356,7 @@ void Boundary::inner_cells(Obstacle **obstacle_list, size_t number_of_obstacles)
         for (size_t j = j1; j <= j2; ++j) {
             for (size_t i = i1; i <= i2; ++i) {
                 bool is_inner_cell = true;
-                //check if cell is part of an obstacle
+                // check if cell is part of an obstacle
                 for (size_t o = 0; o < number_of_obstacles && is_inner_cell; o++) {
                     if (obstacle_list[o]->is_obstacle_cell(i, j, k)) {
                         is_inner_cell = false;
@@ -407,8 +408,6 @@ void Boundary::inner_cells() {
 /// \param  number_of_obstacles Number of obstacles
 // *************************************************************************************************
 void Boundary::update_lists(Obstacle **obstacle_list, size_t number_of_obstacles, size_t size_obstacles) {
-    //TODO update for GPU -- delete old data + enter new data
-    //TODO write to joined list directly?
     clear_lists();
     init(size_obstacles);
     inner_cells(obstacle_list, number_of_obstacles);
@@ -419,8 +418,6 @@ void Boundary::update_lists(Obstacle **obstacle_list, size_t number_of_obstacles
 /// \brief  Updates lists of indices
 // *************************************************************************************************
 void Boundary::update_lists() {
-    //TODO update for GPU -- delete old data + enter new data
-    //TODO write to joined list directly?
     clear_lists();
     init(0);
     inner_cells();
