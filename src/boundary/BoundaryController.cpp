@@ -5,13 +5,9 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "BoundaryController.h"
-#include "../utility/Parameters.h"
-#include "../Domain.h"
-#include <tuple>
-#include "../utility/Utility.h"
-#include <algorithm>
+#include <string>
 
-BoundaryController *BoundaryController::singleton = nullptr; // Singleton
+BoundaryController *BoundaryController::singleton = nullptr;  // Singleton
 
 
 BoundaryController::BoundaryController() {
@@ -35,10 +31,18 @@ BoundaryController::BoundaryController() {
 /// \brief  Reads in all parameters of boundary, obstacles and surfaces
 // ***************************************************************************************
 void BoundaryController::readXML() {
+#ifndef BENCHMARKING
+    m_logger->debug("start parsing XML");
+#endif
+
     auto params = Parameters::getInstance();
     parseBoundaryParameter(params->get_first_child("boundaries"));
     parseObstacleParameter(params->get_first_child("obstacles"));
-    parseSurfaceParameter( params->get_first_child("surfaces"));
+    detect_neighbouring_obstacles();
+    parseSurfaceParameter(params->get_first_child("surfaces"));
+#ifndef BENCHMARKING
+    m_logger->debug("finished parsing XML");
+#endif
 }
 
 // ================================= Parser =============================================
@@ -47,12 +51,18 @@ void BoundaryController::readXML() {
 /// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseBoundaryParameter(tinyxml2::XMLElement *xmlParameter) {
+#ifndef BENCHMARKING
+    m_logger->debug("start parsing boundary parameter");
+#endif
 // BOUNDARY
     auto curElem = xmlParameter->FirstChildElement();
     while (curElem) {
         m_bdc_boundary->addBoundaryData(curElem);
         curElem = curElem->NextSiblingElement();
-    } // end while
+    }
+#ifndef BENCHMARKING
+    m_logger->debug("finished parsing boundary parameter");
+#endif
 }
 
 // ================================= Parser =============================================
@@ -61,8 +71,11 @@ void BoundaryController::parseBoundaryParameter(tinyxml2::XMLElement *xmlParamet
 /// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseSurfaceParameter(tinyxml2::XMLElement *xmlParameter) {
+#ifndef BENCHMARKING
+    m_logger->debug("start parsing surface parameter");
+#endif
 // SURFACES
-//TODO surfaces
+// TODO surfaces
     m_hasSurfaces = (Parameters::getInstance()->get("surfaces/enabled") == "Yes");
     if (m_hasSurfaces) {
         std::vector<Surface *> surfaces;
@@ -71,10 +84,13 @@ void BoundaryController::parseSurfaceParameter(tinyxml2::XMLElement *xmlParamete
             Surface *o = new Surface(curElem);
             surfaces.push_back(o);
             curElem = curElem->NextSiblingElement();
-        } // end while
+        }
         m_numberOfSurfaces = surfaces.size();
         m_surfaceList = surfaces.data();
     }
+#ifndef BENCHMARKING
+    m_logger->debug("finished parsing surface parameter");
+#endif
 }
 
 // ================================= Parser =============================================
@@ -83,6 +99,9 @@ void BoundaryController::parseSurfaceParameter(tinyxml2::XMLElement *xmlParamete
 /// \param  xmlParameter pointer to XMLElement to start with
 // ***************************************************************************************
 void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParameter) {
+#ifndef BENCHMARKING
+    m_logger->debug("start parsing obstacle parameter");
+#endif
 // OBSTACLES
     m_hasObstacles = (Parameters::getInstance()->get("obstacles/enabled") == "Yes");
     if (m_hasObstacles) {
@@ -90,6 +109,10 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
         std::vector<BoundaryDataController *> bdc_obstacles;
         auto curElem_obstacle = xmlParameter->FirstChildElement();
         while (curElem_obstacle) {
+            std::string name = curElem_obstacle->Attribute("name");
+#ifndef BENCHMARKING
+            m_logger->debug("read obstacle '{}'", name);
+#endif
             BoundaryDataController *bdc = new BoundaryDataController();
             auto curElem = curElem_obstacle->FirstChildElement();
             real ox1;
@@ -116,11 +139,11 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
                 }
                 curElem = curElem->NextSiblingElement();
             }
-            Obstacle *o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2);
+            Obstacle *o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2, name);
             obstacles.push_back(o);
             bdc_obstacles.push_back(bdc);
             curElem_obstacle = curElem_obstacle->NextSiblingElement();
-        } // end while
+        }
         m_numberOfObstacles = obstacles.size();
         m_obstacleList = new Obstacle *[m_numberOfObstacles];
         m_bdc_obstacles = new BoundaryDataController *[m_numberOfObstacles];
@@ -129,6 +152,9 @@ void BoundaryController::parseObstacleParameter(tinyxml2::XMLElement *xmlParamet
             *(m_bdc_obstacles + i) = bdc_obstacles[i];
         }
     }
+#ifndef BENCHMARKING
+    m_logger->debug("finished parsing obstacle parameter");
+#endif
 }
 
 BoundaryController::~BoundaryController() {
@@ -253,16 +279,33 @@ size_t BoundaryController::get_boundaryList_level_joined_end(size_t level) {
     return m_multigrid->getBoundaryList_level_joined_end(level);
 }
 
-size_t BoundaryController::getObstacleStrideX(size_t id, size_t level){
+size_t BoundaryController::getObstacleStrideX(size_t id, size_t level) {
     return m_multigrid->getObstacleStrideX(id, level);
 }
-size_t BoundaryController::getObstacleStrideY(size_t id, size_t level){
+size_t BoundaryController::getObstacleStrideY(size_t id, size_t level) {
     return m_multigrid->getObstacleStrideY(id, level);
 }
-size_t BoundaryController::getObstacleStrideZ(size_t id, size_t level){
+size_t BoundaryController::getObstacleStrideZ(size_t id, size_t level) {
     return m_multigrid->getObstacleStrideZ(id, level);
 }
 
 std::vector<FieldType> BoundaryController::get_used_fields() {
     return m_bdc_boundary->get_used_fields();
 }
+
+void BoundaryController::detect_neighbouring_obstacles() {
+#ifndef BENCHMARKING
+    m_logger->debug("start detecting neighbouring obstacles");
+#endif
+    for (size_t o1 = 0; o1 < m_numberOfObstacles; o1++) {
+        Obstacle* obstacle1 = m_obstacleList[o1];
+        for (size_t o2 = o1 + 1; o2 < m_numberOfObstacles; o2++) {
+            Obstacle* obstacle2 = m_obstacleList[o2];
+            Obstacle::remove_circular_constraints(obstacle1, obstacle2);
+        }
+    }
+#ifndef BENCHMARKING
+    m_logger->debug("finished detecting neighbouring obstacles");
+#endif
+}
+

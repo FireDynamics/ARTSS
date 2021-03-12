@@ -4,14 +4,11 @@
 /// \author       Severt
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_FIELD_H_
-#define ARTSS_FIELD_H_
+#ifndef ARTSS_FIELD_FIELD_H_
+#define ARTSS_FIELD_FIELD_H_
 
-#include <cmath>
-#include <array>
-#include <utility>
 #include <algorithm>
-#include "../Domain.h"
+#include <utility>
 #include "../utility/GlobalMacrosTypes.h"
 
 #ifndef ENUM_TYPES
@@ -48,5 +45,5 @@ class Field {
     FieldType m_type;
 };
 
+#endif /* ARTSS_FIELD_FIELD_H_ */
 
-#endif /* ARTSS_FIELD_H_ */

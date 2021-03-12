@@ -4,13 +4,13 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_SOLVER_SOLVERSELECTION_H
-#define ARTSS_SOLVER_SOLVERSELECTION_H
+#ifndef ARTSS_SOLVER_SOLVERSELECTION_H_
+#define ARTSS_SOLVER_SOLVERSELECTION_H_
 
-#include "../interfaces/IDiffusion.h"
-#include "../interfaces/ISource.h"
-#include "../interfaces/IPressure.h"
 #include "../interfaces/IAdvection.h"
+#include "../interfaces/IDiffusion.h"
+#include "../interfaces/IPressure.h"
+#include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
 #include "../utility/Utility.h"
 
@@ -56,5 +56,5 @@ namespace SolverSelection {
     void SetTurbulenceSolver(ITurbulence **tubulenceSolver, const std::string& turbulenceType);
 };
 
+#endif /* ARTSS_SOLVER_SOLVERSELECTION_H_ */
 
-#endif /* ARTSS_SOLVER_SOLVERSELECTION_H */
