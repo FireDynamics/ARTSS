@@ -119,6 +119,10 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, co
     const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny(out->get_level());
 
+    const real dx = domain->get_dx(out->get_level());
+    const real dy = domain->get_dy(out->get_level());
+    const real dz = domain->get_dz(out->get_level());
+
     auto bsize = domain->get_size(out->get_level());
 
     auto d_out = out->data;
@@ -138,18 +142,26 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, co
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
 
-        real nu_x1 = 0.5 * (d_ev[IX(i - 1, j, k, Nx, Ny)] + d_ev[idx]);
-        real nu_x2 = 0.5 * (d_ev[IX(i + 1, j, k, Nx, Ny)] + d_ev[idx]);
-        real nu_y1 = 0.5 * (d_ev[IX(i, j - 1, k, Nx, Ny)] + d_ev[idx]);
-        real nu_y2 = 0.5 * (d_ev[IX(i, j + 1, k, Nx, Ny)] + d_ev[idx]);
-        real nu_z1 = 0.5 * (d_ev[IX(i, j, k - 1, Nx, Ny)] + d_ev[idx]);
-        real nu_z2 = 0.5 * (d_ev[IX(i, j, k + 1, Nx, Ny)] + d_ev[idx]);
+        real nu_x1 = 0.5 * (d_ev[IX(i - 1, j, k, Nx, Ny)] + d_ev[idx]) + D;
+        real nu_x2 = 0.5 * (d_ev[IX(i + 1, j, k, Nx, Ny)] + d_ev[idx]) + D;
+        real nu_y1 = 0.5 * (d_ev[IX(i, j - 1, k, Nx, Ny)] + d_ev[idx]) + D;
+        real nu_y2 = 0.5 * (d_ev[IX(i, j + 1, k, Nx, Ny)] + d_ev[idx]) + D;
+        real nu_z1 = 0.5 * (d_ev[IX(i, j, k - 1, Nx, Ny)] + d_ev[idx]) + D;
+        real nu_z2 = 0.5 * (d_ev[IX(i, j, k + 1, Nx, Ny)] + d_ev[idx]) + D;
 
-        d_out[idx] = d_in[idx] +
-                     m_dt * (nu_x1 * (d_in[idx] - d_in[IX(i - 1, j, k, Nx, Ny)]) - nu_x2 * (d_in[IX(i + 1, j, k, Nx, Ny)] - d_in[idx])
-                           + nu_y1 * (d_in[idx] - d_in[IX(i, j - 1, k, Nx, Ny)]) - nu_y2 * (d_in[IX(i, j + 1, k, Nx, Ny)] - d_in[idx])
-                           + nu_z1 * (d_in[idx] - d_in[IX(i, j, k - 1, Nx, Ny)]) - nu_z2 * (d_in[IX(i, j, k + 1, Nx, Ny)] - d_in[idx])
+        auto di0 = (d_in[idx] - d_in[IX(i - 1, j, k, Nx, Ny)]);  // u_i - u_{i-1}
+        auto di1 = (d_in[IX(i + 1, j, k, Nx, Ny)] - d_in[idx]);  // u_{i+1} - u_i
+        auto dj0 = (d_in[idx] - d_in[IX(i, j - 1, k, Nx, Ny)]);
+        auto dj1 = (d_in[IX(i, j + 1, k, Nx, Ny)] - d_in[idx]);
+        auto dk0 = (d_in[idx] - d_in[IX(i, j, k - 1, Nx, Ny)]);
+        auto dk1 = (d_in[IX(i, j, k + 1, Nx, Ny)] - d_in[idx]);
+
+        auto tmp = d_in[idx] -
+                     m_dt * ((nu_x1 * di0 - nu_x2 * di1) // dx // * 4 / dx;  // u_{i-0.5} - u_{i+0.5}
+                           + (nu_y1 * dj0 - nu_y2 * dj1) // dy
+                           + (nu_z1 * dk0 - nu_z2 * dk1) // dz
                      );
+        d_out[idx] = tmp;
     }
 
     if (sync) {

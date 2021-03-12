@@ -8,7 +8,6 @@
 #define ARTSS_BOUNDARY_BOUNDARY_H_
 
 
-#include <vector>
 #include "BoundaryData.h"
 #include "Obstacle.h"
 #include "../utility/Utility.h"
@@ -16,8 +15,8 @@
 class Boundary {
  public:
     ~Boundary();
-    Boundary(Obstacle** obstacleList, size_t numberOfObstacles, size_t size_obstacles, size_t level=0);
-    explicit Boundary(size_t level=0);
+    Boundary(Obstacle** obstacleList, size_t numberOfObstacles, size_t size_obstacles, size_t level = 0);
+    explicit Boundary(size_t level = 0);
     void init(size_t size_obstacles);
 
     size_t* getBoundaryList() {return m_boundaryList;}
@@ -42,6 +41,7 @@ class Boundary {
     void updateLists(Obstacle** obstacleList, size_t numberOfObstacles, size_t size_obstacles);
     void updateLists();
     void control(size_t size_obstacles);
+
  private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
@@ -75,5 +75,5 @@ class Boundary {
     void clearLists();
 };
 
-
 #endif /* ARTSS_BOUNDARY_BOUNDARY_H_ */
+

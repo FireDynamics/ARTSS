@@ -1,19 +1,19 @@
 /// \file       FieldController.h
-/// \brief      
+/// \brief      manages everything regarding any field object
 /// \date       Aug 12, 2020
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_FIELDCONTROLLER_H
-#define ARTSS_FIELDCONTROLLER_H
+#ifndef ARTSS_FIELD_FIELDCONTROLLER_H_
+#define ARTSS_FIELD_FIELDCONTROLLER_H_
 
 
+#include "../interfaces/ISource.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "Field.h"
-#include "../interfaces/ISource.h"
 
 class FieldController {
-public:
+ public:
     FieldController();
     ~FieldController();
 
@@ -85,5 +85,5 @@ public:
     void update_host();
 };
 
+#endif /* ARTSS_FIELD_FIELDCONTROLLER_H_ */
 
-#endif /* ARTSS_FIELDCONTROLLER_H */

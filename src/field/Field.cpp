@@ -5,44 +5,22 @@
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Field.h"
+#include "../Domain.h"
 
-Field::Field(FieldType type, real val): m_type(type) {
-    size_t size = Domain::getInstance()->get_size();
-    m_level = 0;
-    data = new real[size];
-    std::fill(data, data + size, val);
+Field::Field(FieldType type, real val) :
+    Field::Field(type, val, 0, Domain::getInstance()->get_size()) {
 }
 
-Field::Field(FieldType type, real val, size_t level): m_level(level), m_type(type) {
-    size_t size = Domain::getInstance()->get_size(level);
-
-    data = new real[size];
-    std::fill(data, data + size, val);
+Field::Field(FieldType type, real val, size_t level) :
+    Field::Field(type, val, level, Domain::getInstance()->get_size(level)) {
 }
 
-void Field::set_value(real val) {
-    size_t size = Domain::getInstance()->get_size(m_level);
-    std::fill(data, data + size, val);
-}
-
-void Field::copy_data(const Field &other) {
-    size_t size = Domain::getInstance()->get_size(m_level);
-    for (size_t i = 0; i < size; i++) {
-        data[i] = other.data[i];
-    }
+Field::Field(FieldType type, real val, size_t level, size_t size):
+    m_level(level), m_size(size), m_type(type) {
+    data = new real[m_size];
+    set_value(val);
 }
 
 Field::~Field() {
     delete[] data;
-}
-
-//========================== Copy Constructor =================================
-Field::Field(const Field & other) {
-    size_t size = Domain::getInstance()->get_size(other.m_level);
-    data = new real[size];
-    for (size_t i = 0; i < size; i++) {
-        data[i] = other.data[i];
-    }
-    m_type = other.m_type;
-    m_level = other.m_level;
 }

@@ -4,8 +4,8 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H
-#define ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H
+#ifndef ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H_
+#define ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H_
 
 #include <cstdlib>
 #include "../utility/GlobalMacrosTypes.h"
@@ -15,4 +15,5 @@ namespace ObstacleBoundary {
     void apply_boundary_condition(real* data, size_t** index_fields, const size_t* patch_starts, const size_t* patch_ends, size_t level, BoundaryData* boundary_data, size_t id, bool sync = true);
 }  // namespace ObstacleBoundary
 
-#endif /* ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H */
+#endif /* ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H_ */
+

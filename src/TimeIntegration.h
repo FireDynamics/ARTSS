@@ -7,6 +7,8 @@
 #ifndef ARTSS_TIMEINTEGRATION_H_
 #define ARTSS_TIMEINTEGRATION_H_
 
+#include <chrono>
+
 #include "interfaces/ISolver.h"
 #include "interfaces/ISource.h"
 #include "utility/GlobalMacrosTypes.h"
@@ -23,11 +25,11 @@
 #endif
 
 class TimeIntegration {
-public:
+ public:
     explicit TimeIntegration(SolverController *sc);
     void run();
 
-private:
+ private:
     real m_dt;
     real m_t_end;
     real m_t_cur;
