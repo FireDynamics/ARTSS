@@ -236,9 +236,9 @@ void BoundaryController::detect_neighbouring_obstacles() {
     m_logger->debug("start detecting neighbouring obstacles");
 #endif
     for (size_t o1 = 0; o1 < m_number_of_obstacles; o1++) {
-        Obstacle* obstacle1 = m_obstacle_list[o1];
+        Obstacle *obstacle1 = m_obstacle_list[o1];
         for (size_t o2 = o1 + 1; o2 < m_number_of_obstacles; o2++) {
-            Obstacle* obstacle2 = m_obstacle_list[o2];
+            Obstacle *obstacle2 = m_obstacle_list[o2];
             Obstacle::remove_circular_constraints(obstacle1, obstacle2);
         }
     }
@@ -255,7 +255,7 @@ size_t BoundaryController::get_size_boundary_list_level_joined() const {
     return m_multigrid->get_size_boundary_list_level_joined();
 }
 
-size_t* BoundaryController::get_obstacle_list() const {
+size_t *BoundaryController::get_obstacle_list() const {
     return m_multigrid->get_obstacle_list();
 }
 
@@ -298,9 +298,11 @@ size_t BoundaryController::get_boundary_list_level_joined_end(size_t level) cons
 size_t BoundaryController::get_obstacle_stride_x(size_t id, size_t level) const {
     return m_multigrid->get_obstacle_stride_x(id, level);
 }
+
 size_t BoundaryController::get_obstacle_stride_y(size_t id, size_t level) const {
     return m_multigrid->get_obstacle_stride_y(id, level);
 }
+
 size_t BoundaryController::get_obstacle_stride_z(size_t id, size_t level) const {
     return m_multigrid->get_obstacle_stride_z(id, level);
 }
