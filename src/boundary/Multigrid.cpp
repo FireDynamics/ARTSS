@@ -1149,7 +1149,7 @@ void Multigrid::remove_boundary_lists_from_GPU() {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_size_obstacle_index_list(size_t level) {
+size_t Multigrid::get_size_obstacle_index_list(size_t level) const {
     size_t size_oList = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_oList = *(m_size_MG_obstacle_index_list_level + level);
@@ -1161,7 +1161,7 @@ size_t Multigrid::get_size_obstacle_index_list(size_t level) {
 /// \brief  get length of the joined inner cell list
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_inner_index_list_joined() {
+size_t Multigrid::get_length_of_inner_index_list_joined() const {
     return get_first_index_of_inner_index_list(m_levels + 1) + 1;
 }
 
@@ -1170,7 +1170,7 @@ size_t Multigrid::get_length_of_inner_index_list_joined() {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_inner_index_list(size_t level) {
+size_t Multigrid::get_first_index_of_inner_index_list(size_t level) const {
     return *(m_size_MG_inner_index_list_level + level);
 }
 
@@ -1179,7 +1179,7 @@ size_t Multigrid::get_first_index_of_inner_index_list(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_last_index_of_inner_index_list(size_t level) {
+size_t Multigrid::get_last_index_of_inner_index_list(size_t level) const {
     return *(m_size_MG_inner_index_list_level + level + 1) - 1;
 }
 
@@ -1189,7 +1189,7 @@ size_t Multigrid::get_last_index_of_inner_index_list(size_t level) {
 /// \brief  get the index of joined inner cell list, where the first cell of level l is
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_boundary_index_list_joined() {
+size_t Multigrid::get_length_of_boundary_index_list_joined() const {
     return get_first_index_of_boundary_index_list(m_levels + 1) + 1;
 }
 
@@ -1198,7 +1198,7 @@ size_t Multigrid::get_length_of_boundary_index_list_joined() {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_boundary_index_list(size_t level) {
+size_t Multigrid::get_first_index_of_boundary_index_list(size_t level) const {
     return *(m_size_MG_boundary_index_list_level + level);
 }
 
@@ -1207,12 +1207,12 @@ size_t Multigrid::get_first_index_of_boundary_index_list(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_last_index_boundary_index_list(size_t level) {
+size_t Multigrid::get_last_index_boundary_index_list(size_t level) const {
     return *(m_size_MG_boundary_index_list_level + level + 1) - 1;
 }
 
 // sList
-size_t Multigrid::get_length_of_surface_index_list_joined() {
+size_t Multigrid::get_length_of_surface_index_list_joined() const {
     size_t len = 0;
     if (m_number_of_surface_objects > 0) {
         len = get_first_index_of_surface_index_list(m_levels + 1) + 1;
@@ -1220,7 +1220,7 @@ size_t Multigrid::get_length_of_surface_index_list_joined() {
     return len;
 }
 
-size_t Multigrid::get_first_index_of_surface_index_list(size_t level) {
+size_t Multigrid::get_first_index_of_surface_index_list(size_t level) const {
     size_t index = 0;
     if (m_number_of_surface_objects > 0) {
         index = *(m_size_MG_surface_index_list_level + level * m_number_of_surface_objects);
@@ -1228,7 +1228,7 @@ size_t Multigrid::get_first_index_of_surface_index_list(size_t level) {
     return index;
 }
 
-size_t Multigrid::get_last_index_of_surface_index_list(size_t level) {
+size_t Multigrid::get_last_index_of_surface_index_list(size_t level) const {
     size_t index = 0;
     if (m_number_of_surface_objects > 0) {
         index = *(m_size_MG_surface_index_list_level + (level + 1) * m_number_of_surface_objects) - 1;
@@ -1242,7 +1242,7 @@ size_t Multigrid::get_last_index_of_surface_index_list(size_t level) {
 /// \brief  get length of left/right joined boundary list
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_boundary_slice_x_joined() {
+size_t Multigrid::get_length_of_boundary_slice_x_joined() const {
     return get_first_index_of_boundary_slice_x(m_levels + 1) + 1;
 }
 
@@ -1250,7 +1250,7 @@ size_t Multigrid::get_length_of_boundary_slice_x_joined() {
 /// \brief  get length of top/bottom joined boundary list
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_boundary_slice_y_joined() {
+size_t Multigrid::get_length_of_boundary_slice_y_joined() const {
     return get_first_index_of_boundary_slice_y(m_levels + 1) + 1;
 }
 
@@ -1258,7 +1258,7 @@ size_t Multigrid::get_length_of_boundary_slice_y_joined() {
 /// \brief  get length of front/back joined boundary list
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_boundary_slice_z_joined() {
+size_t Multigrid::get_length_of_boundary_slice_z_joined() const {
     return get_first_index_of_boundary_slice_z(m_levels + 1) + 1;
 }
 
@@ -1268,7 +1268,7 @@ size_t Multigrid::get_length_of_boundary_slice_z_joined() {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_boundary_slice_x(size_t level) {
+size_t Multigrid::get_first_index_of_boundary_slice_x(size_t level) const {
     return *(m_size_MG_boundary_slice_x_level + level);
 }
 
@@ -1278,7 +1278,7 @@ size_t Multigrid::get_first_index_of_boundary_slice_x(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_boundary_slice_y(size_t level) {
+size_t Multigrid::get_first_index_of_boundary_slice_y(size_t level) const {
     return *(m_size_MG_boundary_slice_y_level + level);
 }
 
@@ -1288,7 +1288,7 @@ size_t Multigrid::get_first_index_of_boundary_slice_y(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_boundary_slice_z(size_t level) {
+size_t Multigrid::get_first_index_of_boundary_slice_z(size_t level) const {
     return *(m_size_MG_boundary_slice_z_level + level);
 }
 
@@ -1298,7 +1298,7 @@ size_t Multigrid::get_first_index_of_boundary_slice_z(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_last_index_of_boundary_slice_x(size_t level) {
+size_t Multigrid::get_last_index_of_boundary_slice_x(size_t level) const {
     return *(m_size_MG_boundary_slice_x_level + level + 1) - 1;
 }
 
@@ -1308,7 +1308,7 @@ size_t Multigrid::get_last_index_of_boundary_slice_x(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_last_index_of_boundary_slice_y(size_t level) {
+size_t Multigrid::get_last_index_of_boundary_slice_y(size_t level) const {
     return *(m_size_MG_boundary_slice_y_level + level + 1) - 1;
 }
 
@@ -1318,7 +1318,7 @@ size_t Multigrid::get_last_index_of_boundary_slice_y(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_last_index_of_boundary_slice_z(size_t level) {
+size_t Multigrid::get_last_index_of_boundary_slice_z(size_t level) const {
     return *(m_size_MG_boundary_slice_z_level + level + 1) - 1;
 }
 
@@ -1328,7 +1328,7 @@ size_t Multigrid::get_last_index_of_boundary_slice_z(size_t level) {
 /// \brief  get length of m_data_MG_obstacle_front_level_joined
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_front_joined() {
+size_t Multigrid::get_length_of_obstacle_front_joined() const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_t index = (m_levels + 1) * m_number_of_obstacle_objects;
@@ -1343,7 +1343,7 @@ size_t Multigrid::get_length_of_obstacle_front_joined() {
 /// \brief  get length of m_data_MG_obstacle_back_level_joined
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_back_joined() {
+size_t Multigrid::get_length_of_obstacle_back_joined() const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_t index = (m_levels + 1) * m_number_of_obstacle_objects;
@@ -1358,7 +1358,7 @@ size_t Multigrid::get_length_of_obstacle_back_joined() {
 /// \brief  get length of m_data_MG_obstacle_bottom_level_joined
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_bottom_joined() {
+size_t Multigrid::get_length_of_obstacle_bottom_joined() const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_t index = (m_levels + 1) * m_number_of_obstacle_objects;
@@ -1373,7 +1373,7 @@ size_t Multigrid::get_length_of_obstacle_bottom_joined() {
 /// \brief  get length of m_data_MG_obstacle_top_level_joined
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_top_joined() {
+size_t Multigrid::get_length_of_obstacle_top_joined() const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_t index = (m_levels + 1) * m_number_of_obstacle_objects;
@@ -1388,7 +1388,7 @@ size_t Multigrid::get_length_of_obstacle_top_joined() {
 /// \brief  get length of m_data_MG_obstacle_left_level_joined
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_left_joined() {
+size_t Multigrid::get_length_of_obstacle_left_joined() const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_t index = (m_levels + 1) * m_number_of_obstacle_objects;
@@ -1404,7 +1404,7 @@ size_t Multigrid::get_length_of_obstacle_left_joined() {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_right_joined() {
+size_t Multigrid::get_length_of_obstacle_right_joined() const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_t index = (m_levels + 1) * m_number_of_obstacle_objects;
@@ -1420,7 +1420,7 @@ size_t Multigrid::get_length_of_obstacle_right_joined() {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_front(size_t level) {
+size_t Multigrid::get_length_of_obstacle_front(size_t level) const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_t last = get_last_index_of_obstacle_front(level, m_number_of_obstacle_objects - 1);
@@ -1436,7 +1436,7 @@ size_t Multigrid::get_length_of_obstacle_front(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_back(size_t level) {
+size_t Multigrid::get_length_of_obstacle_back(size_t level) const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_t last = get_last_index_of_obstacle_back(level, m_number_of_obstacle_objects - 1);
@@ -1452,7 +1452,7 @@ size_t Multigrid::get_length_of_obstacle_back(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_bottom(size_t level) {
+size_t Multigrid::get_length_of_obstacle_bottom(size_t level) const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_t last = get_last_index_of_obstacle_bottom(level, m_number_of_obstacle_objects - 1);
@@ -1468,7 +1468,7 @@ size_t Multigrid::get_length_of_obstacle_bottom(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_top(size_t level) {
+size_t Multigrid::get_length_of_obstacle_top(size_t level) const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_t last = get_last_index_of_obstacle_top(level, m_number_of_obstacle_objects - 1);
@@ -1484,7 +1484,7 @@ size_t Multigrid::get_length_of_obstacle_top(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_left(size_t level) {
+size_t Multigrid::get_length_of_obstacle_left(size_t level) const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         size_t last = get_last_index_of_obstacle_left(level, m_number_of_obstacle_objects - 1);
@@ -1500,7 +1500,7 @@ size_t Multigrid::get_length_of_obstacle_left(size_t level) {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_right(size_t level) {
+size_t Multigrid::get_length_of_obstacle_right(size_t level) const {
     size_t len = 0;
     if (m_number_of_obstacle_objects > 0) {
         len = get_first_index_of_obstacle_right(level + 1, 0)
@@ -1515,7 +1515,7 @@ size_t Multigrid::get_length_of_obstacle_right(size_t level) {
 /// \param id ID of obstacle
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_front(size_t level, size_t id) {
+size_t Multigrid::get_first_index_of_obstacle_front(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = *(m_size_MG_obstacle_front_level + level * m_number_of_obstacle_objects + id);
@@ -1529,7 +1529,7 @@ size_t Multigrid::get_first_index_of_obstacle_front(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_back(size_t level, size_t id) {
+size_t Multigrid::get_first_index_of_obstacle_back(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = *(m_size_MG_obstacle_back_level + level * m_number_of_obstacle_objects + id);
@@ -1543,7 +1543,7 @@ size_t Multigrid::get_first_index_of_obstacle_back(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_bottom(size_t level, size_t id) {
+size_t Multigrid::get_first_index_of_obstacle_bottom(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = *(m_size_MG_obstacle_bottom_level + level * m_number_of_obstacle_objects + id);
@@ -1557,7 +1557,7 @@ size_t Multigrid::get_first_index_of_obstacle_bottom(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_top(size_t level, size_t id) {
+size_t Multigrid::get_first_index_of_obstacle_top(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = *(m_size_MG_obstacle_top_level + level * m_number_of_obstacle_objects + id);
@@ -1571,7 +1571,7 @@ size_t Multigrid::get_first_index_of_obstacle_top(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_left(size_t level, size_t id) {
+size_t Multigrid::get_first_index_of_obstacle_left(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = *(m_size_MG_obstacle_left_level + level * m_number_of_obstacle_objects + id);
@@ -1585,7 +1585,7 @@ size_t Multigrid::get_first_index_of_obstacle_left(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_right(size_t level, size_t id) {
+size_t Multigrid::get_first_index_of_obstacle_right(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = *(m_size_MG_obstacle_right_level + level * m_number_of_obstacle_objects + id);
@@ -1599,7 +1599,7 @@ size_t Multigrid::get_first_index_of_obstacle_right(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_front(size_t level, size_t id) {
+size_t Multigrid::get_last_index_of_obstacle_front(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_front_level[level * m_number_of_obstacle_objects + id + 1];
@@ -1613,7 +1613,7 @@ size_t Multigrid::get_last_index_of_obstacle_front(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_back(size_t level, size_t id) {
+size_t Multigrid::get_last_index_of_obstacle_back(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_back_level[level * m_number_of_obstacle_objects + id + 1];
@@ -1627,7 +1627,7 @@ size_t Multigrid::get_last_index_of_obstacle_back(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_bottom(size_t level, size_t id) {
+size_t Multigrid::get_last_index_of_obstacle_bottom(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_bottom_level[level * m_number_of_obstacle_objects + id + 1] - 1;
@@ -1641,7 +1641,7 @@ size_t Multigrid::get_last_index_of_obstacle_bottom(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return int
 // *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_top(size_t level, size_t id) {
+size_t Multigrid::get_last_index_of_obstacle_top(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_top_level[level * m_number_of_obstacle_objects + id + 1] - 1;
@@ -1655,7 +1655,7 @@ size_t Multigrid::get_last_index_of_obstacle_top(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return int
 // *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_left(size_t level, size_t id) {
+size_t Multigrid::get_last_index_of_obstacle_left(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_left_level[level * m_number_of_obstacle_objects + id + 1];
@@ -1669,7 +1669,7 @@ size_t Multigrid::get_last_index_of_obstacle_left(size_t level, size_t id) {
 /// \param id ID of obstacle
 /// \return int
 // *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_right(size_t level, size_t id) {
+size_t Multigrid::get_last_index_of_obstacle_right(size_t level, size_t id) const {
     size_t index = 0;
     if (m_number_of_obstacle_objects > 0) {
         index = m_size_MG_obstacle_right_level[level * m_number_of_obstacle_objects + id + 1];
@@ -1678,19 +1678,19 @@ size_t Multigrid::get_last_index_of_obstacle_right(size_t level, size_t id) {
 }
 
 // ---------------- public getter
-size_t Multigrid::get_size_inner_list(size_t level) {
+size_t Multigrid::get_size_inner_list(size_t level) const {
     return get_last_index_of_inner_index_list(level) - get_first_index_of_inner_index_list(level) + 1;
 }
 
-size_t Multigrid::get_size_boundary_ist(size_t level) {
+size_t Multigrid::get_size_boundary_ist(size_t level) const {
     return get_last_index_boundary_index_list(level) - get_first_index_of_boundary_index_list(level) + 1;
 }
 
-size_t Multigrid::get_size_obstacle_list() {
+size_t Multigrid::get_size_obstacle_list() const {
     return get_size_obstacle_index_list(0);
 }
 
-size_t* Multigrid::get_obstacle_list() {
+size_t* Multigrid::get_obstacle_list() const {
     if (m_number_of_obstacle_objects > 0) {
         return m_data_MG_obstacle_list_zero_joined;
     } else {
@@ -1698,30 +1698,30 @@ size_t* Multigrid::get_obstacle_list() {
     }
 }
 
-size_t Multigrid::get_inner_list_level_joined_start(size_t level) {
+size_t Multigrid::get_inner_list_level_joined_start(size_t level) const {
     return *(m_size_MG_inner_index_list_level + level);
 }
 
-size_t Multigrid::get_inner_list_level_joined_end(size_t level) {
+size_t Multigrid::get_inner_list_level_joined_end(size_t level) const {
     return get_inner_list_level_joined_start(level + 1) - 1;
 }
 
-size_t Multigrid::get_boundary_list_level_joined_start(size_t level) {
+size_t Multigrid::get_boundary_list_level_joined_start(size_t level) const {
     return *(m_size_MG_boundary_index_list_level + level);
 }
 
-size_t Multigrid::get_boundary_list_level_joined_end(size_t level) {
+size_t Multigrid::get_boundary_list_level_joined_end(size_t level) const {
     return get_boundary_list_level_joined_start(level + 1) - 1;
 }
 
-size_t Multigrid::get_obstacle_stride_x(size_t id, size_t level) {
+size_t Multigrid::get_obstacle_stride_x(size_t id, size_t level) const {
     return (static_cast<Obstacle *>(m_MG_obstacle_object_list[level][id]))->get_stride_x();
 }
 
-size_t Multigrid::get_obstacle_stride_y(size_t id, size_t level) {
+size_t Multigrid::get_obstacle_stride_y(size_t id, size_t level) const {
     return (static_cast<Obstacle *>(m_MG_obstacle_object_list[level][id]))->get_stride_y();
 }
 
-size_t Multigrid::get_obstacle_stride_z(size_t id, size_t level) {
+size_t Multigrid::get_obstacle_stride_z(size_t id, size_t level) const {
     return (static_cast<Obstacle *>(m_MG_obstacle_object_list[level][id]))->get_stride_z();
 }

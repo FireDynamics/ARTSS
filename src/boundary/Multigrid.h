@@ -23,28 +23,28 @@ class Multigrid {
     explicit Multigrid(BoundaryDataController *bdc_boundary);
     ~Multigrid();
 
-    size_t get_size_inner_list(size_t level = 0);
-    size_t get_size_boundary_ist(size_t level = 0);
-    size_t get_size_obstacle_list();
-    size_t *get_obstacle_list();
+    size_t get_size_inner_list(size_t level = 0) const;
+    size_t get_size_boundary_ist(size_t level = 0) const;
+    size_t get_size_obstacle_list() const;
+    size_t *get_obstacle_list() const;
 
-    size_t* get_inner_list_level_joined() { return m_data_MG_inner_list_level_joined; }
-    size_t get_size_inner_list_level_joined() { return *(m_size_MG_inner_index_list_level + m_levels + 1); }
-    size_t get_inner_list_level_joined_start(size_t level);
-    size_t get_inner_list_level_joined_end(size_t level);
+    size_t* get_inner_list_level_joined() const { return m_data_MG_inner_list_level_joined; }
+    size_t get_size_inner_list_level_joined() const { return *(m_size_MG_inner_index_list_level + m_levels + 1); }
+    size_t get_inner_list_level_joined_start(size_t level) const;
+    size_t get_inner_list_level_joined_end(size_t level) const;
 
-    size_t* get_boundary_list_level_joined() { return m_data_MG_boundary_list_level_joined; }
-    size_t get_size_boundary_list_level_joined() { return *(m_size_MG_boundary_index_list_level + m_levels + 1); }
-    size_t get_boundary_list_level_joined_start(size_t level);
-    size_t get_boundary_list_level_joined_end(size_t level);
+    size_t* get_boundary_list_level_joined() const { return m_data_MG_boundary_list_level_joined; }
+    size_t get_size_boundary_list_level_joined() const { return *(m_size_MG_boundary_index_list_level + m_levels + 1); }
+    size_t get_boundary_list_level_joined_start(size_t level) const;
+    size_t get_boundary_list_level_joined_end(size_t level) const;
 
     void update_lists();
 
     void apply_boundary_condition(real* d, size_t level, FieldType f, bool sync = false);
 
-    size_t get_obstacle_stride_x(size_t id, size_t level);
-    size_t get_obstacle_stride_y(size_t id, size_t level);
-    size_t get_obstacle_stride_z(size_t id, size_t level);
+    size_t get_obstacle_stride_x(size_t id, size_t level) const;
+    size_t get_obstacle_stride_y(size_t id, size_t level) const;
+    size_t get_obstacle_stride_z(size_t id, size_t level) const;
 
  private:
 #ifndef BENCHMARKING
@@ -105,55 +105,55 @@ class Multigrid {
     size_t* m_data_MG_obstacle_right_level_joined;
     size_t* m_data_MG_obstacle_list_zero_joined;
 
-    size_t get_size_obstacle_index_list(size_t level);
-    size_t get_last_index_of_obstacle_front(size_t level, size_t id);
-    size_t get_last_index_of_obstacle_back(size_t level, size_t id);
-    size_t get_last_index_of_obstacle_bottom(size_t level, size_t id);
-    size_t get_last_index_of_obstacle_top(size_t level, size_t id);
-    size_t get_last_index_of_obstacle_left(size_t level, size_t id);
-    size_t get_last_index_of_obstacle_right(size_t level, size_t id);
-    size_t get_first_index_of_obstacle_front(size_t level, size_t id);
-    size_t get_first_index_of_obstacle_back(size_t level, size_t id);
-    size_t get_first_index_of_obstacle_bottom(size_t level, size_t id);
-    size_t get_first_index_of_obstacle_top(size_t level, size_t id);
-    size_t get_first_index_of_obstacle_left(size_t level, size_t id);
-    size_t get_first_index_of_obstacle_right(size_t level, size_t id);
-    size_t get_length_of_obstacle_front(size_t level);
-    size_t get_length_of_obstacle_back(size_t level);
-    size_t get_length_of_obstacle_bottom(size_t level);
-    size_t get_length_of_obstacle_top(size_t level);
-    size_t get_length_of_obstacle_left(size_t level);
-    size_t get_length_of_obstacle_right(size_t level);
+    size_t get_size_obstacle_index_list(size_t level) const;
+    size_t get_last_index_of_obstacle_front(size_t level, size_t id) const;
+    size_t get_last_index_of_obstacle_back(size_t level, size_t id) const;
+    size_t get_last_index_of_obstacle_bottom(size_t level, size_t id) const;
+    size_t get_last_index_of_obstacle_top(size_t level, size_t id) const;
+    size_t get_last_index_of_obstacle_left(size_t level, size_t id) const;
+    size_t get_last_index_of_obstacle_right(size_t level, size_t id) const;
+    size_t get_first_index_of_obstacle_front(size_t level, size_t id) const;
+    size_t get_first_index_of_obstacle_back(size_t level, size_t id) const;
+    size_t get_first_index_of_obstacle_bottom(size_t level, size_t id) const;
+    size_t get_first_index_of_obstacle_top(size_t level, size_t id) const;
+    size_t get_first_index_of_obstacle_left(size_t level, size_t id) const;
+    size_t get_first_index_of_obstacle_right(size_t level, size_t id) const;
+    size_t get_length_of_obstacle_front(size_t level) const;
+    size_t get_length_of_obstacle_back(size_t level) const;
+    size_t get_length_of_obstacle_bottom(size_t level) const;
+    size_t get_length_of_obstacle_top(size_t level) const;
+    size_t get_length_of_obstacle_left(size_t level) const;
+    size_t get_length_of_obstacle_right(size_t level) const;
 
     // get length of from/for joined array
-    size_t get_length_of_obstacle_front_joined();
-    size_t get_length_of_obstacle_back_joined();
-    size_t get_length_of_obstacle_bottom_joined();
-    size_t get_length_of_obstacle_top_joined();
-    size_t get_length_of_obstacle_left_joined();
-    size_t get_length_of_obstacle_right_joined();
+    size_t get_length_of_obstacle_front_joined() const;
+    size_t get_length_of_obstacle_back_joined() const;
+    size_t get_length_of_obstacle_bottom_joined() const;
+    size_t get_length_of_obstacle_top_joined() const;
+    size_t get_length_of_obstacle_left_joined() const;
+    size_t get_length_of_obstacle_right_joined() const;
 
     // get length of bSlice from/for joined array
-    size_t get_length_of_boundary_slice_z_joined();
-    size_t get_length_of_boundary_slice_y_joined();
-    size_t get_length_of_boundary_slice_x_joined();
+    size_t get_length_of_boundary_slice_z_joined() const;
+    size_t get_length_of_boundary_slice_y_joined() const;
+    size_t get_length_of_boundary_slice_x_joined() const;
 
-    size_t get_first_index_of_boundary_slice_z(size_t level);
-    size_t get_first_index_of_boundary_slice_x(size_t level);
-    size_t get_first_index_of_boundary_slice_y(size_t level);
-    size_t get_last_index_of_boundary_slice_z(size_t level);
-    size_t get_last_index_of_boundary_slice_x(size_t level);
-    size_t get_last_index_of_boundary_slice_y(size_t level);
+    size_t get_first_index_of_boundary_slice_z(size_t level) const;
+    size_t get_first_index_of_boundary_slice_x(size_t level) const;
+    size_t get_first_index_of_boundary_slice_y(size_t level) const;
+    size_t get_last_index_of_boundary_slice_z(size_t level) const;
+    size_t get_last_index_of_boundary_slice_x(size_t level) const;
+    size_t get_last_index_of_boundary_slice_y(size_t level) const;
 
-    size_t get_length_of_inner_index_list_joined();
-    size_t get_length_of_boundary_index_list_joined();
-    size_t get_length_of_surface_index_list_joined();
-    size_t get_first_index_of_inner_index_list(size_t level);
-    size_t get_first_index_of_boundary_index_list(size_t level);
-    size_t get_first_index_of_surface_index_list(size_t level);
-    size_t get_last_index_of_inner_index_list(size_t level);
-    size_t get_last_index_boundary_index_list(size_t level);
-    size_t get_last_index_of_surface_index_list(size_t level);
+    size_t get_length_of_inner_index_list_joined() const;
+    size_t get_length_of_boundary_index_list_joined() const;
+    size_t get_length_of_surface_index_list_joined() const;
+    size_t get_first_index_of_inner_index_list(size_t level) const;
+    size_t get_first_index_of_boundary_index_list(size_t level) const;
+    size_t get_first_index_of_surface_index_list(size_t level) const;
+    size_t get_last_index_of_inner_index_list(size_t level) const;
+    size_t get_last_index_boundary_index_list(size_t level) const;
+    size_t get_last_index_of_surface_index_list(size_t level) const;
 
     void init();
     void add_MG_lists();
