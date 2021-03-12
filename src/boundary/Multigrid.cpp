@@ -33,9 +33,11 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
     m_data_boundary_patches_joined[Patch::RIGHT] = m_data_MG_boundary_right_level_joined;
 }
 
-Multigrid::Multigrid(size_t number_of_surfaces, Surface **surface_list,
-                     size_t number_of_obstacles, Obstacle **obstacle_list,
-                     BoundaryDataController *bdc_boundary, BoundaryDataController **bdc_obstacles) {
+Multigrid::Multigrid(
+        size_t number_of_surfaces, Surface **surface_list,
+        size_t number_of_obstacles, Obstacle **obstacle_list,
+        BoundaryDataController *bdc_boundary,
+        BoundaryDataController **bdc_obstacles) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -796,8 +798,8 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
 /// \param k2 coordinate k2 which will be corrected in case its overlapping with obstacle o
 /// \return return true if at least one coordinate was corrected
 // *************************************************************************************************
-bool Multigrid::control_obstacle_overlap(Obstacle *o, size_t *i1, size_t *i2, size_t *j1, size_t *j2,
-                                         size_t *k1, size_t *k2) {
+bool Multigrid::control_obstacle_overlap(
+        Obstacle *o, size_t *i1, size_t *i2, size_t *j1, size_t *j2, size_t *k1, size_t *k2) {
     bool changed = false;
     size_t o_i1 = o->get_coordinates_i1();
     size_t o_i2 = o->get_coordinates_i2();

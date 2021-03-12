@@ -17,9 +17,11 @@
 
 class Multigrid {
  public:
-    Multigrid(size_t number_of_surfaces, Surface** surface_list, size_t number_of_obstacles,
-              Obstacle** obstacle_list, BoundaryDataController* bdc_boundary,
-              BoundaryDataController **bdc_obstacles);
+    Multigrid(
+            size_t number_of_surfaces, Surface** surface_list,
+            size_t number_of_obstacles, Obstacle** obstacle_list,
+            BoundaryDataController* bdc_boundary,
+            BoundaryDataController **bdc_obstacles);
     explicit Multigrid(BoundaryDataController *bdc_boundary);
     ~Multigrid();
 
@@ -178,10 +180,11 @@ class Multigrid {
 
     void remove_boundary_lists_from_GPU();
 
-    static bool control_obstacle_overlap(Obstacle* o,
-                                         size_t *i1, size_t *i2,
-                                         size_t *j1, size_t *j2,
-                                         size_t *k1, size_t *k2);
+    static bool control_obstacle_overlap(
+            Obstacle* o,
+            size_t *i1, size_t *i2,
+            size_t *j1, size_t *j2,
+            size_t *k1, size_t *k2);
 };
 
 #endif /* ARTSS_BOUNDARY_MULTIGRID_H_*/

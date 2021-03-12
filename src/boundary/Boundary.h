@@ -15,28 +15,32 @@
 class Boundary {
  public:
     ~Boundary();
-    Boundary(Obstacle** obstacle_list, size_t number_of_obstacles, size_t size_obstacles, size_t level = 0);
+    Boundary(
+            Obstacle** obstacle_list,
+            size_t number_of_obstacles,
+            size_t size_obstacles,
+            size_t level = 0);
     explicit Boundary(size_t level = 0);
     void init(size_t size_obstacles);
 
-    size_t* get_boundary_list() const {return m_boundary_list;}
-    size_t* get_boundary_front() const {return m_boundary_front;}
-    size_t* get_boundary_back() const {return m_boundary_back;}
-    size_t* get_boundary_top() const {return m_boundary_top;}
-    size_t* get_boundary_bottom() const {return m_boundary_bottom;}
-    size_t* get_boundary_left() const {return m_boundary_left;}
-    size_t* get_boundary_right() const { return m_boundary_right;}
+    size_t* get_boundary_list() const { return m_boundary_list; }
+    size_t* get_boundary_front() const { return m_boundary_front; }
+    size_t* get_boundary_back() const { return m_boundary_back; }
+    size_t* get_boundary_top() const { return m_boundary_top; }
+    size_t* get_boundary_bottom() const { return m_boundary_bottom; }
+    size_t* get_boundary_left() const { return m_boundary_left; }
+    size_t* get_boundary_right() const { return m_boundary_right; }
 
-    size_t* get_inner_list() const { return m_inner_list;}
+    size_t* get_inner_list() const { return m_inner_list; }
     size_t get_size_inner_list() const { return m_size_innerList; }
 
-    size_t get_size_boundary_list() const {return m_size_boundary_list;}
-    size_t get_size_boundary_front() const {return m_size_boundary_front;}
-    size_t get_size_boundary_back() const {return m_size_boundary_back;}
-    size_t get_size_boundary_top() const {return m_size_boundary_top;}
-    size_t get_size_boundary_bottom() const {return m_size_boundary_bottom;}
-    size_t get_size_boundary_left() const {return m_size_boundary_left;}
-    size_t get_size_boundary_right() const { return m_size_boundary_right;}
+    size_t get_size_boundary_list() const { return m_size_boundary_list; }
+    size_t get_size_boundary_front() const { return m_size_boundary_front; }
+    size_t get_size_boundary_back() const { return m_size_boundary_back; }
+    size_t get_size_boundary_top() const { return m_size_boundary_top; }
+    size_t get_size_boundary_bottom() const { return m_size_boundary_bottom; }
+    size_t get_size_boundary_left() const { return m_size_boundary_left; }
+    size_t get_size_boundary_right() const { return m_size_boundary_right; }
 
     void update_lists(Obstacle** obstacle_list, size_t number_of_obstacles, size_t size_obstacles);
     void update_lists();

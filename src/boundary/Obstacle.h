@@ -19,9 +19,12 @@
 
 class Obstacle {
  public:
-    Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const std::string& name);
-    Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2,
-             size_t coords_j2, size_t coords_k2, size_t level, const std::string& name);
+    Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const std::string &name);
+    Obstacle(
+            size_t coords_i1, size_t coords_j1, size_t coords_k1,
+            size_t coords_i2, size_t coords_j2, size_t coords_k2,
+            size_t level,
+            const std::string& name);
     ~Obstacle();
 
     size_t* get_obstacle_list() const { return m_obstacle_list; }
@@ -110,8 +113,11 @@ class Obstacle {
     void remove_patch(Patch patch);
     void remove_cells_at_boundary(size_t level);
 
-    static void calculate_area_index(Obstacle *o1, Obstacle *o2, size_t *o1_coordinate,
-                                     size_t *o2_coordinate, CoordinateAxis direction, bool start);
+    static void calculate_area_index(
+            Obstacle *o1, Obstacle *o2,
+            size_t *o1_coordinate, size_t *o2_coordinate,
+            CoordinateAxis direction,
+            bool start);
     static bool circular_constraints_x_direction(Obstacle *o1, Obstacle *o2);
     static bool circular_constraints_y_direction(Obstacle *o1, Obstacle *o2);
     static bool circular_constraints_z_direction(Obstacle *o1, Obstacle *o2);

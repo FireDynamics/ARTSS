@@ -23,7 +23,11 @@ Boundary::Boundary(size_t level) {
 #endif
 }
 
-Boundary::Boundary(Obstacle **obstacle_list, size_t number_of_obstacles, size_t size_obstacles, size_t level) {
+Boundary::Boundary(
+        Obstacle **obstacle_list,
+        size_t number_of_obstacles,
+        size_t size_obstacles,
+        size_t level) {
     m_level = level;
     init(size_obstacles);
     inner_cells(obstacle_list, number_of_obstacles);
@@ -106,11 +110,11 @@ void Boundary::print(size_t size_obstacles) {
 #endif
 }
 
-//======================================== Control ====================================
-// ***************************************************************************************
+//======================================== Control =================================================
+// *************************************************************************************************
 /// \brief  Units test emergency solution
 /// \param  size_obstacles Amount of obstacle cells
-// ***************************************************************************************
+// *************************************************************************************************
 void Boundary::control(size_t size_obstacles) {
     // TODO(n16h7): clean up
     std::string message;
@@ -149,55 +153,104 @@ void Boundary::control(size_t size_obstacles) {
                             + " Domain inner size: " + std::to_string(innerCells)
                             + " Obstacle size: " + std::to_string(size_obstacles) + "\n";
     }
-    size_t startIndex = IX((domain->get_index_x1(m_level) - 1), (domain->get_index_y1(m_level) - 1), (domain->get_index_z1(m_level) - 1), Nx, Ny);
-    size_t endIndex = IX((domain->get_index_x2(m_level) + 1), (domain->get_index_y2(m_level) + 1), (domain->get_index_z2(m_level) + 1), Nx, Ny);
+    size_t startIndex = IX(
+            (domain->get_index_x1(m_level) - 1),
+            (domain->get_index_y1(m_level) - 1),
+            (domain->get_index_z1(m_level) - 1),
+            Nx, Ny);
+    size_t endIndex = IX(
+            (domain->get_index_x2(m_level) + 1),
+            (domain->get_index_y2(m_level) + 1),
+            (domain->get_index_z2(m_level) + 1),
+            Nx, Ny);
     if (*(m_boundary_list) != startIndex || *(m_boundary_list + m_size_boundary_list - 1) != endIndex) {
         message = message + "first or last index of boundary list not correct ("
-                  + std::to_string(startIndex) + "|" + std::to_string(*(m_boundary_list)) + ")("
-                  + std::to_string(endIndex) + "|" + std::to_string(*(m_boundary_list + m_size_boundary_list - 1)) + ")\n";
+                  + std::to_string(startIndex) + "|"
+                  + std::to_string(*(m_boundary_list)) + ")("
+                  + std::to_string(endIndex) + "|"
+                  + std::to_string(*(m_boundary_list + m_size_boundary_list - 1)) + ")\n";
     }
-    size_t front2 = IX(domain->get_index_x2(m_level) + 1, domain->get_index_y2(m_level) + 1, domain->get_index_z1(m_level) - 1, Nx, Ny);
+    size_t front2 = IX(
+            domain->get_index_x2(m_level) + 1,
+            domain->get_index_y2(m_level) + 1,
+            domain->get_index_z1(m_level) - 1,
+            Nx, Ny);
     if (*(m_boundary_front) != startIndex || *(m_boundary_front + m_size_boundary_front - 1) != front2) {
         message = message + "first or last index of boundary Front not correct ("
-                  + std::to_string(startIndex) + "|" + std::to_string(*(m_boundary_front)) + ")("
-                  + std::to_string(front2) + "|" + std::to_string(*(m_boundary_front + m_size_boundary_front - 1)) + ")\n";
+                  + std::to_string(startIndex) + "|"
+                  + std::to_string(*(m_boundary_front)) + ")("
+                  + std::to_string(front2) + "|"
+                  + std::to_string(*(m_boundary_front + m_size_boundary_front - 1)) + ")\n";
     }
-    size_t back1 = IX(domain->get_index_x1(m_level) - 1, domain->get_index_y1(m_level) - 1, domain->get_index_z2(m_level) + 1, Nx, Ny);
+    size_t back1 = IX(
+            domain->get_index_x1(m_level) - 1,
+            domain->get_index_y1(m_level) - 1,
+            domain->get_index_z2(m_level) + 1,
+            Nx, Ny);
     if (*(m_boundary_back) != back1 || *(m_boundary_back + m_size_boundary_back - 1) != endIndex) {
         message = message + "first or last index of boundary Back not correct ("
-                  + std::to_string(back1) + "|" + std::to_string(*(m_boundary_back)) + ")("
-                  + std::to_string(endIndex) + "|" + std::to_string(*(m_boundary_back + m_size_boundary_back - 1)) + ")\n";
+                  + std::to_string(back1) + "|"
+                  + std::to_string(*(m_boundary_back)) + ")("
+                  + std::to_string(endIndex) + "|"
+                  + std::to_string(*(m_boundary_back + m_size_boundary_back - 1)) + ")\n";
     }
-    size_t bottom2 = IX(domain->get_index_x2(m_level) + 1, domain->get_index_y1(m_level) - 1, domain->get_index_z2(m_level) + 1, Nx, Ny);
+    size_t bottom2 = IX(
+            domain->get_index_x2(m_level) + 1,
+            domain->get_index_y1(m_level) - 1,
+            domain->get_index_z2(m_level) + 1,
+            Nx, Ny);
     if (*(m_boundary_bottom) != startIndex || *(m_boundary_bottom + m_size_boundary_bottom - 1) != bottom2) {
         message = message + "first or last index of boundary Bottom not correct ("
-                  + std::to_string(startIndex) + "|" + std::to_string(*(m_boundary_bottom)) + ")("
-                  + std::to_string(bottom2) + "|" + std::to_string(*(m_boundary_bottom + m_size_boundary_bottom - 1)) + ")\n";
+                  + std::to_string(startIndex) + "|"
+                  + std::to_string(*(m_boundary_bottom)) + ")("
+                  + std::to_string(bottom2) + "|"
+                  + std::to_string(*(m_boundary_bottom + m_size_boundary_bottom - 1)) + ")\n";
     }
-    size_t top1 = IX(domain->get_index_x1(m_level) - 1, domain->get_index_y2(m_level) + 1, domain->get_index_z1(m_level) - 1, Nx, Ny);
+    size_t top1 = IX(
+            domain->get_index_x1(m_level) - 1,
+            domain->get_index_y2(m_level) + 1,
+            domain->get_index_z1(m_level) - 1,
+            Nx, Ny);
     if (*(m_boundary_top) != top1 || *(m_boundary_top + m_size_boundary_top - 1) != endIndex) {
         message = message + "first or last index of boundary Top not correct ("
-                  + std::to_string(top1) + "|" + std::to_string(*(m_boundary_top)) + ")("
-                  + std::to_string(endIndex) + "|" + std::to_string(*(m_boundary_top + m_size_boundary_top - 1)) + ")\n";
+                  + std::to_string(top1) + "|"
+                  + std::to_string(*(m_boundary_top)) + ")("
+                  + std::to_string(endIndex) + "|"
+                  + std::to_string(*(m_boundary_top + m_size_boundary_top - 1)) + ")\n";
     }
-    size_t left2 = IX(domain->get_index_x1(m_level) - 1, domain->get_index_y2(m_level) + 1, domain->get_index_z2(m_level) + 1, Nx, Ny);
+    size_t left2 = IX(
+            domain->get_index_x1(m_level) - 1,
+            domain->get_index_y2(m_level) + 1,
+            domain->get_index_z2(m_level) + 1,
+            Nx, Ny);
     if (*(m_boundary_left) != startIndex || *(m_boundary_left + m_size_boundary_left - 1) != left2) {
         message = message + "first or last index of boundary Left not correct ("
-                  + std::to_string(startIndex) + "|" + std::to_string(*(m_boundary_left)) + ")("
-                  + std::to_string(left2) + "|" + std::to_string(*(m_boundary_left + m_size_boundary_left - 1)) + ")\n";
+                  + std::to_string(startIndex) + "|"
+                  + std::to_string(*(m_boundary_left)) + ")("
+                  + std::to_string(left2) + "|"
+                  + std::to_string(*(m_boundary_left + m_size_boundary_left - 1)) + ")\n";
     }
-    size_t right1 = IX(domain->get_index_x2(m_level) + 1, domain->get_index_y1(m_level) - 1, domain->get_index_z1(m_level) - 1, Nx, Ny);
+    size_t right1 = IX(
+            domain->get_index_x2(m_level) + 1,
+            domain->get_index_y1(m_level) - 1,
+            domain->get_index_z1(m_level) - 1,
+            Nx, Ny);
     if (*(m_boundary_right) != right1 || *(m_boundary_right + m_size_boundary_right - 1) != endIndex) {
         message = message + "first or last index of boundary Right not correct ("
-                  + std::to_string(right1) + "|" + std::to_string(*(m_boundary_right)) + ")("
-                  + std::to_string(endIndex) + "|" + std::to_string(*(m_boundary_right + m_size_boundary_right - 1)) + ")\n";
+                  + std::to_string(right1) + "|"
+                  + std::to_string(*(m_boundary_right)) + ")("
+                  + std::to_string(endIndex) + "|"
+                  + std::to_string(*(m_boundary_right + m_size_boundary_right - 1)) + ")\n";
     }
 
     for (size_t i = 1; i < m_size_boundary_list; i++) {
         int diff = static_cast<int>(m_boundary_list[i] - m_boundary_list[i - 1]);
         if (diff < 0) {
-            message = message + "sorting error at index " + std::to_string(i - 1) + "|" + std::to_string(i)
-                      + " with values " + std::to_string(m_boundary_list[i - 1]) + "|" + std::to_string(m_boundary_list[i]) + "\n";
+            message = message + "sorting error at index "
+                    + std::to_string(i - 1) + "|"
+                    + std::to_string(i) + " with values "
+                    + std::to_string(m_boundary_list[i - 1]) + "|"
+                    + std::to_string(m_boundary_list[i]) + "\n";
         }
     }
     if (!message.empty()) {

@@ -37,8 +37,11 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const s
 }
 
 
-Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2,
-                   size_t coords_j2, size_t coords_k2, size_t level, const std::string &name) {
+Obstacle::Obstacle(
+        size_t coords_i1, size_t coords_j1, size_t coords_k1,
+        size_t coords_i2, size_t coords_j2, size_t coords_k2,
+        size_t level,
+        const std::string &name) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -562,8 +565,11 @@ void Obstacle::replace_patch(size_t *indices, size_t size, Patch p) {
 /// \param direction X/Y/Z axis
 /// \param start true = (i/j/k)1 or false = (i/j/k)2
 // *************************************************************************************************
-void Obstacle::calculate_area_index(Obstacle *o1, Obstacle *o2, size_t *o1_coordinate,
-                                    size_t *o2_coordinate, CoordinateAxis direction, bool start) {
+void Obstacle::calculate_area_index(
+        Obstacle *o1, Obstacle *o2,
+        size_t *o1_coordinate, size_t *o2_coordinate,
+        CoordinateAxis direction,
+        bool start) {
     if (direction == CoordinateAxis::X) {
         if (start) {
             *o1_coordinate = o1->get_coordinates_i1();
@@ -889,10 +895,12 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2) {
     }
 
     if (o1->get_coordinates_j1() - 1 == o2->get_coordinates_j2()) {
-        bool i_overlap = has_overlap(o1->get_coordinates_i1(), o1->get_coordinates_i2(),
-                                     o2->get_coordinates_i1(), o2->get_coordinates_i2());
-        bool k_overlap = has_overlap(o1->get_coordinates_k1(), o1->get_coordinates_k2(),
-                                     o2->get_coordinates_k1(), o2->get_coordinates_k2());
+        bool i_overlap = has_overlap(
+                o1->get_coordinates_i1(), o1->get_coordinates_i2(),
+                o2->get_coordinates_i1(), o2->get_coordinates_i2());
+        bool k_overlap = has_overlap(
+                o1->get_coordinates_k1(), o1->get_coordinates_k2(),
+                o2->get_coordinates_k1(), o2->get_coordinates_k2());
         if (i_overlap && k_overlap) {
 #ifndef BENCHMARKING
             logger->debug("obstacles are next to each other. Working on {} bottom side and on {} top side",

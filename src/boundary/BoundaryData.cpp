@@ -92,8 +92,10 @@ std::string BoundaryData::get_patch_name(Patch p) {
 /// \param value boundary condition value
 /// \param boudnaryCondition boundary condition
 // *************************************************************************************************
-void BoundaryData::add_boundary_condition(const std::vector<Patch> &patches, real value,
-                                          BoundaryCondition boundary_condition) {
+void BoundaryData::add_boundary_condition(
+        const std::vector<Patch> &patches,
+        real value,
+        BoundaryCondition boundary_condition) {
     if (!patches.empty()) {
         m_has_values = true;
     }

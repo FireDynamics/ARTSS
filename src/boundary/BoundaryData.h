@@ -43,11 +43,14 @@ class BoundaryData {
     static std::string get_patch_name(Patch p);
 
     static FieldType match_field(const std::string& string);
-    static Patch match_patch(const std::string& string);
-    static BoundaryCondition match_boundary_condition(const std::string& string);
+    static Patch match_patch(const std::string &string);
+    static BoundaryCondition match_boundary_condition(const std::string &string);
 
-    void add_boundary_condition(const std::vector<Patch>& patches, real value, BoundaryCondition boundary_condition);
-    BoundaryCondition get_boundary_condition(Patch p) const { return m_boundary_conditions[p];}
+    void add_boundary_condition(
+            const std::vector<Patch>& patches,
+            real value,
+            BoundaryCondition boundary_condition);
+    BoundaryCondition get_boundary_condition(Patch p) const { return m_boundary_conditions[p]; }
     real get_value(Patch p) const { return m_values[p];}
 
     bool is_empty() const { return !m_has_values; }

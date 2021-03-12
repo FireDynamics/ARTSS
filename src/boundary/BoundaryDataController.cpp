@@ -79,12 +79,21 @@ void BoundaryDataController::print() {
 /// \param  level         Multigrid level
 /// \param  sync          synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void BoundaryDataController::apply_boundary_condition(real *data, size_t **index_fields,
-                                                      size_t *patch_start, size_t *patch_end,
-                                                      FieldType field_type, size_t level, bool sync) {
+void BoundaryDataController::apply_boundary_condition(
+        real *data,
+        size_t **index_fields,
+        size_t *patch_start, size_t *patch_end,
+        FieldType field_type,
+        size_t level,
+        bool sync) {
     if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {
-        DomainBoundary::apply_boundary_condition(data, index_fields, patch_start, patch_end, level,
-                                                 m_boundary_data[field_type], sync);
+        DomainBoundary::apply_boundary_condition(
+                data,
+                index_fields,
+                patch_start, patch_end,
+                level,
+                m_boundary_data[field_type],
+                sync);
     }
 }
 
@@ -100,17 +109,27 @@ void BoundaryDataController::apply_boundary_condition(real *data, size_t **index
 /// \param  id            ID of obstacle
 /// \param  sync          synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void BoundaryDataController::apply_boundary_condition_obstacle(real *data, size_t **index_fields,
-                                                               size_t *patch_start, size_t *patch_end,
-                                                               FieldType field_type, size_t level,
-                                                               size_t id, bool sync) {
+void BoundaryDataController::apply_boundary_condition_obstacle(
+        real *data,
+        size_t **index_fields,
+        size_t *patch_start, size_t *patch_end,
+        FieldType field_type,
+        size_t level,
+        size_t id,
+        bool sync) {
     if (!(static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty()) {
 #ifndef BENCHMARKING
         m_logger->debug("apply obstacle boundary conditions of {}",
                         BoundaryData::get_field_type_name(static_cast<FieldType>(field_type)));
 #endif
-        ObstacleBoundary::apply_boundary_condition(data, index_fields, patch_start, patch_end, level,
-                                                   m_boundary_data[field_type], id, sync);
+        ObstacleBoundary::apply_boundary_condition(
+                data,
+                index_fields,
+                patch_start, patch_end,
+                level,
+                m_boundary_data[field_type],
+                id,
+                sync);
     }
 }
 
