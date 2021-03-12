@@ -67,8 +67,33 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
   #endif /* ARTSS_ANALYSIS_SOLUTION_H_ */
   ```
 ### Line Break/Hard Wrap
- - 100 characters per line is the guideline here but not a rule which has to be followed everywhere. We are adding line breaks if it makes the code more readable, which in most cases means were a breaking a line out of semantic reasons. In which case the line can be much shorter than 100 characters. There are also some special cases where it is not possible to break a line.
-
+100 characters per line is the guideline here but not a rule which has to be followed everywhere. We are adding line breaks if it makes the code more readable, which in most cases means were a breaking a line out of semantic reasons. In which case the line can be much shorter than 100 characters. There are also some special cases where it is not possible to break a line.
+ - Function names/calls are longer than 100 characters
+ For readability the whole argument list will be wrapped to the next line. If the argument lists fits in the next line, it should look like this:
+ ```
+ void Classname::some_long_function_name(
+      int argument1, int argument2) {
+      [...]
+      }
+ ```
+  If the argument list is too long to fit on one line, each argument gets its own line or is semantically wrapped. 
+  ```
+  void Classname::some_long_function_name(
+       int argument_long1,
+       int argument_long2)
+      [...]
+      }
+  ```
+  Sometimes it makes more sense to group the argument list, like this:
+  ```
+  void Classname::some_long_function_name(
+       int argument_long_start1, int argument_long_end1,
+       int argument_long_start2, int argument_long_end2)
+      [...]
+      }
+  ```
+  Our top priority is to the readability while trying to be as consistent as possible.
+ 
 As we are only a small group of developers, many parts of the code are not yet compliant with our code guidelines and will be improved accordingly as we make changes. Accordingly, more rules may be added to our coding guidelines if we determine that it is necessary.
 
 Please feel free to contact us if you have any questions.
