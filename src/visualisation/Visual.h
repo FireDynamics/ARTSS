@@ -13,23 +13,19 @@
 
 class Visual {
 public:
-    explicit Visual(Solution* solution);
+    explicit Visual(const Solution &solution);
 
-    void visualise(FieldController *field_controller, real t);
+    void visualise(const FieldController &field_controller, real t);
 
-    static void initialise_grid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
+    static void initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
 
-    static void prepare_fields(read_ptr *fields, float **vars, int size);
-
-    static void write_csv(FieldController *solver, std::string filename);
-
-    static void write_data(std::string *data_titles, real **data, size_t size_data, std::string filename);
+    static void write_csv(const FieldController &solver, std::string filename);
 
 private:
     static std::string remove_extension(const std::string &filename);
 
     std::string m_filename;
-    Solution *m_solution;
+    const Solution &m_solution;
     bool m_save_csv = false;
     int m_csv_plots = 0;
     bool m_save_vtk = false;
@@ -40,7 +36,6 @@ private:
     static std::string create_filename(std::string filename, int counter, bool analytical);
 
     bool m_has_analytical_solution = false;
-
 };
 
 #endif /* ARTSS_VISUALISATION_VISUAL_H_ */
