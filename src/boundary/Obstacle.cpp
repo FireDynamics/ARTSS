@@ -38,7 +38,7 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const s
 
 
 Obstacle::Obstacle(size_t coords_i1, size_t coords_j1, size_t coords_k1, size_t coords_i2,
-                   size_t coords_j2, size_t coords_k2, size_t level, const std::string& name) {
+                   size_t coords_j2, size_t coords_k2, size_t level, const std::string &name) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -262,7 +262,7 @@ void Obstacle::print_details() {
 
     size_t size_back = get_size_obstacle_back();
     if (size_back > 0) {
-        m_logger->debug("Back: {} | {}", m_obstacle_back[0],m_obstacle_back[size_back - 1]);
+        m_logger->debug("Back: {} | {}", m_obstacle_back[0], m_obstacle_back[size_back - 1]);
 
         coords_k = getCoordinateK(m_obstacle_back[0], Nx, Ny);
         coords_j = getCoordinateJ(m_obstacle_back[0], Nx, Ny, coords_k);
@@ -296,7 +296,7 @@ void Obstacle::print_details() {
 
     size_t size_bottom = get_size_obstacle_bottom();
     if (size_bottom > 0) {
-        m_logger->debug("Bottom: {} | {}", m_obstacle_bottom[0],m_obstacle_bottom[size_bottom - 1]);
+        m_logger->debug("Bottom: {} | {}", m_obstacle_bottom[0], m_obstacle_bottom[size_bottom - 1]);
 
         coords_k = getCoordinateK(m_obstacle_bottom[0], Nx, Ny);
         coords_j = getCoordinateJ(m_obstacle_bottom[0], Nx, Ny, coords_k);
@@ -363,9 +363,9 @@ void Obstacle::control() {
                         static_cast<long int>(m_obstacle_list[i - 1]);
         if (diff < 0) {
             message += "sorting error at index "
-                    + std::to_string(i - 1) + "|" + std::to_string(i) + " with values "
-                    + std::to_string(m_obstacle_list[i - 1]) + "|"
-                    + std::to_string(m_obstacle_list[i]) + "\n";
+                       + std::to_string(i - 1) + "|" + std::to_string(i) + " with values "
+                       + std::to_string(m_obstacle_list[i - 1]) + "|"
+                       + std::to_string(m_obstacle_list[i]) + "\n";
         }
     }
 
@@ -377,9 +377,9 @@ void Obstacle::control() {
         if (start_index != m_obstacle_front[0] ||
             front_end != m_obstacle_front[m_size_obstacle_front - 1]) {
             message += "first or last index of obstacle front list not correct ("
-                    + std::to_string(start_index) + "|" + std::to_string(m_obstacle_front[0])
-                    + ")(" + std::to_string(front_end) + "|"
-                    + std::to_string(m_obstacle_front[m_size_obstacle_front - 1]) + ")\n";
+                       + std::to_string(start_index) + "|" + std::to_string(m_obstacle_front[0])
+                       + ")(" + std::to_string(front_end) + "|"
+                       + std::to_string(m_obstacle_front[m_size_obstacle_front - 1]) + ")\n";
         }
     }
     if (m_size_obstacle_back > 0) {
@@ -387,9 +387,9 @@ void Obstacle::control() {
         if (back_start != m_obstacle_back[0] ||
             end_index != m_obstacle_back[m_size_obstacle_back - 1]) {
             message += "first or last index of obstacle back list not correct ("
-                    + std::to_string(back_start) + "|" + std::to_string(m_obstacle_back[0])
-                    + ")(" + std::to_string(end_index) + "|"
-                    + std::to_string(m_obstacle_back[m_size_obstacle_back - 1]) + ")\n";
+                       + std::to_string(back_start) + "|" + std::to_string(m_obstacle_back[0])
+                       + ")(" + std::to_string(end_index) + "|"
+                       + std::to_string(m_obstacle_back[m_size_obstacle_back - 1]) + ")\n";
         }
     }
     if (m_size_obstacle_bottom > 0) {
@@ -397,9 +397,9 @@ void Obstacle::control() {
         if (start_index != m_obstacle_bottom[0] ||
             bottom_end != m_obstacle_bottom[m_size_obstacle_bottom - 1]) {
             message += "first or last index of obstacle bottom list not correct ("
-                    + std::to_string(start_index) + "|" + std::to_string(m_obstacle_bottom[0])
-                    + ")(" + std::to_string(bottom_end) + "|"
-                    + std::to_string(m_obstacle_bottom[m_size_obstacle_bottom - 1]) + ")\n";
+                       + std::to_string(start_index) + "|" + std::to_string(m_obstacle_bottom[0])
+                       + ")(" + std::to_string(bottom_end) + "|"
+                       + std::to_string(m_obstacle_bottom[m_size_obstacle_bottom - 1]) + ")\n";
         }
     }
     if (m_size_obstacle_top > 0) {
@@ -407,9 +407,9 @@ void Obstacle::control() {
         if (top_start != m_obstacle_top[0] ||
             end_index != m_obstacle_top[m_size_obstacle_top - 1]) {
             message += "first or last index of obstacle top list not correct ("
-                    + std::to_string(top_start) + "|" + std::to_string(m_obstacle_top[0])
-                    + ")(" + std::to_string(end_index) + "|"
-                    + std::to_string(m_obstacle_top[m_size_obstacle_top - 1]) + ")\n";
+                       + std::to_string(top_start) + "|" + std::to_string(m_obstacle_top[0])
+                       + ")(" + std::to_string(end_index) + "|"
+                       + std::to_string(m_obstacle_top[m_size_obstacle_top - 1]) + ")\n";
         }
     }
     if (m_size_obstacle_left > 0) {
@@ -417,9 +417,9 @@ void Obstacle::control() {
         if (start_index != m_obstacle_left[0] ||
             left_end != m_obstacle_left[m_size_obstacle_left - 1]) {
             message += "first or last index of obstacle left list not correct ("
-                    + std::to_string(start_index) + "|" + std::to_string(m_obstacle_left[0])
-                    + ")(" + std::to_string(left_end) + "|"
-                    + std::to_string(m_obstacle_left[m_size_obstacle_left - 1]) + ")\n";
+                       + std::to_string(start_index) + "|" + std::to_string(m_obstacle_left[0])
+                       + ")(" + std::to_string(left_end) + "|"
+                       + std::to_string(m_obstacle_left[m_size_obstacle_left - 1]) + ")\n";
         }
     }
     if (m_size_obstacle_right > 0) {
@@ -427,15 +427,15 @@ void Obstacle::control() {
         if (right_start != m_obstacle_right[0] ||
             end_index != m_obstacle_right[m_size_obstacle_right - 1]) {
             message += "first or last index of obstacle right list not correct ("
-                    + std::to_string(right_start) + "|" + std::to_string(m_obstacle_right[0])
-                    + ")(" + std::to_string(end_index) + "|"
-                    + std::to_string(m_obstacle_right[m_size_obstacle_right - 1]) + ")\n";
+                       + std::to_string(right_start) + "|" + std::to_string(m_obstacle_right[0])
+                       + ")(" + std::to_string(end_index) + "|"
+                       + std::to_string(m_obstacle_right[m_size_obstacle_right - 1]) + ")\n";
         }
     }
     if (!message.empty()) {
         message = "################ OBSTACLE CONTROL ################\n-- name "
-                + m_name + "\n-- level " + std::to_string(m_level) + "\n" + message
-                + "---------------- OBSTACLE CONTROL END ----------------";
+                  + m_name + "\n-- level " + std::to_string(m_level) + "\n" + message
+                  + "---------------- OBSTACLE CONTROL END ----------------";
 #ifndef BENCHMARKING
         m_logger->warn(message);
 #endif
@@ -464,7 +464,7 @@ bool Obstacle::is_obstacle_cell(size_t i, size_t j, size_t k) const {
 // *************************************************************************************************
 real Obstacle::match_grid(real obstacle_coordinate, real spacing, real start_coordinate) {
     return get_matching_index(obstacle_coordinate, spacing, start_coordinate)
-    * spacing + start_coordinate;
+           * spacing + start_coordinate;
 }
 
 int Obstacle::get_matching_index(real obstacle_coordinate, real spacing, real start_coordinate) {
@@ -765,8 +765,8 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
             size_t o2_removing_index = IX(o2_x2, o2_current_y, o2_current_z, Nx, Ny);
             bool o2_end = false;
             for (; o1_counter_old < o1->get_size_obstacle_left()
-                && o2_counter_old < o2->get_size_obstacle_right() && !o1_end && !o2_end;
-                o1_counter_old++, o2_counter_old++) {
+                   && o2_counter_old < o2->get_size_obstacle_right() && !o1_end && !o2_end;
+                   o1_counter_old++, o2_counter_old++) {
                 o1_current_index = o1->get_obstacle_left()[o1_counter_old];
                 o2_current_index = o2->get_obstacle_right()[o2_counter_old];
                 if (o1_current_index != o1_removing_index) {
@@ -966,8 +966,8 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2) {
             size_t o2_removing_index = IX(o2_current_x, o2_y2, o2_current_z, Nx, Ny);
             bool o2_end = false;
             for (; o1_counter_old < o1->get_size_obstacle_bottom()
-                && o2_counter_old < o2->get_size_obstacle_top() && !o1_end && !o2_end;
-                o1_counter_old++, o2_counter_old++) {
+                   && o2_counter_old < o2->get_size_obstacle_top() && !o1_end && !o2_end;
+                   o1_counter_old++, o2_counter_old++) {
                 o1_current_index = o1->get_obstacle_bottom()[o1_counter_old];
                 o2_current_index = o2->get_obstacle_top()[o2_counter_old];
                 if (o1_current_index != o1_removing_index) {
@@ -1169,8 +1169,8 @@ bool Obstacle::circular_constraints_z_direction(Obstacle *o1, Obstacle *o2) {
             size_t o2_removing_index = IX(o2_current_x, o2_current_y, o2_z2, Nx, Ny);
             bool o2_end = false;
             for (; o1_counter_old < o1->get_size_obstacle_front()
-            && o2_counter_old < o2->get_size_obstacle_back() && !o1_end && !o2_end;
-            o1_counter_old++, o2_counter_old++) {
+                   && o2_counter_old < o2->get_size_obstacle_back() && !o1_end && !o2_end;
+                   o1_counter_old++, o2_counter_old++) {
                 o1_current_index = o1->get_obstacle_front()[o1_counter_old];
                 o2_current_index = o2->get_obstacle_back()[o2_counter_old];
                 if (o1_current_index != o1_removing_index) {
@@ -1205,7 +1205,7 @@ bool Obstacle::circular_constraints_z_direction(Obstacle *o1, Obstacle *o2) {
 
             if (!o1_end) {
                 for (; o1_counter_old < o1->get_size_obstacle_front() && o1_current_y <= o1_y2;
-                o1_counter_old++) {
+                       o1_counter_old++) {
                     o1_current_index = o1->get_obstacle_front()[o1_counter_old];
                     if (o1_current_index != o1_removing_index) {
                         o1_new.push_back(o1_current_index);
@@ -1223,7 +1223,7 @@ bool Obstacle::circular_constraints_z_direction(Obstacle *o1, Obstacle *o2) {
 
             if (!o2_end) {
                 for (; o2_counter_old < o2->get_size_obstacle_back() && o2_current_y <= o2_y2;
-                o2_counter_old++) {
+                       o2_counter_old++) {
                     o2_current_index = o2->get_obstacle_back()[o2_counter_old];
                     if (o2_current_index != o2_removing_index) {
                         o2_new.push_back(o2_current_index);
