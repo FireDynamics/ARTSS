@@ -157,7 +157,7 @@ class Multigrid {
 
     void init();
     void add_MG_lists();
-    void calc_obstacles(Obstacle** obstacle_list);
+    void calc_obstacles(Obstacle** obstacle_object_list);
     void calc_surfaces(Surface** surface_list);
     void send_lists_to_GPU();
     void send_boundary_lists_to_GPU();
