@@ -24,13 +24,13 @@ class Obstacle {
              size_t coords_j2, size_t coords_k2, size_t level, const std::string& name);
     ~Obstacle();
 
-    size_t* get_obstacle_list() { return m_obstacle_list; }
-    size_t* get_obstacle_front() { return m_obstacle_front; }
-    size_t* get_obstacle_back() { return m_obstacle_back; }
-    size_t* get_obstacle_top() { return m_obstacle_top; }
-    size_t* get_obstacle_bottom() { return m_obstacle_bottom; }
-    size_t* get_obstacle_left() { return m_obstacle_left; }
-    size_t* get_obstacle_right() { return m_obstacle_right; }
+    size_t* get_obstacle_list() const { return m_obstacle_list; }
+    size_t* get_obstacle_front() const { return m_obstacle_front; }
+    size_t* get_obstacle_back() const { return m_obstacle_back; }
+    size_t* get_obstacle_top() const { return m_obstacle_top; }
+    size_t* get_obstacle_bottom() const { return m_obstacle_bottom; }
+    size_t* get_obstacle_left() const { return m_obstacle_left; }
+    size_t* get_obstacle_right() const { return m_obstacle_right; }
 
     size_t get_size_obstacle_list() const { return m_size_obstacle_list; }
 
