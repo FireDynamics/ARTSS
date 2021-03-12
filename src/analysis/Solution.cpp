@@ -20,6 +20,9 @@ Solution::Solution() {
     p_a = new Field(FieldType::P, 0.0);
     T_a = new Field(FieldType::T, 0.0);
 
+    auto params = Parameters::getInstance();
+    m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
+
     init();
 }
 
@@ -129,6 +132,11 @@ void Solution::calc_analytical_solution(real t) {
     if (m_current_time_step == t) {
         return;
     }
+
+    if (!m_has_analytical_solution) {
+        return;
+    }
+
     m_current_time_step = t;
     (*this.*m_init_function)(t);
 }
