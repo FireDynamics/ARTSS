@@ -43,7 +43,7 @@ class BoundaryController {
     size_t get_boundary_list_level_joined_start(size_t level) const;
     size_t get_boundary_list_level_joined_end(size_t level) const;
 
-    size_t get_size_surfaceList() const {return m_size_surface_list;};
+    size_t get_size_surfaceList() const {return m_size_surface_list;}
 
     size_t get_obstacle_stride_x(size_t id, size_t level) const;
     size_t get_obstacle_stride_y(size_t id, size_t level) const;

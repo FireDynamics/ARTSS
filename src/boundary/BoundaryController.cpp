@@ -76,8 +76,8 @@ void BoundaryController::parse_surface_parameter(tinyxml2::XMLElement *xmlParame
 #ifndef BENCHMARKING
     m_logger->debug("start parsing surface parameter");
 #endif
-// SURFACES
-// TODO surfaces
+    // SURFACES
+    // TODO(issue 5): surfaces
     m_has_surfaces = (Parameters::getInstance()->get("surfaces/enabled") == "Yes");
     if (m_has_surfaces) {
         std::vector<Surface *> surfaces;
