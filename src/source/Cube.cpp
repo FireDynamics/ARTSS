@@ -17,11 +17,11 @@ void Cube::update_source(Field *out, real t_cur) {
 
 #pragma acc data present(d_out[:size], d_source[:size])
     {
-        size_t *d_iList = boundary->get_innerList_level_joined();
-        size_t *d_bList = boundary->get_boundaryList_level_joined();
+        size_t *d_iList = boundary->get_inner_list_level_joined();
+        size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-        auto bsize_i = boundary->getSize_innerList();
-        auto bsize_b = boundary->getSize_boundaryList();
+        auto bsize_i = boundary->get_size_inner_list();
+        auto bsize_b = boundary->get_size_boundary_list();
 
 #pragma acc parallel loop independent present(d_out[:size], d_source[:size]) async
         // inner cells

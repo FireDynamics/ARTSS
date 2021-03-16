@@ -226,8 +226,8 @@ void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
     auto s_res1 = domain->get_size(residuum1[0]->get_level());
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
     // use iList on level 0, since update on level 0
 #pragma acc kernels present(d_out[:s_out], d_b[:s_b], d_err1[:s_err1], \
@@ -293,8 +293,8 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
         auto d_b = b->data;
 
         auto boundary = BoundaryController::getInstance();
-        auto bsize_i = boundary->getSize_innerList();
-        size_t *d_iList = boundary->get_innerList_level_joined();
+        auto bsize_i = boundary->get_size_inner_list();
+        size_t *d_iList = boundary->get_inner_list_level_joined();
 
         while (r > tol_res &&
                 act_cycles < max_cycles &&
@@ -346,8 +346,8 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
 
     auto domain = Domain::getInstance();
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
 //===================== No refinement, when levels=0 =========//
     if (max_level == 0) {
@@ -410,29 +410,29 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
 
                 // calculate residuum
                 Residuum(f_res0i, out, f_res1i, i, sync);
-                boundary->applyBoundary(d_res0i, i, type_r0, sync); // for residuum0 only Dirichlet BC
+                boundary->apply_boundary(d_res0i, i, type_r0, sync); // for residuum0 only Dirichlet BC
             } else {
                 // smooth
                 Smooth(f_err1i, f_mg_tmpi, f_res1i, i, sync);
 
                 // calculate residuum
                 Residuum(f_res0i, f_err1i, f_res1i, i, sync);
-                boundary->applyBoundary(d_res0i, i, type_r0, sync); // for residuum0 only Dirichlet BC
+                boundary->apply_boundary(d_res0i, i, type_r0, sync); // for residuum0 only Dirichlet BC
             }
 
             // restrict
             Restrict(f_res1ip, f_res0i, i, sync);
-            boundary->applyBoundary(d_res1ip, i + 1, type_r1, sync); // for res only Dirichlet BC
+            boundary->apply_boundary(d_res1ip, i + 1, type_r1, sync); // for res only Dirichlet BC
 
             // set err to zero at next level
 
             // strides (since GPU needs joined list)
             // inner start/ end index of level i + 1
-            size_t start_i = boundary->get_innerList_level_joined_start(i + 1);
-            size_t end_i = boundary->get_innerList_level_joined_end(i + 1) + 1;
+            size_t start_i = boundary->get_inner_list_level_joined_start(i + 1);
+            size_t end_i = boundary->get_inner_list_level_joined_end(i + 1) + 1;
             // boundary start/ end index of level i + 1
-            size_t start_b = boundary->get_boundaryList_level_joined_start(i + 1);
-            size_t end_b = boundary->get_boundaryList_level_joined_end(i + 1) + 1;
+            size_t start_b = boundary->get_boundary_list_level_joined_start(i + 1);
+            size_t end_b = boundary->get_boundary_list_level_joined_end(i + 1) + 1;
             // inner
 #pragma acc kernels present(d_err1ip[:s_err1ip], d_iList[start_i:(end_i-start_i)]) async
 #pragma acc loop independent
@@ -485,17 +485,17 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
         FieldType type_e0 = f_err0i->get_type();
 
         // inner start/ end index of level i - 1
-        size_t start_i = boundary->get_innerList_level_joined_start(i - 1);
-        size_t end_i = boundary->get_innerList_level_joined_end(i - 1) + 1;
+        size_t start_i = boundary->get_inner_list_level_joined_start(i - 1);
+        size_t end_i = boundary->get_inner_list_level_joined_end(i - 1) + 1;
         // boundary start/ end index of level i - 1
-        size_t start_b = boundary->get_boundaryList_level_joined_start(i - 1);
-        size_t end_b = boundary->get_boundaryList_level_joined_end(i - 1) + 1;
+        size_t start_b = boundary->get_boundary_list_level_joined_start(i - 1);
+        size_t end_b = boundary->get_boundary_list_level_joined_end(i - 1) + 1;
 
 #pragma acc data present(d_err0i[:s_err0i], d_err1i[:s_err1i], d_err1im[:s_err1im], d_mg_tmpim[:s_mg_tmpim], d_res1im[:s_res1im], d_out[:s_out])
         {
             // prolongate
             Prolongate(f_err0i, f_err1i, i, sync);
-            boundary->applyBoundary(d_err0i, i - 1, type_e0, sync); // for err0 only Dirichlet BC
+            boundary->apply_boundary(d_err0i, i - 1, type_e0, sync); // for err0 only Dirichlet BC
 
             // correct
             if (i == 1) // use p=out on finest grid
@@ -552,7 +552,7 @@ void VCycleMG::VCycleMultigrid(Field *out, bool sync) {
     auto d_out = out->data;
     FieldType type = out->get_type();
 
-    boundary->applyBoundary(d_out, type, sync);
+    boundary->apply_boundary(d_out, type, sync);
 
     if (sync) {
 #pragma acc wait
@@ -587,19 +587,19 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
     // start/ end index of level
     // inner
-    size_t start_i = boundary->get_innerList_level_joined_start(level);
-    size_t end_i = boundary->get_innerList_level_joined_end(level) + 1;
+    size_t start_i = boundary->get_inner_list_level_joined_start(level);
+    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
     // boundary
-    size_t start_b = boundary->get_boundaryList_level_joined_start(level);
-    size_t end_b = boundary->get_boundaryList_level_joined_end(level) + 1;
+    size_t start_b = boundary->get_boundary_list_level_joined_start(level);
+    size_t end_b = boundary->get_boundary_list_level_joined_end(level) + 1;
 
     // apply boundary: at level 0 apply set BC; else use Dirichlet 0
-    boundary->applyBoundary(d_out, level, type, sync);
+    boundary->apply_boundary(d_out, level, type, sync);
 
     // diffuse
     const real rdx2 = 1. / (dx * dx);
@@ -642,7 +642,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
         {
             for (int i=0; i<relaxs; i++) { // fixed iteration number as in xml
                 JacobiDiffuse::JacobiStep(level, out, tmp, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
-                boundary->applyBoundary(d_out, level, type, sync);
+                boundary->apply_boundary(d_out, level, type, sync);
 
                 std::swap(tmp->data, out->data);
                 std::swap(d_tmp, d_out);
@@ -671,7 +671,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
         {
             for (int i=0; i<relaxs; i++) {
                 ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
-                boundary->applyBoundary(d_out, level, type, sync); // for res/err only Dirichlet BC
+                boundary->apply_boundary(d_out, level, type, sync); // for res/err only Dirichlet BC
             }
         } //end data region
     } else {
@@ -718,12 +718,12 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync
     size_t bsize = domain->get_size(out->get_level());
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
 
     // starts/ ends
     // inner
-    size_t start_i = boundary->get_innerList_level_joined_start(level);
-    size_t end_i = boundary->get_innerList_level_joined_end(level) + 1;
+    size_t start_i = boundary->get_inner_list_level_joined_start(level);
+    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 #pragma acc data present(d_b[:bsize], d_in[:bsize], d_out[:bsize], d_iList[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
@@ -768,12 +768,12 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     size_t bsize_in = domain->get_size(in->get_level());
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
 
     // start/end
     // inner
-    size_t start_i = boundary->get_innerList_level_joined_start(level + 1);
-    size_t end_i = boundary->get_innerList_level_joined_end(level + 1) + 1;
+    size_t start_i = boundary->get_inner_list_level_joined_start(level + 1);
+    size_t end_i = boundary->get_inner_list_level_joined_end(level + 1) + 1;
 
 #ifndef BENCHMARKING
     if (end_i == start_i) {
@@ -842,12 +842,12 @@ void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
 
     // start/end (going backwards)
     // inner
-    size_t start_i = boundary->get_innerList_level_joined_start(level);
-    size_t end_i = boundary->get_innerList_level_joined_end(level) + 1;
+    size_t start_i = boundary->get_inner_list_level_joined_start(level);
+    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 
     // prolongate
     size_t i, j, k;
@@ -935,20 +935,20 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList_level_joined();
-    auto bsize_b = boundary->getSize_boundaryList_level_joined();
+    auto bsize_i = boundary->get_size_inner_list_level_joined();
+    auto bsize_b = boundary->get_size_boundary_list_level_joined();
 
     // start/ end
     // inner
-    size_t start_i = boundary->get_innerList_level_joined_start(level);
-    size_t end_i = boundary->get_innerList_level_joined_end(level) + 1;
-    size_t start_b = boundary->get_boundaryList_level_joined_start(level);
-    size_t end_b = boundary->get_boundaryList_level_joined_end(level) + 1;
+    size_t start_i = boundary->get_inner_list_level_joined_start(level);
+    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
+    size_t start_b = boundary->get_boundary_list_level_joined_start(level);
+    size_t end_b = boundary->get_boundary_list_level_joined_end(level) + 1;
 
-    boundary->applyBoundary(d_out, level, type, sync);
+    boundary->apply_boundary(d_out, level, type, sync);
 
     const real rdx2 = 1. / (dx * dx);
     const real rdy2 = 1. / (dy * dy);
@@ -995,7 +995,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
             while (res > tol_res && it < max_it) {
                 JacobiDiffuse::JacobiStep(level, out, tmp, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
-                boundary->applyBoundary(d_out, level, type, sync);
+                boundary->apply_boundary(d_out, level, type, sync);
 
                 sum = 0.;
 
@@ -1046,7 +1046,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
             while (res > tol_res && it < max_it) {
                 ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
-                boundary->applyBoundary(d_out, level, type, sync); // for res/err only Dirichlet BC
+                boundary->apply_boundary(d_out, level, type, sync); // for res/err only Dirichlet BC
 
                 sum = 0.;
 

@@ -150,8 +150,8 @@ void log_minimum(Field *field, const std::string& text, const std::string& logge
     auto data = field->data;
     real minimum_inner = ULONG_LONG_MAX;
     auto boundary = BoundaryController::getInstance();
-    size_t *innerList = boundary->get_innerList_level_joined();
-    size_t size_innerList = boundary->getSize_innerList();
+    size_t *innerList = boundary->get_inner_list_level_joined();
+    size_t size_innerList = boundary->get_size_inner_list();
     for (size_t i = 0; i < size_innerList; i++) {
         size_t idx = innerList[i];
         real value = data[idx];
@@ -164,8 +164,8 @@ void log_minimum(Field *field, const std::string& text, const std::string& logge
 #endif
     real minimum_boundary = ULONG_LONG_MAX;
     std::vector<size_t> indices;
-    size_t *boundaryList = boundary->get_boundaryList_level_joined();
-    size_t size_boundaryList = boundary->getSize_boundaryList();
+    size_t *boundaryList = boundary->get_boundary_list_level_joined();
+    size_t size_boundaryList = boundary->get_size_boundary_list();
     for (size_t i = 0; i < size_boundaryList; i++) {
         size_t idx = boundaryList[i];
         real value = data[idx];
@@ -191,13 +191,13 @@ void log_minimum(Field *field, const std::string& text, const std::string& logge
 #ifndef BENCHMARKING
     logger->info("minimum boundary {}: {}", text, minimum_boundary);
     logger->info("indices ({}) boundary cells ({})", indices.size(), size_boundaryList);
-    // logger->debug("indices ({})", indices.size(), index);
+    logger->debug("indices ({})", indices.size(), index);
     logger->debug("indices ({})", indices.size());
 #endif
 
     real minimum_obstacle = ULONG_LONG_MAX;
-    size_t *obstacleList = boundary->get_obstacleList();
-    size_t size_obstacleList = boundary->getSize_obstacleList();
+    size_t *obstacleList = boundary->get_obstacle_list();
+    size_t size_obstacleList = boundary->get_size_obstacle_list();
     for (size_t i = 0; i < size_obstacleList; i++) {
         size_t idx = obstacleList[i];
         real value = data[idx];

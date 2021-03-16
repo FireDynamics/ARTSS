@@ -41,7 +41,7 @@ void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real 
     auto boundary = BoundaryController::getInstance();
 
     ExplicitStep(out, in, D, sync);
-    boundary->applyBoundary(d_out, type, sync);
+    boundary->apply_boundary(d_out, type, sync);
 }
 
 //====================================== Turbulent Diffuse ===============================================
@@ -65,7 +65,7 @@ void ExplicitDiffuse::diffuse(Field *out, Field *in, const Field *b, const real 
     auto boundary = BoundaryController::getInstance();
 
     ExplicitStep(out, in, D, EV, sync);
-    boundary->applyBoundary(d_out, type, sync);
+    boundary->apply_boundary(d_out, type, sync);
 }
 
 
@@ -83,8 +83,8 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, bo
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
     real rdx = D / (domain->get_dx(out->get_level()) * domain->get_dx(out->get_level()));
     real rdy = D / (domain->get_dy(out->get_level()) * domain->get_dy(out->get_level()));
@@ -131,8 +131,8 @@ void ExplicitDiffuse::ExplicitStep(Field *out, const Field *in, const real D, co
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_iList[:bsize_i], d_ev[:bsize]) async
     for (size_t ii = 0; ii < bsize_i; ++ii) {
