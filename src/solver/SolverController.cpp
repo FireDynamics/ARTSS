@@ -403,9 +403,55 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             Functions::Uniform(m_field_controller->field_concentration, Ca);
             call_random(m_field_controller->field_concentration);
         }
+    } else if (string_init_usr_fct == FunctionNames::Jet) {
+        std::string dir = params->get("initial_conditions/dir");
+        real value = params->get_real("initial_conditions/value");
+        auto domain = Domain::getInstance();
+        if (dir == "x") {
+            real y1 = params->get_real("initial_conditions/y1");
+            real y2 = params->get_real("initial_conditions/y2");
+            real z1 = params->get_real("initial_conditions/z1");
+            real z2 = params->get_real("initial_conditions/z2");
+            size_t index_x1 = domain->get_index_x1();
+            size_t index_x2 = domain->get_index_x2();
+            size_t index_y1 = Utility::get_index(y1, domain->get_dy(), domain->get_Y1());
+            size_t index_y2 = Utility::get_index(y2, domain->get_dy(), domain->get_Y1());
+            size_t index_z1 = Utility::get_index(z1, domain->get_dz(), domain->get_Z1());
+            size_t index_z2 = Utility::get_index(z2, domain->get_dz(), domain->get_Z1());
+            Functions::Jet(m_field_controller->field_u, index_x1, index_x2, index_y1, index_y2, index_z1, index_z2, value);
+        } else if (dir == "y") {
+            real x1 = params->get_real("initial_conditions/x1");
+            real x2 = params->get_real("initial_conditions/x2");
+            real z1 = params->get_real("initial_conditions/z1");
+            real z2 = params->get_real("initial_conditions/z2");
+            size_t index_x1 = Utility::get_index(x1, domain->get_dx(), domain->get_X1());
+            size_t index_x2 = Utility::get_index(x2, domain->get_dx(), domain->get_X1());
+            size_t index_y1 = domain->get_index_y1();
+            size_t index_y2 = domain->get_index_y2();
+            size_t index_z1 = Utility::get_index(z1, domain->get_dz(), domain->get_Z1());
+            size_t index_z2 = Utility::get_index(z2, domain->get_dz(), domain->get_Z1());
+            Functions::Jet(m_field_controller->field_v, index_x1, index_x2, index_y1, index_y2, index_z1, index_z2, value);
+        } else if (dir == "z") {
+            real x1 = params->get_real("initial_conditions/x1");
+            real x2 = params->get_real("initial_conditions/x2");
+            real y1 = params->get_real("initial_conditions/y1");
+            real y2 = params->get_real("initial_conditions/y2");
+            size_t index_x1 = Utility::get_index(x1, domain->get_dx(), domain->get_X1());
+            size_t index_x2 = Utility::get_index(x2, domain->get_dx(), domain->get_X1());
+            size_t index_y1 = Utility::get_index(y1, domain->get_dy(), domain->get_Y1());
+            size_t index_y2 = Utility::get_index(y2, domain->get_dy(), domain->get_Y1());
+            size_t index_z1 = domain->get_index_z1();
+            size_t index_z2 = domain->get_index_z2();
+            Functions::Jet(m_field_controller->field_w, index_x1, index_x2, index_y1, index_y2, index_z1, index_z2, value);
+        }
+    } else {
+#ifndef BENCHMARKING
+        m_logger->warn("Unknown initial function {}", string_init_usr_fct);
+        m_logger->info("Initial values all set to zero!");
+#endif
     }
 
-    // Sight of boundaries
+        // Sight of boundaries
     auto boundary = BoundaryController::getInstance();
     size_t *iList = boundary->get_inner_list_level_joined();
     size_t size_iList = boundary->get_size_inner_list();
