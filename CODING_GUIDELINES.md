@@ -93,7 +93,10 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
    }
    ```
    Our top priority is to the readability while trying to be as consistent as possible.
- 
+
+### Static and global variables and singletons
+ARTSS currently uses some static and global variables as well two singletons, please refrain from adding new ones except for a exceptional good reason.
+
 As we are only a small group of developers, many parts of the code are not yet compliant with our code guidelines and will be improved accordingly as we make changes. Accordingly, more rules may be added to our coding guidelines if we determine that it is necessary.
 
 Please feel free to contact us if you have any questions.
