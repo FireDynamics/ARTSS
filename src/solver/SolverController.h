@@ -7,6 +7,11 @@
 #ifndef ARTSS_SOLVER_SOLVERCONTROLLER_H
 #define ARTSS_SOLVER_SOLVERCONTROLLER_H
 
+#include "NSSolver.h"
+
+// https://isocpp.org/wiki/faq/templates#templates-defn-vs-decl
+#include "NSSolver.cpp"
+
 #include "../interfaces/ISolver.h"
 #include "../interfaces/ISourceFunction.h"
 #include "../field/FieldController.h"

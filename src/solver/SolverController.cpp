@@ -13,12 +13,6 @@
 #include "AdvectionDiffusionSolver.h"
 #include "PressureSolver.h"
 #include "DiffusionTurbSolver.h"
-#include "NSTurbSolver.h"
-#include "NSSolver.h"
-#include "NSTempSolver.h"
-#include "NSTempTurbSolver.h"
-#include "NSTempConSolver.h"
-#include "NSTempTurbConSolver.h"
 #include "SolverSelection.h"
 #include "../source/ExplicitEulerSource.h"
 #include "../Functions.h"
@@ -171,28 +165,28 @@ void SolverController::init_solver(const std::string &string_solver) {
     } else if (string_solver == SolverTypes::DiffusionTurbSolver) {
         m_solver = new DiffusionTurbSolver(m_field_controller);
     } else if (string_solver == SolverTypes::NSSolver) {
-        m_solver = new NSSolver(m_field_controller);
+        m_solver = new NSSolver2<false, false, false>(m_field_controller);
         m_has_momentum_source = true;
     } else if (string_solver == SolverTypes::NSTurbSolver) {
-        m_solver = new NSTurbSolver(m_field_controller);
+        m_solver = new NSSolver2<false, true, false>(m_field_controller);
         m_has_momentum_source = true;
         m_has_turbulence = true;
     } else if (string_solver == SolverTypes::NSTempSolver) {
-        m_solver = new NSTempSolver(m_field_controller);
+        m_solver = new NSSolver2<true, false, false>(m_field_controller);
         m_has_momentum_source = true;
         m_has_temperature = true;
     } else if (string_solver == SolverTypes::NSTempTurbSolver) {
-        m_solver = new NSTempTurbSolver(m_field_controller);
+        m_solver = new NSSolver2<true, true, false>(m_field_controller);
         m_has_momentum_source = true;
         m_has_temperature = true;
         m_has_turbulence = true;
     } else if (string_solver == SolverTypes::NSTempConSolver) {
-        m_solver = new NSTempConSolver(m_field_controller);
+        m_solver = new NSSolver2<true, false, true>(m_field_controller);
         m_has_momentum_source = true;
         m_has_temperature = true;
         m_has_concentration = true;
     } else if (string_solver == SolverTypes::NSTempTurbConSolver) {
-        m_solver = new NSTempTurbConSolver(m_field_controller);
+        m_solver = new NSSolver2<true, true, true>(m_field_controller);
         m_has_momentum_source = true;
         m_has_temperature = true;
         m_has_concentration = true;
