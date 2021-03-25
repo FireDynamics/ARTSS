@@ -41,12 +41,12 @@ void ConstSmagorinsky::CalcTurbViscosity(Field &ev,
 
 #pragma acc data present(ev, u, v, w)
     {
-        const size_t Nx = domain->get_Nx(in_u.get_level());
-        const size_t Ny = domain->get_Ny(in_v.get_level());
+        const size_t Nx = domain->get_Nx(in_u.getLevel());
+        const size_t Ny = domain->get_Ny(in_v.getLevel());
 
-        const real dx = domain->get_dx(in_u.get_level());
-        const real dy = domain->get_dy(in_v.get_level());
-        const real dz = domain->get_dz(in_w.get_level());
+        const real dx = domain->get_dx(in_u.getLevel());
+        const real dy = domain->get_dy(in_v.getLevel());
+        const real dz = domain->get_dz(in_w.getLevel());
 
         const real rdx = 1. / dx;
         const real rdy = 1. / dy;

@@ -24,11 +24,11 @@ void IPressure::divergence(
         Field const &in_x, Field const &in_y, Field const &in_z, bool sync) {
     auto domain = Domain::getInstance();
 
-    auto Nx = domain->get_Nx(out.get_level());
-    auto Ny = domain->get_Ny(out.get_level());
-    auto dx = domain->get_dx(out.get_level());
-    auto dy = domain->get_dy(out.get_level());
-    auto dz = domain->get_dz(out.get_level());
+    auto Nx = domain->get_Nx(out.getLevel());
+    auto Ny = domain->get_Ny(out.getLevel());
+    auto dx = domain->get_dx(out.getLevel());
+    auto dy = domain->get_dy(out.getLevel());
+    auto dz = domain->get_dz(out.getLevel());
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
@@ -86,20 +86,20 @@ void IPressure::projection(
         Field const &in_p, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto Nx = domain->get_Nx(out_u.get_level());
-    auto Ny = domain->get_Ny(out_u.get_level());
+    auto Nx = domain->get_Nx(out_u.getLevel());
+    auto Ny = domain->get_Ny(out_u.getLevel());
 
-    auto dx = domain->get_dx(out_u.get_level());
-    auto dy = domain->get_dy(out_u.get_level());
-    auto dz = domain->get_dz(out_u.get_level());
+    auto dx = domain->get_dx(out_u.getLevel());
+    auto dy = domain->get_dy(out_u.getLevel());
+    auto dz = domain->get_dz(out_u.getLevel());
 
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
 
-    auto typeu = out_u.get_type();
-    auto typev = out_v.get_type();
-    auto typew = out_w.get_type();
+    auto typeu = out_u.getType();
+    auto typev = out_v.getType();
+    auto typew = out_w.getType();
 
     auto boundary = BoundaryController::getInstance();
 

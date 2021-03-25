@@ -27,21 +27,21 @@ class Field {
     ~Field();
 
     // getter
-    FieldType get_type() const { return m_type; }
-    return_ptr get_data() const { return data; }
+    FieldType getType() const { return m_type; }
+    return_ptr getData() const { return data; }
 
     // read_ptr get_data_ro() const { return data; }
-    size_t get_level() const { return m_level; }
-    size_t get_size() const { return m_size; }
+    size_t getLevel() const { return m_level; }
+    size_t getSize() const { return m_size; }
 
     // setter
     inline real& operator[](size_t i) const { return data[i]; }
 
     // acc functions
-    void update_host() {
+    void updateHost() {
         #pragma acc update host(data[:m_size])
     }
-    void update_dev() {
+    void updateDev() {
         #pragma acc update device(data[:m_size])
     }
     void copyin() {
@@ -49,8 +49,8 @@ class Field {
     }
 
     // basic interface to algorithm
-    void set_value(real val) { std::fill(data, data + m_size, val); }
-    void copy_data(Field const &other) {
+    void setValue(real val) { std::fill(data, data + m_size, val); }
+    void copyData(Field const &other) {
         std::copy(other.data, other.data+other.m_size, data);
     }
     static void swap(Field &a, Field &b) { std::swap(a.data, b.data); }

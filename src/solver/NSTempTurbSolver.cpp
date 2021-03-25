@@ -99,7 +99,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     Field &nu_t = m_field_controller->get_field_nu_t();        // nu_t - Eddy Viscosity
     Field &kappa_t = m_field_controller->get_field_kappa_t();  // kappa_t - Eddy thermal diffusivity
 
-    size_t bsize = Domain::getInstance()->get_size(u.get_level());
+    size_t bsize = Domain::getInstance()->get_size(u.getLevel());
 
     auto nu = m_nu;
     auto kappa = m_kappa;

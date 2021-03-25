@@ -41,8 +41,8 @@ void ExplicitEulerSource::add_source(
         Field &out_x, Field &out_y, Field &out_z,
         Field const &s_x, Field const &s_y, Field const &s_z, bool sync) {
     // local variables and parameters for GPU
-    size_t level = out_x.get_level();
-    FieldType type = out_x.get_type();
+    size_t level = out_x.getLevel();
+    FieldType type = out_x.getType();
 
     auto dt = m_dt;
     auto dir = m_dir_vel;
@@ -100,8 +100,8 @@ void ExplicitEulerSource::add_source(
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void ExplicitEulerSource::add_source(Field &out, Field const &s, bool sync) {
-    size_t level = out.get_level();
-    FieldType type = out.get_type();
+    size_t level = out.getLevel();
+    FieldType type = out.getType();
 
     auto dt = m_dt;
 

@@ -273,9 +273,9 @@ bool Analysis::check_time_step_VN(Field *u, real dt) {
     // local variables and parameters
     real nu = params->get_real("physical_parameters/nu");
 
-    real dx = domain->get_dx(u->get_level());
-    real dy = domain->get_dy(u->get_level());
-    real dz = domain->get_dz(u->get_level());
+    real dx = domain->get_dx(u->getLevel());
+    real dy = domain->get_dy(u->getLevel());
+    real dz = domain->get_dz(u->getLevel());
 
     real dx2sum = (dx * dx + dy * dy + dz * dz);
     real rdx2 = 1. / dx2sum;

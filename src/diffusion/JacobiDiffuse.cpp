@@ -42,7 +42,7 @@ void JacobiDiffuse::diffuse(
         real const D, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    FieldType type = out.get_type();
+    FieldType type = out.getType();
 
     auto d_out = out.data;
 
@@ -56,9 +56,9 @@ void JacobiDiffuse::diffuse(
 
 #pragma acc data present(out, in, b)
     {
-        const real dx = domain->get_dx(out.get_level());  // due to unnecessary parameter passing of *this
-        const real dy = domain->get_dy(out.get_level());
-        const real dz = domain->get_dz(out.get_level());
+        const real dx = domain->get_dx(out.getLevel());  // due to unnecessary parameter passing of *this
+        const real dy = domain->get_dy(out.getLevel());
+        const real dz = domain->get_dz(out.getLevel());
 
         const real rdx = 1. / dx;  // due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;
@@ -154,7 +154,7 @@ void JacobiDiffuse::diffuse(
         real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    FieldType type = out.get_type();
+    FieldType type = out.getType();
 
     auto d_out = out.data;
 
@@ -168,9 +168,9 @@ void JacobiDiffuse::diffuse(
 
 #pragma acc data present(out, in, b, EV)
     {
-        const real dx = domain->get_dx(out.get_level()); //due to unnecessary parameter passing of *this
-        const real dy = domain->get_dy(out.get_level());
-        const real dz = domain->get_dz(out.get_level());
+        const real dx = domain->get_dx(out.getLevel()); //due to unnecessary parameter passing of *this
+        const real dy = domain->get_dy(out.getLevel());
+        const real dz = domain->get_dz(out.getLevel());
 
         const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;
@@ -274,8 +274,8 @@ void JacobiDiffuse::JacobiStep(
         real const rbeta, real const dsign, real const w, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out.get_level());
+    const size_t Nx = domain->get_Nx(out.getLevel()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out.getLevel());
 
     auto boundary = BoundaryController::getInstance();
 
@@ -362,12 +362,12 @@ void JacobiDiffuse::JacobiStep(
         Field const &EV, real const dt, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out.get_level());
+    const size_t Nx = domain->get_Nx(out.getLevel()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out.getLevel());
 
-    const real dx = domain->get_dx(out.get_level()); //due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out.get_level());
-    const real dz = domain->get_dz(out.get_level());
+    const real dx = domain->get_dx(out.getLevel()); //due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out.getLevel());
+    const real dz = domain->get_dz(out.getLevel());
 
     const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
     const real rdy = 1. / dy;

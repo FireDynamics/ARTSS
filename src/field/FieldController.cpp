@@ -82,15 +82,15 @@ FieldController::FieldController(Domain const &domain):
 // ***************************************************************************************
 void FieldController::set_up_boundary() {
     auto boundary = BoundaryController::getInstance();
-    boundary->applyBoundary(field_u.data, field_u.get_type());
-    boundary->applyBoundary(field_v.data, field_v.get_type());
-    boundary->applyBoundary(field_w.data, field_w.get_type());
-    boundary->applyBoundary(field_p.data, field_p.get_type());
-    boundary->applyBoundary(field_T.data, field_T.get_type());
-    boundary->applyBoundary(field_concentration.data, field_concentration.get_type());
+    boundary->applyBoundary(field_u.data, field_u.getType());
+    boundary->applyBoundary(field_v.data, field_v.getType());
+    boundary->applyBoundary(field_w.data, field_w.getType());
+    boundary->applyBoundary(field_p.data, field_p.getType());
+    boundary->applyBoundary(field_T.data, field_T.getType());
+    boundary->applyBoundary(field_concentration.data, field_concentration.getType());
 
     // TODO necessary?
-    boundary->applyBoundary(field_T_ambient.data, field_T_ambient.get_type());
+    boundary->applyBoundary(field_T_ambient.data, field_T_ambient.getType());
 }
 
 void FieldController::set_up_temporary_fields() {
@@ -113,16 +113,16 @@ void FieldController::set_up_temporary_fields() {
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void FieldController::update_data(bool sync) {
-    field_v0.copy_data(field_v);
-    field_w0.copy_data(field_w);
-    field_u_tmp.copy_data(field_u);
-    field_v_tmp.copy_data(field_v);
-    field_w_tmp.copy_data(field_w);
-    field_p0.copy_data(field_p);
-    field_T0.copy_data(field_T);
-    field_T_tmp.copy_data(field_T);
-    field_concentration0.copy_data(field_concentration);
-    field_concentration_tmp.copy_data(field_concentration);
+    field_v0.copyData(field_v);
+    field_w0.copyData(field_w);
+    field_u_tmp.copyData(field_u);
+    field_v_tmp.copyData(field_v);
+    field_w_tmp.copyData(field_w);
+    field_p0.copyData(field_p);
+    field_T0.copyData(field_T);
+    field_T_tmp.copyData(field_T);
+    field_concentration0.copyData(field_concentration);
+    field_concentration_tmp.copyData(field_concentration);
 
     if (sync) {
 #pragma acc wait
@@ -165,49 +165,49 @@ void FieldController::couple_vector(
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void FieldController::couple_scalar(Field const &a, Field &a0, Field &a_tmp, bool sync) {
-    a0.copy_data(a);
-    a_tmp.copy_data(a);
+    a0.copyData(a);
+    a_tmp.copyData(a);
     if (sync) {
 #pragma acc wait
     }
 }
 
 void FieldController::update_device() {
-    field_u.update_dev();
-    field_v.update_dev();
-    field_w.update_dev();
-    field_p.update_dev();
-    field_rhs.update_dev();
-    field_T.update_dev();
-    field_T_ambient.update_dev();
-    field_concentration.update_dev();
-    field_force_x.update_dev();
-    field_force_y.update_dev();
-    field_force_z.update_dev();
-    field_source_T.update_dev();
-    field_source_concentration.update_dev();
-    field_nu_t.update_dev();
-    field_kappa_t.update_dev();
-    field_gamma_t.update_dev();
+    field_u.updateDev();
+    field_v.updateDev();
+    field_w.updateDev();
+    field_p.updateDev();
+    field_rhs.updateDev();
+    field_T.updateDev();
+    field_T_ambient.updateDev();
+    field_concentration.updateDev();
+    field_force_x.updateDev();
+    field_force_y.updateDev();
+    field_force_z.updateDev();
+    field_source_T.updateDev();
+    field_source_concentration.updateDev();
+    field_nu_t.updateDev();
+    field_kappa_t.updateDev();
+    field_gamma_t.updateDev();
 }
 
 void FieldController::update_host(){
-    field_u.update_host();
-    field_v.update_host();
-    field_w.update_host();
-    field_p.update_host();
-    field_rhs.update_host();
-    field_T.update_host();
-    field_T_ambient.update_host();
-    field_concentration.update_host();
-    field_force_x.update_host();
-    field_force_y.update_host();
-    field_force_z.update_host();
-    field_source_T.update_host();
-    field_source_concentration.update_host();
-    field_nu_t.update_host();
-    field_kappa_t.update_host();
-    field_gamma_t.update_host();
+    field_u.updateHost();
+    field_v.updateHost();
+    field_w.updateHost();
+    field_p.updateHost();
+    field_rhs.updateHost();
+    field_T.updateHost();
+    field_T_ambient.updateHost();
+    field_concentration.updateHost();
+    field_force_x.updateHost();
+    field_force_y.updateHost();
+    field_force_z.updateHost();
+    field_source_T.updateHost();
+    field_source_concentration.updateHost();
+    field_nu_t.updateHost();
+    field_kappa_t.updateHost();
+    field_gamma_t.updateHost();
 #pragma acc wait
 }
 

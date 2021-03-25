@@ -76,12 +76,12 @@ void ISource::dissipate(
         Field &out,
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
     auto domain = Domain::getInstance();
-    size_t Nx = domain->get_Nx(out.get_level());
-    size_t Ny = domain->get_Ny(out.get_level());
+    size_t Nx = domain->get_Nx(out.getLevel());
+    size_t Ny = domain->get_Ny(out.getLevel());
 
-    real dx = domain->get_dx(out.get_level());
-    real dy = domain->get_dy(out.get_level());
-    real dz = domain->get_dz(out.get_level());
+    real dx = domain->get_dx(out.getLevel());
+    real dy = domain->get_dy(out.getLevel());
+    real dz = domain->get_dz(out.getLevel());
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
@@ -91,7 +91,7 @@ void ISource::dissipate(
     real dt = params->get_real("physical_parameters/dt");
     real nu = params->get_real("physical_parameters/nu");
 
-    auto type = out.get_type();
+    auto type = out.getType();
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_innerList_level_joined();

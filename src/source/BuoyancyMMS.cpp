@@ -26,7 +26,7 @@ BuoyancyMMS::~BuoyancyMMS() {
 void BuoyancyMMS::set_up() {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto level = m_source_field.get_level();
+    auto level = m_source_field.getLevel();
 
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);

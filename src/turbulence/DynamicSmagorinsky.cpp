@@ -177,12 +177,12 @@ void DynamicSmagorinsky::CalcTurbViscosity(
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(in_u.get_level());
-    const size_t Ny = domain->get_Ny(in_v.get_level());
+    const size_t Nx = domain->get_Nx(in_u.getLevel());
+    const size_t Ny = domain->get_Ny(in_v.getLevel());
 
-    const real dx = domain->get_dx(in_u.get_level());
-    const real dy = domain->get_dy(in_v.get_level());
-    const real dz = domain->get_dz(in_w.get_level());
+    const real dx = domain->get_dx(in_u.getLevel());
+    const real dy = domain->get_dy(in_v.getLevel());
+    const real dz = domain->get_dz(in_w.getLevel());
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -390,8 +390,8 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 void DynamicSmagorinsky::ExplicitFiltering(Field &out, Field const &in, bool sync) {
     auto domain = Domain::getInstance();
 
-    const size_t Nx = domain->get_Nx(out.get_level());
-    const size_t Ny = domain->get_Ny(out.get_level());
+    const size_t Nx = domain->get_Nx(out.getLevel());
+    const size_t Ny = domain->get_Ny(out.getLevel());
     real sum = 0;
 
     //Implement a discrete filter by trapezoidal or simpsons rule.

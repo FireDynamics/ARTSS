@@ -48,15 +48,15 @@ void TimeIntegration::run() {
     Field &nu_t = m_field_controller->get_field_nu_t();
 
 #ifndef BENCHMARKING
-    u.update_host();
-    v.update_host();
-    w.update_host();
-    p.update_host();
-    rhs.update_host();
-    T.update_host();
-    C.update_host();
-    nu_t.update_host();
-    S_T.update_host();
+    u.updateHost();
+    v.updateHost();
+    w.updateHost();
+    p.updateHost();
+    rhs.updateHost();
+    T.updateHost();
+    C.updateHost();
+    nu_t.updateHost();
+    S_T.updateHost();
 #pragma acc wait
 
     m_analysis->analyse(m_field_controller, 0.);
@@ -94,15 +94,15 @@ void TimeIntegration::run() {
             m_solver_controller->solver_do_step(t_cur, false);
 #ifndef BENCHMARKING
             // Visualize
-            u.update_host();
-            v.update_host();
-            w.update_host();
-            p.update_host();
-            rhs.update_host();
-            T.update_host();
-            C.update_host();
-            nu_t.update_host();
-            S_T.update_host();
+            u.updateHost();
+            v.updateHost();
+            w.updateHost();
+            p.updateHost();
+            rhs.updateHost();
+            T.updateHost();
+            C.updateHost();
+            nu_t.updateHost();
+            S_T.updateHost();
 #pragma acc wait
 
             m_visual->visualise(m_field_controller, t_cur);
@@ -153,15 +153,15 @@ void TimeIntegration::run() {
 #endif
 
 #pragma acc wait
-    u.update_host();
-    v.update_host();
-    w.update_host();
-    p.update_host();
-    rhs.update_host();
-    T.update_host();
-    C.update_host();
-    nu_t.update_host();
-    S_T.update_host();
+    u.updateHost();
+    v.updateHost();
+    w.updateHost();
+    p.updateHost();
+    rhs.updateHost();
+    T.updateHost();
+    C.updateHost();
+    nu_t.updateHost();
+    S_T.updateHost();
 #pragma acc wait
     }  // end RANGE
 
