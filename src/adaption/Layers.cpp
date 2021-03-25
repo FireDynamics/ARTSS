@@ -33,7 +33,8 @@ Layers::Layers(FieldController *field_controller) :
 /// \brief  Checks for adaption
 /// \return  bool if adaption is possible true
 // ********************************************************************************
-bool Layers::update(long *p_shift_x1, long *p_shift_x2,
+bool Layers::update(
+        long *p_shift_x1, long *p_shift_x2,
         long *p_shift_y1, long *p_shift_y2,
         long *p_shift_z1, long *p_shift_z2) {
     m_timecounter++;
@@ -110,7 +111,10 @@ size_t Layers::getExpansionSize() {
 /// \brief  Set values for new domain in x-direction
 /// \params start x-values at x1 (start = true) or x-values at x2 (start=false)
 // ********************************************************************************
-void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *, long *, long *, long *, bool start) {
+void Layers::setXValues(
+        long *p_shift_x1, long *p_shift_x2,
+        long *, long *, long *, long *,
+        bool start) {
     Domain *domain = Domain::getInstance();
 
     size_t Nx = domain->get_Nx();
@@ -166,7 +170,10 @@ void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *, long *, long
 // ********************************************************************************
 /// \brief  Set values for new domain
 // ********************************************************************************
-void Layers::apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) {
+void Layers::apply_changes(
+        long *p_shift_x1, long *p_shift_x2,
+        long *p_shift_y1, long *p_shift_y2,
+        long *p_shift_z1, long *p_shift_z2) {
     if (*p_shift_x1) {
         Layers::setXValues(p_shift_x1, p_shift_x2, p_shift_y1, p_shift_y2, p_shift_z1, p_shift_z2, true);
     }
@@ -181,7 +188,9 @@ void Layers::apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1,
 /// \param  checkValue check value
 /// \param  no_buffer_cell Buffersize
 // ***************************************************************************************
-void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shift_x1, long *p_shift_x2) {
+void Layers::adaptXDirection(
+        real checkValue, size_t no_buffer_cell,
+        long *p_shift_x1, long *p_shift_x2) {
     auto domain = Domain::getInstance();
 
     size_t expansion_counter_start = 0;
@@ -241,7 +250,9 @@ void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shi
 /// \param  checkValue check value
 /// \param  no_buffer_cell Buffersize
 // ***************************************************************************************
-void Layers::adaptXDirection_serial(real checkValue, size_t no_buffer_cell, long *p_shift_x1, long *p_shift_x2) {
+void Layers::adaptXDirection_serial(
+        real checkValue, size_t no_buffer_cell,
+        long *p_shift_x1, long *p_shift_x2) {
     auto domain = Domain::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();

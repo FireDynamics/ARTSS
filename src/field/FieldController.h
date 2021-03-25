@@ -110,7 +110,8 @@ class FieldController {
 
     Field sight;
 
-    static void couple_vector(Field const &a, Field &a0, Field &a_tmp,
+    static void couple_vector(
+            Field const &a, Field &a0, Field &a_tmp,
             Field const &b, Field &b0, Field &b_tmp,
             Field const &c, Field &c0, Field &c_tmp, bool sync);
     static void couple_scalar(Field const &a, Field &a0, Field &a_tmp, bool sync);

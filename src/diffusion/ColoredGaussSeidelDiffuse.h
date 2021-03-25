@@ -8,7 +8,6 @@
 #ifndef ARTSS_DIFFUSION_COLOREDGAUSSSEIDEL_H
 #define ARTSS_DIFFUSION_COLOREDGAUSSSEIDEL_H
 
-#include <memory>
 #include "../interfaces/IDiffusion.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
@@ -17,20 +16,25 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
  public:
     ColoredGaussSeidelDiffuse();
 
-    void diffuse(Field &out, Field &in, Field const &b,
+    void diffuse(
+            Field &out, Field &in, Field const &b,
             const real D, bool sync = true) override;
-    void diffuse(Field &out, Field &in, Field const &b,
+    void diffuse(
+            Field &out, Field &in, Field const &b,
             const real D, Field const &EV, bool sync = true) override;
 
-    static void colored_gauss_seidel_step(Field &out, Field const &b,
+    static void colored_gauss_seidel_step(
+            Field &out, Field const &b,
             real alpha_x, real alpha_y, real alpha_z,
             real beta, real dsign, real w, bool sync = true);
 
-    static void colored_gauss_seidel_step(Field &out, Field const &b,
+    static void colored_gauss_seidel_step(
+            Field &out, Field const &b,
             real const dsign, real const w, real const D,
             Field const &EV, const real dt, bool sync = true);  // turbulent version
 
-    static void colored_gauss_seidel_stencil(size_t i, size_t j, size_t k,
+    static void colored_gauss_seidel_stencil(
+            size_t i, size_t j, size_t k,
             real *out, real *b,
             real const alpha_x, real const alpha_y, real const alpha_z,
             real const dsign, real const beta, real const w,

@@ -9,7 +9,8 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-GaussFunction::GaussFunction(real HRR, real cp,
+GaussFunction::GaussFunction(
+        real HRR, real cp,
         real x0, real y0, real z0,
         real sigma_x, real sigma_y, real sigma_z, real tau) :
     m_field_spatial_values(FieldType::RHO, 0.0, 0, Domain::getInstance()->get_size()),

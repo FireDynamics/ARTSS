@@ -39,8 +39,10 @@ SLAdvect::SLAdvect() {
 /// \param  w_vel z -velocity
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SLAdvect::advect(Field &out, Field const &in,
-        Field const &u_vel, Field const &v_vel, Field const &w_vel, bool sync) {
+void SLAdvect::advect(
+        Field &out, Field const &in,
+        Field const &u_vel, Field const &v_vel, Field const &w_vel,
+        bool sync) {
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU

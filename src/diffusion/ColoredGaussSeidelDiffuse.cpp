@@ -211,7 +211,8 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
 /// \param  w        weight (1. - diffusion, 2./3. - multigrid)
 /// \param  sync     synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field &out, Field const &b,
+void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
+        Field &out, Field const &b,
         real const alpha_x, real const alpha_y, real const alpha_z,
         real const beta, real const dsign, real const w, bool) {
     auto domain = Domain::getInstance();
@@ -301,7 +302,8 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field &out, Field cons
 /// \param  dt       time step
 /// \param  sync     synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field &out, Field const &b,
+void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
+        Field &out, Field const &b,
         real const dsign, real const w, real const D,
         Field const &EV, real const dt, bool) {
     auto domain = Domain::getInstance();
@@ -460,7 +462,8 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field &out, Field cons
 /// \param  Nx       number of cells in x-direction of computational domain
 /// \param  Ny       number of cells in y-direction
 // ***************************************************************************************
-void ColoredGaussSeidelDiffuse::colored_gauss_seidel_stencil(size_t i, size_t j, size_t k,
+void ColoredGaussSeidelDiffuse::colored_gauss_seidel_stencil(
+        size_t i, size_t j, size_t k,
         real *out, real *b,
         real const alpha_x, real const alpha_y, real const alpha_z,
         real const dsign, real const beta, real const w,

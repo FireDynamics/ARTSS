@@ -24,7 +24,8 @@
 /// \param  in_temperature_ambient ambient temperature
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ISource::buoyancy_force(Field &out, Field const &in,
+void ISource::buoyancy_force(
+        Field &out, Field const &in,
         Field const &ina, bool sync) {
     auto params = Parameters::getInstance();
     real beta = params->get_real("physical_parameters/beta");
@@ -71,7 +72,8 @@ void ISource::buoyancy_force(Field &out, Field const &in,
 /// \param  in_w  input pointer (\a z -velocity)
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ISource::dissipate(Field &out,
+void ISource::dissipate(
+        Field &out,
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
     auto domain = Domain::getInstance();
     size_t Nx = domain->get_Nx(out.get_level());

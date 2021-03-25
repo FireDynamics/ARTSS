@@ -143,7 +143,8 @@ void FieldController::update_data(bool sync) {
 /// \param  c_tmp temporal field in z- direction
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void FieldController::couple_vector(Field const &a, Field &a0, Field &a_tmp,
+void FieldController::couple_vector(
+        Field const &a, Field &a0, Field &a_tmp,
         Field const &b, Field &b0, Field &b_tmp,
         Field const &c, Field &c0, Field &c_tmp, bool sync) {
     FieldController::couple_scalar(a, a0, a_tmp, false);

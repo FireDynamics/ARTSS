@@ -36,7 +36,10 @@ void CSVWriter::write_analytical(Solution *solution, const std::string& filename
     CSVWriter::csvPrepareAndWrite((filename + ending).c_str(), u, v, w, p, T);
 }
 
-void CSVWriter::csvPrepareAndWrite(const char *filename, real *u, real *v, real *w, real *p, real *div, real *T, real *C, real *s, real *nu_t, real *S_T) {
+void CSVWriter::csvPrepareAndWrite(
+        const char *filename,
+        real *u, real *v, real *w,
+        real *p, real *div, real *T, real *C, real *s, real *nu_t, real *S_T) {
     Domain *domain = Domain::getInstance();
     int size = static_cast<int>(domain->get_size());
 
@@ -87,7 +90,9 @@ void CSVWriter::csvPrepareAndWrite(const char *filename, real *u, real *v, real 
     delete[] (source_T);
 }
 
-void CSVWriter::csvPrepareAndWrite(const char *filename, real *u, real *v, real *w, real *p, real *T) {
+void CSVWriter::csvPrepareAndWrite(
+        const char *filename,
+        real *u, real *v, real *w, real *p, real *T) {
     Domain *domain = Domain::getInstance();
     int size = static_cast<int>(domain->get_size());
 
@@ -119,7 +124,9 @@ void CSVWriter::csvPrepareAndWrite(const char *filename, real *u, real *v, real 
     delete[] (Temp);
 }
 
-void CSVWriter::csv_write(const char *filename, real **vars, int size_vars, const char **var_names) {
+void CSVWriter::csv_write(
+        const char *filename,
+        real **vars, int size_vars, const char **var_names) {
     Domain *domain = Domain::getInstance();
 
     int Nx = static_cast<int>(domain->get_Nx());
@@ -182,7 +189,8 @@ void CSVWriter::csv_write(const char *filename, real **vars, int size_vars, cons
     delete[] (z_centres);
 }
 
-void CSVWriter::write_data(std::string *data_titles,
+void CSVWriter::write_data(
+        std::string *data_titles,
         real **data, size_t size_data, const std::string& filename) {
     const char *var_names[size_data];
     for (size_t i = 0; i < size_data; i++){

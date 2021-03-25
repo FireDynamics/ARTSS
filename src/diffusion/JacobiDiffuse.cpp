@@ -37,7 +37,8 @@ JacobiDiffuse::JacobiDiffuse() {
 /// \param  D     diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void JacobiDiffuse::diffuse(Field &out, Field &in, Field const &b,
+void JacobiDiffuse::diffuse(
+        Field &out, Field &in, Field const &b,
         real const D, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
@@ -148,7 +149,8 @@ void JacobiDiffuse::diffuse(Field &out, Field &in, Field const &b,
 /// \param  EV      turbulent diffusion coefficient (eddy viscosity)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void JacobiDiffuse::diffuse(Field &out, Field &in, Field const &b,
+void JacobiDiffuse::diffuse(
+        Field &out, Field &in, Field const &b,
         real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
@@ -266,7 +268,8 @@ void JacobiDiffuse::diffuse(Field &out, Field &in, Field const &b,
 /// \param  w   weight (1. - diffusion, 2./3. - multigrid)
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void JacobiDiffuse::JacobiStep(Field &out, Field const &in, Field const &b,
+void JacobiDiffuse::JacobiStep(
+        Field &out, Field const &in, Field const &b,
         real const alphaX, real const alphaY, real const alphaZ,
         real const rbeta, real const dsign, real const w, bool sync) {
     auto domain = Domain::getInstance();
@@ -311,7 +314,8 @@ void JacobiDiffuse::JacobiStep(Field &out, Field const &in, Field const &b,
 /// \param  w   weight (1. - diffusion, 2./3. - multigrid)
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void JacobiDiffuse::JacobiStep(size_t level, Field &out, Field const &in, Field const &b,
+void JacobiDiffuse::JacobiStep(
+        size_t level, Field &out, Field const &in, Field const &b,
         real const alphaX, real const alphaY, real const alphaZ,
         real const beta, real const dsign, real const w, bool sync) {
     auto domain = Domain::getInstance();
@@ -352,7 +356,8 @@ void JacobiDiffuse::JacobiStep(size_t level, Field &out, Field const &in, Field 
 /// \param  dt    time step
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void JacobiDiffuse::JacobiStep(Field &out, Field const &in, Field const &b,
+void JacobiDiffuse::JacobiStep(
+        Field &out, Field const &in, Field const &b,
         real const dsign, real const w, real const D,
         Field const &EV, real const dt, bool sync) {
     auto domain = Domain::getInstance();

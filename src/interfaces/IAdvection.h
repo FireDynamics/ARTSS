@@ -13,7 +13,8 @@ class IAdvection {
  public:
     IAdvection() = default;
     virtual ~IAdvection() = default;
-    virtual void advect(Field &out, Field const &in,
+    virtual void advect(
+            Field &out, Field const &in,
             const Field &u_vel, const Field &v_vel, const Field &w_vel, bool sync) = 0;
 };
 

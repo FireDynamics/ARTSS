@@ -14,13 +14,16 @@ class ISource {
  public:
     virtual ~ISource() = default;
 
-    virtual void add_source(Field &out_x, Field &out_y, Field &out_z,
+    virtual void add_source(
+            Field &out_x, Field &out_y, Field &out_z,
             Field const &S_x, Field const &S_y, Field const &S_z, bool sync) = 0;
     virtual void add_source(Field &out, Field const &S, bool sync) = 0;
 
-    void buoyancy_force(Field &out,
+    void buoyancy_force(
+            Field &out,
             Field const &in, Field const &in_temperature_ambient, bool sync = true);
-    void dissipate(Field &out,
+    void dissipate(
+            Field &out,
             Field const &in_u, Field const &in_v, Field const &in_w, bool sync = true);
 };
 

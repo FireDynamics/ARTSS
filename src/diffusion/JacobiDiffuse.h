@@ -17,18 +17,23 @@ class JacobiDiffuse : public IDiffusion {
  public:
     JacobiDiffuse();
 
-    void diffuse(Field &out, Field &in, Field const &b,
+    void diffuse(
+            Field &out, Field &in, Field const &b,
             real const D, bool sync) override;
-    void diffuse(Field &out, Field &in, Field const &b,
+    void diffuse(
+            Field &out, Field &in, Field const &b,
             real const D, Field const &EV, bool sync) override;  // turbulent version
 
-    static void JacobiStep(Field &out, Field const &in, Field const &b,
+    static void JacobiStep(
+            Field &out, Field const &in, Field const &b,
             real const alphaX, real const alphaY, real const alphaZ,
             real const beta, real const dsign, real const w, bool sync = true);
-    static void JacobiStep(size_t level, Field &out, Field const &in, Field const &b,
+    static void JacobiStep(
+            size_t level, Field &out, Field const &in, Field const &b,
             real const alphaX, real const alphaY, real const alphaZ,
             real const beta, real const dsign, real const w, bool sync = true);  // Multigrid version
-    static void JacobiStep(Field &out, Field const &in, Field const &b,
+    static void JacobiStep(
+            Field &out, Field const &in, Field const &b,
             real const dsign, real const w, real const D,
             Field const &EV, real dt, bool sync = true);  // turbulent version
 

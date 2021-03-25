@@ -172,7 +172,8 @@ DynamicSmagorinsky::DynamicSmagorinsky() :
 /// \param  in_w          input pointer of z-velocity
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void DynamicSmagorinsky::CalcTurbViscosity(Field &ev,
+void DynamicSmagorinsky::CalcTurbViscosity(
+        Field &ev,
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU

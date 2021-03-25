@@ -15,7 +15,8 @@ public:
     DynamicSmagorinsky();
     ~DynamicSmagorinsky() override = default;
 
-    void CalcTurbViscosity(Field &ev,
+    void CalcTurbViscosity(
+            Field &ev,
             Field const &in_u, Field const &in_v, Field const &in_w, bool sync) override;
     void ExplicitFiltering(Field &out, Field const &in, bool sync) override;
 

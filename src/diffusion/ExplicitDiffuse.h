@@ -14,9 +14,11 @@ class ExplicitDiffuse : public IDiffusion {
 public:
     ExplicitDiffuse();
 
-    void diffuse(Field &out, Field &in,
+    void diffuse(
+            Field &out, Field &in,
             Field const &b, real const D, bool sync) override;
-    void diffuse(Field &out, Field &in,
+    void diffuse(
+            Field &out, Field &in,
             Field const &b, real const D, Field const &EV, bool sync) override;  // turbulent version
 
     void ExplicitStep(Field &out, Field const &in,

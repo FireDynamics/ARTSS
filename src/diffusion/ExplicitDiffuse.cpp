@@ -16,7 +16,6 @@
 #include "../Domain.h"
 
 ExplicitDiffuse::ExplicitDiffuse() {
-
     auto params = Parameters::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
@@ -52,7 +51,8 @@ void ExplicitDiffuse::diffuse(Field &out, Field &in, Field const &, real const D
 /// \param  D       diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ExplicitDiffuse::diffuse(Field &out, Field &in,
+void ExplicitDiffuse::diffuse(
+        Field &out, Field &in,
         Field const &, real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU

@@ -16,9 +16,11 @@ class IPressure {
     virtual ~IPressure() = default;
     virtual void pressure(Field &out, Field const &b, real t, bool sync) = 0;
 
-    void divergence(Field &out,
+    void divergence(
+            Field &out,
             Field const &in_x, Field const &in_y, Field const &in_z, bool sync);
-    void projection(Field &out_u, Field &out_v, Field &out_w,
+    void projection(
+            Field &out_u, Field &out_v, Field &out_w,
             Field const &in_u, Field const &in_v, Field const &in_w,
             Field const &in_p, bool sync);
 };

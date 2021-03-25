@@ -19,7 +19,8 @@
 /// \param  in_z  input pointer (z -velocity)
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void IPressure::divergence(Field &out,
+void IPressure::divergence(
+        Field &out,
         Field const &in_x, Field const &in_y, Field const &in_z, bool sync) {
     auto domain = Domain::getInstance();
 
@@ -79,7 +80,8 @@ void IPressure::divergence(Field &out,
 /// \param  in_p  input pointer (pressure)
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void IPressure::projection(Field &out_u, Field &out_v, Field &out_w,
+void IPressure::projection(
+        Field &out_u, Field &out_v, Field &out_w,
         Field const &in_u, Field const &in_v, Field const &in_w,
         Field const &in_p, bool sync) {
     auto domain = Domain::getInstance();

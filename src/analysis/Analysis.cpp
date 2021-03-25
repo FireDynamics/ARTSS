@@ -91,8 +91,9 @@ void Analysis::analyse(FieldController *field_controller, real t) {
 /// when verification passed \param  num   numerical solution \param  ana
 /// analytical solution \param  type  type of variable \param  t   current time
 // ***************************************************************************************
-bool Analysis::compare_solutions(read_ptr num, read_ptr ana, FieldType type,
-                                 real t) {
+bool Analysis::compare_solutions(
+        read_ptr num, read_ptr ana,
+        FieldType type, real t) {
   bool verification = false;
 
   // Choose absolute or relative based error calculation

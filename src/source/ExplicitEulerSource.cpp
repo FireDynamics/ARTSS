@@ -37,7 +37,8 @@ ExplicitEulerSource::ExplicitEulerSource() {
 /// \param  S_z    Source pointer in z-direction
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void ExplicitEulerSource::add_source(Field &out_x, Field &out_y, Field &out_z,
+void ExplicitEulerSource::add_source(
+        Field &out_x, Field &out_y, Field &out_z,
         Field const &s_x, Field const &s_y, Field const &s_z, bool sync) {
     // local variables and parameters for GPU
     size_t level = out_x.get_level();
