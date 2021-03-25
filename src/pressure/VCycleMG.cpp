@@ -142,8 +142,7 @@ void VCycleMG::UpdateInput(Field &out, Field const &b, bool sync) {
     auto bsize_i = boundary->getSize_innerList();
 
     // use iList on level 0, since update on level 0
-#pragma acc kernels present(out, b, err1, \
-                            mg_tmp, res1, d_iList[:bsize_i]) async
+#pragma acc kernels present(out, b, err1, mg_tmp, res1, d_iList[:bsize_i]) async
     {
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
