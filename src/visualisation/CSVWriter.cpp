@@ -13,7 +13,7 @@
 static std::string ending = ".csv";
 const static char delimiter = ',';
 
-void CSVWriter::write_numerical(FieldController *field_controller, const std::string& filename) {
+void CSVWriter::write_numerical(FieldController *field_controller, const std::string &filename) {
     auto u = field_controller->get_field_u_data();
     auto v = field_controller->get_field_v_data();
     auto w = field_controller->get_field_w_data();
@@ -27,7 +27,7 @@ void CSVWriter::write_numerical(FieldController *field_controller, const std::st
     CSVWriter::csvPrepareAndWrite((filename + ending).c_str(), u, v, w, p, div, T, C, s, nu_t, S_T);
 }
 
-void CSVWriter::write_analytical(Solution *solution, const std::string& filename) {
+void CSVWriter::write_analytical(Solution *solution, const std::string &filename) {
     auto u = solution->GetU_data();
     auto v = solution->GetV_data();
     auto w = solution->GetW_data();
@@ -191,7 +191,7 @@ void CSVWriter::csv_write(
 
 void CSVWriter::write_data(
         std::string *data_titles,
-        real **data, size_t size_data, const std::string& filename) {
+        real **data, size_t size_data, const std::string &filename) {
     const char *var_names[size_data];
     for (size_t i = 0; i < size_data; i++){
         var_names[i] = data_titles[i].c_str();
