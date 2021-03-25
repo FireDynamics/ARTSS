@@ -1,6 +1,7 @@
 /// \file       Analysis.cpp
-/// \brief      Calculates residual, compares analytical and numerical
-/// solutions, saves variables \date       Jul 11, 2016 \author     Severt
+/// \brief      Calculates residual, compares analytical and numerical solutions, saves variables
+//  \date       Jul 11, 2016
+//  \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <algorithm>
