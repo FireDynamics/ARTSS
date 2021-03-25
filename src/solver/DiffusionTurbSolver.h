@@ -7,7 +7,6 @@
 #ifndef ARTSS_SOLVER_DIFFUSIONTURBSOLVER_H_
 #define ARTSS_SOLVER_DIFFUSIONTURBSOLVER_H_
 
-#include <memory>
 #include <string>
 #include "../Domain.h"
 #include "../interfaces/ISolver.h"
