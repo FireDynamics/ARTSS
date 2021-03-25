@@ -15,7 +15,7 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
 #pragma acc update device(this)
     // note that the pointer is to host memory, so we overwrite with a
     // pointer to memory allocated on the device.
-#pragma acc enter data create(data[0:m_size])
+#pragma acc enter data create(data[:m_size])
 }
 
 Field::Field(Field const &orig):
