@@ -10,23 +10,16 @@
 #include "../Domain.h"
 #include "SolverSelection.h"
 
-AdvectionSolver::AdvectionSolver(FieldController *field_controlller) :
-    m_u_lin(FieldType::U,
-                Parameters::getInstance()->get_real("initial_conditions/w_lin"),
-                0,
-                Domain::getInstance()->get_size()),
-    m_v_lin(FieldType::V,
-                Parameters::getInstance()->get_real("initial_conditions/w_lin"),
-                0,
-                Domain::getInstance()->get_size()),
-    m_w_lin(FieldType::W,
-                Parameters::getInstance()->get_real("initial_conditions/w_lin"),
-                0,
-                Domain::getInstance()->get_size()) {
+AdvectionSolver::AdvectionSolver(
+        FieldController *field_controlller,
+        real u_lin, real v_lin, real w_lin, size_t size) :
+    m_field_controller(field_controlller),
+    m_u_lin(FieldType::U, u_lin, 0.0, size),
+    m_v_lin(FieldType::V, v_lin, 0.0, size),
+    m_w_lin(FieldType::W, w_lin, 0.0, size) {
 #ifndef BENCHMARKING
      m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_controller = field_controlller;
 
     auto params = Parameters::getInstance();
     std::string advectionType = params->get("solver/advection/type");
@@ -37,6 +30,15 @@ AdvectionSolver::AdvectionSolver(FieldController *field_controlller) :
     m_w_lin.copyin();
 
     control();
+}
+
+AdvectionSolver::AdvectionSolver(FieldController *field_controlller) :
+    AdvectionSolver(
+            field_controlller,
+            Parameters::getInstance()->get_real("initial_conditions/u_lin"),
+            Parameters::getInstance()->get_real("initial_conditions/v_lin"),
+            Parameters::getInstance()->get_real("initial_conditions/w_lin"),
+            Domain::getInstance()->get_size()) {
 }
 
 AdvectionSolver::~AdvectionSolver() {

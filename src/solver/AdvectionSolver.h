@@ -14,13 +14,16 @@
 #include "../utility/Utility.h"
 
 class AdvectionSolver : public ISolver {
-public:
+ public:
+    AdvectionSolver(
+        FieldController *field_controlller,
+        real u_lin, real v_lin, real w_lin, size_t size);
     explicit AdvectionSolver(FieldController *field_controller);
     ~AdvectionSolver();
 
     void do_step(real t, bool sync) override;
 
-private:
+ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
