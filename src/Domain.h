@@ -87,10 +87,11 @@ class Domain {
 
     size_t inline get_levels() const { return m_levels; }
 
-    bool resize(long shift_x1, long shift_x2, long shift_y1, long shift_y2, long shift_z1, long shift_z2);
-
     size_t inline get_size() const { return get_Nx() * get_Ny() * get_Nz(); }
     size_t inline get_size(size_t level) const { return get_Nx(level) * get_Ny(level) * get_Nz(level); }
+
+    bool resize(long shift_x1, long shift_x2, long shift_y1, long shift_y2, long shift_z1, long shift_z2);
+
 
     void print();
     void printDetails();
