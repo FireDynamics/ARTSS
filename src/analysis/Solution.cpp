@@ -77,7 +77,7 @@ void Solution::hat(const real) {
     Functions::Hat(w_a);
 }
 
-void Solution::sin_sin_sin(real) {
+void Solution::sin_sin_sin(const real) {
 // Pressure test case
     Functions::FacSinSinSin(p_a);  // TODO time dependency?
 }
