@@ -1055,8 +1055,8 @@ namespace Functions {
         size_t Ny = domain->get_Ny();
 
         for (size_t i = index_x1; i <= index_x2; i++) {
-            for (size_t j = index_y1; i <= index_y2; i++) {
-                for (size_t k = index_z1; i <= index_z2; i++) {
+            for (size_t j = index_y1; j <= index_y2; j++) {
+                for (size_t k = index_z1; k <= index_z2; k++) {
                     size_t index = IX(i, j, k, Nx, Ny);
                     d_out[index] = value;
                 }
