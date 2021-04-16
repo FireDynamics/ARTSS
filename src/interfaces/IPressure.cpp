@@ -8,7 +8,6 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
-#include "../visualisation/Visual.h"
 
 //======================================== Divergence ====================================
 // ***************************************************************************************
@@ -54,9 +53,10 @@ void IPressure::divergence(Field *out, const Field *in_x, const Field *in_y, con
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_iList[j];
-            d_out[i] = 0.5 * rdx * (d_inx[i + 1] - d_inx[i - 1]) \
- + 0.5 * rdy * (d_iny[i + Nx] - d_iny[i - Nx]) \
- + 0.5 * rdz * (d_inz[i + Nx * Ny] - d_inz[i - Nx * Ny]);
+            auto inx = 0.5 * rdx * (d_inx[i + 1] - d_inx[i - 1]) ;
+            auto iny = 0.5 * rdy * (d_iny[i + Nx] - d_iny[i - Nx]) ;
+            auto inz = 0.5 * rdz * (d_inz[i + Nx*Ny] - d_inz[i - Nx*Ny]) ;
+            d_out[i] = inx + iny + inz;
         }
 
 //boundaries
