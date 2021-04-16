@@ -13,14 +13,15 @@
 
 #ifndef ENUM_TYPES
 #define ENUM_TYPES
-const size_t numberOfFieldTypes = 6;
+const size_t numberOfFieldTypes = 7;
 enum FieldType : int {
-    UNKNOWN_FIELD = -1, RHO = 0, U = 1, V = 2, W = 3, P = 4, T = 5
+    UNKNOWN_FIELD = -1, RHO = 0, U = 1, V = 2, W = 3, P = 4, T = 5, NU = 6
 };
 #endif
 
 class Field {
  public:
+    Field(FieldType type);
     Field(FieldType type, real val);
     Field(FieldType type, real val, size_t level);
     Field(FieldType type, real val, size_t level, size_t size);
@@ -33,6 +34,7 @@ class Field {
 
     void set_value(real val) { std::fill(data, data + m_size, val); }
     void copy_data(const Field &other) {
+        // TODO parallelise copy data function for GPU
         std::copy(other.data, other.data+other.m_size, data);
     }
     static void swap(Field *a, Field *b) { std::swap(a->data, b->data); }
