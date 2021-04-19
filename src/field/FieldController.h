@@ -41,6 +41,7 @@ class FieldController {
     real* get_field_T_data() const { return field_T->data; }
     real* get_field_T0_data() const { return field_T0->data; }
     real* get_field_T_tmp_data() const { return field_T_tmp->data; }
+    real* get_field_T_ambient_data() const { return field_T_ambient->data; }
 
     real* get_field_concentration_data() const { return field_concentration->data; }
     real* get_field_concentration0_data() const { return field_concentration0->data; }
