@@ -1,10 +1,10 @@
-/// \file       FieldWriter.cpp
+/// \file       FieldIO.cpp
 /// \brief      
 /// \date       Apr 18, 2021
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 
-#include "FieldWriter.h"
+#include "FieldIO.h"
 
 #include <chrono>
 #include <ctime>
@@ -13,14 +13,14 @@
 #include "../Domain.h"
 
 
-FieldWriter::FieldWriter(FieldController &field_controller, real dt) :
+FieldIO::FieldIO(FieldController &field_controller, real dt) :
         m_field_controller(field_controller), m_dt(dt) {
     std::string header = create_header();
     std::ofstream output_file(m_filename, std::ofstream::binary);
     output_file << header;
 }
 
-void FieldWriter::write_out(real t_cur) {
+void FieldIO::write_out(real t_cur) {
     std::string output;
     auto n = static_cast<int>(t_cur / m_dt);
 
@@ -39,6 +39,12 @@ void FieldWriter::write_out(real t_cur) {
         }
         output.append(fmt::format(FMT_COMPILE("{}\n"), f[size - 1]));
     }
+
+    // TODO write out at line n + m_header_length
+}
+
+void FieldIO::read(real t_cur) {
+    std::ifstream input_file(m_filename, std::ifstream::binary);
 }
 
 //================================= write header ===================================================
@@ -48,9 +54,8 @@ void FieldWriter::write_out(real t_cur) {
 /// ###DOMAIN;<Nx>;<Ny>;<Nz>
 /// ###FIELDS;u;v;w;p;T;concentration
 /// ###DATE:<date>;XML:<XML>
-/// <field temperature ambient>
 // *************************************************************************************************
-std::string FieldWriter::create_header() {
+std::string FieldIO::create_header() {
     auto end = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
@@ -63,12 +68,6 @@ std::string FieldWriter::create_header() {
     header.append(fmt::format(FMT_COMPILE("###FIELDS;u;v;w;p;T;concentration\n")));
     header.append(fmt::format(FMT_COMPILE("###DATE:{};XML:{}\n"),
                               std::ctime(&end_time), Parameters::getInstance()->get_filename()));
-
-    auto size = domain->get_size();
-    auto T_ambient = m_field_controller.get_field_T_ambient_data();
-    for (size_t i = 0; i < size - 1; i++) {
-        header.append(fmt::format(FMT_COMPILE("{};"), T_ambient[i]));
-    }
-    header.append(fmt::format(FMT_COMPILE("{}\n"), T_ambient[size - 1]));
+    m_header_length = header.length();
     return header;
 }
