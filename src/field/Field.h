@@ -21,6 +21,7 @@ enum FieldType : int {
 
 class Field {
  public:
+    Field(FieldType type);
     Field(FieldType type, real val);
     Field(FieldType type, real val, size_t level);
     Field(FieldType type, real val, size_t level, size_t size);
@@ -32,9 +33,8 @@ class Field {
     size_t get_level() { return this->m_level; }
 
     void set_value(real val) { std::fill(data, data + m_size, val); }
-    void copy_data(const Field &other) {
-        std::copy(other.data, other.data+other.m_size, data);
-    }
+    void set_data(real *data, int size) { std::copy(data, data+size, this->data); }
+    void copy_data(const Field &other) { std::copy(other.data, other.data+other.m_size, data); }
     static void swap(Field *a, Field *b) { std::swap(a->data, b->data); }
 
     real *data;

@@ -13,16 +13,15 @@
 #include "../Domain.h"
 
 
-FieldIO::FieldIO(FieldController &field_controller, real dt) :
-        m_field_controller(field_controller), m_dt(dt) {
-    std::string header = create_header();
+FieldIO::FieldIO(FieldController *field_controller, real dt) :
+                m_field_controller(field_controller), m_dt(dt) {
+    const char* header = create_header().c_str();
     std::ofstream output_file(m_filename, std::ofstream::binary);
-    output_file << header;
+    output_file.write(header, m_header_length);
 }
 
 void FieldIO::write_out(real t_cur) {
     std::string output;
-    auto n = static_cast<int>(t_cur / m_dt);
 
     auto u = m_field_controller.get_field_u_data();
     auto v = m_field_controller.get_field_v_data();
@@ -40,11 +39,32 @@ void FieldIO::write_out(real t_cur) {
         output.append(fmt::format(FMT_COMPILE("{}\n"), f[size - 1]));
     }
 
+    m_length = output.length();
+
+    std::ofstream output_file(m_filename, std::ofstream::binary);
+    output_file.seekp(get_position(t_cur, m_length));
     // TODO write out at line n + m_header_length
+    output_file.write(output.c_str(), m_length);
 }
 
-void FieldIO::read(real t_cur) {
+int FieldIO::get_position(real t_cur, int length) {
+    auto n = static_cast<int>(t_cur / m_dt);
+    return length * (n - 1) + m_header_length;
+}
+
+void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
     std::ifstream input_file(m_filename, std::ifstream::binary);
+    input_file.seekg(get_position(t_cur, m_length));
+
+    char *buffer = new char [m_length];
+    input_file.read(buffer, m_length);
+    // TODO fill fields with new values (u,v,w,p,T,C)
+
+    Field *field = u;
+//strtok
+    for (int i = 0; i < m_length; i++) {
+
+    }
 }
 
 //================================= write header ===================================================
