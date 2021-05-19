@@ -7,6 +7,7 @@
 #include "FieldIO.h"
 #include <chrono>
 #include <ctime>
+#include <fmt/os.h>
 
 #include "../Domain.h"
 
@@ -34,7 +35,6 @@ void FieldIO::write_out(real t_cur) {
     auto T = m_field_controller->get_field_T_data();
     auto C = m_field_controller->get_field_concentration_data();
 
-    int t = 0;
     real *fields[] = {u, v, w, p, T, C};
     auto size = Domain::getInstance()->get_size();
     for (auto f: fields){
