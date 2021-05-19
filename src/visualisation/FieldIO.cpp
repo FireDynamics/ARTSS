@@ -8,62 +8,79 @@
 
 #include <chrono>
 #include <ctime>
-#include <fmt/compile.h>
+#define FMT_STRING_ALIAS 1
 
 #include "../Domain.h"
 
 
-FieldIO::FieldIO(FieldController *field_controller, real dt) :
-                m_field_controller(field_controller), m_dt(dt) {
+FieldIO::FieldIO(FieldController *field_controller) : m_field_controller(field_controller) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
+    m_dt = Parameters::getInstance()->get_real("physical_parameters/dt");
+    real t_end = Parameters::getInstance()->get_real("physical_parameters/t_end");
+    size_t n = static_cast<size_t>(t_end / m_dt) + 1;
+    m_positions = new size_t[n];
     const char* header = create_header().c_str();
-    std::ofstream output_file(m_filename, std::ofstream::binary);
-    output_file.write(header, m_header_length);
+    std::ofstream output_file(m_filename, std::ios_base::out);
+    output_file.write(header, m_positions[0]);
 }
 
 void FieldIO::write_out(real t_cur) {
     std::string output;
 
-    auto u = m_field_controller.get_field_u_data();
-    auto v = m_field_controller.get_field_v_data();
-    auto w = m_field_controller.get_field_w_data();
-    auto p = m_field_controller.get_field_w_data();
-    auto T = m_field_controller.get_field_T_data();
-    auto C = m_field_controller.get_field_concentration_data();
+    auto u = m_field_controller->get_field_u_data();
+    auto v = m_field_controller->get_field_v_data();
+    auto w = m_field_controller->get_field_w_data();
+    auto p = m_field_controller->get_field_w_data();
+    auto T = m_field_controller->get_field_T_data();
+    auto C = m_field_controller->get_field_concentration_data();
 
-    auto fields = {u, v, w, p, T, C};
+    int t = 0;
+    real *fields[] = {u, v, w, p, T, C};
     auto size = Domain::getInstance()->get_size();
     for (auto f: fields){
+        output.append(std::to_string(t) + ";" + std::to_string(t_cur) + ";");
         for (size_t i = 0; i < size - 1; i++) {
-            output.append(fmt::format(FMT_COMPILE("{};"), f[i]));
+//            output.append(fmt::format(FMT_COMPILE("{};"), f[i]));
+            output.append(std::to_string(f[i]) + ";");
         }
-        output.append(fmt::format(FMT_COMPILE("{}\n"), f[size - 1]));
+        output.append(std::to_string(f[size-1]) + "\n");
+        // output.append(fmt::format(FMT_COMPILE("{}\n"), f[size - 1]));
+        t++;
     }
 
-    m_length = output.length();
+    size_t n = static_cast<size_t>(t_cur / m_dt);
+    size_t length = output.length();
+    m_positions[n] = m_positions[n - 1] + length;
 
-    std::ofstream output_file(m_filename, std::ofstream::binary);
-    output_file.seekp(get_position(t_cur, m_length));
+    std::ofstream output_file(m_filename, std::ios_base::app);
+    output_file.seekp(m_positions[n - 1]);
     // TODO write out at line n + m_header_length
-    output_file.write(output.c_str(), m_length);
-}
-
-int FieldIO::get_position(real t_cur, int length) {
-    auto n = static_cast<int>(t_cur / m_dt);
-    return length * (n - 1) + m_header_length;
+    output_file.write(output.c_str(), length);
 }
 
 void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
     std::ifstream input_file(m_filename, std::ifstream::binary);
-    input_file.seekg(get_position(t_cur, m_length));
+    size_t n = static_cast<size_t>(t_cur / m_dt) - 1;
+    size_t pos = m_positions[n];
+    size_t length = m_positions[n + 1] - m_positions[n];
+    char *buffer = new char [length];
+    std::string line;
+    input_file.seekg(pos);
 
-    char *buffer = new char [m_length];
-    input_file.read(buffer, m_length);
     // TODO fill fields with new values (u,v,w,p,T,C)
-
-    Field *field = u;
-//strtok
-    for (int i = 0; i < m_length; i++) {
-
+    Field *fields[] = {u, v, w, p, T, C};
+    for (Field *f: fields) {
+        getline(input_file, line);
+        std::strcpy(buffer, line.c_str());
+        char *token_delimiter = strtok(buffer, ";");
+        size_t counter = 0;
+        while (token_delimiter != nullptr) {
+            f->data[counter] = atof(token_delimiter);
+            token_delimiter = strtok(nullptr, ";");
+            counter++;
+        }
     }
 }
 
@@ -84,10 +101,11 @@ std::string FieldIO::create_header() {
     auto Ny = domain->get_Ny();
     auto Nz = domain->get_Nz();
 
-    std::string header = fmt::format(FMT_COMPILE("###DOMAIN;{};{};{}\n"), Nx, Ny, Nz);
-    header.append(fmt::format(FMT_COMPILE("###FIELDS;u;v;w;p;T;concentration\n")));
-    header.append(fmt::format(FMT_COMPILE("###DATE:{};XML:{}\n"),
-                              std::ctime(&end_time), Parameters::getInstance()->get_filename()));
-    m_header_length = header.length();
+    // std::string header = fmt::format(FMT_COMPILE("###DOMAIN;{};{};{}\n"), Nx, Ny, Nz);
+    // header.append(fmt::format(FMT_COMPILE("###FIELDS;u;v;w;p;T;concentration\n")));
+    // header.append(fmt::format(FMT_COMPILE("###DATE:{};XML:{}\n"),
+    //                          std::ctime(&end_time), Parameters::getInstance()->get_filename()));
+    std::string header = "###Domain;" + std::to_string(Nx) + ";" + std::to_string(Ny) + ";" + std::to_string(Nz) + "\n";
+    m_positions[0] = header.length() + 1;
     return header;
 }

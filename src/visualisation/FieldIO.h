@@ -9,10 +9,11 @@
 
 #include <string>
 #include "../field/FieldController.h"
+#include "../utility/Utility.h"
 
 class FieldIO {
  public:
-    FieldIO(FieldController *field_controller, real dt);
+    explicit FieldIO(FieldController *field_controller);
     void write_out(real t_cur);
     void read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C);
     void set_filename(std::string &filename) { m_filename = filename; }
@@ -21,12 +22,13 @@ class FieldIO {
     std::string create_header();
     FieldController *m_field_controller;
 
-    int m_length;
+    size_t *m_positions;
     std::string m_filename = "visualisation.dat";
-    int m_header_length;
     real m_dt;
 
-    int get_position(real t_cur, int length);
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 

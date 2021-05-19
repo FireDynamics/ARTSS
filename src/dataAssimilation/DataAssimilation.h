@@ -21,7 +21,8 @@ struct AssimilationMethods {
 class DataAssimilation {
  public:
     DataAssimilation(FieldController *field_controller);
-    void assimilate(real t_cur);
+    void assimilate(real t_old);
+    void save_data(real t_cur);
  private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
@@ -31,6 +32,7 @@ class DataAssimilation {
 
     IDataAssimilationFunction *func;
     FieldIO *m_field_IO;
+
 };
 
 
