@@ -14,11 +14,11 @@
 #include "utility/GlobalMacrosTypes.h"
 #include "solver/SolverController.h"
 #include "adaption/Adaption.h"
+#include "dataAssimilation/DataAssimilation.h"
 
 #ifndef BENCHMARKING
 #include "analysis/Analysis.h"
 #include "analysis/Solution.h"
-#include "dataAssimilation/DataAssimilation.h"
 #include "visualisation/Visual.h"
 
 #else

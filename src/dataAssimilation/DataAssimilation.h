@@ -24,7 +24,7 @@ class DataAssimilation {
     void assimilate(real t_old);
     void save_data(real t_cur);
 
-    bool is_rollback() { return m_rollback; }
+    bool requires_rollback() { return m_rollback; }
     void disable_rollback() { m_rollback = false; }
 
     real get_new_time_value();

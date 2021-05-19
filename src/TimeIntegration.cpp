@@ -145,7 +145,7 @@ void TimeIntegration::run() {
             //     std::cout<<"Von Neumann condition not met!"<<std::endl;
 #endif
             m_data_assimilation->save_data(t_cur);
-            if (m_data_assimilation->is_rollback()) {
+            if (m_data_assimilation->requires_rollback()) {
                 m_data_assimilation->disable_rollback();
                 t_cur = m_data_assimilation->get_new_time_value();
             }
