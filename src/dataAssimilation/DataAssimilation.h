@@ -23,7 +23,13 @@ class DataAssimilation {
     DataAssimilation(FieldController *field_controller);
     void assimilate(real t_old);
     void save_data(real t_cur);
- private:
+
+    bool is_rollback() { return m_rollback; }
+    void disable_rollback() { m_rollback = false; }
+
+    real get_new_time_value();
+
+private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -33,6 +39,8 @@ class DataAssimilation {
     IDataAssimilationFunction *func;
     FieldIO *m_field_IO;
 
+    bool m_rollback = false;
+    real m_t_cur = -1;
 };
 
 

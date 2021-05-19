@@ -5,10 +5,8 @@
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 
 #include "FieldIO.h"
-
 #include <chrono>
 #include <ctime>
-#define FMT_STRING_ALIAS 1
 
 #include "../Domain.h"
 
@@ -40,23 +38,18 @@ void FieldIO::write_out(real t_cur) {
     real *fields[] = {u, v, w, p, T, C};
     auto size = Domain::getInstance()->get_size();
     for (auto f: fields){
-        output.append(std::to_string(t) + ";" + std::to_string(t_cur) + ";");
         for (size_t i = 0; i < size - 1; i++) {
-//            output.append(fmt::format(FMT_COMPILE("{};"), f[i]));
-            output.append(std::to_string(f[i]) + ";");
+            output.append(fmt::format(("{};"), f[i]));
         }
-        output.append(std::to_string(f[size-1]) + "\n");
-        // output.append(fmt::format(FMT_COMPILE("{}\n"), f[size - 1]));
-        t++;
+        output.append(fmt::format(("{}\n"), f[size - 1]));
     }
 
-    size_t n = static_cast<size_t>(t_cur / m_dt);
+    size_t n = static_cast<size_t>(t_cur / m_dt) - 1;
     size_t length = output.length();
-    m_positions[n] = m_positions[n - 1] + length;
+    m_positions[n] = m_positions[n] + length;
 
     std::ofstream output_file(m_filename, std::ios_base::app);
-    output_file.seekp(m_positions[n - 1]);
-    // TODO write out at line n + m_header_length
+    output_file.seekp(m_positions[n]);
     output_file.write(output.c_str(), length);
 }
 
@@ -69,7 +62,6 @@ void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T,
     std::string line;
     input_file.seekg(pos);
 
-    // TODO fill fields with new values (u,v,w,p,T,C)
     Field *fields[] = {u, v, w, p, T, C};
     for (Field *f: fields) {
         getline(input_file, line);
@@ -101,11 +93,10 @@ std::string FieldIO::create_header() {
     auto Ny = domain->get_Ny();
     auto Nz = domain->get_Nz();
 
-    // std::string header = fmt::format(FMT_COMPILE("###DOMAIN;{};{};{}\n"), Nx, Ny, Nz);
-    // header.append(fmt::format(FMT_COMPILE("###FIELDS;u;v;w;p;T;concentration\n")));
-    // header.append(fmt::format(FMT_COMPILE("###DATE:{};XML:{}\n"),
-    //                          std::ctime(&end_time), Parameters::getInstance()->get_filename()));
-    std::string header = "###Domain;" + std::to_string(Nx) + ";" + std::to_string(Ny) + ";" + std::to_string(Nz) + "\n";
+    std::string header = fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz);
+    header.append(fmt::format(("###FIELDS;u;v;w;p;T;concentration\n")));
+    header.append(fmt::format(("###DATE:{};XML:{}\n"),
+                             std::ctime(&end_time), Parameters::getInstance()->get_filename()));
     m_positions[0] = header.length() + 1;
     return header;
 }

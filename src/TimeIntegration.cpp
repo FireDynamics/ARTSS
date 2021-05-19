@@ -27,6 +27,7 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
     m_field_controller = m_solver_controller->get_field_controller();
 
     m_adaption = new Adaption(m_field_controller);
+    m_data_assimilation = new DataAssimilation(m_field_controller);
 #ifndef BENCHMARKING
     m_solution = new Solution();
     m_analysis = new Analysis(m_solution);
@@ -143,6 +144,11 @@ void TimeIntegration::run() {
             // if(!VN_check)
             //     std::cout<<"Von Neumann condition not met!"<<std::endl;
 #endif
+            m_data_assimilation->save_data(t_cur);
+            if (m_data_assimilation->is_rollback()) {
+                m_data_assimilation->disable_rollback();
+                t_cur = m_data_assimilation->get_new_time_value();
+            }
             // update
             m_adaption->run(t_cur);
 #ifndef BENCHMARKING

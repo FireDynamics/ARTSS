@@ -10,7 +10,7 @@
 
 class IDataAssimilationFunction {
  public:
-    virtual bool control() = 0;
-    virtual void assimilate() = 0;
+    virtual bool control(Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) = 0;
+    virtual void assimilate(Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) = 0;
 };
 #endif /* ARTSS_SRC_INTERFACES_IDATAASSIMILATIONFUNCTION_H */

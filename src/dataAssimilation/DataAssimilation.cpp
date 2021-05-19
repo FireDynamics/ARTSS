@@ -40,14 +40,29 @@ void DataAssimilation::assimilate(real t_old) {
     Field *T_current = new Field(FieldType::T);
     Field *C_current = new Field(FieldType::RHO);
     m_field_IO->read(t_old, u_current, v_current, w_current, p_current, T_current, C_current);
-    if (func->control()) {
-        func->assimilate();
-        // TODO revert to time t_old
+    if (func->control(u_current, v_current, w_current, p_current, T_current, C_current)) {
+        // TODO stop simulation ?
+
+        func->assimilate(u_current, v_current, w_current, p_current, T_current, C_current);
+        m_field_controller->replace_data(u_current, v_current, w_current, p_current, T_current, C_current);
+
+        m_t_cur = t_old;
+        m_rollback = true;
     }
+    delete u_current;
+    delete v_current;
+    delete w_current;
+    delete p_current;
+    delete T_current;
+    delete C_current;
 }
 
 void DataAssimilation::save_data(real t_cur) {
     if (m_assimilated) {
         m_field_IO->write_out(t_cur);
     }
+}
+
+real DataAssimilation::get_new_time_value() {
+    return m_t_cur;
 }
