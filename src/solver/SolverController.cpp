@@ -90,13 +90,7 @@ void SolverController::set_up_sources(const std::string &string_solver) {
             real sigma_y = params->get_real("solver/temperature/source/sigma_y");
             real sigma_z = params->get_real("solver/temperature/source/sigma_z");
             real tau = params->get_real("solver/temperature/source/tau");
-            bool has_noise = false;  // params->get("solver/temperature/source/noise") == XML_TRUE;
-            if (has_noise) {
-                m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
-            } else {
-                m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
-                // TODO has noise
-            }
+            m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
         } else if (temp_fct == SourceMethods::BuoyancyST_MMS) {
             m_source_function_temperature = new BuoyancyMMS();
         } else if (temp_fct == SourceMethods::Cube) {
@@ -114,6 +108,25 @@ void SolverController::set_up_sources(const std::string &string_solver) {
 #ifndef BENCHMARKING
             m_logger->warn("Source method {} not yet implemented!", temp_fct);
 #endif
+        }
+        bool has_noise = params->get("solver/temperature/source/random") == XML_TRUE;
+        if (has_noise) {
+            auto params = Parameters::getInstance();
+            real range = params->get_real("solver/temperature/source/random/range");  // +- range of random numbers
+            bool has_custom_seed = params->get("solver/temperature/source/random/custom_seed") == "Yes";
+            bool has_custom_steps = params->get("solver/temperature/source/random/custom_steps") == "Yes";
+
+            int seed = -1;
+            if (has_custom_seed) {
+                seed = params->get_int("solver/temperature/source/random/seed");
+            }
+
+            real step_size = 1.0;
+            if (has_custom_steps) {
+                step_size = params->get_real("solver/temperature/source/random/step_size");
+            }
+
+            m_source_function_temperature->set_noise(range, seed, step_size);
         }
     }
 
@@ -419,6 +432,9 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             size_t index_z1 = Utility::get_index(z1, domain->get_dz(), domain->get_Z1());
             size_t index_z2 = Utility::get_index(z2, domain->get_dz(), domain->get_Z1());
             Functions::Jet(m_field_controller->field_u, index_x1, index_x2, index_y1, index_y2, index_z1, index_z2, value);
+            if (random) {
+                call_random(m_field_controller->field_u);
+            }
         } else if (dir == "y") {
             real x1 = params->get_real("initial_conditions/x1");
             real x2 = params->get_real("initial_conditions/x2");
@@ -431,6 +447,9 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             size_t index_z1 = Utility::get_index(z1, domain->get_dz(), domain->get_Z1());
             size_t index_z2 = Utility::get_index(z2, domain->get_dz(), domain->get_Z1());
             Functions::Jet(m_field_controller->field_v, index_x1, index_x2, index_y1, index_y2, index_z1, index_z2, value);
+            if (random) {
+                call_random(m_field_controller->field_v);
+            }
         } else if (dir == "z") {
             real x1 = params->get_real("initial_conditions/x1");
             real x2 = params->get_real("initial_conditions/x2");
@@ -443,6 +462,9 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             size_t index_z1 = domain->get_index_z1();
             size_t index_z2 = domain->get_index_z2();
             Functions::Jet(m_field_controller->field_w, index_x1, index_x2, index_y1, index_y2, index_z1, index_z2, value);
+            if (random) {
+                call_random(m_field_controller->field_w);
+            }
         }
     } else {
 #ifndef BENCHMARKING
@@ -509,7 +531,6 @@ void SolverController::force_source() {
         std::string dir = params->get("solver/source/dir");
         if (params->get("solver/source/use_init_values") == XML_FALSE) {
             real ambient_temperature_value = params->get_real("solver/source/ambient_temperature_value");
-            m_field_controller->field_T->set_value(ambient_temperature_value);
             m_field_controller->field_T_ambient->set_value(ambient_temperature_value);
         }
 
