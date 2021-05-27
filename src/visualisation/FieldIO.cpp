@@ -7,7 +7,8 @@
 #include "FieldIO.h"
 #include <chrono>
 #include <ctime>
-#include <fmt/os.h>
+#include <fmt/core.h>
+
 
 #include "../Domain.h"
 
@@ -19,7 +20,7 @@ FieldIO::FieldIO(FieldController *field_controller) : m_field_controller(field_c
     m_dt = Parameters::getInstance()->get_real("physical_parameters/dt");
     real t_end = Parameters::getInstance()->get_real("physical_parameters/t_end");
     size_t n = static_cast<size_t>(t_end / m_dt) + 1;
-    m_positions = new size_t[n];
+    m_positions = new int[n];
     const char* header = create_header().c_str();
     std::ofstream output_file(m_filename, std::ios_base::out);
     output_file.write(header, m_positions[0]);

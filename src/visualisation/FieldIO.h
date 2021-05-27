@@ -22,7 +22,7 @@ class FieldIO {
     std::string create_header();
     FieldController *m_field_controller;
 
-    size_t *m_positions;
+    int *m_positions;
     std::string m_filename = "visualisation.dat";
     real m_dt;
 
