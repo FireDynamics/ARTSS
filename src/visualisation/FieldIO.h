@@ -26,6 +26,9 @@ class FieldIO {
     std::string m_filename = "visualisation.dat";
     real m_dt;
 
+    int m_whole_number_digits;
+    int m_decimal_number_digits;
+
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

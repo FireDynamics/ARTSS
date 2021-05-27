@@ -8,7 +8,7 @@
 #include <chrono>
 #include <ctime>
 #include <fmt/core.h>
-
+#include <algorithm>
 
 #include "../Domain.h"
 
@@ -19,6 +19,15 @@ FieldIO::FieldIO(FieldController *field_controller) : m_field_controller(field_c
 #endif
     m_dt = Parameters::getInstance()->get_real("physical_parameters/dt");
     real t_end = Parameters::getInstance()->get_real("physical_parameters/t_end");
+
+    std::string string_t_end = std::to_string(t_end);
+    auto s_t_end = string_t_end.find('.');
+    std::string string_dt = std::to_string(m_dt);
+    auto s_dt = string_dt.find('.');
+
+    m_decimal_number_digits = std::max(string_t_end.substr(1, s_t_end).length(), string_dt.substr(1, s_dt).length());
+    m_whole_number_digits = std::max(string_t_end.substr(0, s_t_end).length(), string_dt.substr(0, s_dt).length());
+
     size_t n = static_cast<size_t>(t_end / m_dt) + 1;
     m_positions = new int[n];
     const char* header = create_header().c_str();
@@ -94,9 +103,10 @@ std::string FieldIO::create_header() {
     auto Ny = domain->get_Ny();
     auto Nz = domain->get_Nz();
 
-    std::string header = fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz);
-    header.append(fmt::format(("###FIELDS;u;v;w;p;T;concentration\n")));
-    header.append(fmt::format(("###DATE:{};XML:{}\n"),
+    std::string header = fmt::format("Current time step: {}, dt={}", 0, m_dt);
+    header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
+    header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
+    header.append(fmt::format("###DATE:{};XML:{}\n",
                              std::ctime(&end_time), Parameters::getInstance()->get_filename()));
     m_positions[0] = header.length() + 1;
     return header;
