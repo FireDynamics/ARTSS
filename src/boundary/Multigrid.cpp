@@ -190,12 +190,12 @@ Multigrid::~Multigrid() {
     size_t size_boundary_slice_z = get_length_of_boundary_slice_z_joined();
     size_t size_boundary_slice_y = get_length_of_boundary_slice_y_joined();
     size_t size_boundary_slice_x = get_length_of_boundary_slice_x_joined();
-#pragma acc exit data delete(m_data_MG_bFront_level_joined[:size_boundary_slice_z])
-#pragma acc exit data delete(m_data_MG_bBack_level_joined[:size_boundary_slice_z])
-#pragma acc exit data delete(m_data_MG_bTop_level_joined[:size_boundary_slice_y])
-#pragma acc exit data delete(m_data_MG_bBottom_level_joined[:size_boundary_slice_y])
-#pragma acc exit data delete(m_data_MG_bLeft_level_joined[:size_boundary_slice_x])
-#pragma acc exit data delete(m_data_MG_bRight_level_joined[:size_boundary_slice_x])
+#pragma acc exit data delete(m_data_MG_boundary_front_level_joined[:size_boundary_slice_z])
+#pragma acc exit data delete(m_data_MG_boundary_back_level_joined[:size_boundary_slice_z])
+#pragma acc exit data delete(m_data_MG_boundary_top_level_joined[:size_boundary_slice_y])
+#pragma acc exit data delete(m_data_MG_boundary_bottom_level_joined[:size_boundary_slice_y])
+#pragma acc exit data delete(m_data_MG_boundary_left_level_joined[:size_boundary_slice_x])
+#pragma acc exit data delete(m_data_MG_boundary_right_level_joined[:size_boundary_slice_x])
     delete[] m_data_MG_boundary_front_level_joined;
     delete[] m_data_MG_boundary_back_level_joined;
     delete[] m_data_MG_boundary_top_level_joined;
@@ -900,12 +900,12 @@ void Multigrid::send_boundary_lists_to_GPU() {
     }
 #pragma acc enter data copyin(m_data_MG_inner_list_level_joined[:size_inner_list])
 #pragma acc enter data copyin(m_data_MG_boundary_list_level_joined[:size_boundary_list])
-#pragma acc enter data copyin(m_data_MG_bFront_level_joined[:size_boundary_slice_z])
-#pragma acc enter data copyin(m_data_MG_bBack_level_joined[:size_boundary_slice_z])
-#pragma acc enter data copyin(m_data_MG_bTop_level_joined[:size_boundary_slice_y])
-#pragma acc enter data copyin(m_data_MG_bBottom_level_joined[:size_boundary_slice_y])
-#pragma acc enter data copyin(m_data_MG_bLeft_level_joined[:size_boundary_slice_x])
-#pragma acc enter data copyin(m_data_MG_bRight_level_joined[:size_boundary_slice_x])
+#pragma acc enter data copyin(m_data_MG_boundary_front_level_joined[:size_boundary_slice_z])
+#pragma acc enter data copyin(m_data_MG_boundary_back_level_joined[:size_boundary_slice_z])
+#pragma acc enter data copyin(m_data_MG_boundary_top_level_joined[:size_boundary_slice_y])
+#pragma acc enter data copyin(m_data_MG_boundary_bottom_level_joined[:size_boundary_slice_y])
+#pragma acc enter data copyin(m_data_MG_boundary_left_level_joined[:size_boundary_slice_x])
+#pragma acc enter data copyin(m_data_MG_boundary_right_level_joined[:size_boundary_slice_x])
 }
 
 // ================================= Send surface list to GPU ======================================
@@ -1000,12 +1000,12 @@ void Multigrid::send_obstacle_lists_to_GPU() {
 
         m_data_MG_obstacle_list_zero_joined = m_MG_obstacle_index_list[0];  // TODO(issue 33) wrong because only one obstacle is used?
         size_t size_obstacle_list = get_size_obstacle_list();
-#pragma acc enter data copyin(m_data_MG_oFront_level_joined[:size_oFront])
-#pragma acc enter data copyin(m_data_MG_oBack_level_joined[:size_oBack])
-#pragma acc enter data copyin(m_data_MG_oTop_level_joined[:size_oTop])
-#pragma acc enter data copyin(m_data_MG_oBottom_level_joined[:size_oBottom])
-#pragma acc enter data copyin(m_data_MG_oLeft_level_joined[:size_oLeft])
-#pragma acc enter data copyin(m_data_MG_oRight_level_joined[:size_oRight])
+#pragma acc enter data copyin(m_data_MG_obstacle_front_level_joined[:size_oFront])
+#pragma acc enter data copyin(m_data_MG_obstacle_back_level_joined[:size_oBack])
+#pragma acc enter data copyin(m_data_MG_obstacle_top_level_joined[:size_oTop])
+#pragma acc enter data copyin(m_data_MG_obstacle_bottom_level_joined[:size_oBottom])
+#pragma acc enter data copyin(m_data_MG_obstacle_left_level_joined[:size_oLeft])
+#pragma acc enter data copyin(m_data_MG_obstacle_right_level_joined[:size_oRight])
 #pragma acc enter data copyin(m_data_MG_obstacle_list_zero_joined[:size_obstacle_list])
     }
 }
@@ -1132,12 +1132,12 @@ void Multigrid::remove_boundary_lists_from_GPU() {
     size_t size_boundary_slice_z = get_length_of_boundary_slice_z_joined();
     size_t size_boundary_slice_y = get_length_of_boundary_slice_y_joined();
     size_t size_boundary_slice_x = get_length_of_boundary_slice_x_joined();
-#pragma acc exit data delete(m_data_MG_bFront_level_joined[:size_boundary_slice_z])
-#pragma acc exit data delete(m_data_MG_bBack_level_joined[:size_boundary_slice_z])
-#pragma acc exit data delete(m_data_MG_bTop_level_joined[:size_boundary_slice_y])
-#pragma acc exit data delete(m_data_MG_bBottom_level_joined[:size_boundary_slice_y])
-#pragma acc exit data delete(m_data_MG_bLeft_level_joined[:size_boundary_slice_x])
-#pragma acc exit data delete(m_data_MG_bRight_level_joined[:size_boundary_slice_x])
+#pragma acc exit data delete(m_data_MG_boundary_front_level_joined[:size_boundary_slice_z])
+#pragma acc exit data delete(m_data_MG_boundary_back_level_joined[:size_boundary_slice_z])
+#pragma acc exit data delete(m_data_MG_boundary_top_level_joined[:size_boundary_slice_y])
+#pragma acc exit data delete(m_data_MG_boundary_bottom_level_joined[:size_boundary_slice_y])
+#pragma acc exit data delete(m_data_MG_boundary_left_level_joined[:size_boundary_slice_x])
+#pragma acc exit data delete(m_data_MG_boundary_right_level_joined[:size_boundary_slice_x])
     delete[] m_data_MG_boundary_front_level_joined;
     delete[] m_data_MG_boundary_back_level_joined;
     delete[] m_data_MG_boundary_top_level_joined;
