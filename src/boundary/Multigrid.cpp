@@ -1147,7 +1147,6 @@ void Multigrid::remove_boundary_lists_from_GPU() {
 }
 
 //======================================== Private getter ==========================================
-
 // *************************************************************************************************
 /// \brief  get size of obstacle index list for level
 /// \param level Multigrid level
