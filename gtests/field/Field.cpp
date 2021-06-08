@@ -58,7 +58,7 @@ TEST_F(FieldTest, swap_field) {
         x += 1.0;
     }
 
-    Field::swap(&a, &b);
+    Field::swap(a, b);
 
     x = 0.0;
     for (auto i=0; i < size; ++i) {

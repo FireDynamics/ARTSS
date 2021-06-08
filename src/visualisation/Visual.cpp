@@ -30,6 +30,7 @@ Visual::Visual(const Solution &solution) : m_solution(solution) {
     if (m_save_vtk) {
         m_vtk_plots = params->get_int("visualisation/vtk_nth_plot");
     }
+    m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
 }
 
 void Visual::visualise(const FieldController &field_controller, real t) {
