@@ -353,7 +353,7 @@ void Multigrid::control() {
         }
     }
 
-    {
+    if (get_size_obstacle_list() != 0) {
         std::vector<size_t> v(m_data_MG_obstacle_list_zero_joined, m_data_MG_obstacle_list_zero_joined + get_size_obstacle_list());
         std::sort(v.begin(), v.end());
         std::vector<size_t>::iterator it = std::unique(v.begin(), v.begin() + get_size_obstacle_list());
