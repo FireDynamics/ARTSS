@@ -141,6 +141,11 @@ if(NOT TARGET gtest)
     add_subdirectory(external/googletest)
 endif()
 
+if(NOT TARGET Threads::Threads)
+    find_package(Threads QUIET)
+endif()
+
+
 #Targets
 add_executable(artss_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
@@ -152,6 +157,7 @@ target_compile_options(artss_serial_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_serial_benchmark PUBLIC -DBENCHMARKING -DUSE_NVTX)
 target_link_libraries(artss_serial_benchmark)
 target_link_libraries(artss_serial_benchmark PRIVATE fmt::fmt)
+target_link_libraries(artss_serial_benchmark PRIVATE Threads::Threads)
 
 
 add_executable(artss_multicore_cpu ${ARTSS_SOURCE_FILES} src/main.cpp)
