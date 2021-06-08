@@ -116,29 +116,29 @@ FieldController::~FieldController() {
     delete field_u;
     delete field_v;
     delete field_w;
-    delete field_u0;
-    delete field_v0;
-    delete field_w0;
-    delete field_u_tmp;
-    delete field_v_tmp;
-    delete field_w_tmp;
+    delete field_u0;  // TODO(issue 139) invalid free
+    delete field_v0;  // TODO(issue 139) invalid free
+    delete field_w0;  // TODO(issue 139) invalid free
+    delete field_u_tmp;  // TODO(issue 139) invalid free
+    delete field_v_tmp;  // TODO(issue 139) invalid free
+    delete field_w_tmp;  // TODO(issue 139) invalid free
 
     delete field_nu_t;
     delete field_kappa_t;
     delete field_gamma_t;
 
     delete field_p;
-    delete field_p0;
+    delete field_p0;  // TODO(issue 139) invalid free
     delete field_rhs;
 
     delete field_T;
-    delete field_T0;
-    delete field_T_tmp;
+    delete field_T0;  // TODO(issue 139) invalid free
+    delete field_T_tmp;  // TODO(issue 139) invalid free
     delete field_T_ambient;
 
     delete field_concentration;
-    delete field_concentration0;
-    delete field_concentration_tmp;
+    delete field_concentration0;  // TODO(issue 139) invalid free
+    delete field_concentration_tmp;  // TODO(issue 139) invalid free
 
     delete field_force_x;
     delete field_force_y;
