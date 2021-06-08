@@ -20,13 +20,13 @@ struct AssimilationMethods {
 
 class DataAssimilation {
  public:
-    DataAssimilation(FieldController *field_controller);
+    DataAssimilation(const FieldController &field_controller);
     void assimilate(real t_cur);
  private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    FieldController *m_field_controller;
+    const FieldController &m_field_controller;
     bool m_assimilated = false;
 
     IDataAssimilationFunction *func;

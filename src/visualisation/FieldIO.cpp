@@ -13,7 +13,7 @@
 #include "../Domain.h"
 
 
-FieldIO::FieldIO(FieldController *field_controller, real dt) :
+FieldIO::FieldIO(const FieldController &field_controller, real dt) :
                 m_field_controller(field_controller), m_dt(dt) {
     const char* header = create_header().c_str();
     std::ofstream output_file(m_filename, std::ofstream::binary);

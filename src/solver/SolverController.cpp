@@ -39,7 +39,7 @@ SolverController::SolverController() {
 #ifndef BENCHMARKING
     m_logger->info("Start initialising....");
 #endif
-    set_up_sources(string_solver);
+    set_up_sources();
     set_up_fields(string_solver);
     // TODO unclean, first updating device to apply boundary and then updating host to create temporary fields.
     m_field_controller->update_device();
@@ -63,7 +63,7 @@ SolverController::~SolverController() {
     delete source_concentration;
 }
 
-void SolverController::set_up_sources(const std::string &string_solver) {
+void SolverController::set_up_sources() {
     auto params = Parameters::getInstance();
     // source of temperature
     if (m_has_temperature) {

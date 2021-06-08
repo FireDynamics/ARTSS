@@ -12,14 +12,14 @@
 
 class FieldIO {
  public:
-    FieldIO(FieldController *field_controller, real dt);
+    FieldIO(const FieldController &field_controller, real dt);
     void write_out(real t_cur);
     void read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C);
     void set_filename(std::string &filename) { m_filename = filename; }
 
  private:
     std::string create_header();
-    FieldController *m_field_controller;
+    const FieldController &m_field_controller;
 
     int m_length;
     std::string m_filename = "visualisation.dat";

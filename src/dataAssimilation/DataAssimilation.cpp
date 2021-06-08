@@ -8,7 +8,7 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 
-DataAssimilation::DataAssimilation(FieldController *field_controller) : m_field_controller(field_controller) {
+DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
