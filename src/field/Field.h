@@ -31,6 +31,7 @@ class Field {
     // getter
     FieldType get_type() const { return this->m_type; }
     size_t get_level() const { return this->m_level; }
+    size_t get_size() const { return this->m_size; }
 
     inline real& operator[](size_t i) const { return data[i]; }
 
