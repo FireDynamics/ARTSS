@@ -6,7 +6,7 @@
 # -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
 #--------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.12  FATAL_ERROR)
 
 project(ARTSS)
 add_executable(artss)
@@ -151,6 +151,7 @@ add_executable(artss_serial_benchmark ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_serial_benchmark PUBLIC -DBENCHMARKING -DUSE_NVTX)
 target_link_libraries(artss_serial_benchmark)
+target_link_libraries(artss_serial_benchmark PRIVATE fmt::fmt)
 
 
 add_executable(artss_multicore_cpu ${ARTSS_SOURCE_FILES} src/main.cpp)
@@ -165,6 +166,7 @@ target_compile_options(artss_multicore_cpu_benchmark PUBLIC ${ARTSS_COMPILE_OPTI
 target_compile_options(artss_multicore_cpu_benchmark PUBLIC -acc -ta=multicore -DBENCHMARKING -DUSE_NVTX)
 target_link_options(artss_multicore_cpu_benchmark PUBLIC -acc -ta=multicore)
 target_link_libraries(artss_multicore_cpu_benchmark)
+target_link_libraries(artss_multicore_cpu_benchmark PRIVATE fmt::fmt)
 
 
 add_executable(artss_gpu ${ARTSS_SOURCE_FILES} src/main.cpp)
@@ -179,6 +181,7 @@ target_compile_options(artss_gpu_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_gpu_benchmark PUBLIC -acc -Minfo=accel -DBENCHMARKING -DUSE_NVTX -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_options(artss_gpu_benchmark PUBLIC -acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_libraries(artss_gpu_benchmark)
+target_link_libraries(artss_gpu_benchmark PRIVATE fmt::fmt)
 
 
 enable_testing()

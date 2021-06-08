@@ -14,11 +14,13 @@
 #include "utility/GlobalMacrosTypes.h"
 #include "solver/SolverController.h"
 #include "adaption/Adaption.h"
+#include "dataAssimilation/DataAssimilation.h"
 
 #ifndef BENCHMARKING
 #include "analysis/Analysis.h"
 #include "analysis/Solution.h"
 #include "visualisation/Visual.h"
+
 #else
 // only needed if no logger will be available
 #include <iostream>
@@ -37,6 +39,7 @@ class TimeIntegration {
     FieldController *m_field_controller;
     SolverController *m_solver_controller;
     Adaption *m_adaption;
+    DataAssimilation *m_data_assimilation;
 #ifndef BENCHMARKING
     Visual *m_visual;
     Solution *m_solution;

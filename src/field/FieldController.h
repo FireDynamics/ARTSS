@@ -20,6 +20,7 @@ class FieldController {
     void set_up_boundary();
     void set_up_temporary_fields();
     void update_data(bool sync);
+    void replace_data(Field *u, Field *v, Field *w, Field *p, Field *T, Field *C);
 
     // Getter
     real* get_field_u_data() const { return field_u->data; }
