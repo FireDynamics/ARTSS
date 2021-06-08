@@ -13,6 +13,7 @@
 #include "../diffusion/JacobiDiffuse.h"
 #include "../solver/SolverSelection.h"
 #include "../utility/Parameters.h"
+#include "../utility/Utility.h"
 
 
 // =============================== Constructor ===============================
@@ -910,6 +911,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
 
     size_t *data_inner_list = boundary->get_inner_list_level_joined();
     size_t *data_boundary_list = boundary->get_boundary_list_level_joined();
+    size_t bsize_b = boundary->get_size_boundary_list_level_joined();
 
     // start/end
     // inner
