@@ -49,4 +49,3 @@ class Field {
 };
 
 #endif /* ARTSS_FIELD_FIELD_H_ */
-
