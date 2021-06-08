@@ -34,8 +34,8 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
 
 ## Formatting
 #### Parenthesis:
-    - the opening parenthesis is in the same line as the opening statement and NOT on a separate line
-    - do not drop parenthesis even if the the body of a statement consist of a single line
+  - the opening parenthesis is in the same line as the opening statement and NOT on a separate line
+  - do not drop parenthesis even if the the body of a statement consist of a single line
 
     Example:
     ```
@@ -99,6 +99,9 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
   ```
 
 ## Scoping
+#### The auto keyword
+  We like to use the `auto` type specifier to improve code readability. For example in situations where the variable type matches the initialiser expression. For more detailed information see Clang Tidy rule `moderinze-use-auto`.
+  
 #### Static and global variables and singletons
   ARTSS currently uses some static and global variables as well two singletons, please refrain from adding new ones except for a exceptional good reason.
 
