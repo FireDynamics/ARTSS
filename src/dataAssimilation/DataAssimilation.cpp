@@ -12,16 +12,15 @@ DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_IO = new FieldIO(m_field_controller);
-
     Parameters *params = Parameters::getInstance();
     m_assimilated = (params->get("data_assimilation/enabled") == "Yes");
     if (m_assimilated) {
-        std::string init = params->get("data_assimilation/class/name");
-        if (init == AssimilationMethods::Test) {
+        std::string init = params->get("data_assimilation/class_name");
+        if (init == AssimilationMethods::Standard) {
 #ifndef BENCHMARKING
-            m_logger->critical("worked");
+            m_logger->debug("found data assimilation class {}", init);
 #endif
+            m_func = new FieldIO();
         } else {
 #ifndef BENCHMARKING
             m_logger->critical("Data Assimilation class {} is not defined", init);
@@ -32,23 +31,17 @@ DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_
     }
 }
 
-void DataAssimilation::assimilate(real t_old) {
-    Field *u_current = new Field(FieldType::U);
-    Field *v_current = new Field(FieldType::V);
-    Field *w_current = new Field(FieldType::W);
-    Field *p_current = new Field(FieldType::P);
-    Field *T_current = new Field(FieldType::T);
-    Field *C_current = new Field(FieldType::RHO);
-    m_field_IO->read(t_old, u_current, v_current, w_current, p_current, T_current, C_current);
-    if (func->control(u_current, v_current, w_current, p_current, T_current, C_current)) {
-        // TODO stop simulation ?
+void DataAssimilation::assimilate(std::string &file_name) {
+    auto *u_current = new Field(FieldType::U);
+    auto *v_current = new Field(FieldType::V);
+    auto *w_current = new Field(FieldType::W);
+    auto *p_current = new Field(FieldType::P);
+    auto *T_current = new Field(FieldType::T);
+    auto *C_current = new Field(FieldType::RHO);
 
-        func->assimilate(u_current, v_current, w_current, p_current, T_current, C_current);
-        m_field_controller.replace_data(u_current, v_current, w_current, p_current, T_current, C_current);
+    m_t_cur = m_func->read(file_name, u_current, v_current, w_current, p_current, T_current, C_current);
+    m_field_controller.replace_data(u_current, v_current, w_current, p_current, T_current, C_current);
 
-        m_t_cur = t_old;
-        m_rollback = true;
-    }
     delete u_current;
     delete v_current;
     delete w_current;
@@ -59,10 +52,23 @@ void DataAssimilation::assimilate(real t_old) {
 
 void DataAssimilation::save_data(real t_cur) {
     if (m_assimilated) {
-        m_field_IO->write_out(t_cur);
+        auto u = m_field_controller.get_field_u_data();
+        auto v = m_field_controller.get_field_v_data();
+        auto w = m_field_controller.get_field_w_data();
+        auto p = m_field_controller.get_field_w_data();
+        auto T = m_field_controller.get_field_T_data();
+        auto C = m_field_controller.get_field_concentration_data();
+
+        m_func->write(t_cur, u, v, w, p, T, C);
     }
 }
 
-real DataAssimilation::get_new_time_value() {
+real DataAssimilation::get_new_time_value() const {
     return m_t_cur;
+}
+
+void DataAssimilation::initiate_rollback() {
+    m_rollback = false;
+    std::string file_name = "test";
+    assimilate(file_name);
 }

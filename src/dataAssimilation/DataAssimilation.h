@@ -12,22 +12,22 @@
 #include "../field/FieldController.h"
 #include "../interfaces/IDataAssimilationFunction.h"
 #include "../utility/Utility.h"
-#include "../visualisation/FieldIO.h"
+#include "FieldIO.h"
 
 struct AssimilationMethods {
-    inline static const std::string Test = "Test";
+    inline static const std::string Standard = "default";
 };
 
 class DataAssimilation {
  public:
-    DataAssimilation(const FieldController &field_controller);
-    void assimilate(real t_old);
+    explicit DataAssimilation(const FieldController &field_controller);
     void save_data(real t_cur);
 
-    bool requires_rollback() { return m_rollback; }
-    void disable_rollback() { m_rollback = false; }
+    bool requires_rollback() const { return m_rollback; }
 
-    real get_new_time_value();
+    real get_new_time_value() const;
+
+    void initiate_rollback();
 
 private:
 #ifndef BENCHMARKING
@@ -36,11 +36,12 @@ private:
     FieldController m_field_controller;
     bool m_assimilated = false;
 
-    IDataAssimilationFunction *func;
-    FieldIO *m_field_IO;
+    IDataAssimilationFunction *m_func;
 
     bool m_rollback = false;
     real m_t_cur = -1;
+
+    void assimilate(std::string &file_name);
 };
 
 

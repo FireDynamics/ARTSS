@@ -10,28 +10,31 @@
 #include <string>
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
+#include "../interfaces/IDataAssimilationFunction.h"
 
-class FieldIO {
+class FieldIO : public IDataAssimilationFunction {
  public:
-    explicit FieldIO(const FieldController &field_controller);
-    void write_out(real t_cur);
-    void read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C);
+    FieldIO();
+    void write(real t_cur, real *data_u, real *data_v, real *data_w, real *data_p, real *data_T, real *data_C) override;
+    real read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) override;
     void set_filename(std::string &filename) { m_filename = filename; }
+    void read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C);
 
  private:
     std::string create_header();
-    const FieldController &m_field_controller;
 
-    int *m_positions;
+    long *m_positions;
     std::string m_filename = "visualisation.dat";
     real m_dt;
+    std::string m_format;
 
-    int m_whole_number_digits;
-    int m_decimal_number_digits;
+    long m_pos_time_step;
 
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+
+    long m_len_time_step;
 };
 
 

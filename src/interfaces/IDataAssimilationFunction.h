@@ -10,7 +10,7 @@
 
 class IDataAssimilationFunction {
  public:
-    virtual bool control(Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) = 0;
-    virtual void assimilate(Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) = 0;
+    virtual real read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) = 0;
+    virtual void write(real t, real *data_u, real *data_v, real *data_w, real *data_p, real *data_T, real *data_C) = 0;
 };
 #endif /* ARTSS_SRC_INTERFACES_IDATAASSIMILATIONFUNCTION_H */
