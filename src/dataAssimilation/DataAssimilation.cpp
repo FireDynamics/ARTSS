@@ -7,6 +7,8 @@
 #include "DataAssimilation.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
+#include "../TCP/TCPServer.h"
+#include <mpi.h>
 
 DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_field_controller(field_controller) {
 #ifndef BENCHMARKING
@@ -28,6 +30,7 @@ DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_
             std::exit(1);
             // TODO Error Handling
         }
+        config_MPI();
     }
 }
 
@@ -71,4 +74,53 @@ void DataAssimilation::initiate_rollback() {
     m_rollback = false;
     std::string file_name = "test";
     assimilate(file_name);
+}
+
+void DataAssimilation::config_MPI() {
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Init(NULL, NULL);
+
+    int comm_size, comm_rank;
+    MPI_Comm_size(comm, &comm_size);
+    MPI_Comm_rank(comm, &comm_rank);
+
+    if (comm_rank == 1) {
+        TCPServer tcp_server;
+        tcp_server.onNewConnection = [&](TCPSocket *new_client) {
+            std::cout << "New client: [";
+            std::cout << new_client->remoteAddress() << ":" << new_client->remotePort() << "]" << std::endl;
+
+            new_client->onMessageReceived = [new_client](std::string message) {
+                std::cout << new_client->remoteAddress() << ":" << new_client->remotePort() << " => " << message << std::endl;
+                new_client->Send("OK!");
+            };
+
+            new_client->onSocketClosed = [new_client](int errorCode) {
+                std::cout << "Socket closed:" << new_client->remoteAddress() << ":" << new_client->remotePort() << " -> " << errorCode << std::endl;
+            };
+        };
+
+        // Bind the server to a port.
+        tcp_server.Bind(8888, [](int errorCode, std::string errorMessage) {
+            // BINDING FAILED:
+            std::cout << errorCode << " : " << errorMessage << std::endl;
+        });
+
+        // Start Listening the server.
+        tcp_server.Listen([](int errorCode, std::string errorMessage) {
+            // LISTENING FAILED:
+            std::cout << errorCode << " : " << errorMessage << std::endl;
+        });
+
+        // You should do an input loop so the program will not terminated immediately:
+        std::string input;
+        getline(std::cin, input);
+        while (input != "exit") {
+            getline(std::cin, input);
+        }
+
+        // Close the server before exiting the program.
+        tcp_server.Close();
+    }
+
 }
