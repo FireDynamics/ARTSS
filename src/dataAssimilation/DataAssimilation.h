@@ -42,8 +42,9 @@ private:
     real m_t_cur = -1;
 
     void assimilate(std::string &file_name);
-
+#ifdef ASSIMILATION
     void config_MPI();
+#endif
 };
 
 
