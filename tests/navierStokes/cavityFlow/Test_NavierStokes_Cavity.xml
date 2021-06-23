@@ -50,7 +50,7 @@
     <nz> 1 </nz>
   </domain_parameters>
 
-  <adaption dynamic="No" data_extraction="No"> </adaption>
+  <adaption dynamic="No" data_extraction="No"> </adaption> <data_assimilation enabled="No" />
 
   <boundaries>
     <boundary field="u" patch="top" type="dirichlet" value="1.0" />
