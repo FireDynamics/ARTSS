@@ -8,7 +8,7 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../TCP/TCPServer.h"
-#include <mpi.h>
+#include "mpi.h"
 
 DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_field_controller(field_controller) {
 #ifndef BENCHMARKING
