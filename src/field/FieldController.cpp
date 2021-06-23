@@ -168,22 +168,22 @@ void FieldController::set_up_boundary() {
 
 void FieldController::set_up_temporary_fields() {
     // copy constructor
-    field_u0 = new Field(field_u->get_type());
-    field_u_tmp = new Field(field_u->get_type());
+    field_u0 = new Field(*field_u);
+    field_u_tmp = new Field(*field_u);
 
-    field_v0 = new Field(field_v->get_type());
-    field_v_tmp = new Field(field_v->get_type());
+    field_v0 = new Field(*field_v);
+    field_v_tmp = new Field(*field_v);
 
-    field_w0 = new Field(field_w->get_type());
-    field_w_tmp = new Field(field_w->get_type());
+    field_w0 = new Field(*field_w);
+    field_w_tmp = new Field(*field_w);
 
-    field_T0 = new Field(field_T->get_type());
-    field_T_tmp = new Field(field_T->get_type());
+    field_T0 = new Field(*field_T);
+    field_T_tmp = new Field(*field_T);
 
-    field_concentration0 = new Field(field_concentration->get_type());
-    field_concentration_tmp = new Field(field_concentration->get_type());
+    field_concentration0 = new Field(*field_concentration);
+    field_concentration_tmp = new Field(*field_concentration);
 
-    field_p0 = new Field(field_p->get_type());
+    field_p0 = new Field(*field_p);
 
     auto d_u0 = field_u0->data;
     auto d_v0 = field_v0->data;
@@ -206,18 +206,6 @@ void FieldController::set_up_temporary_fields() {
                               d_p0[:bsize], \
                               d_T0[:bsize], d_T_tmp[:bsize], \
                               d_C0[:bsize], d_C_tmp[:bsize])
-
-    field_u0->copy_data(*field_u);
-    field_u_tmp->copy_data(*field_u);
-    field_v0->copy_data(*field_v);
-    field_v_tmp->copy_data(*field_v);
-    field_w0->copy_data(*field_w);
-    field_w_tmp->copy_data(*field_w);
-    field_T0->copy_data(*field_T);
-    field_T_tmp->copy_data(*field_T);
-    field_concentration0->copy_data(*field_concentration);
-    field_concentration_tmp->copy_data(*field_concentration);
-    field_p0->copy_data(*field_p);
 }
 
 //======================================= Update data ==================================
