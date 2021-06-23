@@ -45,7 +45,7 @@
       <turbulence include="Yes">
         <Pr_T> 0.9 </Pr_T>
       </turbulence>
-      <source type="ExplicitEuler" temp_fct="BuoyancyST_MMS" dissipation="No">
+      <source type="ExplicitEuler" temp_fct="BuoyancyST_MMS" dissipation="No" random="No">
       </source>
     </temperature>
     <solution available="No">

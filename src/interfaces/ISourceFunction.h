@@ -13,6 +13,7 @@
 class ISourceFunction {
 public:
     virtual void update_source(Field *out, real t_cur) = 0;
+    virtual void set_noise(real range, int seed, real step_size) { }
 };
 
 

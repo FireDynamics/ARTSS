@@ -177,7 +177,7 @@ function create_testcases {
     <w_lin> 0. </w_lin>  <!-- z-velocity in linear case  -->
     <pa> 0. </pa>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type=\"ExplicitEuler\" temp_fct=\"Zero\" dissipation=\"No\">
+    echo "    <source type=\"ExplicitEuler\" temp_fct=\"Zero\" dissipation=\"No\" random=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
 
@@ -196,7 +196,7 @@ function create_testcases {
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "    <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\">
+    echo "    <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\" random=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
@@ -228,7 +228,7 @@ function create_testcases {
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct=\"RampTanh\" dissipation=\"No\">
+    echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" dissipation=\"No\" random=\"No\">
         <HRR> 25000. </HRR>     <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 30. </x0>
@@ -269,7 +269,7 @@ function create_testcases {
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\">
+    echo "      <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\" random=\"No\">
       </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
@@ -380,7 +380,7 @@ function create_testcases {
     echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"No\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
       <ambient_temperature_value> 300 </ambient_temperature_value>
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct= \"RampTanh\" dissipation=\"No\">
+    echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" dissipation=\"No\" random=\"No\">
         <HRR> 2500. </HRR>      <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 0. </x0>
@@ -416,7 +416,7 @@ function create_testcases {
     echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"No\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
       <ambient_temperature_value> 299.14 </ambient_temperature_value>
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type = \"ExplicitEuler\" temp_fct=\"GaussST\" ramp_fct= \"RampTanh\" dissipation=\"No\">
+    echo "      <source type = \"ExplicitEuler\" temp_fct=\"GaussST\" dissipation=\"No\" random=\"No\">
         <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
         <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 0. </x0>

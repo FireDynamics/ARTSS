@@ -19,7 +19,9 @@ public:
 
     static void initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
 
-    static void write_csv(const FieldController &solver, std::string filename);
+    static void write_csv(const FieldController &field_controller, std::string filename);
+    static void write_vtk(const FieldController &field_controller, std::string filename);
+    static void write_vtk_debug(const FieldController &field_controller, std::string filename);
 
 private:
     static std::string remove_extension(const std::string &filename);

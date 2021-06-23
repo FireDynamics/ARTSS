@@ -23,8 +23,7 @@ GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real 
 }
 
 void GaussFunction::init() {
-    auto params = Parameters::getInstance();
-    m_field_spatial_values = new Field(FieldType::RHO, 0.);
+    m_field_spatial_values = new Field(FieldType::RHO);
     create_spatial_values();
 }
 
@@ -40,14 +39,31 @@ void GaussFunction::update_source(Field *out, real t_cur) {
     auto data_out = out->data;
     auto data_spatial = m_field_spatial_values->data;
     auto time_val = get_time_value(t_cur);
+    std::uniform_int_distribution<int> dist(-m_steps, m_steps);
 
 #pragma acc data present(data_out[:size], data_spatial[:size])
     {
 #pragma acc parallel loop independent present(data_out[:size], data_spatial[:size]) async
         for (size_t i = 0; i < size; i++) {
-            data_out[i] = data_spatial[i] * time_val;  // TODO * random value (5%)
+            double no = dist(m_mt) * m_step_size;
+            // ((1 + no) - no * (1 - m_has_noise)) = 1 + no - no + no * m_has_noise
+            double noise = 1 + no * m_has_noise;  // * 1 if no noise, * (1-no) else
+            data_out[i] = data_spatial[i] * time_val * noise;
         }
 #pragma acc wait
+    }
+}
+
+void GaussFunction::set_noise(real range, int seed, real step_size) {
+    m_has_noise = true;
+    m_steps = range / step_size;
+    m_step_size = step_size;
+
+    if (seed > 0) {
+        m_mt = std::mt19937(seed);
+    } else {
+        std::random_device rd;
+        m_mt = std::mt19937(rd());
     }
 }
 
@@ -121,11 +137,7 @@ void GaussFunction::create_spatial_values() {
         auto y_j = (yj(j, Y1, dy) - m_y0);
         auto z_k = (zk(k, Z1, dz) - m_z0);
         real expr = std::exp(-(r_sigma_x_2 * x_i * x_i + r_sigma_y_2 * y_j * y_j + r_sigma_z_2 * z_k * z_k));
-        real tmp = HRRrV * rcp * expr;
-        if (tmp < 0.01) {
-            tmp = 0;
-        }
-        d_out[idx] = tmp;
+        d_out[idx] = HRRrV * rcp * expr;
     }
 
 #pragma acc enter data copyin(d_out[:bsize])

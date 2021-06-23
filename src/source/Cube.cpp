@@ -9,38 +9,26 @@
 #include "../boundary/BoundaryController.h"
 
 void Cube::update_source(Field *out, real t_cur) {
-    auto boundary = BoundaryController::getInstance();
     size_t size = Domain::getInstance()->get_size();
+    auto data_out = out->data;
+    auto data_spatial = m_source_field->data;
+    std::uniform_int_distribution<int> dist(-m_steps, m_steps);
 
-    auto d_out = out->data;
-    auto d_source = m_source_field->data;
-
-#pragma acc data present(d_out[:size], d_source[:size])
+#pragma acc data present(data_out[:size], data_spatial[:size])
     {
-        size_t *d_iList = boundary->get_inner_list_level_joined();
-        size_t *d_bList = boundary->get_boundary_list_level_joined();
-
-        auto bsize_i = boundary->get_size_inner_list();
-        auto bsize_b = boundary->get_size_boundary_list();
-
-#pragma acc parallel loop independent present(d_out[:size], d_source[:size]) async
-        // inner cells
-        for (size_t l = 0; l < bsize_i; ++l) {
-            const size_t idx = d_iList[l];
-            d_out[idx] = d_source[idx];
+#pragma acc parallel loop independent present(data_out[:size], data_spatial[:size]) async
+        for (size_t i = 0; i < size; i++) {
+            double no = dist(m_mt) * m_step_size;
+            // ((1 + no) - no * (1 - m_has_noise)) = 1 + no - no + no * m_has_noise
+            double noise = 1 + no * m_has_noise;  // * 1 if no noise, * (1-no) else
+            data_out[i] = data_spatial[i] * noise;
         }
-
-        // boundary cells
-        for (size_t l = 0; l < bsize_b; ++l) {
-            const size_t idx = d_bList[l];
-            d_out[idx] = d_source[idx];
-        }
+#pragma acc wait
     }
-
 }
 
 Cube::Cube(real value, real x_start, real y_start, real z_start, real x_end, real y_end, real z_end) {
-    m_source_field = new Field(FieldType::T, 0);
+    m_source_field = new Field(FieldType::T);
     set_up(value, x_start, y_start, z_start, x_end, y_end, z_end);
 }
 
@@ -83,4 +71,17 @@ void Cube::set_up(real value, real x_start, real y_start, real z_start, real x_e
         }
     }
 #pragma acc enter data copyin(data[:size])
+}
+
+void Cube::set_noise(real range, int seed, real step_size) {
+    m_has_noise = true;
+    m_steps = range / step_size;
+    m_step_size = step_size;
+
+    if (seed > 0) {
+        m_mt = std::mt19937(seed);
+    } else {
+        std::random_device rd;
+        m_mt = std::mt19937(rd());
+    }
 }

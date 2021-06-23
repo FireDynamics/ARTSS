@@ -15,9 +15,11 @@ public:
     BuoyancyMMS();
     ~BuoyancyMMS();
     void update_source(Field *out, real t_cur) override;
+    void set_noise(bool has_noise) { m_has_noise = has_noise; }
 private:
     void set_up();
     Field *m_source_field;
+    bool m_has_noise = false;
 };
 
 
