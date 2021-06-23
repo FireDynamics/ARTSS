@@ -2,7 +2,7 @@
 
 #include <cerrno>
 
-std::string BaseSocket::ipToString(sockaddr_in addr)
+std::string BaseSocket::ip_to_string(sockaddr_in addr)
 {
     char ip[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &(addr.sin_addr), ip, INET_ADDRSTRLEN);
@@ -10,31 +10,31 @@ std::string BaseSocket::ipToString(sockaddr_in addr)
     return std::string(ip);
 }
 
-BaseSocket::BaseSocket(std::function<void(int, std::string)> onError, SocketType sockType, int socketId) : sock(socketId)
+BaseSocket::BaseSocket(std::function<void(int, std::string)> onError, SocketType socket_type, int socket_id) : sock(socket_id)
 {
-    if (socketId < 0)
+    if (socket_id < 0)
     {
-        if ((this->sock = socket(AF_INET, sockType, 0)) < 0)
+        if ((this->sock = socket(AF_INET, socket_type, 0)) < 0)
         {
             onError(errno, "Socket creating error.");
         }
     }
 }
 
-void BaseSocket::Close()
+void BaseSocket::close()
 {
-    if(isClosed) return;
+    if(is_closed) return;
 
-    isClosed = true;
+    is_closed = true;
     close(this->sock);    
 }
 
-std::string BaseSocket::remoteAddress()
+std::string BaseSocket::remote_address()
 {
-    return ipToString(this->address);
+    return ip_to_string(this->address);
 }
 
-int BaseSocket::remotePort()
+int BaseSocket::remote_port()
 {
     return ntohs(this->address.sin_port);
 }

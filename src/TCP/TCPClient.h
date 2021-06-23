@@ -1,3 +1,8 @@
+/// \file      TCPClient.h
+/// \brief     Based on GitHub Project Asynchronous Sockets for C++ (https://github.com/eminfedar/async-sockets-cpp)
+/// \date      June 23, 2021
+/// \author    My Linh Wuerzburger
+
 #ifndef FDR_TCPSOCKET_H
 #define FDR_TCPSOCKET_H
 
@@ -12,27 +17,27 @@ class EASYSOCKET_API TCPSocket : public BaseSocket
 {
 public:
     // Event Listeners:
-    std::function<void(std::string)> onMessageReceived;
-    std::function<void(const char*, int)> onRawMessageReceived;
-    std::function<void(int)> onSocketClosed;
+    std::function<void(std::string)> on_message_received;
+    std::function<void(const char*, ssize_t)> on_raw_message_received;
+    std::function<void(int)> on_socket_closed;
 
-    explicit TCPSocket(FDR_ON_ERROR, int socketId = -1);
+    explicit TCPSocket(FDR_ON_ERROR, int socket_id = -1);
 
-    int Send(std::string message);
-    int Send(const char *bytes, size_t byteslength);
+    int send_message(const std::string& message);
+    int send_message(const char *bytes, size_t bytes_length);
 
-    void Connect(std::string host, uint16_t port, std::function<void()> onConnected = [](){}, FDR_ON_ERROR);
-    void Connect(uint32_t ipv4, uint16_t port, std::function<void()> onConnected = [](){}, FDR_ON_ERROR);
+    void Connect(const std::string& host, uint16_t port, const std::function<void()>& on_connected = []() {}, FDR_ON_ERROR);
+    void Connect(uint32_t ipv4, uint16_t port, const std::function<void()>& on_connected = []() {}, FDR_ON_ERROR);
 
-    void Listen();
+    void listen();
 
-    void setAddressStruct(sockaddr_in addr);
-    sockaddr_in getAddressStruct() const;
+    void set_address_struct(sockaddr_in addr);
+    sockaddr_in get_address_struct() const;
 
 private:
-    static void Receive(TCPSocket *socket);
+    static void receive(TCPSocket *socket);
 
-    void setTimeout(int seconds);
+    void set_timeout(int seconds);
 };
 
 #endif

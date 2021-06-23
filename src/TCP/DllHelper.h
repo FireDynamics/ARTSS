@@ -1,3 +1,8 @@
+/// \file      DllHelper.h
+/// \brief     Based on GitHub Project Asynchronous Sockets for C++ (https://github.com/eminfedar/async-sockets-cpp)
+/// \date      June 23, 2021
+/// \author    My Linh Wuerzburger
+
 #ifdef BUILD_EASYSOCKET
 #define EASYSOCKET_API EXPORT_EASYSOCKET
 #else

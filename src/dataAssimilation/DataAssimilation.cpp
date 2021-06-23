@@ -8,7 +8,7 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../TCP/TCPServer.h"
-#include <mpi.h>
+#include <mpi/mpi.h>
 
 DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_field_controller(field_controller) {
 #ifndef BENCHMARKING
@@ -78,7 +78,7 @@ void DataAssimilation::initiate_rollback() {
 
 void DataAssimilation::config_MPI() {
     MPI_Comm comm = MPI_COMM_WORLD;
-    MPI_Init(NULL, NULL);
+    MPI_Init(nullptr, nullptr);
 
     int comm_size, comm_rank;
     MPI_Comm_size(comm, &comm_size);
@@ -86,41 +86,47 @@ void DataAssimilation::config_MPI() {
 
     if (comm_rank == 1) {
         TCPServer tcp_server;
-        tcp_server.onNewConnection = [&](TCPSocket *new_client) {
+        tcp_server.on_new_connection = [&](TCPSocket *new_client) {
             std::cout << "New client: [";
-            std::cout << new_client->remoteAddress() << ":" << new_client->remotePort() << "]" << std::endl;
+            std::cout << new_client->remote_address() << ":" << new_client->remote_port() << "]" << std::endl;
+            // TODO messages to logger
 
-            new_client->onMessageReceived = [new_client](std::string message) {
-                std::cout << new_client->remoteAddress() << ":" << new_client->remotePort() << " => " << message << std::endl;
-                new_client->Send("OK!");
+            new_client->on_message_received = [new_client](const std::string& message) {  // message from client
+                std::cout << new_client->remote_address() << ":" << new_client->remote_port() << " => " << message << std::endl;
+                new_client->send_message("OK!");  // send a message back (acknowledgment/error/whatever)
+                // TODO process message from client
             };
 
-            new_client->onSocketClosed = [new_client](int errorCode) {
-                std::cout << "Socket closed:" << new_client->remoteAddress() << ":" << new_client->remotePort() << " -> " << errorCode << std::endl;
+            new_client->on_socket_closed = [new_client](int error_code) {
+                // on close, client as well server
+                std::cout << "Socket closed:" << new_client->remote_address() << ":" << new_client->remote_port() << " -> " << error_code << std::endl;
+                // TODO ?
             };
         };
 
-        // Bind the server to a port.
-        tcp_server.Bind(8888, [](int errorCode, std::string errorMessage) {
+        // bind the server to a port.
+        tcp_server.bind_port(7777, [](int error_code, const std::string &error_message) {
             // BINDING FAILED:
-            std::cout << errorCode << " : " << errorMessage << std::endl;
+            std::cout << error_code << " : " << error_message << std::endl;
+            // TODO: binding wasn't possible, therefore exit ARTSS because something's wrong with the environment
         });
 
         // Start Listening the server.
-        tcp_server.Listen([](int errorCode, std::string errorMessage) {
+        tcp_server.start_listen([](int error_code, const std::string &error_message) {
             // LISTENING FAILED:
-            std::cout << errorCode << " : " << errorMessage << std::endl;
+            std::cout << error_code << " : " << error_message << std::endl;
+            // TODO: listening not possible, therefore exit ARTSS because TCP Server cannot be used
         });
 
-        // You should do an input loop so the program will not terminated immediately:
+        // TODO: You should do an input loop so the program will not terminated immediately: loop until main thread of MPI says to exit
         std::string input;
         getline(std::cin, input);
         while (input != "exit") {
             getline(std::cin, input);
         }
 
-        // Close the server before exiting the program.
-        tcp_server.Close();
+        // close the server before exiting the program.
+        tcp_server.close();
     }
 
 }
