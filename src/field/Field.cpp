@@ -7,8 +7,7 @@
 #include "Field.h"
 #include "../Domain.h"
 
-Field::Field(FieldType type): m_type(type), m_level(0) {
-    m_size = Domain::getInstance()->get_size();
+Field::Field(FieldType type): m_type(type), m_level(0), m_size(Domain::getInstance()->get_size()) {
     data = new real[m_size];
 }
 
