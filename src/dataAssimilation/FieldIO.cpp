@@ -171,7 +171,7 @@ std::string FieldIO::create_header() {
     m_pos_time_step = text.length();
     std::string format = text + "{: f}" + ", dt={}";
 
-    std::string header = fmt::format("TEST {: f}, dt={: f}", 0, m_dt);
+    std::string header = fmt::format("TEST {}, dt={}", 0, m_dt);
     header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
     header.append(fmt::format("###DATE:{};XML:{}\n",

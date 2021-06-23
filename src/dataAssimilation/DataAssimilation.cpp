@@ -32,7 +32,7 @@ DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_
             std::exit(1);
             // TODO Error Handling
         }
-#ifdef DATAASSIMILATION
+#ifdef ASSIMILATION
         config_MPI();
 #else
         m_logger->critical("Data Assimilation can be only executed with its respective executable");
@@ -85,11 +85,13 @@ void DataAssimilation::initiate_rollback() {
 
 #ifdef ASSIMILATION
 void DataAssimilation::config_MPI() {
-    MPI_Comm comm = MPI_COMM_WORLD;
-    MPI_Init(nullptr, nullptr);
+    m_logger->info("config MPI");
+    MPI_Init(NULL, NULL);
+    m_logger->info("config MPI Init");
 
     int num_procs;
-    MPI_Comm_size (MPI_COMM_WORLD, &num_procs);
+    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+    m_logger->info("num_procs {}", num_procs);
 
     if (num_procs < 2) {
 #ifndef BENCHMARKING
@@ -100,8 +102,8 @@ void DataAssimilation::config_MPI() {
     }
 
     int comm_size, comm_rank;
-    MPI_Comm_size(comm, &comm_size);
-    MPI_Comm_rank(comm, &comm_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
 
     if (comm_rank == 1) {
         TCPServer tcp_server;
