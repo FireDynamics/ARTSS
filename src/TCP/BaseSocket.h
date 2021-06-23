@@ -48,7 +48,7 @@ class EASYSOCKET_API BaseSocket {
 
     explicit BaseSocket(FDR_ON_ERROR, SocketType socket_type = TCP, int socket_id = -1);
 
-    virtual void close();
+    virtual void close_socket();
 
     std::string remote_address();
 

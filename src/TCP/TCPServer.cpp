@@ -35,10 +35,10 @@ void TCPServer::start_listening(std::function<void(int, std::string)> onError) {
     accept_thread.detach();
 }
 
-void TCPServer::close() {
+void TCPServer::close_socket() {
     shutdown(this->sock, SHUT_RDWR);
 
-    BaseSocket::close();
+    BaseSocket::close_socket();
 }
 
 void TCPServer::accept_connection(TCPServer *server, std::function<void(int, std::string)> onError) {

@@ -21,8 +21,7 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
     set_value(val);
 }
 
-Field::Field(FieldType type) : m_level(0), m_type(type){
-    m_size = Domain::getInstance()->get_size();
+Field::Field(FieldType type) : m_level(0), m_type(type), m_size(Domain::getInstance()->get_size()) {
     data = new real[m_size];
 }
 

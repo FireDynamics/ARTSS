@@ -106,7 +106,7 @@ void TCPSocket::receive(TCPSocket *socket) {
             socket->on_raw_message_received(tempBuffer, messageLength);
     }
 
-    socket->close();
+    socket->close_socket();
     if (socket->on_socket_closed)
         socket->on_socket_closed(errno);
 }

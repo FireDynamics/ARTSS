@@ -28,7 +28,7 @@ class EASYSOCKET_API TCPServer : public BaseSocket {
     void start_listening(FDR_ON_ERROR);
 
     // Overriding close to add shutdown():
-    void close() override;
+    void close_socket() override;
 
   private:
     static void accept_connection(TCPServer *server, FDR_ON_ERROR);

@@ -8,7 +8,7 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../TCP/TCPServer.h"
-#include <mpi/mpi.h>
+#include <mpi.h>
 
 DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_field_controller(field_controller) {
 #ifndef BENCHMARKING
@@ -138,7 +138,7 @@ void DataAssimilation::config_MPI() {
         }
 
         // close the server before exiting the program.
-        tcp_server.close();
+        tcp_server.close_socket();
     }
 
 }

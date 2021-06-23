@@ -21,12 +21,12 @@ BaseSocket::BaseSocket(std::function<void(int, std::string)> onError, SocketType
     }
 }
 
-void BaseSocket::close()
+void BaseSocket::close_socket()
 {
     if(is_closed) return;
 
     is_closed = true;
-    close(this->sock);    
+    close(this->sock);
 }
 
 std::string BaseSocket::remote_address()
