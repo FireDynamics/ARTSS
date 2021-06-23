@@ -13,9 +13,8 @@
 #include <functional>
 #include <thread>
 
-class EASYSOCKET_API TCPSocket : public BaseSocket
-{
-public:
+class EASYSOCKET_API TCPSocket : public BaseSocket {
+  public:
     // Event Listeners:
     std::function<void(std::string)> on_message_received;
     std::function<void(const char*, ssize_t)> on_raw_message_received;
@@ -34,7 +33,7 @@ public:
     void set_address_struct(sockaddr_in addr);
     sockaddr_in get_address_struct() const;
 
-private:
+  private:
     static void receive(TCPSocket *socket);
 
     void set_timeout(int seconds);

@@ -70,7 +70,7 @@ real DataAssimilation::get_new_time_value() const {
     return m_t_cur;
 }
 
-void DataAssimilation::initiate_rollback(const std::string &message) {
+void DataAssimilation::initiate_rollback() {
     m_rollback = false;
     std::string file_name = "test";
     assimilate(file_name);
