@@ -26,10 +26,10 @@ public:
     int send_message(const std::string& message);
     int send_message(const char *bytes, size_t bytes_length);
 
-    void Connect(const std::string& host, uint16_t port, const std::function<void()>& on_connected = []() {}, FDR_ON_ERROR);
-    void Connect(uint32_t ipv4, uint16_t port, const std::function<void()>& on_connected = []() {}, FDR_ON_ERROR);
+    void initiate_connection(const std::string& host, uint16_t port, const std::function<void()>& on_connected = []() { }, FDR_ON_ERROR);
+    void initiate_connection(uint32_t ipv4, uint16_t port, const std::function<void()>& on_connected = []() { }, FDR_ON_ERROR);
 
-    void listen();
+    void start_listening();
 
     void set_address_struct(sockaddr_in addr);
     sockaddr_in get_address_struct() const;

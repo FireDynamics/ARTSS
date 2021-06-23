@@ -25,13 +25,13 @@ void TCPServer::bind_port(const char *address, uint16_t port, std::function<void
     }
 }
 
-void TCPServer::start_listen(std::function<void(int, std::string)> onError) {
+void TCPServer::start_listening(std::function<void(int, std::string)> onError) {
     if (listen(this->sock, 10) < 0) {
-        onError(errno, "Error: Server can't start_listen the socket.");
+        onError(errno, "Error: Server can't start_listening the socket.");
         return;
     }
 
-    std::thread accept_thread(accept_clients, this, onError);
+    std::thread accept_thread(accept_connection, this, onError);
     accept_thread.detach();
 }
 
@@ -41,7 +41,7 @@ void TCPServer::close() {
     BaseSocket::close();
 }
 
-void TCPServer::accept_clients(TCPServer *server, std::function<void(int, std::string)> onError) {
+void TCPServer::accept_connection(TCPServer *server, std::function<void(int, std::string)> onError) {
     sockaddr_in new_socket_info;
     socklen_t new_socket_info_length = sizeof(new_socket_info);
 
@@ -62,7 +62,7 @@ void TCPServer::accept_clients(TCPServer *server, std::function<void(int, std::s
             newSocket->set_address_struct(new_socket_info);
 
             server->on_new_connection(newSocket);
-            newSocket->listen();
+            newSocket->start_listening();
         }
     }
 }

@@ -24,7 +24,7 @@ int TCPSocket::send_message(const char *bytes, size_t bytes_length) {
     return static_cast<int>(sent);
 }
 
-void TCPSocket::Connect(const std::string& host, uint16_t port, const std::function<void()>& on_connected, std::function<void(int, std::string)> onError) {
+void TCPSocket::initiate_connection(const std::string& host, uint16_t port, const std::function<void()>& on_connected, std::function<void(int, std::string)> onError) {
     struct addrinfo hints{}, *res, *it;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
@@ -45,10 +45,10 @@ void TCPSocket::Connect(const std::string& host, uint16_t port, const std::funct
 
     freeaddrinfo(res);
 
-    this->Connect((uint32_t) this->address.sin_addr.s_addr, port, on_connected, onError);
+    this->initiate_connection((uint32_t) this->address.sin_addr.s_addr, port, on_connected, onError);
 }
 
-void TCPSocket::Connect(uint32_t ipv4, uint16_t port, const std::function<void()>& on_connected, std::function<void(int, std::string)> onError) {
+void TCPSocket::initiate_connection(uint32_t ipv4, uint16_t port, const std::function<void()>& on_connected, std::function<void(int, std::string)> onError) {
     this->address.sin_family = AF_INET;
     this->address.sin_port = htons(port);
     this->address.sin_addr.s_addr = ipv4;
@@ -67,10 +67,10 @@ void TCPSocket::Connect(uint32_t ipv4, uint16_t port, const std::function<void()
     on_connected();
 
     // Start listening from server:
-    this->listen();
+    this->start_listening();
 }
 
-void TCPSocket::listen() {
+void TCPSocket::start_listening() {
     // Start listening the socket from thread.
     std::thread receiveListening(receive, this);
     receiveListening.detach();

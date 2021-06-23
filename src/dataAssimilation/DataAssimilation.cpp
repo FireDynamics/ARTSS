@@ -70,7 +70,7 @@ real DataAssimilation::get_new_time_value() const {
     return m_t_cur;
 }
 
-void DataAssimilation::initiate_rollback() {
+void DataAssimilation::initiate_rollback(const std::string &message) {
     m_rollback = false;
     std::string file_name = "test";
     assimilate(file_name);
@@ -79,6 +79,17 @@ void DataAssimilation::initiate_rollback() {
 void DataAssimilation::config_MPI() {
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Init(nullptr, nullptr);
+
+    int num_procs;
+    MPI_Comm_size (MPI_COMM_WORLD, &num_procs);
+
+    if (num_procs < 2) {
+#ifndef BENCHMARKING
+        m_logger->critical("Data Assimilation needs at least 2 processes, current number of processes: {}", num_procs);
+#endif
+        // TODO Error Handling
+        std::exit(1);
+    }
 
     int comm_size, comm_rank;
     MPI_Comm_size(comm, &comm_size);
@@ -93,6 +104,7 @@ void DataAssimilation::config_MPI() {
 
             new_client->on_message_received = [new_client](const std::string& message) {  // message from client
                 std::cout << new_client->remote_address() << ":" << new_client->remote_port() << " => " << message << std::endl;
+
                 new_client->send_message("OK!");  // send a message back (acknowledgment/error/whatever)
                 // TODO process message from client
             };
@@ -112,7 +124,7 @@ void DataAssimilation::config_MPI() {
         });
 
         // Start Listening the server.
-        tcp_server.start_listen([](int error_code, const std::string &error_message) {
+        tcp_server.start_listening([](int error_code, const std::string &error_message) {
             // LISTENING FAILED:
             std::cout << error_code << " : " << error_message << std::endl;
             // TODO: listening not possible, therefore exit ARTSS because TCP Server cannot be used

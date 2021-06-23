@@ -27,7 +27,6 @@ class DataAssimilation {
 
     real get_new_time_value() const;
 
-    void initiate_rollback();
 
 private:
 #ifndef BENCHMARKING
@@ -42,6 +41,7 @@ private:
     real m_t_cur = -1;
 
     void assimilate(std::string &file_name);
+    void initiate_rollback(const std::string &message);
 
     void config_MPI();
 };

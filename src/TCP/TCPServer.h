@@ -25,13 +25,13 @@ class EASYSOCKET_API TCPServer : public BaseSocket {
     void bind_port(const char *address, uint16_t port, FDR_ON_ERROR);
 
     // Start listening the server.
-    void start_listen(FDR_ON_ERROR);
+    void start_listening(FDR_ON_ERROR);
 
     // Overriding close to add shutdown():
     void close() override;
 
   private:
-    static void accept_clients(TCPServer *server, FDR_ON_ERROR);
+    static void accept_connection(TCPServer *server, FDR_ON_ERROR);
 };
 
 #endif
