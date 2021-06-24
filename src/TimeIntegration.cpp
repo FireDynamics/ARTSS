@@ -147,10 +147,11 @@ void TimeIntegration::run() {
             //     std::cout<<"Von Neumann condition not met!"<<std::endl;
 #endif
 #ifdef ASSIMILATION
-            m_data_assimilation->save_data(t_cur);
             if (m_data_assimilation->requires_rollback()) {
-                m_data_assimilation->initiate_rollback();
                 t_cur = m_data_assimilation->get_new_time_value();
+                m_data_assimilation->initiate_rollback();
+            } else {
+                m_data_assimilation->save_data(t_cur);
             }
 #endif
             // update
@@ -186,7 +187,9 @@ void TimeIntegration::run() {
 #pragma acc update host(d_C[:bsize]) wait
 
     } // end RANGE
-
+#ifdef ASSIMILATION
+    DataAssimilation::simulation_is_running = false;
+#endif
 #ifndef BENCHMARKING
     m_logger->info("Done calculating and timing ...");
 #else
