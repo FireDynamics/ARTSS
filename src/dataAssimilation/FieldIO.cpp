@@ -92,21 +92,16 @@ void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T,
     std::ifstream input_file(m_filename, std::ifstream::binary);
     size_t n = static_cast<size_t>(t_cur / m_dt) - 1;
     long pos = m_positions[n];
-    size_t length = m_positions[n + 1] - m_positions[n];
-    char *buffer = new char [length];
     std::string line;
     input_file.seekg(pos);
 
     Field *fields[] = {u, v, w, p, T, C};
     for (Field *f: fields) {
         getline(input_file, line);
-        std::strcpy(buffer, line.c_str());
-        char *token_delimiter = strtok(buffer, ";");
+        std::vector<std::string> splitted_string = Utility::split(line, ';');
         size_t counter = 0;
-        while (token_delimiter != nullptr) {
-            f->data[counter] = atof(token_delimiter);
-            token_delimiter = strtok(nullptr, ";");
-            counter++;
+        for (auto part: splitted_string) {
+            f->data[counter] = std::stod(part);
         }
     }
 }
