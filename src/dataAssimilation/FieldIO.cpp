@@ -7,11 +7,11 @@
 #include "FieldIO.h"
 #include <chrono>
 #include <ctime>
-#include <fmt/core.h>
 #include <algorithm>
 #include <iomanip>
 
 #include "../Domain.h"
+#include "../../external/fmt/include/fmt/format.h"
 
 
 FieldIO::FieldIO() {

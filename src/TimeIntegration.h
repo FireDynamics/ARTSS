@@ -14,7 +14,9 @@
 #include "utility/GlobalMacrosTypes.h"
 #include "solver/SolverController.h"
 #include "adaption/Adaption.h"
+#ifdef ASSIMILATION
 #include "dataAssimilation/DataAssimilation.h"
+#endif
 
 #ifndef BENCHMARKING
 #include "analysis/Analysis.h"
@@ -39,7 +41,9 @@ class TimeIntegration {
     FieldController *m_field_controller;
     SolverController *m_solver_controller;
     Adaption *m_adaption;
+#ifdef ASSIMILATION
     DataAssimilation *m_data_assimilation;
+#endif
 #ifndef BENCHMARKING
     Visual *m_visual;
     Solution *m_solution;

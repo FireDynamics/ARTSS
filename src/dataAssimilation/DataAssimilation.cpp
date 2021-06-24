@@ -7,10 +7,8 @@
 #include "DataAssimilation.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
-#ifdef ASSIMILATION
 #include "../TCP/TCPServer.h"
 #include "mpi.h"
-#endif
 
 DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_field_controller(field_controller) {
 #ifndef BENCHMARKING
@@ -32,12 +30,7 @@ DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_
             std::exit(1);
             // TODO Error Handling
         }
-#ifdef ASSIMILATION
         config_MPI();
-#else
-        m_logger->critical("Data Assimilation can be only executed with its respective executable");
-        std::exit(1);
-#endif
     }
 }
 
@@ -83,7 +76,6 @@ void DataAssimilation::initiate_rollback() {
     assimilate(file_name);
 }
 
-#ifdef ASSIMILATION
 void DataAssimilation::config_MPI() {
     m_logger->info("config MPI");
     MPI_Init(NULL, NULL);
@@ -152,4 +144,3 @@ void DataAssimilation::config_MPI() {
     }
 
 }
-#endif

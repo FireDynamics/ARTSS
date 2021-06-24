@@ -183,6 +183,9 @@ target_compile_options(artss_gpu_benchmark PUBLIC -acc -Minfo=accel -DBENCHMARKI
 target_link_options(artss_gpu_benchmark PUBLIC -acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_libraries(artss_gpu_benchmark)
 
+add_subdirectory(src/dataAssimilation)
+add_subdirectory(src/TCP)
+get_target_property(ARTSS_SOURCE_FILES artss SOURCES)
 add_executable(artss_data_assimilation_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_data_assimilation_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_data_assimilation_serial PUBLIC -DASSIMILATION)
