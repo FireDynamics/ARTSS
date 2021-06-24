@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <iomanip>
 
+#include <fmt/format.h>
 #include "../Domain.h"
-#include "../../external/fmt/include/fmt/format.h"
 
 
 FieldIO::FieldIO() {
