@@ -1369,3 +1369,7 @@ bool Obstacle::is_edge_cell(size_t i, size_t j, size_t k) {
 
     return (on_x && on_y) || (on_y || on_z) || (on_x && on_z);
 }
+
+bool Obstacle::has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1, size_t k2) {
+    return has_overlap(m_i1, m_i2, i1, i2) && has_overlap(m_j1, m_j2, j1, j2) && has_overlap(m_k1, m_k2, k1, k2);
+}

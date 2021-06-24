@@ -736,9 +736,9 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
         }
 
         for (size_t c = 0; c < id; c++) {
-            bool overlap = control_obstacle_overlap(obstacle_list_coarse[c], &i1_coarse, &i2_coarse,
-                                                    &j1_coarse, &j2_coarse, &k1_coarse, &k2_coarse);
-            if (overlap) {
+            // bool overlap = control_obstacle_overlap(obstacle_list_coarse[c], &i1_coarse, &i2_coarse,
+            //                                        &j1_coarse, &j2_coarse, &k1_coarse, &k2_coarse);
+            if (obstacle_list_coarse[c]->has_overlap(i1_coarse, i2_coarse, j1_coarse, j2_coarse, k1_coarse, k2_coarse)) {
                 m_logger->debug("overlapping of obstacle {} with obstacle {} on level {}",
                                 obstacle_list_coarse[c]->get_name(), obstacle_fine->get_name(), level);
             }
@@ -779,7 +779,7 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
         size = data.size();
     }
 
-    size_t *obstacle_list_tmp = new size_t[size];
+    auto *obstacle_list_tmp = new size_t[size];
     std::copy(&data[0], &data[size], obstacle_list_tmp);
     *(m_size_MG_obstacle_index_list_level + level) = size;
     *(m_MG_obstacle_index_list + level) = obstacle_list_tmp;
@@ -801,36 +801,38 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
 bool Multigrid::control_obstacle_overlap(
         Obstacle *o, size_t *i1, size_t *i2, size_t *j1, size_t *j2, size_t *k1, size_t *k2) {
     bool changed = false;
-    size_t o_i1 = o->get_coordinates_i1();
-    size_t o_i2 = o->get_coordinates_i2();
-    size_t o_j1 = o->get_coordinates_j1();
-    size_t o_j2 = o->get_coordinates_j2();
-    size_t o_k1 = o->get_coordinates_k1();
-    size_t o_k2 = o->get_coordinates_k2();
+    if (o->has_overlap(*i1, *i2, *j1, *j2, *k1, *k2)) {
+       size_t o_i1 = o->get_coordinates_i1();
+       size_t o_i2 = o->get_coordinates_i2();
+       size_t o_j1 = o->get_coordinates_j1();
+       size_t o_j2 = o->get_coordinates_j2();
+       size_t o_k1 = o->get_coordinates_k1();
+       size_t o_k2 = o->get_coordinates_k2();
 
-    if (o_i1 <= *i1 && *i1 <= o_i2) {
-        *i1 = o_i2 + 1;
-        changed = true;
-    }
-    if (o_i1 <= *i2 && *i2 <= o_i2) {
-        *i2 = o_i1 - 1;
-        changed = true;
-    }
-    if (o_j1 <= *j1 && *j1 <= o_j2) {
-        *j1 = o_j2 + 1;
-        changed = true;
-    }
-    if (o_j1 <= *j2 && *j2 <= o_j2) {
-        *j2 = o_j1 - 1;
-        changed = true;
-    }
-    if (o_k1 <= *k1 && *k1 <= o_k2) {
-        *k1 = o_k2 + 1;
-        changed = true;
-    }
-    if (o_k1 <= *k2 && *k2 <= o_k2) {
-        *k2 = o_k1 - 1;
-        changed = true;
+       if (o_i1 <= *i1 && *i1 <= o_i2) {
+           *i1 = o_i2 + 1;
+           changed = true;
+       }
+       if (o_i1 <= *i2 && *i2 <= o_i2) {
+           *i2 = o_i1 - 1;
+           changed = true;
+       }
+       if (o_j1 <= *j1 && *j1 <= o_j2) {
+           *j1 = o_j2 + 1;
+           changed = true;
+       }
+       if (o_j1 <= *j2 && *j2 <= o_j2) {
+           *j2 = o_j1 - 1;
+           changed = true;
+       }
+       if (o_k1 <= *k1 && *k1 <= o_k2) {
+           *k1 = o_k2 + 1;
+           changed = true;
+       }
+       if (o_k1 <= *k2 && *k2 <= o_k2) {
+           *k2 = o_k1 - 1;
+           changed = true;
+       }
     }
     return changed;
 }
