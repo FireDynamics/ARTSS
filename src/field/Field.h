@@ -21,6 +21,7 @@ enum FieldType : int {
 
 class Field {
  public:
+    Field(FieldType type);
     Field(FieldType type, real val);
     Field(FieldType type, real val, size_t level);
     Field(FieldType type, real val, size_t level, size_t size);

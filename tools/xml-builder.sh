@@ -110,6 +110,8 @@ ADAPT_END=No
 OBSTACLE=1
 SURFACE=1
 
+DATA_ASS=No #data assimilation
+
 LEADINGNO=2
 
 #------------------------------------------------------------------------------
@@ -190,6 +192,8 @@ ${YELLOW}--cs${NC}            \tset parameter for ConstSmagorinsky (default: $CS
 ${YELLOW}--csv${NC}           \tenable write out of csv files (default: $CSV)
 
 ${YELLOW}--csvplots${NC}      \twrite out a csv file every nth timestep (default: $CSVPLOTS)
+
+${YELLOW}--dataassimilation   \tenable data assimilation (default: $DATA_ASS)
 
 ${YELLOW}--dataextraction${NC}\t enable data extraction
 
@@ -746,6 +750,13 @@ else
         fi
       fi
     fi
+    WRITETO="$WRITETO <data_assimilation enabled=\"$DATA_ASS\""
+    if [[ $DATA_ASS == "Yes" ]]
+    then
+        WRITETO="$WRITETO class_name=\"Standard\" />"
+    else
+        WRITETO="$WRITETO />"
+    fi
     if [ $BOUC -eq 0 ]
     then
       WRITETO=${WRITETO}"\n\n"$(cat $BFILE)
@@ -934,6 +945,10 @@ do
       ;;
     --dataextraction)
       ADAPT_DATA="Yes"
+      shift
+      ;;
+    --dataassimilation)
+      DATA_ASS="Yes"
       shift
       ;;
     --diff|--diffusion)

@@ -20,6 +20,7 @@ class FieldController {
     void set_up_boundary();
     void set_up_temporary_fields();
     void update_data(bool sync);
+    void replace_data(Field *u, Field *v, Field *w, Field *p, Field *T, Field *C);
 
     // Getter
     real* get_field_u_data() const { return field_u->data; }
@@ -41,6 +42,7 @@ class FieldController {
     real* get_field_T_data() const { return field_T->data; }
     real* get_field_T0_data() const { return field_T0->data; }
     real* get_field_T_tmp_data() const { return field_T_tmp->data; }
+    real* get_field_T_ambient_data() const { return field_T_ambient->data; }
 
     real* get_field_concentration_data() const { return field_concentration->data; }
     real* get_field_concentration0_data() const { return field_concentration0->data; }

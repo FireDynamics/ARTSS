@@ -53,7 +53,7 @@
     <nz> 256 </nz>
   </domain_parameters>
 
-  <adaption dynamic="No" data_extraction="No"> </adaption>
+  <adaption dynamic="No" data_extraction="No"> </adaption> <data_assimilation enabled="No" />
 
   <boundaries>
     <boundary field="u" patch="left,right" type="dirichlet" value="0.4" />
@@ -61,7 +61,6 @@
     <boundary field="u,v,w" patch="front,back,bottom,top" type="neumann" value="0.0" />
     <boundary field="p" patch="front,back,bottom,top,left,right" type="neumann" value="0.0" />
   </boundaries>
-
   <obstacles enabled="Yes">
     <obstacle name="Cube">
       <geometry ox1="0.0273" ox2="0.964" oy1="0.0078" oy2="0.992" oz1="-0.492" oz2="0.4785"/>

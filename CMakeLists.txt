@@ -6,7 +6,7 @@
 # -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
 #--------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.12  FATAL_ERROR)
 
 project(ARTSS)
 add_executable(artss)
@@ -141,6 +141,11 @@ if(NOT TARGET gtest)
     add_subdirectory(external/googletest)
 endif()
 
+if(NOT TARGET MPI)
+    find_package(MPI)
+endif()
+
+
 #Targets
 add_executable(artss_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
@@ -151,7 +156,6 @@ add_executable(artss_serial_benchmark ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_serial_benchmark PUBLIC -DBENCHMARKING -DUSE_NVTX)
 target_link_libraries(artss_serial_benchmark)
-
 
 add_executable(artss_multicore_cpu ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_multicore_cpu PUBLIC ${ARTSS_COMPILE_OPTIONS})
@@ -166,7 +170,6 @@ target_compile_options(artss_multicore_cpu_benchmark PUBLIC -acc -ta=multicore -
 target_link_options(artss_multicore_cpu_benchmark PUBLIC -acc -ta=multicore)
 target_link_libraries(artss_multicore_cpu_benchmark)
 
-
 add_executable(artss_gpu ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_gpu PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_gpu PUBLIC -acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
@@ -180,6 +183,15 @@ target_compile_options(artss_gpu_benchmark PUBLIC -acc -Minfo=accel -DBENCHMARKI
 target_link_options(artss_gpu_benchmark PUBLIC -acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_libraries(artss_gpu_benchmark)
 
+add_subdirectory(src/dataAssimilation)
+add_subdirectory(src/TCP)
+get_target_property(ARTSS_SOURCE_FILES artss SOURCES)
+add_executable(artss_data_assimilation_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
+target_compile_options(artss_data_assimilation_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
+target_compile_options(artss_data_assimilation_serial PUBLIC -DASSIMILATION)
+target_link_libraries(artss_data_assimilation_serial PRIVATE spdlog::spdlog)
+target_link_libraries(artss_data_assimilation_serial PRIVATE fmt::fmt)
+target_link_libraries(artss_data_assimilation_serial PRIVATE MPI::MPI_CXX)
 
 enable_testing()
 add_subdirectory(tests)
