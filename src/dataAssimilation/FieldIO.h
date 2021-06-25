@@ -29,12 +29,11 @@ class FieldIO : public IDataAssimilationFunction {
     std::string m_format;
 
     long m_pos_time_step;
-
+    int m_length_time_stamp;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
 
-    long m_len_time_step;
 };
 
 

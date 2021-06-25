@@ -18,25 +18,28 @@ FieldIO::FieldIO() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_dt = Parameters::getInstance()->get_real("physical_parameters/dt");
-    real t_end = Parameters::getInstance()->get_real("physical_parameters/t_end");
+    std::string dt = Parameters::getInstance()->get("physical_parameters/dt");
+    m_dt = std::stod(dt);
+    std::string t_end = Parameters::getInstance()->get("physical_parameters/t_end");
 
-    std::string string_t_end = std::to_string(t_end);
-    auto s_t_end = string_t_end.find('.');
-    std::string string_dt = std::to_string(m_dt);
-    auto s_dt = string_dt.find('.');
+    std::vector<std::string> t_end_parts = Utility::split(Utility::trim(t_end), '.');
+    std::vector<std::string> dt_parts = Utility::split(Utility::trim(dt), '.');
 
-    size_t decimal_number_digits = std::max(string_t_end.substr(1, s_t_end).length(),
-                                            string_dt.substr(1, s_dt).length());
-    size_t whole_number_digits = std::max(string_t_end.substr(0, s_t_end).length(),
-                                          string_dt.substr(0, s_dt).length());
-    m_len_time_step = decimal_number_digits + whole_number_digits + 1;
-    m_format = "{:" + std::to_string(whole_number_digits + decimal_number_digits)
-            + "." + std::to_string(decimal_number_digits) + "f}";
+    int decimal_number_digits = 0;
+    if (t_end_parts.size() > 1) {
+        decimal_number_digits = std::max(t_end_parts[1].length(), dt_parts[1].length());
+    } else if (dt_parts.size() > 1) {
+        decimal_number_digits = dt_parts[1].length();
+    }
+    int whole_number_digits = std::max(t_end_parts[0].length(), dt_parts[0].length());
 
-    size_t n = static_cast<size_t>(t_end / m_dt) + 1;
+    m_length_time_stamp = decimal_number_digits + whole_number_digits + 1;
+    m_format = "{:0" + std::to_string(m_length_time_stamp) + "." + std::to_string(decimal_number_digits) + "f}";
+
+    size_t n = static_cast<size_t>(std::stod(t_end) / m_dt) + 1;
     m_positions = new long[n];
     std::string header = create_header();
+    std::cout << header << std::endl;
     std::ofstream output_file(m_filename, std::ios_base::out);
     output_file.write(header.c_str(), m_positions[0]);
 }
@@ -54,7 +57,7 @@ FieldIO::FieldIO() {
 /// \param  C       data of field C to be written out
 // *************************************************************************************************
 void FieldIO::write(real t_cur, real *data_u, real *data_v, real *data_w, real *data_p, real *data_T, real *data_C) {
-    std::string output;
+    std::string output = fmt::format(m_format + "\n", t_cur);
 
     real *data_fields[] = {data_u, data_v, data_w, data_p, data_T, data_C};
     auto size = Domain::getInstance()->get_size();
@@ -74,7 +77,7 @@ void FieldIO::write(real t_cur, real *data_u, real *data_v, real *data_w, real *
     output_file.write(output.c_str(), length);
 
     output_file.seekp(m_pos_time_step);
-    output_file.write(fmt::format(m_format, t_cur).c_str(), m_len_time_step);
+    output_file.write(fmt::format(m_format, t_cur).c_str(), m_length_time_stamp);
 }
 
 // ========================================== read =================================================
@@ -100,7 +103,7 @@ void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T,
         getline(input_file, line);
         std::vector<std::string> splitted_string = Utility::split(line, ';');
         size_t counter = 0;
-        for (auto part: splitted_string) {
+        for (const std::string &part: splitted_string) {
             f->data[counter] = std::stod(part);
         }
     }
@@ -162,15 +165,15 @@ std::string FieldIO::create_header() {
     auto Ny = domain->get_Ny();
     auto Nz = domain->get_Nz();
 
-    std::string text = "Current time step: ";
-    m_pos_time_step = text.length();
-    std::string format = text + "{: f}" + ", dt={}";
-
-    std::string header = fmt::format("TEST {}, dt={}", 0, m_dt);
+    std::cout << m_format << std::endl;
+    std::string string_t_cur_text = "Current time step: ";
+    m_pos_time_step = string_t_cur_text.length();
+    std::cout << string_t_cur_text << " with length: " << m_pos_time_step << std::endl;
+    std::string header = fmt::format(string_t_cur_text + m_format + ", dt={}\n", 0.0, m_dt);
     header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
-    header.append(fmt::format("###DATE:{};XML:{}\n",
-                             std::ctime(&end_time), Parameters::getInstance()->get_filename()));
+    header.append(fmt::format("###DATE:{}", std::ctime(&end_time)));
+    header.append(fmt::format("###XML:{}\n", Parameters::getInstance()->get_filename()));
     m_positions[0] = static_cast<long>(header.length()) + 1;
     return header;
 }
