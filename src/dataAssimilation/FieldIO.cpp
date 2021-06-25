@@ -105,6 +105,7 @@ void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T,
         size_t counter = 0;
         for (const std::string &part: splitted_string) {
             f->data[counter] = std::stod(part);
+            counter++;
         }
     }
 }
@@ -130,13 +131,10 @@ real FieldIO::read(std::string &file_name, Field *u, Field *v, Field *w, Field *
         Field *fields[] = {u, v, w, p, T, C};
         for (Field *f: fields) {
             getline(input_file, line);
-            char *buffer = new char[line.length()];
-            std::strcpy(buffer, line.c_str());
-            char *token_delimiter = strtok(buffer, ";");
+            std::vector<std::string> splitted_string = Utility::split(line, ';');
             size_t counter = 0;
-            while (token_delimiter != nullptr) {
-                f->data[counter] = atof(token_delimiter);
-                token_delimiter = strtok(nullptr, ";");
+            for (const std::string &part: splitted_string) {
+                f->data[counter] = std::stod(part);
                 counter++;
             }
         }
