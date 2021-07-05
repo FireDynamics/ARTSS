@@ -743,9 +743,9 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
         }
 #endif
 
-        Obstacle *obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse,
-                                                 i2_coarse, j2_coarse, k2_coarse,
-                                                 level, obstacle_fine->get_name());
+        auto obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse,
+                                            i2_coarse, j2_coarse, k2_coarse,
+                                            level, obstacle_fine->get_name());
         *(obstacle_list_coarse + id) = obstacle_coarse;
 
         size_t index = level * m_number_of_obstacle_objects + id + 1;
@@ -777,7 +777,7 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
         size = data.size();
     }
 
-    auto *obstacle_list_tmp = new size_t[size];
+    auto obstacle_list_tmp = new size_t[size];
     std::copy(&data[0], &data[size], obstacle_list_tmp);
     *(m_size_MG_obstacle_index_list_level + level) = size;
     *(m_MG_obstacle_index_list + level) = obstacle_list_tmp;
