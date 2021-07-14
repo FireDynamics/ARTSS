@@ -34,7 +34,9 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 #endif
 }
 
-void TimeIntegration::run() {
+void TimeIntegration::run(real t_start) {
+    m_t_cur = t_start;
+    m_running = true;
     Domain *domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -96,7 +98,7 @@ void TimeIntegration::run() {
         // std::ofstream file;
         // file.open(adaption->get_write_runtime_name(), ios::app);
         // std::chrono::time_point<std::chrono::system_clock> iter_start, iter_end;
-        while (t_cur < t_end + dt / 2) {
+        while (t_cur < t_end + dt / 2 && m_running) {
             //iter_start = std::chrono::system_clock::now();
 #ifndef BENCHMARKING
             m_logger->info("t_cur = {:.5f}", t_cur);
