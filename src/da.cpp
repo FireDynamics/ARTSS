@@ -71,13 +71,14 @@ void server(TimeIntegration &ti) {
 
     bind(server_fd, (struct sockaddr *)&address, sizeof(address));
     listen(server_fd, 3);
+    std::thread thr(&TimeIntegration::run, &ti, 0.0);
 
     while (true) {
-        new_socket = accept(
-                server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+        new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
         read(new_socket, buffer, 1024);
-        real t = 1.0;
+        real t = std::stod(buffer);
         ti.stop();
-        std::thread thr(&TimeIntegration::run, &ti, t);
+        thr.join();
+        thr = std::thread(&TimeIntegration::run, &ti, t);
     }
 }
