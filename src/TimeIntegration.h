@@ -27,9 +27,11 @@
 class TimeIntegration {
  public:
     explicit TimeIntegration(SolverController *sc);
-    void run();
+    void run(real t_start);
+    void stop() {m_running = false;}
 
  private:
+    bool m_running;
     real m_dt;
     real m_t_end;
     real m_t_cur;

@@ -142,6 +142,13 @@ if(NOT TARGET gtest)
 endif()
 
 #Targets
+add_library(artss_lib ${ARTSS_SOURCE_FILES})
+target_link_libraries(artss_lib PRIVATE spdlog::spdlog)
+target_link_libraries(artss_lib PRIVATE fmt::fmt)
+
+add_executable(artss_data_assimilation_serial src/da.cpp)
+target_link_libraries(artss_data_assimilation_serial artss_lib)
+
 add_executable(artss_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
