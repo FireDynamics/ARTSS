@@ -187,9 +187,6 @@ void TimeIntegration::run() {
 #pragma acc update host(d_C[:bsize]) wait
 
     } // end RANGE
-#ifdef ASSIMILATION
-    DataAssimilation::simulation_is_running = false;
-#endif
 #ifndef BENCHMARKING
     m_logger->info("Done calculating and timing ...");
 #else

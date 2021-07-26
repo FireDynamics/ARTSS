@@ -121,9 +121,8 @@ void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T,
 /// \param  T           field T to store the read data
 /// \param  C           field C to store the read data
 // *************************************************************************************************
-real FieldIO::read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
+void FieldIO::read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
     std::ifstream input_file(file_name, std::ifstream::binary);
-    real time_step = -1;
     if (input_file.is_open()) {
         std::string string_time_step;
         getline(input_file, string_time_step);
@@ -143,7 +142,6 @@ real FieldIO::read(std::string &file_name, Field *u, Field *v, Field *w, Field *
         m_logger->warn("File {} not found, skipping assimilation", file_name);
 #endif
     }
-    return time_step;
 }
 
 //================================= write header ===================================================

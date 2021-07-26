@@ -16,7 +16,7 @@ class FieldIO : public IDataAssimilationFunction {
  public:
     FieldIO();
     void write(real t_cur, real *data_u, real *data_v, real *data_w, real *data_p, real *data_T, real *data_C) override;
-    real read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) override;
+    void read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) override;
     void set_filename(std::string &filename) { m_filename = filename; }
     void read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C);
 
