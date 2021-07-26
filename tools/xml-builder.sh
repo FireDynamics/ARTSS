@@ -750,7 +750,7 @@ else
         fi
       fi
     fi
-    WRITETO="$WRITETO <data_assimilation enabled=\"$DATA_ASS\""
+    WRITETO="$WRITETO\n\n  <data_assimilation enabled=\"$DATA_ASS\""
     if [[ $DATA_ASS == "Yes" ]]
     then
         WRITETO="$WRITETO class_name=\"Standard\" />"

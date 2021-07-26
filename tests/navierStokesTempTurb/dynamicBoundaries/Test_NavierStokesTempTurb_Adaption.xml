@@ -92,7 +92,9 @@
       <endresult enabled="No"> </endresult>
       <time_measuring enabled="No"> </time_measuring>
     </data_extraction>
-  </adaption> <data_assimilation enabled="No" />
+  </adaption>
+
+  <data_assimilation enabled="No" />
 
   <boundaries>
     <boundary field="u,v,w" patch="front,back,bottom,top" type="dirichlet" value="0.0" />

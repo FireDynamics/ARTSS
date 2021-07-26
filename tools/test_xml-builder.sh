@@ -194,7 +194,7 @@ function create_testcases {
     echo "  <initial_conditions usr_fct=\"BuoyancyMMS\" random=\"No\">
     <rhoa> 1. </rhoa>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\">  <!-- Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     echo "    <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
