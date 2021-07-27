@@ -70,7 +70,7 @@ HELP="$DESCRIPTION$OPTIONS"
 COMPILE=""
 DOCKERRUN=1
 DOCKERBUILD=1
-DOCKERHOST=docker_$(hostname)
+DOCKERHOST=docker-$(hostname)
 DOCKERRUNCPU=1
 PROCS=-1
 while [[ $# -gt 0 ]]
@@ -149,6 +149,10 @@ do
     --mb|--multicore_benchmark|--artss_multicore_cpu_benchmark)
       COMPILE="$COMPILE artss_multicore_cpu_benchmark"
       GPU=0
+      shift
+      ;;
+    --mpi)
+      MPI=0
       shift
       ;;
     --pgi)
@@ -257,7 +261,12 @@ rm -rf build/
 mkdir build
 cd build || exit
 
-if [[ $GPU -eq 0 ]] || [[ $COMPILER = "PGI" ]]
+if [[ $MPI -eq 0 ]]
+then
+  CCOMPILER=mpicc
+  CXXCOMPILER=mpiCC
+  COMPILE=artss_data_assimilation_serial
+elif [[ $GPU -eq 0 ]] || [[ $COMPILER = "PGI" ]]
 then
   CCOMPILER=nvc
   CXXCOMPILER=nvc++
@@ -265,6 +274,7 @@ else
   CCOMPILER=gcc
   CXXCOMPILER=g++
 fi
+
 
 if [ -z ${CUDA_VERSION} ]
 then
