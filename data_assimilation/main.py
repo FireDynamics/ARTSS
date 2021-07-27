@@ -13,7 +13,8 @@ def config_tcp():
 
 
 def create_message(t_cur, file_name):
-    return str(t_cur) + "|" + file_name
+    string_msg = str(t_cur) + "|" + file_name
+    return string_msg.encode('utf-8')
 
 
 def send_message(sock, message):
@@ -23,7 +24,7 @@ def send_message(sock, message):
 
         # Look for the response
         amount_received = 0
-        amount_expected = len("OK!")
+        amount_expected = len("message was received")
 
         while amount_received < amount_expected:
             data = sock.recv(16)
@@ -35,5 +36,8 @@ def send_message(sock, message):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     socket = config_tcp()
-    time.sleep(10)
-    send_message(create_message(0.1, "test.txt"))
+    time.sleep(5)
+    send_message(socket, create_message(0.1, "test.txt"))
+    send_message(socket, create_message(0.2, "test.txt"))
+    time.sleep(5)
+    send_message(socket, create_message(0.3, "test.txt"))
