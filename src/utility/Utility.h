@@ -29,7 +29,8 @@ namespace Utility {
     std::string trim(const std::string &string);
     void log_minimum(Field *field, const std::string& text, const std::string& logger_name);
 #ifndef BENCHMARKING
-    std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
+    std::shared_ptr<spdlog::logger> create_tcp_logger(std::string logger_name, std::string log_file, std::string log_level);
+    std::shared_ptr<spdlog::logger> create_logger(std::string logger_name);
 #endif
 }  // namespace Utility
 

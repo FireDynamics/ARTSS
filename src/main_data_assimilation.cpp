@@ -30,6 +30,8 @@ int main(int argc, char **argv) {
 
     if (num_procs < 2 && comm_rank == 0) {
         // TODO Error Handling
+        std::cout << "Data assimilation has to be run with at least 2 processes, "
+                     "currently available: " << num_procs << " processes" << std::endl;
         std::exit(1);
     }
 
@@ -41,6 +43,10 @@ int main(int argc, char **argv) {
         if (argc > 1) {
             XML_filename.assign(argv[1]);
             params->parse(XML_filename);
+
+            std::string log_level = params->get("logging/level");
+            MPI_Request request;
+            MPI_Isend(log_level.c_str(), log_level.size(), MPI_CHAR, 1, 0, MPI_COMM_WORLD, &request);
         } else {
             std::cerr << "XML file missing" << std::endl;
             std::exit(1);
@@ -66,6 +72,7 @@ int main(int argc, char **argv) {
     if (comm_rank == 1) {
         server();
     }
+    MPI_Finalize();
     return 0;
 }
 
@@ -73,28 +80,38 @@ void server() {
     bool simulation_is_running = true;
     MPI_Status status;
     MPI_Request request = MPI_REQUEST_NULL;  // communication is finished
+
 #ifndef BENCHMARKING
-    std::shared_ptr<spdlog::logger> logger = Utility::create_logger("TCP Server");
+    MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+    int msg_len;
+    MPI_Get_count(&status, MPI_CHAR, &msg_len);
+    char msg[msg_len];
+    MPI_Recv(msg, msg_len, MPI_CHAR, status.MPI_TAG, 0, MPI_COMM_WORLD, &status);
+
+    std::string log_file = "tcp_server.dat";
+    std::shared_ptr<spdlog::logger> logger = Utility::create_tcp_logger("TCP Server", log_file, msg);
 #endif
     TCPServer tcp_server;
     tcp_server.on_new_connection = [&](TCPSocket *new_client) {
+        std::cout << fmt::format("New client: [{}:{}]", new_client->remote_address(), new_client->remote_port()) << std::endl;
 #ifndef BENCHMARKING
         logger->info("New client: [{}:{}]", new_client->remote_address(), new_client->remote_port());
 #endif
         new_client->on_message_received = [new_client, logger, &request, &status](const std::string &message) {  // message from client
+            std::cout << fmt::format("received message from client {}:{} => {}", new_client->remote_address(), new_client->remote_port(), message) << std::endl;
 #ifndef BENCHMARKING
             logger->info("received message from client {}:{} => {}", new_client->remote_address(), new_client->remote_port(), message);
 #endif
             int flag;
             MPI_Iprobe(1, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-            if (!flag) {
+            if (flag) {
 #ifndef BENCHMARKING
                 logger->warn("message couldn't be processed as a message is already being processed");
 #endif
                 MPI_Wait(&request, &status);
             }
             new_client->send_message("message was received");  // send a message back (acknowledgment/error/whatever)
-            MPI_Isend(message.c_str(), message.size(), MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &request);
+            MPI_Isend(message.c_str(), message.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, &request);
 #ifndef BENCHMARKING
             logger->debug("message was sent to rank 0");
 #endif
@@ -109,6 +126,7 @@ void server() {
     };
 
     // bind the server to a port.
+    std::cout << "ich bin rank 1 vor binding" << std::endl;
 #ifndef BENCHMARKING
     logger->debug("bind server to a port");
 #endif

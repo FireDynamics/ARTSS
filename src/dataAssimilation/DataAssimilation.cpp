@@ -75,7 +75,7 @@ void DataAssimilation::config_rollback(const char *msg) {
 
 bool DataAssimilation::requires_rollback() {
     MPI_Status status;
-    int flag;
+    int flag = -1;
     MPI_Iprobe(1, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
     if (flag) {
         int msg_len;
