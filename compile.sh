@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 COMPILE=""
-GPU=1
-JURECA=1
-P100=1
+GPU=0
+JURECA=0
+P100=0
 GPU_CC="cc35"
 CUDA_VERSION=10.2
 BUILDTYPE=Release
@@ -68,11 +68,12 @@ Docker - ! cannot be combined with other commands ! (more information about dock
 
 HELP="$DESCRIPTION$OPTIONS"
 COMPILE=""
-DOCKERRUN=1
-DOCKERBUILD=1
+DOCKERRUN=0
+DOCKERBUILD=0
 DOCKERHOST=docker-$(hostname)
-DOCKERRUNCPU=1
+DOCKERRUNCPU=0
 PROCS=-1
+MPI=0
 while [[ $# -gt 0 ]]
 do
   key="$1"
@@ -92,7 +93,7 @@ do
       shift
       ;;
     --docker-build)
-      DOCKERBUILD=0
+      DOCKERBUILD=1
       shift
       ;;
     --docker-hostname)
@@ -101,21 +102,21 @@ do
       shift
       ;;
     --docker-run)
-      DOCKERRUN=0
+      DOCKERRUN=1
       shift
       ;;
     --docker-run-cpu)
-      DOCKERRUNCPU=0
+      DOCKERRUNCPU=1
       shift
       ;;
     -g|--gpu|--artss_gpu)
       COMPILE="$COMPILE artss_gpu" 
-      GPU=0
+      GPU=1
       shift
       ;;
     --gb|--gpu_benchmark|--artss_gpu_benchmark)
       COMPILE="$COMPILE artss_gpu_benchmark "
-      GPU=0
+      GPU=1
       shift
       ;;
     --gcc)
@@ -143,16 +144,16 @@ do
       ;;
     -m|--multicore|--artss_multicore_cpu)
       COMPILE="$COMPILE artss_multicore_cpu"
-      GPU=0
+      GPU=1
       shift
       ;;
     --mb|--multicore_benchmark|--artss_multicore_cpu_benchmark)
       COMPILE="$COMPILE artss_multicore_cpu_benchmark"
-      GPU=0
+      GPU=1
       shift
       ;;
     --mpi)
-      MPI=0
+      MPI=1
       shift
       ;;
     --pgi)
@@ -173,11 +174,11 @@ do
       shift
       ;;
     --jureca)
-      JURECA=0
+      JURECA=1
       shift
       ;;
     --p100)
-      P100=0
+      P100=1
       shift
       ;;
     *)
@@ -188,29 +189,29 @@ do
   esac
 done
 
-if [ $DOCKERBUILD -eq 0 ]
+if [ $DOCKERBUILD -eq 1 ]
 then
   cd docker
   docker build -t artss_docker --no-cache .
   cd ..
 fi
 
-if [ $DOCKERRUN -eq 0 ]
+if [ $DOCKERRUN -eq 1 ]
 then
   docker run --gpus all -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker bash
 fi
 
-if [ $DOCKERRUNCPU -eq 0 ]
+if [ $DOCKERRUNCPU -eq 1 ]
 then
   docker run -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker bash # /bin/bash -c "./compile.sh"
 fi
 
-if [ $DOCKERRUN -eq 0 -o $DOCKERRUNCPU -eq 0 -o $DOCKERBUILD -eq 0 ]
+if [ $DOCKERRUN -eq 1 -o $DOCKERRUNCPU -eq 1 -o $DOCKERBUILD -eq 1 ]
 then
   exit
 fi
 
-if [[ $JURECA -eq 1 && $P100 -eq 1 ]]
+if [[ $JURECA -eq 0 && $P100 -eq 0 ]]
 then
   HOSTNAME=$(hostname)
   if [[ $HOSTNAME = jrl* ]]; then JURECA=0; fi
@@ -219,14 +220,14 @@ fi
 
 if [ "$COMPILE" = "" ]
 then
-  GPU=0
+  GPU=1
 fi
 if [ -z $COMPILER ]
 then
   COMPILER="PGI"
 fi
 
-if [ $JURECA -eq 0 ]
+if [ $JURECA -eq 1 ]
 then
   module load CMake
   module load PGI/19.10-GCC-8.3.0
@@ -238,7 +239,7 @@ then
   GPU=0
 fi
 
-if [ ${P100} -eq 0 ]
+if [ ${P100} -eq 1 ]
 then
   if [ -z "${PGI_VERSION}" ]
   then
@@ -251,7 +252,7 @@ then
   GPU_CC=cc60
 fi
 
-if [ $GPU -eq 0 ]
+if [ $GPU -eq 1 ]
 then
   export CUDA_LIB=$CUDA_ROOT/lib64
   export CUDA_INC=$CUDA_ROOT/include
@@ -261,12 +262,12 @@ rm -rf build/
 mkdir build
 cd build || exit
 
-if [[ $MPI -eq 0 ]]
+if [[ $MPI -eq 1 ]]
 then
   CCOMPILER=mpicc
   CXXCOMPILER=mpiCC
   COMPILE=artss_data_assimilation_serial
-elif [[ $GPU -eq 0 ]] || [[ $COMPILER = "PGI" ]]
+elif [[ $GPU -eq 1 ]] || [[ $COMPILER = "PGI" ]]
 then
   CCOMPILER=nvc
   CXXCOMPILER=nvc++
