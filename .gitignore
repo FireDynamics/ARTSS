@@ -1,7 +1,8 @@
 *.dat
 *.vtk
 *.ods
-/Debug/
+debug/
+Debug/
 .idea/
 build/
 *.source
@@ -10,3 +11,7 @@ build/
 .settings
 *.tmp
 .DS_Store
+venv/
+*.ipynb
+.ipynb_checkpoints/
+__pycache__/
