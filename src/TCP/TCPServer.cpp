@@ -3,12 +3,8 @@
 
 TCPServer::TCPServer(std::function<void(int, std::string)> onError) : BaseSocket(onError, TCP) {
     int opt = 1;
-
-    std::cout << "ich bin rank 1 vor setsockopt" << std::endl;
     setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int));
-    std::cout << "ich bin rank 1 zwischen setsockopt" << std::endl;
     setsockopt(this->sock, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(int));
-    std::cout << "ich bin rank 1 nach setsockopt" << std::endl;
 }
 
 void TCPServer::bind_port(int port, std::function<void(int, std::string)> onError) {
