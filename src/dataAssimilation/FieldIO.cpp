@@ -42,6 +42,7 @@ FieldIO::FieldIO() {
     std::cout << header << std::endl;
     std::ofstream output_file(m_filename, std::ios_base::out);
     output_file.write(header.c_str(), m_positions[0]);
+    output_file.close();
 }
 
 
@@ -70,14 +71,15 @@ void FieldIO::write(real t_cur, real *data_u, real *data_v, real *data_w, real *
 
     size_t n = static_cast<size_t>(t_cur / m_dt) - 1;
     long length = static_cast<long>(output.length());
-    m_positions[n] = m_positions[n] + length;
+    m_positions[n + 1] = m_positions[n] + length;
 
-    std::ofstream output_file(m_filename, std::ios_base::app);
-    output_file.seekp(m_positions[n]);
+    std::fstream output_file(m_filename);
+    output_file.seekp(m_positions[n], std::ios_base::beg);
     output_file.write(output.c_str(), length);
 
-    output_file.seekp(m_pos_time_step);
+    output_file.seekp(m_pos_time_step, std::ios_base::beg);
     output_file.write(fmt::format(m_format, t_cur).c_str(), m_length_time_stamp);
+    output_file.close();
 }
 
 // ========================================== read =================================================
