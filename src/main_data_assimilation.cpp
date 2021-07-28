@@ -89,7 +89,7 @@ void server() {
     MPI_Recv(msg, msg_len, MPI_CHAR, status.MPI_TAG, 0, MPI_COMM_WORLD, &status);
 
     std::string log_file = "tcp_server.dat";
-    std::shared_ptr<spdlog::logger> logger = Utility::create_tcp_logger("TCP Server", log_file, msg);
+    std::shared_ptr<spdlog::logger> logger = Utility::create_logger("TCP Server", log_file, msg);
 #endif
     TCPServer tcp_server;
     tcp_server.on_new_connection = [&](TCPSocket *new_client) {
