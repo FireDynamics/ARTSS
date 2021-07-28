@@ -10,9 +10,8 @@
 
 #include <string>
 #include "../field/FieldController.h"
-#include "../interfaces/IDataAssimilationFunction.h"
 #include "../utility/Utility.h"
-#include "FieldIO.h"
+#include "FieldIOBase.h"
 
 struct AssimilationMethods {
     inline static const std::string Standard = "default";
@@ -35,7 +34,7 @@ private:
     FieldController m_field_controller;
     bool m_assimilated = false;
 
-    IDataAssimilationFunction *m_func;
+    FieldIOBase *m_func;
 
     real m_t_cur = -1;
 
