@@ -10,13 +10,12 @@
 #include <string>
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
-#include "../interfaces/IDataAssimilationFunction.h"
 
-class FieldIO : public IDataAssimilationFunction {
+class FieldIOBase {
  public:
-    FieldIO();
-    void write(real t_cur, real *data_u, real *data_v, real *data_w, real *data_p, real *data_T, real *data_C) override;
-    void read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) override;
+    FieldIOBase();
+    virtual void write(real t_cur, real *data_u, real *data_v, real *data_w, real *data_p, real *data_T, real *data_C);
+    virtual void read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C);
     void set_filename(std::string &filename) { m_filename = filename; }
     void read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C);
 

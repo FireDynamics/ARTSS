@@ -22,7 +22,7 @@ DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_
 #ifndef BENCHMARKING
             m_logger->debug("found data assimilation class {}", init);
 #endif
-            m_func = new FieldIO();
+            m_func = new FieldIOBase();
         } else {
 #ifndef BENCHMARKING
             m_logger->critical("Data Assimilation class {} is not defined", init);

@@ -1,10 +1,10 @@
-/// \file       FieldIO.cpp
+/// \file       FieldIOBase.cpp
 /// \brief      
 /// \date       Apr 18, 2021
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 
-#include "FieldIO.h"
+#include "FieldIOBase.h"
 #include <chrono>
 #include <ctime>
 #include <algorithm>
@@ -14,7 +14,7 @@
 #include "../Domain.h"
 
 
-FieldIO::FieldIO() {
+FieldIOBase::FieldIOBase() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -42,6 +42,7 @@ FieldIO::FieldIO() {
     std::cout << header << std::endl;
     std::ofstream output_file(m_filename, std::ios_base::out);
     output_file.write(header.c_str(), m_positions[0]);
+    output_file.close();
 }
 
 
@@ -56,7 +57,7 @@ FieldIO::FieldIO() {
 /// \param  T       data of field T to be written out
 /// \param  C       data of field C to be written out
 // *************************************************************************************************
-void FieldIO::write(real t_cur, real *data_u, real *data_v, real *data_w, real *data_p, real *data_T, real *data_C) {
+void FieldIOBase::write(real t_cur, real *data_u, real *data_v, real *data_w, real *data_p, real *data_T, real *data_C) {
     std::string output = fmt::format(m_format + "\n", t_cur);
 
     real *data_fields[] = {data_u, data_v, data_w, data_p, data_T, data_C};
@@ -70,14 +71,15 @@ void FieldIO::write(real t_cur, real *data_u, real *data_v, real *data_w, real *
 
     size_t n = static_cast<size_t>(t_cur / m_dt) - 1;
     long length = static_cast<long>(output.length());
-    m_positions[n] = m_positions[n] + length;
+    m_positions[n + 1] = m_positions[n] + length;
 
-    std::ofstream output_file(m_filename, std::ios_base::app);
-    output_file.seekp(m_positions[n]);
+    std::fstream output_file(m_filename);
+    output_file.seekp(m_positions[n], std::ios_base::beg);
     output_file.write(output.c_str(), length);
 
-    output_file.seekp(m_pos_time_step);
+    output_file.seekp(m_pos_time_step, std::ios_base::beg);
     output_file.write(fmt::format(m_format, t_cur).c_str(), m_length_time_stamp);
+    output_file.close();
 }
 
 // ========================================== read =================================================
@@ -91,7 +93,7 @@ void FieldIO::write(real t_cur, real *data_u, real *data_v, real *data_w, real *
 /// \param  T       field T to store the read data
 /// \param  C       field C to store the read data
 // *************************************************************************************************
-void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
+void FieldIOBase::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
     std::ifstream input_file(m_filename, std::ifstream::binary);
     size_t n = static_cast<size_t>(t_cur / m_dt) - 1;
     long pos = m_positions[n];
@@ -121,7 +123,7 @@ void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T,
 /// \param  T           field T to store the read data
 /// \param  C           field C to store the read data
 // *************************************************************************************************
-void FieldIO::read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
+void FieldIOBase::read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
     std::ifstream input_file(file_name, std::ifstream::binary);
     if (input_file.is_open()) {
         std::string string_time_step;
@@ -152,7 +154,7 @@ void FieldIO::read(std::string &file_name, Field *u, Field *v, Field *w, Field *
 /// ###FIELDS;u;v;w;p;T;concentration
 /// ###DATE:<date>;XML:<XML>
 // *************************************************************************************************
-std::string FieldIO::create_header() {
+std::string FieldIOBase::create_header() {
     auto end = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
@@ -173,3 +175,4 @@ std::string FieldIO::create_header() {
     m_positions[0] = static_cast<long>(header.length()) + 1;
     return header;
 }
+
