@@ -1,4 +1,3 @@
-import sys
 import time
 import TCP_client
 from ARTSS import XML, Domain
@@ -19,11 +18,13 @@ if __name__ == '__main__':
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
     domain.print_info()
-    domain.print_debug()
+    # domain.print_debug()
 
-    client = TCP_client.TCPClient()
-    client.connect()
-    client.send_message(create_message(0.1, "test.txt"))
-    client.send_message(create_message(0.2, "test.txt"))
-    time.sleep(5)
-    client.send_message(create_message(0.3, "test.txt"))
+    print(reader.read_field_data(0.3))
+
+    # client = TCP_client.TCPClient()
+    # client.connect()
+    # client.send_message(create_message(0.1, "test.txt"))
+    # client.send_message(create_message(0.2, "test.txt"))
+    # time.sleep(5)
+    # client.send_message(create_message(0.3, "test.txt"))

@@ -1,3 +1,4 @@
+import wsgiref.validate
 from datetime import datetime
 import numpy as np
 
@@ -43,10 +44,13 @@ class FieldReader:
 
     def get_lines_from_file(self, line_numbers: list) -> list:
         lines = []
-        file = open(self.xml_file_name, 'r')
+        max_val = max(line_numbers)
+        file = open(self.file_name, 'r')
         for i, line in enumerate(file):
             if i in line_numbers:
                 lines.append(line)
+            if i > max_val:
+                break
         file.close()
         return lines
 
@@ -64,7 +68,7 @@ class FieldReader:
     def get_fields(self) -> list:
         return self.fields
 
-    def read_field_data(self, time_step) -> dict:
+    def read_field_data(self, time_step: float) -> dict:
         number_of_fields = len(self.fields)
         steps = int(time_step / self.dt)
 
@@ -74,3 +78,26 @@ class FieldReader:
         for i in range(number_of_fields):
             fields[self.fields[i]] = np.fromstring(lines[i], dtype=np.float, sep=';')
         return fields
+
+    def write_field_data(self, file_name: str, data: dict, t_cur: float):
+        number_of_fields = len(self.fields)
+        if number_of_fields != len(data.keys()):
+            print(f'wrong number of fields: expected {number_of_fields} got {len(data.keys())}')
+        else:
+            file = open(file_name, 'w')
+            header = self.write_header(t_cur)
+            file.write(header)
+            for i in range(number_of_fields):
+                field = data[self.fields[i]]
+                line = ''
+                for number in field:
+                    line += f'{number};'
+                line += '\n'
+                file.write(line)
+            file.close()
+
+    def write_header(self, t_cur: float) -> str:
+        return f'###TIMESTEP;{t_cur}\n' \
+               f'###DOMAIN;{self.grid_resolution["nx"]};{self.grid_resolution["ny"]};{self.grid_resolution["nz"]}\n' \
+               f'###FIELDS;' \
+               f'###DATE;'
