@@ -141,7 +141,6 @@ void FieldIOBase::read(std::string &file_name, Field *u, Field *v, Field *w, Fie
                 f->data[counter] = static_cast<real>(std::stold(part));
                 counter++;
             }
-            std::cout << counter << std::endl;
         }
     } else {
 #ifndef BENCHMARKING

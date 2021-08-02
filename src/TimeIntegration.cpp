@@ -4,6 +4,7 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <unistd.h>
 #include "TimeIntegration.h"
 #include "utility/Parameters.h"
 #include "Domain.h"
@@ -148,10 +149,12 @@ void TimeIntegration::run() {
 #endif
 #ifdef ASSIMILATION
             if (m_data_assimilation->requires_rollback()) {
+                sleep(3);
                 t_cur = m_data_assimilation->get_new_time_value();
                 std::cout << fmt::format("ROLLBACK with t_cur {}, -> {} -> {}", t_cur, t_cur/dt, static_cast<int>(t_cur/dt)) << std::endl;
                 iteration_step = static_cast<int>(t_cur / dt);
                 m_data_assimilation->initiate_rollback();
+                sleep(3);
             } else {
                 m_data_assimilation->save_data(t_cur);
             }
