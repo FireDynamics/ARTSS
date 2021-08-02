@@ -149,6 +149,8 @@ void TimeIntegration::run() {
 #ifdef ASSIMILATION
             if (m_data_assimilation->requires_rollback()) {
                 t_cur = m_data_assimilation->get_new_time_value();
+                std::cout << fmt::format("ROLLBACK with t_cur {}, -> {} -> {}", t_cur, t_cur/dt, static_cast<int>(t_cur/dt)) << std::endl;
+                iteration_step = static_cast<int>(t_cur / dt);
                 m_data_assimilation->initiate_rollback();
             } else {
                 m_data_assimilation->save_data(t_cur);

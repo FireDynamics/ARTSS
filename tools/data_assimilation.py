@@ -3,6 +3,10 @@ from datetime import datetime
 import numpy as np
 
 
+def get_date_now() -> str:
+    return datetime.now().strftime('%a %b %d %H:%M:%S %Y')
+
+
 class FieldReader:
     def __init__(self):
         self.file_name = 'visualisation.dat'
@@ -11,13 +15,23 @@ class FieldReader:
         self.grid_resolution: dict
         self.fields: list
         self.date: datetime
+        self.header: str
         self.read_header()
+        self.create_header()
+
+    def create_header(self):
+        domain = f'###DOMAIN;{self.grid_resolution["Nx"]};{self.grid_resolution["Ny"]};{self.grid_resolution["Nz"]}'
+        fields = f'###FIELDS'
+        for f in self.fields:
+            fields += f';{f}'
+        date = f'###DATE;{datetime.now()}'
+        self.header = domain + '\n' + fields + '\n' + date
 
     def read_header(self):
         file = open(self.file_name, 'r')
         # first line
         line = file.readline()
-        self.dt = float(line.split('=')[1])
+        self.dt = float(line.split(';')[3])
         # second line
         line = file.readline().split(';')[1:]
         self.grid_resolution = {'Nx': int(line[0]), 'Ny': int(line[1]), 'Nz': int(line[2])}
@@ -26,10 +40,10 @@ class FieldReader:
         self.fields = line.split(';')[1:]
         # fourth line
         line = file.readline().strip()
-        self.date = datetime.strptime(line.split('DATE:')[1], '%a %b %d %H:%M:%S %Y')
+        self.date = datetime.strptime(line.split(';')[1], '%a %b %d %H:%M:%S %Y')
         # fifth line
         line = file.readline().strip()
-        self.xml_file_name = line.split(':')[1]
+        self.xml_file_name = line.split(';')[1]
         file.close()
 
     def print_header(self):
@@ -56,7 +70,7 @@ class FieldReader:
 
     def get_t_current(self) -> float:
         first_line = self.get_line_from_file(0)
-        t_cur = first_line.split(':')[1].split(',')[0]
+        t_cur = first_line.split(';')[1]
         return int(t_cur)
 
     def get_xml_file_name(self) -> str:
@@ -85,7 +99,7 @@ class FieldReader:
             print(f'wrong number of fields: expected {number_of_fields} got {len(data.keys())}')
         else:
             file = open(file_name, 'w')
-            header = self.write_header(t_cur)
+            header = self.get_header(t_cur)
             file.write(header)
             for i in range(number_of_fields):
                 field = data[self.fields[i]]
@@ -96,8 +110,5 @@ class FieldReader:
                 file.write(line)
             file.close()
 
-    def write_header(self, t_cur: float) -> str:
-        return f'###TIMESTEP;{t_cur}\n' \
-               f'###DOMAIN;{self.grid_resolution["nx"]};{self.grid_resolution["ny"]};{self.grid_resolution["nz"]}\n' \
-               f'###FIELDS;' \
-               f'###DATE;'
+    def get_header(self, t_cur: float) -> str:
+        return f'TIMESTAMP;{t_cur}\n' + self.header + get_date_now() + '\n'

@@ -83,6 +83,7 @@ bool DataAssimilation::requires_rollback() {
         char *msg = new char[msg_len];
         MPI_Recv(msg, msg_len, MPI_CHAR, 1, status.MPI_TAG, MPI_COMM_WORLD, &status);
         config_rollback(msg);  // TODO(MPI): could be done in a third process
+        std::cout << "flag: " << flag << true << std::endl;
     }
     return flag;
 }

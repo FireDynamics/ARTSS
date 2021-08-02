@@ -128,6 +128,9 @@ void FieldIOBase::read(std::string &file_name, Field *u, Field *v, Field *w, Fie
     if (input_file.is_open()) {
         std::string string_time_step;
         getline(input_file, string_time_step);
+        getline(input_file, string_time_step);
+        getline(input_file, string_time_step);
+        getline(input_file, string_time_step);
         std::string line;
         Field *fields[] = {u, v, w, p, T, C};
         for (Field *f: fields) {
@@ -135,9 +138,10 @@ void FieldIOBase::read(std::string &file_name, Field *u, Field *v, Field *w, Fie
             std::vector<std::string> splitted_string = Utility::split(line, ';');
             size_t counter = 0;
             for (const std::string &part: splitted_string) {
-                f->data[counter] = std::stod(part);
+                f->data[counter] = static_cast<real>(std::stold(part));
                 counter++;
             }
+            std::cout << counter << std::endl;
         }
     } else {
 #ifndef BENCHMARKING
@@ -163,15 +167,13 @@ std::string FieldIOBase::create_header() {
     auto Ny = domain->get_Ny();
     auto Nz = domain->get_Nz();
 
-    std::cout << m_format << std::endl;
-    std::string string_t_cur_text = "Current time step: ";
+    std::string string_t_cur_text = "Current time step;";
     m_pos_time_step = string_t_cur_text.length();
-    std::cout << string_t_cur_text << " with length: " << m_pos_time_step << std::endl;
-    std::string header = fmt::format(string_t_cur_text + m_format + ", dt={}\n", 0.0, m_dt);
+    std::string header = fmt::format(string_t_cur_text + m_format + ";dt;{}\n", 0.0, m_dt);
     header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
-    header.append(fmt::format("###DATE:{}", std::ctime(&end_time)));
-    header.append(fmt::format("###XML:{}\n", Parameters::getInstance()->get_filename()));
+    header.append(fmt::format("###DATE;{}", std::ctime(&end_time)));
+    header.append(fmt::format("###XML;{}\n", Parameters::getInstance()->get_filename()));
     m_positions[0] = static_cast<long>(header.length()) + 1;
     return header;
 }

@@ -156,7 +156,7 @@ class Domain:
 
     def print_info(self):
         # alike to info output in logger
-        print(f"Domain size inner cells: {self.domain_param['nx'] - 2} {self.domain_param['ny'] - 2} {self.domain_param['nz'] - 2}\n"
+        print(f"Domain size inner cells: {self.domain_param['nx']} {self.domain_param['ny']} {self.domain_param['nz']}\n"
               f"step size (x|y|z): ({self.domain_param['dx']}|{self.domain_param['dy']}|{self.domain_param['dz']})")
         for o in self.obstacles:
             print(f"-- Obstacle {o['name']}\n"
