@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 
             std::string log_level = params->get("logging/level");
             MPI_Request request;
-            MPI_Isend(log_level.c_str(), log_level.size(), MPI_CHAR, 1, 0, MPI_COMM_WORLD, &request);
+            MPI_Isend(log_level.c_str(), static_cast<int>(log_level.size()), MPI_CHAR, 1, 0, MPI_COMM_WORLD, &request);
         } else {
             std::cerr << "XML file missing" << std::endl;
             std::exit(1);
@@ -126,7 +126,6 @@ void server() {
     };
 
     // bind the server to a port.
-    std::cout << "ich bin rank 1 vor binding" << std::endl;
 #ifndef BENCHMARKING
     logger->debug("bind server to a port");
 #endif
@@ -159,6 +158,7 @@ void server() {
 
     // TODO: You should do an input loop so the program will not terminated immediately: loop until main thread of MPI says to exit
     while (simulation_is_running) {
+        MPI_Recv(&simulation_is_running, 1, MPI_LOGICAL, 0, 77, MPI_COMM_WORLD, &status);
     }
 
     // close the server before exiting the program.

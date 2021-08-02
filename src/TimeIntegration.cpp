@@ -8,6 +8,9 @@
 #include "TimeIntegration.h"
 #include "utility/Parameters.h"
 #include "Domain.h"
+#ifdef ASSIMILATION
+#include "mpi.h"
+#endif
 
 // ==================================== Constructor ====================================
 // ***************************************************************************************
@@ -196,6 +199,11 @@ void TimeIntegration::run() {
     m_logger->info("Done calculating and timing ...");
 #else
     std::cout << "Done calculating and timing ..." << std::endl;
+#endif
+#ifdef ASSIMILATION
+    bool simulation_is_running = false;
+    MPI_Request request;
+    MPI_Isend(&simulation_is_running, 1, MPI_LOGICAL, 1, 77, MPI_COMM_WORLD, &request);
 #endif
 
     // stop timer

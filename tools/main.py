@@ -22,6 +22,7 @@ if __name__ == '__main__':
     reader = FieldReader()
     reader.print_header()
 
+    # optional, provides additional information
     xml = XML(reader.get_xml_file_name())
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)

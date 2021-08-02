@@ -39,7 +39,6 @@ FieldIOBase::FieldIOBase() {
     size_t n = static_cast<size_t>(std::stod(t_end) / m_dt) + 1;
     m_positions = new long[n];
     std::string header = create_header();
-    std::cout << header << std::endl;
     std::ofstream output_file(m_filename, std::ios_base::out);
     output_file.write(header.c_str(), m_positions[0]);
     output_file.close();
@@ -167,7 +166,7 @@ std::string FieldIOBase::create_header() {
     auto Nz = domain->get_Nz();
 
     std::string string_t_cur_text = "Current time step;";
-    m_pos_time_step = string_t_cur_text.length();
+    m_pos_time_step = static_cast<long>(string_t_cur_text.length());
     std::string header = fmt::format(string_t_cur_text + m_format + ";dt;{}\n", 0.0, m_dt);
     header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));

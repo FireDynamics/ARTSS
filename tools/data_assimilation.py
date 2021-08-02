@@ -83,15 +83,19 @@ class FieldReader:
         return self.fields
 
     def read_field_data(self, time_step: float) -> dict:
-        number_of_fields = len(self.fields)
-        steps = int(time_step / self.dt)
+        if time_step < self.get_t_current():
+            print(f'cannot read time step {time_step} as the current time step ')
+            return None
+        else:
+            number_of_fields = len(self.fields)
+            steps = int(time_step / self.dt)
 
-        starting_line = 5 + number_of_fields * steps
-        lines = self.get_lines_from_file(list(range(starting_line, starting_line + number_of_fields + 1)))
-        fields = {}
-        for i in range(number_of_fields):
-            fields[self.fields[i]] = np.fromstring(lines[i], dtype=np.float, sep=';')
-        return fields
+            starting_line = 5 + number_of_fields * steps
+            lines = self.get_lines_from_file(list(range(starting_line, starting_line + number_of_fields + 1)))
+            fields = {}
+            for i in range(number_of_fields):
+                fields[self.fields[i]] = np.fromstring(lines[i], dtype=np.float, sep=';')
+            return fields
 
     def write_field_data(self, file_name: str, data: dict, t_cur: float):
         number_of_fields = len(self.fields)
