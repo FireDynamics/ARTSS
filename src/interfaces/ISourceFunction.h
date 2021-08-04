@@ -13,6 +13,8 @@
 class ISourceFunction {
 public:
     virtual void update_source(Field *out, real t_cur) = 0;
+    virtual void read_header_part(std::string &header) = 0;
+    virtual std::string write_header_part() = 0;
 };
 
 

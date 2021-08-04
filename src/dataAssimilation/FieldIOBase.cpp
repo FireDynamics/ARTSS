@@ -22,16 +22,19 @@ FieldIOBase::FieldIOBase() {
     m_dt = std::stod(dt);
     std::string t_end = Parameters::getInstance()->get("physical_parameters/t_end");
 
-    std::vector<std::string> t_end_parts = Utility::split(Utility::trim(t_end), '.');
-    std::vector<std::string> dt_parts = Utility::split(Utility::trim(dt), '.');
+    //std::vector<std::string> t_end_parts = Utility::split(Utility::trim(t_end), '.');
+    //std::vector<std::string> dt_parts = Utility::split(Utility::trim(dt), '.');
 
-    int decimal_number_digits = 0;
-    if (t_end_parts.size() > 1) {
-        decimal_number_digits = std::max(t_end_parts[1].length(), dt_parts[1].length());
-    } else if (dt_parts.size() > 1) {
-        decimal_number_digits = dt_parts[1].length();
-    }
-    int whole_number_digits = std::max(t_end_parts[0].length(), dt_parts[0].length());
+    int decimal_number_digits;
+    int whole_number_digits;
+    //if (t_end_parts.size() > 1) {
+    //    decimal_number_digits = std::max(t_end_parts[1].length(), dt_parts[1].length());
+    //} else if (dt_parts.size() > 1) {
+    //    decimal_number_digits = dt_parts[1].length();
+    //}
+    //int whole_number_digits = std::max(t_end_parts[0].length(), dt_parts[0].length());
+
+    Utility::calculate_whole_and_decimal_digits(t_end, dt, &decimal_number_digits, &whole_number_digits);
 
     m_length_time_stamp = decimal_number_digits + whole_number_digits + 1;
     m_format = "{:0" + std::to_string(m_length_time_stamp) + "." + std::to_string(decimal_number_digits) + "f}";

@@ -237,4 +237,17 @@ void log_minimum(Field *field, const std::string& text, const std::string& logge
         return trim_end(trim_start(string));
     }
 
+    void calculate_whole_and_decimal_digits(std::string &number1, std::string &number2, int *decimal_number_digits, int *whole_number_digits){
+        std::vector<std::string> number1_parts = Utility::split(Utility::trim(number1), '.');
+        std::vector<std::string> number2_parts = Utility::split(Utility::trim(number2), '.');
+
+        *whole_number_digits = 0;
+        *decimal_number_digits = 0;
+        if (number1.size() > 1) {
+            *decimal_number_digits = std::max(number1_parts[1].length(), number2_parts[1].length());
+        } else if (number2.size() > 1) {
+            *decimal_number_digits = number2_parts[1].length();
+        }
+        *whole_number_digits = std::max(number1_parts[0].length(), number2_parts[0].length());
+    }
 }  // namespace Utility

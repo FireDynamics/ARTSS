@@ -9,8 +9,9 @@
 #include "../Domain.h"
 #include "../TCP/TCPServer.h"
 #include "mpi.h"
+#include "HRRChanger.h"
 
-DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_field_controller(field_controller) {
+DataAssimilation::DataAssimilation(const SolverController &solver_controller, const FieldController &field_controller) : m_field_controller(field_controller), m_solver_controller(solver_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -18,11 +19,10 @@ DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_
     m_assimilated = (params->get("data_assimilation/enabled") == "Yes");
     if (m_assimilated) {
         std::string init = params->get("data_assimilation/class_name");
-        if (init == AssimilationMethods::Standard) {
-#ifndef BENCHMARKING
-            m_logger->debug("found data assimilation class {}", init);
-#endif
+        if (init == AssimilationMethods::FieldReader) {
             m_func = new FieldIOBase();
+        } else if (init == AssimilationMethods::HRRChanger) {
+            m_func = new HRRChanger(m_solver_controller.get_temperature_source_function());
         } else {
 #ifndef BENCHMARKING
             m_logger->critical("Data Assimilation class {} is not defined", init);

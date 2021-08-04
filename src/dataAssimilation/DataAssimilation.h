@@ -12,14 +12,16 @@
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
 #include "FieldIOBase.h"
+#include "../solver/SolverController.h"
 
 struct AssimilationMethods {
-    inline static const std::string Standard = "default";
+    inline static const std::string FieldReader = "FieldReader";
+    inline static const std::string HRRChanger = "HRRChanger";
 };
 
 class DataAssimilation {
  public:
-    explicit DataAssimilation(const FieldController &field_controller);
+    DataAssimilation(const SolverController &solver_controller, const FieldController &field_controller);
     void save_data(real t_cur);
 
     bool requires_rollback();
@@ -32,6 +34,7 @@ private:
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     FieldController m_field_controller;
+    SolverController m_solver_controller;
     bool m_assimilated = false;
 
     FieldIOBase *m_func;

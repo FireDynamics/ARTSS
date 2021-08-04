@@ -23,7 +23,6 @@ GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real 
 }
 
 void GaussFunction::init() {
-    auto params = Parameters::getInstance();
     m_field_spatial_values = new Field(FieldType::RHO, 0.);
     create_spatial_values();
 }
@@ -138,4 +137,31 @@ void GaussFunction::create_spatial_values() {
 // ***************************************************************************************
 real GaussFunction::get_time_value(real t_cur) {
     return tanh(t_cur / m_tau);
+}
+
+std::string GaussFunction::write_header_part() {
+    std::string header_part = fmt::format("###coordinates;{};{};{}", m_x0, m_y0, m_z0);
+    header_part.append(fmt::format("###volume;{};{};{}", m_sigma_x, m_sigma_y, m_sigma_z));
+    header_part.append(fmt::format("###HRR;{};cp;{}", m_HRR, m_cp));
+    return header_part;
+}
+
+void GaussFunction::read_header_part(std::string &header) {
+    std::vector<std::string> lines = Utility::split(header, '\n');
+
+    std::vector<std::string> coordinates = Utility::split(lines[0], ';');
+    m_x0 = std::stod(coordinates[1]);
+    m_y0 = std::stod(coordinates[2]);
+    m_z0 = std::stod(coordinates[3]);
+
+    std::vector<std::string> volume = Utility::split(lines[1], ';');
+    m_sigma_x = std::stod(volume[1]);
+    m_sigma_y = std::stod(volume[2]);
+    m_sigma_z = std::stod(volume[3]);
+
+    std::vector<std::string> heat_source = Utility::split(lines[2], ';');
+    m_HRR = std::stod(heat_source[1]);
+    m_cp = std::stod(heat_source[3]);
+
+    create_spatial_values();
 }

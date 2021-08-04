@@ -27,6 +27,7 @@ namespace Utility {
     std::vector<std::string> split(const std::string& text, char delimiter);
     std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list1, size_t *list2, size_t size_list2);
     std::string trim(const std::string &string);
+    void calculate_whole_and_decimal_digits(std::string &number1, std::string &number2, int *decimal_number_digits, int *whole_number_digits);
     void log_minimum(Field *field, const std::string& text, const std::string& logger_name);
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> create_logger(const std::string& logger_name, const std::string& log_file, const std::string& log_level);
