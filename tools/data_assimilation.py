@@ -83,9 +83,10 @@ class FieldReader:
         return self.fields
 
     def read_field_data(self, time_step: float) -> dict:
-        if time_step < self.get_t_current():
-            print(f'cannot read time step {time_step} as the current time step ')
-            return None
+        t_cur = self.get_t_current()
+        if time_step < t_cur:
+            print(f'cannot read time step {time_step} as the current time step is {t_cur}')
+            return {}
         else:
             number_of_fields = len(self.fields)
             steps = int(time_step / self.dt)
