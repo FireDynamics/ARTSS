@@ -1350,7 +1350,7 @@ void Obstacle::remove_patch(Patch patch) {
 /// \param k coordinate in z direction
 /// \return true if cell is a corner cell, otherwise false
 // *************************************************************************************************
-bool Obstacle::is_corner_cell(size_t i, size_t j, size_t k) {
+bool Obstacle::is_corner_cell(size_t i, size_t j, size_t k) const {
     return (i == m_i1 || i == m_i2) && (j == m_j1 || j == m_j2) && (k == m_k1 || k == m_k2);
 }
 
@@ -1362,10 +1362,14 @@ bool Obstacle::is_corner_cell(size_t i, size_t j, size_t k) {
 /// \param k coordinate in z direction
 /// \return true if cell is a edge cell, otherwise false
 // *************************************************************************************************
-bool Obstacle::is_edge_cell(size_t i, size_t j, size_t k) {
+bool Obstacle::is_edge_cell(size_t i, size_t j, size_t k) const {
     bool on_x = (i == m_i1 || i == m_i2);
     bool on_y = (j == m_j1 || j == m_j2);
     bool on_z = (k == m_k1 || k == m_k2);
 
     return (on_x && on_y) || (on_y || on_z) || (on_x && on_z);
+}
+
+bool Obstacle::has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1, size_t k2) const {
+    return has_overlap(m_i1, m_i2, i1, i2) && has_overlap(m_j1, m_j2, j1, j2) && has_overlap(m_k1, m_k2, k1, k2);
 }
