@@ -119,32 +119,32 @@ link_directories($ENV{CUDA_LIB})
 include_directories($ENV{CUDA_INC})
 
 # find spdlog lib
-if(NOT TARGET spdlog)
+if(NOT TARGET spdlog::spdlog)
     # Stand-alone build
-    find_package(spdlog QUIET)
+    find_package(spdlog::spdlog QUIET)
 endif()
 # use local fallback
-# if(NOT TARGET spdlog)
-#     add_subdirectory(external/spdlog)
-# endif()
+if(NOT TARGET spdlog::spdlog)
+    add_subdirectory(external/spdlog)
+endif()
 
-if(NOT TARGET fmt)
+if(NOT TARGET fmt::fmt)
     # Stand-alone build
-    find_package(fmt QUIET)
+    find_package(fmt::fmt QUIET)
 endif()
 # use local fallback
-# if(NOT TARGET fmt)
-#     add_subdirectory(external/fmt)
-# endif()
+if(NOT TARGET fmt::fmt)
+    add_subdirectory(external/fmt)
+endif()
 
-if(NOT TARGET gtest)
+if(NOT TARGET gtest::gtest)
     # Stand-alone build
-    find_package(gtest QUIET)
+    find_package(gtest::gtest QUIET)
 endif()
 # use local fallback
-# if(NOT TARGET gtest)
-#     add_subdirectory(external/googletest)
-# endif()
+if(NOT TARGET gtest::gtest)
+    add_subdirectory(external/googletest)
+endif()
 
 #Targets
 add_executable(artss_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
