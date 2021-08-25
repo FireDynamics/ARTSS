@@ -67,8 +67,9 @@ class Obstacle {
 
     void set_inner_cells(Field *f, real value);
 
-    bool is_corner_cell(size_t i, size_t j, size_t k);
-    bool is_edge_cell(size_t i, size_t j, size_t k);
+    bool is_corner_cell(size_t i, size_t j, size_t k) const;
+    bool is_edge_cell(size_t i, size_t j, size_t k) const;
+    bool has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1, size_t k2) const;
 
  private:
 #ifndef BENCHMARKING
