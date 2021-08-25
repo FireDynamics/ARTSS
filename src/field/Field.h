@@ -44,7 +44,7 @@ class Field {
     static void swap(Field &a, Field &b) { std::swap(a.data, b.data); }
 
     Field &operator+=(const real x) {
-#pragma acc parallel loop independent data present(this->data[:m_size]) async
+#pragma acc parallel loop independent present(this->data[:m_size]) async
         for (size_t i=0; i < m_size; ++i)
             this->data[i] += x;
 
@@ -53,7 +53,7 @@ class Field {
     }
     Field &operator+=(const Field &rhs) {
         auto rhs_data = rhs.data;
-#pragma acc parallel loop independent data present(this->data[:m_size], rhs_data[:m_size]) async
+#pragma acc parallel loop independent present(this->data[:m_size], rhs_data[:m_size]) async
         for (size_t i=0; i < m_size; ++i)
             this->data[i] += rhs_data[i];
 
@@ -62,7 +62,7 @@ class Field {
     }
 
     Field &operator*=(const real x) {
-#pragma acc parallel loop independent data present(this->data[:m_size]) async
+#pragma acc parallel loop independent present(this->data[:m_size]) async
         for (size_t i=0; i < m_size; ++i)
             this->data[i] *= x;
 
@@ -71,7 +71,7 @@ class Field {
     }
     Field &operator*=(const Field &rhs) {
         auto rhs_data = rhs.data;
-#pragma acc parallel loop independent data present(this->data[:m_size], rhs_data[:m_size]) async
+#pragma acc parallel loop independent present(this->data[:m_size], rhs_data[:m_size]) async
         for (size_t i=0; i < m_size; ++i)
             this->data[i] *= rhs_data[i];
 
