@@ -19,8 +19,8 @@ TEST_F(FieldTest, constructor_val) {
     Field b(UNKNOWN_FIELD, 0.5, 0, size);
 
     for (auto i=0; i < size; ++i) {
-        ASSERT_EQ(a.data[i], 0.0);
-        ASSERT_EQ(b.data[i], 0.5);
+        ASSERT_EQ(a[i], 0.0);
+        ASSERT_EQ(b[i], 0.5);
     }
 }
 
@@ -30,7 +30,7 @@ TEST_F(FieldTest, set_val) {
 
     a.set_value(0.5);
     for (auto i=0; i < size; ++i) {
-        ASSERT_EQ(a.data[i], 0.5);
+        ASSERT_EQ(a[i], 0.5);
     }
 }
 
@@ -42,7 +42,7 @@ TEST_F(FieldTest, copy_data) {
     a.copy_data(b);
 
     for (auto i=0; i < size; ++i) {
-        ASSERT_EQ(a.data[i], b.data[i]);
+        ASSERT_EQ(a[i], b[i]);
     }
 }
 
@@ -53,8 +53,8 @@ TEST_F(FieldTest, swap_field) {
 
     real x = 0.0;
     for (auto i=0; i < size; ++i) {
-        a.data[i] = x + 0.0;
-        b.data[i] = x + 0.5;
+        a[i] = x + 0.0;
+        b[i] = x + 0.5;
         x += 1.0;
     }
 
@@ -62,8 +62,86 @@ TEST_F(FieldTest, swap_field) {
 
     x = 0.0;
     for (auto i=0; i < size; ++i) {
-        ASSERT_EQ(a.data[i], x + 0.5);
-        ASSERT_EQ(b.data[i], x + 0.0);
+        ASSERT_EQ(a[i], x + 0.5);
+        ASSERT_EQ(b[i], x + 0.0);
+        x += 1.0;
+    }
+}
+
+TEST_F(FieldTest, add_two_fields) {
+    size_t size = 100;
+    Field a(UNKNOWN_FIELD, 0.0, 0, size);
+    Field b(UNKNOWN_FIELD, 0.0, 0, size);
+
+    real x = 0.0;
+    for (auto i=0; i < size; ++i) {
+        a[i] = x + 0.0;
+        b[i] = x + 0.5;
+        x += 1.0;
+    }
+
+    a += b;
+
+    x = 0.0;
+    for (auto i=0; i < size; ++i) {
+        ASSERT_EQ(a[i], b[i] + 2 * x + 0.5);
+        x += 1.0;
+    }
+}
+
+TEST_F(FieldTest, mul_two_fields) {
+    size_t size = 100;
+    Field a(UNKNOWN_FIELD, 0.0, 0, size);
+    Field b(UNKNOWN_FIELD, 0.0, 0, size);
+
+    real x = 0.0;
+    for (auto i=0; i < size; ++i) {
+        a[i] = x;
+        b[i] = 0.5;
+        x += 1.0;
+    }
+
+    a *= b;
+
+    x = 0.0;
+    for (auto i=0; i < size; ++i) {
+        ASSERT_EQ(a[i], b[i] * x);
+        x += 1.0;
+    }
+}
+
+TEST_F(FieldTest, add_scalar) {
+    size_t size = 100;
+    Field a(UNKNOWN_FIELD, 0.0, 0, size);
+
+    real x = 0.0;
+    for (auto i=0; i < size; ++i) {
+        a[i] = x;
+    }
+
+    a += 0.5;
+
+    x = 0.0;
+    for (auto i=0; i < size; ++i) {
+        ASSERT_EQ(a[i], x + 0.5);
+        x += 1.0;
+    }
+}
+
+TEST_F(FieldTest, mul_scalar) {
+    size_t size = 100;
+    Field a(UNKNOWN_FIELD, 0.0, 0, size);
+
+    real x = 0.0;
+    for (auto i=0; i < size; ++i) {
+        a[i] = x;
+    }
+
+    a *= 0.5;
+
+    x = 0.0;
+    for (auto i=0; i < size; ++i) {
+        ASSERT_EQ(a[i], x * 0.5);
         x += 1.0;
     }
 }
