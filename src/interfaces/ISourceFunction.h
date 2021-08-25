@@ -9,6 +9,7 @@
 
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include <string>
 
 class ISourceFunction {
 public:

@@ -1,10 +1,10 @@
-/// \file       FieldIOBase.cpp
+/// \file       FieldIO.cpp
 /// \brief      
 /// \date       Apr 18, 2021
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 
-#include "FieldIOBase.h"
+#include "FieldIO.h"
 #include <chrono>
 #include <ctime>
 #include <algorithm>
@@ -12,12 +12,29 @@
 
 #include <fmt/format.h>
 #include "../Domain.h"
+#include "DataAssimilation.h"
+#include "Zero.h"
+#include "HRRChanger.h"
 
 
-FieldIOBase::FieldIOBase() {
+FieldIO::FieldIO(const SolverController &solver_controller): m_solver_controller(solver_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
+    Parameters *params = Parameters::getInstance();
+    std::string init = params->get("data_assimilation/class_name");
+    if (init == AssimilationMethods::None) {
+        m_func = new Zero();
+    } else if (init == AssimilationMethods::HRRChanger) {
+        m_func = new HRRChanger(m_solver_controller.get_temperature_source_function());
+    } else {
+#ifndef BENCHMARKING
+        m_logger->critical("Data Assimilation class {} is not defined", init);
+#endif
+        std::exit(1);
+        // TODO Error Handling
+    }
+
     std::string dt = Parameters::getInstance()->get("physical_parameters/dt");
     m_dt = std::stod(dt);
     std::string t_end = Parameters::getInstance()->get("physical_parameters/t_end");
@@ -27,13 +44,6 @@ FieldIOBase::FieldIOBase() {
 
     int decimal_number_digits;
     int whole_number_digits;
-    //if (t_end_parts.size() > 1) {
-    //    decimal_number_digits = std::max(t_end_parts[1].length(), dt_parts[1].length());
-    //} else if (dt_parts.size() > 1) {
-    //    decimal_number_digits = dt_parts[1].length();
-    //}
-    //int whole_number_digits = std::max(t_end_parts[0].length(), dt_parts[0].length());
-
     Utility::calculate_whole_and_decimal_digits(t_end, dt, &decimal_number_digits, &whole_number_digits);
 
     m_length_time_stamp = decimal_number_digits + whole_number_digits + 1;
@@ -41,7 +51,12 @@ FieldIOBase::FieldIOBase() {
 
     size_t n = static_cast<size_t>(std::stod(t_end) / m_dt) + 1;
     m_positions = new long[n];
+
     std::string header = create_header();
+    std::string header_extra = m_func->add_header_data();
+    header += header_extra +  "\n";
+    m_positions[0] = static_cast<long>(header.length()) + 1;
+
     std::ofstream output_file(m_filename, std::ios_base::out);
     output_file.write(header.c_str(), m_positions[0]);
     output_file.close();
@@ -59,9 +74,8 @@ FieldIOBase::FieldIOBase() {
 /// \param  T       data of field T to be written out
 /// \param  C       data of field C to be written out
 // *************************************************************************************************
-void FieldIOBase::write(real t_cur, real *data_u, real *data_v, real *data_w, real *data_p, real *data_T, real *data_C) {
+void FieldIO::write(real t_cur, real *data_u, real *data_v, real *data_w, real *data_p, real *data_T, real *data_C) {
     std::string output = fmt::format(m_format + "\n", t_cur);
-
     real *data_fields[] = {data_u, data_v, data_w, data_p, data_T, data_C};
     auto size = Domain::getInstance()->get_size();
     for (auto f: data_fields){
@@ -70,17 +84,26 @@ void FieldIOBase::write(real t_cur, real *data_u, real *data_v, real *data_w, re
         }
         output.append(fmt::format(("{}\n"), f[size - 1]));
     }
-
     size_t n = static_cast<size_t>(t_cur / m_dt) - 1;
     long length = static_cast<long>(output.length());
     m_positions[n + 1] = m_positions[n] + length;
 
     std::fstream output_file(m_filename);
+    // write field at position dependent on time step
     output_file.seekp(m_positions[n], std::ios_base::beg);
     output_file.write(output.c_str(), length);
 
+    std::string body_extra = m_func->update_body_data();
+    output_file.write(body_extra.c_str(), static_cast<long>(body_extra.length()));
+
+    // overwrite current time step
     output_file.seekp(m_pos_time_step, std::ios_base::beg);
     output_file.write(fmt::format(m_format, t_cur).c_str(), m_length_time_stamp);
+
+    output_file.seekp(m_pos_header_extra, std::ios_base::beg);
+    std::string header_extra = m_func->update_header_data();
+    output_file.write(header_extra.c_str(), static_cast<long>(header_extra.length()));
+
     output_file.close();
 }
 
@@ -95,7 +118,7 @@ void FieldIOBase::write(real t_cur, real *data_u, real *data_v, real *data_w, re
 /// \param  T       field T to store the read data
 /// \param  C       field C to store the read data
 // *************************************************************************************************
-void FieldIOBase::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
+void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
     std::ifstream input_file(m_filename, std::ifstream::binary);
     size_t n = static_cast<size_t>(t_cur / m_dt) - 1;
     long pos = m_positions[n];
@@ -125,7 +148,7 @@ void FieldIOBase::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field
 /// \param  T           field T to store the read data
 /// \param  C           field C to store the read data
 // *************************************************************************************************
-void FieldIOBase::read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
+void FieldIO::read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
     std::ifstream input_file(file_name, std::ifstream::binary);
     if (input_file.is_open()) {
         std::string string_time_step;
@@ -159,7 +182,7 @@ void FieldIOBase::read(std::string &file_name, Field *u, Field *v, Field *w, Fie
 /// ###FIELDS;u;v;w;p;T;concentration
 /// ###DATE:<date>;XML:<XML>
 // *************************************************************************************************
-std::string FieldIOBase::create_header() {
+std::string FieldIO::create_header() {
     auto end = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
@@ -175,7 +198,6 @@ std::string FieldIOBase::create_header() {
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
     header.append(fmt::format("###DATE;{}", std::ctime(&end_time)));
     header.append(fmt::format("###XML;{}\n", Parameters::getInstance()->get_filename()));
-    m_positions[0] = static_cast<long>(header.length()) + 1;
     return header;
 }
 

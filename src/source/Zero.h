@@ -13,7 +13,8 @@
 class Zero: public ISourceFunction {
 public:
     void update_source(Field *out, real t_cur) override { }
+    void read_header_part(std::string &header) override { }
+    std::string write_header_part() override { return {}; }
 };
-
 
 #endif /* ARTSS_ZERO_H */

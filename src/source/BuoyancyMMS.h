@@ -15,6 +15,8 @@ public:
     BuoyancyMMS();
     ~BuoyancyMMS();
     void update_source(Field *out, real t_cur) override;
+    void read_header_part(std::string &header) override;
+    std::string write_header_part() override;
 private:
     void set_up();
     Field *m_source_field;

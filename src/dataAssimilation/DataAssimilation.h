@@ -11,11 +11,11 @@
 #include <string>
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
-#include "FieldIOBase.h"
+#include "FieldIO.h"
 #include "../solver/SolverController.h"
 
 struct AssimilationMethods {
-    inline static const std::string FieldReader = "FieldReader";
+    inline static const std::string None = "default";
     inline static const std::string HRRChanger = "HRRChanger";
 };
 
@@ -37,7 +37,7 @@ private:
     SolverController m_solver_controller;
     bool m_assimilated = false;
 
-    FieldIOBase *m_func;
+    FieldIO *m_reader;
 
     real m_t_cur = -1;
 
