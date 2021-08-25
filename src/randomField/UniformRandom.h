@@ -15,7 +15,6 @@ class UniformRandom: public IRandomField {
         m_seed(std::random_device()()),
         m_steps(range / step_size) {
         init_dist();
-        std::cout << m_steps << std::endl;
     }
 
     UniformRandom(real range, real step_size, int seed) :
