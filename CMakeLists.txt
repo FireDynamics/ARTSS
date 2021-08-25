@@ -124,18 +124,33 @@ if(NOT TARGET spdlog)
     find_package(spdlog QUIET)
 endif()
 # use local fallback
-if(NOT TARGET spdlog)
-    add_subdirectory(external/spdlog)
+# if(NOT TARGET spdlog)
+#     add_subdirectory(external/spdlog)
+# endif()
+
+if(NOT TARGET fmt)
+    # Stand-alone build
+    find_package(fmt QUIET)
 endif()
+# use local fallback
+# if(NOT TARGET fmt)
+#     add_subdirectory(external/fmt)
+# endif()
 
 if(NOT TARGET gtest)
-    add_subdirectory(external/googletest)
+    # Stand-alone build
+    find_package(gtest QUIET)
 endif()
+# use local fallback
+# if(NOT TARGET gtest)
+#     add_subdirectory(external/googletest)
+# endif()
 
 #Targets
 add_executable(artss_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_link_libraries(artss_serial PRIVATE spdlog::spdlog)
+target_link_libraries(artss_serial PRIVATE fmt::fmt)
 
 add_executable(artss_serial_benchmark ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_serial_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
@@ -148,6 +163,7 @@ target_compile_options(artss_multicore_cpu PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_multicore_cpu PUBLIC -acc -ta=multicore)
 target_link_options(artss_multicore_cpu PUBLIC -acc -ta=multicore)
 target_link_libraries(artss_multicore_cpu PRIVATE spdlog::spdlog)
+target_link_libraries(artss_multicore_cpu PRIVATE fmt::fmt)
 
 add_executable(artss_multicore_cpu_benchmark ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_multicore_cpu_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})
@@ -161,6 +177,7 @@ target_compile_options(artss_gpu PUBLIC ${ARTSS_COMPILE_OPTIONS})
 target_compile_options(artss_gpu PUBLIC -acc -Minfo=accel -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_options(artss_gpu PUBLIC -acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_libraries(artss_gpu PRIVATE spdlog::spdlog)
+target_link_libraries(artss_gpu PRIVATE fmt::fmt)
 
 add_executable(artss_gpu_benchmark ${ARTSS_SOURCE_FILES} src/main.cpp)
 target_compile_options(artss_gpu_benchmark PUBLIC ${ARTSS_COMPILE_OPTIONS})

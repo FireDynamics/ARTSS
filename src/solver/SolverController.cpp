@@ -287,7 +287,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver) {
             Functions::McDermott(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, m_field_controller->field_p, 0.);
-            m_field_controller->field_p.setValue(0.);
+            m_field_controller->field_p.set_value(0.);
         }
         if (string_solver == SolverTypes::NSTempSolver || \
             string_solver == SolverTypes::NSTempConSolver || \
@@ -305,7 +305,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbSolver || \
             string_solver == SolverTypes::NSTempSolver) {
             Functions::Vortex(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, m_field_controller->field_p);
-            m_field_controller->field_p.setValue(0.);
+            m_field_controller->field_p.set_value(0.);
         }
         if (string_solver == SolverTypes::NSTempSolver || \
             string_solver == SolverTypes::NSTempConSolver || \
@@ -323,7 +323,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbSolver || \
             string_solver == SolverTypes::NSTempSolver) {
             Functions::VortexY(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, m_field_controller->field_p);
-            m_field_controller->field_p.setValue(0.);
+            m_field_controller->field_p.set_value(0.);
         }
         if (string_solver == SolverTypes::NSTempSolver || \
             string_solver == SolverTypes::NSTempConSolver || \
@@ -337,7 +337,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
         if (string_solver == SolverTypes::NSSolver || \
             string_solver == SolverTypes::NSTurbSolver) {
             Functions::Beltrami(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, m_field_controller->field_p, 0.);
-            // m_field_controller->field_p->setValue(0.);
+            // m_field_controller->field_p->set_value(0.);
         }
     } else if (string_init_usr_fct == FunctionNames::BuoyancyMMS) {
         // NavierStokesTemp test case
@@ -347,7 +347,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver) {
             Functions::BuoyancyMMS(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, m_field_controller->field_p, m_field_controller->field_T, 0.);
-            m_field_controller->field_p.setValue(0.);
+            m_field_controller->field_p.set_value(0.);
             force_source();
             temperature_source();
         }
@@ -412,8 +412,8 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 
     // Sight of boundaries
     auto boundary = BoundaryController::getInstance();
-    size_t *iList = boundary->get_innerList_level_joined();
-    size_t size_iList = boundary->getSize_innerList();
+    size_t *iList = boundary->get_inner_list_level_joined();
+    size_t size_iList = boundary->get_size_inner_list();
 
     for (size_t i = 0; i < size_iList; i++) {
         size_t idx = iList[i];
@@ -468,8 +468,8 @@ void SolverController::force_source() {
         std::string dir = params->get("solver/source/dir");
         if (params->get("solver/source/use_init_values") == XML_FALSE) {
             real ambient_temperature_value = params->get_real("solver/source/ambient_temperature_value");
-            m_field_controller->field_T.setValue(ambient_temperature_value);
-            m_field_controller->field_T_ambient.setValue(ambient_temperature_value);
+            m_field_controller->field_T.set_value(ambient_temperature_value);
+            m_field_controller->field_T_ambient.set_value(ambient_temperature_value);
         }
 
         if (dir.find('x') != std::string::npos) {
@@ -524,9 +524,9 @@ void SolverController::update_sources(real t_cur, bool) {
 #endif
             if (params->get("solver/source/use_init_values") == XML_FALSE) {
                 int ambient_temperature_value = params->get_int("solver/source/ambient_temperature_value");
-                m_field_controller->field_T_ambient.setValue(ambient_temperature_value);
+                m_field_controller->field_T_ambient.set_value(ambient_temperature_value);
             } else {
-                m_field_controller->field_T_ambient.copyData(m_field_controller->get_field_T());
+                m_field_controller->field_T_ambient.copy_data(m_field_controller->get_field_T());
             }
             momentum_source();
         } else {

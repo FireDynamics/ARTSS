@@ -42,23 +42,23 @@ void JacobiDiffuse::diffuse(
         real const D, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    FieldType type = out.getType();
+    FieldType type = out.get_type();
 
     auto d_out = out.data;
 
     auto boundary = BoundaryController::getInstance();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
 #pragma acc data present(out, in, b)
     {
-        const real dx = domain->get_dx(out.getLevel());  // due to unnecessary parameter passing of *this
-        const real dy = domain->get_dy(out.getLevel());
-        const real dz = domain->get_dz(out.getLevel());
+        const real dx = domain->get_dx(out.get_level());  // due to unnecessary parameter passing of *this
+        const real dy = domain->get_dy(out.get_level());
+        const real dz = domain->get_dz(out.get_level());
 
         const real rdx = 1. / dx;  // due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;
@@ -81,7 +81,7 @@ void JacobiDiffuse::diffuse(
 
         while (res > tol_res && it < max_it) {
             JacobiStep(out, in, b, alphaX, alphaY, alphaZ, rbeta, dsign, w, sync);
-            boundary->applyBoundary(d_out, type, sync);
+            boundary->apply_boundary(d_out, type, sync);
 
             sum = 0.;
 
@@ -154,23 +154,23 @@ void JacobiDiffuse::diffuse(
         real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    FieldType type = out.getType();
+    FieldType type = out.get_type();
 
     auto d_out = out.data;
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
 #pragma acc data present(out, in, b, EV)
     {
-        const real dx = domain->get_dx(out.getLevel()); //due to unnecessary parameter passing of *this
-        const real dy = domain->get_dy(out.getLevel());
-        const real dz = domain->get_dz(out.getLevel());
+        const real dx = domain->get_dx(out.get_level()); //due to unnecessary parameter passing of *this
+        const real dy = domain->get_dy(out.get_level());
+        const real dz = domain->get_dz(out.get_level());
 
         const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;
@@ -191,7 +191,7 @@ void JacobiDiffuse::diffuse(
 
         while (res > tol_res && it < max_it) {
             JacobiStep(out, in, b, dsign, w, D, EV, dt, sync);
-            boundary->applyBoundary(d_out, type, sync);
+            boundary->apply_boundary(d_out, type, sync);
 
             sum = 0.;
 
@@ -274,13 +274,13 @@ void JacobiDiffuse::JacobiStep(
         real const rbeta, real const dsign, real const w, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out.getLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out.getLevel());
+    const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out.get_level());
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc parallel loop independent present(out, in, b, d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
@@ -325,9 +325,9 @@ void JacobiDiffuse::JacobiStep(
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t start_i = boundary->get_innerList_level_joined_start(level);
-    size_t end_i = boundary->get_innerList_level_joined_end(level) + 1;
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t start_i = boundary->get_inner_list_level_joined_start(level);
+    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 
 #pragma acc parallel loop independent present(out, in, b, d_iList[start_i:(end_i-start_i)]) async
     for (size_t j = start_i; j < end_i; ++j) {
@@ -362,12 +362,12 @@ void JacobiDiffuse::JacobiStep(
         Field const &EV, real const dt, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out.getLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out.getLevel());
+    const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out.get_level());
 
-    const real dx = domain->get_dx(out.getLevel()); //due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out.getLevel());
-    const real dz = domain->get_dz(out.getLevel());
+    const real dx = domain->get_dx(out.get_level()); //due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out.get_level());
+    const real dz = domain->get_dz(out.get_level());
 
     const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
     const real rdy = 1. / dy;
@@ -375,8 +375,8 @@ void JacobiDiffuse::JacobiStep(
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc parallel loop independent present(out, in, b, EV, d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {

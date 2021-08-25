@@ -7,10 +7,11 @@
 #include "Field.h"
 #include "../Domain.h"
 
+
 Field::Field(FieldType type, real val, size_t level, size_t size):
-    m_level(level), m_size(size), m_type(type) {
+        m_level(level), m_size(size), m_type(type) {
     data = new real[m_size];
-    setValue(val);
+    set_value(val);
 #pragma acc enter data create(this)
 #pragma acc update device(this)
     // note that the pointer is to host memory, so we overwrite with a
@@ -19,9 +20,9 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
 }
 
 Field::Field(Field const &orig):
-    data(new real[orig.getSize()]),
-    m_level(orig.getLevel()), m_size(orig.getSize()), m_type(orig.getType()) {
-    this->copyData(orig);
+    data(new real[orig.get_size()]),
+    m_level(orig.get_level()), m_size(orig.get_size()), m_type(orig.get_type()) {
+    this->copy_data(orig);
 #pragma acc enter data copyin(this[:1]) create(m_data[:m_size])
 }
 

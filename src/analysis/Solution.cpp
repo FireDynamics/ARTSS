@@ -19,6 +19,9 @@ Solution::Solution(const Domain &domain, std::string initial_condition ) :
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     init(initial_condition);
+
+    auto params = Parameters::getInstance();
+    m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
 }
 
 void Solution::init(std::string initial_condition) {
@@ -116,6 +119,11 @@ void Solution::calc_analytical_solution(real t) {
     if (m_current_time_step == t) {
         return;
     }
+
+    if (!m_has_analytical_solution) {
+        return;
+    }
+
     m_current_time_step = t;
     (*this.*m_init_function)(t);
 }

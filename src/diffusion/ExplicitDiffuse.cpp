@@ -32,14 +32,14 @@ ExplicitDiffuse::ExplicitDiffuse() {
 // ***************************************************************************************
 void ExplicitDiffuse::diffuse(Field &out, Field &in, Field const &, real const D, bool sync) {
     // local variables and parameters for GPU
-    FieldType type = out.getType();
+    FieldType type = out.get_type();
 
     auto d_out = out.data;
 
     auto boundary = BoundaryController::getInstance();
 
     ExplicitStep(out, in, D, sync);
-    boundary->applyBoundary(d_out, type, sync);
+    boundary->apply_boundary(d_out, type, sync);
 }
 
 //====================================== Turbulent Diffuse ===============================================
@@ -56,32 +56,32 @@ void ExplicitDiffuse::diffuse(
         Field const &, real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto bsize = domain->get_size(out.getLevel());
-    FieldType type = out.getType();
+    auto bsize = domain->get_size(out.get_level());
+    FieldType type = out.get_type();
 
     auto d_out = out.data;
 
     auto boundary = BoundaryController::getInstance();
 
     ExplicitStep(out, in, D, EV, sync);
-    boundary->applyBoundary(d_out, type, sync);
+    boundary->apply_boundary(d_out, type, sync);
 }
 
 
 void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out.getLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out.getLevel());
+    const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out.get_level());
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
-    real rdx = D / (domain->get_dx(out.getLevel()) * domain->get_dx(out.getLevel()));
-    real rdy = D / (domain->get_dy(out.getLevel()) * domain->get_dy(out.getLevel()));
-    real rdz = D / (domain->get_dz(out.getLevel()) * domain->get_dz(out.getLevel()));
+    real rdx = D / (domain->get_dx(out.get_level()) * domain->get_dx(out.get_level()));
+    real rdy = D / (domain->get_dy(out.get_level()) * domain->get_dy(out.get_level()));
+    real rdz = D / (domain->get_dz(out.get_level()) * domain->get_dz(out.get_level()));
 
 #pragma acc parallel loop independent present(out, in, d_iList[:bsize_i]) async
     for (size_t ii = 0; ii < bsize_i; ++ii) {
@@ -108,13 +108,13 @@ void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bo
 void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out.getLevel());  // due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out.getLevel());
+    const size_t Nx = domain->get_Nx(out.get_level());  // due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out.get_level());
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc parallel loop independent present(out, in, d_iList[:bsize_i], ev) async
     for (size_t ii = 0; ii < bsize_i; ++ii) {

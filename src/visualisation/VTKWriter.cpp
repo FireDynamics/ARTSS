@@ -10,26 +10,26 @@
 
 static std::string ending = ".vtk";
 
-void VTKWriter::write_numerical(FieldController *field_controller, const std::string& filename) {
-    auto u = field_controller->get_field_u_data();
-    auto v = field_controller->get_field_v_data();
-    auto w = field_controller->get_field_w_data();
-    auto p = field_controller->get_field_p_data();
-    auto div = field_controller->get_field_rhs_data();
-    auto T = field_controller->get_field_T_data();
-    auto C = field_controller->get_field_concentration_data();
-    auto s = field_controller->get_field_sight_data();
-    auto nu_t = field_controller->get_field_nu_t_data();
-    auto S_T = field_controller->get_field_source_T_data();
+void VTKWriter::write_numerical(const FieldController& field_controller, const std::string& filename) {
+    auto u = field_controller.get_field_u_data();
+    auto v = field_controller.get_field_v_data();
+    auto w = field_controller.get_field_w_data();
+    auto p = field_controller.get_field_p_data();
+    auto div = field_controller.get_field_rhs_data();
+    auto T = field_controller.get_field_T_data();
+    auto C = field_controller.get_field_concentration_data();
+    auto s = field_controller.get_field_sight_data();
+    auto nu_t = field_controller.get_field_nu_t_data();
+    auto S_T = field_controller.get_field_source_T_data();
     VTKWriter::vtkPrepareAndWrite((filename + ending).c_str(), u, v, w, p, div, T, C, s, nu_t, S_T);
 }
 
-void VTKWriter::write_analytical(Solution *solution, const std::string& filename) {
-    auto u = solution->GetU();
-    auto v = solution->GetV();
-    auto w = solution->GetW();
-    auto p = solution->GetP();
-    auto T = solution->GetT();
+void VTKWriter::write_analytical(const Solution& solution, const std::string& filename) {
+    auto u = solution.GetU();
+    auto v = solution.GetV();
+    auto w = solution.GetW();
+    auto p = solution.GetP();
+    auto T = solution.GetT();
     VTKWriter::vtkPrepareAndWrite((filename + ending).c_str(), u, v, w, p, T);
 }
 

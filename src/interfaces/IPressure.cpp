@@ -24,22 +24,22 @@ void IPressure::divergence(
         Field const &in_x, Field const &in_y, Field const &in_z, bool sync) {
     auto domain = Domain::getInstance();
 
-    auto Nx = domain->get_Nx(out.getLevel());
-    auto Ny = domain->get_Ny(out.getLevel());
-    auto dx = domain->get_dx(out.getLevel());
-    auto dy = domain->get_dy(out.getLevel());
-    auto dz = domain->get_dz(out.getLevel());
+    auto Nx = domain->get_Nx(out.get_level());
+    auto Ny = domain->get_Ny(out.get_level());
+    auto dx = domain->get_dx(out.get_level());
+    auto dy = domain->get_dy(out.get_level());
+    auto dz = domain->get_dz(out.get_level());
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
 #pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b])
 #pragma acc data present(out, inx, iny, inz)
@@ -86,26 +86,26 @@ void IPressure::projection(
         Field const &in_p, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto Nx = domain->get_Nx(out_u.getLevel());
-    auto Ny = domain->get_Ny(out_u.getLevel());
+    auto Nx = domain->get_Nx(out_u.get_level());
+    auto Ny = domain->get_Ny(out_u.get_level());
 
-    auto dx = domain->get_dx(out_u.getLevel());
-    auto dy = domain->get_dy(out_u.getLevel());
-    auto dz = domain->get_dz(out_u.getLevel());
+    auto dx = domain->get_dx(out_u.get_level());
+    auto dy = domain->get_dy(out_u.get_level());
+    auto dz = domain->get_dz(out_u.get_level());
 
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
 
-    auto typeu = out_u.getType();
-    auto typev = out_v.getType();
-    auto typew = out_w.getType();
+    auto typeu = out_u.get_type();
+    auto typev = out_v.get_type();
+    auto typew = out_w.get_type();
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc data present(d_iList[:bsize_i])
 #pragma acc data present(outu, outv, outw, inu, inv, inw, inp)
@@ -119,10 +119,10 @@ void IPressure::projection(
             out_w[i] = in_w[i] - 0.5 * rdz * (in_p[i + Nx * Ny] - in_p[i - Nx * Ny]);
         }
 
-        // boundaries
-        boundary->applyBoundary(out_u.data, typeu, false);
-        boundary->applyBoundary(out_v.data, typev, false);
-        boundary->applyBoundary(out_w.data, typew, false);
+        //boundaries
+        boundary->apply_boundary(out_u.data, typeu, false);
+        boundary->apply_boundary(out_v.data, typev, false);
+        boundary->apply_boundary(out_w.data, typew, false);
 
         if (sync) {
 #pragma acc wait

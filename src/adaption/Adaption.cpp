@@ -74,7 +74,7 @@ void Adaption::run(real) {
         std::chrono::time_point<std::chrono::system_clock> start, end;
         start = std::chrono::system_clock::now();
 #endif
-        BoundaryController::getInstance()->updateLists();
+        BoundaryController::getInstance()->update_lists();
 #ifndef BENCHMARKING
         end = std::chrono::system_clock::now();
         if (m_has_time_measuring) {

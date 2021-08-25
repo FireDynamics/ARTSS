@@ -160,7 +160,7 @@ void NSTurbSolver::control() {
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
+    if (params->get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif

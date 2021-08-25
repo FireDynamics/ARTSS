@@ -27,31 +27,30 @@ class Field {
     ~Field();
 
     // getter
-    FieldType getType() const { return m_type; }
-    return_ptr getData() const { return data; }
+    FieldType get_type() const { return m_type; }
+    return_ptr get_data() const { return data; }
 
     // read_ptr get_data_ro() const { return data; }
-    size_t getLevel() const { return m_level; }
-    size_t getSize() const { return m_size; }
+    size_t get_level() const { return m_level; }
+    size_t get_size() const { return m_size; }
 
     // setter
     inline real& operator[](size_t i) const { return data[i]; }
 
     // acc functions
-    void updateHost() {
+    void update_host() {
         #pragma acc update host(data[:m_size])
     }
-    void updateDev() {
+    void update_dev() {
         #pragma acc update device(data[:m_size])
     }
     void copyin() {
         #pragma acc enter data copyin(data[:m_size])
     }
 
-    // basic interface to algorithm
-    void setValue(real val) { std::fill(data, data + m_size, val); }
-    void copyData(Field const &other) {
-        std::copy(other.data, other.data+other.m_size, data);
+    void set_value(real val) { std::fill(data, data + m_size, val); }
+    void copy_data(const Field &other) {
+        std::copy(other.data, other.data + other.m_size, data);
     }
     static void swap(Field &a, Field &b) { std::swap(a.data, b.data); }
 
@@ -60,9 +59,7 @@ class Field {
  private:
     size_t const m_level;
     size_t const m_size;
-
     FieldType const m_type;
 };
 
 #endif /* ARTSS_FIELD_FIELD_H_ */
-

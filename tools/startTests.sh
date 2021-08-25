@@ -39,5 +39,5 @@ do
   echo -e "\n$i"
   cd ${p}/tests/${i}
   $build Test_*.xml > /dev/null
-  rm *.vtk
+#  rm *.vtk
 done

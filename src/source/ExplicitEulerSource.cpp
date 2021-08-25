@@ -40,16 +40,17 @@ ExplicitEulerSource::ExplicitEulerSource() {
 void ExplicitEulerSource::add_source(
         Field &out_x, Field &out_y, Field &out_z,
         Field const &s_x, Field const &s_y, Field const &s_z, bool sync) {
+
     // local variables and parameters for GPU
-    size_t level = out_x.getLevel();
-    FieldType type = out_x.getType();
+    size_t level = out_x.get_level();
+    FieldType type = out_x.get_type();
 
     auto dt = m_dt;
     auto dir = m_dir_vel;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc data present(out_x, out_y, out_z, s_x, s_y, s_z)
     {
@@ -62,8 +63,8 @@ void ExplicitEulerSource::add_source(
                 out_x[i] += dt * s_x[i];
             }
 
-            boundary->applyBoundary(out_x.data, level, type, sync);
-        }
+            boundary->apply_boundary(out_x.data, level, type, sync);
+        } // end x- direction
 
         // y - direction
         if (dir.find('y') != std::string::npos) {
@@ -73,8 +74,8 @@ void ExplicitEulerSource::add_source(
                 out_y[i] += dt * s_y[i];
             }
 
-            boundary->applyBoundary(out_y.data, level, type, sync);
-        }
+            boundary->apply_boundary(out_y.data, level, type, sync);
+        } // end y- direction
 
         // z - direction
         if (dir.find('z') != std::string::npos) {
@@ -84,8 +85,8 @@ void ExplicitEulerSource::add_source(
                 out_z[i] += dt * s_z[i];
             }
 
-            boundary->applyBoundary(out_z.data, level, type, sync);
-        }
+            boundary->apply_boundary(out_z.data, level, type, sync);
+        } // end z- direction
 
         if (sync) {
 #pragma acc wait
@@ -100,14 +101,15 @@ void ExplicitEulerSource::add_source(
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void ExplicitEulerSource::add_source(Field &out, Field const &s, bool sync) {
-    size_t level = out.getLevel();
-    FieldType type = out.getType();
+    // local variables and parameters for GPU
+    size_t level = out.get_level();
+    FieldType type = out.get_type();
 
     auto dt = m_dt;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc data present(out, s)
     {
@@ -117,7 +119,7 @@ void ExplicitEulerSource::add_source(Field &out, Field const &s, bool sync) {
             out[i] += dt * s[i];
         }
 
-        boundary->applyBoundary(out.data, level, type, sync);
+        boundary->apply_boundary(out.data, level, type, sync);
 
         if (sync) {
 #pragma acc wait

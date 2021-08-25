@@ -57,6 +57,7 @@ class Solution {
     void (Solution::*m_init_function)(const real);
 
     real m_current_time_step = -1;
+    bool m_has_analytical_solution;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

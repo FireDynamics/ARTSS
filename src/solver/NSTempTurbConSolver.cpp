@@ -119,7 +119,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
     Field &kappa_t = m_field_controller->get_field_kappa_t();  // kappa_t - Eddy thermal diffusivity
     Field &gamma_t = m_field_controller->get_field_gamma_t();  // gamma_t - Eddy mass diffsusivity
 
-    size_t bsize = Domain::getInstance()->get_size(u.getLevel());
+    size_t bsize = Domain::getInstance()->get_size(u.get_level());
 
     auto nu = m_nu;
     auto kappa = m_kappa;
@@ -330,35 +330,35 @@ void NSTempTurbConSolver::control() {
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/temperature/advection/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
+    if (params->get("solver/temperature/advection/field") != BoundaryData::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/concentration/advection/field") != BoundaryData::getFieldTypeName(FieldType::RHO)) {
+    if (params->get("solver/concentration/advection/field") != BoundaryData::get_field_type_name(FieldType::RHO)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/temperature/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
+    if (params->get("solver/temperature/diffusion/field") != BoundaryData::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/concentration/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::RHO)) {
+    if (params->get("solver/concentration/diffusion/field") != BoundaryData::get_field_type_name(FieldType::RHO)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
+    if (params->get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif

@@ -30,7 +30,7 @@ void GaussFunction::update_source(Field &out, real t_cur) {
 #pragma acc data present(out, spatial)
     {
 #pragma acc parallel loop independent present(out, spatial) async
-        for (size_t i = 0; i < out.getSize(); i++) {
+        for (size_t i = 0; i < out.get_size(); i++) {
             out[i] = m_field_spatial_values[i] * get_time_value(t_cur);
         }
 #pragma acc wait
@@ -50,7 +50,7 @@ void GaussFunction::update_source(Field &out, real t_cur) {
 void GaussFunction::create_spatial_values() {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto level = m_field_spatial_values.getLevel();
+    auto level = m_field_spatial_values.get_level();
 
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
@@ -72,9 +72,9 @@ void GaussFunction::create_spatial_values() {
 
     // set Gaussian to cells
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
+    auto bsize_i = boundary->get_size_inner_list();
 
     real HRRrV;
 

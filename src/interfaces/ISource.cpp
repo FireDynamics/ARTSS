@@ -33,11 +33,11 @@ void ISource::buoyancy_force(
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
 #pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], out, in, ina)
     {
@@ -76,12 +76,12 @@ void ISource::dissipate(
         Field &out,
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
     auto domain = Domain::getInstance();
-    size_t Nx = domain->get_Nx(out.getLevel());
-    size_t Ny = domain->get_Ny(out.getLevel());
+    size_t Nx = domain->get_Nx(out.get_level());
+    size_t Ny = domain->get_Ny(out.get_level());
 
-    real dx = domain->get_dx(out.getLevel());
-    real dy = domain->get_dy(out.getLevel());
-    real dz = domain->get_dz(out.getLevel());
+    real dx = domain->get_dx(out.get_level());
+    real dy = domain->get_dy(out.get_level());
+    real dz = domain->get_dz(out.get_level());
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
@@ -91,11 +91,11 @@ void ISource::dissipate(
     real dt = params->get_real("physical_parameters/dt");
     real nu = params->get_real("physical_parameters/nu");
 
-    auto type = out.getType();
+    auto type = out.get_type();
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc data present(out, in_u, in_v, in_w, d_iList[:bsize_i])
     {
@@ -117,7 +117,7 @@ void ISource::dissipate(
         }
 
         // boundaries
-        boundary->applyBoundary(out.data, type, sync);
+        boundary->apply_boundary(out.data, type, sync);
 
         if (sync) {
 #pragma acc wait

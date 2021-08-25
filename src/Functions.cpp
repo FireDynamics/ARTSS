@@ -43,16 +43,16 @@ namespace Functions {
 // ***************************************************************************************
     void Beltrami(Field &outx, Field &outy, Field &outz, Field &outp, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx.getLevel());
-        size_t Ny = domain->get_Ny(outx.getLevel());
+        size_t Nx = domain->get_Nx(outx.get_level());
+        size_t Ny = domain->get_Ny(outx.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx.getLevel());
-        real dy = domain->get_dy(outx.getLevel());
-        real dz = domain->get_dz(outx.getLevel());
+        real dx = domain->get_dx(outx.get_level());
+        real dy = domain->get_dy(outx.get_level());
+        real dz = domain->get_dz(outx.get_level());
 
         auto params = Parameters::getInstance();
 
@@ -61,10 +61,10 @@ namespace Functions {
         real nu = params->get_real("physical_parameters/nu"); //1;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -112,26 +112,26 @@ namespace Functions {
 // ***************************************************************************************
     void BeltramiBC_p(Field &outx) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx.getLevel());
-        size_t Ny = domain->get_Ny(outx.getLevel());
+        size_t Nx = domain->get_Nx(outx.get_level());
+        size_t Ny = domain->get_Ny(outx.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx.getLevel());
-        real dy = domain->get_dy(outx.getLevel());
-        real dz = domain->get_dz(outx.getLevel());
+        real dx = domain->get_dx(outx.get_level());
+        real dy = domain->get_dy(outx.get_level());
+        real dz = domain->get_dz(outx.get_level());
 
         auto params = Parameters::getInstance();
 
         real a = params->get_real("initial_conditions/a");  // 0.25 * M_PI;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -166,16 +166,16 @@ namespace Functions {
 // ***************************************************************************************
     void BeltramiBC_u(Field &outx, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx.getLevel());
-        size_t Ny = domain->get_Ny(outx.getLevel());
+        size_t Nx = domain->get_Nx(outx.get_level());
+        size_t Ny = domain->get_Ny(outx.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx.getLevel());
-        real dy = domain->get_dy(outx.getLevel());
-        real dz = domain->get_dz(outx.getLevel());
+        real dx = domain->get_dx(outx.get_level());
+        real dy = domain->get_dy(outx.get_level());
+        real dz = domain->get_dz(outx.get_level());
 
         auto params = Parameters::getInstance();
 
@@ -184,10 +184,10 @@ namespace Functions {
         real nu = params->get_real("physical_parameters/nu"); //1.;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -218,16 +218,16 @@ namespace Functions {
 // ***************************************************************************************
     void BeltramiBC_v(Field &outx, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx.getLevel());
-        size_t Ny = domain->get_Ny(outx.getLevel());
+        size_t Nx = domain->get_Nx(outx.get_level());
+        size_t Ny = domain->get_Ny(outx.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx.getLevel());
-        real dy = domain->get_dy(outx.getLevel());
-        real dz = domain->get_dz(outx.getLevel());
+        real dx = domain->get_dx(outx.get_level());
+        real dy = domain->get_dy(outx.get_level());
+        real dz = domain->get_dz(outx.get_level());
 
         auto params = Parameters::getInstance();
 
@@ -236,10 +236,10 @@ namespace Functions {
         real nu = params->get_real("physical_parameters/nu");  // 1.;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -270,16 +270,16 @@ namespace Functions {
 // ***************************************************************************************
     void BeltramiBC_w(Field &outx, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx.getLevel());
-        size_t Ny = domain->get_Ny(outx.getLevel());
+        size_t Nx = domain->get_Nx(outx.get_level());
+        size_t Ny = domain->get_Ny(outx.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx.getLevel());
-        real dy = domain->get_dy(outx.getLevel());
-        real dz = domain->get_dz(outx.getLevel());
+        real dx = domain->get_dx(outx.get_level());
+        real dy = domain->get_dy(outx.get_level());
+        real dz = domain->get_dz(outx.get_level());
 
         auto params = Parameters::getInstance();
 
@@ -288,10 +288,10 @@ namespace Functions {
         real nu = params->get_real("physical_parameters/nu");
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -328,10 +328,10 @@ namespace Functions {
         real g = params->get_real("physical_parameters/g");  // -9.81;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
@@ -358,14 +358,14 @@ namespace Functions {
 // ***************************************************************************************
     void BuoyancyMMS(Field &outx, Field &outy, Field &outz, Field &outp, Field &outT, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx.getLevel());
-        size_t Ny = domain->get_Ny(outx.getLevel());
+        size_t Nx = domain->get_Nx(outx.get_level());
+        size_t Ny = domain->get_Ny(outx.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx.getLevel());
-        real dy = domain->get_dy(outx.getLevel());
+        real dx = domain->get_dx(outx.get_level());
+        real dy = domain->get_dy(outx.get_level());
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -378,10 +378,10 @@ namespace Functions {
         real rpi = 1. / M_PI;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
@@ -419,14 +419,14 @@ namespace Functions {
 // ***************************************************************************************
     void BuoyancyST_MMS(Field &out, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.getLevel());
-        size_t Ny = domain->get_Ny(out.getLevel());
+        size_t Nx = domain->get_Nx(out.get_level());
+        size_t Ny = domain->get_Ny(out.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(out.getLevel());
-        real dy = domain->get_dy(out.getLevel());
+        real dx = domain->get_dx(out.get_level());
+        real dy = domain->get_dy(out.get_level());
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -440,10 +440,10 @@ namespace Functions {
         real c_kappa = 2 * kappa * M_PI * M_PI - 1;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
 
         size_t coords_k, coords_i, coords_j;
 
@@ -486,10 +486,10 @@ namespace Functions {
 
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
@@ -519,16 +519,16 @@ namespace Functions {
 // ***************************************************************************************
     void ExpSinusProd(Field &out, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.getLevel());
-        size_t Ny = domain->get_Ny(out.getLevel());
+        size_t Nx = domain->get_Nx(out.get_level());
+        size_t Ny = domain->get_Ny(out.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.getLevel());
-        real dy = domain->get_dy(out.getLevel());
-        real dz = domain->get_dz(out.getLevel());
+        real dx = domain->get_dx(out.get_level());
+        real dy = domain->get_dy(out.get_level());
+        real dz = domain->get_dz(out.get_level());
 
         auto params = Parameters::getInstance();
 
@@ -539,10 +539,10 @@ namespace Functions {
         real kpinu = 3 * l * l * M_PI * M_PI * nu;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         //inner cells
@@ -575,27 +575,27 @@ namespace Functions {
 // ***************************************************************************************
     void ExpSinusSum(Field &outx, Field &outy, Field &outz, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx.getLevel());
-        size_t Ny = domain->get_Ny(outx.getLevel());
-        size_t Nz = domain->get_Nz(outx.getLevel());
+        size_t Nx = domain->get_Nx(outx.get_level());
+        size_t Ny = domain->get_Ny(outx.get_level());
+        size_t Nz = domain->get_Nz(outx.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx.getLevel());
-        real dy = domain->get_dy(outx.getLevel());
-        real dz = domain->get_dz(outx.getLevel());
+        real dx = domain->get_dx(outx.get_level());
+        real dy = domain->get_dy(outx.get_level());
+        real dz = domain->get_dz(outx.get_level());
 
         auto params = Parameters::getInstance();
 
         real nu = params->get_real("physical_parameters/nu");
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         if (Nz != 3) {
@@ -659,16 +659,16 @@ namespace Functions {
 // ***************************************************************************************
     void FacSinSinSin(Field &out) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.getLevel());
-        size_t Ny = domain->get_Ny(out.getLevel());
+        size_t Nx = domain->get_Nx(out.get_level());
+        size_t Ny = domain->get_Ny(out.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.getLevel());
-        real dy = domain->get_dy(out.getLevel());
-        real dz = domain->get_dz(out.getLevel());
+        real dx = domain->get_dx(out.get_level());
+        real dy = domain->get_dy(out.get_level());
+        real dz = domain->get_dz(out.get_level());
 
         auto params = Parameters::getInstance();
 
@@ -677,10 +677,10 @@ namespace Functions {
         real rdkpi = 1. / dkpi;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -712,16 +712,16 @@ namespace Functions {
 // ***************************************************************************************
     void GaussBubble(Field &out, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.getLevel());
-        size_t Ny = domain->get_Ny(out.getLevel());
+        size_t Nx = domain->get_Nx(out.get_level());
+        size_t Ny = domain->get_Ny(out.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.getLevel());
-        real dy = domain->get_dy(out.getLevel());
-        real dz = domain->get_dz(out.getLevel());
+        real dx = domain->get_dx(out.get_level());
+        real dy = domain->get_dy(out.get_level());
+        real dz = domain->get_dz(out.get_level());
 
         auto params = Parameters::getInstance();
 
@@ -734,10 +734,10 @@ namespace Functions {
         real l = params->get_real("initial_conditions/l");
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -829,24 +829,24 @@ namespace Functions {
         }
 
         // set values into layers
-        size_t Nx = domain->get_Nx(out.getLevel());
-        size_t Ny = domain->get_Ny(out.getLevel());
+        size_t Nx = domain->get_Nx(out.get_level());
+        size_t Ny = domain->get_Ny(out.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.getLevel());
-        real dy = domain->get_dy(out.getLevel());
-        real dz = domain->get_dz(out.getLevel());
+        real dx = domain->get_dx(out.get_level());
+        real dy = domain->get_dy(out.get_level());
+        real dz = domain->get_dz(out.get_level());
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
-        size_t *oList = boundary->get_obstacleList();
-        size_t size_oList = boundary->getSize_obstacleList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *oList = boundary->get_obstacle_list();
+        size_t size_oList = boundary->get_size_obstacle_list();
         size_t coords_i, coords_j, coords_k;
         real x, y, z;
 
@@ -951,16 +951,16 @@ namespace Functions {
 // ***************************************************************************************
     void Hat(Field &out) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.getLevel());
-        size_t Ny = domain->get_Ny(out.getLevel());
+        size_t Nx = domain->get_Nx(out.get_level());
+        size_t Ny = domain->get_Ny(out.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.getLevel());
-        real dy = domain->get_dy(out.getLevel());
-        real dz = domain->get_dz(out.getLevel());
+        real dx = domain->get_dx(out.get_level());
+        real dy = domain->get_dy(out.get_level());
+        real dz = domain->get_dz(out.get_level());
 
         auto params = Parameters::getInstance();
         real start_x = params->get_real("initial_conditions/x1");
@@ -973,10 +973,10 @@ namespace Functions {
         real val_out = params->get_real("initial_conditions/val_out");
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -1023,14 +1023,14 @@ namespace Functions {
 // ***************************************************************************************
     void McDermott(Field &outx, Field &outy, Field &outz, Field &outp, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx.getLevel());
-        size_t Ny = domain->get_Ny(outx.getLevel());
+        size_t Nx = domain->get_Nx(outx.get_level());
+        size_t Ny = domain->get_Ny(outx.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx.getLevel());
-        real dy = domain->get_dy(outx.getLevel());
+        real dx = domain->get_dx(outx.get_level());
+        real dy = domain->get_dy(outx.get_level());
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -1038,10 +1038,10 @@ namespace Functions {
         real A = params->get_real("initial_conditions/A"); //2;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
@@ -1082,8 +1082,12 @@ namespace Functions {
 // ***************************************************************************************
     void Random(Field &out, real range, bool is_absolute, int seed, real step_size) {
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *oList = boundary->get_obstacle_list();
+        size_t size_oList = boundary->get_size_obstacle_list();
 
         std::mt19937 mt;
         double steps = range/step_size;
@@ -1115,25 +1119,25 @@ namespace Functions {
 // ***************************************************************************************
     void SinSinSin(Field &out) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.getLevel());
-        size_t Ny = domain->get_Ny(out.getLevel());
+        size_t Nx = domain->get_Nx(out.get_level());
+        size_t Ny = domain->get_Ny(out.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.getLevel());
-        real dy = domain->get_dy(out.getLevel());
-        real dz = domain->get_dz(out.getLevel());
+        real dx = domain->get_dx(out.get_level());
+        real dy = domain->get_dy(out.get_level());
+        real dz = domain->get_dz(out.get_level());
 
         auto params = Parameters::getInstance();
         real l = params->get_real("initial_conditions/l"); //2;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -1164,10 +1168,10 @@ namespace Functions {
 // ***************************************************************************************
     void Uniform(Field &out, real val) {
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
 
         // inner cells
         for (size_t i = 0; i < size_iList; i++) {
@@ -1191,14 +1195,14 @@ namespace Functions {
 // ***************************************************************************************
     void Vortex(Field &outx, Field &outy, Field &outz, Field &outp) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx.getLevel());
-        size_t Ny = domain->get_Ny(outx.getLevel());
+        size_t Nx = domain->get_Nx(outx.get_level());
+        size_t Ny = domain->get_Ny(outx.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx.getLevel());
-        real dy = domain->get_dy(outx.getLevel());
+        real dx = domain->get_dx(outx.get_level());
+        real dy = domain->get_dy(outx.get_level());
 
         auto params = Parameters::getInstance();
 
@@ -1216,10 +1220,10 @@ namespace Functions {
         real rhoGrR_c = rhoa * G * G * rR_c;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
@@ -1255,14 +1259,14 @@ namespace Functions {
 
     void VortexY(Field &outx, Field &outy, Field &outz, Field &outp) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx.getLevel());
-        size_t Ny = domain->get_Ny(outx.getLevel());
+        size_t Nx = domain->get_Nx(outx.get_level());
+        size_t Ny = domain->get_Ny(outx.get_level());
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx.getLevel());
-        real dy = domain->get_dy(outx.getLevel());
+        real dx = domain->get_dx(outx.get_level());
+        real dy = domain->get_dy(outx.get_level());
 
         auto params = Parameters::getInstance();
 
@@ -1280,10 +1284,10 @@ namespace Functions {
         real rhoGrR_c = rhoa * G * G * rR_c;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_innerList_level_joined();
-        size_t size_iList = boundary->getSize_innerList();
-        size_t *bList = boundary->get_boundaryList_level_joined();
-        size_t size_bList = boundary->getSize_boundaryList();
+        size_t *iList = boundary->get_inner_list_level_joined();
+        size_t size_iList = boundary->get_size_inner_list();
+        size_t *bList = boundary->get_boundary_list_level_joined();
+        size_t size_bList = boundary->get_size_boundary_list();
         size_t coords_k, coords_i, coords_j;
 
         // inner cells

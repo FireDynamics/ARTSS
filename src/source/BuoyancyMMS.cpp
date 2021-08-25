@@ -26,7 +26,7 @@ BuoyancyMMS::~BuoyancyMMS() {
 void BuoyancyMMS::set_up() {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto level = m_source_field.getLevel();
+    auto level = m_source_field.get_level();
 
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
@@ -51,11 +51,11 @@ void BuoyancyMMS::set_up() {
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
     // inner cells
     for (size_t l = 0; l < bsize_i; ++l) {
@@ -83,11 +83,11 @@ void BuoyancyMMS::update_source(Field &out, real t_cur) {
 
 #pragma acc data present(out, source)
     {
-        size_t *d_iList = boundary->get_innerList_level_joined();
-        size_t *d_bList = boundary->get_boundaryList_level_joined();
+        size_t *d_iList = boundary->get_inner_list_level_joined();
+        size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-        auto bsize_i = boundary->getSize_innerList();
-        auto bsize_b = boundary->getSize_boundaryList();
+        auto bsize_i = boundary->get_size_inner_list();
+        auto bsize_b = boundary->get_size_boundary_list();
 
 #pragma acc parallel loop independent present(out, source) async
         // inner cells

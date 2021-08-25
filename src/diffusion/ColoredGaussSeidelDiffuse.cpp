@@ -48,23 +48,26 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
 void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, const real D, bool sync) {
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    FieldType type = out.getType();
+    FieldType type = out.get_type();
 
     auto d_out = out.data;
     auto d_b = b.data;
 
     auto boundary = BoundaryController::getInstance();
 
-    auto bsize_i = boundary->getSize_innerList();
-    size_t* d_iList = boundary->get_innerList_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
+
+    size_t* d_iList = boundary->get_inner_list_level_joined();
+    size_t* d_bList = boundary->get_boundary_list_level_joined();
 
 {
-    const size_t Nx = domain->get_Nx(out.getLevel());  // due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out.getLevel());
+    const size_t Nx = domain->get_Nx(out.get_level());  // due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out.get_level());
 
-    const real dx = domain->get_dx(out.getLevel());  // due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out.getLevel());
-    const real dz = domain->get_dz(out.getLevel());
+    const real dx = domain->get_dx(out.get_level());  // due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out.get_level());
+    const real dz = domain->get_dz(out.get_level());
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -89,7 +92,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, con
 
     while (res > tol_res && it < max_it) {
         colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, dsign, w, sync);
-        boundary->applyBoundary(d_out, type, sync);
+        boundary->apply_boundary(d_out, type, sync);
 
         sum = 0;
 
@@ -129,7 +132,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
         real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    FieldType type = out.getType();
+    FieldType type = out.get_type();
 
     auto d_out  = out.data;
     auto d_b    = b.data;
@@ -137,16 +140,18 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
 
     auto boundary = BoundaryController::getInstance();
 
-    auto bsize_i = boundary->getSize_innerList();
-    size_t* d_iList = boundary->get_innerList_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
+    size_t* d_iList = boundary->get_inner_list_level_joined();
+    size_t* d_bList = boundary->get_boundary_list_level_joined();
 {
-    const size_t Nx = domain->get_Nx(out.getLevel());
-    const size_t Ny = domain->get_Ny(out.getLevel());
+    const size_t Nx = domain->get_Nx(out.get_level());
+    const size_t Ny = domain->get_Ny(out.get_level());
 
-    const real dx = domain->get_dx(out.getLevel());
-    const real dy = domain->get_dy(out.getLevel());
-    const real dz = domain->get_dz(out.getLevel());
+    const real dx = domain->get_dx(out.get_level());
+    const real dy = domain->get_dy(out.get_level());
+    const real dz = domain->get_dz(out.get_level());
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -167,7 +172,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
 
     while (res > tol_res && it < max_it) {
         colored_gauss_seidel_step(out, b, dsign, w, D, EV, dt, sync);
-        boundary->applyBoundary(d_out, type, sync);
+        boundary->apply_boundary(d_out, type, sync);
 
         sum = 0;
 
@@ -217,9 +222,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
         real const beta, real const dsign, real const w, bool) {
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    const size_t nx = domain->get_Nx(out.getLevel());
-    const size_t ny = domain->get_Ny(out.getLevel());
-    const size_t nz = domain->get_Nz(out.getLevel());
+    const size_t nx = domain->get_Nx(out.get_level());
+    const size_t ny = domain->get_Ny(out.get_level());
+    const size_t nz = domain->get_Nz(out.get_level());
 
     auto d_out = out.data;
     auto d_b = b.data;
@@ -308,13 +313,13 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
         Field const &EV, real const dt, bool) {
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    const size_t Nx = domain->get_Nx(out.getLevel());
-    const size_t Ny = domain->get_Ny(out.getLevel());
-    const size_t Nz = domain->get_Nz(out.getLevel());
+    const size_t Nx = domain->get_Nx(out.get_level());
+    const size_t Ny = domain->get_Ny(out.get_level());
+    const size_t Nz = domain->get_Nz(out.get_level());
 
-    const real dx = domain->get_dx(out.getLevel());  // due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out.getLevel());
-    const real dz = domain->get_dz(out.getLevel());
+    const real dx = domain->get_dx(out.get_level());  // due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out.get_level());
+    const real dz = domain->get_dz(out.get_level());
 
     const real rdx = 1. / dx;  // due to unnecessary parameter passing of *this
     const real rdy = 1. / dy;

@@ -41,12 +41,12 @@ void ConstSmagorinsky::CalcTurbViscosity(Field &ev,
 
 #pragma acc data present(ev, u, v, w)
     {
-        const size_t Nx = domain->get_Nx(in_u.getLevel());
-        const size_t Ny = domain->get_Ny(in_v.getLevel());
+        const size_t Nx = domain->get_Nx(in_u.get_level());
+        const size_t Ny = domain->get_Ny(in_v.get_level());
 
-        const real dx = domain->get_dx(in_u.getLevel());
-        const real dy = domain->get_dy(in_v.getLevel());
-        const real dz = domain->get_dz(in_w.getLevel());
+        const real dx = domain->get_dx(in_u.get_level());
+        const real dy = domain->get_dy(in_v.get_level());
+        const real dz = domain->get_dz(in_w.get_level());
 
         const real rdx = 1. / dx;
         const real rdy = 1. / dy;
@@ -58,8 +58,8 @@ void ConstSmagorinsky::CalcTurbViscosity(Field &ev,
         real Cs = m_Cs;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *d_iList = boundary->get_innerList_level_joined();
-        auto bsize_i = boundary->getSize_innerList();
+        size_t *d_iList = boundary->get_inner_list_level_joined();
+        auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc parallel loop independent present(ev, u, v, w, d_iList[:bsize_i]) async
         for (size_t j = 0; j < bsize_i; ++j) {

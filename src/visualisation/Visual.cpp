@@ -15,7 +15,7 @@
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
-Visual::Visual(Solution *solution) {
+Visual::Visual(const Solution &solution) : m_solution(solution) {
     auto params = Parameters::getInstance();
     m_filename = remove_extension(params->get_filename());
 
@@ -30,15 +30,10 @@ Visual::Visual(Solution *solution) {
     if (m_save_vtk) {
         m_vtk_plots = params->get_int("visualisation/vtk_nth_plot");
     }
-    m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
-    m_solution = solution;
 }
 
-void Visual::visualise(FieldController *field_controller, const real t) {
+void Visual::visualise(const FieldController &field_controller, real t) {
     int n = static_cast<int> (std::round(t / m_dt));
-    if (m_has_analytical_solution) {
-        m_solution->calc_analytical_solution(t);
-    }
 
     std::string filename = create_filename(m_filename, static_cast<int>(std::round(t / m_dt)), false);
     if (m_save_vtk) {
@@ -60,15 +55,11 @@ void Visual::visualise(FieldController *field_controller, const real t) {
     }
 }
 
-void Visual::write_csv(FieldController *solver, std::string filename){
+void Visual::write_csv(const FieldController &solver, std::string filename){
     CSVWriter::write_numerical(solver, filename);
 }
 
-void Visual::write_data(std::string *data_titles, real **data, size_t size_data, std::string filename){
-    CSVWriter::write_data(data_titles, data, size_data, filename);
-}
-
-void Visual::initialise_grid(float *x_coords, float *y_coords, float *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
+void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
     Domain *domain = Domain::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
@@ -79,23 +70,10 @@ void Visual::initialise_grid(float *x_coords, float *y_coords, float *z_coords, 
         for (int j = 0; j < Ny; j++) {
             for (int i = 0; i < Nx; i++) {
                 size_t index = IX(i, j, k, Nx, Ny);
-                x_coords[index] = static_cast<float> (X1 + (i - 0.5) * dx);
-                y_coords[index] = static_cast<float> (Y1 + (j - 0.5) * dy);
-                z_coords[index] = static_cast<float> (Z1 + (k - 0.5) * dz);
+                x_coords[index] = (X1 + (i - 0.5) * dx);
+                y_coords[index] = (Y1 + (j - 0.5) * dy);
+                z_coords[index] = (Z1 + (k - 0.5) * dz);
             }
-        }
-    }
-}
-
-void Visual::prepare_fields(read_ptr *fields, float **vars, int size) {
-    Domain *domain = Domain::getInstance();
-
-    int domain_size = static_cast<int>(domain->get_size());
-
-    // Cast variables to floats
-    for (int index = 0; index < domain_size; index++) {
-        for (int v = 0; v < size; v++) {
-            vars[v][index] = static_cast<float>(fields[v][index]);
         }
     }
 }
