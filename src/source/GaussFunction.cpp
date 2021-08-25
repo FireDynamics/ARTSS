@@ -35,35 +35,12 @@ GaussFunction::~GaussFunction() {
 }
 
 void GaussFunction::update_source(Field *out, real t_cur) {
-    size_t size = Domain::getInstance()->get_size();
-    auto data_out = out->data;
-    auto data_spatial = m_field_spatial_values->data;
     auto time_val = get_time_value(t_cur);
-    std::uniform_int_distribution<int> dist(-m_steps, m_steps);
+    out->copy_data(*m_field_spatial_values);
+    (*out) *= time_val;
 
-#pragma acc data present(data_out[:size], data_spatial[:size])
-    {
-#pragma acc parallel loop independent present(data_out[:size], data_spatial[:size]) async
-        for (size_t i = 0; i < size; i++) {
-            double no = dist(m_mt) * m_step_size;
-            // ((1 + no) - no * (1 - m_has_noise)) = 1 + no - no + no * m_has_noise
-            double noise = 1 + no * m_has_noise;  // * 1 if no noise, * (1-no) else
-            data_out[i] = data_spatial[i] * time_val * noise;
-        }
-#pragma acc wait
-    }
-}
-
-void GaussFunction::set_noise(real range, int seed, real step_size) {
-    m_has_noise = true;
-    m_steps = range / step_size;
-    m_step_size = step_size;
-
-    if (seed > 0) {
-        m_mt = std::mt19937(seed);
-    } else {
-        std::random_device rd;
-        m_mt = std::mt19937(rd());
+    if (m_has_noise) {
+        (*out) *= m_noise_maker->random_field();
     }
 }
 

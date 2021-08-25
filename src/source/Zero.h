@@ -13,7 +13,6 @@
 class Zero: public ISourceFunction {
 public:
     void update_source(Field*, real) override { }
-    void set_noise(real, int, real) override { };
 };
 
 

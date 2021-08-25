@@ -27,6 +27,7 @@
 #include "../source/ExplicitEulerSource.h"
 #include "../source/Zero.h"
 #include "../utility/Parameters.h"
+#include "../randomField/UniformRandom.h"
 
 SolverController::SolverController() {
 #ifndef BENCHMARKING
@@ -126,7 +127,8 @@ void SolverController::set_up_sources(const std::string &string_solver) {
                 step_size = params->get_real("solver/temperature/source/random/step_size");
             }
 
-            m_source_function_temperature->set_noise(range, seed, step_size);
+            IRandomField *noise_maker = new UniformRandom(range, step_size, seed);
+            m_source_function_temperature->set_noise(noise_maker);
         }
     }
 

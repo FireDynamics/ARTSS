@@ -9,21 +9,10 @@
 #include "../boundary/BoundaryController.h"
 
 void Cube::update_source(Field *out, real t_cur) {
-    size_t size = Domain::getInstance()->get_size();
-    auto data_out = out->data;
-    auto data_spatial = m_source_field->data;
-    std::uniform_int_distribution<int> dist(-m_steps, m_steps);
+    (*out).copy_data(*m_source_field);
 
-#pragma acc data present(data_out[:size], data_spatial[:size])
-    {
-#pragma acc parallel loop independent present(data_out[:size], data_spatial[:size]) async
-        for (size_t i = 0; i < size; i++) {
-            double no = dist(m_mt) * m_step_size;
-            // ((1 + no) - no * (1 - m_has_noise)) = 1 + no - no + no * m_has_noise
-            double noise = 1 + no * m_has_noise;  // * 1 if no noise, * (1-no) else
-            data_out[i] = data_spatial[i] * noise;
-        }
-#pragma acc wait
+    if (m_has_noise) {
+        (*out) *= m_noise_maker->random_field();
     }
 }
 
@@ -71,17 +60,4 @@ void Cube::set_up(real value, real x_start, real y_start, real z_start, real x_e
         }
     }
 #pragma acc enter data copyin(data[:size])
-}
-
-void Cube::set_noise(real range, int seed, real step_size) {
-    m_has_noise = true;
-    m_steps = range / step_size;
-    m_step_size = step_size;
-
-    if (seed > 0) {
-        m_mt = std::mt19937(seed);
-    } else {
-        std::random_device rd;
-        m_mt = std::mt19937(rd());
-    }
 }

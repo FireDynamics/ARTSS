@@ -8,22 +8,23 @@
 #define ARTSS_CUBE_H
 
 
-#include "../interfaces/ISourceFunction.h"
 #include <random>
 
+#include "../interfaces/ISourceFunction.h"
+
 class Cube: public ISourceFunction {
-public:
-    Cube(real value, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z);
+ public:
+    Cube(real value,
+            real x_start, real y_start, real z_start,
+            real x_end, real y_end, real z_end);
     ~Cube();
     void update_source(Field *out, real t_cur) override;
-    void set_noise(real range, int seed, real step_size) override;
-private:
+
+ private:
     Field *m_source_field;
-    int m_has_noise = false;
-    std::mt19937 m_mt;
-    double m_steps;
-    real m_step_size;
-    void set_up(real value, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z);
+    void set_up(real value,
+            real x_start, real y_start, real z_start,
+            real x_end, real y_end, real z_end);
 };
 
 
