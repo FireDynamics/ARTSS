@@ -14,9 +14,9 @@ AdvectionSolver::AdvectionSolver(
         FieldController *field_controlller,
         real u_lin, real v_lin, real w_lin, size_t size) :
     m_field_controller(field_controlller),
-    m_u_lin(FieldType::U, u_lin, 0.0, size),
-    m_v_lin(FieldType::V, v_lin, 0.0, size),
-    m_w_lin(FieldType::W, w_lin, 0.0, size) {
+    m_u_lin(FieldType::U, u_lin, 0, size),
+    m_v_lin(FieldType::V, v_lin, 0, size),
+    m_w_lin(FieldType::W, w_lin, 0, size) {
 #ifndef BENCHMARKING
      m_logger = Utility::create_logger(typeid(this).name());
 #endif
