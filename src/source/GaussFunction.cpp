@@ -46,11 +46,18 @@ GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real 
     create_spatial_values(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z);
 }
 
+GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z, real tau, std::shared_ptr<spdlog::logger> logger) {
+    m_logger = logger;
+    m_tau = tau;
+    // m_field_spatial_values = new Field(FieldType::RHO, 0.);
+    // create_spatial_values(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z);
+}
+
 GaussFunction::~GaussFunction() {
     auto data_spatial = m_field_spatial_values->data;
     size_t size = Domain::getInstance()->get_size();
 #pragma acc exit data delete(data_spatial[:size])
-    delete m_field_spatial_values;
+    // delete m_field_spatial_values;
 }
 
 void GaussFunction::update_source(Field *out, real t_cur) {
@@ -72,10 +79,14 @@ void GaussFunction::update_source(Field *out, real t_cur) {
 bool GaussFunction::test_obstacle_blocks(int i0, int j0, int k0,
         int i, int j, int k,
         const Obstacle &obst) {
+
+    m_logger->warn("i:{} j:{} k:{}", i0, j0, k0);
+    m_logger->warn("i:{} j:{} k:{}", i, j, k);
     bool blocked;
-    const auto di = i0 - i;
-    const auto dj = j0 - j;
-    const auto dk = k0 - k;
+    const auto di = i - i0;
+    const auto dj = j - j0;
+    const auto dk = k - k0;
+    m_logger->warn("i:{} j:{} k:{}", di, dj, dk);
     const auto point_i1 = obst.getCoordinates_i1();
     const auto point_i2 = obst.getCoordinates_i2();
     const auto point_j1 = obst.getCoordinates_j1();
@@ -87,58 +98,87 @@ bool GaussFunction::test_obstacle_blocks(int i0, int j0, int k0,
                         static_cast<real>(point_k1), static_cast<real>(point_k2)};
 
     for (int surface_id=0; surface_id < 6; ++surface_id) {
+        m_logger->debug("surface_id: {}", surface_id);
         auto s = surface_points[surface_id];
         auto p1 = cuboid_points[s[0]];
         auto p2 = cuboid_points[s[1]];
         auto p3 = cuboid_points[s[2]];
+        m_logger->debug("surface_point: ({},{},{})", indeces[p1[0]], indeces[p1[1]], indeces[p1[2]]);
+        m_logger->debug("surface_point: ({},{},{})", indeces[p2[0]], indeces[p2[1]], indeces[p2[2]]);
+        m_logger->debug("surface_point: ({},{},{})", indeces[p3[0]], indeces[p3[1]], indeces[p3[2]]);
 
         // surface vector 1
         auto svi1 = indeces[p2[0]] - indeces[p1[0]];  // saving dx
         auto svj1 = indeces[p2[1]] - indeces[p1[1]];
         auto svk1 = indeces[p2[2]] - indeces[p1[2]];
+        m_logger->debug("surface_vector1: ({},{},{})", svi1, svj1, svk1);
 
         // surface vector 2
         auto svi2 = indeces[p3[0]] - indeces[p1[0]];
         auto svj2 = indeces[p3[1]] - indeces[p1[1]];
         auto svk2 = indeces[p3[2]] - indeces[p1[2]];
+        m_logger->debug("surface_vector1: ({},{},{})", svi2, svj2, svk2);
 
-        // p1 + l*sv1 + m*sv2 = n*l + c <=>
-        // l*sv1 + m*sv2 - n*l = c - p1
-        auto det_A = det3(svi1, svj1, svk1,
-            svi2, svj2, svk2,
-            -di, -dj, -dk);
+        // p1 + l*sv1 + m*sv2 = n*d + c0 <=>
+        // l*sv1 + m*sv2 - n*d = c0 - p1
+        auto det_A = det3(di, -svi1, -svi2,
+            dj, -svj1, -svj2,
+            dk, -svk1, -svk2);
+        // auto det_A = det3(svi1, svj1, svk1,
+        //     svi2, svj2, svk2,
+        //     -di, -dj, -dk);
 
         // okay det is small, its never gonna meet
+        m_logger->info("| {}, {}, {} |", di, -svi1, -svi2);
+        m_logger->info("| {}, {}, {} |", dj, -svj1, -svj2);
+        m_logger->info("| {}, {}, {} |", dk, -svk1, -svk2);
+        m_logger->error("|det|: {}", det_A);
         if (fabs(det_A) < eps) {
             continue;
         }
 
         // rhs of les (c - p1)
-        auto ddi1 = static_cast<real>(i) - indeces[p1[0]];
-        auto ddj1 = static_cast<real>(j) - indeces[p1[1]];
-        auto ddk1 = static_cast<real>(k) - indeces[p1[2]];
+        auto ddi = indeces[p1[0]] - static_cast<real>(i0);
+        auto ddj = indeces[p1[1]] - static_cast<real>(j0);
+        auto ddk = indeces[p1[2]] - static_cast<real>(k0);
+        m_logger->info("rhs: ({},{},{})", ddi, ddj, ddk);
 
-        auto det_Ax = det3(ddi1, ddj1, ddk1,
-            svi2, svj2, svk2,
-            -di, -dj, -dk);
-        auto det_Ay = det3(svi1, svj1, svk1,
-            ddi1, ddj1, ddk1,
-            -di, -dj, -dk);
-        auto det_Az = det3(svi1, svj1, svk1,
-            svi2, svj2, svk2,
-            ddi1, ddj1, ddk1);
+        auto det_Ax = det3(ddi, -svi1, -svi2,
+            ddj, -svj1, -svj2,
+            ddk, -svk1, -svk2);
+        auto det_Ay = det3(di, ddi, -svi2,
+            dj, ddj, -svj2,
+            dk, ddk, -svk2);
+        auto det_Az = det3(di, -svi1, ddi,
+            dj, -svj1, ddj,
+            dk, -svk1, ddk);
+        // auto det_Ax = det3(ddi, svi1, -di,
+        //     ddj, svj2, -dj,
+        //     ddk, svk2, -dk);
+        // auto det_Ay = det3(svi1, ddi, -di,
+        //     svj1, ddj, -dj,
+        //     svk1, ddk, -dk);
+        // auto det_Az = det3(svi1, svi2, ddi,
+        //     svj1, svj2, ddj,
+        //     svk1, svk2, ddk);
 
         auto sx = det_Ax / det_A;  // sx : l
         auto sy = det_Ay / det_A;  // sy : m
         auto sz = det_Az / det_A;  // sz : n
 
-        blocked = sx > -eps && sx < 1.0 + eps
-                && sy > -eps && sy < 1.0 + eps
-                && sz > -eps && sz < 1.0 + eps;
+        m_logger->debug("x,y,z: ({},{},{})", sx, sy, sz);
+        m_logger->debug("xp: ({},{},{})",
+                indeces[p1[0]] + svi1*sy + svi2*sz,
+                indeces[p1[1]] + svj1*sy + svj2*sz,
+                indeces[p1[2]] + svk1*sy + svk2*sz);
+        m_logger->debug("xp: ({},{},{})",
+                static_cast<real>(i0) + di*sx,
+                static_cast<real>(j0) + dj*sx,
+                static_cast<real>(k0) + dk*sx);
 
-        // std::cout << svi1 << "," << svi2 << "," << indeces[p1[0]] << std::endl;
-        // std::cout << svj1 << "," << svj2 << "," << indeces[p1[1]] << std::endl;
-        // std::cout << svk1 << "," << svk2 << "," << indeces[p1[2]] << std::endl;
+        blocked = sx > -0.0-eps && sx < 1.0 + eps
+                && sy > -0.0-eps && sy < 1.0 + eps
+                && sz > -0.0-eps && sz < 1.0 + eps;
 
         // std::cout << di << "," << i << std::endl;
         // std::cout << dj << "," << j << std::endl;
@@ -151,13 +191,29 @@ bool GaussFunction::test_obstacle_blocks(int i0, int j0, int k0,
         // std::cout << sz << std::endl;
 
         if (blocked) {
-            // std::cout << blocked << std::endl;
-            break;
+            return true;
         }
     }
 
-    return blocked;
+    return false;
 }
+
+bool GaussFunction::test_obstacles_blocks(int level,
+        int i0, int j0, int k0,
+        int i, int j, int k,
+        Obstacle** obst_list, int obst_size) {
+    for (auto obst_id=0; obst_id < obst_size; ++obst_id) {
+        bool blocked = GaussFunction::test_obstacle_blocks(i0, j0, k0,
+                i, j, k,
+                (obst_list[level][obst_id]));
+        if (blocked) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
 // ***************************************************************************************
 /// \brief  Volumetric Gaussian temperature source in energy equation
@@ -221,16 +277,10 @@ void GaussFunction::create_spatial_values(real HRR, real cp,
         real dj = (j0 - j);
         real dk = (k0 - k);
 
-        bool blocked;
-        for (auto obst_id=0; obst_id < obst_size; ++obst_id) {
-            blocked = GaussFunction::test_obstacle_blocks(i0, j0, k0,
-                    i, j, k,
-                    (*obst_list[level][obst_id]));
-            if (blocked) {
-                break;
-            }
-        }
-
+        bool blocked = test_obstacles_blocks(level,
+                i0, j0, k0,
+                i, j, k,
+                *obst_list, obst_size);
         real x_i = dx * di;
         real y_j = dy * dj;
         real z_k = dz * dk;
@@ -242,6 +292,7 @@ void GaussFunction::create_spatial_values(real HRR, real cp,
         if (blocked) {
             // std::cout << "XXX" << i << "," << j << "," << k << ",0" << std::endl;
             d_out[idx] = 0.0;
+            continue;
         } else {
             // std::cout << "XXX" << i << "," << j << "," << k << ",1" << std::endl;
             d_out[idx] = expr;
