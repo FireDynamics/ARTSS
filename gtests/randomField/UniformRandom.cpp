@@ -254,7 +254,7 @@ TEST_F(UniformRandomFieldTest, steps_100_atleatoneh) {
     }
 }
 
-TEST_F(UniformRandomFieldTest, stesstest) {
+TEST_F(UniformRandomFieldTest, stess_test) {
     int steps = 100;
     int ssize = 2;
     size_t size = 10000;
@@ -267,7 +267,7 @@ TEST_F(UniformRandomFieldTest, stesstest) {
     }
 }
 
-TEST_F(UniformRandomFieldTest, stesstest2) {
+TEST_F(UniformRandomFieldTest, stess_test2) {
     int steps = 100;
     int ssize = 2;
     size_t size = 20000;
