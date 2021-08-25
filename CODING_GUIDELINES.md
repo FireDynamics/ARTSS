@@ -31,6 +31,8 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
     `final commit: Issue 15 Coding Guidelines (#113) [description of changes...]`
    
   - Linking to issue. Either link PR to the issue manually or use the phrase "should close #XY" int the description for automatic linking. 
+  - Conclude changes to the PR with a comment summarising the changes to the PR before requesting a review. This is to help the reviewer understand what changes should be part of the PR and also to identify code that may have been added incorrectly. Imagine that you want to avoid having to guess what the other person was trying to achieve with these changes when reviewing someone else's code. This should also be the text that is added as a merge commit message.
+
 
 ## Formatting
 #### Parenthesis:
