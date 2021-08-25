@@ -40,7 +40,7 @@ void GaussFunction::update_source(Field *out, real t_cur) {
     (*out) *= time_val;
 
     if (m_has_noise) {
-        (*out) *= m_noise_maker->random_field();
+        (*out) *= m_noise_maker->random_field(out->get_size());
     }
 }
 

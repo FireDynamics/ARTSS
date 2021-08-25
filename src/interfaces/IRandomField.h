@@ -6,7 +6,10 @@
 class IRandomField {
  public:
      virtual ~IRandomField() = default;
-     virtual Field random_field() = 0;
+     virtual Field random_field(size_t) = 0;
+     Field random_field(const Field &in) {
+         return random_field(in.get_size());
+     }
 };
 
 

@@ -4,6 +4,8 @@
 
 
 #include <random>
+#include <iostream>
+
 #include "../interfaces/IRandomField.h"
 
 
@@ -13,6 +15,7 @@ class UniformRandom: public IRandomField {
         m_seed(std::random_device()()),
         m_steps(range / step_size) {
         init_dist();
+        std::cout << m_steps << std::endl;
     }
 
     UniformRandom(real range, real step_size, int seed) :
@@ -22,7 +25,7 @@ class UniformRandom: public IRandomField {
 
     ~UniformRandom() = default;
 
-    Field random_field() override;
+    Field random_field(size_t size) override;
 
  private:
      void init_dist() {

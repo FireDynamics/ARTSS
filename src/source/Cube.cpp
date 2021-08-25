@@ -12,7 +12,7 @@ void Cube::update_source(Field *out, real t_cur) {
     (*out).copy_data(*m_source_field);
 
     if (m_has_noise) {
-        (*out) *= m_noise_maker->random_field();
+        (*out) *= m_noise_maker->random_field(out->get_size());
     }
 }
 

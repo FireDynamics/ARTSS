@@ -25,6 +25,10 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
     set_value(val);
 }
 
+Field::Field(size_t size) :
+    Field::Field(UNKNOWN_FIELD, 0.0, 0, size) {
+}
+
 Field::~Field() {
     delete[] data;
 }
