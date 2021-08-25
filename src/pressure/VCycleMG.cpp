@@ -550,6 +550,7 @@ void VCycleMG::Smooth(Field &out, Field &tmp, Field const &b, size_t level, bool
 // ************************************************************************
 void VCycleMG::Residuum(Field &out, Field const &in, Field const &b, size_t level, bool sync) {
     auto domain = Domain::getInstance();
+    size_t bsize = domain->get_size(out->get_level());
 
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(in.get_level());
