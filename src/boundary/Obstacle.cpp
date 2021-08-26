@@ -413,6 +413,177 @@ bool Obstacle::isObstacleCell(size_t i, size_t j, size_t k) const {
     return m_i1 <= i && i <= i2 && m_j1 <= j && j <= j2 && m_k1 <= k && k <= k2;
 }
 
+real constexpr det3(real a1, real a2, real a3,
+        real b1, real b2, real b3,
+        real c1, real c2, real c3) {
+    return a1 * (b2 * c3 - b3 * c2)
+        - b1 * (a2 * c3 - a3 * c2)
+        + c1 * (a2 * b3 - a3 * b2);
+}
+
+real constexpr eps = 10E-6;
+
+constexpr int cuboid_points[8][3] = {
+    {0, 2, 4},
+    {1, 2, 4},
+    {1, 3, 4},
+    {0, 3, 4},
+    {0, 2, 5},
+    {1, 2, 5},
+    {1, 3, 5},
+    {0, 3, 5}
+};
+
+constexpr int surface_points[6][3] = {
+    {0, 1, 4},
+    {1, 2, 5},
+    {3, 2, 6},
+    {1, 3, 7},
+    {0, 1, 3},
+    {4, 5, 7},
+};
+
+// ======================== Tests if line crosses obstacle ====================
+// ****************************************************************************
+/// \brief  Check if any cell  between two pins is inside the obstacle
+/// \param  i x-coordinate (start_point)
+/// \param  j y-coordinate (start_point)
+/// \param  k z-coordinate (start_point)
+/// \param  i x-coordinate (end_point)
+/// \param  j y-coordinate (end_point)
+/// \param  k z-coordinate (end_point)
+/// \return  bool true if yes false if no
+// ****************************************************************************
+bool Obstacle::line_crosses(int i0, int j0, int k0, int i, int j, int k) const {
+    // m_logger->error("i:{} j:{} k:{}", i0, j0, k0);
+    // m_logger->warn("i:{} j:{} k:{}", i, j, k);
+    bool blocked;
+    const auto di = i - i0;
+    const auto dj = j - j0;
+    const auto dk = k - k0;
+    // m_logger->warn("i:{} j:{} k:{}", di, dj, dk);
+    const auto point_i1 = getCoordinates_i1();
+    const auto point_i2 = getCoordinates_i2();
+    const auto point_j1 = getCoordinates_j1();
+    const auto point_j2 = getCoordinates_j2();
+    const auto point_k1 = getCoordinates_k1();
+    const auto point_k2 = getCoordinates_k2();
+    real indeces[6] = {static_cast<real>(point_i1), static_cast<real>(point_i2),
+                       static_cast<real>(point_j1), static_cast<real>(point_j2),
+                       static_cast<real>(point_k1), static_cast<real>(point_k2)};
+
+    if (isObstacleCell(i, j, k))
+        return true;
+
+    for (int surface_id=0; surface_id < 6; ++surface_id) {
+        // m_logger->debug("surface_id: {}", surface_id);
+        auto s = surface_points[surface_id];
+        auto p1 = cuboid_points[s[0]];
+        auto p2 = cuboid_points[s[1]];
+        auto p3 = cuboid_points[s[2]];
+        // m_logger->debug("surface_point: ({},{},{})",
+        //        indeces[p1[0]], indeces[p1[1]], indeces[p1[2]]);
+        // m_logger->debug("surface_point: ({},{},{})",
+        //        indeces[p2[0]], indeces[p2[1]], indeces[p2[2]]);
+        // m_logger->debug("surface_point: ({},{},{})",
+        //        indeces[p3[0]], indeces[p3[1]], indeces[p3[2]]);
+
+        // surface vector 1
+        auto svi1 = indeces[p2[0]] - indeces[p1[0]];  // saving dx
+        auto svj1 = indeces[p2[1]] - indeces[p1[1]];
+        auto svk1 = indeces[p2[2]] - indeces[p1[2]];
+        // m_logger->debug("surface_vector1: ({},{},{})", svi1, svj1, svk1);
+
+        // surface vector 2
+        auto svi2 = indeces[p3[0]] - indeces[p1[0]];
+        auto svj2 = indeces[p3[1]] - indeces[p1[1]];
+        auto svk2 = indeces[p3[2]] - indeces[p1[2]];
+        // m_logger->debug("surface_vector1: ({},{},{})", svi2, svj2, svk2);
+
+        // p1 + l*sv1 + m*sv2 = n*d + c0 <=>
+        // l*sv1 + m*sv2 - n*d = c0 - p1
+        auto det_A = det3(di, -svi1, -svi2,
+            dj, -svj1, -svj2,
+            dk, -svk1, -svk2);
+        // auto det_A = det3(svi1, svj1, svk1,
+        //     svi2, svj2, svk2,
+        //     -di, -dj, -dk);
+
+        // okay det is small, its never gonna meet
+        // m_logger->info("| {}, {}, {} |", di, -svi1, -svi2);
+        // m_logger->info("| {}, {}, {} |", dj, -svj1, -svj2);
+        // m_logger->info("| {}, {}, {} |", dk, -svk1, -svk2);
+        // m_logger->error("|det|: {}", det_A);
+        if (fabs(det_A) < eps) {
+            continue;
+        }
+
+        // rhs of les (c - p1)
+        auto ddi = indeces[p1[0]] - static_cast<real>(i0);
+        auto ddj = indeces[p1[1]] - static_cast<real>(j0);
+        auto ddk = indeces[p1[2]] - static_cast<real>(k0);
+        // m_logger->debug("rhs: ({},{},{})", ddi, ddj, ddk);
+
+        auto det_Ax = det3(ddi, -svi1, -svi2,
+            ddj, -svj1, -svj2,
+            ddk, -svk1, -svk2);
+        auto det_Ay = det3(di, ddi, -svi2,
+            dj, ddj, -svj2,
+            dk, ddk, -svk2);
+        auto det_Az = det3(di, -svi1, ddi,
+            dj, -svj1, ddj,
+            dk, -svk1, ddk);
+        // auto det_Ax = det3(ddi, svi1, -di,
+        //     ddj, svj2, -dj,
+        //     ddk, svk2, -dk);
+        // auto det_Ay = det3(svi1, ddi, -di,
+        //     svj1, ddj, -dj,
+        //     svk1, ddk, -dk);
+        // auto det_Az = det3(svi1, svi2, ddi,
+        //     svj1, svj2, ddj,
+        //     svk1, svk2, ddk);
+
+        auto sx = det_Ax / det_A;  // sx : l
+        auto sy = det_Ay / det_A;  // sy : m
+        auto sz = det_Az / det_A;  // sz : n
+
+        // m_logger->debug("{:6f} < eps < {6f}", -eps, 1.0 + eps);
+        // m_logger->debug("x,y,z: ({:6f},{:6f},{:6f})", sx, sy, sz);
+        // m_logger->debug("xp: ({},{},{})",
+        //        indeces[p1[0]] + svi1*sy + svi2*sz,
+        //        indeces[p1[1]] + svj1*sy + svj2*sz,
+        //        indeces[p1[2]] + svk1*sy + svk2*sz);
+        // m_logger->debug("xp: ({},{},{})",
+        //        static_cast<real>(i0) + di*sx,
+        //        static_cast<real>(j0) + dj*sx,
+        //        static_cast<real>(k0) + dk*sx);
+
+        // m_logger->debug("{}", sx >= -eps && sx <= 1.0 + eps);
+        // m_logger->debug("{}", sy >= -eps && sy <= 1.0 + eps);
+        // m_logger->debug("{}", sz >= -eps && sz <= 1.0 + eps);
+        blocked = sx >= -eps && sx <= 1.0 + eps
+                && sy >= -eps && sy <= 1.0 + eps
+                && sz >= -eps && sz <= 1.0 + eps;
+
+        // std::cout << di << "," << i << std::endl;
+        // std::cout << dj << "," << j << std::endl;
+        // std::cout << dk << "," << k << std::endl;
+
+        // std::cout << surface_id << std::endl;
+
+        // std::cout << sx << " : " << sy << " : " << sz << std::endl;
+        // std::cout << sy << std::endl;
+        // std::cout << sz << std::endl;
+
+        if (blocked) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 //======================================== Match grid ====================================
 // ***************************************************************************************
 /// \brief  Snaps value to grid discretisation

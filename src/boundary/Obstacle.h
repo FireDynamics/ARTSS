@@ -47,6 +47,7 @@ public:
     size_t getSize_obstacleRight() { return m_size_obstacleRight; }
 
     bool isObstacleCell(size_t i, size_t j, size_t k) const;
+    bool line_crosses(int i0, int j0, int k0, int i, int j, int k) const;
 
     void print();
 
