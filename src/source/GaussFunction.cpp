@@ -139,6 +139,7 @@ real GaussFunction::get_time_value(real t_cur) {
     return tanh(t_cur / m_tau);
 }
 
+#ifdef ASSIMILATION
 std::string GaussFunction::write_header_part() {
     std::string header_part = fmt::format("###coordinates;{};{};{}", m_x0, m_y0, m_z0);
     header_part.append(fmt::format("###volume;{};{};{}", m_sigma_x, m_sigma_y, m_sigma_z));
@@ -165,3 +166,4 @@ void GaussFunction::read_header_part(std::string &header) {
 
     create_spatial_values();
 }
+#endif

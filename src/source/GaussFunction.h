@@ -29,6 +29,7 @@ class GaussFunction: public ISourceFunction {
     void update_source(Field *out, real t_cur) override;
     void read_header_part(std::string &header) override;
     std::string write_header_part() override;
+
  private:
     Field *m_field_spatial_values;
     real m_tau;

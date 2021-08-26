@@ -114,6 +114,7 @@ void BuoyancyMMS::update_source(Field *out, real t_cur) {
     }
 }
 
+#ifdef ASSIMILATION
 void BuoyancyMMS::read_header_part(std::string &header) {
 
 }
@@ -121,3 +122,4 @@ void BuoyancyMMS::read_header_part(std::string &header) {
 std::string BuoyancyMMS::write_header_part() {
     return std::string();
 }
+#endif
