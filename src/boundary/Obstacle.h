@@ -38,12 +38,14 @@ class Obstacle {
         size_t level,
         const std::string& name,
         const Domain &domain);
+#ifndef BENCHMARKING
     Obstacle(
         size_t coords_i1, size_t coords_j1, size_t coords_k1,
         size_t coords_i2, size_t coords_j2, size_t coords_k2,
         size_t level,
         std::shared_ptr<spdlog::logger> logger,
         const Domain &domain);
+#endif
     ~Obstacle();
 
     size_t* get_obstacle_list() const { return m_obstacle_list; }
