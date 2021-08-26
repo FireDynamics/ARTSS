@@ -15,6 +15,8 @@ public:
     Cube(real value, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z);
     ~Cube();
     void update_source(Field *out, real t_cur) override;
+    void read_header_part(std::string &header) override;
+    std::string write_header_part() override;
 
 private:
     Field *m_source_field;

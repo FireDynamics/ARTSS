@@ -9,27 +9,16 @@
 #include "../Domain.h"
 #include "../TCP/TCPServer.h"
 #include "mpi.h"
+#include "HRRChanger.h"
 
-DataAssimilation::DataAssimilation(const FieldController &field_controller) : m_field_controller(field_controller) {
+DataAssimilation::DataAssimilation(const SolverController &solver_controller, const FieldController &field_controller) : m_field_controller(field_controller), m_solver_controller(solver_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     Parameters *params = Parameters::getInstance();
     m_assimilated = (params->get("data_assimilation/enabled") == "Yes");
     if (m_assimilated) {
-        std::string init = params->get("data_assimilation/class_name");
-        if (init == AssimilationMethods::Standard) {
-#ifndef BENCHMARKING
-            m_logger->debug("found data assimilation class {}", init);
-#endif
-            m_func = new FieldIOBase();
-        } else {
-#ifndef BENCHMARKING
-            m_logger->critical("Data Assimilation class {} is not defined", init);
-#endif
-            std::exit(1);
-            // TODO Error Handling
-        }
+        m_reader = new FieldIO(solver_controller);
         m_new_field_u = new Field(FieldType::U);
         m_new_field_v = new Field(FieldType::V);
         m_new_field_w = new Field(FieldType::W);
@@ -46,7 +35,7 @@ void DataAssimilation::read_new_data(std::string &file_name) {
 #ifndef BENCHMARKING
     m_logger->debug("read new data from {}", file_name);
 #endif
-    m_func->read(file_name, m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T, m_new_field_C);
+    m_reader->read(file_name, m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T, m_new_field_C);
 }
 
 void DataAssimilation::save_data(real t_cur) {
@@ -57,7 +46,7 @@ void DataAssimilation::save_data(real t_cur) {
     real *T = m_field_controller.get_field_T_data();
     real *C = m_field_controller.get_field_concentration_data();
 
-    m_func->write(t_cur, u, v, w, p, T, C);
+    m_reader->write(t_cur, u, v, w, p, T, C);
 }
 
 real DataAssimilation::get_new_time_value() const {

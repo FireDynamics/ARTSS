@@ -32,7 +32,7 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 
     m_adaption = new Adaption(m_field_controller);
 #ifdef ASSIMILATION
-    m_data_assimilation = new DataAssimilation(*m_field_controller);
+    m_data_assimilation = new DataAssimilation(*m_solver_controller, *m_field_controller);
 #endif
 #ifndef BENCHMARKING
     m_solution = new Solution();
