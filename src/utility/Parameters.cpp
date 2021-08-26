@@ -1,14 +1,13 @@
-/// \file 		Parameters.h
-/// \brief 		Access parameters of XML file
-/// \date 		May 20, 2016
-/// \author 	Arnold
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       Parameters.cpp
+/// \brief      Access parameters of XML file
+/// \date       May 20, 2016
+/// \author     Arnold
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-#include <vector>
 
 #include "Parameters.h"
 #include "Utility.h"
+
 
 Parameters *Parameters::single = nullptr;
 
@@ -20,28 +19,51 @@ Parameters *Parameters::getInstance() {
     return single;
 }
 
-// ========================================= Parse =======================================
-// ***************************************************************************************
+// ==================================== Parse ==================================
+// *****************************************************************************
 /// \brief  parses xml file
-/// \param	filename		string (name of xml-file)
-// ***************************************************************************************
+/// \param  filename        string (name of xml-file)
+// *****************************************************************************
 void Parameters::parse(const std::string& filename) {
     if (filename.empty()) {
         std::cout << "no XML file specified, skip reading parameter" << std::endl;
         return;
     } else {
-        std::cout << "read in XML file: " << filename << std::endl;
+        // spdlog::info("read in XML file: ");
     }
 
     tinyxml2::XMLError eResult = this->doc->LoadFile(filename.c_str()); // loads xml file
     m_filename = filename;
+
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger("XMLFile");
+    m_logger->debug("start the simulation of \"{}\"", filename);
+    this->printAllXMLAttributes("", this->doc->RootElement());
+#endif
 }
 
-// ======================================== Getter =======================================
-// ***************************************************************************************
+void Parameters::printAllXMLAttributes(std::string prefix, tinyxml2::XMLElement *elem) {
+#ifndef BENCHMARKING
+    prefix += elem->Name();
+    for (auto i = elem->FirstAttribute(); i; i = i->Next()) {
+        m_logger->debug("{}<{} = {}>", prefix, i->Name(), i->Value());
+    }
+
+    prefix += "/";
+    for (auto i = elem->FirstChildElement(); i; i = i->NextSiblingElement()) {
+        if (i->GetText())
+            m_logger->debug("{}{} = {}", prefix, i->Name(), i->GetText());
+
+        this->printAllXMLAttributes(prefix, i);
+    }
+#endif
+}
+
+// =================================== Getter ==================================
+// *****************************************************************************
 /// \brief  gets raw string (from xml-file)
-/// \param	raw_path   tree path (as string) of xml-file
-// ***************************************************************************************
+/// \param  raw_path   tree path (as string) of xml-file
+// *****************************************************************************
 std::string Parameters::get(const std::string &raw_path) {
     auto path = Utility::split(raw_path, '/');
 
@@ -64,7 +86,7 @@ std::string Parameters::get(const std::string &raw_path) {
 
 // ***************************************************************************************
 /// \brief  gets real number (from xml-file)
-/// \param	raw_path		tree path (as string) of xml-file
+/// \param  raw_path        tree path (as string) of xml-file
 // ***************************************************************************************
 real Parameters::get_real(const std::string &raw_path) {
     auto raw_result = this->get(raw_path);
@@ -73,7 +95,7 @@ real Parameters::get_real(const std::string &raw_path) {
 
 // ***************************************************************************************
 /// \brief  gets double number (from xml-file)
-/// \param	raw_path		tree path (as string) of xml-file
+/// \param  raw_path        tree path (as string) of xml-file
 // ***************************************************************************************
 double Parameters::get_double(const std::string &raw_path) {
     auto raw_result = this->get(raw_path);
@@ -82,7 +104,7 @@ double Parameters::get_double(const std::string &raw_path) {
 
 // ***************************************************************************************
 /// \brief  gets integer number (from xml-file)
-/// \param	raw_path		tree path (as string) of xml-file
+/// \param  raw_path        tree path (as string) of xml-file
 // ***************************************************************************************
 int Parameters::get_int(const std::string &raw_path) {
     auto raw_result = this->get(raw_path);

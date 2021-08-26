@@ -8,7 +8,7 @@
 #define ARTSS_DIFFUSION_EXPLICITDIFFUSE_H_
 
 #include "../interfaces/IDiffusion.h"
-#include "../Field.h"
+#include "../field/Field.h"
 
 class ExplicitDiffuse : public IDiffusion {
 public:

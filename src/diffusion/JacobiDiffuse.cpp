@@ -5,16 +5,18 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include <cmath>
 
 #include "JacobiDiffuse.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
+#include "../utility/Utility.h"
 
 JacobiDiffuse::JacobiDiffuse() {
-
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
@@ -25,8 +27,8 @@ JacobiDiffuse::JacobiDiffuse() {
     m_tol_res = params->get_real("solver/diffusion/tol_res");
 }
 
-//====================================== Diffuse ===============================================
-// ***************************************************************************************
+// ============================ Diffuse =====================================
+// *****************************************************************************
 /// \brief  solves diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
 ///     via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
 /// \param  out     output pointer
@@ -36,11 +38,10 @@ JacobiDiffuse::JacobiDiffuse() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
-
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto bsize = domain->get_size(out->GetLevel());
-    FieldType type = out->GetType();
+    auto bsize = domain->get_size(out->get_level());
+    FieldType type = out->get_type();
 
     auto d_out = out->data;
     auto d_in = in->data;
@@ -48,17 +49,17 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 
     auto boundary = BoundaryController::getInstance();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
 #pragma acc data present(d_out[:bsize], d_in[:bsize], d_b[:bsize])
     {
-        const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
-        const real dy = domain->get_dy(out->GetLevel());
-        const real dz = domain->get_dz(out->GetLevel());
+        const real dx = domain->get_dx(out->get_level()); //due to unnecessary parameter passing of *this
+        const real dy = domain->get_dy(out->get_level());
+        const real dz = domain->get_dz(out->get_level());
 
         const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;
@@ -81,8 +82,8 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
         real res = 1.;
 
         while (res > tol_res && it < max_it) {
-            JacobiStep(out, in, b, alphaX, alphaY, alphaZ, beta, dsign, w, sync);
-            boundary->applyBoundary(d_out, type, sync);
+            JacobiStep(out, in, b, alphaX, alphaY, alphaZ, rbeta, dsign, w, sync);
+            boundary->apply_boundary(d_out, type, sync);
 
             sum = 0.;
 
@@ -133,16 +134,14 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
         }
 
 #ifndef BENCHMARKING
-        std::cout << "Number of iterations:" << it << std::endl;
-        std::cout << "Jacobi ||res|| = " << res << "\n";
-        //TODO Logger
+        m_logger->info("Number of iterations: {}", it);
+        m_logger->info("Jacobi ||res|| = {:0.5e}", res);
 #endif
-
-    }//end data region
+    }  // end data region
 }
 
-//====================================== Turbulent version ===============================================
-// ***************************************************************************************
+// ======================= Turbulent version ================================
+// ************************************************************************
 /// \brief  solves turbulent diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
 ///     via calculated iterations of Jacobi step (dependent on residual/ maximal iterations)
 /// \param  out     output pointer
@@ -153,11 +152,10 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, const Field *EV, bool sync) {
-
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto bsize = domain->get_size(out->GetLevel());
-    FieldType type = out->GetType();
+    auto bsize = domain->get_size(out->get_level());
+    FieldType type = out->get_type();
 
     auto d_out = out->data;
     auto d_in = in->data;
@@ -166,17 +164,17 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
 #pragma acc data present(d_out[:bsize], d_in[:bsize], d_b[:bsize], d_EV[:bsize])
     {
-        const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
-        const real dy = domain->get_dy(out->GetLevel());
-        const real dz = domain->get_dz(out->GetLevel());
+        const real dx = domain->get_dx(out->get_level()); //due to unnecessary parameter passing of *this
+        const real dy = domain->get_dy(out->get_level());
+        const real dz = domain->get_dz(out->get_level());
 
         const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
         const real rdy = 1. / dy;
@@ -197,7 +195,7 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 
         while (res > tol_res && it < max_it) {
             JacobiStep(out, in, b, dsign, w, D, EV, dt, sync);
-            boundary->applyBoundary(d_out, type, sync);
+            boundary->apply_boundary(d_out, type, sync);
 
             sum = 0.;
 
@@ -251,15 +249,14 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 #pragma acc wait
         }
 #ifndef BENCHMARKING
-        std::cout << "Number of iterations:" << it << std::endl;
-        std::cout << "Jacobi ||res|| = " << res << "\n";
-        //TODO Logger
+        m_logger->info("Number of iterations: {}", it);
+        m_logger->info("Jacobi ||res|| = {:0.5e}", res);
 #endif
-    }//end data region
+    }  // end data region
 }
 
-//====================================== Jacobian stencil ===============================================
-// ***************************************************************************************
+// ======================= Jacobian stencil ================================
+// ************************************************************************
 /// \brief  performs one (weighted) Jacobi step \f$ x_i^{(n+1)}:=\frac1{a_{ii}}\left(b_i-\sum_{j\not=i} a_{ij}\cdot x_j^{(n)}\right), \, i=0,\dots,N_x-2 \f$
 /// \param  out   output pointer
 /// \param  in    input pointer
@@ -275,14 +272,13 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 /// \param  w   weight (1. - diffusion, 2./3. - multigrid)
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, const real alphaX, const real alphaY, const real alphaZ, const real beta, const real dsign, const real w, bool sync) {
-
+void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, const real alphaX, const real alphaY, const real alphaZ, const real rbeta, const real dsign, const real w, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->get_level());
 
-    auto bsize = domain->get_size(out->GetLevel());
+    auto bsize = domain->get_size(out->get_level());
 
     auto d_out = out->data;
     auto d_in = in->data;
@@ -290,15 +286,15 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_b[:bsize], d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_iList[j];
-        real out_h = beta * (dsign * d_b[i] + alphaX * (d_in[i + 1] + d_in[i - 1]) \
+        real out_h = (dsign * d_b[i] + alphaX * (d_in[i + 1] + d_in[i - 1]) \
  + alphaY * (d_in[i + Nx] + d_in[i - Nx]) \
- + alphaZ * (d_in[i + Nx * Ny] + d_in[i - Nx * Ny]));
+ + alphaZ * (d_in[i + Nx * Ny] + d_in[i - Nx * Ny])) / rbeta;
         d_out[i] = (1 - w) * d_in[i] + w * out_h;
     }
 
@@ -307,8 +303,8 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
     }
 }
 
-//========================= Multigrid version for Jacobian stencil =========================
-// ***************************************************************************************
+// =============== Multigrid version for Jacobian stencil ===============
+// ************************************************************************
 /// \brief  performs one (weighted) Jacobi step at multigrid level, \f$ x_i^{(n+1)}:=\frac1{a_{ii}}\left(b_i-\sum_{j\not=i} a_{ij}\cdot x_j^{(n)}\right), \, i=0,\dots,N_x-2 \f$
 /// \param  level multigrid level
 /// \param  out   output pointer
@@ -326,13 +322,12 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const Field *b, const real alphaX, const real alphaY, const real alphaZ, const real beta, const real dsign, const real w, bool sync) {
-
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(level); //due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny(level);
 
-    auto bsize = domain->get_size(out->GetLevel());
+    auto bsize = domain->get_size(out->get_level());
 
     auto d_out = out->data;
     auto d_in = in->data;
@@ -340,9 +335,9 @@ void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const 
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t start_i = boundary->get_innerList_level_joined_start(level);
-    size_t end_i = boundary->get_innerList_level_joined_end(level) + 1;
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t start_i = boundary->get_inner_list_level_joined_start(level);
+    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 
 #pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_b[:bsize], d_iList[start_i:(end_i-start_i)]) async
     for (size_t j = start_i; j < end_i; ++j) {
@@ -358,8 +353,8 @@ void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const 
     }
 }
 
-//========================= Turbulent version for Jacobian stencil =========================
-// ***************************************************************************************
+// =============== Turbulent version for Jacobian stencil ===============
+// ************************************************************************
 /// \brief  performs one (weighted) Jacobi step for turbulent diffusion, \f$ x_i^{(n+1)}:=\frac1{a_{ii}}\left(b_i-\sum_{j\not=i} a_{ij}\cdot x_j^{(n)}\right), \, i=0,\dots,N_x-2 \f$
 /// \param  out   output pointer
 /// \param  in    input pointer
@@ -372,21 +367,20 @@ void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const 
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, const real dsign, const real w, const real D, const Field *EV, const real dt, bool sync) {
-
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->get_level());
 
-    const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out->GetLevel());
-    const real dz = domain->get_dz(out->GetLevel());
+    const real dx = domain->get_dx(out->get_level()); //due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out->get_level());
+    const real dz = domain->get_dz(out->get_level());
 
     const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
     const real rdy = 1. / dy;
     const real rdz = 1. / dz;
 
-    auto bsize = domain->get_size(out->GetLevel());
+    auto bsize = domain->get_size(out->get_level());
 
     real aX, aY, aZ, bb, rb; //multipliers calculated
 
@@ -397,8 +391,8 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_b[:bsize], d_EV[:bsize], d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
@@ -410,9 +404,11 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
         rb = (1. + 2. * (aX + aY + aZ));
         bb = 1. / rb;
 
-        real out_h = bb * (dsign * d_b[i] + aX * (d_in[i + 1] + d_in[i - 1]) \
- + aY * (d_in[i + Nx] + d_in[i - Nx]) \
- + aZ * (d_in[i + Nx * Ny] + d_in[i - Nx * Ny]));
+        auto d_aX = aX * (d_in[i + 1] + d_in[i - 1]) ;
+        auto d_aY = aY * (d_in[i + Nx] + d_in[i - Nx]) ;
+        auto d_aZ = aZ * (d_in[i + Nx * Ny] + d_in[i - Nx * Ny]);
+
+        real out_h = bb * (dsign * d_b[i] + d_aX + d_aY + d_aZ);
         d_out[i] = (1 - w) * d_in[i] + w * out_h;
     }
 

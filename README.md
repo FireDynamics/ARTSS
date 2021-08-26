@@ -14,14 +14,16 @@ The serial CPU version of ARTSS can be compiled on Linux or MacOS systems with v
 whereas the multicore and GPU version needs an OpenACC capable compiler.
 Detailed requirements are listed in the table below (general requirements for serial version, specific for multicore and GPU version).
 
-|          | Purpose                                             | Tool     | Version       |
-|--------- | --------------------------------------------------- | -------- | --------------|
-| General  | Version control system (optional)                   | git      |   >= 2.0      |
-|          | Build processor using a compiler-independent method | CMake    |   >= 2.8      |
-|          | Compiler fully supporting C++-17 (gcc or clang)     | gcc      |   >= 7.0      |
-|          | Visualization of output                             | vtk      |   >= 5.8      |
-|          | Testing for consistency of output while developing  | Python   |   >= 3.6      |
-| Specific | Compiler fully supporting C++-17 and OpenACC        | PGI      |   >= 19.10    |
+|           | Purpose                                             | Tool     | Version       |
+|---------- | --------------------------------------------------- | -------- | --------------|
+| General   | Version control system (optional)                   | git      |   >= 2.0      |
+|           | Build processor using a compiler-independent method | CMake    |   >= 2.8      |
+|           | Compiler fully supporting C++-17 (gcc or clang)     | gcc      |   >= 7.0      |
+|           | Visualization of output                             | vtk      |   >= 5.8      |
+|           | Testing for consistency of output while developing  | Python   |   >= 3.6      |
+| Libraries | Logging                                             | spdlog   |               |
+|           | String formatting in output                         | fmt      |               |
+| Specific  | Compiler fully supporting C++-17 and OpenACC        | NVHPC    |   >= 20.9.0   |
 
 ### Compiling the Code
 Once the code has been checked out and all required software has been installed, ARTSS
@@ -34,11 +36,16 @@ git clone https://github.com/FireDynamics/ARTSS.git
 cd ARTSS
 ```
 
+if you already have a local copy of ARTSS and are missing spdlog or fmt do a recursive submodule init.
+```
+git submodule update --init --recursive
+```
+
 2. Compiling the code
 ```
 ./compile.sh [OPTIONS]
 ```
-*Note: Without options all executables will be compiled using the PGI compiler and CUDA 10.1.*
+*Note: Without options all executables will be compiled using the NVHPC compiler and CUDA 10.1.*
 
 OPTIONS (selection; show all by using --help flag):
 - '-s' -> Compile serial ARTSS version
@@ -80,4 +87,4 @@ ARTSS
 
 ### Contributing
 
-We are working constantly on this project, which above all means we are not finished yet: continuous improvements are made, new features are implemented and bugs getting fixed. If you find any errors or you have a suggestions, please feel free to write an issue [here](https://github.com/FireDynamics/ARTSS/issues). If you want to work on the project, please refer to the [contributing guidlines](https://github.com/FireDynamics/ARTSS/tree/master/CONTRIBUTING.md).
+We are working constantly on this project, which above all means we are not finished yet: continuous improvements are made, new features are implemented and bugs getting fixed. If you find any errors or you have a suggestions, please feel free to write an issue [here](https://github.com/FireDynamics/ARTSS/issues). If you want to work on the project, please refer to the [contributing guidelines](https://github.com/FireDynamics/ARTSS/tree/master/CONTRIBUTING.md).

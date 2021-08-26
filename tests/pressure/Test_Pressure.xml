@@ -5,20 +5,20 @@
     <dt> 0.1 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
   </physical_parameters>
 
-  <solver description = "PressureSolver" >
-    <pressure type = "VCycleMG" field = "p">
+  <solver description="PressureSolver" >
+    <pressure type="VCycleMG" field="p">
       <n_level> 5 </n_level>  <!-- number of restriction levels -->
       <n_cycle> 2 </n_cycle> <!-- number of cycles -->
       <max_cycle> 100 </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
-      <diffusion type = "Jacobi" field = "p">
+      <diffusion type="Jacobi" field="p">
         <n_relax> 4 </n_relax>  <!-- number of iterations -->
         <max_solve> 100 </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
         <w> 0.6666666667 </w>  <!-- relaxation parameter  -->
       </diffusion>
     </pressure>
-    <solution available = "Yes">
+    <solution available="Yes">
       <tol> 1e-03 </tol>  <!-- tolerance for further tests -->
     </solution>
   </solver>
@@ -51,11 +51,14 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "SinSinSin" >
+  <initial_conditions usr_fct="SinSinSin" random="No" >
     <l> 2. </l>
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 10 </vtk_nth_plot>
   </visualisation>
+
+  <logging file="output_test_pressure.log" level="info">
+  </logging>
 </ARTSS>

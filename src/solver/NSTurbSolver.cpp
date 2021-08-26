@@ -4,8 +4,6 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-
 #include "NSTurbSolver.h"
 #include "../pressure/VCycleMG.h"
 #include "../utility/Parameters.h"
@@ -13,7 +11,11 @@
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 
-NSTurbSolver::NSTurbSolver() {
+NSTurbSolver::NSTurbSolver(FieldController *field_controller) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
+    m_field_controller = field_controller;
 
     auto params = Parameters::getInstance();
 
@@ -29,7 +31,7 @@ NSTurbSolver::NSTurbSolver() {
     SolverSelection::SetTurbulenceSolver(&mu_tub, params->get("solver/turbulence/type"));
 
     //Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), p, rhs);
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), m_field_controller->field_p, m_field_controller->field_rhs);
 
     //Source
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
@@ -55,22 +57,22 @@ NSTurbSolver::~NSTurbSolver() {
 void NSTurbSolver::do_step(real t, bool sync) {
 
     // local variables and parameters for GPU
-    auto u = ISolver::u;
-    auto v = ISolver::v;
-    auto w = ISolver::w;
-    auto u0 = ISolver::u0;
-    auto v0 = ISolver::v0;
-    auto w0 = ISolver::w0;
-    auto u_tmp = ISolver::u_tmp;
-    auto v_tmp = ISolver::v_tmp;
-    auto w_tmp = ISolver::w_tmp;
-    auto p = ISolver::p;
-    auto p0 = ISolver::p0;
-    auto rhs = ISolver::rhs;
-    auto f_x = ISolver::f_x;
-    auto f_y = ISolver::f_y;
-    auto f_z = ISolver::f_z;
-    auto nu_t = ISolver::nu_t;     //nu_t - Eddy Viscosity
+    auto u = m_field_controller->field_u;
+    auto v = m_field_controller->field_v;
+    auto w = m_field_controller->field_w;
+    auto u0 = m_field_controller->field_u0;
+    auto v0 = m_field_controller->field_v0;
+    auto w0 = m_field_controller->field_w0;
+    auto u_tmp = m_field_controller->field_u_tmp;
+    auto v_tmp = m_field_controller->field_v_tmp;
+    auto w_tmp = m_field_controller->field_w_tmp;
+    auto p = m_field_controller->field_p;
+    auto p0 = m_field_controller->field_p0;
+    auto rhs = m_field_controller->field_rhs;
+    auto f_x = m_field_controller->field_force_x;
+    auto f_y = m_field_controller->field_force_y;
+    auto f_z = m_field_controller->field_force_z;
+    auto nu_t = m_field_controller->field_nu_t;     //nu_t - Eddy Viscosity
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -89,7 +91,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
     auto d_fz = f_z->data;
     auto d_nu_t = nu_t->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->get_level());
 
     auto nu = m_nu;
 
@@ -99,46 +101,42 @@ void NSTurbSolver::do_step(real t, bool sync) {
 
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        std::cout << "Advect ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
         adv_vel->advect(v, v0, u0, v0, w0, sync);
         adv_vel->advect(w, w0, u0, v0, w0, sync);
 
         // Couple velocity to prepare for diffusion
-        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve turbulent diffusion equation
 #ifndef BENCHMARKING
-        std::cout << "Calculating Turbulent viscosity ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Calculating Turbulent viscosity ...");
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 
 
 #ifndef BENCHMARKING
-        std::cout << "Diffuse ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Diffuse ...");
 #endif
         dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
         dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
 
         // Couple data to prepare for adding source
-        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 3. Add force
         if (m_force_function != SourceMethods::Zero) {
 
 #ifndef BENCHMARKING
-            std::cout << "Add source ..." << std::endl;
-            //TODO Logger
+            m_logger->info("Add source ...");
 #endif
             sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
 
             // Couple data
-            ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 4. Solve pressure equation and project
@@ -147,8 +145,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
 
         // Solve pressure equation
 #ifndef BENCHMARKING
-        std::cout << "Pressure ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);
 
@@ -168,23 +165,29 @@ void NSTurbSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void NSTurbSolver::control() {
+#ifndef BENCHMARKING
+    auto logger = Utility::create_logger(typeid(NSTurbSolver).name());
+#endif
     auto params = Parameters::getInstance();
     if (params->get("solver/advection/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
-    if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+    if (params->get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
 }

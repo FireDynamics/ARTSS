@@ -1,8 +1,10 @@
 $1 ./Test_Pressure.xml
 
-rm -rf *.vtk
-
 python3 ./verify.py
+
+rm -f *.log
+rm -f *.vtk
+ls *.dat | grep -v '_ref.dat' | xargs rm -r
 
 if [ $? -eq 0 ]
 then

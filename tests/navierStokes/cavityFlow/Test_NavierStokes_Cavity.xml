@@ -1,37 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ARTSS>
   <physical_parameters>
-    <t_end> 10. </t_end>  <!-- simulation end time -->
-    <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
+    <t_end> 0.5 </t_end>  <!-- simulation end time -->
+    <dt> 0.001 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
     <nu> 0.1 </nu>  <!-- kinematic viscosity -->
   </physical_parameters>
 
-  <solver description = "NSSolver" >
-    <advection type = "SemiLagrangian" field = "u,v,w">
+  <solver description="NSSolver" >
+    <advection type="SemiLagrangian" field="u,v,w">
     </advection>
-    <diffusion type = "Jacobi" field = "u,v,w">
-      <max_iter> 100 </max_iter>  <!-- max number of iterations -->
+    <diffusion type="Jacobi" field="u,v,w">
+      <max_iter> 50 </max_iter>  <!-- max number of iterations -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
       <w> 1 </w>  <!-- relaxation parameter -->
     </diffusion>
-  <source type = "ExplicitEuler" force_fct="Uniform" dir = "x"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz)     -->
-    <val_x> 1. </val_x>
-    <val_y> 0. </val_y>
-    <val_z> 0. </val_z>
-  </source>
-    <pressure type = "VCycleMG" field = "p">
+    <source type="ExplicitEuler" force_fct="Zero" dir="xyz">  <!-- Direction of force (x,y,z or combinations xy,xz,yz,xyz) -->
+    </source>
+    <pressure type="VCycleMG" field="p">
       <n_level> 4 </n_level>  <!-- number of restriction levels -->
       <n_cycle> 2 </n_cycle> <!-- number of cycles -->
       <max_cycle> 100 </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
-      <diffusion type = "Jacobi" field = "p">
+      <diffusion type="Jacobi" field="p">
         <n_relax> 4 </n_relax>  <!-- number of iterations -->
         <max_solve> 100 </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
         <w> 0.6666666667 </w>  <!-- relaxation parameter  -->
       </diffusion>
     </pressure>
-    <solution available = "No">
+    <solution available="No">
     </solution>
   </solver>
 
@@ -56,20 +53,24 @@
   <adaption dynamic="No" data_extraction="No"> </adaption>
 
   <boundaries>
-    <boundary field="u,v,w" patch="left,right" type="periodic" value="0.0" />
-    <boundary field="u,v,w" patch="front,back,bottom,top" type="dirichlet" value="0.0" />
-    <boundary field="p" patch="left,right" type="periodic" value="0.0" />
-    <boundary field="p" patch="front,back,bottom,top" type="neumann" value="0.0" />
+    <boundary field="u" patch="top" type="dirichlet" value="1.0" />
+    <boundary field="u" patch="front,back,left,right,bottom" type="dirichlet" value="0.0" />
+    <boundary field="v,w" patch="front,back,left,right,bottom,top" type="dirichlet" value="0.0" />
+    <boundary field="p" patch="top" type="dirichlet" value="0.0" />
+    <boundary field="p" patch="front,back,left,right,bottom" type="neumann" value="0.0" />
   </boundaries>
 
   <obstacles enabled="No"/>
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Zero" >
+  <initial_conditions usr_fct="Zero"  random="No">
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
-    <vtk_nth_plot> 20 </vtk_nth_plot>
+    <vtk_nth_plot> 50 </vtk_nth_plot>
   </visualisation>
+
+  <logging file="output_test_navierstokes_cavity.log" level="info">
+  </logging>
 </ARTSS>

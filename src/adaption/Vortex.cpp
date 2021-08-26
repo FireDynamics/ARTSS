@@ -8,7 +8,7 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 
-Vortex::Vortex(ISolver *solver) {
+Vortex::Vortex(FieldController *field_controller) {
     auto domain = Domain::getInstance();
     auto params = Parameters::getInstance();
     m_u_lin = params->get_real("initial_conditions/u_lin");
@@ -25,9 +25,9 @@ Vortex::Vortex(ISolver *solver) {
     m_buffer = params->get_int("adaption/class/buffer");
     m_threshold = m_u_lin * params->get_real("adaption/class/threshold");
 
-    u = solver->u;
-    v = solver->v;
-    w = solver->w;
+    u = field_controller->field_u;
+    v = field_controller->field_v;
+    w = field_controller->field_w;
 }
 
 // ==================================== Has reduction ===============================

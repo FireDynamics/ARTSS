@@ -14,21 +14,27 @@
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../field/FieldController.h"
 
 class NSTurbSolver : public ISolver {
-public:
-    NSTurbSolver();
-    ~NSTurbSolver() override;
+ public:
+    NSTurbSolver(FieldController *field_controller);
+    ~NSTurbSolver();
 
     void do_step(real t, bool sync) override;
 
-private:
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
+
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
     IPressure *pres;
     ISource *sou_vel;
     ITurbulence *mu_tub;
 
+    FieldController *m_field_controller;
     real m_nu;
 
     static void control();

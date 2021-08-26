@@ -7,23 +7,42 @@
 #ifndef ARTSS_TIMEINTEGRATION_H_
 #define ARTSS_TIMEINTEGRATION_H_
 
+#include <chrono>
+
 #include "interfaces/ISolver.h"
 #include "interfaces/ISource.h"
 #include "utility/GlobalMacrosTypes.h"
+#include "solver/SolverController.h"
+#include "adaption/Adaption.h"
+
+#ifndef BENCHMARKING
 #include "analysis/Analysis.h"
+#include "analysis/Solution.h"
+#include "visualisation/Visual.h"
+#else
+// only needed if no logger will be available
+#include <iostream>
+#endif
 
 class TimeIntegration {
-public:
-  explicit TimeIntegration(ISolver *isolv);
+ public:
+    explicit TimeIntegration(SolverController *sc);
+    void run();
 
-  void run();
+ private:
+    real m_dt;
+    real m_t_end;
+    real m_t_cur;
 
-private:
-  ISolver* m_solver;
-  real m_dt;
-  real m_t_end;
-  real m_t_cur;
-  size_t m_size = 0;
+    FieldController *m_field_controller;
+    SolverController *m_solver_controller;
+    Adaption *m_adaption;
+#ifndef BENCHMARKING
+    Visual *m_visual;
+    Solution *m_solution;
+    Analysis *m_analysis;
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_TIMEINTEGRATION_H_ */

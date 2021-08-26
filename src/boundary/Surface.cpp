@@ -2,15 +2,18 @@
 // Created by linh on 01.10.19.
 //
 
-#include <iostream>
 #include "Surface.h"
-#include "../Domain.h"
-#include "../utility/Utility.h"
 
-//TODO duplicates ?
+
+// TODO(issue 15): surface implementing
+//  - underscores instead of camel case
+//  - create file description
 Surface::Surface(tinyxml2::XMLElement* element) {
     m_boundaryDataController = new BoundaryDataController();
-    std::cout << "################ SURFACE ################" << std::endl;
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger->info("################ SURFACE ################");
+#endif
     auto domain = Domain::getInstance();
 
     real dx = domain->get_dx();
@@ -28,9 +31,12 @@ Surface::Surface(tinyxml2::XMLElement* element) {
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
-    std::cout << "surface ID ";
     m_surfaceID = element->IntAttribute("ID");
-    std::cout << m_surfaceID << std::endl;
+
+#ifndef BENCHMARKING
+    m_logger->info("surface ID {}", m_surfaceID);
+#endif
+
     real sx1 = element->DoubleAttribute("sx1");
     real sx2 = element->DoubleAttribute("sx2");
     real sy1 = element->DoubleAttribute("sy1");
@@ -43,19 +49,23 @@ Surface::Surface(tinyxml2::XMLElement* element) {
     m_strideX = static_cast<size_t> (floor(lsx * rdx + 1 + 0.5));
     m_strideY = static_cast<size_t> (floor(lsy * rdy + 1 + 0.5));
     m_strideZ = static_cast<size_t> (floor(lsz * rdz + 1 + 0.5));
-    //round due to cells at boundary (sx as midpoint of cells in xml)
+    // round due to cells at boundary (sx as midpoint of cells in xml)
     m_i1 = static_cast<size_t> (round(fabs(sx1 - (X1-0.5*dx)) * rdx));
     m_j1 = static_cast<size_t> (round(fabs(sy1 - (Y1-0.5*dy)) * rdy));
     m_k1 = static_cast<size_t> (round(fabs(sz1 - (Z1-0.5*dz)) * rdz));
 
     createSurface(Nx, Ny);
     print();
-    std::cout << "----------------END SURFACE ----------------" << std::endl;
+#ifndef BENCHMARKING
+    m_logger->info("----------------END SURFACE ----------------");
+#endif
 }
 
 Surface::Surface(size_t surfaceID, size_t startIndex, size_t strideX, size_t strideY, size_t strideZ, size_t level) {
-    std::cout << "################ SURFACE ################" << std::endl;
-    std::cout << "LEVEL: " << level << std::endl;
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger->info("################ SURFACE ################");
+#endif
     m_surfaceID = surfaceID;
 
     m_strideX = strideX;
@@ -65,33 +75,40 @@ Surface::Surface(size_t surfaceID, size_t startIndex, size_t strideX, size_t str
     Domain* domain = Domain::getInstance();
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
-    std::vector<size_t> coords = Utility::coordinateFromLinearIndex(startIndex, Nx, Ny);
-    m_i1 = coords[0];
-    m_j1 = coords[1];
-    m_k1 = coords[2];
+    m_k1 = getCoordinateK(startIndex, Nx, Ny);
+    m_j1 = getCoordinateJ(startIndex, Nx, Ny, m_k1);
+    m_i1 = getCoordinateI(startIndex, Nx, Ny, m_j1, m_k1);
 
     init(Nx, Ny);
-    std::cout << "----------------END SURFACE ----------------" << std::endl;
+#ifndef BENCHMARKING
+    m_logger->info("----------------END SURFACE ----------------");
+#endif
 }
 
 Surface::~Surface() {
-    for (BoundaryData* bd: dataList){
+    for (BoundaryData* bd : dataList) {
         delete(bd);
     }
     delete(m_surfaceList);
 }
 
-void Surface::print(){
+void Surface::print() {
+#ifndef BENCHMARKING
     size_t i2 = get_i2();
     size_t j2 = get_j2();
     size_t k2 = get_k2();
-    std::cout << "Surface ID " << m_surfaceID << std::endl;
-    std::cout << "strides: " << m_strideZ << " " << m_strideY <<  " " << m_strideX << std::endl;
-    std::cout << "size of Surface: " << m_size_surfaceList << std::endl;
-    std::cout << "coords: (" << m_i1 << "|" << i2 << ")(" << m_j1 << "|" << j2 << ")(" << m_k1 << "|" << k2 << std::endl;
+    m_logger->info("Surface ID {}", m_surfaceID);
+    m_logger->info("strides: X: {}, Y: {}, Z:{}", m_strideZ,
+                                                  m_strideY,
+                                                  m_strideX);
+    m_logger->info("size of Surface: {}", m_size_surfaceList);
+    m_logger->info("coords: ({}|{}) ({}|{}) ({}|{})", m_i1, i2,
+                                                      m_j1, j2,
+                                                      m_k1, k2);
+#endif
 }
 
-void Surface::init(size_t Nx, size_t Ny){
+void Surface::init(size_t Nx, size_t Ny) {
     m_size_surfaceList = m_strideX * m_strideY * m_strideZ;
     m_surfaceList = new size_t[m_size_surfaceList];
 
@@ -99,25 +116,31 @@ void Surface::init(size_t Nx, size_t Ny){
     print();
 }
 
-void Surface::createSurface(size_t Nx, size_t Ny){
+void Surface::createSurface(size_t Nx, size_t Ny) {
     size_t counter = 0;
-    std::cout << "list size of sList: " << m_size_surfaceList << std::endl;
-    //fill sList with corresponding indices
-    for (size_t k = m_k1; k < m_k1 + m_strideZ; ++k){
-        for (size_t j = m_j1; j < m_j1 + m_strideY; ++j){
-            for (size_t i = m_i1; i < m_i1 + m_strideX; ++i){
+#ifndef BENCHMARKING
+    m_logger->info("list size of sList: {}", m_size_surfaceList);
+#endif
+
+    // fill sList with corresponding indices
+    for (size_t k = m_k1; k < m_k1 + m_strideZ; ++k) {
+        for (size_t j = m_j1; j < m_j1 + m_strideY; ++j) {
+            for (size_t i = m_i1; i < m_i1 + m_strideX; ++i) {
                 size_t idx = (size_t)(IX(i,j,k,Nx,Ny));
                 *(m_surfaceList + counter) = idx ;
                 counter++;
             }
         }
     }
-    std::cout << "control create Surface " << counter << "|" << m_size_surfaceList << std::endl;
-    std::cout << "end of creating sList" << std::endl;
+#ifndef BENCHMARKING
+    m_logger->info("control create Surface ({}|{})", counter,
+                                                     m_size_surfaceList);
+    m_logger->info("end of creating sList");
+#endif
 }
 
 void Surface::setBoundaryConditions(tinyxml2::XMLElement *xmlElement) {
-    m_boundaryDataController->addBoundaryData(xmlElement);
+    m_boundaryDataController->add_boundary_data(xmlElement);
 }
 
 size_t Surface::get_i2() {
@@ -126,11 +149,10 @@ size_t Surface::get_i2() {
 size_t Surface::get_j2() {
     return m_j1 + m_strideY - 1;
 }
-size_t Surface::get_k2(){
+size_t Surface::get_k2() {
     return m_k1 + m_strideZ - 1;
 }
 
-void Surface::applyBoundaryConditions(real *dataField, FieldType fieldType, size_t level, bool sync){
-    //TODO
-    //m_bdc_boundary->applyBoundaryCondition(dataField, indexFields, patch_starts, patch_ends, fieldType, level, sync);
+void Surface::applyBoundaryConditions(real *dataField, FieldType fieldType, size_t level, bool sync) {
+    // m_bdc_boundary->apply_boundary_condition(dataField, indexFields, patch_starts, patch_ends, fieldType, level, sync);
 }

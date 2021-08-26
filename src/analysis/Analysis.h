@@ -7,27 +7,27 @@
 #ifndef ARTSS_ANALYSIS_ANALYSIS_H_
 #define ARTSS_ANALYSIS_ANALYSIS_H_
 
-#include "../interfaces/ISolver.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "Solution.h"
+#include "../field/FieldController.h"
 
 class Analysis {
-public:
+ public:
     explicit Analysis(Solution *solution);
 
-    void analyse(ISolver *solver, real t);
+    void analyse(FieldController *solver, real t);
 
-    void calc_L2_norm_mid_point(ISolver *solver, real t, real *sum);
+    void calc_L2_norm_mid_point(FieldController *solver, real t, real *sum);
     void calc_RMS_error(real sum_u, real sum_p, real sum_T);
+    real calc_CFL(Field *u, Field *v, Field *w, real dt);
 
     bool check_time_step_VN(Field *u, real dt);
-    bool check_time_step_CFL(Field *u, Field *v, Field *w, real dt);
 
     real set_DT_with_CFL(Field *u, Field *v, Field *w);
 
-    void save_variables_in_file(ISolver *solv);
+    void save_variables_in_file(FieldController *solv);
 
-private:
+ private:
     real m_tol = 1e-7;
 
     bool compare_solutions(read_ptr num, read_ptr ana, FieldType type, real t);
@@ -40,6 +40,9 @@ private:
 
     bool has_analytic_solution = false;
     Solution *m_solution;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_ANALYSIS_ANALYSIS_H_ */

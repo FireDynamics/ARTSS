@@ -1,38 +1,232 @@
-/// \file 		DomainBoundary.cpp
-/// \brief 		Applies boundary condition for domain boundary
-/// \date 		Feb 03, 2020
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
+/// \file       DomainBoundary.cpp
+/// \brief      Applies boundary condition for domain boundary
+/// \date       Feb 03, 2020
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "DomainBoundary.h"
 #include "../Domain.h"
 
-//======================================== Apply boundary condition ====================================
-// ***************************************************************************************
+namespace DomainBoundary {
+namespace {
+    //======================================== Apply boundary condition ============================
+    // *********************************************************************************************
+    /// \brief  Set boundary condition for domain boundary
+    /// \param  data_field   Field
+    /// \param  d_patch List of indices for given patch
+    /// \param  patch_start Start Index of Patch
+    /// \param  patch_end End index of patch
+    /// \param  level Multigrid level
+    /// \param  sign_reference_index Sign of reference index ( POSITIVE_SIGN or NEGATIVE_SIGN )
+    /// \param  reference_index Index of reference
+    /// \param  value Value of boundary condition
+    /// \param  sign Sign of boundary condition ( POSITIVE_SIGN or NEGATIVE_SIGN )
+    // *********************************************************************************************
+    void apply_boundary_condition(real *data_field, const size_t *d_patch, size_t patch_start,
+                                  size_t patch_end, size_t level, int8_t sign_reference_index,
+                                  size_t reference_index, real value, int8_t sign) {
+        Domain *domain = Domain::getInstance();
+        size_t b_size = domain->get_size(level);
+#pragma acc data present(data_field[:b_size])
+        {
+#pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
+            for (size_t j = patch_start; j < patch_end; ++j) {
+                const size_t index = d_patch[j];
+                data_field[index] = sign * data_field[index + sign_reference_index
+                                                      * static_cast<int>(reference_index)] + value;
+            }
+#pragma acc wait
+        }
+    }
+
+    //======================================== Apply dirichlet =====================================
+    // *********************************************************************************************
+    /// \brief  Apply dirichlet boundary condition
+    /// \param  data_field   Field
+    /// \param  d_patch List of indices for given patch
+    /// \param  patch Patch
+    /// \param  patch_start Start Index of Patch
+    /// \param  patch_end End index of patch
+    /// \param  level Multigrid level
+    /// \param  value Value of boundary condition
+    // *********************************************************************************************
+    void apply_dirichlet(real *data_field, size_t *d_patch, Patch patch, size_t patch_start,
+                         size_t patch_end, size_t level, real value) {
+        if (level > 0) {
+            value = 0;
+        }
+
+        Domain *domain = Domain::getInstance();
+        size_t reference_index = 0;
+        int8_t sign_reference_index = POSITIVE_SIGN;
+        switch (patch) {
+            case FRONT:
+            case BACK:
+                reference_index = domain->get_Nx(level) * domain->get_Ny(level);
+                break;
+            case BOTTOM:
+            case TOP:
+                reference_index = domain->get_Nx(level);
+                break;
+            case LEFT:
+            case RIGHT:
+                reference_index = 1;
+                break;
+            default:
+#ifndef BENCHMARKING
+                auto logger = Utility::create_logger("DomainBoundary");
+                logger->error("Unknown Patch for dirichlet boundary condition: {}", patch);
+#endif
+                break;
+        }
+
+        if (patch == BACK || patch == TOP || patch == RIGHT){
+            sign_reference_index = NEGATIVE_SIGN;
+        }
+
+        apply_boundary_condition(
+                data_field, d_patch, patch_start, patch_end,
+                level, sign_reference_index, reference_index, value * 2, NEGATIVE_SIGN);
+    }
+
+    //======================================== Apply neumann =======================================
+    // *********************************************************************************************
+    /// \brief  Apply neumann boundary condition
+    /// \param  data_field   Field
+    /// \param  d_patch List of indices for given patch
+    /// \param  patch Patch
+    /// \param  patch_start Start Index of Patch
+    /// \param  patch_end End index of patch
+    /// \param  level Multigrid level
+    /// \param  value Value of boundary condition
+    // *********************************************************************************************
+    void apply_neumann(real *data_field, size_t *d_patch, Patch patch, size_t patch_start,
+                       size_t patch_end, size_t level, real value) {
+        if (level > 0) {
+            value = 0;
+        }
+        Domain *domain = Domain::getInstance();
+        size_t reference_index = 0;
+        int8_t sign_reference_index = POSITIVE_SIGN;
+        switch (patch) {
+            case FRONT:
+            case BACK:
+                value *= domain->get_dz(level);
+                reference_index = domain->get_Nx(level) * domain->get_Ny(level);
+                break;
+            case BOTTOM:
+            case TOP:
+                value *= domain->get_dy(level);
+                reference_index = domain->get_Nx(level);
+                break;
+            case LEFT:
+            case RIGHT:
+                value *= domain->get_dz(level);
+                reference_index = 1;
+                break;
+            default:
+#ifndef BENCHMARKING
+                auto logger = Utility::create_logger("DomainBoundary");
+                logger->error("Unknown Patch for neumann boundary condition: {}", patch);
+#endif
+                break;
+        }
+
+        if (patch == BACK || patch == TOP || patch == RIGHT){
+            sign_reference_index = NEGATIVE_SIGN;
+        }
+        apply_boundary_condition(
+                data_field, d_patch, patch_start, patch_end,
+                level, sign_reference_index, reference_index, value, POSITIVE_SIGN);
+    }
+
+    //======================================== Apply periodic ======================================
+    // *********************************************************************************************
+    /// \brief  Apply periodic boundary condition
+    /// \param  data_field   Field
+    /// \param  d_patch List of indices for given patch
+    /// \param  patch Patch
+    /// \param  patch_start Start Index of Patch
+    /// \param  patch_end End index of patch
+    /// \param  level Multigrid level
+    // *********************************************************************************************
+    void apply_periodic(real *data_field, size_t *d_patch, Patch patch, size_t patch_start,
+                        size_t patch_end, size_t level) {
+        Domain *domain = Domain::getInstance();
+        size_t Nx = domain->get_Nx(level);
+        size_t Ny = domain->get_Ny(level);
+
+        size_t reference_index = 0;
+        int sign_reference_index = POSITIVE_SIGN;
+
+        switch (patch) {
+            case FRONT:
+            case BACK:
+                reference_index = Nx * Ny * (Domain::getInstance()->get_nz(level) - 2);
+                break;
+            case BOTTOM:
+            case TOP:
+                reference_index = Nx * (Domain::getInstance()->get_ny(level) - 2);
+                break;
+            case LEFT:
+            case RIGHT:
+                reference_index = (Domain::getInstance()->get_nx(level) - 2);
+                break;
+            default:
+#ifndef BENCHMARKING
+                auto logger = Utility::create_logger("DomainBoundary");
+                logger->error("Unknown Patch for periodic boundary condition: {}", patch);
+#endif
+                break;
+        }
+
+        if (patch == BACK || patch == TOP || patch == RIGHT) {
+            sign_reference_index = NEGATIVE_SIGN;
+        }
+
+        apply_boundary_condition(
+                data_field, d_patch, patch_start, patch_end,
+                level, sign_reference_index, reference_index, 0, POSITIVE_SIGN);
+    }
+}
+
+//======================================== Apply boundary condition ================================
+// *************************************************************************************************
 /// \brief  Applies boundary condition for domain boundary
-/// \param  dataField	Field
-/// \param  indexFields List of indices for each patch
-/// \param  patch_starts List of start indices
-/// \param  patch_ends List of end indices
+/// \param  data_field   Field
+/// \param  index_fields List of indices for each patch
+/// \param  patch_start List of start indices
+/// \param  patch_end List of end indices
 /// \param  level Multigrid level
-/// \param  boundaryData Boundary data object of Domain
+/// \param  boundary_data Boundary data_field object of Domain
 /// \param  sync synchronous kernel launching (true, default: false)
-// ***************************************************************************************
-void DomainBoundary::applyBoundaryCondition(real *dataField, size_t **indexFields, const size_t *patch_starts, const size_t *patch_ends, size_t level, BoundaryData *boundaryData, bool sync) {
-    for (size_t i = 0; i < numberOfPatches; i++) {
-        size_t *d_patch = *(indexFields + i);
+// *************************************************************************************************
+void apply_boundary_condition(real *data_field, size_t **index_fields, const size_t *patch_starts,
+                              const size_t *patch_ends, size_t level, BoundaryData *boundary_data,
+                              bool sync) {
+    for (size_t i = 0; i < number_of_patches; i++) {
+        size_t *d_patch = *(index_fields + i);
         size_t patch_start = *(patch_starts + i);
         size_t patch_end = *(patch_ends + i);
         Patch p = static_cast<Patch>(i);
-        switch (boundaryData->getBoundaryCondition(p)) {
+        BoundaryCondition bc = boundary_data->get_boundary_condition(p);
+        switch (bc) {
             case BoundaryCondition::DIRICHLET:
-                applyDirichlet(dataField, d_patch, p, patch_start, patch_end, level, boundaryData->getValue(p));
+                apply_dirichlet(data_field, d_patch, p, patch_start, patch_end, level,
+                                boundary_data->get_value(p));
                 break;
             case BoundaryCondition::NEUMANN:
-                applyNeumann(dataField, d_patch, p, patch_start, patch_end, level, boundaryData->getValue(p));
+                apply_neumann(data_field, d_patch, p, patch_start, patch_end, level,
+                              boundary_data->get_value(p));
                 break;
             case BoundaryCondition::PERIODIC:
-                applyPeriodic(dataField, d_patch, p, patch_start, patch_end, level);
+                apply_periodic(data_field, d_patch, p, patch_start, patch_end, level);
+                break;
+            default:
+#ifndef BENCHMARKING
+                auto logger = Utility::create_logger("DomainBoundary");
+                logger->error("Unknown boundary condition: {}", bc);
+#endif
                 break;
         }
     }
@@ -40,154 +234,4 @@ void DomainBoundary::applyBoundaryCondition(real *dataField, size_t **indexField
 #pragma acc wait
     }
 }
-
-//======================================== Apply boundary condition ====================================
-// ***************************************************************************************
-/// \brief  Set boundary condition for domain boundary
-/// \param  dataField	Field
-/// \param  d_patch List of indices for given patch
-/// \param  patch_start Start Index of Patch
-/// \param  patch_end End index of patch
-/// \param  level Multigrid level
-/// \param  referenceIndex Index of reference
-/// \param  value Value of boundary condition
-/// \param  sign Sign of boundary condition
-// ***************************************************************************************
-void DomainBoundary::applyBoundaryCondition(real *dataField, const size_t *d_patch, size_t patch_start, size_t patch_end, size_t level, int referenceIndex, real value, int8_t sign) {
-    Domain *domain = Domain::getInstance();
-    size_t bsize = domain->get_size(level);
-#pragma acc data present(dataField[:bsize])
-    {
-#pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
-        for (size_t j = patch_start; j < patch_end; ++j) {
-            const size_t index = d_patch[j];
-            dataField[index] = sign * dataField[index + referenceIndex] + value;
-        }
-#pragma acc wait
-    }
-}
-
-//======================================== Apply dirichlet ====================================
-// ***************************************************************************************
-/// \brief  Apply dirichlet boundary condition
-/// \param  dataField	Field
-/// \param  d_patch List of indices for given patch
-/// \param  patch Patch
-/// \param  patch_start Start Index of Patch
-/// \param  patch_end End index of patch
-/// \param  level Multigrid level
-/// \param  value Value of boundary condition
-// ***************************************************************************************
-void DomainBoundary::applyDirichlet(real *dataField, size_t *d_patch, Patch patch, size_t patch_start, size_t patch_end, size_t level, real value) {
-    if (level > 0) {
-        value = 0;
-    }
-    Domain* domain = Domain::getInstance();
-    int referenceIndex = 0;
-    switch (patch){
-        case BACK:
-            referenceIndex = -domain->get_Nx(level) * domain->get_Ny(level);
-            break;
-        case FRONT:
-            referenceIndex = domain->get_Nx(level) * domain->get_Ny(level);
-            break;
-        case TOP:
-            referenceIndex = -domain->get_Nx(level);
-            break;
-        case BOTTOM:
-            referenceIndex = domain->get_Nx(level);
-            break;
-        case RIGHT:
-            referenceIndex = -1;
-            break;
-        case LEFT:
-            referenceIndex = 1;
-            break;
-    }
-    applyBoundaryCondition(dataField, d_patch, patch_start, patch_end, level, referenceIndex, value * 2, -1);
-}
-
-//======================================== Apply neumann ====================================
-// ***************************************************************************************
-/// \brief  Apply neumann boundary condition
-/// \param  dataField	Field
-/// \param  d_patch List of indices for given patch
-/// \param  patch Patch
-/// \param  patch_start Start Index of Patch
-/// \param  patch_end End index of patch
-/// \param  level Multigrid level
-/// \param  value Value of boundary condition
-// ***************************************************************************************
-void DomainBoundary::applyNeumann(real *dataField, size_t *d_patch, Patch patch, size_t patch_start, size_t patch_end, size_t level, real value) {
-    if (level > 0) {
-        value = 0;
-    }
-    Domain* domain = Domain::getInstance();
-    int referenceIndex = 0;
-    switch (patch){
-        case BACK:
-            value *= domain->get_dz(level);
-            referenceIndex = -domain->get_Nx(level) * domain->get_Ny(level);
-            break;
-        case FRONT:
-            value *= domain->get_dz(level);
-            referenceIndex = domain->get_Nx(level) * domain->get_Ny(level);
-            break;
-        case TOP:
-            value *= domain->get_dy(level);
-            referenceIndex = -domain->get_Nx(level);
-            break;
-        case BOTTOM:
-            value *= domain->get_dy(level);
-            referenceIndex = domain->get_Nx(level);
-            break;
-        case RIGHT:
-            value *= domain->get_dz(level);
-            referenceIndex = -1;
-            break;
-        case LEFT:
-            value *= domain->get_dz(level);
-            referenceIndex = 1;
-            break;
-    }
-    applyBoundaryCondition(dataField, d_patch, patch_start, patch_end, level, referenceIndex, value, 1);
-}
-
-//======================================== Apply periodic ====================================
-// ***************************************************************************************
-/// \brief  Apply periodic boundary condition
-/// \param  dataField	Field
-/// \param  d_patch List of indices for given patch
-/// \param  patch Patch
-/// \param  patch_start Start Index of Patch
-/// \param  patch_end End index of patch
-/// \param  level Multigrid level
-// ***************************************************************************************
-void DomainBoundary::applyPeriodic(real *dataField, size_t *d_patch, Patch patch, size_t patch_start, size_t patch_end, size_t level) {
-    Domain *domain = Domain::getInstance();
-    size_t Nx = domain->get_Nx(level);
-    size_t Ny = domain->get_Ny(level);
-
-    int referenceIndex = 0;
-    switch (patch){
-        case FRONT:
-            referenceIndex = Nx * Ny * (Domain::getInstance()->get_nz(level) - 2);
-            break;
-        case BACK:
-            referenceIndex = -Nx * Ny * (Domain::getInstance()->get_nz(level) - 2);
-            break;
-        case BOTTOM:
-            referenceIndex = Nx * (Domain::getInstance()->get_ny(level) - 2);
-            break;
-        case TOP:
-            referenceIndex = -Nx * (Domain::getInstance()->get_ny(level) - 2);
-            break;
-        case LEFT:
-            referenceIndex = (Domain::getInstance()->get_nx(level) - 2);
-            break;
-        case RIGHT:
-            referenceIndex = -(Domain::getInstance()->get_nx(level) - 2);
-            break;
-    }
-    applyBoundaryCondition(dataField, d_patch, patch_start, patch_end, level, referenceIndex, 0, 1);
-}
+}  // namespace DomainBoundary

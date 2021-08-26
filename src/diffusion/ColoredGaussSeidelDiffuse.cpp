@@ -5,17 +5,21 @@
 /// \author       My Linh Wuerzburger
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-#include<cmath>
+
+#include <cmath>
 
 #include "ColoredGaussSeidelDiffuse.h"
 #include "../boundary/BoundaryController.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
+#include "../utility/Utility.h"
 
-//=============================== Constructor ======================================
+
+// ========================== Constructor =================================
 ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
-
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
@@ -30,10 +34,10 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
         m_max_iter = 10000;
         m_tol_res = 1e-16;
     }
-};
+}
 
-//==================================== Diffuse ===========================================
-// ***************************************************************************************
+// ========================== Diffuse =================================
+// ************************************************************************
 /// \brief  solves Diffusion equation \f$ \partial_t \phi_2 = \nu \ nabla^2 \phi_2 \f$
 ///     via calculated iterations of CGS step (dependent on residual/ maximal iterations)
 /// \param  out     output pointer
@@ -43,32 +47,31 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, bool sync) {
-
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    auto bsize = domain->get_size(out->GetLevel());
-    FieldType type = out->GetType();
+    auto bsize = domain->get_size(out->get_level());
+    FieldType type = out->get_type();
 
     auto d_out = out->data;
     auto d_b = b->data;
 
     auto boundary = BoundaryController::getInstance();
 
-  auto bsize_i = boundary->getSize_innerList();
-  auto bsize_b = boundary->getSize_boundaryList();
+  auto bsize_i = boundary->get_size_inner_list();
+  auto bsize_b = boundary->get_size_boundary_list();
 
-    size_t* d_iList = boundary->get_innerList_level_joined();
-    size_t* d_bList = boundary->get_boundaryList_level_joined();
+    size_t* d_iList = boundary->get_inner_list_level_joined();
+    size_t* d_bList = boundary->get_boundary_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize])
 {
-    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out->GetLevel());
-    const size_t Nz = domain->get_Nz(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->get_level());
+    const size_t Nz = domain->get_Nz(out->get_level());
 
-    const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out->GetLevel());
-    const real dz = domain->get_dz(out->GetLevel());
+    const real dx = domain->get_dx(out->get_level()); //due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out->get_level());
+    const real dz = domain->get_dz(out->get_level());
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -93,7 +96,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
     while (res > tol_res && it < max_it) {
         colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, dsign, w, sync);
-        boundary->applyBoundary(d_out, type, sync);
+        boundary->apply_boundary(d_out, type, sync);
 
         sum = 0;
 
@@ -104,7 +107,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
                     - alpha_y * (d_out[i + Nx] + d_out[i - Nx])\
                     - alpha_z * (d_out[i + Nx * Ny] + d_out[i - Nx * Ny])\
                     + rbeta * d_out[i] - d_b[i]);
-            //TODO: find a way to exclude obstacle indices! Jacobi now uses res=D*(out-in)
+            // TODO: find a way to exclude obstacle indices! Jacobi now uses res=D*(out-in)
             sum += res * res;
         }
 
@@ -113,21 +116,19 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
         it++;
     } //end while
 
-    if (sync)
-{
+    if (sync) {
 //#pragma acc wait
     }
 
 #ifndef BENCHMARKING
-    std::cout << "Number of iterations:" << it << std::endl;
-    std::cout << "Colored Gauss-Seidel ||res|| = " << res << "\n";
-    //TODO Logger
+    m_logger->info("Number of iterations: {}", it);
+    m_logger->info("Colored Gauss-Seidel ||res|| = {:.5e}", res);
 #endif
 } //end data region
-};
+}
 
-//=============================== Turbulent version ======================================
-// ***************************************************************************************
+// ===================== Turbulent version ============================
+// ************************************************************************
 /// \brief  solves Diffusion equation \f$ \partial_t \phi_2 = \nu_{eff} \ nabla^2 \phi_2 \f$
 ///         via calculated iterations of CGS step (dependent on residual/ maximal iterations)
 /// \param  out         output pointer
@@ -136,13 +137,12 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 /// \param  D           diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  EV          eddy viscosity (nu_turb)
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+// ************************************************************************
 void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D, const Field *EV, bool sync) {
-
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    auto bsize = domain->get_size(out->GetLevel());
-    FieldType type = out->GetType();
+    auto bsize = domain->get_size(out->get_level());
+    FieldType type = out->get_type();
 
     auto d_out  = out->data;
     auto d_b    = b->data;
@@ -150,21 +150,21 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
     auto boundary = BoundaryController::getInstance();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
-    size_t* d_iList = boundary->get_innerList_level_joined();
-    size_t* d_bList = boundary->get_boundaryList_level_joined();
+    size_t* d_iList = boundary->get_inner_list_level_joined();
+    size_t* d_bList = boundary->get_boundary_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize], d_EV[:bsize])
 {
-    const size_t Nx = domain->get_Nx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out->GetLevel());
-    const size_t Nz = domain->get_Nz(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level()); //due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny(out->get_level());
+    const size_t Nz = domain->get_Nz(out->get_level());
 
-    const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out->GetLevel());
-    const real dz = domain->get_dz(out->GetLevel());
+    const real dx = domain->get_dx(out->get_level()); //due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out->get_level());
+    const real dz = domain->get_dz(out->get_level());
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -185,7 +185,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
     while (res > tol_res && it < max_it) {
         colored_gauss_seidel_step(out, b, dsign, w, D, EV, dt, sync);
-        boundary->applyBoundary(d_out, type, sync);
+        boundary->apply_boundary(d_out, type, sync);
 
         sum = 0;
 
@@ -210,21 +210,19 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
     } //end while
 
-    if (sync)
-{
+    if (sync) {
 //#pragma acc wait
     }
 
 #ifndef BENCHMARKING
-    std::cout << "Number of iterations:" << it << std::endl;
-    std::cout << "Colored Gauss-Seidel ||res|| = " << res << "\n";
-    //TODO Logger
+    m_logger->info("Number of iterations: {}", it);
+    m_logger->info("Colored Gauss-Seidel ||res|| = {.5e}", res);
 #endif
-} //end data region
-};
+    }  // end data region
+}
 
-//=============================== Iteration step ======================================
-// ***************************************************************************************
+//========================== Iteration step =================================
+// *****************************************************************************
 /// \brief  applies single CGS step on red-black grid
 /// \param  out      output pointer
 /// \param  b        source pointer
@@ -242,19 +240,19 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
 
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    const size_t nx = domain->get_Nx(out->GetLevel());
-    const size_t ny = domain->get_Ny(out->GetLevel());
-    const size_t nz = domain->get_Nz(out->GetLevel());
+    const size_t nx = domain->get_Nx(out->get_level());
+    const size_t ny = domain->get_Ny(out->get_level());
+    const size_t nz = domain->get_Nz(out->get_level());
 
-    const size_t bsize = domain->get_size(out->GetLevel());
+    const size_t bsize = domain->get_size(out->get_level());
 
     auto d_out = out->data;
     auto d_b = b->data;
 
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize]) async
 {
-//TODO: exclude obstacles!
-    //red
+    // TODO: exclude obstacles!
+    // red
 //#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < nz - 1; k += 2) {
         for (size_t j = 1; j < ny - 1; j += 2) {
@@ -329,10 +327,10 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
 } //end data region
 
 //#pragma acc wait
-};
+}
 
-//======================== Turbulent version of iteration step ===========================
-// ***************************************************************************************
+// ============== Turbulent version of iteration step =================
+// *****************************************************************************
 /// \brief  applies single CGS step on red-black grid
 /// \param  out      output pointer
 /// \param  b        source pointer
@@ -347,19 +345,19 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
 
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    const size_t Nx = domain->get_Nx(out->GetLevel());
-    const size_t Ny = domain->get_Ny(out->GetLevel());
-    const size_t Nz = domain->get_Nz(out->GetLevel());
+    const size_t Nx = domain->get_Nx(out->get_level());
+    const size_t Ny = domain->get_Ny(out->get_level());
+    const size_t Nz = domain->get_Nz(out->get_level());
 
-    const real dx = domain->get_dx(out->GetLevel()); //due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out->GetLevel());
-    const real dz = domain->get_dz(out->GetLevel());
+    const real dx = domain->get_dx(out->get_level()); //due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy(out->get_level());
+    const real dz = domain->get_dz(out->get_level());
 
     const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
     const real rdy = 1. / dy;
     const real rdz = 1. / dz;
 
-    size_t bsize = domain->get_size(out->GetLevel());
+    size_t bsize = domain->get_size(out->get_level());
 
     real aX, aY, aZ, bb, rb; //multipliers calculated
 
@@ -367,11 +365,10 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
     auto d_b    = b->data;
     auto d_EV   = EV->data;
 
-//TODO: exclude obstacles!
+// TODO: exclude obstacles!
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize], d_EV[:bsize]) async
 {
-
-    //red
+    // red
 //#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
@@ -426,11 +423,11 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
             }
         }
     }
-} //end data region
+} // end data region
 //#pragma acc wait
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize], d_EV[:bsize]) async
 {
-    //black
+    // black
 //#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
@@ -491,12 +488,12 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(Field *out, const Fiel
             }
         }
     }
-} //end data region
+} // end data region
 //#pragma acc wait
-};
+}
 
-//=================================== CGS stencil ========================================
-// ***************************************************************************************
+// ========================= CGS stencil ==============================
+// ************************************************************************
 /// \brief  single CGS step
 /// \param  i        index in x-direction
 /// \param  j        index in y-direction

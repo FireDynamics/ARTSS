@@ -9,7 +9,8 @@
 #define ARTSS_DIFFUSION_JACOBIDIFFUSE_H_
 
 #include "../interfaces/IDiffusion.h"
-#include "../Field.h"
+#include "../field/Field.h"
+#include "../utility/Utility.h"
 
 class JacobiDiffuse : public IDiffusion {
 public:
@@ -23,6 +24,9 @@ public:
     static void JacobiStep(Field *out, const Field *in, const Field *b, real dsign, real w, real D, const Field *EV, real dt, bool sync = true); // turbulent version
 
 private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
     real m_dt;
     real m_dsign;
     real m_w;

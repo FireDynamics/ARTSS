@@ -43,8 +43,8 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    size_t bsize = domain->get_size(out->GetLevel());
-    FieldType type = out->GetType();
+    size_t bsize = domain->get_size(out->get_level());
+    FieldType type = out->get_type();
 
     auto d_out = out->data;
     auto d_in = in->data;
@@ -54,42 +54,42 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
 
     auto boundary = BoundaryController::getInstance();
 
-    auto bsize_i = boundary->getSize_innerList();
-    size_t *d_iList = boundary->get_innerList_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
 
-#pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize])
+#pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize], d_iList[:bsize_i])
     {
-        const size_t Nx = domain->get_Nx(out->GetLevel());    // due to unnecessary parameter passing of *this
-        const size_t Ny = domain->get_Ny(out->GetLevel());
+        const size_t Nx = domain->get_Nx(out->get_level());
+        const size_t Ny = domain->get_Ny(out->get_level());
 
-        const real dx = domain->get_dx(out->GetLevel());    // due to unnecessary parameter passing of *this
-        const real dy = domain->get_dy(out->GetLevel());
-        const real dz = domain->get_dz(out->GetLevel());
-
-        const real rdx = 1. / dx;        // due to unnecessary parameter passing of *this
-        const real rdy = 1. / dy;
-        const real rdz = 1. / dz;
+        const real dx = domain->get_dx(out->get_level());
+        const real dy = domain->get_dy(out->get_level());
+        const real dz = domain->get_dz(out->get_level());
 
         const real dt = m_dt;
 
-        const real dtx = dt * rdx;
-        const real dty = dt * rdy;
-        const real dtz = dt * rdz;
+        const real dtx = dt / dx;
+        const real dty = dt / dy;
+        const real dtz = dt / dz;
+
+        const real epsilon_x = 1e-6; //dx / dt;
+        const real epsilon_y = 1e-6; //dy / dt;
+        const real epsilon_z = 1e-6; //dz / dt;
 
         // start indices for computational domain of inner cells
-        long int i_start = static_cast<long int> (domain->get_index_x1());
-        long int j_start = static_cast<long int> (domain->get_index_y1());
-        long int k_start = static_cast<long int> (domain->get_index_z1());
-        long int i_end = static_cast<long int> (domain->get_index_x2());
-        long int j_end = static_cast<long int> (domain->get_index_y2());
-        long int k_end = static_cast<long int> (domain->get_index_z2());
+        auto i_start = static_cast<long int> (domain->get_index_x1());
+        auto j_start = static_cast<long int> (domain->get_index_y1());
+        auto k_start = static_cast<long int> (domain->get_index_z1());
+        auto i_end = static_cast<long int> (domain->get_index_x2());
+        auto j_end = static_cast<long int> (domain->get_index_y2());
+        auto k_end = static_cast<long int> (domain->get_index_z2());
 
-#pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize], d_iList[:bsize_i]) async
+#pragma acc loop independent
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_iList[l];
-            const long int k = static_cast<long int> (getCoordinateK(idx, Nx, Ny));
-            const long int j = static_cast<long int> (getCoordinateJ(idx, Nx, Ny, k));
-            const long int i = static_cast<long int> (getCoordinateI(idx, Nx, Ny, j, k));
+            auto k = static_cast<long int> (getCoordinateK(idx, Nx, Ny));
+            auto j = static_cast<long int> (getCoordinateJ(idx, Nx, Ny, k));
+            auto i = static_cast<long int> (getCoordinateI(idx, Nx, Ny, j, k));
 
             // TODO: backtracking may be outside the computational region, it is not a reasonable solution to cut the vector; idea: enlarge ghost cell to CFL*dx
             // Linear Trace Back
@@ -98,48 +98,48 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             real Ck = dtz * d_w_vel[idx];
 
             // Calculation of horizontal indices and interpolation weights
-            long int i0;
-            long int i1;
-            real r;
+            long int i0 = i;
+            long int i1 = i;
+            real r = 1;
 
-            if (Ci > 0) {
+            if (Ci > epsilon_x) {
                 i0 = std::max(i_start, (i - static_cast<long int>(Ci)));
                 i1 = i0 - 1;
-                r = fabs(fmod(Ci, 1));
-            } else {
-                i1 = std::min(i_end, i - static_cast<long int>(Ci));
-                i0 = i1 + 1;
-                r = 1 - fabs(fmod(Ci, 1));
+                r = fmod(Ci, 1);  // closer to i1 if r is closer to 1
+            } else if (Ci < -epsilon_x) {
+                i0 = std::min(i_end, i - static_cast<long int>(Ci));
+                i1 = i0 + 1;
+                r = fmod(-Ci, 1);  // closer to i1 if r is closer to 1
             }
 
             // Calculation of vertical indices and interpolation weights
-            long int j0;
-            long int j1;
-            real s;
+            long int j0 = j;
+            long int j1 = j;
+            real s = 1;
 
-            if (Cj > 0) {
+            if (Cj > epsilon_y) {
                 j0 = std::max(j_start, j - static_cast<long int>(Cj));
                 j1 = j0 - 1;
-                s = fabs(fmod(Cj, 1));
-            } else {
-                j1 = std::min(j_end, j - static_cast<long int>(Cj));
-                j0 = j1 + 1;
-                s = 1 - fabs(fmod(Cj, 1));
+                s = fmod(Cj, 1);
+            } else if (Cj < -epsilon_y){
+                j0 = std::min(j_end, j - static_cast<long int>(Cj));
+                j1 = j0 + 1;
+                s = fmod(-Cj, 1);
             }
 
             // Calculation of depth indices and interpolation weights
-            long int k0;
-            long int k1;
-            real t;
+            long int k0 = k;
+            long int k1 = k;
+            real t = 1;
 
-            if (Ck > 0) {
+            if (Ck > epsilon_z) {
                 k0 = std::max(k_start, k - static_cast<long int>(Ck));
                 k1 = k0 - 1;
-                t = fabs(fmod(Ck, 1));
-            } else {
-                k1 = std::min(k_end, k - static_cast<long int>(Ck));
-                k0 = k1 + 1;
-                t = 1 - fabs(fmod(Ck, 1));
+                t = fmod(Ck, 1);
+            } else if (Ck < -epsilon_z) {
+                k0 = std::min(k_end, k - static_cast<long int>(Ck));
+                k1 = k0 + 1;
+                t = fmod(-Ck, 1);
             }
 
             // Trilinear Interpolation
@@ -166,17 +166,23 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
 
             size_t idx_111 = IX(i1, j1, k1, Nx, Ny);
             auto d_111 = d_in[idx_111];
-            d_out[idx] = (1. - t) * ((1. - s) * ((1. - r) * d_000 + r * d_100)
-                                          + s * ((1. - r) * d_010 + r * d_110))
-                              + t * ((1. - s) * ((1. - r) * d_001 + r * d_101)
-                                          + s * ((1. - r) * d_011 + r * d_111)); // row-major
-        }
 
-        boundary->applyBoundary(d_out, type, sync);
+            auto r100 = d_000 + r * (d_100 - d_000);
+            auto r110 = d_010 + r * (d_110 - d_010);
+            auto r101 = d_001 + r * (d_101 - d_001);
+            auto r111 = d_011 + r * (d_111 - d_011);
+
+            auto s110 = r100 + s * (r110 - r100);
+            auto s111 = r101 + s * (r111 - r101);
+
+            auto tmp = s110 + t * (s111 - s110);  // row-major
+            d_out[idx] = tmp;
+        }
+        boundary->apply_boundary(d_out, type, sync);
 
         if (sync) {
 #pragma acc wait
         }
-
-    }// end data region
+    }  // end data region
 }
+

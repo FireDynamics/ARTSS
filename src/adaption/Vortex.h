@@ -12,7 +12,7 @@
 
 class Vortex : public IAdaptionFunction {
 public:
-    explicit Vortex(ISolver *solver);
+    explicit Vortex(FieldController *field_controller);
 
     bool update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
     void apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;

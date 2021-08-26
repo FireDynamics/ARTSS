@@ -1,109 +1,108 @@
-/// \file 		BoundaryData.cpp
-/// \brief 		Data class for boundary data
-/// \date 		Oct 08, 2020
-/// \author 	My Linh Würzburger
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
-#include <iostream>
+/// \file       BoundaryData.cpp
+/// \brief      Data class for boundary data
+/// \date       Oct 08, 2020
+/// \author     My Linh Würzburger
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 #include "BoundaryData.h"
 #include "../Domain.h"
 #include "../utility/Utility.h"
-#include "../utility/GlobalMacrosTypes.h"
 
-inline static const std::vector<std::string> FieldTypeNames = {"rho", "u", "v", "w", "p", "T"};
-inline static const std::vector<std::string> PatchNames = {"front", "back", "bottom", "top", "left", "right"};
-inline static const std::vector<std::string> BoundaryConditionNames = {"neumann", "dirichlet", "periodic"};
+inline static const std::vector<std::string> field_type_names = {"rho", "u", "v", "w", "p", "T"};
+inline static const std::vector<std::string> patch_names = {"front", "back", "bottom", "top", "left", "right"};
+inline static const std::vector<std::string> boundary_condition_names = {"neumann", "dirichlet", "periodic"};
 
 BoundaryData::BoundaryData() {
-    m_values = new real[numberOfPatches];
-    m_boundaryConditions = new BoundaryCondition[numberOfPatches];
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
+    m_values = new real[number_of_patches];
+    m_boundary_conditions = new BoundaryCondition[number_of_patches];
 }
 
 BoundaryData::~BoundaryData() {
     delete[] m_values;
-    delete[] m_boundaryConditions;
+    delete[] m_boundary_conditions;
 }
 
-//====================================== Print =================================
-// *******************************************************************************
+//====================================== Print =====================================================
+// *************************************************************************************************
 /// \brief  Print boundary infos
-// *******************************************************************************
+// *************************************************************************************************
 void BoundaryData::print() {
-    for (size_t i = 0; i < numberOfPatches; i++) {
-        std::cout << "\t Patch " << getPatchName(static_cast<Patch>(i)) << " with " << getBoundaryConditionName(m_boundaryConditions[i]) << " " << m_values[i] << std::endl;
+#ifndef BENCHMARKING
+    for (size_t i = 0; i < number_of_patches; i++) {
+        std::string p = get_patch_name(static_cast<Patch>(i));
+        std::string bc = get_boundary_condition_name(m_boundary_conditions[i]);
+        real val = m_values[i];
+        m_logger->info("\t Patch {} with {} {}", p, bc, val);
     }
-    //TODO print boundaries
+#endif
 }
 
-//====================================== Matches =================================
-// *******************************************************************************
-/// \brief  matches string to FieldTypeNames
-/// \param	s			string to be matched
-// *******************************************************************************
-FieldType BoundaryData::matchField(const std::string &s) {
-
-    for (auto fn = 0; fn < FieldTypeNames.size(); fn++) {
-        if (FieldTypeNames[fn] == s) return (FieldType) fn;
+//====================================== Matches ===================================================
+// *************************************************************************************************
+/// \brief  matches string to field_type_names
+/// \param  string           string to be matched
+// *************************************************************************************************
+FieldType BoundaryData::match_field(const std::string &string) {
+    for (size_t fn = 0; fn < field_type_names.size(); fn++) {
+        if (field_type_names[fn] == string) return (FieldType) fn;
     }
-
-    std::cout << "unknown field found -> exit" << std::endl;
-    std::flush(std::cout);
-    std::exit(1);
+    return UNKNOWN_FIELD;
 }
 
-// *******************************************************************************
-/// \brief  matches string to PatchNames
-/// \param	s			string to be matched
-// *******************************************************************************
-Patch BoundaryData::matchPatch(const std::string &s) {
-    for (auto pn = 0; pn < PatchNames.size(); pn++) {
-        if (PatchNames[pn] == s) return (Patch) pn;
+// *************************************************************************************************
+/// \brief  matches string to patch_names
+/// \param  string           string to be matched
+// *************************************************************************************************
+Patch BoundaryData::match_patch(const std::string &string) {
+    for (size_t pn = 0; pn < patch_names.size(); pn++) {
+        if (patch_names[pn] == string) return (Patch) pn;
     }
-
-    std::cout << "unknown patch found -> exit" << std::endl;
-    std::flush(std::cout);
-    std::exit(1);
+    return UNKNOWN_PATCH;
 }
 
-// *******************************************************************************
-/// \brief  matches string to BoundaryConditionNames
-/// \param	s			string to be matched
-// *******************************************************************************
-BoundaryCondition BoundaryData::matchBoundaryCondition(const std::string &s) {
-    for (auto tn = 0; tn < BoundaryConditionNames.size(); tn++) {
-        if (BoundaryConditionNames[tn] == s) return (BoundaryCondition) tn;
+// *************************************************************************************************
+/// \brief  matches string to boundary_condition_names
+/// \param  string           string to be matched
+// *************************************************************************************************
+BoundaryCondition BoundaryData::match_boundary_condition(const std::string &string) {
+    for (size_t tn = 0; tn < boundary_condition_names.size(); tn++) {
+        if (boundary_condition_names[tn] == string) return static_cast<BoundaryCondition>(tn);
     }
-
-    std::cout << "unknown BC type found -> exit" << std::endl;
-    std::flush(std::cout);
-    std::exit(1);
+    return UNKNOWN_CONDITION;
 }
 
-std::string BoundaryData::getFieldTypeName(FieldType f) {
-    return FieldTypeNames[f];
+std::string BoundaryData::get_field_type_name(FieldType f) {
+    return field_type_names[f];
 }
 
-std::string BoundaryData::getBoundaryConditionName(BoundaryCondition bc) {
-    return BoundaryConditionNames[bc];
+std::string BoundaryData::get_boundary_condition_name(BoundaryCondition bc) {
+    return boundary_condition_names[bc];
 }
 
-std::string BoundaryData::getPatchName(Patch p) {
-    return PatchNames[p];
+std::string BoundaryData::get_patch_name(Patch p) {
+    return patch_names[p];
 }
 
-//=============================== Add boundary condition=========================
-// *******************************************************************************
+//=============================== Add boundary condition============================================
+// *************************************************************************************************
 /// \brief  Add boundary condition
-/// \param	patches Corresponding patches of boundary condition
+/// \param  patches Corresponding patches of boundary condition
 /// \param value boundary condition value
 /// \param boudnaryCondition boundary condition
-// *******************************************************************************
-void BoundaryData::addBoundaryCondition(const std::vector<Patch> &patches, real value, BoundaryCondition boundaryCondition) {
+// *************************************************************************************************
+void BoundaryData::add_boundary_condition(
+        const std::vector<Patch> &patches,
+        real value,
+        BoundaryCondition boundary_condition) {
     if (!patches.empty()) {
-        m_hasValues = true;
+        m_has_values = true;
     }
-    for (Patch patch: patches) {
+    for (Patch patch : patches) {
         size_t p = patch;
         *(m_values + p) = value;
-        *(m_boundaryConditions + p) = boundaryCondition;
+        *(m_boundary_conditions + p) = boundary_condition;
     }
 }
+

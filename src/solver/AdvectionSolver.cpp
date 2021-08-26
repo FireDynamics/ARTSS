@@ -4,15 +4,17 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-
 #include "AdvectionSolver.h"
 #include "../interfaces/IAdvection.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
 
-AdvectionSolver::AdvectionSolver() {
+AdvectionSolver::AdvectionSolver(FieldController *field_controlller) {
+#ifndef BENCHMARKING
+     m_logger = Utility::create_logger(typeid(this).name());
+#endif
+    m_field_controller = field_controlller;
 
     auto params = Parameters::getInstance();
     std::string advectionType = params->get("solver/advection/type");
@@ -34,7 +36,7 @@ AdvectionSolver::AdvectionSolver() {
     auto d_v_lin = v_lin->data;
     auto d_w_lin = w_lin->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u_linm->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u_linm->get_level());
 
 #pragma acc enter data copyin(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize])
     control();
@@ -47,7 +49,7 @@ AdvectionSolver::~AdvectionSolver() {
     auto d_v_lin = v_linm->data;
     auto d_w_lin = w_linm->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u_linm->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u_linm->get_level());
 
 #pragma acc exit data delete(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize])
 
@@ -64,12 +66,12 @@ AdvectionSolver::~AdvectionSolver() {
 // ***************************************************************************************
 void AdvectionSolver::do_step(real t, bool sync) {
   // local variables and parameters for GPU
-    auto u = ISolver::u;
-    auto v = ISolver::v;
-    auto w = ISolver::w;
-    auto u0 = ISolver::u0;
-    auto v0 = ISolver::v0;
-    auto w0 = ISolver::w0;
+    auto u = m_field_controller->field_u;
+    auto v = m_field_controller->field_v;
+    auto w = m_field_controller->field_w;
+    auto u0 = m_field_controller->field_u0;
+    auto v0 = m_field_controller->field_v0;
+    auto w0 = m_field_controller->field_w0;
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -86,14 +88,13 @@ void AdvectionSolver::do_step(real t, bool sync) {
     auto d_v_lin = v_lin->data;
     auto d_w_lin = w_lin->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->get_level());
 
 #pragma acc data present(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize], d_u[:bsize], d_u0[:bsize], d_v[:bsize], d_v0[:bsize], d_w[:bsize], d_w0[:bsize])
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        std::cout << "Advect ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Advect ...");
 #endif
         adv->advect(u, u0, u_lin, v_lin, w_lin, sync);
         adv->advect(v, v0, u_lin, v_lin, w_lin, sync);
@@ -108,9 +109,11 @@ void AdvectionSolver::do_step(real t, bool sync) {
 void AdvectionSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/advection/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger(typeid(AdvectionSolver).name());
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }

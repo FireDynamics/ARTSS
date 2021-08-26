@@ -10,26 +10,26 @@
 
 static std::string ending = ".vtk";
 
-void VTKWriter::write_numerical(ISolver *solver, const std::string& filename) {
-    auto u = solver->get_u();
-    auto v = solver->get_v();
-    auto w = solver->get_w();
-    auto p = solver->get_p();
-    auto div = solver->get_rhs();
-    auto T = solver->get_T();
-    auto C = solver->get_concentration();
-    auto s = solver->get_sight();
-    auto nu_t = solver->get_nu_t();
-    auto S_T = solver->get_S_T();
+void VTKWriter::write_numerical(const FieldController& field_controller, const std::string& filename) {
+    auto u = field_controller.get_field_u_data();
+    auto v = field_controller.get_field_v_data();
+    auto w = field_controller.get_field_w_data();
+    auto p = field_controller.get_field_p_data();
+    auto div = field_controller.get_field_rhs_data();
+    auto T = field_controller.get_field_T_data();
+    auto C = field_controller.get_field_concentration_data();
+    auto s = field_controller.get_field_sight_data();
+    auto nu_t = field_controller.get_field_nu_t_data();
+    auto S_T = field_controller.get_field_source_T_data();
     VTKWriter::vtkPrepareAndWrite((filename + ending).c_str(), u, v, w, p, div, T, C, s, nu_t, S_T);
 }
 
-void VTKWriter::write_analytical(Solution *solution, const std::string& filename) {
-    auto u = solution->GetU();
-    auto v = solution->GetV();
-    auto w = solution->GetW();
-    auto p = solution->GetP();
-    auto T = solution->GetT();
+void VTKWriter::write_analytical(const Solution& solution, const std::string& filename) {
+    auto u = solution.GetU();
+    auto v = solution.GetV();
+    auto w = solution.GetW();
+    auto p = solution.GetP();
+    auto T = solution.GetT();
     VTKWriter::vtkPrepareAndWrite((filename + ending).c_str(), u, v, w, p, T);
 }
 
@@ -257,7 +257,7 @@ void VTKWriter::vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v,
                 size_t index = IX(i, j, k, Nx, Ny);
                 x_centres[index] = x_coords[i] + static_cast<float> (0.5 * dx);
                 y_centres[index] = y_coords[j] + static_cast<float> (0.5 * dy);
-                z_centres[index] = z_coords[j] + static_cast<float> (0.5 * dz);
+                z_centres[index] = z_coords[k] + static_cast<float> (0.5 * dz);
                 u_vel[index] = static_cast<float>(u[index]);
                 v_vel[index] = static_cast<float>(v[index]);
                 w_vel[index] = static_cast<float>(w[index]);

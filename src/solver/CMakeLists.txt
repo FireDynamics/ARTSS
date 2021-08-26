@@ -1,0 +1,30 @@
+target_sources(artss
+    PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/AdvectionSolver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/AdvectionSolver.h
+        ${CMAKE_CURRENT_LIST_DIR}/AdvectionDiffusionSolver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/AdvectionDiffusionSolver.h
+        ${CMAKE_CURRENT_LIST_DIR}/DiffusionSolver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/DiffusionSolver.h
+        ${CMAKE_CURRENT_LIST_DIR}/DiffusionTurbSolver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/DiffusionTurbSolver.h
+        ${CMAKE_CURRENT_LIST_DIR}/NSSolver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/NSSolver.h
+        ${CMAKE_CURRENT_LIST_DIR}/NSTurbSolver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/NSTurbSolver.h
+        ${CMAKE_CURRENT_LIST_DIR}/NSTempSolver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/NSTempSolver.h
+        ${CMAKE_CURRENT_LIST_DIR}/NSTempConSolver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/NSTempConSolver.h
+        ${CMAKE_CURRENT_LIST_DIR}/NSTempTurbSolver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/NSTempTurbSolver.h
+        ${CMAKE_CURRENT_LIST_DIR}/NSTempTurbConSolver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/NSTempTurbConSolver.h
+        ${CMAKE_CURRENT_LIST_DIR}/PressureSolver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/PressureSolver.h
+        ${CMAKE_CURRENT_LIST_DIR}/SolverSelection.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/SolverSelection.h
+        ${CMAKE_CURRENT_LIST_DIR}/SolverController.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/SolverController.h
+)
+

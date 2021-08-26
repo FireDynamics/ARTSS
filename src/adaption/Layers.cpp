@@ -10,7 +10,7 @@
 #include "../utility/Parameters.h"
 #include "Adaption.h"
 
-Layers::Layers(ISolver *solver) {
+Layers::Layers(FieldController *field_controller) {
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
     m_minimal = static_cast<size_t> (std::pow(2, domain->get_levels()));
@@ -21,13 +21,13 @@ Layers::Layers(ISolver *solver) {
     m_timestep = static_cast<size_t> (params->get_int("adaption/class/timestep"));
     m_expansion_size = static_cast<size_t> (params->get_int("adaption/class/expansion_size"));
 
-    m_T = solver->T;
-    m_Ta = solver->T_ambient;
+    m_T = field_controller->field_T;
+    m_Ta = field_controller->field_T_ambient;
 
-    m_Nu = solver->nu_t;
+    m_Nu = field_controller->field_nu_t;
 
-    m_kappa = solver->kappa_t;
-    m_gamma = solver->gamma_t;
+    m_kappa = field_controller->field_kappa_t;
+    m_gamma = field_controller->field_gamma_t;
 
     //if (params->get("adaption/version") == "CPU"){
     //    m_fctP_adapt = adapt_x_direction_serial;

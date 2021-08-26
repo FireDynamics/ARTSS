@@ -1,10 +1,8 @@
-/// \file 		NSTempTurbConSolver.cpp
-/// \brief 		Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
-/// \date 		Oct 02, 2017
-/// \author 	Küsters
-/// \copyright 	<2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
-
-#include <iostream>
+/// \file       NSTempTurbConSolver.cpp
+/// \brief      Defines the (fractional) steps to solve the incompressible Navier-Stokes equations with force f(T), turbulence and concentration C
+/// \date       Oct 02, 2017
+/// \author     Küsters
+/// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "NSTempTurbConSolver.h"
 #include "../pressure/VCycleMG.h"
@@ -13,7 +11,11 @@
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 
-NSTempTurbConSolver::NSTempTurbConSolver() {
+NSTempTurbConSolver::NSTempTurbConSolver(FieldController *field_controller) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
+    m_field_controller = field_controller;
 
     auto params = Parameters::getInstance();
 
@@ -45,7 +47,7 @@ NSTempTurbConSolver::NSTempTurbConSolver() {
     m_gamma = params->get_real("solver/concentration/diffusion/gamma");
 
     // Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), p, rhs);
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), m_field_controller->field_p, m_field_controller->field_rhs);
 
     // Source of velocity
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
@@ -84,40 +86,39 @@ NSTempTurbConSolver::~NSTempTurbConSolver() {
 //====================================== do_step =================================
 // ***************************************************************************************
 /// \brief  brings all calculation steps together into one function
-/// \param	dt			time step
-/// \param  sync		synchronization boolean (true=sync (default), false=async)
+/// \param  dt          time step
+/// \param  sync        synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSTempTurbConSolver::do_step(real t, bool sync) {
-
     auto params = Parameters::getInstance();
 
     // local variables and parameters for GPU
-    auto u = ISolver::u;
-    auto v = ISolver::v;
-    auto w = ISolver::w;
-    auto u0 = ISolver::u0;
-    auto v0 = ISolver::v0;
-    auto w0 = ISolver::w0;
-    auto u_tmp = ISolver::u_tmp;
-    auto v_tmp = ISolver::v_tmp;
-    auto w_tmp = ISolver::w_tmp;
-    auto p = ISolver::p;
-    auto p0 = ISolver::p0;
-    auto rhs = ISolver::rhs;
-    auto T = ISolver::T;
-    auto T0 = ISolver::T0;
-    auto T_tmp = ISolver::T_tmp;
-    auto C = ISolver::concentration;
-    auto C0 = ISolver::concentration0;
-    auto C_tmp = ISolver::concentration_tmp;
-    auto f_x = ISolver::f_x;
-    auto f_y = ISolver::f_y;
-    auto f_z = ISolver::f_z;
-    auto S_T = ISolver::S_T;
-    auto S_C = ISolver::S_concentration;
-    auto nu_t = ISolver::nu_t;            //nu_t - Eddy Viscosity
-    auto kappa_t = ISolver::kappa_t;        //kappa_t - Eddy thermal diffusivity
-    auto gamma_t = ISolver::gamma_t;        //gamma_t - Eddy mass diffsusivity
+    auto u = m_field_controller->field_u;
+    auto v = m_field_controller->field_v;
+    auto w = m_field_controller->field_w;
+    auto u0 = m_field_controller->field_u0;
+    auto v0 = m_field_controller->field_v0;
+    auto w0 = m_field_controller->field_w0;
+    auto u_tmp = m_field_controller->field_u_tmp;
+    auto v_tmp = m_field_controller->field_v_tmp;
+    auto w_tmp = m_field_controller->field_w_tmp;
+    auto p = m_field_controller->field_p;
+    auto p0 = m_field_controller->field_p0;
+    auto rhs = m_field_controller->field_rhs;
+    auto T = m_field_controller->field_T;
+    auto T0 = m_field_controller->field_T0;
+    auto T_tmp = m_field_controller->field_T_tmp;
+    auto C = m_field_controller->field_concentration;
+    auto C0 = m_field_controller->field_concentration0;
+    auto C_tmp = m_field_controller->field_concentration_tmp;
+    auto f_x = m_field_controller->field_force_x;
+    auto f_y = m_field_controller->field_force_y;
+    auto f_z = m_field_controller->field_force_z;
+    auto S_T = m_field_controller->field_source_T;
+    auto S_C = m_field_controller->field_source_concentration;
+    auto nu_t = m_field_controller->field_nu_t;            //nu_t - Eddy Viscosity
+    auto kappa_t = m_field_controller->field_kappa_t;        //kappa_t - Eddy thermal diffusivity
+    auto gamma_t = m_field_controller->field_gamma_t;        //gamma_t - Eddy mass diffsusivity
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -146,7 +147,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
     auto d_kappa_t = kappa_t->data;
     auto d_gamma_t = gamma_t->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->get_level());
 
     auto nu = m_nu;
     auto kappa = m_kappa;
@@ -160,44 +161,40 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
-        std::cout << "Advect ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Advect ...");
 #endif
         adv_vel->advect(u, u0, u0, v0, w0, sync);
         adv_vel->advect(v, v0, u0, v0, w0, sync);
         adv_vel->advect(w, w0, u0, v0, w0, sync);
 
         // Couple velocity to prepare for diffusion
-        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 2. Solve turbulent diffusion equation
 #ifndef BENCHMARKING
-        std::cout << "Calculating Turbulent viscosity ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Calculating Turbulent viscosity ...");
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
 
 #ifndef BENCHMARKING
-        std::cout << "Diffuse ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Diffuse ...");
 #endif
         dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
         dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
 
         // Couple data to prepare for adding source
-        ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 3. Add force
         if (m_forceFct != SourceMethods::Zero) {
 #ifndef BENCHMARKING
-            std::cout << "Add momentum source ..." << std::endl;
-            //TODO Logger
+            m_logger->info("Add momentum source ...");
 #endif
             sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
 
             // Couple data to prepare for adding source
-            ISolver::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+            FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
 // 4. Solve pressure equation and project
@@ -206,8 +203,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
         // Solve pressure equation
 #ifndef BENCHMARKING
-        std::cout << "Pressure ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);
 
@@ -218,13 +214,12 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
         // Solve advection equation
 #ifndef BENCHMARKING
-        std::cout << "Advect Temperature ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Advect Temperature ...");
 #endif
         adv_temp->advect(T, T0, u, v, w, sync);
 
         // Couple temperature to prepare for diffusion
-        ISolver::couple_scalar(T, T0, T_tmp, sync);
+        FieldController::couple_scalar(T, T0, T_tmp, sync);
 
         // Solve diffusion equation
         // turbulence
@@ -238,25 +233,23 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
             }
 
 #ifndef BENCHMARKING
-            std::cout << "Diffuse turbulent Temperature ..." << std::endl;
-            //TODO Logger
+            m_logger->info("Diffuse turbulent Temperature ...");
 #endif
             dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
 
             // Couple temperature to prepare for adding source
-            ISolver::couple_scalar(T, T0, T_tmp, sync);
+            FieldController::couple_scalar(T, T0, T_tmp, sync);
         } else {
             // no turbulence
             if (kappa != 0.) {
 
 #ifndef BENCHMARKING
-                std::cout << "Diffuse Temperature ..." << std::endl;
-                //TODO Logger
+                m_logger->info("Diffuse Temperature ...");
 #endif
                 dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
 
                 // Couple temperature to prepare for adding source
-                ISolver::couple_scalar(T, T0, T_tmp, sync);
+                FieldController::couple_scalar(T, T0, T_tmp, sync);
             }
         }
 
@@ -264,39 +257,36 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
         if (m_has_dissipation) {
 
 #ifndef BENCHMARKING
-            std::cout << "Add dissipation ..." << std::endl;
-            //TODO Logger
+            m_logger->info("Add dissipation ...");
 #endif
             sou_temp->dissipate(T, u, v, w, sync);
 
             // Couple temperature
-            ISolver::couple_scalar(T, T0, T_tmp, sync);
+            FieldController::couple_scalar(T, T0, T_tmp, sync);
         }
 
             // Add source
         else if (m_tempFct != SourceMethods::Zero) {
 
 #ifndef BENCHMARKING
-            std::cout << "Add temperature source ..." << std::endl;
-            //TODO Logger
+            m_logger->info("Add temperature source ...");
 #endif
             sou_temp->add_source(T, S_T, sync);
 
             // Couple temperature
-            ISolver::couple_scalar(T, T0, T_tmp, sync);
+            FieldController::couple_scalar(T, T0, T_tmp, sync);
         }
 
 // 6. Solve Concentration
 
         // Solve advection equation
 #ifndef BENCHMARKING
-        std::cout << "Advect Concentration ..." << std::endl;
-        //TODO Logger
+        m_logger->info("Advect Concentration ...");
 #endif
         adv_con->advect(C, C0, u, v, w, sync);
 
         // Couple concentration to prepare for diffusion
-        ISolver::couple_scalar(C, C0, C_tmp, sync);
+        FieldController::couple_scalar(C, C0, C_tmp, sync);
 
         // Solve diffusion equation
         // turbulence
@@ -308,24 +298,22 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
             for (size_t i = 0; i < bsize; ++i) d_gamma_t[i] = d_nu_t[i] * rSc_T; // gamma_turb = nu_turb/Sc_turb
 
 #ifndef BENCHMARKING
-            std::cout << "Diffuse turbulent Concentration ..." << std::endl;
-            //TODO Logger
+            m_logger->info("Diffuse turbulent Concentration ...");
 #endif
             dif_con->diffuse(C, C0, C_tmp, gamma, gamma_t, sync);
 
             // Couple concentration to prepare for adding source
-            ISolver::couple_scalar(C, C0, C_tmp, sync);
+            FieldController::couple_scalar(C, C0, C_tmp, sync);
         } else {
             // no turbulence
             if (gamma != 0.) {
 #ifndef BENCHMARKING
-                std::cout << "Diffuse Concentration ..." << std::endl;
-                //TODO Logger
+                m_logger->info("Diffuse Concentration ...");
 #endif
                 dif_con->diffuse(C, C0, C_tmp, gamma, sync);
 
                 // Couple concentration to prepare for adding source
-                ISolver::couple_scalar(C, C0, C_tmp, sync);
+                FieldController::couple_scalar(C, C0, C_tmp, sync);
             }
         }
 
@@ -333,13 +321,12 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
         if (m_conFct != SourceMethods::Zero) {
 
 #ifndef BENCHMARKING
-            std::cout << "Add concentration source ..." << std::endl;
-            //TODO Logger
+            m_logger->info("Add concentration source ...");
 #endif
             sou_con->add_source(C, S_C, sync);
 
             // Couple concentration
-            ISolver::couple_scalar(C, C0, C_tmp, sync);
+            FieldController::couple_scalar(C, C0, C_tmp, sync);
         }
 
 // 7. Sources updated in Solver::update_sources, TimeIntegration
@@ -356,46 +343,57 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 // ***************************************************************************************
 void NSTempTurbConSolver::control() {
     auto params = Parameters::getInstance();
+#ifndef BENCHMARKING
+    auto logger = Utility::create_logger(typeid(NSTempTurbConSolver).name());
+#endif
+
     if (params->get("solver/advection/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
-    if (params->get("solver/temperature/advection/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+    if (params->get("solver/temperature/advection/field") != BoundaryData::get_field_type_name(FieldType::T)) {
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
-    if (params->get("solver/concentration/advection/field") != BoundaryData::getFieldTypeName(FieldType::RHO)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+    if (params->get("solver/concentration/advection/field") != BoundaryData::get_field_type_name(FieldType::RHO)) {
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
-    if (params->get("solver/temperature/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+    if (params->get("solver/temperature/diffusion/field") != BoundaryData::get_field_type_name(FieldType::T)) {
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
-    if (params->get("solver/concentration/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::RHO)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+    if (params->get("solver/concentration/diffusion/field") != BoundaryData::get_field_type_name(FieldType::RHO)) {
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
-    if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+    if (params->get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
+#ifndef BENCHMARKING
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        // TODO Error handling
     }
 }

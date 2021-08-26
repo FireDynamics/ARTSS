@@ -7,23 +7,31 @@
 #ifndef ARTSS_SOLVER_ADVECTIONDIFFUSIONSOLVER_H_
 #define ARTSS_SOLVER_ADVECTIONDIFFUSIONSOLVER_H_
 
+#include "../field/FieldController.h"
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IAdvection.h"
 #include "../interfaces/IDiffusion.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
 
 class AdvectionDiffusionSolver : public ISolver {
 public:
-  AdvectionDiffusionSolver();
-  ~AdvectionDiffusionSolver() override;
+    AdvectionDiffusionSolver(FieldController *field_controller);
+    ~AdvectionDiffusionSolver();
 
-  void do_step(real t, bool sync) override;
+    void do_step(real t, bool sync) override;
 
 private:
-  IAdvection* adv;
-  IDiffusion* dif;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 
-  real m_nu;
+    IAdvection *adv;
+    IDiffusion *dif;
+
+    FieldController *m_field_controller;
+
+    real m_nu;
 
     static void control();
 };

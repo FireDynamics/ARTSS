@@ -7,22 +7,30 @@
 #ifndef ARTSS_SOLVER_NSTEMPTURBSOLVER_H_
 #define ARTSS_SOLVER_NSTEMPTURBSOLVER_H_
 
-#include "../interfaces/ISolver.h"
+#include <string>
+#include "../field/FieldController.h"
 #include "../interfaces/IAdvection.h"
 #include "../interfaces/IDiffusion.h"
 #include "../interfaces/IPressure.h"
+#include "../interfaces/ISolver.h"
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
 
 class NSTempTurbSolver : public ISolver {
-public:
-    NSTempTurbSolver();
-    ~NSTempTurbSolver() override;
+ public:
+    explicit NSTempTurbSolver(FieldController *fieldController);
+    ~NSTempTurbSolver();
 
     void do_step(real t, bool sync) override;
 
-private:
+ private:
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
+    FieldController *m_field_controller;
+
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
     IAdvection *adv_temp;
@@ -35,7 +43,7 @@ private:
     real m_nu;
     real m_kappa;
 
-    std::string m_dir_vel = "";
+    std::string m_dir_vel;
 
     static void control();
 
@@ -46,3 +54,4 @@ private:
 };
 
 #endif /* ARTSS_SOLVER_NSTEMPTURBSOLVER_H_ */
+

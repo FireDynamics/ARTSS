@@ -4,16 +4,17 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
-
 #include "DiffusionSolver.h"
 #include "../interfaces/IDiffusion.h"
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
 
-DiffusionSolver::DiffusionSolver() {
-
+DiffusionSolver::DiffusionSolver(FieldController *field_controller) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
+    m_field_controller = field_controller;
     auto params = Parameters::getInstance();
     std::string diffusionType = params->get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
@@ -33,21 +34,20 @@ DiffusionSolver::~DiffusionSolver() {
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void DiffusionSolver::do_step(real t, bool sync) {
-
 #ifndef BENCHMARKING
-    std::cout << "Diffuse ..." << std::endl;
+    m_logger->info("Diffuse ...");
 #endif
 // 1. Solve diffusion equation
     // local variables and parameters for GPU
-    auto u = ISolver::u;
-    auto v = ISolver::v;
-    auto w = ISolver::w;
-    auto u0 = ISolver::u0;
-    auto v0 = ISolver::v0;
-    auto w0 = ISolver::w0;
-    auto u_tmp = ISolver::u_tmp;
-    auto v_tmp = ISolver::v_tmp;
-    auto w_tmp = ISolver::w_tmp;
+    auto u = m_field_controller->field_u;
+    auto v = m_field_controller->field_v;
+    auto w = m_field_controller->field_w;
+    auto u0 = m_field_controller->field_u0;
+    auto v0 = m_field_controller->field_v0;
+    auto w0 = m_field_controller->field_w0;
+    auto u_tmp = m_field_controller->field_u_tmp;
+    auto v_tmp = m_field_controller->field_v_tmp;
+    auto w_tmp = m_field_controller->field_w_tmp;
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -59,7 +59,7 @@ void DiffusionSolver::do_step(real t, bool sync) {
     auto d_v_tmp = v_tmp->data;
     auto d_w_tmp = w_tmp->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->GetLevel());
+    size_t bsize = Domain::getInstance()->get_size(u->get_level());
 
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize])
     {
@@ -76,9 +76,11 @@ void DiffusionSolver::do_step(real t, bool sync) {
 void DiffusionSolver::control() {
     auto params = Parameters::getInstance();
     if (params->get("solver/diffusion/field") != "u,v,w") {
-        std::cout << "Fields not specified correctly!" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger(typeid(DiffusionSolver).name());
+        logger->error("Fields not specified correctly!");
+#endif
         std::exit(1);
-        //TODO Error handling + Loggers
+        //TODO Error handling
     }
 }

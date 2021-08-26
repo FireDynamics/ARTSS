@@ -7,13 +7,13 @@
 #ifndef ARTSS_VISUALISATION_VTKWRITER_H
 #define ARTSS_VISUALISATION_VTKWRITER_H
 
-#include "../interfaces/ISolver.h"
 #include "../analysis/Solution.h"
+#include "../field/FieldController.h"
 
 class VTKWriter {
 public:
-    static void write_numerical(ISolver *solver, const std::string& filename);
-    static void write_analytical(Solution *solution, const std::string& filename);
+    static void write_numerical(const FieldController& field_controller, const std::string& filename);
+    static void write_analytical(const Solution& solution, const std::string& filename);
 
 private:
     static void vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t, read_ptr S_T);

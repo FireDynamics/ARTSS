@@ -8,6 +8,7 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
+#include "../visualisation/Visual.h"
 
 //======================================== Divergence ====================================
 // ***************************************************************************************
@@ -28,24 +29,24 @@ void IPressure::divergence(Field *out, const Field *in_x, const Field *in_y, con
     auto d_iny = in_y->data;
     auto d_inz = in_z->data;
 
-    auto Nx = domain->get_Nx(out->GetLevel());
-    auto Ny = domain->get_Ny(out->GetLevel());
-    auto dx = domain->get_dx(out->GetLevel());
-    auto dy = domain->get_dy(out->GetLevel());
-    auto dz = domain->get_dz(out->GetLevel());
+    auto Nx = domain->get_Nx(out->get_level());
+    auto Ny = domain->get_Ny(out->get_level());
+    auto dx = domain->get_dx(out->get_level());
+    auto dy = domain->get_dy(out->get_level());
+    auto dz = domain->get_dz(out->get_level());
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
 
-    auto size = domain->get_size(out->GetLevel());
+    auto size = domain->get_size(out->get_level());
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
 #pragma acc data present(d_out[:size], d_inx[:size], d_iny[:size], d_inz[:size], d_iList[:bsize_i], d_bList[:bsize_b])
     {
@@ -98,28 +99,28 @@ void IPressure::projection(Field *out_u, Field *out_v, Field *out_w, const Field
     auto d_inw = in_w->data;
     auto d_inp = in_p->data;
 
-    auto Nx = domain->get_Nx(out_u->GetLevel());
-    auto Ny = domain->get_Ny(out_u->GetLevel());
+    auto Nx = domain->get_Nx(out_u->get_level());
+    auto Ny = domain->get_Ny(out_u->get_level());
 
-    auto dx = domain->get_dx(out_u->GetLevel());
-    auto dy = domain->get_dy(out_u->GetLevel());
-    auto dz = domain->get_dz(out_u->GetLevel());
+    auto dx = domain->get_dx(out_u->get_level());
+    auto dy = domain->get_dy(out_u->get_level());
+    auto dz = domain->get_dz(out_u->get_level());
 
     auto rdx = 1. / dx;
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
 
-    auto size = domain->get_size(out_u->GetLevel());
+    auto size = domain->get_size(out_u->get_level());
 
-    auto typeu = out_u->GetType();
-    auto typev = out_v->GetType();
-    auto typew = out_w->GetType();
+    auto typeu = out_u->get_type();
+    auto typev = out_v->get_type();
+    auto typew = out_w->get_type();
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc data present(d_outu[:size], d_outv[:size], d_outw[:size], d_inu[:size], d_inv[:size], d_inw[:size], d_inp[:size], d_iList[:bsize_i])
     {
@@ -133,9 +134,9 @@ void IPressure::projection(Field *out_u, Field *out_v, Field *out_w, const Field
         }
 
         //boundaries
-        boundary->applyBoundary(d_outu, typeu, false);
-        boundary->applyBoundary(d_outv, typev, false);
-        boundary->applyBoundary(d_outw, typew, false);
+        boundary->apply_boundary(d_outu, typeu, false);
+        boundary->apply_boundary(d_outv, typev, false);
+        boundary->apply_boundary(d_outw, typew, false);
 
         if (sync) {
 #pragma acc wait

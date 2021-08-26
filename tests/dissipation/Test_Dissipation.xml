@@ -7,22 +7,22 @@
     <kappa> 0. </kappa>  <!-- thermal diffusion -->
   </physical_parameters>
 
-  <solver description = "NSTempSolver" >
-    <advection type = "SemiLagrangian" field = "u,v,w">
+  <solver description="NSTempSolver" >
+    <advection type="SemiLagrangian" field="u,v,w">
     </advection>
-    <diffusion type = "Jacobi" field = "u,v,w">
+    <diffusion type="Jacobi" field="u,v,w">
       <max_iter> 100 </max_iter>  <!-- max number of iterations -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
       <w> 1 </w>  <!-- relaxation parameter -->
     </diffusion>
-    <source type = "ExplicitEuler" force_fct = "Zero" dir = "xyz">  <!-- Direction of force (x,y,z or combinations xy,xz,yz,xyz) -->
+    <source type="ExplicitEuler" force_fct="Zero" dir="xyz">  <!-- Direction of force (x,y,z or combinations xy,xz,yz,xyz) -->
     </source>
-    <pressure type = "VCycleMG" field = "p">
+    <pressure type="VCycleMG" field="p">
       <n_level> 4 </n_level>  <!-- number of restriction levels -->
       <n_cycle> 2 </n_cycle> <!-- number of cycles -->
       <max_cycle> 4 </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
-      <diffusion type = "Jacobi" field = "p">
+      <diffusion type="Jacobi" field="p">
         <n_relax> 4 </n_relax>  <!-- number of iterations -->
         <max_solve> 5 </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
@@ -30,17 +30,17 @@
       </diffusion>
     </pressure>
     <temperature>
-      <advection type = "SemiLagrangian" field = "T">
+      <advection type="SemiLagrangian" field="T">
       </advection>
-      <diffusion type = "Jacobi" field = "T">
+      <diffusion type="Jacobi" field="T">
         <max_iter> 100 </max_iter>
         <tol_res> 1e-07 </tol_res>
         <w> 1 </w>
       </diffusion>
-    <source type = "ExplicitEuler" temp_fct = "Zero" dissipation="No">
+    <source type="ExplicitEuler" temp_fct="Zero" dissipation="No">
     </source>
     </temperature>
-    <solution available = "No">
+    <solution available="No">
     </solution>
   </solver>
 
@@ -78,7 +78,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Drift" >  <!-- Drift function  -->
+  <initial_conditions usr_fct="Drift"  random="No">  <!-- Drift function  -->
     <u_lin> 2. </u_lin>  <!-- x-velocity in linear case  -->
     <v_lin> 2. </v_lin>  <!-- y-velocity in linear case  -->
     <w_lin> 0. </w_lin>  <!-- z-velocity in linear case  -->
@@ -88,4 +88,7 @@
   <visualisation save_vtk="Yes" save_csv="No">
     <vtk_nth_plot> 200 </vtk_nth_plot>
   </visualisation>
+
+  <logging file="output_test_dissipation.log" level="info">
+  </logging>
 </ARTSS>

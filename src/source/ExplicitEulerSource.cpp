@@ -4,24 +4,23 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <iostream>
 #include "ExplicitEulerSource.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
-#include "../Domain.h"
 
 ExplicitEulerSource::ExplicitEulerSource() {
-
     auto params = Parameters::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
     m_dir_vel = params->get("solver/source/dir");
 
     if (m_dir_vel.find('x') == std::string::npos && m_dir_vel.find('y') == std::string::npos && m_dir_vel.find('z') == std::string::npos) {
-        std::cout << "unknown direction -> exit" << std::endl;
-        std::flush(std::cout);
+#ifndef BENCHMARKING
+        m_logger = Utility::create_logger(typeid(ExplicitEulerSource).name());
+        m_logger->error("unknown direction -> exit");
+#endif
         std::exit(1);
-        //TODO Error handling + Logger
+        //TODO Error handling
     }
 }
 
@@ -40,9 +39,9 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    size_t level = out_x->GetLevel();
+    size_t level = out_x->get_level();
     size_t bsize = domain->get_size(level);
-    FieldType type = out_x->GetType();
+    FieldType type = out_x->get_type();
 
     auto d_outx = out_x->data;
     auto d_outy = out_y->data;
@@ -55,8 +54,8 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
     auto dir = m_dir_vel;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc data present(d_outx[:bsize], d_outy[:bsize], d_outz[:bsize], d_Sx[:bsize], d_Sy[:bsize], d_Sz[:bsize])
     {
@@ -69,7 +68,7 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
                 d_outx[i] += dt * d_Sx[i];
             }
 
-            boundary->applyBoundary(d_outx, level, type, sync);
+            boundary->apply_boundary(d_outx, level, type, sync);
         } // end x- direction
 
         //y - direction
@@ -80,7 +79,7 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
                 d_outy[i] += dt * d_Sy[i];
             }
 
-            boundary->applyBoundary(d_outy, level, type, sync);
+            boundary->apply_boundary(d_outy, level, type, sync);
         } // end y- direction
 
         //z - direction
@@ -91,7 +90,7 @@ void ExplicitEulerSource::add_source(Field *out_x, Field *out_y, Field *out_z, F
                 d_outz[i] += dt * d_Sz[i];
             }
 
-            boundary->applyBoundary(d_outz, level, type, sync);
+            boundary->apply_boundary(d_outz, level, type, sync);
         } // end z- direction
 
         if (sync) {
@@ -110,9 +109,9 @@ void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
 
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    size_t level = out->GetLevel();
+    size_t level = out->get_level();
     auto bsize = domain->get_size(level);
-    FieldType type = out->GetType();
+    FieldType type = out->get_type();
 
     auto d_out = out->data;
     auto d_S = S->data;
@@ -120,8 +119,8 @@ void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
     auto dt = m_dt;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc data present(d_out[:bsize], d_S[:bsize])
     {
@@ -131,7 +130,7 @@ void ExplicitEulerSource::add_source(Field *out, Field *S, bool sync) {
             d_out[i] += dt * d_S[i];
         }
 
-        boundary->applyBoundary(d_out, level, type, sync);
+        boundary->apply_boundary(d_out, level, type, sync);
 
         if (sync) {
 #pragma acc wait

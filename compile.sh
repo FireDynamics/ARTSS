@@ -3,8 +3,8 @@ COMPILE=""
 GPU=1
 JURECA=1
 P100=1
-GPU_CC="cc30"
-CUDA_VERSION=10.1
+GPU_CC="cc35"
+CUDA_VERSION=10.2
 BUILDTYPE=Release
 
 YELLOW='\033[1;33m'
@@ -50,7 +50,7 @@ Other:
    ${YELLOW}-c${NC}
   ${YELLOW}--cudaversion${NC}                     \t set CUDA Version
   ${YELLOW}--cc${NC}
-  ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (30|35|50|60|70|75)
+  ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (35|50|60|62|70|72|75|80)
    ${YELLOW}-d${NC}
    ${YELLOW}--debugmode${NC}                      \t set debug flag for build type (default: ${BUILDTYPE})
 
@@ -193,12 +193,12 @@ fi
 
 if [ $DOCKERRUN -eq 0 ]
 then
-  docker run --gpus all -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker
+  docker run --gpus all -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker bash
 fi
 
 if [ $DOCKERRUNCPU -eq 0 ]
 then
-  docker run -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker # /bin/bash -c "./compile.sh"
+  docker run -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker bash # /bin/bash -c "./compile.sh"
 fi
 
 if [ $DOCKERRUN -eq 0 -o $DOCKERRUNCPU -eq 0 -o $DOCKERBUILD -eq 0 ]
@@ -242,7 +242,7 @@ then
   fi
   if [ -z ${CUDA_VERSION} ]
   then
-    CUDA_VERSION=10.1
+    CUDA_VERSION=10.2
   fi
   GPU_CC=cc60
 fi
@@ -259,8 +259,8 @@ cd build || exit
 
 if [[ $GPU -eq 0 ]] || [[ $COMPILER = "PGI" ]]
 then
-  CCOMPILER=pgcc
-  CXXCOMPILER=pgc++
+  CCOMPILER=nvc
+  CXXCOMPILER=nvc++
 else
   CCOMPILER=gcc
   CXXCOMPILER=g++
