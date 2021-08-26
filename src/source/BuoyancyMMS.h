@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_BUOYANCYMMS_H
-#define ARTSS_BUOYANCYMMS_H
+#ifndef ARTSS_SOURCE_BUOYANCYMMS_H
+#define ARTSS_SOURCE_BUOYANCYMMS_H
 
 
 #include "../interfaces/ISourceFunction.h"
@@ -22,5 +22,4 @@ private:
     Field *m_source_field;
 };
 
-
-#endif /* ARTSS_BUOYANCYMMS_H */
+#endif /* ARTSS_SOURCE_BUOYANCYMMS_H */

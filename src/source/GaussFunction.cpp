@@ -139,15 +139,19 @@ real GaussFunction::get_time_value(real t_cur) {
     return tanh(t_cur / m_tau);
 }
 
-#ifdef ASSIMILATION
 std::string GaussFunction::write_header_part() {
+#ifdef ASSIMILATION
     std::string header_part = fmt::format("###coordinates;{};{};{}", m_x0, m_y0, m_z0);
     header_part.append(fmt::format("###volume;{};{};{}", m_sigma_x, m_sigma_y, m_sigma_z));
     header_part.append(fmt::format("###HRR;{};cp;{}", m_HRR, m_cp));
     return header_part;
+#else
+    return {};
+#endif
 }
 
 void GaussFunction::read_header_part(std::string &header) {
+#ifdef ASSIMILATION
     std::vector<std::string> lines = Utility::split(header, '\n');
 
     std::vector<std::string> coordinates = Utility::split(lines[0], ';');
@@ -165,5 +169,5 @@ void GaussFunction::read_header_part(std::string &header) {
     m_cp = std::stod(heat_source[3]);
 
     create_spatial_values();
-}
 #endif
+}

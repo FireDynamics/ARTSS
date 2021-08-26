@@ -85,7 +85,6 @@ void Cube::set_up(real value, real x_start, real y_start, real z_start, real x_e
 #pragma acc enter data copyin(data[:size])
 }
 
-#ifdef ASSIMILATION
 void Cube::read_header_part(std::string &header) {
 
 }
@@ -93,4 +92,3 @@ void Cube::read_header_part(std::string &header) {
 std::string Cube::write_header_part() {
     return std::string();
 }
-#endif
