@@ -182,48 +182,48 @@ TEST_F(GaussFunctionTest, test_single_obst_field_2d_1) {
     int x, y;
 
     // for (x=0; x < 64; ++x) {
-    //     for(y=0; y < 64; ++y) {
+    //     for (y=0; y < 64; ++y) {
     //         std::cerr << "XXX" << x << " " << y << " " << GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst) << std::endl;
     //     }
     // }
     for (x=0, y=0; x < X0 / 2; ++x) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
     }
     for (x=X0/2+1, y=0; x < 64; ++x) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
     }
 
     for (x=0, y=Y0/2; x < X0/4*3; ++x) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
     }
     for (x=X0/4*3+1, y=Y0/2; x < 64; ++x) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
     }
 
     for (x=0, y=0; y < Y0 / 2; ++y) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
     }
 
     for (x=X0/2, y=0; y < Y0/4*3; ++y) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
     }
 
     for (x=X0/2, y=Y0/4*3+1; y < 64; ++y) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
     }
 
     for (x=0; x < 64; ++x) {
         for(y=0; y < 64; ++y) {
             auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
             if (x > X0 || y > Y0) {
-                ASSERT_FALSE(ret);
+                EXPECT_FALSE(ret);
             }
         }
     }
@@ -243,33 +243,56 @@ TEST_F(GaussFunctionTest, test_single_obst_field_2d_2) {
 
     for (x=0, y=64; x < X0/2*3; ++x) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
     }
     for (x=X0/2*3+1, y=64; x < 64; ++x) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
     }
 
     for (x=64, y=0; y < Y0/2*3; ++y) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
     }
     for (x=64, y=X0/2*3+1; y < 64; ++y) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_TRUE(ret) << "Failed at (" << x << ", " << y << ")";
     }
 
     for (x=X0/2, y=Y0/4*3+1; y < 64; ++y) {
         auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
-        ASSERT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
+        EXPECT_FALSE(ret) << "Failed at (" << x << ", " << y << ")";
     }
 
     for (x=0; x < 64; ++x) {
         for(y=0; y < 64; ++y) {
             auto ret = GaussFunction::test_obstacle_blocks(X0, Y0, 0, x, y, 0, obst);
             if (x < X0 || y < Y0) {
-                ASSERT_FALSE(ret);
+                EXPECT_FALSE(ret);
             }
         }
     }
+}
+
+TEST_F(GaussFunctionTest, stress_test_single_obst_field1) {
+    auto logger = Utility::create_logger("test_single_obst", "warn", "tmp.out");
+    Domain cube(0.0, 1.0, 0.0, 1.0, 0.0, 1.0,
+                0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 64*8, 64*8, 64*8, 1);
+
+    Obstacle obst(30*8, 30*8, 0*8, 31*8, 31*8, 64*8, 0*8, logger, cube);
+    Field out(FieldType::UNKNOWN_FIELD, 0.0, 0, cube.get_size());
+
+    int X0 = 32*8;
+    int Y0 = 32*8;
+    int x, y, z, count;
+
+    for (x=0; x < 64*8; ++x) {
+        for (y=0; y < 64*8; ++y) {
+            for (z=0; z < 64*8; ++z) {
+                count += GaussFunction::test_obstacle_blocks(X0, Y0, 32*8, x, y, z, obst);
+            }
+        }
+    }
+
+    EXPECT_EQ(count, 1101004554);
 }
