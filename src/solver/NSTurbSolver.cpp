@@ -10,6 +10,7 @@
 #include "../Domain.h"
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
+#include "../visualisation/VTKWriter.h"
 
 NSTurbSolver::NSTurbSolver(FieldController *field_controller) {
 #ifndef BENCHMARKING
@@ -98,7 +99,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
 #pragma acc data present(    d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], \
                             d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_nu_t[:bsize])
     {
-
+    int counter = 0;
 // 1. Solve advection equation
 #ifndef BENCHMARKING
         m_logger->info("Advect ...");
@@ -109,13 +110,15 @@ void NSTurbSolver::do_step(real t, bool sync) {
 
         // Couple velocity to prepare for diffusion
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
-
+        //VTKWriter::write_numerical(*m_field_controller, "debug_not_" + std::to_string(t) + "_" + std::to_string(counter) +"_after_advection.vtk");
+        //counter++;
 // 2. Solve turbulent diffusion equation
 #ifndef BENCHMARKING
         m_logger->info("Calculating Turbulent viscosity ...");
 #endif
         mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
-
+        //VTKWriter::write_numerical(*m_field_controller, "debug_not_" + std::to_string(t) + "_" + std::to_string(counter) +"_after_turbvisc.vtk");
+        //counter++;
 
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
@@ -126,6 +129,8 @@ void NSTurbSolver::do_step(real t, bool sync) {
 
         // Couple data to prepare for adding source
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+        //VTKWriter::write_numerical(*m_field_controller, "debug_not_" + std::to_string(t) + "_" + std::to_string(counter) +"_after_diffusion.vtk");
+        //counter++;
 
 // 3. Add force
         if (m_force_function != SourceMethods::Zero) {
@@ -137,20 +142,29 @@ void NSTurbSolver::do_step(real t, bool sync) {
 
             // Couple data
             FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
+
+            //VTKWriter::write_numerical(*m_field_controller, "debug_not_" + std::to_string(t) + "_" + std::to_string(counter) +"_after_source.vtk");
+            //counter++;
         }
 
 // 4. Solve pressure equation and project
         // Calculate divergence of u
         pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
+        //VTKWriter::write_numerical(*m_field_controller, "debug_not_" + std::to_string(t) + "_" + std::to_string(counter) +"_after_div.vtk");
+        //counter++;
 
         // Solve pressure equation
 #ifndef BENCHMARKING
         m_logger->info("Pressure ...");
 #endif
         pres->pressure(p, rhs, t, sync);
+        //VTKWriter::write_numerical(*m_field_controller, "debug_not_" + std::to_string(t) + "_" + std::to_string(counter) +"_after_pres.vtk");
+        //counter++;
 
         // Correct
         pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
+        //VTKWriter::write_numerical(*m_field_controller, "debug_not_" + std::to_string(t) + "_" + std::to_string(counter) +"_after_projection.vtk");
+        //counter++;
 
 // 5. Sources updated in Solver::update_sources, TimeIntegration
 

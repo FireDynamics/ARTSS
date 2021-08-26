@@ -7,6 +7,7 @@
 #include "TimeIntegration.h"
 #include "utility/Parameters.h"
 #include "Domain.h"
+#include "visualisation/VTKWriter.h"
 
 // ==================================== Constructor ====================================
 // ***************************************************************************************
@@ -25,12 +26,23 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 
     m_solver_controller = sc;
     m_field_controller = m_solver_controller->get_field_controller();
+    int counter = 0;
+    VTKWriter::write_numerical(*m_field_controller, "debug_ti_" + std::to_string(counter));
+    counter++;
 
     m_adaption = new Adaption(m_field_controller);
+    VTKWriter::write_numerical(*m_field_controller, "debug_ti_" + std::to_string(counter));
+    counter++;
 #ifndef BENCHMARKING
     m_solution = new Solution();
+    VTKWriter::write_numerical(*m_field_controller, "debug_ti_" + std::to_string(counter));
+    counter++;
     m_analysis = new Analysis(m_solution);
+    VTKWriter::write_numerical(*m_field_controller, "debug_ti_" + std::to_string(counter));
+    counter++;
     m_visual = new Visual(*m_solution);
+    VTKWriter::write_numerical(*m_field_controller, "debug_ti_" + std::to_string(counter));
+    counter++;
 #endif
 }
 
@@ -72,8 +84,15 @@ void TimeIntegration::run() {
 #pragma acc update host(d_C[:bsize])
 #pragma acc update host(d_nu_t[:bsize])
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
+    int counter = 0;
+    VTKWriter::write_numerical(*m_field_controller, "debug_ti2_" + std::to_string(counter));
+    counter++;
     m_analysis->analyse(m_field_controller, 0.);
+    VTKWriter::write_numerical(*m_field_controller, "debug_ti2_" + std::to_string(counter));
+    counter++;
     m_visual->visualise(*m_field_controller, 0.);
+    VTKWriter::write_numerical(*m_field_controller, "debug_ti2_" + std::to_string(counter));
+    counter++;
     m_logger->info("Start calculating and timing...");
 #else
     std::cout << "Start calculating and timing...\n" << std::endl;
