@@ -57,11 +57,11 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
     auto boundary = BoundaryController::getInstance();
 
-  auto bsize_i = boundary->getSize_innerList();
-  auto bsize_b = boundary->getSize_boundaryList();
+  auto bsize_i = boundary->get_size_inner_list();
+  auto bsize_b = boundary->get_size_boundary_list();
 
-    size_t* d_iList = boundary->get_innerList_level_joined();
-    size_t* d_bList = boundary->get_boundaryList_level_joined();
+    size_t* d_iList = boundary->get_inner_list_level_joined();
+    size_t* d_bList = boundary->get_boundary_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize])
 {
@@ -96,7 +96,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
     while (res > tol_res && it < max_it) {
         colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, dsign, w, sync);
-        boundary->applyBoundary(d_out, type, sync);
+        boundary->apply_boundary(d_out, type, sync);
 
         sum = 0;
 
@@ -150,11 +150,11 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
     auto boundary = BoundaryController::getInstance();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
-    size_t* d_iList = boundary->get_innerList_level_joined();
-    size_t* d_bList = boundary->get_boundaryList_level_joined();
+    size_t* d_iList = boundary->get_inner_list_level_joined();
+    size_t* d_bList = boundary->get_boundary_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize], d_EV[:bsize])
 {
@@ -185,7 +185,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field *out, Field *in, const Field *b, c
 
     while (res > tol_res && it < max_it) {
         colored_gauss_seidel_step(out, b, dsign, w, D, EV, dt, sync);
-        boundary->applyBoundary(d_out, type, sync);
+        boundary->apply_boundary(d_out, type, sync);
 
         sum = 0;
 

@@ -5,12 +5,12 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "NSTempTurbSolver.h"
+#include "../Domain.h"
+#include "../boundary/BoundaryData.h"
+#include "../boundary/BoundaryController.h"
 #include "../pressure/VCycleMG.h"
 #include "../utility/Parameters.h"
-#include "../utility/Utility.h"
-#include "../Domain.h"
 #include "SolverSelection.h"
-#include "../boundary/BoundaryData.h"
 
 NSTempTurbSolver::NSTempTurbSolver(FieldController *field_controller) {
 #ifndef BENCHMARKING
@@ -75,7 +75,6 @@ NSTempTurbSolver::~NSTempTurbSolver() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSTempTurbSolver::do_step(real t, bool sync) {
-
     auto params = Parameters::getInstance();
 
     // local variables and parameters for GPU
@@ -98,8 +97,8 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     auto f_y = m_field_controller->field_force_y;
     auto f_z = m_field_controller->field_force_z;
     auto S_T = m_field_controller->field_source_T;
-    auto nu_t = m_field_controller->field_nu_t;            //nu_t - Eddy Viscosity
-    auto kappa_t = m_field_controller->field_kappa_t;     //kappa_t - Eddy thermal diffusivity
+    auto nu_t = m_field_controller->field_nu_t;           // nu_t - Eddy Viscosity
+    auto kappa_t = m_field_controller->field_kappa_t;     // kappa_t - Eddy thermal diffusivity
 
     auto d_u = u->data;
     auto d_v = v->data;
@@ -123,15 +122,19 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     auto d_nu_t = nu_t->data;
     auto d_kappa_t = kappa_t->data;
 
-    size_t bsize = Domain::getInstance()->get_size(u->get_level());
+    size_t bsize = Domain::getInstance()->get_size();
 
     auto nu = m_nu;
     auto kappa = m_kappa;
     auto dir_vel = m_dir_vel;
 
-#pragma acc data present(    d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], \
-                            d_w0[:bsize], d_w_tmp[:bsize], d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], \
-                            d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_S_T[:bsize], d_nu_t[:bsize], d_kappa_t[:bsize])
+#pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], \
+                         d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], \
+                         d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], \
+                         d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], \
+                         d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], \
+                         d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], \
+                         d_S_T[:bsize], d_nu_t[:bsize], d_kappa_t[:bsize])
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
@@ -192,7 +195,6 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         m_logger->info("Advect Temperature ...");
 #endif
         adv_temp->advect(T, T0, u, v, w, sync);
-
         // Couple temperature to prepare for diffusion
         FieldController::couple_scalar(T, T0, T_tmp, sync);
 
@@ -217,7 +219,6 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         } else {
             // no turbulence
             if (kappa != 0.) {
-
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Temperature ...");
 #endif
@@ -230,7 +231,6 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 
         // Add dissipation
         if (m_hasDissipation) {
-
 #ifndef BENCHMARKING
             m_logger->info("Add dissipation ...");
 #endif
@@ -283,21 +283,21 @@ void NSTempTurbSolver::control() {
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/temperature/advection/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
+    if (params->get("solver/temperature/advection/field") != BoundaryData::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/temperature/diffusion/field") != BoundaryData::getFieldTypeName(FieldType::T)) {
+    if (params->get("solver/temperature/diffusion/field") != BoundaryData::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/pressure/field") != BoundaryData::getFieldTypeName(FieldType::P)) {
+    if (params->get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif

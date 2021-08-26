@@ -12,6 +12,8 @@
 #include "../utility/Utility.h"
 
 namespace DomainBoundary {
-    void apply_boundary_condition(real* data_field, size_t** index_fields, const size_t* patch_starts, const size_t* patch_ends, size_t level, BoundaryData* boundary_data, bool sync = true);
+    void apply_boundary_condition(real* data_field, size_t** index_fields,
+                                  const size_t* patch_starts, const size_t* patch_ends,
+                                  size_t level, BoundaryData* boundary_data, bool sync = true);
 }  // namespace DomainBoundary
 #endif /* ARTSS_BOUNDARYCONDITION_DOMAINBOUNDARY_H */

@@ -25,11 +25,11 @@
 #endif
 
 class TimeIntegration {
-public:
+ public:
     explicit TimeIntegration(SolverController *sc);
     void run();
 
-private:
+ private:
     real m_dt;
     real m_t_end;
     real m_t_cur;

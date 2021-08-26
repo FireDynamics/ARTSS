@@ -14,14 +14,16 @@ The serial CPU version of ARTSS can be compiled on Linux or MacOS systems with v
 whereas the multicore and GPU version needs an OpenACC capable compiler.
 Detailed requirements are listed in the table below (general requirements for serial version, specific for multicore and GPU version).
 
-|          | Purpose                                             | Tool     | Version       |
-|--------- | --------------------------------------------------- | -------- | --------------|
-| General  | Version control system (optional)                   | git      |   >= 2.0      |
-|          | Build processor using a compiler-independent method | CMake    |   >= 2.8      |
-|          | Compiler fully supporting C++-17 (gcc or clang)     | gcc      |   >= 7.0      |
-|          | Visualization of output                             | vtk      |   >= 5.8      |
-|          | Testing for consistency of output while developing  | Python   |   >= 3.6      |
-| Specific | Compiler fully supporting C++-17 and OpenACC        | NVHPC    |   >= 20.9.0   |
+|           | Purpose                                             | Tool     | Version       |
+|---------- | --------------------------------------------------- | -------- | --------------|
+| General   | Version control system (optional)                   | git      |   >= 2.0      |
+|           | Build processor using a compiler-independent method | CMake    |   >= 2.8      |
+|           | Compiler fully supporting C++-17 (gcc or clang)     | gcc      |   >= 7.0      |
+|           | Visualization of output                             | vtk      |   >= 5.8      |
+|           | Testing for consistency of output while developing  | Python   |   >= 3.6      |
+| Libraries | Logging                                             | spdlog   |               |
+|           | String formatting in output                         | fmt      |               |
+| Specific  | Compiler fully supporting C++-17 and OpenACC        | NVHPC    |   >= 20.9.0   |
 
 ### Compiling the Code
 Once the code has been checked out and all required software has been installed, ARTSS
@@ -34,7 +36,7 @@ git clone https://github.com/FireDynamics/ARTSS.git
 cd ARTSS
 ```
 
-if you already have a local copy of ARTSS and are missing spdlog do a recursive submodul init.
+if you already have a local copy of ARTSS and are missing spdlog or fmt do a recursive submodule init.
 ```
 git submodule update --init --recursive
 ```

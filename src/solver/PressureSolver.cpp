@@ -56,7 +56,7 @@ void PressureSolver::do_step(real t, bool sync) {
 void PressureSolver::control() {
     auto params = Parameters::getInstance();
     auto p_field = params->get("solver/pressure/field");
-    if (p_field != BoundaryData::getFieldTypeName(FieldType::P)) {
+    if (p_field != BoundaryData::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(typeid(PressureSolver).name());
         logger->error("Fields not specified correctly!");

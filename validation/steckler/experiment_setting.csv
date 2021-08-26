@@ -1,0 +1,32 @@
+,height [m],width [m],depth [m]
+room,2.18,2.8,2.8
+
+soffit,1.83
+sill,0.057
+
+door,height [m],width [m]
+2/6,1.83,0.24
+3/6,1.83,0.36
+4/6,1.83,0.49
+5/6,1.83,0.62
+6/6,1.83,0.74
+7/6,1.83,0.86
+8/6,1.83,0.99
+
+window,height [m],width [m]
+1/3,0.46,0.74
+2/3,0.92,0.74
+Full,1.38,0.74
+
+,height [m],burner radius,plattform
+gas burner,0.02,0.3,0.42
+
+gas burner location  (midpoint),x [m],y [m]
+A,1.4,1.4
+B,0.21,1.19
+C,1.4,1.19
+D,0.21,1.4
+E,1.19,1.4
+F,1.4,0.81
+G,1.4,0.24
+H,0.46,0.46

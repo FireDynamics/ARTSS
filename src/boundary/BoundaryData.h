@@ -13,7 +13,7 @@
 #include "../utility/tinyxml2.h"
 #include "../field/Field.h"
 
-const size_t numberOfPatches = 6;
+const size_t number_of_patches = 6;
 enum Patch : int {
     UNKNOWN_PATCH = -1,
     FRONT = 0,
@@ -24,7 +24,7 @@ enum Patch : int {
     RIGHT = 5
 };
 
-const size_t numberOfBoundaryConditions = 3;
+const size_t number_of_boundary_conditions = 3;
 enum BoundaryCondition : int {
     UNKNOWN_CONDITION = -1,
     NEUMANN = 0,
@@ -33,32 +33,36 @@ enum BoundaryCondition : int {
 };
 
 class BoundaryData {
-public:
+ public:
     BoundaryData();
     ~BoundaryData();
     void print();
 
-    static std::string getFieldTypeName(FieldType f);
-    static std::string getBoundaryConditionName(BoundaryCondition bc);
-    static std::string getPatchName(Patch p);
+    static std::string get_field_type_name(FieldType f);
+    static std::string get_boundary_condition_name(BoundaryCondition bc);
+    static std::string get_patch_name(Patch p);
 
-    static FieldType matchField(const std::string& s);
-    static Patch matchPatch(const std::string& s);
-    static BoundaryCondition matchBoundaryCondition(const std::string& s);
+    static FieldType match_field(const std::string& string);
+    static Patch match_patch(const std::string &string);
+    static BoundaryCondition match_boundary_condition(const std::string &string);
 
-    void addBoundaryCondition(const std::vector<Patch>& patches, real value, BoundaryCondition boundaryCondition);
-    BoundaryCondition getBoundaryCondition(Patch p){ return m_boundaryConditions[p];};
-    real getValue(Patch p){ return m_values[p];};
+    void add_boundary_condition(
+            const std::vector<Patch>& patches,
+            real value,
+            BoundaryCondition boundary_condition);
+    BoundaryCondition get_boundary_condition(Patch p) const { return m_boundary_conditions[p]; }
+    real get_value(Patch p) const { return m_values[p];}
 
-    bool isEmpty(){ return !m_hasValues; };
-private:
+    bool is_empty() const { return !m_has_values; }
 
+ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    BoundaryCondition* m_boundaryConditions;
+    BoundaryCondition* m_boundary_conditions;
     real* m_values;
 
-    bool m_hasValues = false;
+    bool m_has_values = false;
 };
 #endif /* ARTSS_BOUNDARY_BOUNDARYDATA_H_ */
+

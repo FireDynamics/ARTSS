@@ -49,11 +49,11 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 
     auto boundary = BoundaryController::getInstance();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
 #pragma acc data present(d_out[:bsize], d_in[:bsize], d_b[:bsize])
     {
@@ -83,7 +83,7 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 
         while (res > tol_res && it < max_it) {
             JacobiStep(out, in, b, alphaX, alphaY, alphaZ, rbeta, dsign, w, sync);
-            boundary->applyBoundary(d_out, type, sync);
+            boundary->apply_boundary(d_out, type, sync);
 
             sum = 0.;
 
@@ -164,11 +164,11 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
 #pragma acc data present(d_out[:bsize], d_in[:bsize], d_b[:bsize], d_EV[:bsize])
     {
@@ -195,7 +195,7 @@ void JacobiDiffuse::diffuse(Field *out, Field *in, const Field *b, const real D,
 
         while (res > tol_res && it < max_it) {
             JacobiStep(out, in, b, dsign, w, D, EV, dt, sync);
-            boundary->applyBoundary(d_out, type, sync);
+            boundary->apply_boundary(d_out, type, sync);
 
             sum = 0.;
 
@@ -286,8 +286,8 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_b[:bsize], d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
@@ -335,9 +335,9 @@ void JacobiDiffuse::JacobiStep(size_t level, Field *out, const Field *in, const 
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t start_i = boundary->get_innerList_level_joined_start(level);
-    size_t end_i = boundary->get_innerList_level_joined_end(level) + 1;
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t start_i = boundary->get_inner_list_level_joined_start(level);
+    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 
 #pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_b[:bsize], d_iList[start_i:(end_i-start_i)]) async
     for (size_t j = start_i; j < end_i; ++j) {
@@ -391,8 +391,8 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], d_b[:bsize], d_EV[:bsize], d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
@@ -404,9 +404,11 @@ void JacobiDiffuse::JacobiStep(Field *out, const Field *in, const Field *b, cons
         rb = (1. + 2. * (aX + aY + aZ));
         bb = 1. / rb;
 
-        real out_h = bb * (dsign * d_b[i] + aX * (d_in[i + 1] + d_in[i - 1]) \
- + aY * (d_in[i + Nx] + d_in[i - Nx]) \
- + aZ * (d_in[i + Nx * Ny] + d_in[i - Nx * Ny]));
+        auto d_aX = aX * (d_in[i + 1] + d_in[i - 1]) ;
+        auto d_aY = aY * (d_in[i + Nx] + d_in[i - Nx]) ;
+        auto d_aZ = aZ * (d_in[i + Nx * Ny] + d_in[i - Nx * Ny]);
+
+        real out_h = bb * (dsign * d_b[i] + d_aX + d_aY + d_aZ);
         d_out[i] = (1 - w) * d_in[i] + w * out_h;
     }
 

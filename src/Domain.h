@@ -17,6 +17,10 @@
 #include "utility/Parameters.h"
 #include "utility/Utility.h"
 
+enum CoordinateAxis : int {
+    UNKNOWN_DIRECTION = -1, X = 0, Y = 1, Z = 2
+};
+
 class Domain {
  public:
     Domain();
@@ -94,11 +98,11 @@ class Domain {
     void print();
     void printDetails();
 
-private:
+ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    static Domain *single; //Singleton
+    static Domain *single; // Singleton
     void calc_MG_values();
 
     static real calc_new_coord(real oldCoord, long shift, real cell_width);
@@ -111,4 +115,4 @@ private:
     real m_X1, m_X2, m_Y1, m_Y2, m_Z1, m_Z2;
 };
 
-#endif //ARTSS_DOMAIN_H
+#endif /* ARTSS_DOMAIN_H_ */

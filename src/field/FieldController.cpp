@@ -1,13 +1,15 @@
 /// \file       FieldController.cpp
-/// \brief      
+/// \brief      manages everything reagarding any field object
 /// \date       Aug 12, 2020
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
 #include "FieldController.h"
-#include "../utility/Parameters.h"
+#include <string>
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
+#include "../solver/SolverSelection.h"
+#include "../utility/Parameters.h"
 
 FieldController::FieldController() {
     // Variables
@@ -27,7 +29,7 @@ FieldController::FieldController() {
 
     // Temperature
     field_T = new Field(FieldType::T, 0.0);
-    field_T_ambient = new Field(FieldType::T, 300);
+    field_T_ambient = new Field(FieldType::T, 0);
 
     // Concentration
     field_concentration = new Field(FieldType::RHO, 0.0);
@@ -64,15 +66,14 @@ FieldController::FieldController() {
     Domain *domain = Domain::getInstance();
     auto bsize = domain->get_size();
     // copyin fields
-#pragma acc enter data copyin(  d_u[:bsize], \
-                                d_v[:bsize], \
-                                d_w[:bsize], \
-                                d_p[:bsize], d_rhs[:bsize], \
-                                d_T[:bsize], d_T_a[:bsize], \
-                                d_C[:bsize], \
-                                d_f_x[:bsize], d_f_y[:bsize], d_f_z[:bsize], d_S_T[:bsize], d_S_C[:bsize], \
-                                d_nu_t[:bsize], d_kappa_t[:bsize], d_gamma_t[:bsize])
-
+#pragma acc enter data copyin(d_u[:bsize], \
+                              d_v[:bsize], \
+                              d_w[:bsize], \
+                              d_p[:bsize], d_rhs[:bsize], \
+                              d_T[:bsize], d_T_a[:bsize], \
+                              d_C[:bsize], \
+                              d_f_x[:bsize], d_f_y[:bsize], d_f_z[:bsize], d_S_T[:bsize], d_S_C[:bsize], \
+                              d_nu_t[:bsize], d_kappa_t[:bsize], d_gamma_t[:bsize])
 }
 
 // ==================================== Destructor ====================================
@@ -154,15 +155,15 @@ FieldController::~FieldController() {
 // ***************************************************************************************
 void FieldController::set_up_boundary() {
     auto boundary = BoundaryController::getInstance();
-    boundary->applyBoundary(field_u->data, field_u->get_type());
-    boundary->applyBoundary(field_v->data, field_v->get_type());
-    boundary->applyBoundary(field_w->data, field_w->get_type());
-    boundary->applyBoundary(field_p->data, field_p->get_type());
-    boundary->applyBoundary(field_T->data, field_T->get_type());
-    boundary->applyBoundary(field_concentration->data, field_concentration->get_type());
+    boundary->apply_boundary(field_u->data, field_u->get_type());
+    boundary->apply_boundary(field_v->data, field_v->get_type());
+    boundary->apply_boundary(field_w->data, field_w->get_type());
+    boundary->apply_boundary(field_p->data, field_p->get_type());
+    boundary->apply_boundary(field_T->data, field_T->get_type());
+    boundary->apply_boundary(field_concentration->data, field_concentration->get_type());
 
     // TODO necessary?
-    boundary->applyBoundary(field_T_ambient->data, field_T_ambient->get_type());
+    boundary->apply_boundary(field_T_ambient->data, field_T_ambient->get_type());
 }
 
 void FieldController::set_up_temporary_fields() {
@@ -199,13 +200,12 @@ void FieldController::set_up_temporary_fields() {
     Domain *domain = Domain::getInstance();
     auto bsize = domain->get_size();
     // copyin fields
-#pragma acc enter data copyin(  d_u0[:bsize], d_u_tmp[:bsize], \
-                                d_v0[:bsize], d_v_tmp[:bsize], \
-                                d_w0[:bsize], d_w_tmp[:bsize], \
-                                d_p0[:bsize], \
-                                d_T0[:bsize], d_T_tmp[:bsize], \
-                                d_C0[:bsize], d_C_tmp[:bsize])
-
+#pragma acc enter data copyin(d_u0[:bsize], d_u_tmp[:bsize], \
+                              d_v0[:bsize], d_v_tmp[:bsize], \
+                              d_w0[:bsize], d_w_tmp[:bsize], \
+                              d_p0[:bsize], \
+                              d_T0[:bsize], d_T_tmp[:bsize], \
+                              d_C0[:bsize], d_C_tmp[:bsize])
 }
 
 //======================================= Update data ==================================
@@ -237,22 +237,25 @@ void FieldController::update_data(bool sync) {
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t bsize_i = boundary->getSize_innerList();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
-    size_t bsize_b = boundary->getSize_boundaryList();
-    size_t *d_oList = boundary->get_obstacleList();
-    size_t bsize_o = boundary->getSize_obstacleList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t bsize_i = boundary->get_size_inner_list();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
+    size_t bsize_b = boundary->get_size_boundary_list();
+    size_t *d_oList = boundary->get_obstacle_list();
+    size_t bsize_o = boundary->get_size_obstacle_list();
 
-#pragma acc data present(    d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o], d_u[:bsize], d_v[:bsize], d_w[:bsize], \
-                            d_u0[:bsize], d_v0[:bsize], d_w0[:bsize], d_u_tmp[:bsize], d_v_tmp[:bsize], d_w_tmp[:bsize], \
-                            d_p[:bsize], d_p0[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize])
+#pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o], d_u[:bsize], d_v[:bsize], d_w[:bsize], \
+                         d_u0[:bsize], d_v0[:bsize], d_w0[:bsize], d_u_tmp[:bsize], d_v_tmp[:bsize], d_w_tmp[:bsize], \
+                         d_p[:bsize], d_p0[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize])
     {
         // inner
-#pragma acc parallel loop independent present(    d_iList[:bsize_i], d_u[:bsize], d_v[:bsize], d_w[:bsize], \
-                                                d_u0[:bsize], d_v0[:bsize], d_w0[:bsize], d_u_tmp[:bsize], d_v_tmp[:bsize], d_w_tmp[:bsize], \
-                                                d_p[:bsize], d_p0[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], \
-                                                d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize]) async
+#pragma acc parallel loop independent present(d_iList[:bsize_i], \
+                                              d_u[:bsize], d_v[:bsize], d_w[:bsize], \
+                                              d_u0[:bsize], d_v0[:bsize], d_w0[:bsize], \
+                                              d_u_tmp[:bsize], d_v_tmp[:bsize], d_w_tmp[:bsize], \
+                                              d_p[:bsize], d_p0[:bsize], \
+                                              d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], \
+                                              d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize]) async
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t idx = d_iList[j];
             d_u0[idx] = d_u[idx];
@@ -303,7 +306,7 @@ void FieldController::update_data(bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    } //end data region
+    }  // end data region
 }
 
 //======================================== Couple velocity ====================================
@@ -321,7 +324,6 @@ void FieldController::update_data(bool sync) {
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void FieldController::couple_vector(const Field *a, Field *a0, Field *a_tmp, const Field *b, Field *b0, Field *b_tmp, const Field *c, Field *c0, Field *c_tmp, bool sync) {
-
     // local variables and parameters for GPU
     auto d_a = a->data;
     auto d_a0 = a0->data;
@@ -337,15 +339,15 @@ void FieldController::couple_vector(const Field *a, Field *a0, Field *a_tmp, con
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t bsize_i = boundary->getSize_innerList();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
-    size_t bsize_b = boundary->getSize_boundaryList();
-    size_t *d_oList = boundary->get_obstacleList();
-    size_t bsize_o = boundary->getSize_obstacleList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t bsize_i = boundary->get_size_inner_list();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
+    size_t bsize_b = boundary->get_size_boundary_list();
+    size_t *d_oList = boundary->get_obstacle_list();
+    size_t bsize_o = boundary->get_size_obstacle_list();
 
-#pragma acc data present(    d_a[:size], d_a0[:size], d_a_tmp[:size], d_b[:size], d_b0[:size], d_b_tmp[:size], \
-                            d_c[:size], d_c0[:size], d_c_tmp[:size], d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
+#pragma acc data present(d_a[:size], d_a0[:size], d_a_tmp[:size], d_b[:size], d_b0[:size], d_b_tmp[:size], \
+                         d_c[:size], d_c0[:size], d_c_tmp[:size], d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
     {
         // inner
 #pragma acc kernels async
@@ -387,7 +389,7 @@ void FieldController::couple_vector(const Field *a, Field *a0, Field *a_tmp, con
         if (sync) {
 #pragma acc wait
         }
-    }//end data region
+    }  // end data region
 }
 
 //======================================= Couple scalar ==================================
@@ -399,7 +401,6 @@ void FieldController::couple_vector(const Field *a, Field *a0, Field *a_tmp, con
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void FieldController::couple_scalar(const Field *a, Field *a0, Field *a_tmp, bool sync) {
-
     // local variables and parameters for GPU
     auto d_a = a->data;
     auto d_a0 = a0->data;
@@ -409,12 +410,12 @@ void FieldController::couple_scalar(const Field *a, Field *a0, Field *a_tmp, boo
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t bsize_i = boundary->getSize_innerList();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
-    size_t bsize_b = boundary->getSize_boundaryList();
-    size_t *d_oList = boundary->get_obstacleList();
-    size_t bsize_o = boundary->getSize_obstacleList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t bsize_i = boundary->get_size_inner_list();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
+    size_t bsize_b = boundary->get_size_boundary_list();
+    size_t *d_oList = boundary->get_obstacle_list();
+    size_t bsize_o = boundary->get_size_obstacle_list();
 
 #pragma acc data present(d_a[:size], d_a0[:size], d_a_tmp[:size], d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
     {
@@ -445,7 +446,7 @@ void FieldController::couple_scalar(const Field *a, Field *a0, Field *a_tmp, boo
         if (sync) {
 #pragma acc wait
         }
-    }//end data region
+    }  // end data region
 }
 
 void FieldController::update_device() {
@@ -525,3 +526,4 @@ void FieldController::update_host(){
 #pragma acc update host(d_kappa_t[:bsize])
 #pragma acc update host(d_gamma_t[:bsize]) wait    // all in one update does not work!
 }
+
