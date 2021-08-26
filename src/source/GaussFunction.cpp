@@ -94,9 +94,7 @@ bool GaussFunction::test_obstacle_blocks(int i0, int j0, int k0,
                         static_cast<real>(point_j1), static_cast<real>(point_j2),
                         static_cast<real>(point_k1), static_cast<real>(point_k2)};
 
-    if (i >= point_i1 && i <= point_i2 &&
-            j >= point_j1 && j <= point_j2 &&
-            k >= point_k1 && k <= point_k2)
+    if (obst.isObstacleCell(i, j, k))
         return true;
 
     for (int surface_id=0; surface_id < 6; ++surface_id) {
