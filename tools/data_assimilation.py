@@ -71,7 +71,7 @@ class FieldReader:
     def get_t_current(self) -> float:
         first_line = self.get_line_from_file(0)
         t_cur = first_line.split(';')[1]
-        return int(t_cur)
+        return float(t_cur)
 
     def get_xml_file_name(self) -> str:
         return self.xml_file_name
@@ -84,7 +84,7 @@ class FieldReader:
 
     def read_field_data(self, time_step: float) -> dict:
         t_cur = self.get_t_current()
-        if time_step < t_cur:
+        if time_step > t_cur:
             print(f'cannot read time step {time_step} as the current time step is {t_cur}')
             return {}
         else:
