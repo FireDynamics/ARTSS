@@ -40,17 +40,14 @@ constexpr int surface_points[6][3] = {
     {4, 5, 7},
 };
 
-GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z, real tau) {
+GaussFunction::GaussFunction(
+        real HRR, real cp,
+        real x0, real y0, real z0,
+        real sigma_x, real sigma_y, real sigma_z,
+        real tau) {
     m_tau = tau;
     m_field_spatial_values = new Field(FieldType::RHO, 0.);
     create_spatial_values(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z);
-}
-
-GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real sigma_x, real sigma_y, real sigma_z, real tau, std::shared_ptr<spdlog::logger> logger) {
-    m_logger = logger;
-    m_tau = tau;
-    // m_field_spatial_values = new Field(FieldType::RHO, 0.);
-    // create_spatial_values(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z);
 }
 
 GaussFunction::~GaussFunction() {
@@ -80,13 +77,13 @@ bool GaussFunction::test_obstacle_blocks(int i0, int j0, int k0,
         int i, int j, int k,
         const Obstacle &obst) {
 
-    m_logger->warn("i:{} j:{} k:{}", i0, j0, k0);
-    m_logger->warn("i:{} j:{} k:{}", i, j, k);
+    // m_logger->error("i:{} j:{} k:{}", i0, j0, k0);
+    // m_logger->warn("i:{} j:{} k:{}", i, j, k);
     bool blocked;
     const auto di = i - i0;
     const auto dj = j - j0;
     const auto dk = k - k0;
-    m_logger->warn("i:{} j:{} k:{}", di, dj, dk);
+    // m_logger->warn("i:{} j:{} k:{}", di, dj, dk);
     const auto point_i1 = obst.getCoordinates_i1();
     const auto point_i2 = obst.getCoordinates_i2();
     const auto point_j1 = obst.getCoordinates_j1();
@@ -98,26 +95,26 @@ bool GaussFunction::test_obstacle_blocks(int i0, int j0, int k0,
                         static_cast<real>(point_k1), static_cast<real>(point_k2)};
 
     for (int surface_id=0; surface_id < 6; ++surface_id) {
-        m_logger->debug("surface_id: {}", surface_id);
+        // m_logger->debug("surface_id: {}", surface_id);
         auto s = surface_points[surface_id];
         auto p1 = cuboid_points[s[0]];
         auto p2 = cuboid_points[s[1]];
         auto p3 = cuboid_points[s[2]];
-        m_logger->debug("surface_point: ({},{},{})", indeces[p1[0]], indeces[p1[1]], indeces[p1[2]]);
-        m_logger->debug("surface_point: ({},{},{})", indeces[p2[0]], indeces[p2[1]], indeces[p2[2]]);
-        m_logger->debug("surface_point: ({},{},{})", indeces[p3[0]], indeces[p3[1]], indeces[p3[2]]);
+        // m_logger->debug("surface_point: ({},{},{})", indeces[p1[0]], indeces[p1[1]], indeces[p1[2]]);
+        // m_logger->debug("surface_point: ({},{},{})", indeces[p2[0]], indeces[p2[1]], indeces[p2[2]]);
+        // m_logger->debug("surface_point: ({},{},{})", indeces[p3[0]], indeces[p3[1]], indeces[p3[2]]);
 
         // surface vector 1
         auto svi1 = indeces[p2[0]] - indeces[p1[0]];  // saving dx
         auto svj1 = indeces[p2[1]] - indeces[p1[1]];
         auto svk1 = indeces[p2[2]] - indeces[p1[2]];
-        m_logger->debug("surface_vector1: ({},{},{})", svi1, svj1, svk1);
+        // m_logger->debug("surface_vector1: ({},{},{})", svi1, svj1, svk1);
 
         // surface vector 2
         auto svi2 = indeces[p3[0]] - indeces[p1[0]];
         auto svj2 = indeces[p3[1]] - indeces[p1[1]];
         auto svk2 = indeces[p3[2]] - indeces[p1[2]];
-        m_logger->debug("surface_vector1: ({},{},{})", svi2, svj2, svk2);
+        // m_logger->debug("surface_vector1: ({},{},{})", svi2, svj2, svk2);
 
         // p1 + l*sv1 + m*sv2 = n*d + c0 <=>
         // l*sv1 + m*sv2 - n*d = c0 - p1
@@ -129,10 +126,10 @@ bool GaussFunction::test_obstacle_blocks(int i0, int j0, int k0,
         //     -di, -dj, -dk);
 
         // okay det is small, its never gonna meet
-        m_logger->info("| {}, {}, {} |", di, -svi1, -svi2);
-        m_logger->info("| {}, {}, {} |", dj, -svj1, -svj2);
-        m_logger->info("| {}, {}, {} |", dk, -svk1, -svk2);
-        m_logger->error("|det|: {}", det_A);
+        // m_logger->info("| {}, {}, {} |", di, -svi1, -svi2);
+        // m_logger->info("| {}, {}, {} |", dj, -svj1, -svj2);
+        // m_logger->info("| {}, {}, {} |", dk, -svk1, -svk2);
+        // m_logger->error("|det|: {}", det_A);
         if (fabs(det_A) < eps) {
             continue;
         }
@@ -141,7 +138,7 @@ bool GaussFunction::test_obstacle_blocks(int i0, int j0, int k0,
         auto ddi = indeces[p1[0]] - static_cast<real>(i0);
         auto ddj = indeces[p1[1]] - static_cast<real>(j0);
         auto ddk = indeces[p1[2]] - static_cast<real>(k0);
-        m_logger->info("rhs: ({},{},{})", ddi, ddj, ddk);
+        // m_logger->debug("rhs: ({},{},{})", ddi, ddj, ddk);
 
         auto det_Ax = det3(ddi, -svi1, -svi2,
             ddj, -svj1, -svj2,
@@ -166,19 +163,23 @@ bool GaussFunction::test_obstacle_blocks(int i0, int j0, int k0,
         auto sy = det_Ay / det_A;  // sy : m
         auto sz = det_Az / det_A;  // sz : n
 
-        m_logger->debug("x,y,z: ({},{},{})", sx, sy, sz);
-        m_logger->debug("xp: ({},{},{})",
-                indeces[p1[0]] + svi1*sy + svi2*sz,
-                indeces[p1[1]] + svj1*sy + svj2*sz,
-                indeces[p1[2]] + svk1*sy + svk2*sz);
-        m_logger->debug("xp: ({},{},{})",
-                static_cast<real>(i0) + di*sx,
-                static_cast<real>(j0) + dj*sx,
-                static_cast<real>(k0) + dk*sx);
+        // m_logger->debug("{:6f} < eps < {6f}", -eps, 1.0 + eps);
+        // m_logger->debug("x,y,z: ({:6f},{:6f},{:6f})", sx, sy, sz);
+        // m_logger->debug("xp: ({},{},{})",
+        //        indeces[p1[0]] + svi1*sy + svi2*sz,
+        //        indeces[p1[1]] + svj1*sy + svj2*sz,
+        //        indeces[p1[2]] + svk1*sy + svk2*sz);
+        // m_logger->debug("xp: ({},{},{})",
+        //        static_cast<real>(i0) + di*sx,
+        //        static_cast<real>(j0) + dj*sx,
+        //        static_cast<real>(k0) + dk*sx);
 
-        blocked = sx > -0.0-eps && sx < 1.0 + eps
-                && sy > -0.0-eps && sy < 1.0 + eps
-                && sz > -0.0-eps && sz < 1.0 + eps;
+        // m_logger->debug("{}", sx >= -eps && sx <= 1.0 + eps);
+        // m_logger->debug("{}", sy >= -eps && sy <= 1.0 + eps);
+        // m_logger->debug("{}", sz >= -eps && sz <= 1.0 + eps);
+        blocked = sx >= -eps && sx <= 1.0 + eps
+                && sy >= -eps && sy <= 1.0 + eps
+                && sz >= -eps && sz <= 1.0 + eps;
 
         // std::cout << di << "," << i << std::endl;
         // std::cout << dj << "," << j << std::endl;
@@ -198,14 +199,13 @@ bool GaussFunction::test_obstacle_blocks(int i0, int j0, int k0,
     return false;
 }
 
-bool GaussFunction::test_obstacles_blocks(int level,
-        int i0, int j0, int k0,
+bool GaussFunction::test_obstacles_blocks(int i0, int j0, int k0,
         int i, int j, int k,
-        Obstacle** obst_list, int obst_size) {
+        Obstacle** obst_list, size_t obst_size) {
     for (auto obst_id=0; obst_id < obst_size; ++obst_id) {
         bool blocked = GaussFunction::test_obstacle_blocks(i0, j0, k0,
                 i, j, k,
-                (obst_list[level][obst_id]));
+                *(obst_list[obst_id]));
         if (blocked) {
             return true;
         }
@@ -277,10 +277,14 @@ void GaussFunction::create_spatial_values(real HRR, real cp,
         real dj = (j0 - j);
         real dk = (k0 - k);
 
-        bool blocked = test_obstacles_blocks(level,
-                i0, j0, k0,
+        bool blocked = test_obstacles_blocks(i0, j0, k0,
                 i, j, k,
-                *obst_list, obst_size);
+                obst_list[level], obst_size);
+        if (blocked) {
+            d_out[idx] = 0.0;
+            continue;
+        }
+
         real x_i = dx * di;
         real y_j = dy * dj;
         real z_k = dz * dk;
@@ -288,15 +292,7 @@ void GaussFunction::create_spatial_values(real HRR, real cp,
         real expr = std::exp(-(r_sigma_x_2 * (x_i * x_i)
                                 + r_sigma_y_2 * (y_j * y_j)
                                 + r_sigma_z_2 * (z_k * z_k)));
-
-        if (blocked) {
-            // std::cout << "XXX" << i << "," << j << "," << k << ",0" << std::endl;
-            d_out[idx] = 0.0;
-            continue;
-        } else {
-            // std::cout << "XXX" << i << "," << j << "," << k << ",1" << std::endl;
-            d_out[idx] = expr;
-        }
+        d_out[idx] = expr;
 
         V += expr * dx * dy * dz;
     }

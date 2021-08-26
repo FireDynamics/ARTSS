@@ -20,20 +20,15 @@ class GaussFunction: public ISourceFunction {
             real x0, real y0, real z0,
             real sigma_x, real sigma_y, real sigma_z, real tau);
 
-    GaussFunction(real HRR, real cp,
-            real x0, real y0, real z0,
-            real sigma_x, real sigma_y, real sigma_z, real tau,
-            std::shared_ptr<spdlog::logger> logger);
-
     ~GaussFunction();
 
     void update_source(Field *out, real t_cur) override;
 
-    bool test_obstacles_blocks(int level,
+    static bool test_obstacles_blocks(
             int i0, int j0, int k0,
             int i, int j, int k,
-            Obstacle** obst_list, int obst_id);
-    bool test_obstacle_blocks(int i0, int j0, int k0,
+            Obstacle** obst_list, size_t obst_size);
+    static bool test_obstacle_blocks(int i0, int j0, int k0,
             int i, int j, int k,
             const Obstacle &obst);
 
