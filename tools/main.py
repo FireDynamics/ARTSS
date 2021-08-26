@@ -29,13 +29,14 @@ if __name__ == '__main__':
     domain.print_info()
     domain.print_debug()
 
-    t_cur = 0.3
+    t_cur = 0.08
     fields = reader.read_field_data(t_cur)
-    field = change_something(domain, fields['T'])
-    fields['T'] = field
-    file_name = 'test.txt'
-    reader.write_field_data(file_name, fields, t_cur)
+    if len(fields.keys()) > 0:
+        field = change_something(domain, fields['T'])
+        fields['T'] = field
+        file_name = 'test.txt'
+        reader.write_field_data(file_name, fields, t_cur)
 
-    client = TCP_client.TCPClient()
-    client.connect()
-    client.send_message(create_message(t_cur, file_name))
+        client = TCP_client.TCPClient()
+        client.connect()
+        client.send_message(create_message(t_cur, file_name))
