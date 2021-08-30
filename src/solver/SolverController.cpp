@@ -40,7 +40,7 @@ SolverController::SolverController() {
 #ifndef BENCHMARKING
     m_logger->info("Start initialising....");
 #endif
-    set_up_sources(string_solver);
+    set_up_sources();
     set_up_fields(string_solver);
     // TODO unclean, first updating device to apply boundary and then updating host to create temporary fields.
     m_field_controller->update_device();
@@ -64,7 +64,7 @@ SolverController::~SolverController() {
     delete source_concentration;
 }
 
-void SolverController::set_up_sources(const std::string &string_solver) {
+void SolverController::set_up_sources() {
     auto params = Parameters::getInstance();
     // source of temperature
     if (m_has_temperature) {
@@ -112,10 +112,9 @@ void SolverController::set_up_sources(const std::string &string_solver) {
         }
         bool has_noise = params->get("solver/temperature/source/random") == XML_TRUE;
         if (has_noise) {
-            auto params = Parameters::getInstance();
             real range = params->get_real("solver/temperature/source/random/range");  // +- range of random numbers
-            bool has_custom_seed = params->get("solver/temperature/source/random/custom_seed") == "Yes";
-            bool has_custom_steps = params->get("solver/temperature/source/random/custom_steps") == "Yes";
+            bool has_custom_seed = params->get("solver/temperature/source/random/custom_seed") == XML_TRUE;
+            bool has_custom_steps = params->get("solver/temperature/source/random/custom_steps") == XML_TRUE;
 
             int seed = -1;
             if (has_custom_seed) {
@@ -238,7 +237,7 @@ void SolverController::init_solver(const std::string &string_solver) {
 void SolverController::set_up_fields(const std::string &string_solver) {
     auto params = Parameters::getInstance();
     std::string string_init_usr_fct = params->get("initial_conditions/usr_fct");
-    bool random = params->get("initial_conditions/random") == "Yes";
+    bool random = params->get("initial_conditions/random") == XML_TRUE;
 
     if (string_init_usr_fct == FunctionNames::GaussBubble) {
         if (string_solver == SolverTypes::AdvectionSolver) {
@@ -494,9 +493,9 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 void SolverController::call_random(Field *field) {
     auto params = Parameters::getInstance();
     real range = params->get_real("initial_conditions/random/range");  // +- range of random numbers
-    bool is_absolute = params->get("initial_conditions/random/absolute") == "Yes";
-    bool has_custom_seed = params->get("initial_conditions/random/custom_seed") == "Yes";
-    bool has_custom_steps = params->get("initial_conditions/random/custom_steps") == "Yes";
+    bool is_absolute = params->get("initial_conditions/random/absolute") == XML_TRUE;
+    bool has_custom_seed = params->get("initial_conditions/random/custom_seed") == XML_TRUE;
+    bool has_custom_steps = params->get("initial_conditions/random/custom_steps") == XML_TRUE;
 
     int seed = -1;
     if (has_custom_seed) {
