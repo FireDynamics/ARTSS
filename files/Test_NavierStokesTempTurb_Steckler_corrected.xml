@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ARTSS>
   <physical_parameters>
-    <t_end> 10. </t_end>  <!-- simulation end time -->
+    <t_end> 20. </t_end>  <!-- simulation end time -->
     <dt> 0.05 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
     <nu> 3.1e-5 </nu>  <!-- kinematic viscosity -->
     <beta> 3.34e-3 </beta>  <!-- thermal expansion coefficient -->
@@ -90,37 +90,37 @@
   </boundaries>
   <obstacles enabled="Yes">
     <obstacle name="left wall"> <!-- left wall -->
-      <geometry ox1="-1.6625" ox2="-1.4" oy1="0." oy2="2.18" oz1="-1.4" oz2="1.4"/>
+      <geometry ox1="-1.8" ox2="-1.4" oy1="0." oy2="2.18" oz1="-1.4" oz2="1.4"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="ceiling"> <!-- ceiling -->
-      <geometry ox1="-1.6625" ox2="1.6625" oy1="2.18" oy2="2.3796875" oz1="-1.6625" oz2="1.6625"/>
+      <geometry ox1="-1.8" ox2="1.8" oy1="2.18" oy2="2.3796875" oz1="-1.6625" oz2="1.6625"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="back wall"> <!-- back wall -->
-      <geometry ox1="-1.6625" ox2="1.6625" oy1="0." oy2="2.18" oz1="1.4" oz2="1.6625"/>
+      <geometry ox1="-1.8" ox2="1.6625" oy1="0." oy2="2.18" oz1="1.4" oz2="1.6625"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="front wall"> <!-- front wall -->
-      <geometry ox1="-1.6625" ox2="1.6625" oy1="0." oy2="2.18" oz1="-1.6625" oz2="-1.4"/>
+      <geometry ox1="-1.8" ox2="1.6625" oy1="0." oy2="2.18" oz1="-1.6625" oz2="-1.4"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="right wall left from door"> <!-- right wall -->
-      <geometry ox1="1.4" ox2="1.6625" oy1="0." oy2="2.18" oz1="-1.4" oz2="-0.43"/>
+      <geometry ox1="1.4" ox2="1.8" oy1="0." oy2="2.18" oz1="-1.4" oz2="-0.43"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="right wall above door"> <!-- right wall -->
-      <geometry ox1="1.4" ox2="1.6625" oy1="1.83" oy2="2.18" oz1="-0.43" oz2="0.43"/>
+      <geometry ox1="1.4" ox2="1.8" oy1="1.83" oy2="2.18" oz1="-0.43" oz2="0.43"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="right wall right from door"> <!-- right wall -->
-      <geometry ox1="1.4" ox2="1.6625" oy1="0." oy2="2.18" oz1="0.43" oz2="1.4"/>
+      <geometry ox1="1.4" ox2="1.8" oy1="0." oy2="2.18" oz1="0.43" oz2="1.4"/>
       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
