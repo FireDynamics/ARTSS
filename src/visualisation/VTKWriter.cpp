@@ -33,6 +33,110 @@ void VTKWriter::write_analytical(const Solution& solution, const std::string& fi
     VTKWriter::vtkPrepareAndWrite((filename + ending).c_str(), u, v, w, p, T);
 }
 
+/**
+ * Only for debugging
+ * @param field
+ * @param filename
+ * @param var_name
+ */
+void VTKWriter::write_field(const Field &field, const std::string &file_name, const std::string& var_name) {
+    const char *filename = (file_name + ending).c_str();
+    Domain *domain = Domain::getInstance();
+    real X1 = domain->get_X1();
+    real Y1 = domain->get_Y1();
+    real Z1 = domain->get_Z1();
+
+    size_t level = field.get_level();
+    int Nx = static_cast<int>(domain->get_Nx(level));
+    int Ny = static_cast<int>(domain->get_Ny(level));
+    int Nz = static_cast<int>(domain->get_Nz(level));
+
+    real dx = domain->get_dx(level);
+    real dy = domain->get_dy(level);
+    real dz = domain->get_dz(level);
+
+    int size = static_cast<int>(domain->get_size());
+
+// Initialize variables
+    int size_vars = 7; // Number of variables
+    int var_dims[] = {1, 1, 1, 1, 1, 1, 1}; // Dimensions of variables
+    int centering[] = {0, 0, 0, 0, 0, 0, 0}; // Whether the variables are centered in a cell: 0 for zonal!
+    const char *var_names[] = {"x-coords", "y-coords", "z-coords",
+                               "i", "j", "k",
+                               var_name.c_str()};
+
+    int dims[] = {Nx + 1, Ny + 1, Nz + 1};            // Dimensions of the rectilinear array (+1 for zonal values)
+
+    auto *x_coords = new float[(Nx + 1)];
+    auto *y_coords = new float[(Ny + 1)];
+    auto *z_coords = new float[(Nz + 1)];
+
+    // Initialize grid
+    // faces of the grid cells
+    for (int i = 0; i < Nx + 1; i++) {
+        x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
+    }
+
+    for (int j = 0; j < Ny + 1; j++) {
+        y_coords[j] = static_cast<float> (Y1 + (j - 1) * dy);
+    }
+
+    for (int k = 0; k < Nz + 1; k++) {
+        z_coords[k] = static_cast<float> (Z1 + (k - 1) * dz);
+    }
+
+    // centers of the grid cells
+    auto *x_centres = new float[size];
+    auto *y_centres = new float[size];
+    auto *z_centres = new float[size];
+
+    auto *index_i = new float[size];
+    auto *index_j = new float[size];
+    auto *index_k = new float[size];
+
+    // velocities
+    auto *field_of_var_name = new float[size];
+
+// Cast variables to floats
+    for (int k = 0; k < Nz; k++) {
+        for (int j = 0; j < Ny; j++) {
+            for (int i = 0; i < Nx; i++) {
+                size_t index = IX(i, j, k, Nx, Ny);
+                x_centres[index] = x_coords[i] + static_cast<float> (0.5 * dx);
+                y_centres[index] = y_coords[j] + static_cast<float> (0.5 * dy);
+                z_centres[index] = z_coords[k] + static_cast<float> (0.5 * dz);
+                index_i[index] = static_cast<float> (i);
+                index_j[index] = static_cast<float> (j);
+                index_k[index] = static_cast<float> (k);
+                field_of_var_name[index] = static_cast<float> (field.data[index]);
+            }
+        }
+    }
+
+    // Summarize pointers to variables in an array
+    float *vars[] = {static_cast<float *> (x_centres),
+                     static_cast<float *> (y_centres),
+                     static_cast<float *> (z_centres),
+                     static_cast<float *> (index_i),
+                     static_cast<float *> (index_j),
+                     static_cast<float *> (index_k),
+                     static_cast<float *> (field_of_var_name)};
+
+    // Use visit_writer to write data on mesh
+    write_rectilinear_mesh(filename, 1, dims, x_coords, y_coords, z_coords, size_vars, var_dims, centering, var_names, vars);
+
+    // Clean up
+    delete[] (x_coords);
+    delete[] (y_coords);
+    delete[] (z_coords);
+    delete[] (x_centres);
+    delete[] (y_centres);
+    delete[] (z_centres);
+    delete[] index_i;
+    delete[] index_j;
+    delete[] index_k;
+}
+
 //================================= Visualization (VTK) ==================================
 // ***************************************************************************************
 /// \brief  Prepares the (numerical) arrays in a correct format and writes the structured grid and its variables
