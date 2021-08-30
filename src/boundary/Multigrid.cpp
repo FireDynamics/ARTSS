@@ -734,24 +734,6 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
             && k2_coarse - k1_coarse + 1 >= domain->get_nz(level) - 2) {
             m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in z-direction at level {}", obstacle_fine->get_name(), level);
         }
-        if (i2_coarse - i1_coarse <= 1) {
-            m_logger->warn("Obstacle '{}' is too small with size 1 in x-direction at level {}. "
-                           "Consider less multigrid level, a higher resolution at the finest grid "
-                           "or expanding the obstacle. Otherwise only the right boundary condition "
-                           "will be applied.", obstacle_fine->get_name(), level);
-        }
-        if (j2_coarse - j1_coarse <= 1) {
-            m_logger->warn("Obstacle '{}' is too small with size 1 in y-direction at level {}. "
-                           "Consider less multigrid level, a higher resolution at the finest grid "
-                           "or expanding the obstacle. Otherwise only the top boundary condition "
-                           "will be applied.", obstacle_fine->get_name(), level);
-        }
-        if (k2_coarse - k1_coarse <= 1) {
-            m_logger->warn("Obstacle '{}' is too small with size 1 in z-direction at level {}. "
-                           "Consider less multigrid level, a higher resolution at the finest grid "
-                           "or expanding the obstacle. Otherwise only the back boundary condition "
-                           "will be applied.", obstacle_fine->get_name(), level);
-        }
 
         for (size_t c = 0; c < id; c++) {
             if (obstacle_list_coarse[c]->has_overlap(i1_coarse, i2_coarse, j1_coarse, j2_coarse, k1_coarse, k2_coarse)) {
@@ -764,6 +746,26 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
         auto obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse,
                                             i2_coarse, j2_coarse, k2_coarse,
                                             level, obstacle_fine->get_name());
+#ifndef BENCHMARKING
+        if (obstacle_coarse->get_stride_x() <= 1) {
+            m_logger->warn("Obstacle '{}' is too small with size 1 in x-direction at level {}. "
+                           "Consider less multigrid level, a higher resolution at the finest grid "
+                           "or expanding the obstacle. Otherwise only the right boundary condition "
+                           "will be applied.", obstacle_fine->get_name(), level);
+        }
+        if (obstacle_coarse->get_stride_y() <= 1) {
+            m_logger->warn("Obstacle '{}' is too small with size 1 in y-direction at level {}. "
+                           "Consider less multigrid level, a higher resolution at the finest grid "
+                           "or expanding the obstacle. Otherwise only the top boundary condition "
+                           "will be applied.", obstacle_fine->get_name(), level);
+        }
+        if (obstacle_coarse->get_stride_z() <= 1) {
+            m_logger->warn("Obstacle '{}' is too small with size 1 in z-direction at level {}. "
+                           "Consider less multigrid level, a higher resolution at the finest grid "
+                           "or expanding the obstacle. Otherwise only the back boundary condition "
+                           "will be applied.", obstacle_fine->get_name(), level);
+        }
+#endif
         *(obstacle_list_coarse + id) = obstacle_coarse;
 
         size_t index = level * m_number_of_obstacle_objects + id + 1;
