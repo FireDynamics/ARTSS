@@ -52,6 +52,7 @@ class Field {
 #pragma acc wait
         return *this;
     }
+
     Field &operator+=(const Field &rhs) {
         auto rhs_data = rhs.data;
 #pragma acc parallel loop independent present(this->data[:m_size], rhs_data[:m_size]) async
@@ -70,6 +71,7 @@ class Field {
 #pragma acc wait
         return *this;
     }
+
     Field &operator*=(const Field &rhs) {
         auto rhs_data = rhs.data;
 #pragma acc parallel loop independent present(this->data[:m_size], rhs_data[:m_size]) async
