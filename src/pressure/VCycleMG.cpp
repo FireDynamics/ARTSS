@@ -78,7 +78,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 #pragma acc enter data copyin(data_residuum0[:bsize_residuum0])
 
         // build residuum1
-        auto r1 = new Field(FieldType::P, 0.0, residuum1[i]->get_level());
+        auto r1 = new Field(FieldType::P, 0.0, i + 1);
         residuum1.push_back(r1);
 
         real *data_residuum1 = r1->data;
@@ -87,19 +87,19 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 #pragma acc enter data copyin(data_residuum1[:bsize_residuum1])
 
         //  build error1
-        Field *e1 = new Field(FieldType::P, 0.0, i + 1);
+        auto e1 = new Field(FieldType::P, 0.0, i + 1);
         error1.push_back(e1);
 
-        auto d_err1 = e1->data;
+        real *d_err1 = e1->data;
         size_t bsize_err1 = domain->get_size(e1->get_level());
 
 #pragma acc enter data copyin(d_err1[:bsize_err1])
 
         // build mg_temporal_solution
-        Field *mg = new Field(FieldType::P, 0.0, i + 1); //new field to prevent aliasing
+        auto mg = new Field(FieldType::P, 0.0, i + 1); //new field to prevent aliasing
         mg_temporal_solution.push_back(mg);
 
-        auto data_mg_temporal_solution = mg->data;
+        real *data_mg_temporal_solution = mg->data;
         size_t bsize_mg_temporal_solution = domain->get_size(mg->get_level());
 
 #pragma acc enter data copyin(data_mg_temporal_solution[:bsize_mg_temporal_solution])
@@ -108,24 +108,24 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 //  build err0
     err0.resize(levels + 1);
 
-    Field *e00 = new Field(FieldType::P, 0.0, error1[0]->get_level());
+    auto e00 = new Field(FieldType::P, 0.0, error1[0]->get_level());
 
     err0[0] = e00;
 
-    auto d_err00 = e00->data;
+    real *d_err00 = e00->data;
     size_t bsize_err00 = domain->get_size(e00->get_level());
 
 #pragma acc enter data copyin(d_err00[:bsize_err00])
 
     //building Fields for level
     // levels going down
-    for (int i=levels; i>0; --i) {
+    for (size_t i = levels; i > 0; --i) {
         // build err0
-        Field *e0 = new Field(FieldType::P, 0.0, error1[i - 1]->get_level());
+        auto e0 = new Field(FieldType::P, 0.0, error1[i - 1]->get_level());
 
         err0[i] = e0;
 
-        auto d_err0 = err0[i]->data;
+        real *d_err0 = err0[i]->data;
         size_t bsize_err0 = domain->get_size(err0[i]->get_level());
 
 #pragma acc enter data copyin(d_err0[:bsize_err0])
