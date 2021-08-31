@@ -85,6 +85,7 @@ YEND=0.1556 #physical domain parameter Y2
 ZSTART=-0.1556 #physical domain parameter Z1
 ZEND=0.1556 #physical domain parameter Z2
 
+COMPUTATIONALDOMAIN=0
 xSTART=-0.1556 #computational domain parameter x1
 xEND=0.1556 #computational domain parameter x2
 ySTART=-0.1556 #computational domain parameter y1
@@ -172,6 +173,8 @@ ${YELLOW}--burgers${NC}                \tcreate xml file with parameter for Burg
 
 ${YELLOW}--cn${NC}
 ${YELLOW}--calcnlevel${NC}\tcalculate nlevel
+
+${YELLOW}--computationaldomain${NC}\tenable computational domain
 
 ${YELLOW}--conadvtype${NC}
 ${YELLOW}--conadvectiontype${NC}       \tset concentration advection discretization method (default: $CONADVECTIONTYPE)
@@ -665,9 +668,12 @@ else
   WRITETO="$WRITETO
     </solution>
   </solver>"
-  WRITETO="$WRITETO
 
-  <domain_parameters>
+  if [ $COMPUTATIONALDOMAIN -eq 1 ]
+  then
+    WRITETO="$WRITETO
+
+  <domain_parameters enable_computational_domain=\"Yes\">
     <X1> $XSTART </X1>  <!-- physical domain -->
     <X2> $XEND </X2>
     <Y1> $YSTART </Y1>
@@ -685,7 +691,22 @@ else
     <nz> $NZ </nz>
   </domain_parameters>
 "
+  else
+    WRITETO="$WRITETO
 
+  <domain_parameters enable_computational_domain=\"No\">
+    <X1> $XSTART </X1>  <!-- physical domain -->
+    <X2> $XEND </X2>
+    <Y1> $YSTART </Y1>
+    <Y2> $YEND </Y2>
+    <Z1> $ZSTART </Z1>
+    <Z2> $ZEND </Z2>
+    <nx> $NX </nx>  <!-- grid resolution (number of cells excl. ghost cells) -->
+    <ny> $NY </ny>
+    <nz> $NZ </nz>
+  </domain_parameters>
+"
+  fi
     if [ $ADAPT_PAR -eq 0 ]
     then
       WRITETO=${WRITETO}"\n"$(cat $AFILE)
@@ -891,6 +912,10 @@ do
       ;;
     --cn|--calcnlevel)
       CALCNLEVEL=0
+      shift
+      ;;
+    --computationaldomain)
+      COMPUTATIONALDOMAIN=1
       shift
       ;;
     --conadvtype|--conadvectiontype)
@@ -1247,6 +1272,7 @@ do
       ;;
     --xstartc|--xstartcomputational)
       xSTART=$2
+      COMPUTATIONALDOMAIN=1
       shift
       shift
       ;;
@@ -1263,6 +1289,7 @@ do
       ;;
     --xendc|--xendcomputational)
       xEND=$2
+      COMPUTATIONALDOMAIN=1
       shift
       shift
       ;;
@@ -1290,6 +1317,7 @@ do
       ;;
     --ystartc|--ystartcomputational)
       ySTART=$2
+      COMPUTATIONALDOMAIN=1
       shift
       shift
       ;;
@@ -1306,6 +1334,7 @@ do
       ;;
     --yendc|--yendcomputational)
       yEND=$2
+      COMPUTATIONALDOMAIN=1
       shift
       shift
       ;;
@@ -1334,6 +1363,7 @@ do
       ;;
     --zstartc|--zstartcomputational)
       zSTART=$2
+      COMPUTATIONALDOMAIN=1
       shift
       shift
       ;;
@@ -1344,6 +1374,7 @@ do
       ;;
     --zendc|--zendcomputational)
       zEND=$2
+      COMPUTATIONALDOMAIN=1
       shift
       shift
       ;;

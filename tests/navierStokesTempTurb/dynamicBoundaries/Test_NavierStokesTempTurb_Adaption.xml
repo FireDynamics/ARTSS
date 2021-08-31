@@ -61,7 +61,7 @@
     </solution>
   </solver>
 
-  <domain_parameters>
+  <domain_parameters enable_computational_domain="Yes">
     <X1> 0. </X1>  <!-- physical domain -->
     <X2> 128. </X2>
     <Y1> -3. </Y1>
