@@ -702,7 +702,7 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
     // TODO define lists with obstacle size
     Domain *domain = Domain::getInstance();
     Obstacle **obstacle_list_fine = *(m_MG_obstacle_object_list + (level - 1));
-    Obstacle **obstacle_list_coarse = new Obstacle *[m_number_of_obstacle_objects];
+    auto obstacle_list_coarse = new Obstacle *[m_number_of_obstacle_objects];
     *(m_MG_obstacle_object_list + level) = obstacle_list_coarse;
     *(m_size_MG_obstacle_index_list_level + level) = 0;
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
@@ -724,30 +724,48 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
 #ifndef BENCHMARKING
         if (i2_fine - i1_fine + 1 < domain->get_nx(level - 1) - 2
             && i2_coarse - i1_coarse + 1 >= domain->get_nx(level) - 2) {
-            m_logger->warn("Be cautious! Obstacle fills up inner cells in x-direction at level {}", level);
+            m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in x-direction at level {}", obstacle_fine->get_name(), level);
         }
         if (j2_fine - j1_fine + 1 < domain->get_ny(level - 1) - 2
             && j2_coarse - j1_coarse + 1 >= domain->get_ny(level) - 2) {
-            m_logger->warn("Be cautious! Obstacle fills up inner cells in y-direction at level {}", level);
+            m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in y-direction at level {}", obstacle_fine->get_name(), level);
         }
         if (k2_fine - k1_fine + 1 < domain->get_nz(level - 1) - 2
             && k2_coarse - k1_coarse + 1 >= domain->get_nz(level) - 2) {
-            m_logger->warn("Be cautious! Obstacle fills up inner cells in z-direction at level {}", level);
+            m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in z-direction at level {}", obstacle_fine->get_name(), level);
         }
 
         for (size_t c = 0; c < id; c++) {
-            bool overlap = control_obstacle_overlap(obstacle_list_coarse[c], &i1_coarse, &i2_coarse,
-                                                    &j1_coarse, &j2_coarse, &k1_coarse, &k2_coarse);
-            if (overlap) {
+            if (obstacle_list_coarse[c]->has_overlap(i1_coarse, i2_coarse, j1_coarse, j2_coarse, k1_coarse, k2_coarse)) {
                 m_logger->debug("overlapping of obstacle {} with obstacle {} on level {}",
                                 obstacle_list_coarse[c]->get_name(), obstacle_fine->get_name(), level);
             }
         }
 #endif
 
-        Obstacle *obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse,
-                                                 i2_coarse, j2_coarse, k2_coarse,
-                                                 level, obstacle_fine->get_name());
+        auto obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse,
+                                            i2_coarse, j2_coarse, k2_coarse,
+                                            level, obstacle_fine->get_name());
+#ifndef BENCHMARKING
+        if (obstacle_coarse->get_stride_x() <= 1) {
+            m_logger->warn("Obstacle '{}' is too small with size 1 in x-direction at level {}. "
+                           "Consider less multigrid level, a higher resolution at the finest grid "
+                           "or expanding the obstacle. Otherwise only the right boundary condition "
+                           "will be applied.", obstacle_fine->get_name(), level);
+        }
+        if (obstacle_coarse->get_stride_y() <= 1) {
+            m_logger->warn("Obstacle '{}' is too small with size 1 in y-direction at level {}. "
+                           "Consider less multigrid level, a higher resolution at the finest grid "
+                           "or expanding the obstacle. Otherwise only the top boundary condition "
+                           "will be applied.", obstacle_fine->get_name(), level);
+        }
+        if (obstacle_coarse->get_stride_z() <= 1) {
+            m_logger->warn("Obstacle '{}' is too small with size 1 in z-direction at level {}. "
+                           "Consider less multigrid level, a higher resolution at the finest grid "
+                           "or expanding the obstacle. Otherwise only the back boundary condition "
+                           "will be applied.", obstacle_fine->get_name(), level);
+        }
+#endif
         *(obstacle_list_coarse + id) = obstacle_coarse;
 
         size_t index = level * m_number_of_obstacle_objects + id + 1;
@@ -779,60 +797,11 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
         size = data.size();
     }
 
-    size_t *obstacle_list_tmp = new size_t[size];
+    auto obstacle_list_tmp = new size_t[size];
     std::copy(&data[0], &data[size], obstacle_list_tmp);
     *(m_size_MG_obstacle_index_list_level + level) = size;
     *(m_MG_obstacle_index_list + level) = obstacle_list_tmp;
     return obstacle_list_coarse;
-}
-
-// ================================= control obstacle overlap ======================================
-// *************************************************************************************************
-/// \brief  control and correct when obstacles are overlapping caused by the dominant restriction
-/// \param o Obstacle to be compared to
-/// \param i1 coordinate i1 which will be corrected in case its overlapping with obstacle o
-/// \param i2 coordinate i2 which will be corrected in case its overlapping with obstacle o
-/// \param j1 coordinate j1 which will be corrected in case its overlapping with obstacle o
-/// \param j2 coordinate j2 which will be corrected in case its overlapping with obstacle o
-/// \param k1 coordinate k1 which will be corrected in case its overlapping with obstacle o
-/// \param k2 coordinate k2 which will be corrected in case its overlapping with obstacle o
-/// \return return true if at least one coordinate was corrected
-// *************************************************************************************************
-bool Multigrid::control_obstacle_overlap(
-        Obstacle *o, size_t *i1, size_t *i2, size_t *j1, size_t *j2, size_t *k1, size_t *k2) {
-    bool changed = false;
-    size_t o_i1 = o->get_coordinates_i1();
-    size_t o_i2 = o->get_coordinates_i2();
-    size_t o_j1 = o->get_coordinates_j1();
-    size_t o_j2 = o->get_coordinates_j2();
-    size_t o_k1 = o->get_coordinates_k1();
-    size_t o_k2 = o->get_coordinates_k2();
-
-    if (o_i1 <= *i1 && *i1 <= o_i2) {
-        *i1 = o_i2 + 1;
-        changed = true;
-    }
-    if (o_i1 <= *i2 && *i2 <= o_i2) {
-        *i2 = o_i1 - 1;
-        changed = true;
-    }
-    if (o_j1 <= *j1 && *j1 <= o_j2) {
-        *j1 = o_j2 + 1;
-        changed = true;
-    }
-    if (o_j1 <= *j2 && *j2 <= o_j2) {
-        *j2 = o_j1 - 1;
-        changed = true;
-    }
-    if (o_k1 <= *k1 && *k1 <= o_k2) {
-        *k1 = o_k2 + 1;
-        changed = true;
-    }
-    if (o_k1 <= *k2 && *k2 <= o_k2) {
-        *k2 = o_k1 - 1;
-        changed = true;
-    }
-    return changed;
 }
 
 // ================================= Send lists to GPU =============================================

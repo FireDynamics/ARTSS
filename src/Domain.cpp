@@ -25,18 +25,29 @@ Domain::Domain() {
     m_ny[0] = static_cast<size_t> (params->get_int("domain_parameters/ny")) + 2;
     m_nz[0] = static_cast<size_t> (params->get_int("domain_parameters/nz")) + 2;
 
-    m_x1 = params->get_real("domain_parameters/x1");
-    m_x2 = params->get_real("domain_parameters/x2");
-    m_y1 = params->get_real("domain_parameters/y1");
-    m_y2 = params->get_real("domain_parameters/y2");
-    m_z1 = params->get_real("domain_parameters/z1");
-    m_z2 = params->get_real("domain_parameters/z2");
     m_X1 = params->get_real("domain_parameters/X1");
     m_X2 = params->get_real("domain_parameters/X2");
     m_Y1 = params->get_real("domain_parameters/Y1");
     m_Y2 = params->get_real("domain_parameters/Y2");
     m_Z1 = params->get_real("domain_parameters/Z1");
     m_Z2 = params->get_real("domain_parameters/Z2");
+
+    bool has_computational_domain = (params->get("domain_parameters/enable_computational_domain") == XML_TRUE);
+    if (has_computational_domain){
+        m_x1 = params->get_real("domain_parameters/x1");
+        m_x2 = params->get_real("domain_parameters/x2");
+        m_y1 = params->get_real("domain_parameters/y1");
+        m_y2 = params->get_real("domain_parameters/y2");
+        m_z1 = params->get_real("domain_parameters/z1");
+        m_z2 = params->get_real("domain_parameters/z2");
+    } else {
+        m_x1 = m_X1;
+        m_x2 = m_X2;
+        m_y1 = m_Y1;
+        m_y2 = m_Y2;
+        m_z1 = m_Z1;
+        m_z2 = m_Z2;
+    }
 
     calc_MG_values();
 #ifndef BENCHMARKING
