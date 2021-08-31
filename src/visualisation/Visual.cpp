@@ -17,7 +17,7 @@
 
 Visual::Visual(const Solution &solution) : m_solution(solution) {
     auto params = Parameters::getInstance();
-    m_filename = remove_extension(params->get_filename());
+    m_filename = Utility::remove_extension(params->get_filename());
 
     m_save_csv = (params->get("visualisation/save_csv") == "Yes");
     m_save_vtk = (params->get("visualisation/save_vtk") == "Yes");
@@ -90,15 +90,4 @@ std::string Visual::create_filename(std::string filename, int counter, bool anal
     tstep << std::setw(6) << std::setfill('0') << counter;
     fname.append(tstep.str());
     return fname;
-}
-
-//================================= Remove extension ==================================
-// ***************************************************************************************
-/// \brief  Removes extension from filename
-/// \param  filename    xml-file name (via argument)
-// ***************************************************************************************
-std::string Visual::remove_extension(const std::string &filename) {
-    size_t lastdot = filename.find_last_of('.');
-    if (lastdot == std::string::npos) return filename;
-    return filename.substr(0, lastdot);
 }

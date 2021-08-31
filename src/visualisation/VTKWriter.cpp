@@ -7,6 +7,7 @@
 #include "VTKWriter.h"
 #include "../Domain.h"
 #include "visit_writer.h"  //( https://wci.llnl.gov/codes/visit/ )
+#include "Visual.h"
 
 static std::string ending = ".vtk";
 
@@ -40,7 +41,9 @@ void VTKWriter::write_analytical(const Solution& solution, const std::string& fi
  * @param var_name
  */
 void VTKWriter::write_field(const Field &field, const std::string &file_name, const std::string& var_name) {
-    const char *filename = (file_name + ending).c_str();
+    std::string xml_file_name = Utility::remove_extension(Parameters::getInstance()->get_filename());
+    std::string tmp = xml_file_name + "_" + file_name + ending;
+    const char *filename = tmp.c_str();
     Domain *domain = Domain::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();

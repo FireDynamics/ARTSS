@@ -31,9 +31,9 @@ private:
     void Prolongate(Field* out, Field* in, size_t level, bool sync = true);
     void Solve( Field* out, Field* tmp, Field* b, size_t level, bool sync = true);
 
-    int levels;
-    int cycles;
-    int relaxs;
+    size_t levels;
+    size_t cycles;
+    size_t relaxs;
 
     real m_dsign;
     real m_w;

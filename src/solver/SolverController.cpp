@@ -35,34 +35,21 @@ SolverController::SolverController() {
 #endif
     auto params = Parameters::getInstance();
     m_field_controller = new FieldController();
-    int counter = 0;
-    VTKWriter::write_numerical(*m_field_controller, "debug_" + std::to_string(counter));
-    counter++;
     std::string string_solver = params->get("solver/description");
     init_solver(string_solver);
-    VTKWriter::write_numerical(*m_field_controller, "debug_" + std::to_string(counter));
-    counter++;
 #ifndef BENCHMARKING
     m_logger->info("Start initialising....");
 #endif
     set_up_sources(string_solver);
-    VTKWriter::write_numerical(*m_field_controller, "debug_" + std::to_string(counter));
-    counter++;
     set_up_fields(string_solver);
-    VTKWriter::write_numerical(*m_field_controller, "debug_" + std::to_string(counter));
-    counter++;
     // TODO unclean, first updating device to apply boundary and then updating host to create temporary fields.
     m_field_controller->update_device();
 #ifndef BENCHMARKING
     m_logger->debug("set up boundary");
 #endif
     m_field_controller->set_up_boundary();
-    VTKWriter::write_numerical(*m_field_controller, "debug_" + std::to_string(counter));
-    counter++;
     m_field_controller->update_host();
     m_field_controller->set_up_temporary_fields();
-    VTKWriter::write_numerical(*m_field_controller, "debug_" + std::to_string(counter));
-    counter++;
 
     source_velocity = nullptr;
     source_temperature = nullptr;

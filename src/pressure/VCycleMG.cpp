@@ -14,6 +14,7 @@
 #include "../Domain.h"
 #include "../solver/SolverSelection.h"
 #include "../utility/Utility.h"
+#include "../visualisation/VTKWriter.h"
 
 
 // =============================== Constructor ===============================
@@ -35,69 +36,52 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
     relaxs = params->get_int("solver/pressure/diffusion/n_relax");
 
     m_dsign = -1.;
-    m_w = 2. / 3.;
     m_w = params->get_real("solver/pressure/diffusion/w");
 
-    // copies of out and b to prevent aliasing
-    auto d_out = out->data;
-    auto s_out = domain->get_size(out->get_level());
-    auto t_out = out->get_type();
-    auto d_b = b->data;
-    auto s_b = domain->get_size(b->get_level());
-    auto t_b = b->get_type();
-
-    Field *out_err1 = new Field(t_out, 0.0);
-    Field *out_tmp = new Field(t_out, 0.0);
-    Field *b_res1 = new Field(t_b, 0.0);
-
-    for (size_t i = 0; i < s_out; ++i) {
-        out_err1->data[i] = d_out[i];
-        out_tmp->data[i] = d_out[i];
-    }
-    for (size_t i = 0; i < s_b; ++i) {
-        b_res1->data[i] = d_b[i];
-    }
+    auto out_err1 = new Field(*out);
+    auto out_tmp = new Field(*out);
+    auto b_res1 = new Field(*b);
 
 // residuum
     residuum1.push_back(b_res1);
-    auto data_residuum1 = residuum1.back()->data;
-    size_t bsize_residuum1 = domain->get_size(residuum1.back()->get_level());
+    real *data_residuum1_level0 = residuum1.back()->data;
+    size_t bsize_residuum1_level0 = domain->get_size();
 
-#pragma acc enter data copyin(data_residuum1[:bsize_residuum1])
+#pragma acc enter data copyin(data_residuum1_level0[:bsize_residuum1_level0])
 
 // error
     error1.push_back(out_err1);
-    auto data_err1 = error1.back()->data;
-    size_t bsize_err1 = domain->get_size(error1.back()->get_level());
+    real *data_err1_level0 = error1.back()->data;
+    size_t bsize_err1_level0 = domain->get_size();
 
-#pragma acc enter data copyin(data_err1[:bsize_err1])
+#pragma acc enter data copyin(data_err1_level0[:bsize_err1_level0])
 
 // temporal solution
     mg_temporal_solution.push_back(out_tmp);
-    auto data_mg_temporal_solution = mg_temporal_solution.back()->data;
-    size_t bsize_mg_temporal_solution = domain->get_size(mg_temporal_solution.back()->get_level());
+    real *data_mg_temporal_solution_level0 = mg_temporal_solution.back()->data;
+    size_t bsize_mg_temporal_solution_level0 = domain->get_size();
 
-#pragma acc enter data copyin(data_mg_temporal_solution[:bsize_mg_temporal_solution])
+#pragma acc enter data copyin(data_mg_temporal_solution_level0[:bsize_mg_temporal_solution_level0])
 
 
     //building Fields for level + sending to GPU
     // levels going up
-    for (int i = 0; i < levels; ++i) {
+    for (size_t i = 0; i < levels; ++i) {
 
         // build residuum0
-        Field *r0 = new Field(FieldType::P, 0.0, i);
+        auto r0 = new Field(FieldType::P, 0.0, error1[i]->get_level());
         residuum0.push_back(r0);
 
-        auto data_residuum0 = r0->data;
+        real *data_residuum0 = r0->data;
         size_t bsize_residuum0 = domain->get_size(r0->get_level());
 
 #pragma acc enter data copyin(data_residuum0[:bsize_residuum0])
 
         // build residuum1
-        Field *r1 = new Field(FieldType::P, 0.0, i + 1);
+        auto r1 = new Field(FieldType::P, 0.0, residuum1[i]->get_level());
         residuum1.push_back(r1);
 
-        auto data_residuum1 = r1->data;
+        real *data_residuum1 = r1->data;
         size_t bsize_residuum1 = domain->get_size(r1->get_level());
 
 #pragma acc enter data copyin(data_residuum1[:bsize_residuum1])

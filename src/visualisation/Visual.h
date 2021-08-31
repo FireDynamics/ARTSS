@@ -22,7 +22,6 @@ public:
     static void write_csv(const FieldController &solver, std::string filename);
 
 private:
-    static std::string remove_extension(const std::string &filename);
 
     std::string m_filename;
     const Solution &m_solution;

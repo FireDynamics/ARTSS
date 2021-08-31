@@ -210,4 +210,15 @@ void log_minimum(Field *field, const std::string& text, const std::string& logge
 #endif
 }
 
+//================================= Remove extension ==================================
+// ***************************************************************************************
+/// \brief  Removes extension from filename
+/// \param  filename    xml-file name (via argument)
+// ***************************************************************************************
+std::string remove_extension(const std::string &filename) {
+    size_t lastdot = filename.find_last_of('.');
+    if (lastdot == std::string::npos) return filename;
+    return filename.substr(0, lastdot);
+}
+
 }  // namespace Utility
