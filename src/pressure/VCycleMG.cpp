@@ -377,59 +377,34 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
             boundary->apply_boundary(data_residuum1_level_plus_1, level + 1, type_r1, sync); // for res only Dirichlet BC
 
             // set err to zero at next level
-            // TODO(lukas) set everything to 0 ? currently the obstacle cells are excluded
-            //field_error1_level_plus_1->set_value(0);
-
-
-            // strides (since GPU needs joined list)
-            // inner start/ end index of level level + 1
-            size_t start_i = boundary->get_inner_list_level_joined_start(level + 1);
-            size_t end_i = boundary->get_inner_list_level_joined_end(level + 1) + 1;
-            // boundary start/ end index of level level + 1
-            size_t start_b = boundary->get_boundary_list_level_joined_start(level + 1);
-            size_t end_b = boundary->get_boundary_list_level_joined_end(level + 1) + 1;
-            // inner
-#pragma acc kernels present(data_err1ip[:size_err1ip], data_inner_list[start_i:(end_i-start_i)]) async
-#pragma acc loop independent
-            for (size_t j = start_i; j < end_i; ++j) {
-                const size_t idx = data_inner_list[j];
-                data_error1_level_plus_1[idx] = 0.0;
-            }
-
-            //boundary
-#pragma acc kernels present(data_err1ip[:size_err1ip], data_boundary_list[start_b:(end_b-start_b)]) async
-#pragma acc loop independent
-            for (size_t j = start_b; j < end_b; ++j) {
-                const size_t idx = data_boundary_list[j];
-                data_error1_level_plus_1[idx] = 0.0;
-            }
-
+            field_error1_level_plus_1->set_value(0);
         }
     }
 
 //===================== levels going up ====================//
     for (size_t i = max_level; i > 0; --i) {
-        Field *field_err0i = m_error0[i];
-        Field *field_err1i = m_error1[i];
-        Field *field_err1im = m_error1[i - 1];
-        Field *field_mg_tmpim = m_mg_temporal_solution[i - 1];
-        Field *field_res1im = m_residuum1[i - 1];
+        //TODO after removing the duplicate level 0 in error0 there are only 4 levels in error0, which results into an error here
+        Field *field_error0_level = m_error0[i];
+        Field *field_error1_level = m_error1[i];
+        Field *field_error1_level_minus_1 = m_error1[i - 1];
+        Field *field_mg_temporal_solution_level_minus_1 = m_mg_temporal_solution[i - 1];
+        Field *field_residuum1_level_minus_1 = m_residuum1[i - 1];
 
-        real *data_err0i = m_error0[i]->data;
-        real *data_err1i = m_error1[i]->data;
-        real *data_err1im = m_error1[i - 1]->data;
-        real *data_mg_tmpim = m_mg_temporal_solution[i - 1]->data;
-        real *data_res1im = m_residuum1[i - 1]->data;
+        real *data_error0_level = field_error0_level->data;
+        real *data_error1_level = field_error1_level->data;
+        real *data_err1_level_minus_1 = field_error1_level_minus_1->data;
+        real *data_mg_temporal_solution_level_minus_1 = field_mg_temporal_solution_level_minus_1->data;
+        real *data_residuum1_level_minus_1 = field_residuum1_level_minus_1->data;
         real *data_out = field_out->data;
 
-        size_t size_err0i = m_error0[i]->get_size();
-        size_t size_err1i = m_error1[i]->get_size();
-        size_t size_err1im = m_error1[i - 1]->get_size();
-        size_t size_mg_tmpim = m_mg_temporal_solution[i - 1]->get_size();
-        size_t size_res1im = m_residuum1[i - 1]->get_size();
+        size_t size_error0_level = field_error0_level->get_size();
+        size_t size_error1_level = field_error1_level->get_size();
+        size_t size_error1_level_minus_1 = field_error1_level_minus_1->get_size();
+        size_t size_mg_temporal_solution_level_minus_1 = field_mg_temporal_solution_level_minus_1->get_size();
+        size_t size_residuum1_level_minus_1 = field_residuum1_level_minus_1->get_size();
         size_t size_out = field_out->get_size();
 
-        FieldType type_e0 = field_err0i->get_type();
+        FieldType type_e0 = field_error0_level->get_type();
 
         // inner start/end index of level i - 1
         size_t start_i = boundary->get_inner_list_level_joined_start(i - 1);
@@ -441,8 +416,8 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
 #pragma acc data present(data_err0i[:size_err0i], data_err1i[:size_err1i], data_err1im[:size_err1im], data_mg_tmpim[:size_mg_tmpim], data_res1im[:size_res1im], data_out[:size_out])
         {
             // prolongate
-            Prolongate(field_err0i, field_err1i, i, sync);
-            boundary->apply_boundary(data_err0i, i - 1, type_e0, sync); // for m_error0 only Dirichlet BC
+            Prolongate(field_error0_level, field_error1_level, i, sync);
+            boundary->apply_boundary(data_error0_level, i - 1, type_e0, sync); // for m_error0 only Dirichlet BC
 
             // correct
             if (i == 1) {  // use p=field_out on finest grid
@@ -452,7 +427,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
 #pragma acc loop independent
                     for (size_t j = start_i; j < end_i; ++j) {
                         const size_t idx = data_inner_list[j];
-                        data_out[idx] += data_err0i[idx];
+                        data_out[idx] += data_error0_level[idx];
                     }
                 }
                 // boundary
@@ -461,11 +436,11 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
 #pragma acc loop independent
                     for (size_t j = start_b; j < end_b; ++j) {
                         const size_t idx = data_boundary_list[j];
-                        data_out[idx] += data_err0i[idx];
+                        data_out[idx] += data_error0_level[idx];
                     }
                 }
                 // smooth
-                Smooth(field_out, field_mg_tmpim, field_res1im, i - 1, sync);
+                Smooth(field_out, field_mg_temporal_solution_level_minus_1, field_residuum1_level_minus_1, i - 1, sync);
             } else {
                 // correct
                 // inner
@@ -474,7 +449,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
 #pragma acc loop independent
                     for (size_t j = start_i; j < end_i; ++j) {
                         const size_t idx = data_inner_list[j];
-                        data_err1im[idx] += data_err0i[idx];
+                        data_err1_level_minus_1[idx] += data_error0_level[idx];
                     }
                 }
                 // boundary
@@ -483,14 +458,14 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
 #pragma acc loop independent
                     for (size_t j = start_b; j < end_b; ++j) {
                         const size_t idx = data_boundary_list[j];
-                        data_err1im[idx] += data_err0i[idx];
+                        data_err1_level_minus_1[idx] += data_error0_level[idx];
                     }
                 }
                 // smooth
-                if (i - 1 == m_levels - 1) {
-                    Solve(field_err1im, field_mg_tmpim, field_res1im, i - 1, sync);
+                if (i == m_levels) {
+                    Solve(field_error1_level_minus_1, field_mg_temporal_solution_level_minus_1, field_residuum1_level_minus_1, i - 1, sync);
                 } else {
-                    Smooth(field_err1im, field_mg_tmpim, field_res1im, i - 1, sync); // for err only Dirichlet BC
+                    Smooth(field_error1_level_minus_1, field_mg_temporal_solution_level_minus_1, field_residuum1_level_minus_1, i - 1, sync); // for err only Dirichlet BC
                 }
             }
         }
@@ -623,7 +598,7 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
 #ifndef BENCHMARKING
     if (end_i == start_i) {
         m_logger->warn("Be cautious: Obstacle might fill up inner cells completely in level {} with Nx_fine= {}!",
-                       level, domain->get_nx(out->get_level()));
+                       level + 1, domain->get_nx(out->get_level()));
     }
 #endif
 
@@ -644,10 +619,10 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
                                    + data_in[IX(2 * i,     2 * j - 1, 2 * k - 1, Nx_fine, Ny_fine)]\
                                    + data_in[IX(2 * i - 1, 2 * j,     2 * k - 1, Nx_fine, Ny_fine)]\
                                    + data_in[IX(2 * i,     2 * j,     2 * k - 1, Nx_fine, Ny_fine)]\
-                                   + data_in[IX(2 * i - 1, 2 * j - 1, 2 * k, Nx_fine, Ny_fine)]\
-                                   + data_in[IX(2 * i,     2 * j - 1, 2 * k, Nx_fine, Ny_fine)]\
-                                   + data_in[IX(2 * i - 1, 2 * j,     2 * k, Nx_fine, Ny_fine)]\
-                                   + data_in[IX(2 * i,     2 * j,     2 * k, Nx_fine, Ny_fine)]);
+                                   + data_in[IX(2 * i - 1, 2 * j - 1, 2 * k    , Nx_fine, Ny_fine)]\
+                                   + data_in[IX(2 * i,     2 * j - 1, 2 * k    , Nx_fine, Ny_fine)]\
+                                   + data_in[IX(2 * i - 1, 2 * j,     2 * k    , Nx_fine, Ny_fine)]\
+                                   + data_in[IX(2 * i,     2 * j,     2 * k    , Nx_fine, Ny_fine)]);
 
         }
 
