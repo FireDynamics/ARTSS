@@ -242,7 +242,7 @@ TEST_F(FieldTest, stress_add_scalar) {
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
-        EXPECT_EQ(a[i], x + 100000 / 2);
+        EXPECT_EQ(a[i], x + 100000. / 2);
         x += 1.0;
     }
 }
