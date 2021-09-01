@@ -51,6 +51,9 @@ class BoundaryController {
 
     std::vector<FieldType> get_used_fields() const;
 
+    bool is_obstacle_cell(size_t level, size_t idx);
+    bool is_obstacle_cell(size_t level, size_t i, size_t j, size_t k);
+
  private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;

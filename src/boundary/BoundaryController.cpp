@@ -310,3 +310,11 @@ size_t BoundaryController::get_obstacle_stride_z(size_t id, size_t level) const 
 std::vector<FieldType> BoundaryController::get_used_fields() const {
     return m_bdc_boundary->get_used_fields();
 }
+
+bool BoundaryController::is_obstacle_cell(size_t level, size_t idx) {
+    return m_multigrid->is_obstacle_cell(level, idx);
+}
+
+bool BoundaryController::is_obstacle_cell(size_t level, size_t i, size_t j, size_t k) {
+    return m_multigrid->is_obstacle_cell(level, i, j, k);
+}
