@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_DOMAIN_H
-#define ARTSS_DOMAIN_H
+#ifndef ARTSS_DOMAIN_H_
+#define ARTSS_DOMAIN_H_
 
 #include <cmath>
 #ifdef _OPENACC
@@ -114,4 +114,4 @@ class Domain {
     void control();
 };
 
-#endif /* ARTSS_DOMAIN_H */
+#endif /* ARTSS_DOMAIN_H_ */
