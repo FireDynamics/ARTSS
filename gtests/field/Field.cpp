@@ -34,7 +34,7 @@ TEST_F(FieldTest, set_val) {
     }
 }
 
-TEST_F(FieldTest, stess_set_val) {
+TEST_F(FieldTest, stress_set_val) {
     size_t size = 100000;
 
     Field a(UNKNOWN_FIELD, 0.0, 0, size);
