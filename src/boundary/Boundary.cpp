@@ -70,8 +70,8 @@ void Boundary::init(size_t size_obstacles) {
     m_boundary_left = new size_t[m_size_boundary_left];
     m_boundary_right = new size_t[m_size_boundary_right];
 
-    m_size_innerList = domain->get_nx() * domain->get_ny() * domain->get_nz() - size_obstacles;
-    m_inner_list = new size_t[m_size_innerList];
+    m_size_inner_list = domain->get_nx(m_level) * domain->get_ny(m_level) * domain->get_nz(m_level) - size_obstacles;
+    m_inner_list = new size_t[m_size_inner_list];
 
     boundary_cells();
 }
@@ -103,9 +103,9 @@ void Boundary::print(size_t size_obstacles) {
                     *(m_boundary_left + 0), *(m_boundary_left + m_size_boundary_left - 1));
     m_logger->debug("Right starts with {} and ends with {}",
                     *(m_boundary_right + 0), *(m_boundary_right + m_size_boundary_right - 1));
-    m_logger->debug("list size of innerList: {} obstacle size: {}", m_size_innerList, size_obstacles);
+    m_logger->debug("list size of innerList: {} obstacle size: {}", m_size_inner_list, size_obstacles);
     m_logger->debug("Inner starts with {} and ends with {}",
-                    *(m_inner_list + 0), *(m_inner_list + m_size_innerList - 1));
+                    *(m_inner_list + 0), *(m_inner_list + m_size_inner_list - 1));
     m_logger->debug("--------------- END BOUNDARY ---------------");
 #endif
 }
@@ -141,17 +141,17 @@ void Boundary::control(size_t size_obstacles) {
                           + " Left: " + std::to_string(m_size_boundary_left)
                           + " Right: " + std::to_string(m_size_boundary_right) + "\n";
     }
-    if (m_size_boundary_list + m_size_innerList + size_obstacles != size) {
+    if (m_size_boundary_list + m_size_inner_list + size_obstacles != size) {
         message = message + "list size of all domain cells is not equal with domain size."
                             "Boundary List: " + std::to_string(m_size_boundary_list)
-                            + " Inner List: " + std::to_string(m_size_innerList)
+                            + " Inner List: " + std::to_string(m_size_inner_list)
                             + " Domain Size: " + std::to_string(domain->get_size(m_level))
                             + " Obstacle size: " + std::to_string(size_obstacles) + "\n";
     }
     size_t innerCells = nz * ny * nx;
-    if (m_size_innerList != innerCells - size_obstacles) {
+    if (m_size_inner_list != innerCells - size_obstacles) {
         message = message + "list size of inner cell is not equal with domain inner size minus size of obstacles."
-                            " Inner List: " + std::to_string(m_size_innerList)
+                            " Inner List: " + std::to_string(m_size_inner_list)
                             + " Domain inner size: " + std::to_string(innerCells)
                             + " Obstacle size: " + std::to_string(size_obstacles) + "\n";
     }

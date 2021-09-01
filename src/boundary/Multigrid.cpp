@@ -326,8 +326,8 @@ void Multigrid::control() {
             message += "get_size_inner_list(level) does not equal the difference between start and end "
                        + std::to_string(cindex_inner_start) + "|" + std::to_string(cindex_inner_end) + "\n";
         }
-        size_t bsize_boundary = nx * ny * nz - (nx - 2) * (ny - 2) * (nz - 2);
-        size_t csize_boundary = get_size_boundary_ist(level);
+        size_t bsize_boundary = domain->get_size(level) - nx * ny * nz;
+        size_t csize_boundary = get_size_boundary_list(level);
         if (csize_boundary != bsize_boundary) {
             message += "get_size_boundary_list(level) does not equal size-(nx-2)*(ny-2)*(nz-2) "
                        + std::to_string(bsize_boundary) + "|" + std::to_string(csize_boundary) + "\n";
@@ -1655,7 +1655,7 @@ size_t Multigrid::get_size_inner_list(size_t level) const {
     return get_last_index_of_inner_index_list(level) - get_first_index_of_inner_index_list(level) + 1;
 }
 
-size_t Multigrid::get_size_boundary_ist(size_t level) const {
+size_t Multigrid::get_size_boundary_list(size_t level) const {
     return get_last_index_boundary_index_list(level) - get_first_index_of_boundary_index_list(level) + 1;
 }
 
