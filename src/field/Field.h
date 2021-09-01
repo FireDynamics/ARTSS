@@ -41,6 +41,7 @@ class Field {
     }
     static void swap(Field &a, Field &b) { std::swap(a.data, b.data); }
 
+    real get_sum();
     real *data;
 
  private:

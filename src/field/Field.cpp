@@ -30,3 +30,11 @@ Field::Field(Field const &original):
         m_level(original.m_level), m_size(original.m_size), m_type(original.m_type) {
     this->copy_data(original);
 }
+
+real Field::get_sum() {
+    real sum = 0;
+    for (size_t i = 0; i < m_size; i++) {
+        sum += data[i];
+    }
+    return sum;
+}
