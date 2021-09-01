@@ -46,11 +46,20 @@ private:
     real m_dsign;
     real m_w;
 
+    /**
+     *
+     */
     std::vector<Field*> m_residuum0;
+    /**
+     * stores on level 0 rhs/b field
+     */
     std::vector<Field*> m_residuum1;
     std::vector<Field*> m_error0;
+    /**
+     * stores on level 0 out/p field
+     */
     std::vector<Field*> m_error1;
-    std::vector<Field*> m_mg_temporal_solution;
+    std::vector<Field*> m_mg_temporal_solution; // only as storage? or even sometimes as output field?
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

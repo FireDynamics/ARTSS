@@ -199,7 +199,7 @@ VCycleMG::~VCycleMG() {
 // ************************************************************************
 void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
     m_error1[0]->copy_data(*out);
-    m_mg_temporal_solution[0]->copy_data(*out);
+    m_mg_temporal_solution[0]->copy_data(*out);  // TODO necessary?
     m_residuum1[0]->copy_data(*b);
 }
 
@@ -320,62 +320,65 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
         return;
     }
 
+   //TODO necessary or already done?
+   // m_error1[0]->copy_data(*field_out);
 //===================== levels going down ====================//
     for (size_t level = 0; level < max_level; ++level) {
-        Field *field_res0i = m_residuum0[level];
-        Field *field_err1i = m_error1[level];
-        Field *field_err1ip = m_error1[level + 1];
-        Field *field_mg_tmpi = m_mg_temporal_solution[level];
-        Field *field_res1i = m_residuum1[level];
-        Field *field_res1ip = m_residuum1[level + 1];
+        Field *field_residuum0_level = m_residuum0[level];
+        Field *field_error1_level = m_error1[level];
+        Field *field_error1_level_plus_1 = m_error1[level + 1];
+        Field *field_mg_temporal_level = m_mg_temporal_solution[level];
+        Field *field_residuum1_level = m_residuum1[level];
+        Field *field_residuum1_level_plus_1 = m_residuum1[level + 1];
 
-        real *data_res0i = field_res0i->data;
-        real *data_err1i = field_err1i->data;
-        real *data_err1ip = field_err1ip->data;
-        real *data_mg_tmpi = field_mg_tmpi->data;
-        real *data_res1i = field_res1i->data;
-        real *data_res1ip = field_res1ip->data;
+        real *data_residuum0_level = field_residuum0_level->data;
+        real *data_error1_level = field_error1_level->data;
+        real *data_error1_level_plus_1 = field_error1_level_plus_1->data;
+        real *data_mg_temporal_level = field_mg_temporal_level->data;
+        real *data_residuum1_level = field_residuum1_level->data;
+        real *data_residuum1_level_plus_1 = field_residuum1_level_plus_1->data;
         real *data_out = field_out->data;
 
-        size_t size_res0i = field_res0i->get_size();
-        size_t size_err1i = field_err1i->get_size();
-        size_t size_err1ip = field_err1ip->get_size();
-        size_t size_mg_tmpi = field_mg_tmpi->get_size();
-        size_t size_res1i = field_res1i->get_size();
-        size_t size_res1ip = field_res1ip->get_size();
+        size_t size_residuum0_level = field_residuum0_level->get_size();
+        size_t size_error1_level = field_error1_level->get_size();
+        size_t size_error1_level_plus_1 = field_error1_level_plus_1->get_size();
+        size_t size_mg_temporal_level = field_mg_temporal_level->get_size();
+        size_t size_residuum1_level = field_residuum1_level->get_size();
+        size_t size_residuum1_level_plus_1 = field_residuum1_level_plus_1->get_size();
         size_t size_out = field_out->get_size();
 
-        FieldType type_r0 = field_res0i->get_type();
+        FieldType type_r0 = field_residuum0_level->get_type();
 
-        FieldType type_r1 = field_res1ip->get_type();
+        FieldType type_r1 = field_residuum1_level_plus_1->get_type();
 
 #pragma acc data present(data_res0i[:size_res0i], data_err1i[:size_err1i], data_err1ip[:size_err1ip], \
                          data_mg_tmpi[:size_mg_tmpi], data_res1i[:size_res1i], data_res1ip[:size_res1ip], \
                          data_out[:size_out])
         {
+            //TODO can be changed to field_error1_level = p ?
             if (level == 0) {  // use p = field_out on finest grid
                 // smooth
-                Smooth(field_out, field_mg_tmpi, field_res1i, level, sync);
+                Smooth(field_out, field_mg_temporal_level, field_residuum1_level, level, sync);
 
-                // calculate residuum
-                Residuum(field_res0i, field_out, field_res1i, level, sync);
-                boundary->apply_boundary(data_res0i, level, type_r0, sync); // for m_residuum0 only Dirichlet BC
+                // calculate residuum, store in residuum0
+                Residuum(field_residuum0_level, field_out, field_residuum1_level, level, sync);
+                boundary->apply_boundary(data_residuum0_level, level, type_r0, sync); // for m_residuum0 only Dirichlet BC
             } else {
                 // smooth
-                Smooth(field_err1i, field_mg_tmpi, field_res1i, level, sync);
+                Smooth(field_error1_level, field_mg_temporal_level, field_residuum1_level, level, sync);
 
                 // calculate residuum
-                Residuum(field_res0i, field_err1i, field_res1i, level, sync);
-                boundary->apply_boundary(data_res0i, level, type_r0, sync); // for m_residuum0 only Dirichlet BC
+                Residuum(field_residuum0_level, field_error1_level, field_residuum1_level, level, sync);
+                boundary->apply_boundary(data_residuum0_level, level, type_r0, sync); // for m_residuum0 only Dirichlet BC
             }
 
             // restrict
-            Restrict(field_res1ip, field_res0i, level, sync);
-            boundary->apply_boundary(data_res1ip, level + 1, type_r1, sync); // for res only Dirichlet BC
+            Restrict(field_residuum1_level_plus_1, field_residuum0_level, level, sync);
+            boundary->apply_boundary(data_residuum1_level_plus_1, level + 1, type_r1, sync); // for res only Dirichlet BC
 
             // set err to zero at next level
             // TODO(lukas) set everything to 0 ? currently the obstacle cells are excluded
-            //field_err1ip->set_value(0);
+            //field_error1_level_plus_1->set_value(0);
 
 
             // strides (since GPU needs joined list)
@@ -390,7 +393,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
 #pragma acc loop independent
             for (size_t j = start_i; j < end_i; ++j) {
                 const size_t idx = data_inner_list[j];
-                data_err1ip[idx] = 0.0;
+                data_error1_level_plus_1[idx] = 0.0;
             }
 
             //boundary
@@ -398,7 +401,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
 #pragma acc loop independent
             for (size_t j = start_b; j < end_b; ++j) {
                 const size_t idx = data_boundary_list[j];
-                data_err1ip[idx] = 0.0;
+                data_error1_level_plus_1[idx] = 0.0;
             }
 
         }
@@ -571,9 +574,10 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync
 #pragma acc loop independent
         for (size_t j = start_i; j < end_i; ++j) {
             const size_t i = data_inner_list[j];
-            data_out[i] = data_b[i] - (rdx2 * (data_in[i - 1]       - 2 * data_in[i] + data_in[i + 1])\
-                                    +  rdy2 * (data_in[i - Nx]      - 2 * data_in[i] + data_in[i + Nx])\
-                                    +  rdz2 * (data_in[i - Nx * Ny] - 2 * data_in[i] + data_in[i + Nx * Ny]));
+            real weighted = (rdx2 * (data_in[i - 1]       - 2 * data_in[i] + data_in[i + 1])\
+                          +  rdy2 * (data_in[i - Nx]      - 2 * data_in[i] + data_in[i + Nx])\
+                          +  rdz2 * (data_in[i - Nx * Ny] - 2 * data_in[i] + data_in[i + Nx * Ny]));
+            data_out[i] = data_b[i] - weighted;
         }
 
         if (sync) {
@@ -595,12 +599,12 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
 
     // local variables and parameters for GPU
     // coarse grid
-    const size_t Nx = domain->get_Nx(out->get_level());
-    const size_t Ny = domain->get_Ny(out->get_level());
+    const size_t Nx_coarse = domain->get_Nx(out->get_level());
+    const size_t Ny_coarse = domain->get_Ny(out->get_level());
 
     // fine grid
-    const size_t nx = domain->get_Nx(in->get_level());
-    const size_t ny = domain->get_Ny(in->get_level());
+    const size_t Nx_fine = domain->get_Nx(in->get_level());
+    const size_t Ny_fine = domain->get_Ny(in->get_level());
 
     auto data_out = out->data;
     auto data_in = in->data;
@@ -618,7 +622,7 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
 
 #ifndef BENCHMARKING
     if (end_i == start_i) {
-        m_logger->warn("Be cautious: Obstacle might fill up inner cells completely in level {} with nx= {}!",
+        m_logger->warn("Be cautious: Obstacle might fill up inner cells completely in level {} with Nx_fine= {}!",
                        level, domain->get_nx(out->get_level()));
     }
 #endif
@@ -626,26 +630,24 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
     // average from eight neighboring cells
     // obstacles not used in fine grid, since coarse grid only obstacle if one of 8 fine grids was an obstacle,
     // thus if coarse cell inner cell, then surrounding fine cells also inner cells!
-    size_t i, j, k;
-
 #pragma acc data present(data_in[:bsize_in], data_out[:bsize_out], data_inner_list[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
 #pragma acc loop independent
         for (size_t l = start_i; l < end_i; ++l) {
             const size_t idx = data_inner_list[l];
-            k = getCoordinateK(idx, Nx, Ny);
-            j = getCoordinateJ(idx, Nx, Ny, k);
-            i = getCoordinateI(idx, Nx, Ny, j, k);
+            size_t k = getCoordinateK(idx, Nx_coarse, Ny_coarse);
+            size_t j = getCoordinateJ(idx, Nx_coarse, Ny_coarse, k);
+            size_t i = getCoordinateI(idx, Nx_coarse, Ny_coarse, j, k);
 
-            data_out[idx] = 0.125 * (data_in[IX(2 * i - 1, 2 * j - 1, 2 * k - 1, nx, ny)]\
-                                   + data_in[IX(2 * i,     2 * j - 1, 2 * k - 1, nx, ny)]\
-                                   + data_in[IX(2 * i - 1, 2 * j,     2 * k - 1, nx, ny)]\
-                                   + data_in[IX(2 * i,     2 * j,     2 * k - 1, nx, ny)]\
-                                   + data_in[IX(2 * i - 1, 2 * j - 1, 2 * k, nx, ny)]\
-                                   + data_in[IX(2 * i,     2 * j - 1, 2 * k, nx, ny)]\
-                                   + data_in[IX(2 * i - 1, 2 * j,     2 * k, nx, ny)]\
-                                   + data_in[IX(2 * i,     2 * j,     2 * k, nx, ny)]);
+            data_out[idx] = 0.125 * (data_in[IX(2 * i - 1, 2 * j - 1, 2 * k - 1, Nx_fine, Ny_fine)]\
+                                   + data_in[IX(2 * i,     2 * j - 1, 2 * k - 1, Nx_fine, Ny_fine)]\
+                                   + data_in[IX(2 * i - 1, 2 * j,     2 * k - 1, Nx_fine, Ny_fine)]\
+                                   + data_in[IX(2 * i,     2 * j,     2 * k - 1, Nx_fine, Ny_fine)]\
+                                   + data_in[IX(2 * i - 1, 2 * j - 1, 2 * k, Nx_fine, Ny_fine)]\
+                                   + data_in[IX(2 * i,     2 * j - 1, 2 * k, Nx_fine, Ny_fine)]\
+                                   + data_in[IX(2 * i - 1, 2 * j,     2 * k, Nx_fine, Ny_fine)]\
+                                   + data_in[IX(2 * i,     2 * j,     2 * k, Nx_fine, Ny_fine)]);
 
         }
 
