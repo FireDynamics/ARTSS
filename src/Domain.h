@@ -66,9 +66,9 @@ class Domain {
     real inline get_dx() { return get_dx(0); }
     real inline get_dy() { return get_dy(0); }
     real inline get_dz() { return get_dz(0); }
-    real inline get_dx(size_t level) { return this->get_lx() / (static_cast<double>(m_nx[level]) - 2); }
-    real inline get_dy(size_t level) { return this->get_ly() / (static_cast<double>(m_ny[level]) - 2); }
-    real inline get_dz(size_t level) { return this->get_lz() / (static_cast<double>(m_nz[level]) - 2); }
+    real inline get_dx(size_t level) { return this->get_lx() / static_cast<double>(m_nx[level]); }
+    real inline get_dy(size_t level) { return this->get_ly() / static_cast<double>(m_ny[level]); }
+    real inline get_dz(size_t level) { return this->get_lz() / static_cast<double>(m_nz[level]); }
 
     // start and end index of computational domain without ghost cells
     size_t inline get_index_x1() { return get_index_x1(0); }
