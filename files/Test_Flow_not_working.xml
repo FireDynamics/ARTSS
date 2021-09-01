@@ -57,7 +57,7 @@
   </boundaries>
   <obstacles enabled="Yes">
     <obstacle name="Cube">
-      <geometry ox1="0.0273" ox2="0.964" oy1="0.0078" oy2="0.992" oz1="-0.492" oz2="0.4785"/>
+      <geometry ox1="0.0273" ox2="0.964" oy1="0.0078" oy2="0.992" oz1="-0.492" oz2="0.492"/>
         <!--      <geometry ox1="0.0273" ox2="0.965" oy1="0.0078" oy2="0.994" oz1="-0.492" oz2="0.4795"/> -->
       <boundary field="u,v,w" patch="front,back,left,right,bottom,top" type="dirichlet" value="0.0" />
       <boundary field="p" patch="front,back,left,right,bottom,top" type="neumann" value="0.0" />
@@ -74,7 +74,7 @@
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
-    <vtk_nth_plot> 20 </vtk_nth_plot>
+    <vtk_nth_plot> 1 </vtk_nth_plot>
     <csv_nth_plot> 1 </csv_nth_plot>
   </visualisation>
 
