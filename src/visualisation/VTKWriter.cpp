@@ -7,7 +7,6 @@
 #include "VTKWriter.h"
 #include "../Domain.h"
 #include "visit_writer.h"  //( https://wci.llnl.gov/codes/visit/ )
-#include "Visual.h"
 
 static std::string ending = ".vtk";
 
