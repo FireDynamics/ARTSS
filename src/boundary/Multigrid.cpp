@@ -257,16 +257,16 @@ void Multigrid::control() {
         size_t bLen = (static_cast<Boundary *>(*(m_MG_boundary_object_list + level)))->get_size_inner_list();
         size_t cLen = get_last_index_of_inner_index_list(level) - get_first_index_of_inner_index_list(level) + 1;
         if (cLen != bLen) {
-            size_t control = (domain->get_nx(level) - 2) * (domain->get_ny(level) - 2) * (domain->get_nz(level) - 2);
+            size_t control = domain->get_nx(level) * domain->get_ny(level) * domain->get_nz(level);
             message += "length calculated by first and last index of inner_list does not equals size of innerList of Boundary object "
                        + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
         }
         bLen = (static_cast<Boundary *>(*(m_MG_boundary_object_list + level)))->get_size_boundary_list();
         cLen = get_last_index_boundary_index_list(level) - get_first_index_of_boundary_index_list(level) + 1;
         if (cLen != bLen) {
-            size_t control = (domain->get_nx(level) * domain->get_ny(level) * 2)
-                             + (domain->get_nx(level) * (domain->get_nz(level) - 2)) * 2
-                             + ((domain->get_ny(level) - 2) * (domain->get_nz(level) - 2)) * 2;
+            size_t control = (domain->get_Nx(level) * domain->get_Ny(level) * 2)
+                             + (domain->get_Nx(level) * (domain->get_Nz(level) - 2)) * 2
+                             + ((domain->get_Ny(level) - 2) * (domain->get_Nz(level) - 2)) * 2;
             message += "length calculated by first and last index of boundary_list does not equals size of boundaryList of Boundary object "
                        + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
         }
@@ -313,7 +313,7 @@ void Multigrid::control() {
                        + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
         }
 
-        size_t csize_inner = (domain->get_nx(level) - 2) * (domain->get_ny(level) - 2) * (domain->get_nz(level) - 2)
+        size_t csize_inner = domain->get_nx(level) * domain->get_ny(level) * domain->get_nz(level)
                              - get_size_obstacle_index_list(level);
         size_t bsize_inner = get_size_inner_list(level);
         if (csize_inner != bsize_inner) {
@@ -722,16 +722,16 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
         size_t k2_coarse = (k2_fine + 1) / 2;
 
 #ifndef BENCHMARKING
-        if (i2_fine - i1_fine + 1 < domain->get_nx(level - 1) - 2
-            && i2_coarse - i1_coarse + 1 >= domain->get_nx(level) - 2) {
+        if (i2_fine - i1_fine + 1 < domain->get_nx(level - 1)
+            && i2_coarse - i1_coarse + 1 >= domain->get_nx(level)) {
             m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in x-direction at level {}", obstacle_fine->get_name(), level);
         }
-        if (j2_fine - j1_fine + 1 < domain->get_ny(level - 1) - 2
-            && j2_coarse - j1_coarse + 1 >= domain->get_ny(level) - 2) {
+        if (j2_fine - j1_fine + 1 < domain->get_ny(level - 1)
+            && j2_coarse - j1_coarse + 1 >= domain->get_ny(level)) {
             m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in y-direction at level {}", obstacle_fine->get_name(), level);
         }
-        if (k2_fine - k1_fine + 1 < domain->get_nz(level - 1) - 2
-            && k2_coarse - k1_coarse + 1 >= domain->get_nz(level) - 2) {
+        if (k2_fine - k1_fine + 1 < domain->get_nz(level - 1)
+            && k2_coarse - k1_coarse + 1 >= domain->get_nz(level)) {
             m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in z-direction at level {}", obstacle_fine->get_name(), level);
         }
 
