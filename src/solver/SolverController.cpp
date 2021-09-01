@@ -27,7 +27,6 @@
 #include "../source/ExplicitEulerSource.h"
 #include "../source/Zero.h"
 #include "../utility/Parameters.h"
-#include "../visualisation/VTKWriter.h"
 
 SolverController::SolverController() {
 #ifndef BENCHMARKING
