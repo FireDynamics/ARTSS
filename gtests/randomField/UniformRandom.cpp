@@ -35,7 +35,7 @@ TEST_F(UniformRandomFieldTest, reprod) {
     UniformRandom noise_maker2(steps, 1.0, 0);
     Field b = noise_maker2.random_field(size);
 
-    for (auto i=0; i < size; ++i) {
+    for (auto i = 0; i < size; ++i) {
         EXPECT_EQ(a[i], b[i]);
     }
 }
@@ -50,7 +50,7 @@ TEST_F(UniformRandomFieldTest, reprod2) {
     UniformRandom noise_maker2(steps, 1.0, 1336);
     Field b = noise_maker2.random_field(size);
 
-    for (auto i=0; i < size; ++i) {
+    for (auto i = 0; i < size; ++i) {
         EXPECT_EQ(a[i], b[i]);
     }
 }
@@ -66,7 +66,7 @@ TEST_F(UniformRandomFieldTest, uniq) {
     Field b = noise_maker2.random_field(size);
 
     int count = 0;
-    for (auto i=0; i < size; ++i) {
+    for (auto i = 0; i < size; ++i) {
         count += a[i] == b[i];
     }
 
@@ -85,7 +85,7 @@ TEST_F(UniformRandomFieldTest, uniq2) {
     Field b = noise_maker2.random_field(size);
 
     int count = 0;
-    for (auto i=0; i < size; ++i) {
+    for (auto i = 0; i < size; ++i) {
         count += a[i] == b[i];
     }
 
@@ -102,7 +102,7 @@ TEST_F(UniformRandomFieldTest, sucdiff) {
     Field b = noise_maker.random_field(size);
 
     int count = 0;
-    for (auto i=0; i < size; ++i) {
+    for (auto i = 0; i < size; ++i) {
         count += a[i] == b[i];
     }
 
@@ -117,7 +117,7 @@ TEST_F(UniformRandomFieldTest, steps_10_ge_le) {
     UniformRandom noise_maker(steps, 1.0, 0);
     Field a = noise_maker.random_field(size);
 
-    for (auto i=0; i < size; ++i) {
+    for (auto i = 0; i < size; ++i) {
         EXPECT_GE(a[i], -steps);
         EXPECT_LE(a[i], steps);
     }
@@ -130,7 +130,7 @@ TEST_F(UniformRandomFieldTest, steps_1000_ge_le) {
     UniformRandom noise_maker(steps, 1.0, 1337);
     Field a = noise_maker.random_field(size);
 
-    for (auto i=0; i < size; ++i) {
+    for (auto i = 0; i < size; ++i) {
         EXPECT_GE(a[i], -steps);
         EXPECT_LE(a[i], steps);
     }
@@ -143,9 +143,9 @@ TEST_F(UniformRandomFieldTest, steps_10_atleatone) {
     UniformRandom noise_maker(steps, 1.0, 0);
     Field a = noise_maker.random_field(size);
 
-    for (int j=-steps; j <= steps; ++j) {
+    for (int j = -steps; j <= steps; ++j) {
         bool found = false;
-        for (size_t i=0; i < size; ++i) {
+        for (size_t i = 0; i < size; ++i) {
             if (a[i] == j) {
                 found = true;
             }
@@ -163,9 +163,9 @@ TEST_F(UniformRandomFieldTest, steps_10_atleatone2) {
     UniformRandom noise_maker(steps, ssize, 0);
     Field a = noise_maker.random_field(size);
 
-    for (int j=-steps/ssize; j <= steps/ssize; ++j) {
+    for (int j = -steps / ssize; j <= steps / ssize; ++j) {
         bool found = false;
-        for (size_t i=0; i < size; ++i) {
+        for (size_t i = 0; i < size; ++i) {
             if (a[i] == j) {
                 found = true;
             }
@@ -183,9 +183,9 @@ TEST_F(UniformRandomFieldTest, steps_10_atleatoneh) {
     UniformRandom noise_maker(steps, ssize, 0);
     Field a = noise_maker.random_field(size);
 
-    for (int j=-steps/ssize; j <= steps/ssize; ++j) {
+    for (int j = -steps / ssize; j <= steps / ssize; ++j) {
         bool found = false;
-        for (size_t i=0; i < size; ++i) {
+        for (size_t i = 0; i < size; ++i) {
             if (a[i] == j) {
                 found = true;
             }
@@ -202,9 +202,9 @@ TEST_F(UniformRandomFieldTest, steps_100_atleatone) {
     UniformRandom noise_maker(steps, 1.0, 0);
     Field a = noise_maker.random_field(size);
 
-    for (int j=-steps; j <= steps; ++j) {
+    for (int j = -steps; j <= steps; ++j) {
         bool found = false;
-        for (size_t i=0; i < size; ++i) {
+        for (size_t i = 0; i < size; ++i) {
             if (a[i] == j) {
                 found = true;
             }
@@ -222,9 +222,9 @@ TEST_F(UniformRandomFieldTest, steps_100_atleatone2) {
     UniformRandom noise_maker(steps, ssize, 0);
     Field a = noise_maker.random_field(size);
 
-    for (int j=-steps/ssize; j <= steps/ssize; ++j) {
+    for (int j = -steps / ssize; j <= steps / ssize; ++j) {
         bool found = false;
-        for (size_t i=0; i < size; ++i) {
+        for (size_t i = 0; i < size; ++i) {
             if (a[i] == j) {
                 found = true;
             }
@@ -242,9 +242,9 @@ TEST_F(UniformRandomFieldTest, steps_100_atleatoneh) {
     UniformRandom noise_maker(steps, ssize, 0);
     Field a = noise_maker.random_field(size);
 
-    for (int j=-steps/ssize; j <= steps/ssize; ++j) {
+    for (int j = -steps / ssize; j <= steps / ssize; ++j) {
         bool found = false;
-        for (size_t i=0; i < size; ++i) {
+        for (size_t i = 0; i < size; ++i) {
             if (a[i] == j) {
                 found = true;
             }
@@ -259,7 +259,7 @@ TEST_F(UniformRandomFieldTest, stess_test) {
     int ssize = 2;
     size_t size = 10000;
 
-    for (int i=0; i < 10000; ++i) {
+    for (int i = 0; i < 10000; ++i) {
         UniformRandom noise_maker(steps, ssize, 0);
         Field a = noise_maker.random_field(size);
         EXPECT_GE(a[a[0]], -steps);
@@ -272,7 +272,7 @@ TEST_F(UniformRandomFieldTest, stess_test2) {
     int ssize = 2;
     size_t size = 20000;
 
-    for (int i=0; i < 10000; ++i) {
+    for (int i = 0; i < 10000; ++i) {
         UniformRandom noise_maker(steps, ssize, 0);
         Field a = noise_maker.random_field(size);
         EXPECT_GE(a[a[0]], -steps);
