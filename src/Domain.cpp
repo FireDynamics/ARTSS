@@ -171,11 +171,11 @@ void Domain::print() {
 #ifndef BENCHMARKING
     m_logger->info("-- Domain");
     m_logger->info("Domain size inner cells: ({}|{}|{})", get_nx(),
-                                                               get_ny(),
-                                                               get_nz());
+                                                          get_ny(),
+                                                          get_nz());
     m_logger->info("step size (x|y|z): ({}|{}|{})", get_dx(),
-                                                         get_dy(),
-                                                         get_dz());
+                                                    get_dy(),
+                                                    get_dz());
 #endif
 }
 
