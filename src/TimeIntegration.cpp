@@ -7,7 +7,6 @@
 #include "TimeIntegration.h"
 #include "utility/Parameters.h"
 #include "Domain.h"
-#include "visualisation/VTKWriter.h"
 
 // ==================================== Constructor ====================================
 // ***************************************************************************************
@@ -73,7 +72,6 @@ void TimeIntegration::run() {
 #pragma acc update host(d_C[:bsize])
 #pragma acc update host(d_nu_t[:bsize])
 #pragma acc update host(d_S_T[:bsize]) wait    // all in one update does not work!
-    int counter = 0;
     m_analysis->analyse(m_field_controller, 0.);
     m_visual->visualise(*m_field_controller, 0.);
     m_logger->info("Start calculating and timing...");
