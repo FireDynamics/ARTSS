@@ -48,7 +48,6 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 #ifndef BENCHMARKING
         m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
 #endif
-        std::exit(1);
         // TODO Error handling
     }
     m_diffusion_max_iter = static_cast<size_t>(params->get_int("solver/diffusion/max_iter"));
@@ -129,7 +128,7 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
         size_t bsize_mg = mg->get_size();
 #pragma acc enter data copyin(data_mg[:bsize_mg])
 
-        auto *e0 = new Field(FieldType::P, 0.0, m_levels - 1);
+        auto *e0 = new Field(FieldType::P, 0.0, level);
         m_error0.push_back(e0);
         // TODO(issue 124)
         real *data_err0 = m_error0[level]->data;
@@ -469,7 +468,6 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
             }
         }
     }
-
     // set boundaries
     real *data_out = field_out->data;
     FieldType type = field_out->get_type();
@@ -763,7 +761,6 @@ void VCycleMG::Prolongate(Field *out, Field *in, const size_t level, bool sync) 
                                + 3 * data_in[idx - neighbour_cell_j - neighbour_cell_k]
                                +     data_in[idx - neighbour_cell_i - neighbour_cell_j - neighbour_cell_k]);
         }
-
         if (sync) {
 #pragma acc wait
         }
@@ -936,12 +933,10 @@ void VCycleMG::call_jacobi(Field *out, Field *tmp, Field *b, const size_t level,
 #pragma acc data present(data_out[:bsize], data_tmp[:bsize], data_b[:bsize])
     {
         size_t it = 0;
-        const size_t max_it =  m_diffusion_max_iter;
-        const real tol_res = m_diffusion_tol_res;
         real sum;
         real res = 10000.;
 
-        while (res > tol_res && it < max_it) {
+        while (res > m_diffusion_tol_res && it < m_diffusion_max_iter) {
             JacobiDiffuse::JacobiStep(level, out, tmp, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
             boundary->apply_boundary(data_out, level, type, sync);
 
