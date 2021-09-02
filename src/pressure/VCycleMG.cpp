@@ -211,7 +211,7 @@ void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
 /// \param  t           current time
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
-void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
+void VCycleMG::pressure(Field *out, Field *b, const real t, bool sync) {
     // Update first
     UpdateInput(out, b);
 
@@ -294,14 +294,12 @@ void VCycleMG::pressure(Field *out, Field *b, real t, bool sync) {
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
-    size_t max_level = m_levels;
-
     auto boundary = BoundaryController::getInstance();
     size_t *data_inner_list = boundary->get_inner_list_level_joined();
     size_t *data_boundary_list = boundary->get_boundary_list_level_joined();
 
-//===================== No refinement, when levels = 0 =========//
-    if (max_level == 0) {
+//===================== No refinement, when max_level = 0 =========//
+    if (m_levels == 0) {
         Field *field_mg_tmpi = m_mg_temporal_solution[0];
         Field *field_res1i = m_residuum1[0];
 
@@ -315,7 +313,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
 
 #pragma acc data present(data_out[:size_out], data_mg_tmpi[:size_mg_tmpi], data_res1i[:size_res1i])
         {
-            Solve(field_out, field_mg_tmpi, field_res1i, max_level, sync);
+            Solve(field_out, field_mg_tmpi, field_res1i, m_levels, sync);
         }
         return;
     }
@@ -323,7 +321,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
    //TODO necessary or already done?
    // m_error1[0]->copy_data(*field_out);
 //===================== levels going down ====================//
-    for (size_t level = 0; level < max_level; ++level) {
+    for (size_t level = 0; level < m_levels; ++level) {
         Field *field_residuum0_level = m_residuum0[level];
         Field *field_error1_level = m_error1[level];
         Field *field_error1_level_plus_1 = m_error1[level + 1];
@@ -365,6 +363,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
                 boundary->apply_boundary(data_residuum0_level, level, type_r0, sync); // for m_residuum0 only Dirichlet BC
             } else {
                 // smooth
+                // TODO(lukas): always field_error1_level = 0 + applyBC before anything is done ?
                 Smooth(field_error1_level, field_mg_temporal_level, field_residuum1_level, level, sync);
 
                 // calculate residuum
@@ -382,13 +381,13 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
     }
 
 //===================== levels going up ====================//
-    for (size_t i = max_level; i > 0; --i) {
+    for (size_t level = m_levels; level > 0; --level) {
         //TODO after removing the duplicate level 0 in error0 there are only 4 levels in error0, which results into an error here
-        Field *field_error0_level = m_error0[i];
-        Field *field_error1_level = m_error1[i];
-        Field *field_error1_level_minus_1 = m_error1[i - 1];
-        Field *field_mg_temporal_solution_level_minus_1 = m_mg_temporal_solution[i - 1];
-        Field *field_residuum1_level_minus_1 = m_residuum1[i - 1];
+        Field *field_error0_level = m_error0[level - 1];
+        Field *field_error1_level = m_error1[level];
+        Field *field_error1_level_minus_1 = m_error1[level - 1];
+        Field *field_mg_temporal_solution_level_minus_1 = m_mg_temporal_solution[level - 1];
+        Field *field_residuum1_level_minus_1 = m_residuum1[level - 1];
 
         real *data_error0_level = field_error0_level->data;
         real *data_error1_level = field_error1_level->data;
@@ -406,21 +405,21 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
 
         FieldType type_e0 = field_error0_level->get_type();
 
-        // inner start/end index of level i - 1
-        size_t start_i = boundary->get_inner_list_level_joined_start(i - 1);
-        size_t end_i = boundary->get_inner_list_level_joined_end(i - 1) + 1;
-        // boundary start/end index of level i - 1
-        size_t start_b = boundary->get_boundary_list_level_joined_start(i - 1);
-        size_t end_b = boundary->get_boundary_list_level_joined_end(i - 1) + 1;
+        // inner start/end index of level level - 1
+        size_t start_i = boundary->get_inner_list_level_joined_start(level - 1);
+        size_t end_i = boundary->get_inner_list_level_joined_end(level - 1) + 1;
+        // boundary start/end index of level level - 1
+        size_t start_b = boundary->get_boundary_list_level_joined_start(level - 1);
+        size_t end_b = boundary->get_boundary_list_level_joined_end(level - 1) + 1;
 
 #pragma acc data present(data_err0i[:size_err0i], data_err1i[:size_err1i], data_err1im[:size_err1im], data_mg_tmpim[:size_mg_tmpim], data_res1im[:size_res1im], data_out[:size_out])
         {
             // prolongate
-            Prolongate(field_error0_level, field_error1_level, i, sync);
-            boundary->apply_boundary(data_error0_level, i - 1, type_e0, sync); // for m_error0 only Dirichlet BC
+            Prolongate(field_error0_level, field_error1_level, level, sync);
+            boundary->apply_boundary(data_error0_level, level - 1, type_e0, sync); // for m_error0 only Dirichlet BC
 
             // correct
-            if (i == 1) {  // use p=field_out on finest grid
+            if (level == 1) {  // use p=field_out on finest grid // TODO remove loop and data_err1_level_minus_1 to p
                 // inner
 #pragma acc kernels present(data_err0i[:size_err0i], data_out[:size_out], data_inner_list[start_i:(end_i-start_i)]) async
                 {
@@ -440,7 +439,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
                     }
                 }
                 // smooth
-                Smooth(field_out, field_mg_temporal_solution_level_minus_1, field_residuum1_level_minus_1, i - 1, sync);
+                Smooth(field_out, field_mg_temporal_solution_level_minus_1, field_residuum1_level_minus_1, level - 1, sync);
             } else {
                 // correct
                 // inner
@@ -462,10 +461,10 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
                     }
                 }
                 // smooth
-                if (i == m_levels) {
-                    Solve(field_error1_level_minus_1, field_mg_temporal_solution_level_minus_1, field_residuum1_level_minus_1, i - 1, sync);
+                if (level == m_levels) {
+                    Solve(field_error1_level_minus_1, field_mg_temporal_solution_level_minus_1, field_residuum1_level_minus_1, level - 1, sync);
                 } else {
-                    Smooth(field_error1_level_minus_1, field_mg_temporal_solution_level_minus_1, field_residuum1_level_minus_1, i - 1, sync); // for err only Dirichlet BC
+                    Smooth(field_error1_level_minus_1, field_mg_temporal_solution_level_minus_1, field_residuum1_level_minus_1, level - 1, sync); // for err only Dirichlet BC
                 }
             }
         }
@@ -490,7 +489,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
 /// \param  level       Multigrid level
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
-void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync) {
+void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, const size_t level, bool sync) {
     real *data_out = out->data;
     FieldType type = out->get_type();
 
@@ -515,7 +514,7 @@ void VCycleMG::Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync)
 /// \param  level       Multigrid level
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // ************************************************************************
-void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync) {
+void VCycleMG::Residuum(Field *out, Field *in, Field *b, const size_t level, bool sync) {
     Domain *domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -569,7 +568,7 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, size_t level, bool sync
 /// \param  level       Multigrid level
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
-void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
+void VCycleMG::Restrict(Field *out, Field *in, const size_t level, bool sync) {
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -640,17 +639,17 @@ void VCycleMG::Restrict(Field *out, Field *in, size_t level, bool sync) {
 /// \param  level       Multigrid level
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
-void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
+void VCycleMG::Prolongate(Field *out, Field *in, const size_t level, bool sync) {
     Domain *domain = Domain::getInstance();
 
     // local variables and parameters for GPU
     // fine grid
-    const size_t nx = domain->get_Nx(out->get_level());
-    const size_t ny = domain->get_Ny(out->get_level());
+    const size_t Nx_fine = domain->get_Nx(out->get_level());
+    const size_t Ny_fine = domain->get_Ny(out->get_level());
 
     // coarse grid
-    const size_t Nx = domain->get_Nx(in->get_level());
-    const size_t Ny = domain->get_Ny(in->get_level());
+    const size_t Nx_coarse = domain->get_Nx(in->get_level());
+    const size_t Ny_coarse = domain->get_Ny(in->get_level());
 
     real *data_out = out->data;
     real *data_in = in->data;
@@ -667,98 +666,102 @@ void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
     size_t start_i = boundary->get_inner_list_level_joined_start(level);
     size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 
-    // prolongate
-    size_t i, j, k;
+    // neighbour cells, i/j/k represent the directions
+    size_t neighbour_cell_i = 1;
+    size_t neighbour_cell_j = Nx_coarse;
+    size_t neighbour_cell_k = Nx_coarse * Ny_coarse;
 
+    // prolongate
 #pragma acc data present(data_in[:bsize_in], data_out[:bsize_out], data_inner_list[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
 #pragma acc loop independent
         for (size_t l = start_i; l < end_i; ++l) {
             const size_t idx = data_inner_list[l];
-            k = idx / (Nx * Ny);
-            j = (idx - k * Nx * Ny) / Nx;
-            i = idx - k * Nx * Ny - j * Nx;
+            size_t k = getCoordinateK(idx, Nx_coarse, Ny_coarse);
+            size_t j = getCoordinateJ(idx, Nx_coarse, Ny_coarse, k);
+            size_t i = getCoordinateI(idx, Nx_coarse, Ny_coarse, j, k);
 
-            data_out[IX(2 * i, 2 * j, 2 * k, nx, ny)] =
+            // x + 1 and y + 1 and z + 1
+            data_out[IX(2 * i, 2 * j, 2 * k, Nx_fine, Ny_fine)] =
                     0.015625 * (27 * data_in[idx]
-                               + 9 * data_in[idx + 1]
-                               + 9 * data_in[idx + Nx]
-                               + 9 * data_in[idx + Nx * Ny]
-                               + 3 * data_in[idx + 1 + Nx]
-                               + 3 * data_in[idx + 1 + Nx * Ny]
-                               + 3 * data_in[idx + Nx + Nx * Ny]
-                               +     data_in[idx + 1 + Nx + Nx * Ny]);
-
-            data_out[IX(2 * i, 2 * j, 2 * k - 1, nx, ny)] =
+                               + 9 * data_in[idx + neighbour_cell_i]
+                               + 9 * data_in[idx + neighbour_cell_j]
+                               + 9 * data_in[idx + neighbour_cell_k]
+                               + 3 * data_in[idx + neighbour_cell_i + neighbour_cell_j]
+                               + 3 * data_in[idx + neighbour_cell_i + neighbour_cell_k]
+                               + 3 * data_in[idx + neighbour_cell_j + neighbour_cell_k]
+                               +     data_in[idx + neighbour_cell_i + neighbour_cell_j + neighbour_cell_k]);
+            // x + 1 and y + 1 and z - 1
+            data_out[IX(2 * i, 2 * j, 2 * k - 1, Nx_fine, Ny_fine)] =
                     0.015625 * (27 * data_in[idx]
-                               + 9 * data_in[idx + 1]
-                               + 9 * data_in[idx + Nx]
-                               + 9 * data_in[idx - Nx * Ny]
-                               + 3 * data_in[idx + 1 + Nx]
-                               + 3 * data_in[idx + 1 - Nx * Ny]
-                               + 3 * data_in[idx + Nx - Nx * Ny]
-                               +     data_in[idx + 1 + Nx - Nx * Ny]);
-
-            data_out[IX(2 * i, 2 * j - 1, 2 * k, nx, ny)] =
+                               + 9 * data_in[idx + neighbour_cell_i]
+                               + 9 * data_in[idx + neighbour_cell_j]
+                               + 9 * data_in[idx - neighbour_cell_k]
+                               + 3 * data_in[idx + neighbour_cell_i + neighbour_cell_j]
+                               + 3 * data_in[idx + neighbour_cell_i - neighbour_cell_k]
+                               + 3 * data_in[idx + neighbour_cell_j - neighbour_cell_k]
+                               +     data_in[idx + neighbour_cell_i + neighbour_cell_j - neighbour_cell_k]);
+            // x + 1 and y - 1 and k + 1
+            data_out[IX(2 * i, 2 * j - 1, 2 * k, Nx_fine, Ny_fine)] =
                     0.015625 * (27 * data_in[idx]
-                               + 9 * data_in[idx + 1]
-                               + 9 * data_in[idx - Nx]
-                               + 9 * data_in[idx + Nx * Ny]
-                               + 3 * data_in[idx + 1 - Nx]
-                               + 3 * data_in[idx + 1 + Nx * Ny]
-                               + 3 * data_in[idx - Nx + Nx * Ny]
-                               +     data_in[idx + 1 - Nx + Nx * Ny]);
-
-            data_out[IX(2 * i, 2 * j - 1, 2 * k - 1, nx, ny)] =
+                               + 9 * data_in[idx + neighbour_cell_i]
+                               + 9 * data_in[idx - neighbour_cell_j]
+                               + 9 * data_in[idx + neighbour_cell_k]
+                               + 3 * data_in[idx + neighbour_cell_i - neighbour_cell_j]
+                               + 3 * data_in[idx + neighbour_cell_i + neighbour_cell_k]
+                               + 3 * data_in[idx - neighbour_cell_j + neighbour_cell_k]
+                               +     data_in[idx + neighbour_cell_i - neighbour_cell_j + neighbour_cell_k]);
+            // x + 1 and y - 1 and z - 1
+            data_out[IX(2 * i, 2 * j - 1, 2 * k - 1, Nx_fine, Ny_fine)] =
                     0.015625 * (27 * data_in[idx]
-                               + 9 * data_in[idx + 1]
-                               + 9 * data_in[idx - Nx]
-                               + 9 * data_in[idx - Nx * Ny]
-                               + 3 * data_in[idx + 1 - Nx]
-                               + 3 * data_in[idx + 1 - Nx * Ny]
-                               + 3 * data_in[idx - Nx - Nx * Ny]
-                               +     data_in[idx + 1 - Nx - Nx * Ny]);
-
-            data_out[IX(2 * i - 1, 2 * j, 2 * k, nx, ny)] =
+                               + 9 * data_in[idx + neighbour_cell_i]
+                               + 9 * data_in[idx - neighbour_cell_j]
+                               + 9 * data_in[idx - neighbour_cell_k]
+                               + 3 * data_in[idx + neighbour_cell_i - neighbour_cell_j]
+                               + 3 * data_in[idx + neighbour_cell_i - neighbour_cell_k]
+                               + 3 * data_in[idx - neighbour_cell_j - neighbour_cell_k]
+                               +     data_in[idx + neighbour_cell_i - neighbour_cell_j - neighbour_cell_k]);
+            // x - 1 and y + 1 and z + 1
+            data_out[IX(2 * i - 1, 2 * j, 2 * k, Nx_fine, Ny_fine)] =
                     0.015625 * (27 * data_in[idx]
-                               + 9 * data_in[idx - 1]
-                               + 9 * data_in[idx + Nx]
-                               + 9 * data_in[idx + Nx * Ny]
-                               + 3 * data_in[idx - 1 + Nx]
-                               + 3 * data_in[idx - 1 + Nx * Ny]
-                               + 3 * data_in[idx + Nx + Nx * Ny]
-                               +     data_in[idx - 1 + Nx + Nx * Ny]);
-
-            data_out[IX(2 * i - 1, 2 * j, 2 * k - 1, nx, ny)] =
+                               + 9 * data_in[idx - neighbour_cell_i]
+                               + 9 * data_in[idx + neighbour_cell_j]
+                               + 9 * data_in[idx + neighbour_cell_k]
+                               + 3 * data_in[idx - neighbour_cell_i + neighbour_cell_j]
+                               + 3 * data_in[idx - neighbour_cell_i + neighbour_cell_k]
+                               + 3 * data_in[idx + neighbour_cell_j + neighbour_cell_k]
+                               +     data_in[idx - neighbour_cell_i + neighbour_cell_j + neighbour_cell_k]);
+            // x - 1 and j + 1 and z - 1
+            data_out[IX(2 * i - 1, 2 * j, 2 * k - 1, Nx_fine, Ny_fine)] =
                     0.015625 * (27 * data_in[idx]
-                               + 9 * data_in[idx - 1]
-                               + 9 * data_in[idx + Nx]
-                               + 9 * data_in[idx - Nx * Ny]
-                               + 3 * data_in[idx - 1 + Nx]
-                               + 3 * data_in[idx - 1 - Nx * Ny]
-                               + 3 * data_in[idx + Nx - Nx * Ny]
-                               +     data_in[idx - 1 + Nx - Nx * Ny]);
-
-            data_out[IX(2 * i - 1, 2 * j - 1, 2 * k, nx, ny)] =
+                               + 9 * data_in[idx - neighbour_cell_i]
+                               + 9 * data_in[idx + neighbour_cell_j]
+                               + 9 * data_in[idx - neighbour_cell_k]
+                               + 3 * data_in[idx - neighbour_cell_i + neighbour_cell_j]
+                               + 3 * data_in[idx - neighbour_cell_i - neighbour_cell_k]
+                               + 3 * data_in[idx + neighbour_cell_j - neighbour_cell_k]
+                               +     data_in[idx - neighbour_cell_i + neighbour_cell_j - neighbour_cell_k]);
+            // x - 1 and j - 1 and z + 1
+            data_out[IX(2 * i - 1, 2 * j - 1, 2 * k, Nx_fine, Ny_fine)] =
                     0.015625 * (27 * data_in[idx]
-                               + 9 * data_in[idx - 1]
-                               + 9 * data_in[idx - Nx]
-                               + 9 * data_in[idx + Nx * Ny]
-                               + 3 * data_in[idx - 1 - Nx]
-                               + 3 * data_in[idx - 1 + Nx * Ny]
-                               + 3 * data_in[idx - Nx + Nx * Ny]
-                               +     data_in[idx - 1 - Nx + Nx * Ny]);
-
-            data_out[IX(2 * i - 1, 2 * j - 1, 2 * k - 1, nx, ny)] =
+                               + 9 * data_in[idx - neighbour_cell_i]
+                               + 9 * data_in[idx - neighbour_cell_j]
+                               + 9 * data_in[idx + neighbour_cell_k]
+                               + 3 * data_in[idx - neighbour_cell_i - neighbour_cell_j]
+                               + 3 * data_in[idx - neighbour_cell_i + neighbour_cell_k]
+                               + 3 * data_in[idx - neighbour_cell_j + neighbour_cell_k]
+                               +     data_in[idx - neighbour_cell_i - neighbour_cell_j + neighbour_cell_k]);
+            // x - 1 and y - 1 and z - 1
+            data_out[IX(2 * i - 1, 2 * j - 1, 2 * k - 1, Nx_fine, Ny_fine)] =
                     0.015625 * (27 * data_in[idx]
-                               + 9 * data_in[idx - 1]
-                               + 9 * data_in[idx - Nx]
-                               + 9 * data_in[idx - Nx * Ny]
-                               + 3 * data_in[idx - 1 - Nx]
-                               + 3 * data_in[idx - 1 - Nx * Ny]
-                               + 3 * data_in[idx - Nx - Nx * Ny]
-                               +     data_in[idx - 1 - Nx - Nx * Ny]);
+                               + 9 * data_in[idx - neighbour_cell_i]
+                               + 9 * data_in[idx - neighbour_cell_j]
+                               + 9 * data_in[idx - neighbour_cell_k]
+                               + 3 * data_in[idx - neighbour_cell_i - neighbour_cell_j]
+                               + 3 * data_in[idx - neighbour_cell_i - neighbour_cell_k]
+                               + 3 * data_in[idx - neighbour_cell_j - neighbour_cell_k]
+                               +     data_in[idx - neighbour_cell_i - neighbour_cell_j - neighbour_cell_k]);
         }
 
         if (sync) {
@@ -776,7 +779,7 @@ void VCycleMG::Prolongate(Field *out, Field *in, size_t level, bool sync) {
 /// \param  level       Multigrid level
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
-void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) {
+void VCycleMG::Solve(Field *out, Field *tmp, Field *b, const size_t level, bool sync) {
     auto domain = Domain::getInstance();
 
     if (level < m_levels - 1) {
@@ -806,7 +809,7 @@ void VCycleMG::Solve(Field *out, Field *tmp, Field *b, size_t level, bool sync) 
     }
 }
 
-void VCycleMG::call_colored_gauss_seidel(Field *out, Field *tmp, Field *b, size_t level, bool sync) {
+void VCycleMG::call_colored_gauss_seidel(Field *out, Field *tmp, Field *b, const size_t level, bool sync) {
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -885,7 +888,7 @@ void VCycleMG::call_colored_gauss_seidel(Field *out, Field *tmp, Field *b, size_
 
 }
 
-void VCycleMG::call_jacobi(Field *out, Field *tmp, Field *b, size_t level, bool sync) {
+void VCycleMG::call_jacobi(Field *out, Field *tmp, Field *b, const size_t level, bool sync) {
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
