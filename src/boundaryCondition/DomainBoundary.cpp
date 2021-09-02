@@ -162,15 +162,15 @@ namespace {
         switch (patch) {
             case FRONT:
             case BACK:
-                reference_index = Nx * Ny * (Domain::getInstance()->get_nz(level) - 2);
+                reference_index = Nx * Ny * Domain::getInstance()->get_nz(level);
                 break;
             case BOTTOM:
             case TOP:
-                reference_index = Nx * (Domain::getInstance()->get_ny(level) - 2);
+                reference_index = Nx * Domain::getInstance()->get_ny(level);
                 break;
             case LEFT:
             case RIGHT:
-                reference_index = (Domain::getInstance()->get_nx(level) - 2);
+                reference_index = Domain::getInstance()->get_nx(level);
                 break;
             default:
 #ifndef BENCHMARKING

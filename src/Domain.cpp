@@ -21,9 +21,9 @@ Domain::Domain() {
     m_ny = new size_t[m_levels + 1];
     m_nz = new size_t[m_levels + 1];
 
-    m_nx[0] = static_cast<size_t> (params->get_int("domain_parameters/nx")) + 2;
-    m_ny[0] = static_cast<size_t> (params->get_int("domain_parameters/ny")) + 2;
-    m_nz[0] = static_cast<size_t> (params->get_int("domain_parameters/nz")) + 2;
+    m_nx[0] = static_cast<size_t> (params->get_int("domain_parameters/nx"));
+    m_ny[0] = static_cast<size_t> (params->get_int("domain_parameters/ny"));
+    m_nz[0] = static_cast<size_t> (params->get_int("domain_parameters/nz"));
 
     m_X1 = params->get_real("domain_parameters/X1");
     m_X2 = params->get_real("domain_parameters/X2");
@@ -52,6 +52,7 @@ Domain::Domain() {
     calc_MG_values();
 #ifndef BENCHMARKING
     printDetails();
+    control();
 #endif
 }
 
@@ -60,11 +61,10 @@ Domain::Domain() {
 /// \brief  Calculates amount of Cells in XYZ direction for each multigrid level
 // ***************************************************************************************
 void Domain::calc_MG_values() {
-
     for (size_t l = 1; l < m_levels + 1; ++l) {
-        m_nx[l] = (m_nx[l - 1] == 3) ? 3 : static_cast<size_t> (std::round((m_nx[l - 1] - 2) / 2 + 2));
-        m_ny[l] = (m_ny[l - 1] == 3) ? 3 : static_cast<size_t> (std::round((m_ny[l - 1] - 2) / 2 + 2));
-        m_nz[l] = (m_nz[l - 1] == 3) ? 3 : static_cast<size_t> (std::round((m_nz[l - 1] - 2) / 2 + 2));
+        m_nx[l] = (m_nx[l - 1] == 3) ? 3 : static_cast<size_t> (std::round(m_nx[l - 1] / 2));
+        m_ny[l] = (m_ny[l - 1] == 3) ? 3 : static_cast<size_t> (std::round(m_ny[l - 1] / 2));
+        m_nz[l] = (m_nz[l - 1] == 3) ? 3 : static_cast<size_t> (std::round(m_nz[l - 1] / 2));
     }
 }
 
@@ -170,9 +170,9 @@ bool Domain::set_new_value(long shift, real startCoord_p, real endCoord_p, real 
 void Domain::print() {
 #ifndef BENCHMARKING
     m_logger->info("-- Domain");
-    m_logger->info("Domain size inner cells: ({}|{}|{})", get_nx() - 2,
-                                                          get_ny() - 2,
-                                                          get_nz() - 2);
+    m_logger->info("Domain size inner cells: ({}|{}|{})", get_nx(),
+                                                          get_ny(),
+                                                          get_nz());
     m_logger->info("step size (x|y|z): ({}|{}|{})", get_dx(),
                                                     get_dy(),
                                                     get_dz());
@@ -216,5 +216,34 @@ void Domain::printDetails() {
     }
 
     m_logger->debug("--------------- Domain Parameter end ---------------");
+#endif
+}
+
+void Domain::control() {
+#ifndef BENCHMARKING
+    if (m_levels > 0) {
+        int minimum_amount_of_cells = static_cast<int>(std::pow(2, m_levels));
+        size_t nx = get_nx();
+        if (nx % minimum_amount_of_cells != 0) {
+            m_logger->warn("nx ({}) has to be a multiple of 2^levels = {}. "
+                           "Consider changing nx or levels of multi grid solver. "
+                           "Otherwise unexpected behaviour may occur.",
+                           nx, minimum_amount_of_cells);
+        }
+        size_t ny = get_ny();
+        if (ny % minimum_amount_of_cells != 0) {
+            m_logger->warn("ny ({}) has to be a multiple of 2^levels = {}. "
+                           "Consider changing ny or levels of multi grid solver. "
+                           "Otherwise unexpected behaviour may occur.",
+                           ny, minimum_amount_of_cells);
+        }
+        size_t nz = get_nz();
+        if (nz % minimum_amount_of_cells != 0) {
+            m_logger->warn("nz ({}) has to be a multiple of 2^levels = {}. "
+                           "Consider changing nz or levels of multi grid solver. "
+                           "Otherwise unexpected behaviour may occur.",
+                           nz, minimum_amount_of_cells);
+        }
+    }
 #endif
 }
