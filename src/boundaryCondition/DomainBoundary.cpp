@@ -32,8 +32,7 @@ namespace {
 #pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
             for (size_t j = patch_start; j < patch_end; ++j) {
                 const size_t index = d_patch[j];
-                data_field[index] = sign * data_field[index + sign_reference_index
-                                                      * static_cast<int>(reference_index)] + value;
+                data_field[index] = sign * data_field[index + sign_reference_index * reference_index] + value;
             }
 #pragma acc wait
         }

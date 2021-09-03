@@ -9,38 +9,15 @@
 #include "../boundary/BoundaryController.h"
 
 void Cube::update_source(Field *out, real t_cur) {
-    auto boundary = BoundaryController::getInstance();
-    size_t size = Domain::getInstance()->get_size();
+    out->copy_data(*m_source_field);
 
-    auto d_out = out->data;
-    auto d_source = m_source_field->data;
-
-#pragma acc data present(d_out[:size], d_source[:size])
-    {
-        size_t *d_iList = boundary->get_inner_list_level_joined();
-        size_t *d_bList = boundary->get_boundary_list_level_joined();
-
-        auto bsize_i = boundary->get_size_inner_list();
-        auto bsize_b = boundary->get_size_boundary_list();
-
-#pragma acc parallel loop independent present(d_out[:size], d_source[:size]) async
-        // inner cells
-        for (size_t l = 0; l < bsize_i; ++l) {
-            const size_t idx = d_iList[l];
-            d_out[idx] = d_source[idx];
-        }
-
-        // boundary cells
-        for (size_t l = 0; l < bsize_b; ++l) {
-            const size_t idx = d_bList[l];
-            d_out[idx] = d_source[idx];
-        }
+    if (m_has_noise) {
+        (*out) *= m_noise_maker->random_field(out->get_size());
     }
-
 }
 
 Cube::Cube(real value, real x_start, real y_start, real z_start, real x_end, real y_end, real z_end) {
-    m_source_field = new Field(FieldType::T, 0);
+    m_source_field = new Field(FieldType::T);
     set_up(value, x_start, y_start, z_start, x_end, y_end, z_end);
 }
 
