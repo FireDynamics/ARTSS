@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_CUBE_H
-#define ARTSS_CUBE_H
+#ifndef ARTSS_SOURCE_CUBE_H_
+#define ARTSS_SOURCE_CUBE_H_
 
 
 #include <random>
@@ -28,4 +28,4 @@ class Cube: public ISourceFunction {
 };
 
 
-#endif /* ARTSS_CUBE_H */
+#endif /* ARTSS_SOURCE_CUBE_H_ */
