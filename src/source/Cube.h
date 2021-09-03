@@ -8,8 +8,6 @@
 #define ARTSS_SOURCE_CUBE_H_
 
 
-#include <random>
-
 #include "../interfaces/ISourceFunction.h"
 
 class Cube: public ISourceFunction {
