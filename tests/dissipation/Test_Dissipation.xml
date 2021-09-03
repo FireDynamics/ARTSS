@@ -37,7 +37,7 @@
         <tol_res> 1e-07 </tol_res>
         <w> 1 </w>
       </diffusion>
-    <source type="ExplicitEuler" temp_fct="Zero" dissipation="No">
+    <source type="ExplicitEuler" temp_fct="Zero" dissipation="No" random="No">
     </source>
     </temperature>
     <solution available="No">

@@ -591,13 +591,13 @@ else
       if [ "$TEMPSOURCEFCT" == "Zero" ]
       then
         WRITETO="$WRITETO
-      <source type=\"$TEMPSOURCETYPE\" temp_fct=\"$TEMPSOURCEFCT\" dissipation=\"No\">
+      <source type=\"$TEMPSOURCETYPE\" temp_fct=\"$TEMPSOURCEFCT\" dissipation=\"No\" random=\"No\">
       </source>"
       fi
       if [ \"$TEMPSOURCEFCT\" == \"GaussST\" ]
       then
         WRITETO="$WRITETO
-      <source type=\"$TEMPSOURCETYPE\" temp_fct=\"GaussST\" ramp_fct=\"RampTanh\" dissipation=\"No\">
+      <source type=\"$TEMPSOURCETYPE\" temp_fct=\"GaussST\" dissipation=\"No\" random=\"No\">
         <HRR> $HRR </HRR>  <!-- total heat release rate (in kW) -->
         <cp> $CP </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> $GAUSSX0 </x0>
