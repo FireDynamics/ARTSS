@@ -70,7 +70,7 @@ TEST_F(UniformRandomFieldTest, uniq) {
         count += a[i] == b[i];
     }
 
-    // TODO calculate probality of failure
+    // TODO calculate probability of failure
     EXPECT_GT(count, 1000);
 }
 
@@ -89,11 +89,11 @@ TEST_F(UniformRandomFieldTest, uniq2) {
         count += a[i] == b[i];
     }
 
-    // TODO calculate probality of failure
+    // TODO calculate probability of failure
     EXPECT_GT(count, 1000);
 }
 
-TEST_F(UniformRandomFieldTest, sucdiff) {
+TEST_F(UniformRandomFieldTest, success_difference) {
     int steps = 10;
     size_t size = 2 * steps * 10000;
 
@@ -106,7 +106,7 @@ TEST_F(UniformRandomFieldTest, sucdiff) {
         count += a[i] == b[i];
     }
 
-    // TODO calculate probality of failure
+    // TODO calculate probability of failure
     EXPECT_GT(count, 1000);
 }
 
@@ -136,7 +136,7 @@ TEST_F(UniformRandomFieldTest, steps_1000_ge_le) {
     }
 }
 
-TEST_F(UniformRandomFieldTest, steps_10_atleatone) {
+TEST_F(UniformRandomFieldTest, steps_10_at_least_one) {
     int steps = 10;
     size_t size = 2 * steps * 1000;
 
@@ -155,15 +155,15 @@ TEST_F(UniformRandomFieldTest, steps_10_atleatone) {
     }
 }
 
-TEST_F(UniformRandomFieldTest, steps_10_atleatone2) {
+TEST_F(UniformRandomFieldTest, steps_10_at_least_one2) {
     int steps = 10;
-    int ssize = 2;
+    int step_size = 2;
     size_t size = 2 * steps * 1000;
 
-    UniformRandom noise_maker(steps, ssize, 0);
+    UniformRandom noise_maker(steps, step_size, 0);
     Field a = noise_maker.random_field(size);
 
-    for (int j = -steps / ssize; j <= steps / ssize; ++j) {
+    for (int j = -steps / step_size; j <= steps / step_size; ++j) {
         bool found = false;
         for (size_t i = 0; i < size; ++i) {
             if (a[i] == j) {
@@ -175,15 +175,15 @@ TEST_F(UniformRandomFieldTest, steps_10_atleatone2) {
     }
 }
 
-TEST_F(UniformRandomFieldTest, steps_10_atleatoneh) {
+TEST_F(UniformRandomFieldTest, steps_10_at_least_one_h) {
     int steps = 10;
-    real ssize = 0.5;
+    real step_size = 0.5;
     size_t size = 2 * steps * 1000;
 
-    UniformRandom noise_maker(steps, ssize, 0);
+    UniformRandom noise_maker(steps, step_size, 0);
     Field a = noise_maker.random_field(size);
 
-    for (int j = -steps / ssize; j <= steps / ssize; ++j) {
+    for (int j = -steps / step_size; j <= steps / step_size; ++j) {
         bool found = false;
         for (size_t i = 0; i < size; ++i) {
             if (a[i] == j) {
@@ -195,7 +195,7 @@ TEST_F(UniformRandomFieldTest, steps_10_atleatoneh) {
     }
 }
 
-TEST_F(UniformRandomFieldTest, steps_100_atleatone) {
+TEST_F(UniformRandomFieldTest, steps_100_at_least_one) {
     int steps = 100;
     size_t size = 2 * steps * 10000;
 
@@ -214,15 +214,15 @@ TEST_F(UniformRandomFieldTest, steps_100_atleatone) {
     }
 }
 
-TEST_F(UniformRandomFieldTest, steps_100_atleatone2) {
+TEST_F(UniformRandomFieldTest, steps_100_at_least_one2) {
     int steps = 100;
-    int ssize = 2;
+    int step_size = 2;
     size_t size = 2 * steps * 10000;
 
-    UniformRandom noise_maker(steps, ssize, 0);
+    UniformRandom noise_maker(steps, step_size, 0);
     Field a = noise_maker.random_field(size);
 
-    for (int j = -steps / ssize; j <= steps / ssize; ++j) {
+    for (int j = -steps / step_size; j <= steps / step_size; ++j) {
         bool found = false;
         for (size_t i = 0; i < size; ++i) {
             if (a[i] == j) {
@@ -234,46 +234,46 @@ TEST_F(UniformRandomFieldTest, steps_100_atleatone2) {
     }
 }
 
-TEST_F(UniformRandomFieldTest, steps_100_atleatoneh) {
+TEST_F(UniformRandomFieldTest, steps_100_at_least_one_h) {
     int steps = 100;
-    real ssize = 0.5;
+    real step_size = 0.5;
     size_t size = 2 * steps * 10000;
 
-    UniformRandom noise_maker(steps, ssize, 0);
+    UniformRandom noise_maker(steps, step_size, 0);
     Field a = noise_maker.random_field(size);
 
-    for (int j = -steps / ssize; j <= steps / ssize; ++j) {
+    for (int j = -steps / step_size; j <= steps / step_size; ++j) {
         bool found = false;
         for (size_t i = 0; i < size; ++i) {
             if (a[i] == j) {
                 found = true;
             }
         }
-        // could fail in 1 : 10E-45 Cases
+        // could fail in 1 : 10E-45 cases
         EXPECT_TRUE(found) << "didn't found: " << j;
     }
 }
 
-TEST_F(UniformRandomFieldTest, stess_test) {
+TEST_F(UniformRandomFieldTest, stress_test) {
     int steps = 100;
-    int ssize = 2;
+    int step_size = 2;
     size_t size = 10000;
 
     for (int i = 0; i < 10000; ++i) {
-        UniformRandom noise_maker(steps, ssize, 0);
+        UniformRandom noise_maker(steps, step_size, 0);
         Field a = noise_maker.random_field(size);
         EXPECT_GE(a[a[0]], -steps);
         EXPECT_LE(a[a[0]], steps);
     }
 }
 
-TEST_F(UniformRandomFieldTest, stess_test2) {
+TEST_F(UniformRandomFieldTest, stress_test2) {
     int steps = 100;
-    int ssize = 2;
+    int step_size = 2;
     size_t size = 20000;
 
     for (int i = 0; i < 10000; ++i) {
-        UniformRandom noise_maker(steps, ssize, 0);
+        UniformRandom noise_maker(steps, step_size, 0);
         Field a = noise_maker.random_field(size);
         EXPECT_GE(a[a[0]], -steps);
         EXPECT_LE(a[a[0]], steps);
