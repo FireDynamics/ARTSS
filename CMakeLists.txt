@@ -128,12 +128,12 @@ if(NOT TARGET spdlog)
     add_subdirectory(external/spdlog)
 endif()
 
-if(NOT TARGET fmt)
+if(NOT TARGET fmt::fmt)
     # Stand-alone build
-    find_package(fmt QUIET)
+    find_package(fmt::fmt QUIET)
 endif()
 # use local fallback
-if(NOT TARGET fmt)
+if(NOT TARGET fmt::fmt)
     add_subdirectory(external/fmt)
 endif()
 
