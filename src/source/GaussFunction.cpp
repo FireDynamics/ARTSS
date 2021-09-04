@@ -13,7 +13,7 @@ GaussFunction::GaussFunction(
         real HRR, real cp,
         real x0, real y0, real z0,
         real sigma_x, real sigma_y, real sigma_z, real tau) :
-    m_field_spatial_values(FieldType::RHO, 0.0, 0, Domain::getInstance()->get_size()),
+    m_field_spatial_values(FieldType::RHO),
     m_tau(tau),
     m_HRR(HRR),
     m_cp(cp),
@@ -27,13 +27,12 @@ GaussFunction::GaussFunction(
 }
 
 void GaussFunction::update_source(Field &out, real t_cur) {
-#pragma acc data present(out, spatial)
-    {
-#pragma acc parallel loop independent present(out, spatial) async
-        for (size_t i = 0; i < out.get_size(); i++) {
-            out[i] = m_field_spatial_values[i] * get_time_value(t_cur);
-        }
-#pragma acc wait
+    auto time_val = get_time_value(t_cur);
+    out.copy_data(m_field_spatial_values);
+    out *= time_val;
+
+    if (m_has_noise) {
+        out *= m_noise_maker->random_field(out.get_size());
     }
 }
 
@@ -50,7 +49,7 @@ void GaussFunction::update_source(Field &out, real t_cur) {
 void GaussFunction::create_spatial_values() {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto level = m_field_spatial_values.get_level();
+    size_t level = m_field_spatial_values.get_level();
 
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
@@ -105,11 +104,7 @@ void GaussFunction::create_spatial_values() {
         auto y_j = (yj(j, Y1, dy) - m_y0);
         auto z_k = (zk(k, Z1, dz) - m_z0);
         real expr = std::exp(-(r_sigma_x_2 * x_i * x_i + r_sigma_y_2 * y_j * y_j + r_sigma_z_2 * z_k * z_k));
-        real tmp = HRRrV * rcp * expr;
-        if (tmp < 0.01) {
-            tmp = 0;
-        }
-        m_field_spatial_values[idx] = tmp;
+        m_field_spatial_values[idx] = HRRrV * rcp * expr;
     }
     m_field_spatial_values.copyin();
 }

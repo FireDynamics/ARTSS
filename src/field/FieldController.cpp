@@ -14,47 +14,47 @@
 FieldController::FieldController(Domain const &domain):
     // Variables
     // Velocities
-    field_u(FieldType::U, 0.0, 0, domain.get_size()),
-    field_v(FieldType::V, 0.0, 0, domain.get_size()),
-    field_w(FieldType::W, 0.0, 0, domain.get_size()),
+    field_u(FieldType::U),
+    field_v(FieldType::V),
+    field_w(FieldType::W),
 
-    field_u0(FieldType::U, 0.0, 0, domain.get_size()),
-    field_v0(FieldType::V, 0.0, 0, domain.get_size()),
-    field_w0(FieldType::W, 0.0, 0, domain.get_size()),
+    field_u0(FieldType::U),
+    field_v0(FieldType::V),
+    field_w0(FieldType::W),
 
-    field_u_tmp(FieldType::U, 0.0, 0, domain.get_size()),
-    field_v_tmp(FieldType::V, 0.0, 0, domain.get_size()),
-    field_w_tmp(FieldType::W, 0.0, 0, domain.get_size()),
+    field_u_tmp(FieldType::U),
+    field_v_tmp(FieldType::V),
+    field_w_tmp(FieldType::W),
 
     // Turbulent diffusivity
-    field_nu_t(FieldType::U, 0.0, 0, domain.get_size()),
-    field_kappa_t(FieldType::T, 0.0, 0, domain.get_size()),
-    field_gamma_t(FieldType::RHO, 0.0, 0, domain.get_size()),
+    field_nu_t(FieldType::NU),
+    field_kappa_t(FieldType::T),
+    field_gamma_t(FieldType::RHO),
 
     // Pressure
-    field_p(FieldType::P, 0.0, 0, domain.get_size()),
-    field_p0(FieldType::P, 0.0, 0, domain.get_size()),
-    field_rhs(FieldType::P, 0.0, 0, domain.get_size()),
+    field_p(FieldType::P),
+    field_p0(FieldType::P),
+    field_rhs(FieldType::P),
 
     // Temperature
-    field_T(FieldType::T, 0.0, 0, domain.get_size()),
-    field_T0(FieldType::T, 0.0, 0, domain.get_size()),
-    field_T_tmp(FieldType::T, 0.0, 0, domain.get_size()),
-    field_T_ambient(FieldType::T, 0.0, 0, domain.get_size()),
+    field_T(FieldType::T),
+    field_T0(FieldType::T),
+    field_T_tmp(FieldType::T),
+    field_T_ambient(FieldType::T),
 
     // Concentration
-    field_concentration(FieldType::RHO, 0.0, 0, domain.get_size()),
-    field_concentration0(FieldType::RHO, 0.0, 0, domain.get_size()),
-    field_concentration_tmp(FieldType::RHO, 0.0, 0, domain.get_size()),
+    field_concentration(FieldType::RHO),
+    field_concentration0(FieldType::RHO),
+    field_concentration_tmp(FieldType::RHO),
 
     // Forces
-    field_force_x(FieldType::U, 0.0, 0, domain.get_size()),
-    field_force_y(FieldType::V, 0.0, 0, domain.get_size()),
-    field_force_z(FieldType::W, 0.0, 0, domain.get_size()),
+    field_force_x(FieldType::U),
+    field_force_y(FieldType::V),
+    field_force_z(FieldType::W),
 
     // Sources
-    field_source_T(FieldType::T, 0.0, 0, domain.get_size()),
-    field_source_concentration(FieldType::RHO, 0.0, 0, domain.get_size()),
+    field_source_T(FieldType::T),
+    field_source_concentration(FieldType::RHO),
 
     // Fields for sight of boundaries
     sight(FieldType::RHO, 1.0, 0, domain.get_size()) {

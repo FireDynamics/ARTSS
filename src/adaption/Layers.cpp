@@ -205,16 +205,12 @@ void Layers::adaptXDirection(
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
-        size_t nx_begin = domain->get_index_x1();
-
+        size_t i_start = domain->get_index_x1();
+        size_t i_end = domain->get_index_x2() + 1;
         size_t j_start = domain->get_index_y1();
-        size_t j_end = j_start + domain->get_ny() - 1;
-
+        size_t j_end = domain->get_index_y2() + 1;
         size_t k_start = domain->get_index_z1();
-        size_t k_end = k_start + domain->get_nz() - 1;
-
-        size_t i_start = nx_begin;
-        size_t i_end = nx_begin + domain->get_nx() - 1;
+        size_t k_end = domain->get_index_z2() + 1;
 
         // loop through left and right side of cuboid in x direction
 #pragma acc parallel loop collapse(2) present(m_T) reduction(+:expansion_counter_end)
@@ -257,15 +253,12 @@ void Layers::adaptXDirection_serial(
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
-    size_t nx_begin = domain->get_index_x1();//((domain->get_x1() - domain->get_X1()) / domain->get_dx());
-
-    size_t j_start = domain->get_index_y1();//((domain->get_y1() - domain->get_Y1()) / domain->get_dy());
-    size_t j_end = j_start + domain->get_ny() - 1;
-    size_t k_start = domain->get_index_z1();//((domain->get_z1() - domain->get_Z1()) / domain->get_dz());
-    size_t k_end = k_start + domain->get_nz() - 1;
-
-    size_t i_start = nx_begin;
-    size_t i_end = nx_begin + domain->get_nx() - 1;
+    size_t i_start = domain->get_index_x1();
+    size_t i_end = domain->get_index_x2() + 1;
+    size_t j_start = domain->get_index_y1();
+    size_t j_end = domain->get_index_y2() + 1;
+    size_t k_start = domain->get_index_z1();
+    size_t k_end = domain->get_index_z2() + 1;
 
     //expansion - expand if there is at least one cell in the buffer area fulfills the condition
     ADTypes expansion_start = ADTypes::UNKNOWN;

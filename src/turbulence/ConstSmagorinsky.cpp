@@ -82,6 +82,7 @@ void ConstSmagorinsky::CalcTurbViscosity(Field &ev,
         if (sync) {
 #pragma acc wait
         }
+        boundary->apply_boundary(ev.data, ev.get_type(), sync);
     }
 }
 

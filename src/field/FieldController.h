@@ -16,7 +16,7 @@
 class FieldController {
  public:
     explicit FieldController(Domain const &domain);
-  
+
     void set_up_boundary();
     void set_up_temporary_fields();
     void update_data(bool sync);
@@ -76,6 +76,14 @@ class FieldController {
 
     Field &get_field_source_T() { return field_source_T; }
     real* get_field_source_T_data() const { return field_source_T.data; }
+    real *get_field_source_concentration_data() const { return field_source_concentration.data; }
+
+    real* get_field_force_x_data() const { return field_force_x.data; }
+    real* get_field_force_y_data() const { return field_force_y.data; }
+    real* get_field_force_z_data() const { return field_force_z.data; }
+
+    real* get_field_kappa_data() const { return field_kappa_t.data; }
+    real* get_field_gamma_data() const { return field_gamma_t.data; }
 
     Field &get_field_source_concentration() { return field_source_concentration; }
     real* get_field_source_concentration_data() { return field_source_concentration.data; }

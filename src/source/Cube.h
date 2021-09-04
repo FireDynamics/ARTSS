@@ -4,28 +4,26 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_CUBE_H
-#define ARTSS_CUBE_H
+#ifndef ARTSS_SOURCE_CUBE_H_
+#define ARTSS_SOURCE_CUBE_H_
 
 
 #include "../interfaces/ISourceFunction.h"
 
 class Cube: public ISourceFunction {
  public:
-    Cube(
-            real value,
-            real x0, real y0, real z0,
-            real sigma_x, real sigma_y, real sigma_z);
+    Cube(real value,
+            real x_start, real y_start, real z_start,
+            real x_end, real y_end, real z_end);
     ~Cube();
     void update_source(Field &out, real t_cur) override;
 
  private:
     Field m_source_field;
-    void set_up(
-            real value,
-            real x0, real y0, real z0,
-            real sigma_x, real sigma_y, real sigma_z);
+    void set_up(real value,
+            real x_start, real y_start, real z_start,
+            real x_end, real y_end, real z_end);
 };
 
 
-#endif /* ARTSS_CUBE_H */
+#endif /* ARTSS_SOURCE_CUBE_H_ */

@@ -31,6 +31,10 @@ void Cube::update_source(Field &out, real) {
             const size_t idx = d_bList[l];
             out[idx] = m_source_field[idx];
         }
+
+        if (m_has_noise) {
+            out *= m_noise_maker->random_field(out.get_size());
+        }
     }
 }
 
@@ -38,7 +42,7 @@ Cube::Cube(
         real value, real
         x_start, real y_start, real z_start,
         real x_end, real y_end, real z_end) :
-    m_source_field(FieldType::T, 0.0, 0, Domain::getInstance()->get_size()) {
+    m_source_field(FieldType::T) {
     set_up(value, x_start, y_start, z_start, x_end, y_end, z_end);
 }
 

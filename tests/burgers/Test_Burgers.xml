@@ -19,19 +19,13 @@
     </solution>
   </solver>
 
-  <domain_parameters>
+  <domain_parameters enable_computational_domain="No">
     <X1> -3.1415926536 </X1>  <!-- physical domain -->
     <X2> 3.1415926536 </X2>
     <Y1> -3.1415926536 </Y1>
     <Y2> 3.1415926536 </Y2>
     <Z1> -3.1415926536 </Z1>
     <Z2> 3.1415926536 </Z2>
-    <x1> -3.1415926536 </x1>  <!-- computational domain -->
-    <x2> 3.1415926536 </x2>
-    <y1> -3.1415926536 </y1>
-    <y2> 3.1415926536 </y2>
-    <z1> -3.1415926536 </z1>
-    <z2> 3.1415926536 </z2>
     <nx> 40 </nx>  <!-- grid resolution (number of cells excl. ghost cells) -->
     <ny> 40 </ny>
     <nz> 1 </nz>
