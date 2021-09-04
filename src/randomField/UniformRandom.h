@@ -1,5 +1,6 @@
-#ifndef ARTSS_SOURCE_UNIFORMRANDOM_H_
-#define ARTSS_SOURCE_UNIFORMRANDOM_H_
+
+#ifndef ARTSS_SOURCE_URANDOM_H_
+#define ARTSS_SOURCE_URANDOM_H_
 
 
 #include <random>
@@ -10,21 +11,18 @@
 
 class UniformRandom: public IRandomField {
  public:
-    UniformRandom(real range, real step_size) :
+    UniformRandom(int range, int step_size) :
         m_seed(std::random_device()()),
-        m_steps(static_cast<int>(range / step_size)),
-        m_step_size(step_size) {
+        m_steps(range / step_size) {
         init_dist();
     }
 
     UniformRandom(real range, real step_size, int seed) :
-        m_seed(seed),
-        m_steps(static_cast<int>(range / step_size)),
-        m_step_size(step_size) {
+        m_seed(seed), m_steps(range / step_size) {
         init_dist();
     }
 
-    ~UniformRandom() override = default;
+    ~UniformRandom() = default;
 
     Field random_field(size_t size) override;
 
@@ -36,9 +34,9 @@ class UniformRandom: public IRandomField {
 
      const int m_seed;
      const int m_steps;
-     const real m_step_size;
      std::mt19937 m_mt;
      std::uniform_int_distribution<int> m_dist;
 };
 
-#endif /* ARTSS_SOURCE_UNIFORMRANDOM_H_ */
+
+#endif

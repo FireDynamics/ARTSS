@@ -279,17 +279,3 @@ TEST_F(UniformRandomFieldTest, stress_test2) {
         EXPECT_LE(a[a[0]], steps);
     }
 }
-
-TEST_F(UniformRandomFieldTest, step_size) {
-    int steps = 20;
-    real step_size = 0.1;
-    size_t size = 1000;
-
-    UniformRandom noise_maker(steps, step_size, 0);
-    Field a = noise_maker.random_field(size);
-    for (int i = 0; i < size; ++i) {
-        real tmp = a[i] * 10;
-        int integer = static_cast<int>(tmp);
-        ASSERT_GE(tmp - integer, 0);
-    }
-}
