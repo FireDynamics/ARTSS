@@ -34,22 +34,25 @@ void IPressure::divergence(
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_inner_list = boundary->get_inner_list_level_joined();
     size_t *d_bList = boundary->get_boundary_list_level_joined();
 
     auto bsize_i = boundary->get_size_inner_list();
     auto bsize_b = boundary->get_size_boundary_list();
 
-#pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b])
+    size_t neighbour_i = 1;
+    size_t neighbour_j = Nx;
+    size_t neighbour_k = Nx * Ny;
+#pragma acc data present(d_inner_list[:bsize_i], d_bList[:bsize_b])
 #pragma acc data present(out, inx, iny, inz)
     {
 #pragma acc kernels async
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_iList[j];
-            real value_in_x = 0.5 * rdx * (in_x[i + 1    ] - in_x[i - 1]) ;
-            real value_in_y = 0.5 * rdy * (in_y[i + Nx   ] - in_y[i - Nx]) ;
-            real value_in_z = 0.5 * rdz * (in_z[i + Nx * Ny] - in_z[i - Nx * Ny]) ;
+            const size_t i = d_inner_list[j];
+            real value_in_x = 0.5 * rdx * (in_x[i + neighbour_i] - in_x[i - neighbour_i]) ;
+            real value_in_y = 0.5 * rdy * (in_y[i + neighbour_j] - in_y[i - neighbour_j]) ;
+            real value_in_z = 0.5 * rdz * (in_z[i + neighbour_k] - in_z[i - neighbour_k]) ;
             out[i] = value_in_x + value_in_y + value_in_z;
         }
 
@@ -97,32 +100,35 @@ void IPressure::projection(
     auto rdy = 1. / dy;
     auto rdz = 1. / dz;
 
-    auto typeu = out_u.get_type();
-    auto typev = out_v.get_type();
-    auto typew = out_w.get_type();
+    auto type_u = out_u.get_type();
+    auto type_v = out_v.get_type();
+    auto type_w = out_w.get_type();
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_inner_list = boundary->get_inner_list_level_joined();
 
     auto bsize_i = boundary->get_size_inner_list();
 
-#pragma acc data present(d_iList[:bsize_i])
+    size_t neighbour_i = 1;
+    size_t neighbour_j = Nx;
+    size_t neighbour_k = Nx * Ny;
+#pragma acc data present(d_inner_list[:bsize_i])
 #pragma acc data present(outu, outv, outw, inu, inv, inw, inp)
     {
 #pragma acc kernels async
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_iList[j];
-            out_u[i] = in_u[i] - 0.5 * rdx * (in_p[i + 1] - in_p[i - 1]);
-            out_v[i] = in_v[i] - 0.5 * rdy * (in_p[i + Nx] - in_p[i - Nx]);
-            out_w[i] = in_w[i] - 0.5 * rdz * (in_p[i + Nx * Ny] - in_p[i - Nx * Ny]);
+            const size_t i = d_inner_list[j];
+            out_u[i] = in_u[i] - 0.5 * rdx * (in_p[i + neighbour_i] - in_p[i - neighbour_i]);
+            out_v[i] = in_v[i] - 0.5 * rdy * (in_p[i + neighbour_j] - in_p[i - neighbour_j]);
+            out_w[i] = in_w[i] - 0.5 * rdz * (in_p[i + neighbour_k] - in_p[i - neighbour_k]);
         }
 
         //boundaries
-        boundary->apply_boundary(out_u.data, typeu, false);
-        boundary->apply_boundary(out_v.data, typev, false);
-        boundary->apply_boundary(out_w.data, typew, false);
+        boundary->apply_boundary(out_u.data, type_u, false);
+        boundary->apply_boundary(out_v.data, type_v, false);
+        boundary->apply_boundary(out_w.data, type_w, false);
 
         if (sync) {
 #pragma acc wait
