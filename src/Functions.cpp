@@ -1183,7 +1183,7 @@ namespace Functions {
         size_t size_oList = boundary->get_size_obstacle_list();
 
         std::mt19937 mt;
-        double steps = range/step_size;
+        double steps = range / step_size;
         if (seed > 0) {
           mt = std::mt19937(seed);
         } else {
