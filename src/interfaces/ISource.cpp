@@ -97,6 +97,9 @@ void ISource::dissipate(
     size_t *d_iList = boundary->get_inner_list_level_joined();
     auto bsize_i = boundary->get_size_inner_list();
 
+    size_t neighbour_i = 1;
+    size_t neighbour_j = Nx;
+    size_t neighbour_k = Nx * Ny;
 #pragma acc data present(out, in_u, in_v, in_w, d_iList[:bsize_i])
     {
         // inner
@@ -104,15 +107,24 @@ void ISource::dissipate(
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_iList[j];
-            real out_h = nu * (2 * (0.5 * rdx * (in_u[i + 1      ] - in_u[i - 1      ])) * (0.5 * rdx * (in_u[i + 1      ] - in_u[i - 1 ]))
-                             + 2 * (0.5 * rdy * (in_v[i + Nx     ] - in_v[i - Nx     ])) * (0.5 * rdy * (in_v[i + Nx     ] - in_v[i - Nx]))
-                             + 2 * (0.5 * rdz * (in_w[i + Nx * Ny] - in_w[i - Nx * Ny])) * (0.5 * rdz * (in_w[i + Nx * Ny] - in_w[i - Nx * Ny]))
-                                + ((0.5 * rdx * (in_v[i + 1      ] - in_v[i - 1      ])) + (0.5 * rdy * (in_u[i + Nx     ] - in_u[i - Nx])))
-                                * ((0.5 * rdx * (in_v[i + 1      ] - in_v[i - 1      ])) + (0.5 * rdy * (in_u[i + Nx     ] - in_u[i - Nx])))
-                                + ((0.5 * rdy * (in_w[i + Nx     ] - in_w[i - Nx     ])) + (0.5 * rdz * (in_v[i + Nx * Ny] - in_v[i - Nx * Ny])))
-                                * ((0.5 * rdy * (in_w[i + Nx     ] - in_w[i - Nx     ])) + (0.5 * rdz * (in_v[i + Nx * Ny] - in_v[i - Nx * Ny])))
-                                + ((0.5 * rdz * (in_u[i + Nx * Ny] - in_u[i - Nx * Ny])) + (0.5 * rdx * (in_w[i + 1      ] - in_w[i - 1])))
-                                * ((0.5 * rdz * (in_u[i + Nx * Ny] - in_u[i - Nx * Ny])) + (0.5 * rdx * (in_w[i + 1      ] - in_w[i - 1]))));
+            real out_h = nu * (2 * (0.5 * rdx * (in_u[i + neighbour_i] - in_u[i - neighbour_i]))
+                                 * (0.5 * rdx * (in_u[i + neighbour_i] - in_u[i - neighbour_i]))
+                             + 2 * (0.5 * rdy * (in_v[i + neighbour_j] - in_v[i - neighbour_j]))
+                                 * (0.5 * rdy * (in_v[i + neighbour_j] - in_v[i - neighbour_j]))
+                             + 2 * (0.5 * rdz * (in_w[i + neighbour_k] - in_w[i - neighbour_k]))
+                                 * (0.5 * rdz * (in_w[i + neighbour_k] - in_w[i - neighbour_k]))
+                                + ((0.5 * rdx * (in_v[i + neighbour_i] - in_v[i - neighbour_i]))
+                                +  (0.5 * rdy * (in_u[i + neighbour_j] - in_u[i - neighbour_j])))
+                                * ((0.5 * rdx * (in_v[i + neighbour_i] - in_v[i - neighbour_i]))
+                                +  (0.5 * rdy * (in_u[i + neighbour_j] - in_u[i - neighbour_j])))
+                                + ((0.5 * rdy * (in_w[i + neighbour_j] - in_w[i - neighbour_j]))
+                                +  (0.5 * rdz * (in_v[i + neighbour_k] - in_v[i - neighbour_k])))
+                                * ((0.5 * rdy * (in_w[i + neighbour_j] - in_w[i - neighbour_j]))
+                                +  (0.5 * rdz * (in_v[i + neighbour_k] - in_v[i - neighbour_k])))
+                                + ((0.5 * rdz * (in_u[i + neighbour_k] - in_u[i - neighbour_k]))
+                                +  (0.5 * rdx * (in_w[i + neighbour_i] - in_w[i - neighbour_i])))
+                                * ((0.5 * rdz * (in_u[i + neighbour_k] - in_u[i - neighbour_k]))
+                                +  (0.5 * rdx * (in_w[i + neighbour_i] - in_w[i - neighbour_i]))));
             out[i] += dt * out_h;
         }
 
