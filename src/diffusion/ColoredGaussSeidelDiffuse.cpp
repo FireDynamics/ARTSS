@@ -61,6 +61,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, con
     size_t* d_iList = boundary->get_inner_list_level_joined();
     size_t* d_bList = boundary->get_boundary_list_level_joined();
 
+//#pragma acc data present(d_out[:bsize], d_b[:bsize])
 {
     const size_t Nx = domain->get_Nx(out.get_level());  // due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny(out.get_level());
@@ -96,7 +97,8 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, con
 
         sum = 0;
 
-        for (size_t j = 0; j < bsize_i; ++j) {
+//#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_iList[:bsize_i]) async
+        for (size_t j = 0; j < bsize_i; ++j){
         const size_t i = d_iList[j];
             res = (- alpha_x * (d_out[i + 1] + d_out[i - 1])
                    - alpha_y * (d_out[i + Nx] + d_out[i - Nx])
@@ -106,15 +108,20 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, con
             sum += res * res;
         }
 
+//#pragma acc wait
         res = sqrt(sum);
         it++;
+    } //end while
+
+    if (sync) {
+//#pragma acc wait
     }
 
 #ifndef BENCHMARKING
     m_logger->info("Number of iterations: {}", it);
     m_logger->info("Colored Gauss-Seidel ||res|| = {:.5e}", res);
 #endif
-}
+} //end data region
 }
 
 // ===================== Turbulent version ============================
@@ -145,6 +152,8 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
 
     size_t* d_iList = boundary->get_inner_list_level_joined();
     size_t* d_bList = boundary->get_boundary_list_level_joined();
+
+//#pragma acc data present(d_out[:bsize], d_b[:bsize], d_EV[:bsize])
 {
     const size_t Nx = domain->get_Nx(out.get_level());
     const size_t Ny = domain->get_Ny(out.get_level());
@@ -176,12 +185,13 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
 
         sum = 0;
 
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_iList[j];
-            alpha_x = (D + d_EV[i]) * dt * rdx * rdx;
-            alpha_y = (D + d_EV[i]) * dt * rdy * rdy;
-            alpha_z = (D + d_EV[i]) * dt * rdz * rdz;
-            rbeta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
+//#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_EV[:bsize], d_iList[:bsize_i]) async
+    for (size_t j = 0; j < bsize_i; ++j){
+        const size_t i = d_iList[j];
+        alpha_x = (D + d_EV[i]) * dt * rdx * rdx;
+        alpha_y = (D + d_EV[i]) * dt * rdy * rdy;
+        alpha_z = (D + d_EV[i]) * dt * rdz * rdz;
+        rbeta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
 
             res = (- alpha_x * (d_out[i + 1      ] + d_out[i - 1      ])
                    - alpha_y * (d_out[i + Nx     ] + d_out[i - Nx     ])
@@ -190,8 +200,14 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
             sum += res * res;
         }
 
+//#pragma acc wait
         res = sqrt(sum);
         it++;
+
+    } //end while
+
+    if (sync) {
+//#pragma acc wait
     }
 
 #ifndef BENCHMARKING
@@ -229,9 +245,11 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
     auto d_out = out.data;
     auto d_b = b.data;
 
+//#pragma acc kernels present(d_out[:bsize], d_b[:bsize]) async
 {
     // TODO: exclude obstacles!
     // red
+//#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < nz - 1; k += 2) {
         for (size_t j = 1; j < ny - 1; j += 2) {
             for (size_t i = 1; i < nx - 1; i += 2) {
@@ -239,6 +257,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
+//#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < nz - 1; k += 2) {
         for (size_t j = 2; j < ny - 1; j += 2) {
             for (size_t i = 2; i < nx - 1; i += 2) {
@@ -246,6 +265,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
+//#pragma acc loop independent collapse(3)
     for (size_t k = 2; k < nz - 1; k += 2) {
         for (size_t j = 1; j < ny - 1; j += 2) {
             for (size_t i = 2; i < nx - 1; i += 2) {
@@ -253,6 +273,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
+//#pragma acc loop independent collapse(3)
     for (size_t k = 2; k < nz - 1; k += 2) {
         for (size_t j = 2; j < ny - 1; j += 2) {
             for (size_t i = 1; i < nx - 1; i += 2) {
@@ -260,10 +281,14 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
-}
+} //end data region
 
+//#pragma acc wait
+
+//#pragma acc kernels present(d_out[:bsize], d_b[:bsize]) async
 {
     //black
+//#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < nz - 1; k += 2) {
         for (size_t j = 1; j < ny - 1; j += 2) {
             for (size_t i = 2; i < nx - 1; i += 2) {
@@ -271,6 +296,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
+//#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < nz - 1; k += 2) {
         for (size_t j = 2; j < ny - 1; j += 2) {
             for (size_t i = 1; i < nx - 1; i += 2) {
@@ -278,6 +304,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
+//#pragma acc loop independent collapse(3)
     for (size_t k = 2; k < nz - 1; k += 2) {
         for (size_t j = 1; j < ny - 1; j += 2) {
             for (size_t i = 1; i < nx - 1; i += 2) {
@@ -285,6 +312,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
+//#pragma acc loop independent collapse(3)
     for (size_t k = 2; k < nz - 1; k += 2) {
         for (size_t j = 2; j < ny - 1; j += 2) {
             for (size_t i = 2; i < nx - 1; i += 2) {
@@ -292,7 +320,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
-}
+} //end data region
+
+//#pragma acc wait
 }
 
 // ============== Turbulent version of iteration step =================
@@ -332,8 +362,10 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
     auto d_EV   = EV.data;
 
 // TODO: exclude obstacles!
+//#pragma acc kernels present(d_out[:bsize], d_b[:bsize], d_EV[:bsize]) async
 {
     // red
+//#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
             for (size_t i = 1; i < Nx - 1; i += 2) {
@@ -360,6 +392,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
+//#pragma acc loop independent collapse(3)
     for (size_t k = 2; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
             for (size_t i = 2; i < Nx - 1; i += 2) {
@@ -386,9 +419,12 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
-}
+} // end data region
+//#pragma acc wait
+//#pragma acc kernels present(d_out[:bsize], d_b[:bsize], d_EV[:bsize]) async
 {
     // black
+//#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
             for (size_t i = 2; i < Nx - 1; i += 2) {
@@ -403,6 +439,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
+//#pragma acc loop independent collapse(3)
     for (size_t k = 1; k < Nz - 1; k += 2) {
         for (size_t j = 2; j < Ny - 1; j += 2) {
             for (size_t i = 1; i < Nx - 1; i += 2) {
@@ -417,6 +454,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
+//#pragma acc loop independent collapse(3)
     for (size_t k = 2; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
             for (size_t i = 1; i < Nx - 1; i += 2) {
@@ -431,6 +469,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
+//#pragma acc loop independent collapse(3)
     for (size_t k = 2; k < Nz - 1; k += 2) {
         for (size_t j = 2; j < Ny - 1; j += 2) {
             for (size_t i = 2; i < Nx - 1; i += 2) {
@@ -445,7 +484,8 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
-}
+} // end data region
+//#pragma acc wait
 }
 
 // ========================= CGS stencil ==============================
