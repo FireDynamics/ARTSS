@@ -210,6 +210,7 @@ TEST_F(FieldTest, stress_mul_two_fields) {
 TEST_F(FieldTest, add_scalar) {
     size_t size = 100;
     Field a(UNKNOWN_FIELD, 0.0, 0, size);
+    Field b(UNKNOWN_FIELD, 0.0, 0, size);
 
     real x = 0.0;
     for (auto i = 0; i < size; ++i) {

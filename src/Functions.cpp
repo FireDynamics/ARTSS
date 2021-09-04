@@ -1071,6 +1071,40 @@ namespace Functions {
         }
     }
 
+// ============================================== Jet ==============================================
+// *************************************************************************************************
+/// \brief Initial set up of a jet stream in a defined pipe
+/// \param out velocity field
+/// \param index_x1 starting index in x-direction
+/// \param index_x2 ending index in x-direction
+/// \param index_y1 starting index in y-direction
+/// \param index_y2 ending index in y-direction
+/// \param index_z1 starting index in z-direction
+/// \param index_z2 ending index in z-direction
+/// \param value velocity value to be set
+// *************************************************************************************************
+    void Jet(
+            Field *out,
+            size_t index_x1, size_t index_x2,
+            size_t index_y1, size_t index_y2,
+            size_t index_z1, size_t index_z2,
+            real value) {
+        auto domain = Domain::getInstance();
+        auto d_out = out->data;
+
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
+
+        for (size_t i = index_x1; i <= index_x2; i++) {
+            for (size_t j = index_y1; j <= index_y2; j++) {
+                for (size_t k = index_z1; k <= index_z2; k++) {
+                    size_t index = IX(i, j, k, Nx, Ny);
+                    d_out[index] = value;
+                }
+            }
+        }
+    }
+
 // ========================== NS Test - McDermott IC for u,v,w,p =========================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - McDermott

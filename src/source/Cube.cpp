@@ -10,31 +10,9 @@
 
 void Cube::update_source(Field &out, real) {
     auto boundary = BoundaryController::getInstance();
-
-#pragma acc data present(out, source)
-    {
-        size_t *d_iList = boundary->get_inner_list_level_joined();
-        size_t *d_bList = boundary->get_boundary_list_level_joined();
-
-        auto bsize_i = boundary->get_size_inner_list();
-        auto bsize_b = boundary->get_size_boundary_list();
-
-#pragma acc parallel loop independent present(out, source) async
-        // inner cells
-        for (size_t l = 0; l < bsize_i; ++l) {
-            const size_t idx = d_iList[l];
-            out[idx] = m_source_field[idx];
-        }
-
-        // boundary cells
-        for (size_t l = 0; l < bsize_b; ++l) {
-            const size_t idx = d_bList[l];
-            out[idx] = m_source_field[idx];
-        }
-
-        if (m_has_noise) {
-            out *= m_noise_maker->random_field(out.get_size());
-        }
+    out.copy_data(m_source_field);
+    if (m_has_noise) {
+        out *= m_noise_maker->random_field(out.get_size());
     }
 }
 

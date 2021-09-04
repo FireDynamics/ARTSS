@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_SOURCE_ZERO_H_
-#define ARTSS_SOURCE_ZERO_H_
+#ifndef ARTSS_SOURCE_ZERO_H
+#define ARTSS_SOURCE_ZERO_H
 
 
 #include "../interfaces/ISourceFunction.h"
@@ -16,4 +16,4 @@ public:
 };
 
 
-#endif /* ARTSS_SOURCE_ZERO_H_ */
+#endif /* ARTSS_SOURCE_ZERO_H */
