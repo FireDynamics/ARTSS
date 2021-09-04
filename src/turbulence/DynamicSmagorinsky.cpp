@@ -280,11 +280,11 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 
         // modulus of strain tensor
         S_bar[i] = sqrt(2. * (S11[i] * S11[i]
-                            +  S22[i] * S22[i]
-                            +  S33[i] * S33[i]
-                       + 2. * (S12[i] * S12[i])
-                       + 2. * (S13[i] * S13[i])
-                       + 2. * (S23[i] * S23[i])));
+                           +  S22[i] * S22[i]
+                           +  S33[i] * S33[i]
+                      + 2. * (S12[i] * S12[i])
+                      + 2. * (S13[i] * S13[i])
+                      + 2. * (S23[i] * S23[i])));
 
         // product of strain modulus and strain tensor
         P11[i] = S_bar[i] * S11[i];
@@ -328,7 +328,7 @@ void DynamicSmagorinsky::CalcTurbViscosity(
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_inner_list[j];
         // modulus of filtered strain tensor
-        S_bar_f[i] =  sqrt(2. * (S11_f[i] * S11_f[i]
+        S_bar_f[i] = sqrt(2. * (S11_f[i] * S11_f[i]
                              +  S22_f[i] * S22_f[i]
                              +  S33_f[i] * S33_f[i]
                         + 2. * (S12_f[i] * S12_f[i])
