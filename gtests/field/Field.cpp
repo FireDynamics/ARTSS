@@ -30,7 +30,7 @@ TEST_F(FieldTest, set_val) {
 
     a.set_value(0.5);
     for (auto i = 0; i < size; ++i) {
-        ASSERT_EQ(a[i], 0.5);
+        EXPECT_EQ(a[i], 0.5);
     }
 }
 
@@ -210,7 +210,6 @@ TEST_F(FieldTest, stress_mul_two_fields) {
 TEST_F(FieldTest, add_scalar) {
     size_t size = 100;
     Field a(UNKNOWN_FIELD, 0.0, 0, size);
-    Field b(UNKNOWN_FIELD, 0.0, 0, size);
 
     real x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -221,9 +220,6 @@ TEST_F(FieldTest, add_scalar) {
     a += 0.5;
 
     x = 0.0;
-    for (auto i=0; i < size; ++i) {
-        ASSERT_EQ(a[i], x + 0.5);
-        ASSERT_EQ(b[i], x + 0.0);
     for (auto i = 0; i < size; ++i) {
         EXPECT_EQ(a[i], x + 0.5);
         x += 1.0;
