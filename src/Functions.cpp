@@ -360,14 +360,14 @@ namespace Functions {
 // ***************************************************************************************
     void BuoyancyMMS(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &outT, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out_x.get_level());
-        size_t Ny = domain->get_Ny(out_x.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(out_x.get_level());
-        real dy = domain->get_dy(out_x.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -421,14 +421,14 @@ namespace Functions {
 // ***************************************************************************************
     void BuoyancyST_MMS(Field &out, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.get_level());
-        size_t Ny = domain->get_Ny(out.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(out.get_level());
-        real dy = domain->get_dy(out.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -521,16 +521,16 @@ namespace Functions {
 // ***************************************************************************************
     void ExpSinusProd(Field &out, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.get_level());
-        size_t Ny = domain->get_Ny(out.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.get_level());
-        real dy = domain->get_dy(out.get_level());
-        real dz = domain->get_dz(out.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
@@ -577,17 +577,17 @@ namespace Functions {
 // ***************************************************************************************
     void ExpSinusSum(Field &out_x, Field &out_y, Field &out_z, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out_x.get_level());
-        size_t Ny = domain->get_Ny(out_x.get_level());
-        size_t Nz = domain->get_Nz(out_x.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
+        size_t Nz = domain->get_Nz();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out_x.get_level());
-        real dy = domain->get_dy(out_x.get_level());
-        real dz = domain->get_dz(out_x.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
@@ -600,7 +600,7 @@ namespace Functions {
         size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
-        if (Nz != 3) {
+        if (Nz > 3) {
             real d = 3.;                // 3D
 
             // inner cells
@@ -661,16 +661,16 @@ namespace Functions {
 // ***************************************************************************************
     void FacSinSinSin(Field &out) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.get_level());
-        size_t Ny = domain->get_Ny(out.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.get_level());
-        real dy = domain->get_dy(out.get_level());
-        real dz = domain->get_dz(out.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
@@ -714,25 +714,25 @@ namespace Functions {
 // ***************************************************************************************
     void GaussBubble(Field &out, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.get_level());
-        size_t Ny = domain->get_Ny(out.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.get_level());
-        real dy = domain->get_dy(out.get_level());
-        real dz = domain->get_dz(out.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
         real u_lin = params->get_real("initial_conditions/u_lin");
         real v_lin = params->get_real("initial_conditions/v_lin");
         real w_lin = params->get_real("initial_conditions/w_lin");
-        real xshift = params->get_real("initial_conditions/xshift");
-        real yshift = params->get_real("initial_conditions/yshift");
-        real zshift = params->get_real("initial_conditions/zshift");
+        real x_shift = params->get_real("initial_conditions/x_shift");
+        real y_shift = params->get_real("initial_conditions/y_shift");
+        real z_shift = params->get_real("initial_conditions/z_shift");
         real l = params->get_real("initial_conditions/l");
 
         auto boundary = BoundaryController::getInstance();
@@ -749,12 +749,12 @@ namespace Functions {
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            real xshift2 = ((xi(coords_i, X1, dx) - xshift) / u_lin - t) * ((xi(coords_i, X1, dx) - xshift) / u_lin - t);
-            real yshift2 = ((yj(coords_j, Y1, dy) - yshift) / v_lin - t) * ((yj(coords_j, Y1, dy) - yshift) / v_lin - t);
-            real zshift2 = ((zk(coords_k, Z1, dz) - zshift) / w_lin - t) * ((zk(coords_k, Z1, dz) - zshift) / w_lin - t);
+            real x_shift2 = ((xi(coords_i, X1, dx) - x_shift) / u_lin - t) * ((xi(coords_i, X1, dx) - x_shift) / u_lin - t);
+            real y_shift2 = ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t) * ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t);
+            real z_shift2 = ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t) * ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t);
             real quot = 1. / (2. * l * l);
 
-            out.data[idx] = exp(-(xshift2 + yshift2 + zshift2) * quot);
+            out.data[idx] = exp(-(x_shift2 + y_shift2 + z_shift2) * quot);
         }
         // boundary
         for (size_t i = 0; i < size_boundary_list; i++) {
@@ -763,12 +763,12 @@ namespace Functions {
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            real xshift2 = ((xi(coords_i, X1, dx) - xshift) / u_lin - t) * ((xi(coords_i, X1, dx) - xshift) / u_lin - t);
-            real yshift2 = ((yj(coords_j, Y1, dy) - yshift) / v_lin - t) * ((yj(coords_j, Y1, dy) - yshift) / v_lin - t);
-            real zshift2 = ((zk(coords_k, Z1, dz) - zshift) / w_lin - t) * ((zk(coords_k, Z1, dz) - zshift) / w_lin - t);
+            real x_shift2 = ((xi(coords_i, X1, dx) - x_shift) / u_lin - t) * ((xi(coords_i, X1, dx) - x_shift) / u_lin - t);
+            real y_shift2 = ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t) * ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t);
+            real z_shift2 = ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t) * ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t);
             real quot = 1. / (2. * l * l);
 
-            out.data[idx] = exp(-(xshift2 + yshift2 + zshift2) * quot);
+            out.data[idx] = exp(-(x_shift2 + y_shift2 + z_shift2) * quot);
         }
     }
 
@@ -780,13 +780,13 @@ namespace Functions {
     void Layers(Field &out) {
         auto domain = Domain::getInstance();
         auto params = Parameters::getInstance();
-        size_t n_layers = static_cast<size_t> (params->get_int("initial_conditions/n_layers"));
+        int n_layers = params->get_int("initial_conditions/n_layers");
 
         // layer border
         real *bord = new real[n_layers + 1];
         real val_bord;
 
-        for (size_t l = 1; l < n_layers; ++l) {
+        for (int l = 1; l < n_layers; ++l) {
             std::string val_bord_l = "initial_conditions/border_";
             val_bord_l += std::to_string(l);
             val_bord = params->get_real(val_bord_l);
@@ -823,7 +823,7 @@ namespace Functions {
         real *val = new real[n_layers];
         real val_out;
 
-        for (size_t l = 0; l < n_layers; ++l) {
+        for (int l = 0; l < n_layers; ++l) {
             std::string val_out_l = "initial_conditions/value_";
             val_out_l += std::to_string(l + 1);
             val_out = params->get_real(val_out_l);
@@ -831,16 +831,16 @@ namespace Functions {
         }
 
         // set values into layers
-        size_t Nx = domain->get_Nx(out.get_level());
-        size_t Ny = domain->get_Ny(out.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.get_level());
-        real dy = domain->get_dy(out.get_level());
-        real dz = domain->get_dz(out.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -896,16 +896,28 @@ namespace Functions {
 
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
-                    if (bord[l] <= x && x <= bord[l + 1]) out.data[idx] = val[l];
-                    if (x < bord[0]) out.data[idx] = val[0];
+                    if (bord[l] <= x && x <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (x < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else if (dir == "y") {
                     y = yj(coords_j, Y1, dy) - 0.5 * dy;
-                    if (bord[l] <= y && y <= bord[l + 1]) out.data[idx] = val[l];
-                    if (y < bord[0]) out.data[idx] = val[0];
+                    if (bord[l] <= y && y <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (y < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
-                    if (bord[l] <= z && z <= bord[l + 1]) out.data[idx] = val[l];
-                    if (z < bord[0]) out.data[idx] = val[0];
+                    if (bord[l] <= z && z <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (z < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else {
 #ifndef BENCHMARKING
                     auto m_logger = Utility::create_logger("Functions");
@@ -923,16 +935,28 @@ namespace Functions {
 
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
-                    if (bord[l] <= x && x <= bord[l + 1]) out.data[idx] = val[l];
-                    if (x < bord[0]) out.data[idx] = val[0];
+                    if (bord[l] <= x && x <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (x < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else if (dir == "y") {
                     y = yj(coords_j, Y1, dy) - 0.5 * dy;
-                    if (bord[l] <= y && y <= bord[l + 1]) out.data[idx] = val[l];
-                    if (y < bord[0]) out.data[idx] = val[0];
+                    if (bord[l] <= y && y <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (y < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
-                    if (bord[l] <= z && z <= bord[l + 1]) out.data[idx] = val[l];
-                    if (z < bord[0]) out.data[idx] = val[0];
+                    if (bord[l] <= z && z <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (z < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else {
 #ifndef BENCHMARKING
                     auto m_logger = Utility::create_logger("Functions");
@@ -953,16 +977,16 @@ namespace Functions {
 // ***************************************************************************************
     void Hat(Field &out) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.get_level());
-        size_t Ny = domain->get_Ny(out.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.get_level());
-        real dy = domain->get_dy(out.get_level());
-        real dz = domain->get_dz(out.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
         real start_x = params->get_real("initial_conditions/x1");
@@ -1033,7 +1057,6 @@ namespace Functions {
             size_t index_z1, size_t index_z2,
             real value) {
         auto domain = Domain::getInstance();
-        auto d_out = out.data;
 
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -1042,7 +1065,7 @@ namespace Functions {
             for (size_t j = index_y1; j <= index_y2; j++) {
                 for (size_t k = index_z1; k <= index_z2; k++) {
                     size_t index = IX(i, j, k, Nx, Ny);
-                    d_out[index] = value;
+                    out[index] = value;
                 }
             }
         }
@@ -1059,14 +1082,14 @@ namespace Functions {
 // ***************************************************************************************
     void McDermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out_x.get_level());
-        size_t Ny = domain->get_Ny(out_x.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(out_x.get_level());
-        real dy = domain->get_dy(out_x.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -1155,16 +1178,16 @@ namespace Functions {
 // ***************************************************************************************
     void SinSinSin(Field &out) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out.get_level());
-        size_t Ny = domain->get_Ny(out.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out.get_level());
-        real dy = domain->get_dy(out.get_level());
-        real dz = domain->get_dz(out.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
         real l = params->get_real("initial_conditions/l"); //2;
@@ -1231,14 +1254,14 @@ namespace Functions {
 // ***************************************************************************************
     void Vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out_x.get_level());
-        size_t Ny = domain->get_Ny(out_x.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(out_x.get_level());
-        real dy = domain->get_dy(out_x.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
 
         auto params = Parameters::getInstance();
 
@@ -1295,14 +1318,14 @@ namespace Functions {
 
     void VortexY(Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out_x.get_level());
-        size_t Ny = domain->get_Ny(out_x.get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(out_x.get_level());
-        real dy = domain->get_dy(out_x.get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
 
         auto params = Parameters::getInstance();
 
