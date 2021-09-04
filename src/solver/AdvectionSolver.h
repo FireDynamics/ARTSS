@@ -16,8 +16,8 @@
 class AdvectionSolver : public ISolver {
  public:
     AdvectionSolver(
-        FieldController *field_controlller,
-        real u_lin, real v_lin, real w_lin, size_t size);
+        FieldController *field_controller,
+        real u_lin, real v_lin, real w_lin);
     explicit AdvectionSolver(FieldController *field_controller);
     ~AdvectionSolver();
 

@@ -11,12 +11,12 @@
 #include "SolverSelection.h"
 
 AdvectionSolver::AdvectionSolver(
-        FieldController *field_controlller,
-        real u_lin, real v_lin, real w_lin, size_t size) :
-    m_field_controller(field_controlller),
-    m_u_lin(FieldType::U, u_lin, 0, size),
-    m_v_lin(FieldType::V, v_lin, 0, size),
-    m_w_lin(FieldType::W, w_lin, 0, size) {
+        FieldController *field_controller,
+        real u_lin, real v_lin, real w_lin) :
+    m_field_controller(field_controller),
+    m_u_lin(FieldType::U, u_lin),
+    m_v_lin(FieldType::V, v_lin),
+    m_w_lin(FieldType::W, w_lin) {
 #ifndef BENCHMARKING
      m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -32,13 +32,12 @@ AdvectionSolver::AdvectionSolver(
     control();
 }
 
-AdvectionSolver::AdvectionSolver(FieldController *field_controlller) :
+AdvectionSolver::AdvectionSolver(FieldController *field_controller) :
     AdvectionSolver(
-            field_controlller,
+            field_controller,
             Parameters::getInstance()->get_real("initial_conditions/u_lin"),
             Parameters::getInstance()->get_real("initial_conditions/v_lin"),
-            Parameters::getInstance()->get_real("initial_conditions/w_lin"),
-            Domain::getInstance()->get_size()) {
+            Parameters::getInstance()->get_real("initial_conditions/w_lin")) {
 }
 
 AdvectionSolver::~AdvectionSolver() {
@@ -52,7 +51,6 @@ AdvectionSolver::~AdvectionSolver() {
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void AdvectionSolver::do_step(real, bool sync) {
-  // local variables and parameters for GPU
     Field &u = m_field_controller->field_u;
     Field &v = m_field_controller->field_v;
     Field &w = m_field_controller->field_w;
