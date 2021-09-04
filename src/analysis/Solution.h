@@ -23,16 +23,16 @@ class Solution {
     void calc_analytical_solution(real t);
 
     // Getter
-    real* GetU_data() const { return u_a.data; }
-    real* GetV_data() const { return v_a.data; }
-    real* GetW_data() const { return w_a.data; }
-    real* GetP_data() const { return p_a.data; }
-    real* GetT_data() const { return T_a.data; }
-    return_ptr GetU() const { return u_a.data; }
-    return_ptr GetV() const { return v_a.data; }
-    return_ptr GetW() const { return w_a.data; }
-    return_ptr GetP() const { return p_a.data; }
-    return_ptr GetT() const { return T_a.data; }
+    real *get_field_data_u() const { return u_a.data; }
+    real *get_field_data_v() const { return v_a.data; }
+    real *get_field_data_w() const { return w_a.data; }
+    real *get_field_data_p() const { return p_a.data; }
+    real *get_field_data_T() const { return T_a.data; }
+    return_ptr get_data_u() const { return u_a.data; }
+    return_ptr get_data_v() const { return v_a.data; }
+    return_ptr get_data_w() const { return w_a.data; }
+    return_ptr get_data_p() const { return p_a.data; }
+    return_ptr get_data_T() const { return T_a.data; }
 
  private:
     void init(std::string &initial_condition);

@@ -30,11 +30,11 @@ void CSVWriter::write_numerical(const FieldController &field_controller, const s
 }
 
 void CSVWriter::write_analytical(const Solution &solution, const std::string &filename) {
-    auto u = solution.GetU_data();
-    auto v = solution.GetV_data();
-    auto w = solution.GetW_data();
-    auto p = solution.GetP_data();
-    auto T = solution.GetT_data();
+    auto u = solution.get_field_data_u();
+    auto v = solution.get_field_data_v();
+    auto w = solution.get_field_data_w();
+    auto p = solution.get_field_data_p();
+    auto T = solution.get_field_data_T();
     CSVWriter::csvPrepareAndWrite(filename + ending, u, v, w, p, T);
 }
 
