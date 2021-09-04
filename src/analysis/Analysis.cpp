@@ -46,7 +46,7 @@ void Analysis::analyse(FieldController *field_controller, real t) {
         tinyxml2::XMLElement *xmlParameter = params->get_first_child("boundaries");
         auto curElem = xmlParameter->FirstChildElement();
 
-        #ifndef BENCHMARKING
+#ifndef BENCHMARKING
         m_logger->info("Compare to analytical solution:");
 #endif
 
@@ -94,13 +94,13 @@ bool Analysis::compare_solutions(read_ptr num, read_ptr ana, FieldType type, rea
     if (res <= m_tol) {
 #ifndef BENCHMARKING
         m_logger->info("{} PASSED Test at time {} with error e = {}",
-                BoundaryData::get_field_type_name(type), t, res);
+                       BoundaryData::get_field_type_name(type), t, res);
 #endif
         verification = true;
     } else {
 #ifndef BENCHMARKING
         m_logger->warn("{} FAILED Test at time {} with error e = {}",
-                BoundaryData::get_field_type_name(type), t, res);
+                       BoundaryData::get_field_type_name(type), t, res);
 #endif
     }
     return verification;
@@ -117,13 +117,13 @@ real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
     real r;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *innerList = boundary->get_inner_list_level_joined();
+    size_t *inner_list = boundary->get_inner_list_level_joined();
     size_t size_iList = boundary->get_size_inner_list();
 
     // weighted 2-norm
     // absolute error
     for (size_t i = 0; i < size_iList; i++) {
-        size_t idx = innerList[i];
+        size_t idx = inner_list[i];
         r = fabs(num[idx] - ana[idx]);
         sum += r * r;
     }
@@ -150,12 +150,12 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
     real rr;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *innerList = boundary->get_inner_list_level_joined();
+    size_t *inner_list = boundary->get_inner_list_level_joined();
     size_t size_iList = boundary->get_size_inner_list();
 
     // relative part with norm of analytical solution as denominator
     for (size_t i = 0; i < size_iList; i++) {
-        rr = ana[innerList[i]];
+        rr = ana[inner_list[i]];
         sumr += rr * rr;
     }
 
@@ -177,7 +177,7 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
 
         // relative part with norm of numerical solution as quotient
         for (size_t i = 0; i < size_iList; i++) {
-            rr = num[innerList[i]];
+            rr = num[inner_list[i]];
             sumr += rr * rr;
         }
 
@@ -189,7 +189,7 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
         eps = epsa / adenom;
     }
 
-    //T ODO(n16h7) add. output
+    // TODO(n16h7) add. output
 #ifndef BENCHMARKING
     m_logger->info("Relative error ||e|| = {}", eps);
 #endif
@@ -276,9 +276,9 @@ bool Analysis::check_time_step_VN(Field *u, real dt) {
     // local variables and parameters
     real nu = params->get_real("physical_parameters/nu");
 
-    real dx = domain->get_dx(u->get_level());
-    real dy = domain->get_dy(u->get_level());
-    real dz = domain->get_dz(u->get_level());
+    real dx = domain->get_dx();
+    real dy = domain->get_dy();
+    real dz = domain->get_dz();
 
     real dx2sum = (dx * dx + dy * dy + dz * dz);
     real rdx2 = 1. / dx2sum;
@@ -304,15 +304,15 @@ bool Analysis::check_time_step_VN(Field *u, real dt) {
 // *****************************************************************************
 real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt) const {
     real cfl_max = 0;  // highest seen C. C is always positiv, so 0 is a lower
-                       // bound
+    // bound
     real cfl_local;    // C in the local cell
 
     auto boundary = BoundaryController::getInstance();
     auto domain = Domain::getInstance();
 
     // local variables and parameters
-    size_t *innerList = boundary->get_inner_list_level_joined();
-    size_t sizei = boundary->get_size_inner_list();
+    size_t *inner_list = boundary->get_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_inner_list();
 
     real dx = domain->get_dx();
     real dy = domain->get_dy();
@@ -321,8 +321,8 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
     // calc C for every cell and get the maximum
 #pragma acc data present(u, v, w)
 #pragma acc parallel loop reduction(max:cfl_max)
-    for (size_t i=0; i < sizei; i++) {
-        size_t idx = innerList[i];
+    for (size_t i = 0; i < size_inner_list; i++) {
+        size_t idx = inner_list[i];
         // \frac{C}{\Delta t} = \frac{\Delta u}{\Delta x} +
         //                      \frac{\Delta v}{\Delta y} +
         //                      \frac{\Delta w}{\Delta z} +
@@ -333,7 +333,7 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
         cfl_max = std::max(cfl_max, cfl_local);
     }
 
-    return dt*cfl_max;
+    return dt * cfl_max;
 }
 
 // =============================== Save variables ==============================
@@ -344,12 +344,12 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
 void Analysis::save_variables_in_file(FieldController *field_controller) {
     //TODO do not write field out if not used
     auto boundary = BoundaryController::getInstance();
-    size_t *innerList = boundary->get_inner_list_level_joined();
-    size_t size_innerList = boundary->get_size_inner_list();
-    size_t *boundaryList = boundary->get_boundary_list_level_joined();
-    size_t size_boundaryList = boundary->get_size_boundary_list();
-    size_t *obstacleList = boundary->get_obstacle_list();
-    size_t size_obstacleList = boundary->get_size_obstacle_list();
+    size_t *inner_list = boundary->get_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_inner_list();
+    size_t *boundary_list = boundary->get_boundary_list_level_joined();
+    size_t size_boundary_list = boundary->get_size_boundary_list();
+    size_t *obstacle_list = boundary->get_obstacle_list();
+    size_t size_obstacle_list = boundary->get_size_obstacle_list();
 
     std::vector<FieldType> v_fields = boundary->get_used_fields();
 
@@ -361,13 +361,18 @@ void Analysis::save_variables_in_file(FieldController *field_controller) {
     dataField[FieldType::P] = field_controller->get_field_p_data();
     dataField[FieldType::T] = field_controller->get_field_T_data();
 
-    for (auto & v_field : v_fields) {
-        write_file(dataField[v_field], BoundaryData::get_field_type_name(v_field), innerList, size_innerList, boundaryList, size_boundaryList, obstacleList, size_obstacleList);
+    for (auto &v_field: v_fields) {
+        write_file(
+                dataField[v_field],
+                BoundaryData::get_field_type_name(v_field),
+                inner_list, size_inner_list,
+                boundary_list, size_boundary_list,
+                obstacle_list, size_obstacle_list);
     }
 }
 
 void Analysis::write_file(
-        const real *field, const std::string& filename,
+        const real *field, const std::string &filename,
         size_t *inner_list, size_t size_inner_list,
         size_t *boundary_list, size_t size_boundary_list,
         size_t *obstacle_list, size_t size_obstacle_list) {
