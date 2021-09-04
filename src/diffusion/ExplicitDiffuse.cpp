@@ -17,7 +17,6 @@
 
 ExplicitDiffuse::ExplicitDiffuse() {
     auto params = Parameters::getInstance();
-
     m_dt = params->get_real("physical_parameters/dt");
 }
 
@@ -131,12 +130,12 @@ void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Fi
         real nu_z1 = 0.5 * (EV[IX(i, j, k - 1, Nx, Ny)] + EV[idx]) + D;
         real nu_z2 = 0.5 * (EV[IX(i, j, k + 1, Nx, Ny)] + EV[idx]) + D;
 
-        auto di0 = (in[idx] - in[IX(i - 1, j, k, Nx, Ny)]);  // u_i - u_{i-1}
-        auto di1 = (in[IX(i + 1, j, k, Nx, Ny)] - in[idx]);  // u_{i+1} - u_i
-        auto dj0 = (in[idx] - in[IX(i, j - 1, k, Nx, Ny)]);
-        auto dj1 = (in[IX(i, j + 1, k, Nx, Ny)] - in[idx]);
-        auto dk0 = (in[idx] - in[IX(i, j, k - 1, Nx, Ny)]);
-        auto dk1 = (in[IX(i, j, k + 1, Nx, Ny)] - in[idx]);
+        real di0 = (in[idx] - in[IX(i - 1, j, k, Nx, Ny)]);  // u_i - u_{i-1}
+        real di1 = (in[IX(i + 1, j, k, Nx, Ny)] - in[idx]);  // u_{i+1} - u_i
+        real dj0 = (in[idx] - in[IX(i, j - 1, k, Nx, Ny)]);
+        real dj1 = (in[IX(i, j + 1, k, Nx, Ny)] - in[idx]);
+        real dk0 = (in[idx] - in[IX(i, j, k - 1, Nx, Ny)]);
+        real dk1 = (in[IX(i, j, k + 1, Nx, Ny)] - in[idx]);
 
         out[idx] = in[idx] +
                      m_dt * ((nu_x1 * di0 - nu_x2 * di1)   // dx // * 4 / dx;  // u_{i-0.5} - u_{i+0.5}
