@@ -9,12 +9,8 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 
-BuoyancyMMS::BuoyancyMMS() :
-    m_source_field(FieldType::RHO, 0, 0, Domain::getInstance()->get_size()) {
+BuoyancyMMS::BuoyancyMMS() : m_source_field(FieldType::RHO) {
     set_up();
-}
-
-BuoyancyMMS::~BuoyancyMMS() {
 }
 
 //===================================== Energy Source ====================================
@@ -26,16 +22,14 @@ BuoyancyMMS::~BuoyancyMMS() {
 void BuoyancyMMS::set_up() {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto level = m_source_field.get_level();
-
-    size_t Nx = domain->get_Nx(level);
-    size_t Ny = domain->get_Ny(level);
+    size_t Nx = domain->get_Nx();
+    size_t Ny = domain->get_Ny();
 
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
 
-    real dx = domain->get_dx(level);
-    real dy = domain->get_dy(level);
+    real dx = domain->get_dx();
+    real dy = domain->get_dy();
 
     auto params = Parameters::getInstance();
 
@@ -51,7 +45,7 @@ void BuoyancyMMS::set_up() {
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_inner_list = boundary->get_inner_list_level_joined();
     size_t *d_bList = boundary->get_boundary_list_level_joined();
 
     auto bsize_i = boundary->get_size_inner_list();
@@ -59,7 +53,7 @@ void BuoyancyMMS::set_up() {
 
     // inner cells
     for (size_t l = 0; l < bsize_i; ++l) {
-        const size_t idx = d_iList[l];
+        const size_t idx = d_inner_list[l];
         size_t k = getCoordinateK(idx, Nx, Ny);
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
@@ -79,27 +73,6 @@ void BuoyancyMMS::set_up() {
 }
 
 void BuoyancyMMS::update_source(Field &out, real t_cur) {
-    auto boundary = BoundaryController::getInstance();
-
-#pragma acc data present(out, source)
-    {
-        size_t *d_iList = boundary->get_inner_list_level_joined();
-        size_t *d_bList = boundary->get_boundary_list_level_joined();
-
-        auto bsize_i = boundary->get_size_inner_list();
-        auto bsize_b = boundary->get_size_boundary_list();
-
-#pragma acc parallel loop independent present(out, source) async
-        // inner cells
-        for (size_t l = 0; l < bsize_i; ++l) {
-            const size_t idx = d_iList[l];
-            out[idx] = m_source_field[idx] * exp(-t_cur);
-        }
-
-        // boundary cells
-        for (size_t l = 0; l < bsize_b; ++l) {
-            const size_t idx = d_bList[l];
-            out[idx] = m_source_field[idx] * exp(-t_cur);
-        }
-    }
+    out.copy_data(m_source_field);
+    out *= exp(-t_cur);
 }
