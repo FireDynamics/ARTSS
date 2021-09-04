@@ -63,8 +63,6 @@ namespace Functions {  // alphabetically ordered
 
   void McDermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t);
 
-  real RampTanh(real t);
-
   void Random(Field &out, real range, bool is_absolute, int seed, real step_size);
 
   void SinSinSin(Field &out);
@@ -74,7 +72,7 @@ namespace Functions {  // alphabetically ordered
   void Vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
   void VortexY(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
 
-  void Zero(Field &field, size_t* arr_idx, size_t arr_idx_size);
+  void Zero(Field &field, size_t *arr_idx, size_t arr_idx_size);
 };
 
 #endif /* ARTSS_FUNCTIONS_H_ */
