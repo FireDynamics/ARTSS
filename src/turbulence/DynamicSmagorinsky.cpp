@@ -16,76 +16,76 @@
 #include "../boundary/BoundaryController.h"
 
 DynamicSmagorinsky::DynamicSmagorinsky() :
-    u_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    v_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    w_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    u_f(FieldType::U),
+    v_f(FieldType::U),
+    w_f(FieldType::U),
 
-    uu(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    vv(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    ww(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    uv(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    uw(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    vw(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    uu(FieldType::U),
+    vv(FieldType::U),
+    ww(FieldType::U),
+    uv(FieldType::U),
+    uw(FieldType::U),
+    vw(FieldType::U),
 
-    uu_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    vv_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    ww_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    uv_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    uw_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    vw_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    uu_f(FieldType::U),
+    vv_f(FieldType::U),
+    ww_f(FieldType::U),
+    uv_f(FieldType::U),
+    uw_f(FieldType::U),
+    vw_f(FieldType::U),
 
-    uf_uf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    vf_vf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    wf_wf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    uf_vf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    uf_wf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    vf_wf(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    uf_uf(FieldType::U),
+    vf_vf(FieldType::U),
+    wf_wf(FieldType::U),
+    uf_vf(FieldType::U),
+    uf_wf(FieldType::U),
+    vf_wf(FieldType::U),
 
-    L11(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    L22(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    L33(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    L12(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    L13(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    L23(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    L11(FieldType::U),
+    L22(FieldType::U),
+    L33(FieldType::U),
+    L12(FieldType::U),
+    L13(FieldType::U),
+    L23(FieldType::U),
 
-    S11(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    S22(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    S33(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    S12(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    S13(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    S23(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S11(FieldType::U),
+    S22(FieldType::U),
+    S33(FieldType::U),
+    S12(FieldType::U),
+    S13(FieldType::U),
+    S23(FieldType::U),
 
-    S11_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    S22_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    S33_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    S12_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    S13_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    S23_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    S11_f(FieldType::U),
+    S22_f(FieldType::U),
+    S33_f(FieldType::U),
+    S12_f(FieldType::U),
+    S13_f(FieldType::U),
+    S23_f(FieldType::U),
 
-    P11(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    P22(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    P33(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    P12(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    P13(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    P23(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P11(FieldType::U),
+    P22(FieldType::U),
+    P33(FieldType::U),
+    P12(FieldType::U),
+    P13(FieldType::U),
+    P23(FieldType::U),
 
-    P11_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    P22_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    P33_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    P12_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    P13_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    P23_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    P11_f(FieldType::U),
+    P22_f(FieldType::U),
+    P33_f(FieldType::U),
+    P12_f(FieldType::U),
+    P13_f(FieldType::U),
+    P23_f(FieldType::U),
 
-    M11(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    M22(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    M33(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    M12(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    M13(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    M23(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
+    M11(FieldType::U),
+    M22(FieldType::U),
+    M33(FieldType::U),
+    M12(FieldType::U),
+    M13(FieldType::U),
+    M23(FieldType::U),
 
-    S_bar(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    S_bar_f(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()),
-    Cs(FieldType::U, 0.0, 0, Domain::getInstance()->get_size()) {
+    S_bar(FieldType::U),
+    S_bar_f(FieldType::U),
+    Cs(FieldType::U) {
     auto params = Parameters::getInstance();
     m_nu = params->get_real("physical_parameters/nu");
 
@@ -177,12 +177,12 @@ void DynamicSmagorinsky::CalcTurbViscosity(
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(in_u.get_level());
-    const size_t Ny = domain->get_Ny(in_v.get_level());
+    const size_t Nx = domain->get_Nx();
+    const size_t Ny = domain->get_Ny();
 
-    const real dx = domain->get_dx(in_u.get_level());
-    const real dy = domain->get_dy(in_v.get_level());
-    const real dz = domain->get_dz(in_w.get_level());
+    const real dx = domain->get_dx();
+    const real dy = domain->get_dy();
+    const real dz = domain->get_dz();
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -197,7 +197,7 @@ void DynamicSmagorinsky::CalcTurbViscosity(
     real sum = 0;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_inner_list = boundary->get_inner_list_level_joined();
     auto bsize_i = boundary->get_size_inner_list();
 
 // Velocity filter
@@ -211,9 +211,9 @@ void DynamicSmagorinsky::CalcTurbViscosity(
                         u_f, v_f, w_f, \
                         uf_uf, vf_vf, wf_wf, \
                         uf_vf, uf_wf, vf_wf, \
-                        d_iList[:bsize_i]) async
+                        d_inner_list[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_iList[j];
+        const size_t i = d_inner_list[j];
         // product of velocities
         uu[i] = u_f[i] * u_f[i];
         vv[i] = v_f[i] * v_f[i];
@@ -252,9 +252,9 @@ void DynamicSmagorinsky::CalcTurbViscosity(
                         uf_uf, vf_vf, wf_wf, \
                         uf_vf, uf_wf, vf_wf, \
                         u_f, v_f, w_f, \
-                        d_iList[:bsize_i]) async
+                        d_inner_list[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_iList[j];
+        const size_t i = d_inner_list[j];
 
         // Leonard stress
         L11[i] = uu_f[i] - uf_uf[i];
@@ -269,22 +269,22 @@ void DynamicSmagorinsky::CalcTurbViscosity(
         S22[i] = (v_f[i + Nx] - v_f[i - Nx]) * 0.5 * rdy;
         S33[i] = (w_f[i + Nx * Ny] - w_f[i - Nx * Ny]) * 0.5 * rdz;
 
-        S12[i] = 0.5 * ((u_f[i + Nx] - u_f[i - Nx]) * 0.5 * rdy \
- + (v_f[i + 1] - v_f[i - 1]) * 0.5 * rdx);
+        S12[i] = 0.5 * ((u_f[i + Nx] - u_f[i - Nx]) * 0.5 * rdy
+                      + (v_f[i + 1] - v_f[i - 1]) * 0.5 * rdx);
 
-        S13[i] = 0.5 * ((u_f[i + Nx * Ny] - u_f[i - Nx * Ny]) * 0.5 * rdz  \
- + (w_f[i + 1] - w_f[i - 1]) * 0.5 * rdx);
+        S13[i] = 0.5 * ((u_f[i + Nx * Ny] - u_f[i - Nx * Ny]) * 0.5 * rdz
+                      + (w_f[i + 1] - w_f[i - 1]) * 0.5 * rdx);
 
-        S23[i] = 0.5 * ((v_f[i + Nx * Ny] - v_f[i - Nx * Ny]) * 0.5 * rdz  \
- + (w_f[i + Nx] - w_f[i - Nx]) * 0.5 * rdy);
+        S23[i] = 0.5 * ((v_f[i + Nx * Ny] - v_f[i - Nx * Ny]) * 0.5 * rdz
+                      + (w_f[i + Nx] - w_f[i - Nx]) * 0.5 * rdy);
 
         // modulus of strain tensor
-        S_bar[i] = sqrt(2. * (S11[i] * S11[i] \
- + S22[i] * S22[i] \
- + S33[i] * S33[i] \
- + 2. * (S12[i] * S12[i]) \
- + 2. * (S13[i] * S13[i]) \
- + 2. * (S23[i] * S23[i])));
+        S_bar[i] = sqrt(2. * (S11[i] * S11[i]
+                            +  S22[i] * S22[i]
+                            +  S33[i] * S33[i]
+                       + 2. * (S12[i] * S12[i])
+                       + 2. * (S13[i] * S13[i])
+                       + 2. * (S23[i] * S23[i])));
 
         // product of strain modulus and strain tensor
         P11[i] = S_bar[i] * S11[i];
@@ -324,16 +324,16 @@ void DynamicSmagorinsky::CalcTurbViscosity(
                         L11, L22, L33, \
                         L12, L13, L23, \
                         Cs, \
-                        d_iList[:bsize_i]) async
+                        d_inner_list[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_iList[j];
+        const size_t i = d_inner_list[j];
         // modulus of filtered strain tensor
-        S_bar_f[i] = sqrt(2. * (S11_f[i] * S11_f[i] \
- + S22_f[i] * S22_f[i] \
- + S33_f[i] * S33_f[i] \
- + 2. * (S12_f[i] * S12_f[i]) \
- + 2. * (S13_f[i] * S13_f[i]) \
- + 2. * (S23_f[i] * S23_f[i])));
+        S_bar_f[i] =  sqrt(2. * (S11_f[i] * S11_f[i]
+                             +  S22_f[i] * S22_f[i]
+                             +  S33_f[i] * S33_f[i]
+                        + 2. * (S12_f[i] * S12_f[i])
+                        + 2. * (S13_f[i] * S13_f[i])
+                        + 2. * (S23_f[i] * S23_f[i])));
 
         // High frequency resolved terms
         M11[i] = 2.0 * delta_s * delta_s * (P11_f[i] - alpha * alpha * S_bar_f[i] * S11_f[i]);
@@ -344,9 +344,13 @@ void DynamicSmagorinsky::CalcTurbViscosity(
         M23[i] = 2.0 * delta_s * delta_s * (P23_f[i] - alpha * alpha * S_bar_f[i] * S23_f[i]);
 
         num = L11[i] * M11[i] + L22[i] * M22[i] * L33[i] * M33[i]
-              + 2.0 * L12[i] * M12[i] + 2.0 * L13[i] * M13[i] + 2.0 * L23[i] * M23[i];
-        den = M11[i] * M11[i] + M22[i] * M22[i] * M33[i] * M33[i]
-              + 2.0 * M12[i] * M12[i] + 2.0 * M13[i] * M13[i] + 2.0 * M23[i] * M23[i];
+                + 2.0 * L12[i] * M12[i]
+                + 2.0 * L13[i] * M13[i]
+                + 2.0 * L23[i] * M23[i];
+        den = M11[i] * M11[i]+ M22[i] * M22[i] * M33[i] * M33[i]
+              + 2.0 * M12[i] * M12[i]
+              + 2.0 * M13[i] * M13[i]
+              + 2.0 * M23[i] * M23[i];
 
         // dynamic constant
         Cs[i] = num / den;
@@ -358,7 +362,7 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 
     // local averaging of the coefficients
     for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_iList[j];
+        const size_t i = d_inner_list[j];
         sum = 0;
         for (size_t l = 0; l < 3; l++) {
             for (size_t m = 0; m < 3; m++) {
@@ -373,7 +377,7 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 
     // negative coefficients are allowed unless they don't make the effective viscosity zero. In our case d_ev is very small to do that
     for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_iList[j];
+        const size_t i = d_inner_list[j];
         if ((ev[i] + m_nu) < 0) {
             ev[i] = 0;
         }
@@ -400,12 +404,12 @@ void DynamicSmagorinsky::ExplicitFiltering(Field &out, Field const &in, bool syn
 
     //Construction by product combination for trapezoidal
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_inner_list = boundary->get_inner_list_level_joined();
     auto bsize_i = boundary->get_size_inner_list();
 
-#pragma acc parallel loop independent present(out, in, a[:3], d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, in, a[:3], d_inner_list[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_iList[j];
+        const size_t i = d_inner_list[j];
         sum = 0;
 #pragma acc loop independent collapse(3)
         for (size_t l = 0; l < 3; l++) {
