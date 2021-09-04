@@ -18,7 +18,6 @@ class FieldController {
     explicit FieldController(Domain const &domain);
 
     void set_up_boundary();
-    void set_up_temporary_fields();
     void update_data(bool sync);
 
     // Getter
