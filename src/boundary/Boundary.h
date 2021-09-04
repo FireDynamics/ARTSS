@@ -32,7 +32,7 @@ class Boundary {
     size_t* get_boundary_right() const { return m_boundary_right; }
 
     size_t* get_inner_list() const { return m_inner_list; }
-    size_t get_size_inner_list() const { return m_size_innerList; }
+    size_t get_size_inner_list() const { return m_size_inner_list; }
 
     size_t get_size_boundary_list() const { return m_size_boundary_list; }
     size_t get_size_boundary_front() const { return m_size_boundary_front; }
@@ -70,7 +70,7 @@ class Boundary {
     size_t m_size_boundary_right;
 
     size_t* m_inner_list;
-    size_t m_size_innerList;
+    size_t m_size_inner_list;
 
     void boundary_cells();
     void inner_cells(Obstacle** obstacle_list, size_t number_of_obstacles);

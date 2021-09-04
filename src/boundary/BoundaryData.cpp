@@ -7,7 +7,7 @@
 #include "../Domain.h"
 #include "../utility/Utility.h"
 
-inline static const std::vector<std::string> field_type_names = {"rho", "u", "v", "w", "p", "T"};
+inline static const std::vector<std::string> field_type_names = {"rho", "u", "v", "w", "p", "T", "nu"};
 inline static const std::vector<std::string> patch_names = {"front", "back", "bottom", "top", "left", "right"};
 inline static const std::vector<std::string> boundary_condition_names = {"neumann", "dirichlet", "periodic"};
 
@@ -90,7 +90,7 @@ std::string BoundaryData::get_patch_name(Patch p) {
 /// \brief  Add boundary condition
 /// \param  patches Corresponding patches of boundary condition
 /// \param value boundary condition value
-/// \param boudnaryCondition boundary condition
+/// \param boundary_condition boundary condition
 // *************************************************************************************************
 void BoundaryData::add_boundary_condition(
         const std::vector<Patch> &patches,

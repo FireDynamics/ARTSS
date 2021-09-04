@@ -32,8 +32,7 @@ namespace {
 #pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
             for (size_t j = patch_start; j < patch_end; ++j) {
                 const size_t index = d_patch[j];
-                data_field[index] = sign * data_field[index + sign_reference_index
-                                                      * static_cast<int>(reference_index)] + value;
+                data_field[index] = sign * data_field[index + sign_reference_index * reference_index] + value;
             }
 #pragma acc wait
         }
@@ -162,15 +161,15 @@ namespace {
         switch (patch) {
             case FRONT:
             case BACK:
-                reference_index = Nx * Ny * (Domain::getInstance()->get_nz(level) - 2);
+                reference_index = Nx * Ny * Domain::getInstance()->get_nz(level);
                 break;
             case BOTTOM:
             case TOP:
-                reference_index = Nx * (Domain::getInstance()->get_ny(level) - 2);
+                reference_index = Nx * Domain::getInstance()->get_ny(level);
                 break;
             case LEFT:
             case RIGHT:
-                reference_index = (Domain::getInstance()->get_nx(level) - 2);
+                reference_index = Domain::getInstance()->get_nx(level);
                 break;
             default:
 #ifndef BENCHMARKING

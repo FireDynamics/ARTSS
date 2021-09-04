@@ -19,7 +19,7 @@ FieldController::FieldController() {
     field_w = new Field(FieldType::W, 0.0);
 
     // Turbulent diffusivity
-    field_nu_t = new Field(FieldType::U, 0.0);
+    field_nu_t = new Field(FieldType::NU, 0.0);
     field_kappa_t = new Field(FieldType::T, 0.0);
     field_gamma_t = new Field(FieldType::RHO, 0.0);
 
@@ -488,7 +488,7 @@ void FieldController::update_device() {
 #pragma acc update device(d_gamma_t[:bsize]) wait    // all in one update does not work!
 }
 
-void FieldController::update_host(){
+void FieldController::update_host() {
     auto d_u = field_u->data;
     auto d_v = field_v->data;
     auto d_w = field_w->data;

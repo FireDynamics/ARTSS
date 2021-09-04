@@ -51,6 +51,14 @@ class FieldController {
     real* get_field_nu_t_data() const { return field_nu_t->data; }
 
     real* get_field_source_T_data() const { return field_source_T->data; }
+    real *get_field_source_concentration_data() const { return field_source_concentration->data; }
+
+    real* get_field_force_x_data() const { return field_force_x->data; }
+    real* get_field_force_y_data() const { return field_force_y->data; }
+    real* get_field_force_z_data() const { return field_force_z->data; }
+
+    real* get_field_kappa_data() const { return field_kappa_t->data; }
+    real* get_field_gamma_data() const { return field_gamma_t->data; }
 
     Field *field_u, *field_v, *field_w;          // velocities
     Field *field_u0, *field_v0, *field_w0;
