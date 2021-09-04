@@ -8,13 +8,12 @@
 #include "Solution.h"
 
 
-Solution::Solution(const Domain &domain, std::string initial_condition ) :
-    m_domain(domain),
-    u_a(Field(FieldType::U, 0.0, 0, m_domain.get_size())),
-    v_a(Field(FieldType::V, 0.0, 0, m_domain.get_size())),
-    w_a(Field(FieldType::W, 0.0, 0, m_domain.get_size())),
-    p_a(Field(FieldType::P, 0.0, 0, m_domain.get_size())),
-    T_a(Field(FieldType::T, 0.0, 0, m_domain.get_size()))  {
+Solution::Solution(std::string &initial_condition) :
+    u_a(Field(FieldType::U)),
+    v_a(Field(FieldType::V)),
+    w_a(Field(FieldType::W)),
+    p_a(Field(FieldType::P)),
+    T_a(Field(FieldType::T))  {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -24,7 +23,7 @@ Solution::Solution(const Domain &domain, std::string initial_condition ) :
     m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
 }
 
-void Solution::init(std::string initial_condition) {
+void Solution::init(std::string &initial_condition) {
     // set function pointer to chosen initial condition
     if (initial_condition == FunctionNames::GaussBubble) {
         m_init_function = &Solution::gauss_bubble;

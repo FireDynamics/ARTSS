@@ -18,7 +18,7 @@
 
 class Solution {
  public:
-    Solution(const Domain &domain, std::string initial_condition);
+    explicit Solution(std::string &initial_condition);
 
     void calc_analytical_solution(real t);
 
@@ -35,8 +35,7 @@ class Solution {
     return_ptr GetT() const { return T_a.data; }
 
  private:
-    const Domain &m_domain;
-    void init(std::string initial_condition);
+    void init(std::string &initial_condition);
 
     void gauss_bubble(real t);
     void exp_sinus_prod(real t);

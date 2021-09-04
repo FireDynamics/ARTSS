@@ -17,8 +17,7 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    auto params = Parameters::getInstance();
-    auto *domain = Domain::getInstance();
+    Parameters *params = Parameters::getInstance();
 
     m_dt = params->get_real("physical_parameters/dt");
     m_t_end = params->get_real("physical_parameters/t_end");
@@ -29,7 +28,8 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 
     m_adaption = new Adaption(m_field_controller);
 #ifndef BENCHMARKING
-    m_solution = new Solution(*domain, params->get("initial_conditions/usr_fct"));
+    std::string initial_condition = params->get("initial_conditions/usr_fct");
+    m_solution = new Solution(initial_condition);
     m_analysis = new Analysis(m_solution);
     m_visual = new Visual(*m_solution);
 #endif
