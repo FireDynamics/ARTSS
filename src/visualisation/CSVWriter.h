@@ -20,19 +20,14 @@ class CSVWriter {
     static void write_numerical(const FieldController &field_controller, const std::string &filename);
     static void write_analytical(const Solution &solution, const std::string &filename);
 
-    static void write_data(
-            std::string *data_titles, real **data, size_t size_data,
-            const std::string& filename);
-
  private:
-    static void csvPrepareAndWrite(
+    static void csv_prepare_and_write(
             const std::string &filename,
             real *u, real* v, real* w,
             real* p, real* div, real* T, real* C, real* s, real* nu_t, real* S_T);
-    static void csvPrepareAndWrite(
+    static void csv_prepare_and_write(
             const std::string &filename,
             real *u, real* v, real* w, real* p, real* T);
-
     static void csv_write(
             const std::string &filename,
             real **vars, int size_vars,
