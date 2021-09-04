@@ -49,7 +49,6 @@ SolverController::SolverController() {
 #endif
     m_field_controller->set_up_boundary();
     m_field_controller->update_host();
-    m_field_controller->set_up_temporary_fields();
 
     source_velocity = nullptr;
     source_temperature = nullptr;

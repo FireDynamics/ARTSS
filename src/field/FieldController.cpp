@@ -174,3 +174,24 @@ void FieldController::update_host(){
 #pragma acc wait
 }
 
+void FieldController::couple_vector(const Field &a, Field &a0, Field &a_tmp,
+                                    const Field &b, Field &b0, Field &b_tmp,
+                                    const Field &c, Field &c0, Field &c_tmp,
+                                    bool sync) {
+    // TODO parallelisable ?
+    a0.copy_data(a);
+    a_tmp.copy_data(a);
+
+    b0.copy_data(b);
+    b_tmp.copy_data(b);
+
+    c0.copy_data(c);
+    c_tmp.copy_data(c);
+}
+
+void FieldController::couple_scalar(const Field &a, Field &a0, Field &a_tmp, bool sync) {
+    // TODO parallelisable ?
+    a0.copy_data(a);
+    a_tmp.copy_data(a);
+}
+
