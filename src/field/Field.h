@@ -26,7 +26,7 @@ class Field {
     Field(FieldType type, real val);
     Field(FieldType type, real val, size_t level);
     Field(FieldType type, real val, size_t level, size_t size);
-    Field(Field const &orig);
+    Field(Field const &original);
 
     ~Field();
 
