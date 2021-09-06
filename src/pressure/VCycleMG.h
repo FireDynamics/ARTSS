@@ -8,6 +8,7 @@
 #define ARTSS_PRESSURE_VCYCLEMG_H_
 
 #include <vector>
+#include <src/interfaces/IDiffusion.h>
 #include "../interfaces/IPressure.h"
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
@@ -28,17 +29,22 @@ private:
     void Smooth(Field *out, Field *tmp, Field *b, size_t level, bool sync = true);
     void Residuum(Field *out, Field *in, Field *b, size_t level, bool sync = true);
     void Restrict(Field *out, Field *in, size_t level, bool sync = true);
-    void Prolongate(Field *out, Field *in, size_t level, bool sync = true);
+    static void Prolongate(Field *out, Field *in, size_t level, bool sync = true);
     void Solve( Field *out, Field *tmp, Field *b, size_t level, bool sync = true);
 
+    void call_smooth_colored_gauss_seidel(Field *out, Field *tmp, Field *b, size_t level, bool sync);
+    void call_smooth_jacobi(Field *out, Field *tmp, Field *b, size_t level, bool sync);
+    void call_solve_colored_gauss_seidel(Field *out, Field *tmp, Field *b, size_t level, bool sync);
+    void call_solve_jacobi(Field *out, Field *tmp, Field *b, size_t level, bool sync);
     void call_colored_gauss_seidel(Field *out, Field *tmp, Field *b, size_t level, bool sync);
     void call_jacobi(Field *out, Field *tmp, Field *b, size_t level, bool sync);
 
     size_t m_levels;
-    size_t m_n_cycle;
+    int m_n_cycle;
     int m_n_relax;
 
-    void (VCycleMG::*m_diffusion_function)(Field *, Field *, Field *, size_t, bool);
+    void (VCycleMG::*m_smooth_diffusion_function)(Field *, Field *, Field *, size_t, bool);
+    void (VCycleMG::*m_solve_diffusion_function)(Field *, Field *, Field *, size_t, bool);
     size_t m_diffusion_max_iter;
     real m_diffusion_tol_res;
 
