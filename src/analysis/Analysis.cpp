@@ -267,7 +267,7 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
 /// \param  u     x-velocity field
 /// \param  dt      time step size
 // ***************************************************************************************
-bool Analysis::check_time_step_VN(Field &u, real dt) {
+bool Analysis::check_time_step_VN(real dt) {
     bool VN_check;
 
     auto params = Parameters::getInstance();

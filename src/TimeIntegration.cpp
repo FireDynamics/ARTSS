@@ -127,7 +127,7 @@ void TimeIntegration::run() {
             } else {
                 m_logger->info("CFL = {}", cfl);
             }
-            // bool VN_check = ana.check_time_step_VN(u, dt);
+            // bool VN_check = ana.check_time_step_VN(dt);
             // if(!VN_check)
             //     std::cout<<"Von Neumann condition not met!"<<std::endl;
 #endif
