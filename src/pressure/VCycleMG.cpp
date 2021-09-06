@@ -402,7 +402,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
         size_t start_b = boundary->get_boundary_list_level_joined_start(level - 1);
         size_t end_b = boundary->get_boundary_list_level_joined_end(level - 1) + 1;
 
-#pragma acc data present(data_error0_level[:size_error0_level], data_error1_level[:size_error1_level], data_error1_level_minus_1[:size_error1_level_minus_1], data_mg_temporal_level_minus_1[:size_mg_temporal_level_minus_1], data_residuum1_level_minus_1[:size_residuum1_level_minus_1], data_out[:size_out])
+#pragma acc data present(data_error0_level[:size_error0_level], data_error1_level[:size_error1_level], data_error1_level_minus_1[:size_error1_level_minus_1], data_mg_temporal_solution_level_minus_1[:size_mg_temporal_solution_level_minus_1], data_residuum1_level_minus_1[:size_residuum1_level_minus_1], data_out[:size_out])
         {
             // prolongate
             Prolongate(field_error0_level, field_error1_level, level, sync);
