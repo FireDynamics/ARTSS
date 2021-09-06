@@ -43,3 +43,14 @@ TEST_F(BoundaryDataTest, match_patch) {
     Patch patch_unknown = BoundaryData::match_patch("a");
     ASSERT_EQ(patch_unknown, Patch::UNKNOWN_PATCH);
 }
+
+TEST_F(BoundaryDataTest, match_boundary_condition) {
+    BoundaryCondition bc_neumann = BoundaryData::match_boundary_condition("neumann");
+    ASSERT_EQ(bc_neumann, BoundaryCondition::NEUMANN);
+    BoundaryCondition bc_dirichlet = BoundaryData::match_boundary_condition("dirichlet");
+    ASSERT_EQ(bc_dirichlet, BoundaryCondition::DIRICHLET);
+    BoundaryCondition bc_periodic = BoundaryData::match_boundary_condition("periodic");
+    ASSERT_EQ(bc_periodic, BoundaryCondition::PERIODIC);
+    BoundaryCondition bc_unknown = BoundaryData::match_boundary_condition("a");
+    ASSERT_EQ(bc_unknown, BoundaryCondition::UNKNOWN_CONDITION);
+}
