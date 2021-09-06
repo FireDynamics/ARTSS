@@ -120,7 +120,7 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
     if (!(static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty()) {
 #ifndef BENCHMARKING
         m_logger->debug("apply obstacle boundary conditions of {}",
-                        BoundaryData::get_field_type_name(static_cast<FieldType>(field_type)));
+                        BoundaryData::get_field_type_name(field_type));
 #endif
         ObstacleBoundary::apply_boundary_condition(
                 data,
