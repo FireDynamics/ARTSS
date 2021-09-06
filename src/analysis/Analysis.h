@@ -23,8 +23,6 @@ class Analysis {
 
     bool check_time_step_VN(real dt);
 
-    real set_DT_with_CFL(Field const &u, Field const &v, Field const &w) const;
-
     void save_variables_in_file(FieldController *solv);
 
  private:
