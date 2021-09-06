@@ -8,7 +8,6 @@
 #define ARTSS_PRESSURE_VCYCLEMG_H_
 
 #include <vector>
-#include <src/interfaces/IDiffusion.h>
 #include "../interfaces/IPressure.h"
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
