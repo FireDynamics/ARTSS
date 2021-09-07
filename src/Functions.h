@@ -8,6 +8,7 @@
 #define ARTSS_FUNCTIONS_H_
 
 #include "field/Field.h"
+#include "Domain.h"
 #include <string>
 
 struct FunctionNames{
@@ -19,6 +20,7 @@ struct FunctionNames{
     static const std::string ExpSinusSum;
     static const std::string GaussBubble;
     static const std::string Hat;
+    static const std::string Jet;
     static const std::string McDermott;
     static const std::string RandomC;
     static const std::string SinSinSin;
@@ -49,6 +51,13 @@ namespace Functions {  // alphabetically ordered
   void GaussBubble(Field* out, real t);
 
   void Hat(Field* out);
+
+  void Jet(
+          Field* out,
+          const size_t index_x1, const size_t index_x2,
+          const size_t index_y1, const size_t index_y2,
+          const size_t index_z1, const size_t index_z2,
+          const real value);
 
   void Layers(Field* out);
 

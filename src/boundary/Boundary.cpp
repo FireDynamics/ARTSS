@@ -48,30 +48,30 @@ Boundary::Boundary(
 void Boundary::init(size_t size_obstacles) {
     auto domain = Domain::getInstance();
 
-    const size_t nx = domain->get_nx(m_level);
-    const size_t ny = domain->get_ny(m_level);
-    const size_t nz = domain->get_nz(m_level);
+    const size_t Nx = domain->get_Nx(m_level);
+    const size_t Ny = domain->get_Ny(m_level);
+    const size_t Nz = domain->get_Nz(m_level);
 
-    m_size_boundary_list = 2 * nx * ny + 2 * (nz - 2) * (ny - 2) + 2 * (nz - 2) * nx;
+    m_size_boundary_list = 2 * Nx * Ny + 2 * (Nz - 2) * (Ny - 2) + 2 * (Nz - 2) * Nx;
     m_boundary_list = new size_t[m_size_boundary_list];
 
-    m_size_boundary_front = ny * nx;
-    m_size_boundary_back = ny * nx;
+    m_size_boundary_front = Ny * Nx;
+    m_size_boundary_back = Ny * Nx;
     m_boundary_front = new size_t[m_size_boundary_front];
     m_boundary_back = new size_t[m_size_boundary_back];
 
-    m_size_boundary_top = nz * nx;
-    m_size_boundary_bottom = nz * nx;
+    m_size_boundary_top = Nz * Nx;
+    m_size_boundary_bottom = Nz * Nx;
     m_boundary_bottom = new size_t[m_size_boundary_bottom];
     m_boundary_top = new size_t[m_size_boundary_top];
 
-    m_size_boundary_left = nz * ny;
-    m_size_boundary_right = nz * ny;
+    m_size_boundary_left = Nz * Ny;
+    m_size_boundary_right = Nz * Ny;
     m_boundary_left = new size_t[m_size_boundary_left];
     m_boundary_right = new size_t[m_size_boundary_right];
 
-    m_size_innerList = (nx - 2) * (ny - 2) * (nz - 2) - size_obstacles;
-    m_inner_list = new size_t[m_size_innerList];
+    m_size_inner_list = domain->get_nx(m_level) * domain->get_ny(m_level) * domain->get_nz(m_level) - size_obstacles;
+    m_inner_list = new size_t[m_size_inner_list];
 
     boundary_cells();
 }
@@ -103,9 +103,9 @@ void Boundary::print(size_t size_obstacles) {
                     *(m_boundary_left + 0), *(m_boundary_left + m_size_boundary_left - 1));
     m_logger->debug("Right starts with {} and ends with {}",
                     *(m_boundary_right + 0), *(m_boundary_right + m_size_boundary_right - 1));
-    m_logger->debug("list size of innerList: {} obstacle size: {}", m_size_innerList, size_obstacles);
+    m_logger->debug("list size of innerList: {} obstacle size: {}", m_size_inner_list, size_obstacles);
     m_logger->debug("Inner starts with {} and ends with {}",
-                    *(m_inner_list + 0), *(m_inner_list + m_size_innerList - 1));
+                    *(m_inner_list + 0), *(m_inner_list + m_size_inner_list - 1));
     m_logger->debug("--------------- END BOUNDARY ---------------");
 #endif
 }
@@ -119,6 +119,8 @@ void Boundary::control(size_t size_obstacles) {
     // TODO(n16h7): clean up
     std::string message;
     Domain *domain = Domain::getInstance();
+    size_t size = domain->get_size(m_level);
+
     size_t nx = domain->get_nx(m_level);
     size_t ny = domain->get_ny(m_level);
     size_t nz = domain->get_nz(m_level);
@@ -127,7 +129,7 @@ void Boundary::control(size_t size_obstacles) {
     size_t all_cells = m_size_boundary_front + m_size_boundary_back
                        + m_size_boundary_bottom + m_size_boundary_top
                        + m_size_boundary_left + m_size_boundary_right;
-    size_t duplicates = 4 * nx + 4 * (ny - 2) + 4 * (nz - 2) + 8;
+    size_t duplicates = 4 * Nx + 4 * Ny + 4 * nz;
     if (m_size_boundary_list != all_cells - duplicates) {
         message = message + "list size of all boundary cells does not fit with sum of it parts. Boundary List: "
                   + std::to_string(m_size_boundary_list) + " sum: " + std::to_string(all_cells)
@@ -139,17 +141,17 @@ void Boundary::control(size_t size_obstacles) {
                           + " Left: " + std::to_string(m_size_boundary_left)
                           + " Right: " + std::to_string(m_size_boundary_right) + "\n";
     }
-    if (m_size_boundary_list + m_size_innerList + size_obstacles != nx * ny * nz) {
+    if (m_size_boundary_list + m_size_inner_list + size_obstacles != size) {
         message = message + "list size of all domain cells is not equal with domain size."
                             "Boundary List: " + std::to_string(m_size_boundary_list)
-                            + " Inner List: " + std::to_string(m_size_innerList)
+                            + " Inner List: " + std::to_string(m_size_inner_list)
                             + " Domain Size: " + std::to_string(domain->get_size(m_level))
                             + " Obstacle size: " + std::to_string(size_obstacles) + "\n";
     }
-    size_t innerCells = (nz - 2) * (ny - 2) * (nx - 2);
-    if (m_size_innerList != innerCells - size_obstacles) {
+    size_t innerCells = nz * ny * nx;
+    if (m_size_inner_list != innerCells - size_obstacles) {
         message = message + "list size of inner cell is not equal with domain inner size minus size of obstacles."
-                            " Inner List: " + std::to_string(m_size_innerList)
+                            " Inner List: " + std::to_string(m_size_inner_list)
                             + " Domain inner size: " + std::to_string(innerCells)
                             + " Obstacle size: " + std::to_string(size_obstacles) + "\n";
     }
