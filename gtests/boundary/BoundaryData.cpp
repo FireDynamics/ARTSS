@@ -43,3 +43,20 @@ TEST_F(BoundaryDataTest, match_patch) {
     Patch patch_unknown = BoundaryData::match_patch("a");
     ASSERT_EQ(patch_unknown, Patch::UNKNOWN_PATCH);
 }
+
+TEST_F(BoundaryDataTest, get_field_type_name) {
+    std::string rho = BoundaryData::get_field_type_name(FieldType::RHO);
+    ASSERT_EQ("rho", rho);
+    std::string u = BoundaryData::get_field_type_name(FieldType::U);
+    ASSERT_EQ("u", u);
+    std::string v = BoundaryData::get_field_type_name(FieldType::V);
+    ASSERT_EQ("v", v);
+    std::string w = BoundaryData::get_field_type_name(FieldType::W);
+    ASSERT_EQ("w", w);
+    std::string p = BoundaryData::get_field_type_name(FieldType::P);
+    ASSERT_EQ("p", p);
+    std::string T = BoundaryData::get_field_type_name(FieldType::T);
+    ASSERT_STRCASEEQ("T", T.c_str());
+    //std::string unknown = BoundaryData::get_field_type_name(FieldType::UNKNOWN_FIELD);
+    //ASSERT_EQ("unknown field", unknown);
+}
