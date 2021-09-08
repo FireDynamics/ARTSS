@@ -31,8 +31,8 @@ namespace {
         size_t b_size = domain->get_size(level);
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger("ObstacleBoundary");
-        logger->debug("applying from {} to {} for length {}", patch_start, patch_end,
-                      patch_end-patch_start+1);
+        logger->debug("applying from {} to {} for length {}, pointer {}", patch_start, patch_end,
+                      patch_end-patch_start+1, static_cast<void *>(data_field));
 #endif
 #pragma acc data present(data_field[:b_size])
         {
@@ -219,35 +219,43 @@ namespace {
 void apply_boundary_condition(real *data, size_t **index_fields, const size_t *patch_starts,
                               const size_t *patch_ends, size_t level, BoundaryData *boundary_data,
                               size_t id, bool sync) {
-    for (size_t i = 0; i < number_of_patches; i++) {
-        size_t *d_patch = *(index_fields + i);
-        size_t patch_start = *(patch_starts + i);
-        size_t patch_end = *(patch_ends + i);
-        Patch p = static_cast<Patch>(i);
-        BoundaryCondition bc = boundary_data->get_boundary_condition(p);
-        switch (bc) {
-            case BoundaryCondition::DIRICHLET:
-                apply_dirichlet(data, d_patch, p, patch_start, patch_end, level,
-                                boundary_data->get_value(p));
-                break;
-            case BoundaryCondition::NEUMANN:
-                apply_neumann(data, d_patch, p, patch_start, patch_end, level,
-                              boundary_data->get_value(p));
-                break;
-            case BoundaryCondition::PERIODIC:
-                apply_periodic(data, d_patch, p, patch_start, patch_end, level, id);
-                break;
-            default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("ObstacleBoundary");
-                logger->error("Unknown boundary condition: {}", bc);
+        auto logger = Utility::create_logger("ObstacleBoundary");
 #endif
-                break;
+        for (size_t i = 0; i < number_of_patches; i++) {
+            size_t *d_patch = *(index_fields + i);
+            size_t patch_start = *(patch_starts + i);
+            size_t patch_end = *(patch_ends + i);
+            auto p = static_cast<Patch>(i);
+            if (patch_start == patch_end) {
+#ifndef BENCHMARKING
+                logger->debug("skipping apply boundary condition for : {}", BoundaryData::get_patch_name(p));
+#endif
+                continue;
+            }
+            BoundaryCondition bc = boundary_data->get_boundary_condition(p);
+            switch (bc) {
+                case BoundaryCondition::DIRICHLET:
+                    apply_dirichlet(data, d_patch, p, patch_start, patch_end, level,
+                                    boundary_data->get_value(p));
+                    break;
+                case BoundaryCondition::NEUMANN:
+                    apply_neumann(data, d_patch, p, patch_start, patch_end, level,
+                                  boundary_data->get_value(p));
+                    break;
+                case BoundaryCondition::PERIODIC:
+                    apply_periodic(data, d_patch, p, patch_start, patch_end, level, id);
+                    break;
+                default:
+#ifndef BENCHMARKING
+                    logger->error("Unknown boundary condition: {}", bc);
+#endif
+                    break;
+            }
         }
-    }
-    if (sync) {
+        if (sync) {
 #pragma acc wait
-    }
+        }
 }
 
 }  // namespace ObstacleBoundary
