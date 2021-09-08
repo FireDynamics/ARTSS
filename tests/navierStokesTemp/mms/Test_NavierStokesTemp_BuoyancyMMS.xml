@@ -17,7 +17,7 @@
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
       <w> 1 </w>  <!-- relaxation parameter -->
     </diffusion>
-    <source type="ExplicitEuler" force_fct="Buoyancy" dir="y" use_init_values="Yes">  <!-- Direction of force (x,y,z or combinations xy,xz,yz,xyz) -->
+   <source type="ExplicitEuler" force_fct="Buoyancy" dir="y" use_init_values="Yes"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>
     <pressure type="VCycleMG" field="p">
       <n_level> 4 </n_level>  <!-- number of restriction levels -->
@@ -39,7 +39,7 @@
         <tol_res> 1e-07 </tol_res>
         <w> 1 </w>
       </diffusion>
-    <source type="ExplicitEuler" temp_fct="BuoyancyST_MMS" dissipation="No">
+    <source type="ExplicitEuler" temp_fct="BuoyancyST_MMS" dissipation="No" random="No">
     </source>
     </temperature>
     <solution available="Yes">
@@ -47,19 +47,13 @@
     </solution>
   </solver>
 
-  <domain_parameters>
+  <domain_parameters enable_computational_domain="No">
     <X1> -2. </X1>  <!-- physical domain -->
     <X2> 2. </X2>
     <Y1> -2. </Y1>
     <Y2> 2. </Y2>
     <Z1> -2. </Z1>
     <Z2> 2. </Z2>
-    <x1> -2. </x1>  <!-- computational domain -->
-    <x2> 2. </x2>
-    <y1> -2. </y1>
-    <y2> 2. </y2>
-    <z1> -2. </z1>
-    <z2> 2. </z2>
     <nx> 64 </nx>  <!-- grid resolution (number of cells excl. ghost cells) -->
     <ny> 64 </ny>
     <nz> 1 </nz>
@@ -77,7 +71,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct="BuoyancyMMS"  random="No">
+  <initial_conditions usr_fct="BuoyancyMMS" random="No">
     <rhoa> 1. </rhoa>
   </initial_conditions>
 

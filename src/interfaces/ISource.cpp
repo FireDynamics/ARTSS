@@ -40,11 +40,11 @@ void ISource::buoyancy_force(Field *out, const Field *in, const Field *in_temper
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
 #pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], d_out[:bsize], d_in[:bsize], d_ina[:bsize])
     {
@@ -106,8 +106,8 @@ void ISource::dissipate(Field *out, const Field *in_u, const Field *in_v, const 
     auto type = out->get_type();
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc data present(d_out[:size], d_inu[:size], d_inv[:size], d_inw[:size], d_iList[:bsize_i])
     {
@@ -129,7 +129,7 @@ void ISource::dissipate(Field *out, const Field *in_u, const Field *in_v, const 
         }
 
         // boundaries
-        boundary->applyBoundary(d_out, type, sync);
+        boundary->apply_boundary(d_out, type, sync);
 
         if (sync) {
 #pragma acc wait

@@ -79,14 +79,38 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
      }
      ```
      Our top priority is to the readability while trying to be as consistent as possible.
-   
+
+## Includes
+#### Include What You Use
+  If a source or header file refers to a symbol defined elsewhere, the file should directly include a header file which properly intends to provide a declaration or definition of that symbol. It should not include header files for any other reason. 
+
+#### Names and Order of Includes
+  Include headers in the following order: Related header, C system headers, C++ standard library headers, other libraries' headers, your project's headers.
+
+  All of a project's header files should be listed as descendants of the project's source directory without use of UNIX directory aliases . (the current directory) or .. (the parent directory). For example, google-awesome-project/src/base/logging.h should be included as:
+
+  #include "base/logging.h"
+
+  In dir/foo.cc or dir/foo_test.cc, whose main purpose is to implement or test the stuff in dir2/foo2.h, order your includes as follows:
+  ```
+      1. dir2/foo2.h.
+      2. A blank line
+      3. C system headers (more precisely: headers in angle brackets with the .h extension), e.g., <unistd.h>, <stdlib.h>.
+      4. A blank line
+      5. C++ standard library headers (without file extension), e.g., <algorithm>, <cstddef>.
+      6. A blank line
+      7. Other libraries' .h files.
+      8. Your project's .h files.
+  ```
+  Separate each non-empty group with one blank line.
+
 ## Header Files
 #### Self contained:
   Headers should be self contained, which means it should contain all necessary imports without relying on import of other (imported) headers.
 
   Example: `Solution.h` uses `std::vector` accordingly it has to import `std::vector`
-  
-#### Include guards:
+
+#### define guards:
   Our include guards have the format ARTSS_DIRNAME_FILENAME_H_
 
   Example: `Soluction.h` in directory `analysis`
@@ -112,6 +136,9 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
 #### Static and global variables and singletons
   ARTSS currently uses some static and global variables as well two singletons, please refrain from adding new ones except for a exceptional good reason.
 
+
+
+# Closing Remarks
 As we are only a small group of developers, many parts of the code are not yet compliant with our code guidelines and will be improved accordingly as we make changes. Accordingly, more rules may be added to our coding guidelines if we determine that it is necessary.
 
 Please feel free to contact us if you have any questions.

@@ -22,35 +22,34 @@ class BoundaryController {
     static BoundaryController* getInstance();
     ~BoundaryController();
 
-    void applyBoundary(real *d, FieldType f, bool sync = true);
-    void applyBoundary(real *d, size_t level, FieldType f, bool sync = true);
-    // void applyBoundary(real *d, size_t level, FieldType f, real* val, bool sync = true); // for non-const BC
+    void apply_boundary(real *d, FieldType f, bool sync = true);
+    void apply_boundary(real *d, size_t level, FieldType f, bool sync = true);
 
-    void printBoundaries();
-    void updateLists();
+    void print_boundaries();
+    void update_lists();
 
-    size_t getSize_innerList();
-    size_t getSize_boundaryList();
-    size_t* get_obstacleList();
-    size_t getSize_obstacleList();
+    size_t get_size_inner_list() const;
+    size_t get_size_boundary_list() const;
+    size_t* get_obstacle_list() const;
+    size_t get_size_obstacle_list() const;
 
-    size_t* get_innerList_level_joined();
-    size_t getSize_innerList_level_joined(); // TODO necessary?
-    size_t get_innerList_level_joined_start(size_t level);
-    size_t get_innerList_level_joined_end(size_t level);
+    size_t* get_inner_list_level_joined() const;
+    size_t get_size_inner_list_level_joined() const;
+    size_t get_inner_list_level_joined_start(size_t level) const;
+    size_t get_inner_list_level_joined_end(size_t level) const;
 
-    size_t* get_boundaryList_level_joined();
-    size_t getSize_boundaryList_level_joined(); // TODO necessary?
-    size_t get_boundaryList_level_joined_start(size_t level);
-    size_t get_boundaryList_level_joined_end(size_t level);
+    size_t* get_boundary_list_level_joined() const;
+    size_t get_size_boundary_list_level_joined() const;
+    size_t get_boundary_list_level_joined_start(size_t level) const;
+    size_t get_boundary_list_level_joined_end(size_t level) const;
 
-    size_t getSize_surfaceList() {return m_size_sList;};
+    size_t get_size_surfaceList() const {return m_size_surface_list;}
 
-    size_t getObstacleStrideX(size_t id, size_t level);
-    size_t getObstacleStrideY(size_t id, size_t level);
-    size_t getObstacleStrideZ(size_t id, size_t level);
+    size_t get_obstacle_stride_x(size_t id, size_t level) const;
+    size_t get_obstacle_stride_y(size_t id, size_t level) const;
+    size_t get_obstacle_stride_z(size_t id, size_t level) const;
 
-    std::vector<FieldType> get_used_fields();
+    std::vector<FieldType> get_used_fields() const;
 
  private:
 #ifndef BENCHMARKING
@@ -62,21 +61,21 @@ class BoundaryController {
     BoundaryDataController **m_bdc_obstacles;
     Multigrid* m_multigrid;
 
-    Surface** m_surfaceList;
-    size_t m_numberOfSurfaces = 0;
-    Obstacle** m_obstacleList;
-    size_t m_numberOfObstacles = 0;
+    Surface** m_surface_list;
+    size_t m_number_of_surfaces = 0;
+    Obstacle** m_obstacle_list;
+    size_t m_number_of_obstacles = 0;
 
-    size_t m_size_sList = 0;
+    size_t m_size_surface_list = 0;
 
-    bool m_hasObstacles;
-    bool m_hasSurfaces;
+    bool m_has_obstacles;
+    bool m_has_surfaces;
 
     BoundaryController();
-    void readXML();
-    void parseBoundaryParameter(tinyxml2::XMLElement *xmlParameter);
-    void parseObstacleParameter(tinyxml2::XMLElement *xmlParameter);
-    void parseSurfaceParameter(tinyxml2::XMLElement *xmlParameter);
+    void read_XML();
+    void parse_boundary_parameter(tinyxml2::XMLElement *xml_parameter);
+    void parse_obstacle_parameter(tinyxml2::XMLElement *xml_parameter);
+    void parse_surface_parameter(tinyxml2::XMLElement *xml_parameter);
 
     void detect_neighbouring_obstacles();
 };

@@ -143,71 +143,88 @@ std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list
     return result;
 }
 
-void log_minimum(Field *field, const std::string& text, const std::string& logger_name) {
+void log_field_info(Field *field, const std::string& text, const std::string& logger_name) {
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(logger_name);
 #endif
     auto data = field->data;
-    real minimum_inner = ULONG_LONG_MAX;
     auto boundary = BoundaryController::getInstance();
-    size_t *innerList = boundary->get_innerList_level_joined();
-    size_t size_innerList = boundary->getSize_innerList();
-    for (size_t i = 0; i < size_innerList; i++) {
-        size_t idx = innerList[i];
+    size_t *inner_list = boundary->get_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_inner_list();
+
+    size_t idx = inner_list[0];
+    real minimum_inner = data[idx];
+    real maximum_inner = data[idx];
+    real average_inner = data[idx];
+    for (size_t i = 1; i < size_inner_list; i++) {
+        idx = inner_list[i];
         real value = data[idx];
         if (value < minimum_inner) {
             minimum_inner = value;
         }
+        if (value > maximum_inner) {
+            maximum_inner = value;
+        }
+        average_inner += value;
     }
+    average_inner /= size_inner_list;
 #ifndef BENCHMARKING
     logger->info("minimum inner {}: {}", text, minimum_inner);
+    logger->info("maximum inner {}: {}", text, maximum_inner);
+    logger->info("average inner {}: {}", text, average_inner);
 #endif
-    real minimum_boundary = ULONG_LONG_MAX;
-    std::vector<size_t> indices;
-    size_t *boundaryList = boundary->get_boundaryList_level_joined();
-    size_t size_boundaryList = boundary->getSize_boundaryList();
-    for (size_t i = 0; i < size_boundaryList; i++) {
-        size_t idx = boundaryList[i];
+
+    size_t *boundary_list = boundary->get_boundary_list_level_joined();
+    size_t size_boundary_list = boundary->get_size_boundary_list();
+
+    idx = boundary_list[0];
+    real minimum_boundary = data[idx];
+    real maximum_boundary = data[idx];
+    real average_boundary = data[idx];
+    for (size_t i = 0; i < size_boundary_list; i++) {
+        size_t idx = boundary_list[i];
         real value = data[idx];
         if (value < minimum_boundary) {
-            indices.clear();
-            indices.push_back(idx);
             minimum_boundary = value;
-        } else if (value == minimum_boundary) {
-            indices.push_back(idx);
         }
+        if (value > maximum_boundary) {
+            maximum_boundary = value;
+        }
+        average_boundary += value;
     }
-
-    size_t Nx = Domain::getInstance()->get_Nx();
-    size_t Ny = Domain::getInstance()->get_Ny();
-    std::string index;
-    for (size_t idx: indices) {
-        size_t k = getCoordinateK(idx, Nx, Ny);
-        size_t j = getCoordinateJ(idx, Nx, Ny, k);
-        size_t i = getCoordinateI(idx, Nx, Ny, j, k);
-        index += " (" + std::to_string(i) + "|" + std::to_string(j) + "|" + std::to_string(k) + ")";
-    }
-
+    average_boundary /= size_boundary_list;
 #ifndef BENCHMARKING
     logger->info("minimum boundary {}: {}", text, minimum_boundary);
-    logger->info("indices ({}) boundary cells ({})", indices.size(), size_boundaryList);
-    // logger->debug("indices ({})", indices.size(), index);
-    logger->debug("indices ({})", indices.size());
+    logger->info("maximum boundary {}: {}", text, maximum_boundary);
+    logger->info("average boundary {}: {}", text, average_boundary);
 #endif
 
-    real minimum_obstacle = ULONG_LONG_MAX;
-    size_t *obstacleList = boundary->get_obstacleList();
-    size_t size_obstacleList = boundary->getSize_obstacleList();
-    for (size_t i = 0; i < size_obstacleList; i++) {
-        size_t idx = obstacleList[i];
-        real value = data[idx];
-        if (value < minimum_obstacle) {
-            minimum_obstacle = value;
+    size_t *obstacle_list = boundary->get_obstacle_list();
+    size_t size_obstacle_list = boundary->get_size_obstacle_list();
+
+    if (size_obstacle_list > 0) {
+        idx = obstacle_list[0];
+        real minimum_obstacle = data[idx];
+        real maximum_obstacle = data[idx];
+        real average_obstacle = data[idx];
+        for (size_t i = 0; i < size_obstacle_list; i++) {
+            size_t idx = obstacle_list[i];
+            real value = data[idx];
+            if (value < minimum_obstacle) {
+                minimum_obstacle = value;
+            }
+            if (value > maximum_obstacle) {
+                maximum_obstacle = value;
+            }
+            average_obstacle += value;
         }
-    }
+        average_obstacle /= size_obstacle_list;
 #ifndef BENCHMARKING
-    logger->info("minimum obstacle {}: {}", text, minimum_obstacle);
+        logger->info("minimum obstacle {}: {}", text, minimum_obstacle);
+        logger->info("maximum obstacle {}: {}", text, maximum_obstacle);
+        logger->info("average obstacle {}: {}", text, average_obstacle);
 #endif
+    }
 }
 
 }  // namespace Utility

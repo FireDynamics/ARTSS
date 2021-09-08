@@ -19,7 +19,7 @@ FieldController::FieldController() {
     field_w = new Field(FieldType::W, 0.0);
 
     // Turbulent diffusivity
-    field_nu_t = new Field(FieldType::U, 0.0);
+    field_nu_t = new Field(FieldType::NU, 0.0);
     field_kappa_t = new Field(FieldType::T, 0.0);
     field_gamma_t = new Field(FieldType::RHO, 0.0);
 
@@ -155,15 +155,15 @@ FieldController::~FieldController() {
 // ***************************************************************************************
 void FieldController::set_up_boundary() {
     auto boundary = BoundaryController::getInstance();
-    boundary->applyBoundary(field_u->data, field_u->get_type());
-    boundary->applyBoundary(field_v->data, field_v->get_type());
-    boundary->applyBoundary(field_w->data, field_w->get_type());
-    boundary->applyBoundary(field_p->data, field_p->get_type());
-    boundary->applyBoundary(field_T->data, field_T->get_type());
-    boundary->applyBoundary(field_concentration->data, field_concentration->get_type());
+    boundary->apply_boundary(field_u->data, field_u->get_type());
+    boundary->apply_boundary(field_v->data, field_v->get_type());
+    boundary->apply_boundary(field_w->data, field_w->get_type());
+    boundary->apply_boundary(field_p->data, field_p->get_type());
+    boundary->apply_boundary(field_T->data, field_T->get_type());
+    boundary->apply_boundary(field_concentration->data, field_concentration->get_type());
 
     // TODO necessary?
-    boundary->applyBoundary(field_T_ambient->data, field_T_ambient->get_type());
+    boundary->apply_boundary(field_T_ambient->data, field_T_ambient->get_type());
 }
 
 void FieldController::set_up_temporary_fields() {
@@ -237,12 +237,12 @@ void FieldController::update_data(bool sync) {
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t bsize_i = boundary->getSize_innerList();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
-    size_t bsize_b = boundary->getSize_boundaryList();
-    size_t *d_oList = boundary->get_obstacleList();
-    size_t bsize_o = boundary->getSize_obstacleList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t bsize_i = boundary->get_size_inner_list();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
+    size_t bsize_b = boundary->get_size_boundary_list();
+    size_t *d_oList = boundary->get_obstacle_list();
+    size_t bsize_o = boundary->get_size_obstacle_list();
 
 #pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o], d_u[:bsize], d_v[:bsize], d_w[:bsize], \
                          d_u0[:bsize], d_v0[:bsize], d_w0[:bsize], d_u_tmp[:bsize], d_v_tmp[:bsize], d_w_tmp[:bsize], \
@@ -339,12 +339,12 @@ void FieldController::couple_vector(const Field *a, Field *a0, Field *a_tmp, con
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t bsize_i = boundary->getSize_innerList();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
-    size_t bsize_b = boundary->getSize_boundaryList();
-    size_t *d_oList = boundary->get_obstacleList();
-    size_t bsize_o = boundary->getSize_obstacleList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t bsize_i = boundary->get_size_inner_list();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
+    size_t bsize_b = boundary->get_size_boundary_list();
+    size_t *d_oList = boundary->get_obstacle_list();
+    size_t bsize_o = boundary->get_size_obstacle_list();
 
 #pragma acc data present(d_a[:size], d_a0[:size], d_a_tmp[:size], d_b[:size], d_b0[:size], d_b_tmp[:size], \
                          d_c[:size], d_c0[:size], d_c_tmp[:size], d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
@@ -410,12 +410,12 @@ void FieldController::couple_scalar(const Field *a, Field *a0, Field *a_tmp, boo
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t bsize_i = boundary->getSize_innerList();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
-    size_t bsize_b = boundary->getSize_boundaryList();
-    size_t *d_oList = boundary->get_obstacleList();
-    size_t bsize_o = boundary->getSize_obstacleList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t bsize_i = boundary->get_size_inner_list();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
+    size_t bsize_b = boundary->get_size_boundary_list();
+    size_t *d_oList = boundary->get_obstacle_list();
+    size_t bsize_o = boundary->get_size_obstacle_list();
 
 #pragma acc data present(d_a[:size], d_a0[:size], d_a_tmp[:size], d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
     {
@@ -488,7 +488,7 @@ void FieldController::update_device() {
 #pragma acc update device(d_gamma_t[:bsize]) wait    // all in one update does not work!
 }
 
-void FieldController::update_host(){
+void FieldController::update_host() {
     auto d_u = field_u->data;
     auto d_v = field_v->data;
     auto d_w = field_w->data;

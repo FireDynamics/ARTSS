@@ -23,8 +23,7 @@ GaussFunction::GaussFunction(real HRR, real cp, real x0, real y0, real z0, real 
 }
 
 void GaussFunction::init() {
-    auto params = Parameters::getInstance();
-    m_field_spatial_values = new Field(FieldType::RHO, 0.);
+    m_field_spatial_values = new Field(FieldType::RHO);
     create_spatial_values();
 }
 
@@ -36,18 +35,12 @@ GaussFunction::~GaussFunction() {
 }
 
 void GaussFunction::update_source(Field *out, real t_cur) {
-    size_t size = Domain::getInstance()->get_size();
-    auto data_out = out->data;
-    auto data_spatial = m_field_spatial_values->data;
     auto time_val = get_time_value(t_cur);
+    out->copy_data(*m_field_spatial_values);
+    (*out) *= time_val;
 
-#pragma acc data present(data_out[:size], data_spatial[:size])
-    {
-#pragma acc parallel loop independent present(data_out[:size], data_spatial[:size]) async
-        for (size_t i = 0; i < size; i++) {
-            data_out[i] = data_spatial[i] * time_val;  // TODO * random value (5%)
-        }
-#pragma acc wait
+    if (m_has_noise) {
+        (*out) *= m_noise_maker->random_field(out->get_size());
     }
 }
 
@@ -88,9 +81,9 @@ void GaussFunction::create_spatial_values() {
 
     // set Gaussian to cells
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
+    auto bsize_i = boundary->get_size_inner_list();
 
     real HRRrV;
 
@@ -121,11 +114,7 @@ void GaussFunction::create_spatial_values() {
         auto y_j = (yj(j, Y1, dy) - m_y0);
         auto z_k = (zk(k, Z1, dz) - m_z0);
         real expr = std::exp(-(r_sigma_x_2 * x_i * x_i + r_sigma_y_2 * y_j * y_j + r_sigma_z_2 * z_k * z_k));
-        real tmp = HRRrV * rcp * expr;
-        if (tmp < 0.01) {
-            tmp = 0;
-        }
-        d_out[idx] = tmp;
+        d_out[idx] = HRRrV * rcp * expr;
     }
 
 #pragma acc enter data copyin(d_out[:bsize])
