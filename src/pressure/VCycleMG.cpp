@@ -29,10 +29,7 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-
     Parameters *params = Parameters::getInstance();
-    Domain *domain = Domain::getInstance();
-
 
     m_dt = params->get_real("physical_parameters/dt");
     m_dsign = -1.;
@@ -84,7 +81,6 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
         auto *r0 = new Field(FieldType::P, 0.0, level);
         r0->copyin();
         m_residuum0.push_back(r0);
-        // TODO(issue 124)
 
         // build m_residuum1
         auto *r1 = new Field(FieldType::P, 0.0, level + 1);
@@ -194,7 +190,7 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
             sum = 0.;
 
             // calculate residuum in inner cells
-#pragma acc parallel loop independent present(out, b, d_iList[:bsize_i]) async
+#pragma acc parallel loop independent present(out, b, data_inner_list[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = data_inner_list[j];
                 r = b[i] - (rdx2 * (out[i - neighbour_i] - 2 * out[i] + out[i + neighbour_i])
@@ -514,8 +510,7 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
     size_t neighbour_cell_k = Nx_coarse * Ny_coarse;
 
     // prolongate
-#pragma acc data present(in, out, d_iList[start_i:(end_i-start_i)])
-#pragma acc data present(data_in[:bsize_in], data_out[:bsize_out], data_inner_list[start_i:(end_i-start_i)])
+#pragma acc data present(in, out, data_inner_list[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
 #pragma acc loop independent
@@ -691,7 +686,7 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
     const real beta = 1. / rbeta;
 
     tmp.copy_data(out);
-#pragma acc data present(out[:bsize], tmp[:bsize], b[:bsize])
+#pragma acc data present(out, tmp, b)
     {
         for (int i = 0; i < m_n_relax; i++) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
@@ -743,7 +738,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
     const real beta = 1. / rbeta;
 
     tmp.copy_data(out);
-#pragma acc data present(data_out[:bsize], data_tmp[:bsize], data_b[:bsize])
+#pragma acc data present(out, tmp, b)
     {
         size_t it = 0;
         const size_t max_it = m_diffusion_max_iter;
@@ -760,7 +755,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
 
             sum = 0.;
 
-#pragma acc parallel loop independent present(data_out[:bsize], data_tmp[:bsize], data_inner_list[:bsize_i]) async
+#pragma acc parallel loop independent present(out, tmp, data_inner_list[:bsize_i]) async
             for (size_t j = start_i; j < end_i; ++j) {
                 const size_t i = data_inner_list[j];
                 res = b[i] - (rdx2 * (data_out[i - neighbour_i] - 2 * data_out[i] + data_out[i + neighbour_i])\
@@ -809,7 +804,7 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
     const real beta = 1. / rbeta;
 
     tmp.copy_data(out);
-#pragma acc data present(out[:bsize], tmp[:bsize], b[:bsize])
+#pragma acc data present(out, tmp, b)
     {
         size_t it = 0;
         for (int i = 0; i < m_n_relax; i++){
@@ -839,14 +834,11 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
     real *data_out = out.data;
     real *data_tmp = tmp.data;
 
-    size_t bsize = domain->get_size(out.get_level());
     FieldType type = out.get_type();
 
     BoundaryController *boundary = BoundaryController::getInstance();
 
     size_t *data_inner_list = boundary->get_inner_list_level_joined();
-    size_t *data_boundary_list = boundary->get_boundary_list_level_joined();
-    size_t bsize_b = boundary->get_size_boundary_list_level_joined();
     size_t bsize_i = boundary->get_size_inner_list_level_joined();
 
     // start/end
@@ -869,7 +861,7 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
     const real beta = 1. / rbeta;
 
     tmp.copy_data(out);
-#pragma acc data present(data_out[:bsize], data_tmp[:bsize], data_b[:bsize])
+#pragma acc data present(out, tmp, b)
     {
         size_t it = 0;
         real sum;
@@ -884,7 +876,7 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
 
             sum = 0.;
 
-#pragma acc parallel loop independent present(data_out[:bsize], data_tmp[:bsize], data_inner_list[:bsize_i]) async
+#pragma acc parallel loop independent present(out, tmp, data_inner_list[:bsize_i]) async
             for (size_t j = start_i; j < end_i; ++j) {
                 const size_t i = data_inner_list[j];
                 res = b[i] - (rdx2 * (out[i - neighbour_i] - 2 * out[i] + data_out[i + neighbour_i])
