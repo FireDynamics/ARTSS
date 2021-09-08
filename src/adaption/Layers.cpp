@@ -10,7 +10,12 @@
 #include "../utility/Parameters.h"
 #include "Adaption.h"
 
-Layers::Layers(FieldController *field_controller) {
+Layers::Layers(FieldController *field_controller) :
+    m_T(field_controller->get_field_T()),
+    m_Ta(field_controller->get_field_T_ambient()),
+    m_Nu(field_controller->get_field_nu_t()),
+    m_kappa(field_controller->get_field_kappa_t()),
+    m_gamma(field_controller->get_field_gamma_t()) {
     auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
     m_minimal = static_cast<size_t> (std::pow(2, domain->get_levels()));
@@ -20,14 +25,6 @@ Layers::Layers(FieldController *field_controller) {
     m_check_value = params->get_real("adaption/class/check_value");
     m_timestep = static_cast<size_t> (params->get_int("adaption/class/timestep"));
     m_expansion_size = static_cast<size_t> (params->get_int("adaption/class/expansion_size"));
-
-    m_T = field_controller->field_T;
-    m_Ta = field_controller->field_T_ambient;
-
-    m_Nu = field_controller->field_nu_t;
-
-    m_kappa = field_controller->field_kappa_t;
-    m_gamma = field_controller->field_gamma_t;
 }
 
 
@@ -36,7 +33,10 @@ Layers::Layers(FieldController *field_controller) {
 /// \brief  Checks for adaption
 /// \return  bool if adaption is possible true
 // ********************************************************************************
-bool Layers::update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) {
+bool Layers::update(
+        long *p_shift_x1, long *p_shift_x2,
+        long *p_shift_y1, long *p_shift_y2,
+        long *p_shift_z1, long *p_shift_z2) {
     m_timecounter++;
     if (m_timecounter < m_timestep) {
         return false;
@@ -111,7 +111,10 @@ size_t Layers::getExpansionSize() {
 /// \brief  Set values for new domain in x-direction
 /// \params start x-values at x1 (start = true) or x-values at x2 (start=false)
 // ********************************************************************************
-void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2, bool start) {
+void Layers::setXValues(
+        long *p_shift_x1, long *p_shift_x2,
+        long *, long *, long *, long *,
+        bool start) {
     Domain *domain = Domain::getInstance();
 
     size_t Nx = domain->get_Nx();
@@ -122,30 +125,22 @@ void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, lo
     size_t k_start = static_cast<size_t> (std::round((m_z1 - domain->get_Z1()) / domain->get_dz()));
     size_t k_end = k_start + m_nz;
 
-    real *data_nu = m_Nu->data;
-    real *data_gamma = m_gamma->data;
-    real *data_kappa = m_kappa->data;
-    real *data_temp = m_T->data;
-    real *data_tempA = m_Ta->data;
-
-    size_t size = domain->get_size();
-
     if (start) {
         size_t nx_begin = static_cast<size_t> (std::round((m_x1 - domain->get_X1()) / domain->get_dx()));
         long shift = *p_shift_x1;
         size_t index;
         size_t idx;
-#pragma acc parallel loop collapse(3) present(data_nu[:size], data_gamma[:size], data_kappa[:size], data_temp[:size], data_tempA[:size])
+#pragma acc parallel loop collapse(3) present(m_nu, m_gamma, m_kappa, m_T, m_Ta)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 for (int i = 0; i >= shift; i--) {
                     index = IX(nx_begin + 1, j, k, Nx, Ny);
                     idx = IX(nx_begin + i, j, k, Nx, Ny);
-                    *(data_nu + idx) = *(data_nu + index);
-                    *(data_gamma + idx) = *(data_gamma + index);
-                    *(data_kappa + idx) = *(data_kappa + index);
-                    *(data_temp + idx) = *(data_temp + index);
-                    *(data_tempA + idx) = *(data_tempA + index);
+                    m_Nu[idx] = m_Nu[index];
+                    m_gamma[idx] = m_gamma[index];
+                    m_kappa[idx] = m_kappa[index];
+                    m_T[idx] = m_T[index];
+                    m_Ta[idx] = m_Ta[index];
                 }
             }
         }
@@ -154,17 +149,17 @@ void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, lo
         long shift = *p_shift_x2;
         size_t index;
         size_t idx;
-#pragma acc parallel loop collapse(3) present(data_nu[:size], data_gamma[:size], data_kappa[:size], data_temp[:size], data_tempA[:size])
+#pragma acc parallel loop collapse(3) present(m_nu, m_gamma, m_kappa, m_T, m_Ta)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 for (int i = 0; i <= shift; i++) {
                     index = IX(nx_end, j, k, Nx, Ny);
                     idx = IX(nx_end + i + 1, j, k, Nx, Ny);
-                    *(data_nu + idx) = *(data_nu + index);
-                    *(data_gamma + idx) = *(data_gamma + index);
-                    *(data_kappa + idx) = *(data_kappa + index);
-                    *(data_temp + idx) = *(data_temp + index);
-                    *(data_tempA + idx) = *(data_tempA + index);
+                    m_Nu[idx] = m_Nu[index];
+                    m_gamma[idx] = m_gamma[index];
+                    m_kappa[idx] = m_kappa[index];
+                    m_T[idx] = m_T[index];
+                    m_Ta[idx] = m_Ta[index];
                 }
             }
         }
@@ -175,7 +170,10 @@ void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, lo
 // ********************************************************************************
 /// \brief  Set values for new domain
 // ********************************************************************************
-void Layers::apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) {
+void Layers::apply_changes(
+        long *p_shift_x1, long *p_shift_x2,
+        long *p_shift_y1, long *p_shift_y2,
+        long *p_shift_z1, long *p_shift_z2) {
     if (*p_shift_x1) {
         Layers::setXValues(p_shift_x1, p_shift_x2, p_shift_y1, p_shift_y2, p_shift_z1, p_shift_z2, true);
     }
@@ -190,11 +188,10 @@ void Layers::apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1,
 /// \param  checkValue check value
 /// \param  no_buffer_cell Buffersize
 // ***************************************************************************************
-void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shift_x1, long *p_shift_x2) {
+void Layers::adaptXDirection(
+        real checkValue, size_t no_buffer_cell,
+        long *p_shift_x1, long *p_shift_x2) {
     auto domain = Domain::getInstance();
-
-    auto data = m_T->data;
-    size_t size = domain->get_size();
 
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;
@@ -202,8 +199,8 @@ void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shi
     bool expansion_start = (domain->get_x1() != domain->get_X1());
     bool expansion_end = (domain->get_x2() != domain->get_X2());
 
-    //copy(expansion_counter_start,expansion_counter_end)
-#pragma acc data present(data[:size]) copyout(expansion_counter_end, expansion_counter_start)
+    // copy(expansion_counter_start,expansion_counter_end)
+#pragma acc data present(m_t) copyout(expansion_counter_end, expansion_counter_start)
     {
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -215,22 +212,21 @@ void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shi
         size_t k_start = domain->get_index_z1();
         size_t k_end = domain->get_index_z2() + 1;
 
-        //loop through left and right side of cuboid in x direction
-#pragma acc parallel loop collapse(2) present(data[:size]) reduction(+:expansion_counter_end)
+        // loop through left and right side of cuboid in x direction
+#pragma acc parallel loop collapse(2) present(m_T) reduction(+:expansion_counter_end)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 // check innermost plane of the buffer zone on the right side
-                if ((*(data + IX(i_end - no_buffer_cell + 1, j, k, Nx, Ny)) > checkValue)) {
+                if ((m_T[IX(i_end - no_buffer_cell + 1, j, k, Nx, Ny)]) > checkValue) {
                     expansion_counter_end++;
                 }
             }
         }
-//#pragma acc parallel loop collapse(2) present(data[:size]) reduction(max:expansion_counter_start)
-#pragma acc parallel loop collapse(2) present(data[:size]) reduction(+:expansion_counter_start)
+#pragma acc parallel loop collapse(2) present(m_T) reduction(+:expansion_counter_start)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 // check innermost plane of the buffer zone on the left side
-                if ((*(data + IX(i_start + no_buffer_cell - 1, j, k, Nx, Ny)) > checkValue)) {
+                if ((m_T[IX(i_start - no_buffer_cell - 1, j, k, Nx, Ny)]) > checkValue) {
                     expansion_counter_start++;
                 }
             }
@@ -250,7 +246,9 @@ void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shi
 /// \param  checkValue check value
 /// \param  no_buffer_cell Buffersize
 // ***************************************************************************************
-void Layers::adaptXDirection_serial(real checkValue, size_t no_buffer_cell, long *p_shift_x1, long *p_shift_x2) {
+void Layers::adaptXDirection_serial(
+        real checkValue, size_t no_buffer_cell,
+        long *p_shift_x1, long *p_shift_x2) {
     auto domain = Domain::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
@@ -276,21 +274,19 @@ void Layers::adaptXDirection_serial(real checkValue, size_t no_buffer_cell, long
         expansion = expansion_end;
     }
 
-    auto data = m_T->data;
-
     //loop through left and right side of cuboid in x direction
     for (size_t j = j_start; j < j_end && expansion == ADTypes::UNKNOWN; j++) {
         for (size_t k = k_start; k < k_end && expansion == ADTypes::UNKNOWN; k++) {
             // check innermost plane of the buffer zone on the left side
             //size_t idx_s1 = IX(i_start + no_buffer_cell - 1, j, k, Nx, Ny);
             if (expansion_start == ADTypes::UNKNOWN &&
-                (*(data + IX(i_start + no_buffer_cell - 1, j, k, Nx, Ny)) > checkValue)) {
+                (m_T[IX(i_start + no_buffer_cell - 1, j, k, Nx, Ny)] > checkValue)) {
                 expansion_start = ADTypes::YES;
             }
             // check innermost plane of the buffer zone on the right side
 //            size_t idx_s2 = IX(i_end - no_buffer_cell + 1, j, k, Nx, Ny);
             if (expansion_end == ADTypes::UNKNOWN &&
-                (*(data + IX(i_end - no_buffer_cell + 1, j, k, Nx, Ny)) > checkValue)) {
+                (m_T[IX(i_end + no_buffer_cell + 1, j, k, Nx, Ny)] > checkValue)) {
                 expansion_end = ADTypes::YES;
             }
             if (expansion_end == expansion_start) {

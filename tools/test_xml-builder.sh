@@ -12,13 +12,13 @@ function create_testcases {
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"dirichlet\" value=\"0.0\" />
   </boundaries>" > "${NAME}_${BFILEVAL}"
     echo "  <initial_conditions usr_fct=\"GaussBubble\"  random=\"No\">  <!-- Gaussian function  -->
-    <u_lin> 0.5 </u_lin>      <!-- x-velocity in linear case  -->
-    <v_lin> 0.5 </v_lin>      <!-- y-velocity in linear case  -->
-    <w_lin> 0.25 </w_lin>     <!-- z-velocity in linear case  -->
-    <xshift> 1.025 </xshift>  <!-- xshift of Gauss Bubble in domain  -->
-    <yshift> 1.025 </yshift>  <!-- yshift of Gauss Bubble in domain  -->
-    <zshift> 0.5 </zshift>    <!-- zshift of Gauss Bubble in domain  -->
-    <l> 0.03125 </l>          <!-- sigma in Gaussian -->
+    <u_lin> 0.5 </u_lin>        <!-- x-velocity in linear case  -->
+    <v_lin> 0.5 </v_lin>        <!-- y-velocity in linear case  -->
+    <w_lin> 0.25 </w_lin>       <!-- z-velocity in linear case  -->
+    <x_shift> 1.025 </x_shift>  <!-- x_shift of Gauss Bubble in domain  -->
+    <y_shift> 1.025 </y_shift>  <!-- y_shift of Gauss Bubble in domain  -->
+    <z_shift> 0.5 </z_shift>    <!-- z_shift of Gauss Bubble in domain  -->
+    <l> 0.03125 </l>            <!-- sigma in Gaussian -->
   </initial_conditions>" > "${NAME}_${IFILEVAL}"
     ((INDEX++))
   fi
