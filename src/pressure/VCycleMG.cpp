@@ -416,8 +416,8 @@ void VCycleMG::Restrict(Field &out, Field const &in, const size_t level, bool sy
 
     // neighbour cells, i/j/k represent the directions
     const size_t neighbour_cell_i = 1;
-    const size_t neighbour_cell_j = Nx_coarse;
-    const size_t neighbour_cell_k = Nx_coarse * Ny_coarse;
+    const size_t neighbour_cell_j = 1;
+    const size_t neighbour_cell_k = 1;
     // average from eight neighboring cells
     // obstacles not used in fine grid, since coarse grid only obstacle if one of 8 fine grids was an obstacle,
     // thus if coarse cell inner cell, then surrounding fine cells also inner cells!
