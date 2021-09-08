@@ -52,27 +52,27 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
     m_diffusion_tol_res = params->get_real("solver/diffusion/tol_res");
 
     // reserve memory, push_back can still be used
-    m_residuum0.reserve(m_levels);
-    m_residuum1.reserve(m_levels + 1);
-    m_error0.reserve(m_levels);
-    m_error1.reserve(m_levels + 1);
-    m_mg_temporal_solution.reserve(m_levels + 1);
+    m_residuum0 = new Field*[m_levels];
+    m_residuum1 = new Field*[m_levels + 1];
+    m_error0 = new Field*[m_levels];
+    m_error1 = new Field*[m_levels + 1];
+    m_mg_temporal_solution = new Field*[m_levels + 1];
 
     // copies of out and b to prevent aliasing
     // residuum
     auto *b_res1 = new Field(b);
     b_res1->copyin();
-    m_residuum1.push_back(b_res1);
+    *(m_residuum1) = b_res1;
 
     // error
     auto *out_err1 = new Field(out);
     out_err1->copyin();
-    m_error1.push_back(out_err1);
+    *(m_error1) = out_err1;
 
 // temporal solution
     auto *out_tmp = new Field(out);
     out_tmp->copyin();
-    m_mg_temporal_solution.push_back(out_tmp);
+    *(m_mg_temporal_solution) = out_tmp;
 
     // building fields for level + sending to GPU
     // level going up
@@ -80,45 +80,46 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
         // build m_residuum0
         auto *r0 = new Field(FieldType::P, 0.0, level);
         r0->copyin();
-        m_residuum0.push_back(r0);
+        *(m_residuum0 + level) = r0;
 
         // build m_residuum1
         auto *r1 = new Field(FieldType::P, 0.0, level + 1);
         r1->copyin();
-        m_residuum1.push_back(r1);
+        *(m_residuum1 + level + 1) = r1;
+
+        //  build m_error0
+        auto *e0 = new Field(FieldType::P, 0.0, level);
+        e0->copyin();
+        *(m_error0 + level) = e0;
 
         //  build m_error1
         auto *e1 = new Field(FieldType::P, 0.0, level + 1);
         e1->copyin();
-        m_error1.push_back(e1);
+        *(m_error1 + level + 1) = e1;
 
         // build m_mg_temporal_solution
         auto *mg = new Field(FieldType::P, 0.0, level + 1);
         mg->copyin();
-        m_mg_temporal_solution.push_back(mg);
-
-        auto *e0 = new Field(FieldType::P, 0.0, level);
-        e0->copyin();
-        m_error0.push_back(e0);
+        *(m_mg_temporal_solution + level + 1) = mg;
     } // end level loop
 }
 
 VCycleMG::~VCycleMG() {
-    for (size_t i = 0; i < m_residuum0.size(); i++) {
+    for (size_t i = 0; i < m_levels; i++) {
         delete m_residuum0[i];
     }
-    for (size_t i = 0; i < m_residuum1.size(); i++) {
+    for (size_t i = 0; i < m_levels + 1; i++) {
         delete m_residuum1[i];
     }
 
-    for (size_t i = 0; i < m_error0.size(); i++) {
+    for (size_t i = 0; i < m_levels; i++) {
         delete m_error0[i];
     }
-    for (size_t i = 0; i < m_error1.size(); i++) {
+    for (size_t i = 0; i < m_levels + 1; i++) {
         delete m_error1[i];
     }
 
-    for (size_t i = 0; i < m_mg_temporal_solution.size(); i++) {
+    for (size_t i = 0; i < m_levels + 1; i++) {
         delete m_mg_temporal_solution[i];
     }
 }
@@ -236,12 +237,12 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
    // m_error1[0]->copy_data(*out);
 //===================== levels going down ====================//
     for (size_t level = 0; level < m_levels; ++level) {
-        Field *field_residuum0_level = m_residuum0[level];
-        Field *field_error1_level = m_error1[level];
-        Field *field_error1_level_plus_1 = m_error1[level + 1];
-        Field *field_mg_temporal_level = m_mg_temporal_solution[level];
-        Field *field_residuum1_level = m_residuum1[level];
-        Field *field_residuum1_level_plus_1 = m_residuum1[level + 1];
+        Field *field_residuum0_level = *(m_residuum0 + level);
+        Field *field_error1_level = *(m_error1 + level);
+        Field *field_error1_level_plus_1 = *(m_error1 + level + 1);
+        Field *field_mg_temporal_level = *(m_mg_temporal_solution + level);
+        Field *field_residuum1_level = *(m_residuum1 + level);
+        Field *field_residuum1_level_plus_1 = *(m_residuum1 + level + 1);
 
         real *data_residuum0_level = field_residuum0_level->data;
         real *data_residuum1_level_plus_1 = field_residuum1_level_plus_1->data;
@@ -281,11 +282,11 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
 
 //===================== levels going up ====================//
     for (size_t level = m_levels; level > 0; --level) {
-        Field *field_error0_level = m_error0[level - 1];
-        Field *field_error1_level = m_error1[level];
-        Field *field_error1_level_minus_1 = m_error1[level - 1];
-        Field *field_mg_temporal_solution_level_minus_1 = m_mg_temporal_solution[level - 1];
-        Field *field_residuum1_level_minus_1 = m_residuum1[level - 1];
+        Field *field_error0_level = *(m_error0 + level - 1);
+        Field *field_error1_level = *(m_error1 + level);
+        Field *field_error1_level_minus_1 = *(m_error1 + level - 1);
+        Field *field_mg_temporal_solution_level_minus_1 = *(m_mg_temporal_solution + level - 1);
+        Field *field_residuum1_level_minus_1 = *(m_residuum1 + level - 1);
 
         real *data_error0_level = field_error0_level->data;
 

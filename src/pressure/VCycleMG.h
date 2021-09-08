@@ -7,7 +7,6 @@
 #ifndef ARTSS_PRESSURE_VCYCLEMG_H_
 #define ARTSS_PRESSURE_VCYCLEMG_H_
 
-#include <vector>
 #include "../interfaces/IPressure.h"
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
@@ -25,18 +24,16 @@ class VCycleMG: public IPressure{
  private:
     void VCycleMultigrid(Field &out, bool sync = true);
     void UpdateInput(Field &out, Field const &b, bool sync = true);
-    void Smooth(Field &out, Field &tmp, Field const &b, size_t const level, bool sync = true);
-    void Residuum(Field &out, Field const &in, Field const &b, size_t const level, bool sync = true);
-    void Restrict(Field &out, Field const &in, size_t const level, bool sync = true);
-    void Prolongate(Field &out, Field const &in, size_t const level, bool sync = true);
-    void Solve(Field &out, Field &tmp, Field const &b, size_t const level, bool sync = true);
+    void Smooth(Field &out, Field &tmp, Field const &b, size_t level, bool sync = true);
+    void Residuum(Field &out, Field const &in, Field const &b, size_t level, bool sync = true);
+    void Restrict(Field &out, Field const &in, size_t level, bool sync = true);
+    void Prolongate(Field &out, Field const &in, size_t level, bool sync = true);
+    void Solve(Field &out, Field &tmp, Field const &b, size_t level, bool sync = true);
 
-    void call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, size_t const level, bool sync);
-    void call_smooth_jacobi(Field &out, Field &tmp, Field const &b, size_t const level, bool sync);
-    void call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, size_t const level, bool sync);
-    void call_solve_jacobi(Field &out, Field &tmp, Field const &b, size_t const level, bool sync);
-    void call_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, const size_t level, bool sync);
-    void call_jacobi(Field &out, Field &tmp, Field const &b, size_t const level, bool sync);
+    void call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
+    void call_smooth_jacobi(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
+    void call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
+    void call_solve_jacobi(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
 
     const size_t m_levels;
     const int m_n_cycle;
@@ -51,20 +48,17 @@ class VCycleMG: public IPressure{
     real m_dsign;
     real m_w;
 
-    /**
-     *
-     */
-    std::vector<Field*> m_residuum0;
+    Field **m_residuum0;
     /**
      * stores on level 0 rhs/b field
      */
-    std::vector<Field*> m_residuum1;
-    std::vector<Field*> m_error0;
+    Field **m_residuum1;
+    Field **m_error0;
     /**
      * stores on level 0 out/p field
      */
-    std::vector<Field*> m_error1;
-    std::vector<Field*> m_mg_temporal_solution; // only as storage? or even sometimes as output field?
+    Field **m_error1;
+    Field **m_mg_temporal_solution; // only as storage? or even sometimes as output field?
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
