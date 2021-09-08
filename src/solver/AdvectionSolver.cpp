@@ -10,52 +10,38 @@
 #include "../Domain.h"
 #include "SolverSelection.h"
 
-AdvectionSolver::AdvectionSolver(FieldController *field_controlller) {
+AdvectionSolver::AdvectionSolver(
+        FieldController *field_controller,
+        real u_lin, real v_lin, real w_lin) :
+    m_field_controller(field_controller),
+    m_u_lin(FieldType::U, u_lin),
+    m_v_lin(FieldType::V, v_lin),
+    m_w_lin(FieldType::W, w_lin) {
 #ifndef BENCHMARKING
      m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_controller = field_controlller;
 
     auto params = Parameters::getInstance();
     std::string advectionType = params->get("solver/advection/type");
     SolverSelection::SetAdvectionSolver(&adv, params->get("solver/advection/type"));
 
-    real d_u_linm = params->get_real("initial_conditions/u_lin");
-    real d_v_linm = params->get_real("initial_conditions/v_lin");
-    real d_w_linm = params->get_real("initial_conditions/w_lin");
+    m_u_lin.copyin();
+    m_v_lin.copyin();
+    m_w_lin.copyin();
 
-    u_linm = new Field(FieldType::U, d_u_linm);
-    v_linm = new Field(FieldType::V, d_v_linm);
-    w_linm = new Field(FieldType::W, d_w_linm);
-
-    auto u_lin = u_linm;
-    auto v_lin = v_linm;
-    auto w_lin = w_linm;
-
-    auto d_u_lin = u_lin->data;
-    auto d_v_lin = v_lin->data;
-    auto d_w_lin = w_lin->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u_linm->get_level());
-
-#pragma acc enter data copyin(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize])
     control();
+}
+
+AdvectionSolver::AdvectionSolver(FieldController *field_controller) :
+    AdvectionSolver(
+            field_controller,
+            Parameters::getInstance()->get_real("initial_conditions/u_lin"),
+            Parameters::getInstance()->get_real("initial_conditions/v_lin"),
+            Parameters::getInstance()->get_real("initial_conditions/w_lin")) {
 }
 
 AdvectionSolver::~AdvectionSolver() {
     delete adv;
-
-    auto d_u_lin = u_linm->data;
-    auto d_v_lin = v_linm->data;
-    auto d_w_lin = w_linm->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u_linm->get_level());
-
-#pragma acc exit data delete(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize])
-
-    delete u_linm;
-    delete v_linm;
-    delete w_linm;
 }
 
 //====================================== do_step =================================
@@ -64,42 +50,24 @@ AdvectionSolver::~AdvectionSolver() {
 /// \param  dt      time step
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void AdvectionSolver::do_step(real t, bool sync) {
-  // local variables and parameters for GPU
-    auto u = m_field_controller->field_u;
-    auto v = m_field_controller->field_v;
-    auto w = m_field_controller->field_w;
-    auto u0 = m_field_controller->field_u0;
-    auto v0 = m_field_controller->field_v0;
-    auto w0 = m_field_controller->field_w0;
+void AdvectionSolver::do_step(real, bool sync) {
+    Field &u = m_field_controller->field_u;
+    Field &v = m_field_controller->field_v;
+    Field &w = m_field_controller->field_w;
+    Field &u0 = m_field_controller->field_u0;
+    Field &v0 = m_field_controller->field_v0;
+    Field &w0 = m_field_controller->field_w0;
 
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-
-    auto u_lin = u_linm;
-    auto v_lin = v_linm;
-    auto w_lin = w_linm;
-
-    auto d_u_lin = u_lin->data;
-    auto d_v_lin = v_lin->data;
-    auto d_w_lin = w_lin->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u->get_level());
-
-#pragma acc data present(d_u_lin[:bsize], d_v_lin[:bsize], d_w_lin[:bsize], d_u[:bsize], d_u0[:bsize], d_v[:bsize], d_v0[:bsize], d_w[:bsize], d_w0[:bsize])
+#pragma acc data present(u_lin, v_lin, w_lin, u, u0, v, v0, w, w0)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
         m_logger->info("Advect ...");
 #endif
-        adv->advect(u, u0, u_lin, v_lin, w_lin, sync);
-        adv->advect(v, v0, u_lin, v_lin, w_lin, sync);
-        adv->advect(w, w0, u_lin, v_lin, w_lin, sync);
-    }//end data
+        adv->advect(u, u0, m_u_lin, m_v_lin, m_w_lin, sync);
+        adv->advect(v, v0, m_u_lin, m_v_lin, m_w_lin, sync);
+        adv->advect(w, w0, m_u_lin, m_v_lin, m_w_lin, sync);
+    }
 }
 
 //======================================= Check data ==================================
