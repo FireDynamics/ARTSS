@@ -6,58 +6,44 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Solution.h"
-#include "../utility/Utility.h"
-#include "../utility/Parameters.h"
-#include "../Functions.h"
 
-Solution::Solution() {
+
+Solution::Solution(std::string &initial_condition) :
+    u_a(Field(FieldType::U)),
+    v_a(Field(FieldType::V)),
+    w_a(Field(FieldType::W)),
+    p_a(Field(FieldType::P)),
+    T_a(Field(FieldType::T))  {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    u_a = new Field(FieldType::U, 0.0);
-    v_a = new Field(FieldType::V, 0.0);
-    w_a = new Field(FieldType::W, 0.0);
-    p_a = new Field(FieldType::P, 0.0);
-    T_a = new Field(FieldType::T, 0.0);
+    init(initial_condition);
 
     auto params = Parameters::getInstance();
     m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
-
-    init();
 }
 
-Solution::~Solution() {
-    delete u_a;
-    delete v_a;
-    delete w_a;
-    delete p_a;
-    delete T_a;
-}
-
-void Solution::init() {
-    auto params = Parameters::getInstance();
-    std::string initialCondition = params->get("initial_conditions/usr_fct");
-
+void Solution::init(std::string &initial_condition) {
     // set function pointer to chosen initial condition
-    if (initialCondition == FunctionNames::GaussBubble) {
+    if (initial_condition == FunctionNames::GaussBubble) {
         m_init_function = &Solution::gauss_bubble;
-    } else if (initialCondition == FunctionNames::ExpSinusProd) {
+    } else if (initial_condition == FunctionNames::ExpSinusProd) {
         m_init_function = &Solution::exp_sinus_prod;
-    } else if (initialCondition == FunctionNames::ExpSinusSum) {
+    } else if (initial_condition == FunctionNames::ExpSinusSum) {
         m_init_function = &Solution::exp_sinus_sum;
-    } else if (initialCondition == FunctionNames::Hat) {
+    } else if (initial_condition == FunctionNames::Hat) {
         m_init_function = &Solution::hat;
-    } else if (initialCondition == FunctionNames::SinSinSin) {
+    } else if (initial_condition == FunctionNames::SinSinSin) {
         m_init_function = &Solution::sin_sin_sin;
-    } else if (initialCondition == FunctionNames::McDermott) {
+    } else if (initial_condition == FunctionNames::McDermott) {
         m_init_function = &Solution::mcDermott;
-    } else if (initialCondition == FunctionNames::Vortex) {
+    } else if (initial_condition == FunctionNames::Vortex) {
         m_init_function = &Solution::vortex;
-    } else if (initialCondition == FunctionNames::VortexY) {
+    } else if (initial_condition == FunctionNames::VortexY) {
         m_init_function = &Solution::vortex_y;
-    } else if (initialCondition == FunctionNames::Beltrami) {
+    } else if (initial_condition == FunctionNames::Beltrami) {
         m_init_function = &Solution::beltrami;
-    } else if (initialCondition == FunctionNames::BuoyancyMMS) {
+    } else if (initial_condition == FunctionNames::BuoyancyMMS) {
         m_init_function = &Solution::buoyancy_mms;
     } else {
 #ifndef BENCHMARKING
@@ -86,16 +72,16 @@ void Solution::exp_sinus_sum(const real t) {
     Functions::ExpSinusSum(u_a, v_a, w_a, t);
 }
 
-void Solution::hat(const real t) {
+void Solution::hat(const real) {
     // Diffusion test case
-    Functions::Hat(u_a); // TODO time dependency?
+    Functions::Hat(u_a);  // TODO time dependency?
     Functions::Hat(v_a);
     Functions::Hat(w_a);
 }
 
-void Solution::sin_sin_sin(real t) {
+void Solution::sin_sin_sin(const real) {
 // Pressure test case
-    Functions::FacSinSinSin(p_a); // TODO time dependency?
+    Functions::FacSinSinSin(p_a);  // TODO time dependency?
 }
 
 void Solution::mcDermott(const real t) {
@@ -103,19 +89,19 @@ void Solution::mcDermott(const real t) {
     Functions::McDermott(u_a, v_a, w_a, p_a, t);
 }
 
-void Solution::vortex(const real t) {
-    Functions::Vortex(u_a, v_a, w_a, p_a); // TODO time dependency
+void Solution::vortex(const real) {
+    Functions::Vortex(u_a, v_a, w_a, p_a);  // TODO time dependency
 }
 
-void Solution::vortex_y(const real t) {
-    Functions::VortexY(u_a, v_a, w_a, p_a); // TODO time dependency
+void Solution::vortex_y(const real) {
+    Functions::VortexY(u_a, v_a, w_a, p_a);  // TODO time dependency
 }
 
 void Solution::beltrami(const real t) {
     Functions::Beltrami(u_a, v_a, w_a, p_a, t);
 }
 
-void Solution::zero(const real t) {
+void Solution::zero(const real) {
     // do nothing
 }
 

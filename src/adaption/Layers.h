@@ -32,7 +32,7 @@ private:
     size_t m_no_buffer_cells, m_timestep, m_timecounter, m_expansion_size;
 
     real m_check_value;
-    Field *m_T, *m_Ta, *m_Nu, *m_kappa, *m_gamma;
+    Field &m_T, &m_Ta, &m_Nu, &m_kappa, &m_gamma;
     real m_x1, m_x2, m_y1, m_y2, m_z1, m_z2;
     size_t m_nx, m_ny, m_nz;
 };

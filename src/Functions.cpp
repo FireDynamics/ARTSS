@@ -31,31 +31,30 @@ const std::string FunctionNames::Vortex = "Vortex";
 const std::string FunctionNames::VortexY = "VortexY";
 const std::string FunctionNames::Zero = "Zero";
 
-const std::string classname = "Functions";
+const std::string class_name = "Functions";
 namespace Functions {
 
 // ================================ NS Test - Beltrami IC =================================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - Beltrami
-/// \param  outx  x-velocity
-/// \param  outy  y-velocity
-/// \param  outz  z-velocity
-/// \param  outp  pressure
+/// \param  out_x  x-velocity
+/// \param  out_y  y-velocity
+/// \param  out_z  z-velocity
+/// \param  out_p  pressure
 /// \param  t time
 // ***************************************************************************************
-    void Beltrami(Field *outx, Field *outy, Field *outz, Field *outp, real t) {
-
+    void Beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->get_level());
-        size_t Ny = domain->get_Ny(outx->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->get_level());
-        real dy = domain->get_dy(outx->get_level());
-        real dz = domain->get_dz(outx->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
@@ -64,45 +63,43 @@ namespace Functions {
         real nu = params->get_real("physical_parameters/nu"); //1;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
-                                    exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
-            outy->data[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
-                                    exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
-            outz->data[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
-                                    exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
-            outp->data[idx] =
-                    -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
+            out_x[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
+                               exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
+            out_y[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
+                               exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
+            out_z[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
+                               exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
+            out_p[idx] = -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
  + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
  + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
  + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
         }
 
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
-                                    exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
-            outy->data[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
-                                    exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
-            outz->data[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
-                                    exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
-            outp->data[idx] =
-                    -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
+            out_x[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
+                               exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
+            out_y[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
+                               exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
+            out_z[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
+                               exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
+            out_p[idx] = -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
  + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
  + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
  + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
@@ -113,53 +110,50 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC for p ==========================
 // ***************************************************************************************
 /// \brief  Initial pressure set up for NS Test - Beltrami
-/// \param  outx  pressure
+/// \param  out_x  pressure
 // ***************************************************************************************
-    void BeltramiBC_p(Field *outx) {
-
+    void BeltramiBC_p(Field &out_x) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->get_level());
-        size_t Ny = domain->get_Ny(outx->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->get_level());
-        real dy = domain->get_dy(outx->get_level());
-        real dz = domain->get_dz(outx->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
-        real a = params->get_real("initial_conditions/a"); //0.25 * M_PI;
+        real a = params->get_real("initial_conditions/a");  // 0.25 * M_PI;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] =
-                    -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
+            out_x[idx] = -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
  + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
  + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
  + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
         }
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] =
-                    -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
+            out_x[idx] = -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
  + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
  + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
  + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
@@ -169,22 +163,21 @@ namespace Functions {
 // ================================ NS Test - Beltrami IC for u ==========================
 // ***************************************************************************************
 /// \brief  Initial x-velocity set up for NS Test - Beltrami
-/// \param  outx  x-velocity
+/// \param  out_x  x-velocity
 /// \param  t time
 // ***************************************************************************************
-    void BeltramiBC_u(Field *outx, real t) {
-
+    void BeltramiBC_u(Field &out_x, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->get_level());
-        size_t Ny = domain->get_Ny(outx->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->get_level());
-        real dy = domain->get_dy(outx->get_level());
-        real dz = domain->get_dz(outx->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
@@ -193,104 +186,102 @@ namespace Functions {
         real nu = params->get_real("physical_parameters/nu"); //1.;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
-                                    exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
+            out_x[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
+                               exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
         }
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
-                                    exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
+            out_x[idx] = -a * (exp(a * xi(coords_i, X1, dx)) * sin(a * yj(coords_j, Y1, dy) + dz) +
+                               exp(a * zk(coords_k, Z1, dz)) * cos(a * xi(coords_i, X1, dx) + dy)) * exp(-nu * d * d * t);
         }
     }
 
 // ================================ NS Test - Beltrami IC for v ==========================
 // ***************************************************************************************
 /// \brief  Initial y-velocity set up for NS Test - Beltrami
-/// \param  outy  y-velocity
+/// \param  out_y  y-velocity
 /// \param  t time
 // ***************************************************************************************
-    void BeltramiBC_v(Field *outx, real t) {
-
+    void BeltramiBC_v(Field &out_x, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->get_level());
-        size_t Ny = domain->get_Ny(outx->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->get_level());
-        real dy = domain->get_dy(outx->get_level());
-        real dz = domain->get_dz(outx->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
-        real a = params->get_real("initial_conditions/a");//0.25 * M_PI;
-        real d = params->get_real("initial_conditions/d");//0.5 * M_PI;
-        real nu = params->get_real("physical_parameters/nu"); //1.;
+        real a = params->get_real("initial_conditions/a");     // 0.25 * M_PI;
+        real d = params->get_real("initial_conditions/d");     // 0.5 * M_PI;
+        real nu = params->get_real("physical_parameters/nu");  // 1.;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
-                                    exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
+            out_x[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
+                               exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
         }
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
-                                    exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
+            out_x[idx] = -a * (exp(a * yj(coords_j, Y1, dy)) * sin(a * zk(coords_k, Z1, dz) + dx) +
+                               exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
         }
     }
 
 // ================================ NS Test - Beltrami IC for w ==========================
 // ***************************************************************************************
 /// \brief  Initial z-velocity set up for NS Test - Beltrami
-/// \param  outz  z-velocity
+/// \param  out_z  z-velocity
 /// \param  t time
 // ***************************************************************************************
-    void BeltramiBC_w(Field *outx, real t) {
-
+    void BeltramiBC_w(Field &out_x, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->get_level());
-        size_t Ny = domain->get_Ny(outx->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->get_level());
-        real dy = domain->get_dy(outx->get_level());
-        real dz = domain->get_dz(outx->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
@@ -299,29 +290,29 @@ namespace Functions {
         real nu = params->get_real("physical_parameters/nu");
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
-                                    exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
+            out_x[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
+                               exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
         }
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
-                                    exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
+            out_x[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
+                               exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
         }
     }
 
@@ -330,60 +321,53 @@ namespace Functions {
 /// \brief  Buoyancy Force
 /// \param  out   force
 /// \param  T   Temperature
-/// \param  Ta    Ambient temperature
+/// \param  T_ambient    Ambient temperature
 // ***************************************************************************************
-    void BuoyancyForce(Field *out, Field *T, Field *Ta) {
-
-        auto d_out = out->data;
-        auto d_T = T->data;
-        auto d_Ta = Ta->data;
-
+    void BuoyancyForce(Field &out, Field &T, Field &T_ambient) {
         auto params = Parameters::getInstance();
 
         real beta = params->get_real("physical_parameters/beta");
-
-        real g = params->get_real("physical_parameters/g"); //-9.81;
+        real g = params->get_real("physical_parameters/g");  // -9.81;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
-            d_out[idx] = -beta * (d_T[idx] - d_Ta[idx]) * g;
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
+            out[idx] = -beta * (T[idx] - T_ambient[idx]) * g;
         }
 
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
-            d_out[idx] = -beta * (d_T[idx] - d_Ta[idx]) * g;
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
+            out[idx] = -beta * (T[idx] - T_ambient[idx]) * g;
         }
     }
 
 // ================== NSTemp Test - MMS IC for u,v,w,p,T with buoyancy ===================
 // ***************************************************************************************
 /// \brief  Initial set up for NSTemp Test - MMS with buoyant force
-/// \param  outx  x-velocity
-/// \param  outy  y-velocity
-/// \param  outz  z-velocity
-/// \param  outp  pressure
+/// \param  out_x  x-velocity
+/// \param  out_y  y-velocity
+/// \param  out_z  z-velocity
+/// \param  out_p  pressure
 /// \param  outT  temperature
 /// \param  t   time
 // ***************************************************************************************
-    void BuoyancyMMS(Field *outx, Field *outy, Field *outz, Field *outp, Field *outT, real t) {
-
+    void BuoyancyMMS(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &outT, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->get_level());
-        size_t Ny = domain->get_Ny(outx->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx->get_level());
-        real dy = domain->get_dy(outx->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -396,36 +380,36 @@ namespace Functions {
         real rpi = 1. / M_PI;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] = exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            outy->data[idx] = -exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            outz->data[idx] = 0.;
-            outp->data[idx] = rhoa * rpi * c * exp(-t) * cos(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            outT->data[idx] = rhoa * rbeta * rg * 2 * c * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_x.data[idx] = exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_y.data[idx] = -exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_z.data[idx] = 0.;
+            out_p.data[idx] = rhoa * rpi * c * exp(-t) * cos(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            outT.data[idx] = rhoa * rbeta * rg * 2 * c * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
         }
 
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            outx->data[idx] = exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            outy->data[idx] = -exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            outz->data[idx] = 0.;
-            outp->data[idx] = rhoa * rpi * c * exp(-t) * cos(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            outT->data[idx] = rhoa * rbeta * rg * 2 * c * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_x.data[idx] = exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_y.data[idx] = -exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_z.data[idx] = 0.;
+            out_p.data[idx] = rhoa * rpi * c * exp(-t) * cos(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            outT.data[idx] = rhoa * rbeta * rg * 2 * c * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
         }
     }
 
@@ -435,17 +419,16 @@ namespace Functions {
 /// \param  out force
 /// \param  t time
 // ***************************************************************************************
-    void BuoyancyST_MMS(Field *out, real t) {
-
+    void BuoyancyST_MMS(Field &out, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->get_level());
-        size_t Ny = domain->get_Ny(out->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(out->get_level());
-        real dy = domain->get_dy(out->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -459,30 +442,30 @@ namespace Functions {
         real c_kappa = 2 * kappa * M_PI * M_PI - 1;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
 
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out->data[idx] =
+            out.data[idx] =
                     rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
         }
 
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out->data[idx] =
+            out.data[idx] =
                     rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
         }
     }
@@ -490,13 +473,12 @@ namespace Functions {
 // ===================================== NS Test - IC for u,v,w,p ========================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - Flow around cube or Channel flow with Drift
-/// \param  outx  x-velocity
-/// \param  outy  y-velocity
-/// \param  outz  z-velocity
-/// \param  outp  pressure
+/// \param  out_x  x-velocity
+/// \param  out_y  y-velocity
+/// \param  out_z  z-velocity
+/// \param  out_p  pressure
 // ***************************************************************************************
-    void Drift(Field *outx, Field *outy, Field *outz, Field *outp) {
-
+    void Drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
         auto params = Parameters::getInstance();
 
         real u_lin = params->get_real("initial_conditions/u_lin");
@@ -506,27 +488,27 @@ namespace Functions {
 
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
-            outx->data[idx] = u_lin;
-            outy->data[idx] = v_lin;
-            outz->data[idx] = w_lin;
-            outp->data[idx] = pa;
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
+            out_x.data[idx] = u_lin;
+            out_y.data[idx] = v_lin;
+            out_z.data[idx] = w_lin;
+            out_p.data[idx] = pa;
         }
 
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
-            outx->data[idx] = u_lin;
-            outy->data[idx] = v_lin;
-            outz->data[idx] = w_lin;
-            outp->data[idx] = pa;
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
+            out_x.data[idx] = u_lin;
+            out_y.data[idx] = v_lin;
+            out_z.data[idx] = w_lin;
+            out_p.data[idx] = pa;
         }
     }
 
@@ -537,19 +519,18 @@ namespace Functions {
 /// \param  out velocity
 /// \param  t   time
 // ***************************************************************************************
-    void ExpSinusProd(Field *out, real t) {
-
+    void ExpSinusProd(Field &out, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->get_level());
-        size_t Ny = domain->get_Ny(out->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->get_level());
-        real dy = domain->get_dy(out->get_level());
-        real dz = domain->get_dz(out->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
@@ -560,28 +541,28 @@ namespace Functions {
         real kpinu = 3 * l * l * M_PI * M_PI * nu;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         //inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out->data[idx] = A * exp(-kpinu * t) * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
+            out.data[idx] = A * exp(-kpinu * t) * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
                              sin(l * M_PI * zk(coords_k, Z1, dz));
         }
         //boundary
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out->data[idx] = A * exp(-kpinu * t) * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
+            out.data[idx] = A * exp(-kpinu * t) * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
                              sin(l * M_PI * zk(coords_k, Z1, dz));
         }
     }
@@ -589,87 +570,86 @@ namespace Functions {
 // ============================ Burgers Test - IC for u,v,w ==============================
 // ***************************************************************************************
 /// \brief  Initial set up for Burgers Test (c*exp*sin(x+y+z))
-/// \param  outx  x-velocity
-/// \param  outy  y-velocity
-/// \param  outz  z-velocity
+/// \param  out_x  x-velocity
+/// \param  out_y  y-velocity
+/// \param  out_z  z-velocity
 /// \param  t   time
 // ***************************************************************************************
-    void ExpSinusSum(Field *outx, Field *outy, Field *outz, real t) {
-
+    void ExpSinusSum(Field &out_x, Field &out_y, Field &out_z, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->get_level());
-        size_t Ny = domain->get_Ny(outx->get_level());
-        size_t Nz = domain->get_Nz(outx->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
+        size_t Nz = domain->get_Nz();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(outx->get_level());
-        real dy = domain->get_dy(outx->get_level());
-        real dz = domain->get_dz(outx->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
         real nu = params->get_real("physical_parameters/nu");
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
-        if (Nz != 3) {
+        if (Nz > 3) {
             real d = 3.;                // 3D
 
-            //inner cells
-            for (size_t i = 0; i < size_iList; i++) {
-                size_t idx = iList[i];
+            // inner cells
+            for (size_t i = 0; i < size_inner_list; i++) {
+                size_t idx = inner_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-                outx->data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
-                outy->data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
-                outz->data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_x.data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_y.data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_z.data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
             }
-            //boundary
-            for (size_t i = 0; i < size_bList; i++) {
-                size_t idx = bList[i];
+            // boundary
+            for (size_t i = 0; i < size_boundary_list; i++) {
+                size_t idx = boundary_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-                outx->data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
-                outy->data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
-                outz->data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_x.data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_y.data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_z.data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
             }
 
         } else {
             real d = 2.;                // 2D
 
-            //inner cells
-            for (size_t i = 0; i < size_iList; i++) {
-                size_t idx = iList[i];
+            // inner cells
+            for (size_t i = 0; i < size_inner_list; i++) {
+                size_t idx = inner_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-                outx->data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
-                outy->data[idx] = -exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
-                outz->data[idx] = 0.;
+                out_x.data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
+                out_y.data[idx] = -exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
+                out_z.data[idx] = 0.;
             }
-            //boundary
-            for (size_t i = 0; i < size_bList; i++) {
-                size_t idx = bList[i];
+            // boundary
+            for (size_t i = 0; i < size_boundary_list; i++) {
+                size_t idx = boundary_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-                outx->data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
-                outy->data[idx] = -exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
-                outz->data[idx] = 0.;
+                out_x.data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
+                out_y.data[idx] = -exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
+                out_z.data[idx] = 0.;
             }
         }
     }
@@ -679,19 +659,18 @@ namespace Functions {
 /// \brief  Initial set up for Diffusion Test (c*sin*sin*sin)
 /// \param  out velocity
 // ***************************************************************************************
-    void FacSinSinSin(Field *out) {
-
+    void FacSinSinSin(Field &out) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->get_level());
-        size_t Ny = domain->get_Ny(out->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->get_level());
-        real dy = domain->get_dy(out->get_level());
-        real dz = domain->get_dz(out->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
@@ -700,29 +679,29 @@ namespace Functions {
         real rdkpi = 1. / dkpi;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out->data[idx] = -rdkpi * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
+            out.data[idx] = -rdkpi * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
                              sin(l * M_PI * zk(coords_k, Z1, dz));
         }
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out->data[idx] = -rdkpi * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
+            out.data[idx] = -rdkpi * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
                              sin(l * M_PI * zk(coords_k, Z1, dz));
         }
     }
@@ -733,64 +712,63 @@ namespace Functions {
 /// \param  out velocity
 /// \param  t time
 // ***************************************************************************************
-    void GaussBubble(Field *out, real t) {
-
+    void GaussBubble(Field &out, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->get_level());
-        size_t Ny = domain->get_Ny(out->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->get_level());
-        real dy = domain->get_dy(out->get_level());
-        real dz = domain->get_dz(out->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
 
         real u_lin = params->get_real("initial_conditions/u_lin");
         real v_lin = params->get_real("initial_conditions/v_lin");
         real w_lin = params->get_real("initial_conditions/w_lin");
-        real xshift = params->get_real("initial_conditions/xshift");
-        real yshift = params->get_real("initial_conditions/yshift");
-        real zshift = params->get_real("initial_conditions/zshift");
+        real x_shift = params->get_real("initial_conditions/x_shift");
+        real y_shift = params->get_real("initial_conditions/y_shift");
+        real z_shift = params->get_real("initial_conditions/z_shift");
         real l = params->get_real("initial_conditions/l");
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            real xshift2 = ((xi(coords_i, X1, dx) - xshift) / u_lin - t) * ((xi(coords_i, X1, dx) - xshift) / u_lin - t);
-            real yshift2 = ((yj(coords_j, Y1, dy) - yshift) / v_lin - t) * ((yj(coords_j, Y1, dy) - yshift) / v_lin - t);
-            real zshift2 = ((zk(coords_k, Z1, dz) - zshift) / w_lin - t) * ((zk(coords_k, Z1, dz) - zshift) / w_lin - t);
+            real x_shift2 = ((xi(coords_i, X1, dx) - x_shift) / u_lin - t) * ((xi(coords_i, X1, dx) - x_shift) / u_lin - t);
+            real y_shift2 = ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t) * ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t);
+            real z_shift2 = ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t) * ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t);
             real quot = 1. / (2. * l * l);
 
-            out->data[idx] = exp(-(xshift2 + yshift2 + zshift2) * quot);
+            out.data[idx] = exp(-(x_shift2 + y_shift2 + z_shift2) * quot);
         }
         // boundary
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            real xshift2 = ((xi(coords_i, X1, dx) - xshift) / u_lin - t) * ((xi(coords_i, X1, dx) - xshift) / u_lin - t);
-            real yshift2 = ((yj(coords_j, Y1, dy) - yshift) / v_lin - t) * ((yj(coords_j, Y1, dy) - yshift) / v_lin - t);
-            real zshift2 = ((zk(coords_k, Z1, dz) - zshift) / w_lin - t) * ((zk(coords_k, Z1, dz) - zshift) / w_lin - t);
+            real x_shift2 = ((xi(coords_i, X1, dx) - x_shift) / u_lin - t) * ((xi(coords_i, X1, dx) - x_shift) / u_lin - t);
+            real y_shift2 = ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t) * ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t);
+            real z_shift2 = ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t) * ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t);
             real quot = 1. / (2. * l * l);
 
-            out->data[idx] = exp(-(xshift2 + yshift2 + zshift2) * quot);
+            out.data[idx] = exp(-(x_shift2 + y_shift2 + z_shift2) * quot);
         }
     }
 
@@ -799,17 +777,16 @@ namespace Functions {
 /// \brief  Initial set up as layers throughout the domain
 /// \param  out temperature
 // ***************************************************************************************
-    void Layers(Field *out) {
-
+    void Layers(Field &out) {
         auto domain = Domain::getInstance();
         auto params = Parameters::getInstance();
-        size_t n_layers = static_cast<size_t> (params->get_int("initial_conditions/n_layers"));
+        int n_layers = params->get_int("initial_conditions/n_layers");
 
         // layer border
         real *bord = new real[n_layers + 1];
         real val_bord;
 
-        for (size_t l = 1; l < n_layers; ++l) {
+        for (int l = 1; l < n_layers; ++l) {
             std::string val_bord_l = "initial_conditions/border_";
             val_bord_l += std::to_string(l);
             val_bord = params->get_real(val_bord_l);
@@ -839,37 +816,37 @@ namespace Functions {
             m_logger->error("No distance for layers specified!");
 #endif
         }
-        //TODO Error handling
+        // TODO Error handling
 
         // get values in layers
         // layer values
         real *val = new real[n_layers];
         real val_out;
 
-        for (size_t l = 0; l < n_layers; ++l) {
+        for (int l = 0; l < n_layers; ++l) {
             std::string val_out_l = "initial_conditions/value_";
             val_out_l += std::to_string(l + 1);
             val_out = params->get_real(val_out_l);
             val[l] = val_out;
         }
 
-        //set values into layers
-        size_t Nx = domain->get_Nx(out->get_level());
-        size_t Ny = domain->get_Ny(out->get_level());
+        // set values into layers
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->get_level());
-        real dy = domain->get_dy(out->get_level());
-        real dz = domain->get_dz(out->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t *oList = boundary->get_obstacle_list();
         size_t size_oList = boundary->get_size_obstacle_list();
         size_t coords_i, coords_j, coords_k;
@@ -877,61 +854,79 @@ namespace Functions {
 
         // set values into layers
         for (size_t l = 0; l < n_layers; ++l) {
-            //inner cells
-            for (size_t i = 0; i < size_iList; i++) {
-                size_t idx = iList[i];
+            // inner cells
+            for (size_t i = 0; i < size_inner_list; i++) {
+                size_t idx = inner_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
-                    if (bord[l] <= x && x <= bord[l + 1]) out->data[idx] = val[l];
+                    if (bord[l] <= x && x <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
 
                 } else if (dir == "y") {
                     y = yj(coords_j, Y1, dy) - 0.5 * dy;
-                    if (bord[l] <= y && y <= bord[l + 1]) out->data[idx] = val[l];
+                    if (bord[l] <= y && y <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
 
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
-                    if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
+                    if (bord[l] <= z && z <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
                 } else {
 #ifndef BENCHMARKING
                     auto m_logger = Utility::create_logger("Functions");
                     m_logger->error("No distance for layers specified!");
 #endif
                 }
-                //TODO Error handling
+                // TODO Error handling
             }
 
-            //boundary
-            for (size_t i = 0; i < size_bList; i++) {
-                size_t idx = bList[i];
+            // boundary
+            for (size_t i = 0; i < size_boundary_list; i++) {
+                size_t idx = boundary_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
-                    if (bord[l] <= x && x <= bord[l + 1]) out->data[idx] = val[l];
-                    if (x < bord[0]) out->data[idx] = val[0];
+                    if (bord[l] <= x && x <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (x < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else if (dir == "y") {
                     y = yj(coords_j, Y1, dy) - 0.5 * dy;
-                    if (bord[l] <= y && y <= bord[l + 1]) out->data[idx] = val[l];
-                    if (y < bord[0]) out->data[idx] = val[0];
+                    if (bord[l] <= y && y <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (y < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
-                    if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
-                    if (z < bord[0]) out->data[idx] = val[0];
+                    if (bord[l] <= z && z <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (z < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else {
 #ifndef BENCHMARKING
                     auto m_logger = Utility::create_logger("Functions");
                     m_logger->error("No distance for layers specified!");
 #endif
                 }
-                //TODO Error handling
+                // TODO Error handling
             }
-            //obstacles
+            // obstacles
             for (size_t i = 0; i < size_oList; i++) {
                 size_t idx = oList[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
@@ -940,26 +935,38 @@ namespace Functions {
 
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
-                    if (bord[l] <= x && x <= bord[l + 1]) out->data[idx] = val[l];
-                    if (x < bord[0]) out->data[idx] = val[0];
+                    if (bord[l] <= x && x <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (x < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else if (dir == "y") {
                     y = yj(coords_j, Y1, dy) - 0.5 * dy;
-                    if (bord[l] <= y && y <= bord[l + 1]) out->data[idx] = val[l];
-                    if (y < bord[0]) out->data[idx] = val[0];
+                    if (bord[l] <= y && y <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (y < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
-                    if (bord[l] <= z && z <= bord[l + 1]) out->data[idx] = val[l];
-                    if (z < bord[0]) out->data[idx] = val[0];
+                    if (bord[l] <= z && z <= bord[l + 1]) {
+                        out.data[idx] = val[l];
+                    }
+                    if (z < bord[0]) {
+                        out.data[idx] = val[0];
+                    }
                 } else {
 #ifndef BENCHMARKING
                     auto m_logger = Utility::create_logger("Functions");
                     m_logger->error("No distance for layers specified!");
 #endif
                 }
-                //TODO Error handling
+                // TODO Error handling
             }
 
-        } //end layer loop
+        }
     }
 
 
@@ -968,19 +975,18 @@ namespace Functions {
 /// \brief  Initial set up for Diffusion Test
 /// \param  out velocity
 // ***************************************************************************************
-    void Hat(Field *out) {
-
+    void Hat(Field &out) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->get_level());
-        size_t Ny = domain->get_Ny(out->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->get_level());
-        real dy = domain->get_dy(out->get_level());
-        real dz = domain->get_dz(out->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
         real start_x = params->get_real("initial_conditions/x1");
@@ -993,15 +999,15 @@ namespace Functions {
         real val_out = params->get_real("initial_conditions/val_out");
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
-//inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        // inner cells
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -1009,15 +1015,15 @@ namespace Functions {
             if ((start_x <= xi(coords_i, X1, dx) && xi(coords_i, X1, dx) <= end_x) &&
                 (start_y <= yj(coords_j, Y1, dy) && yj(coords_j, Y1, dy) <= end_y) &&
                 (start_z <= zk(coords_k, Z1, dz) && zk(coords_k, Z1, dz) <= end_z)) {
-                out->data[idx] = val_in;
+                out[idx] = val_in;
             } else {
-                out->data[idx] = val_out;
+                out[idx] = val_out;
             }
         }
 
-//boundary
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        // boundary
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -1025,8 +1031,43 @@ namespace Functions {
             if ((start_x <= xi(coords_i, X1, dx) && xi(coords_i, X1, dx) <= end_x) &&
                 (start_y <= yj(coords_j, Y1, dy) && yj(coords_j, Y1, dy) <= end_y) &&
                 (start_z <= zk(coords_k, Z1, dz) && zk(coords_k, Z1, dz) <= end_z)) {
-                out->data[idx] = val_in;
-            } else out->data[idx] = val_out;
+                out[idx] = val_in;
+            } else {
+                out[idx] = val_out;
+            }
+        }
+    }
+
+// ============================================== Jet ==============================================
+// *************************************************************************************************
+/// \brief Initial set up of a jet stream in a defined pipe
+/// \param out velocity field
+/// \param index_x1 starting index in x-direction
+/// \param index_x2 ending index in x-direction
+/// \param index_y1 starting index in y-direction
+/// \param index_y2 ending index in y-direction
+/// \param index_z1 starting index in z-direction
+/// \param index_z2 ending index in z-direction
+/// \param value velocity value to be set
+// *************************************************************************************************
+    void Jet(
+            Field &out,
+            size_t index_x1, size_t index_x2,
+            size_t index_y1, size_t index_y2,
+            size_t index_z1, size_t index_z2,
+            real value) {
+        auto domain = Domain::getInstance();
+
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
+
+        for (size_t i = index_x1; i <= index_x2; i++) {
+            for (size_t j = index_y1; j <= index_y2; j++) {
+                for (size_t k = index_z1; k <= index_z2; k++) {
+                    size_t index = IX(i, j, k, Nx, Ny);
+                    out[index] = value;
+                }
+            }
         }
     }
 
@@ -1067,23 +1108,22 @@ namespace Functions {
 // ========================== NS Test - McDermott IC for u,v,w,p =========================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - McDermott
-/// \param  outx  x-velocity
-/// \param  outy  y-velocity
-/// \param  outz  z-velocity
-/// \param  outp  pressure
+/// \param  out_x  x-velocity
+/// \param  out_y  y-velocity
+/// \param  out_z  z-velocity
+/// \param  out_p  pressure
 /// \param  t   time
 // ***************************************************************************************
-    void McDermott(Field *outx, Field *outy, Field *outz, Field *outp, real t) {
-
+    void McDermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->get_level());
-        size_t Ny = domain->get_Ny(outx->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx->get_level());
-        real dy = domain->get_dy(outx->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
 
         auto params = Parameters::getInstance();
         real nu = params->get_real("physical_parameters/nu");
@@ -1091,38 +1131,36 @@ namespace Functions {
         real A = params->get_real("initial_conditions/A"); //2;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            outx->data[idx] = 1. - A * cos(xi(coords_i, X1, dx) - t) * sin(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
-            outy->data[idx] = 1. + A * sin(xi(coords_i, X1, dx) - t) * cos(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
-            outz->data[idx] = 0.;
-            outp->data[idx] =
-                    -0.25 * A * A * (cos(2 * (xi(coords_i, X1, dx) - t)) + cos(2 * (yj(coords_j, Y1, dy) - t))) * exp(-4 * nu * t);
+            out_x[idx] = 1. - A * cos(xi(coords_i, X1, dx) - t) * sin(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
+            out_y[idx] = 1. + A * sin(xi(coords_i, X1, dx) - t) * cos(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
+            out_z[idx] = 0.;
+            out_p[idx] = -0.25 * A * A * (cos(2 * (xi(coords_i, X1, dx) - t)) + cos(2 * (yj(coords_j, Y1, dy) - t))) * exp(-4 * nu * t);
         }
 
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            outx->data[idx] = 1. - A * cos(xi(coords_i, X1, dx) - t) * sin(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
-            outy->data[idx] = 1. + A * sin(xi(coords_i, X1, dx) - t) * cos(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
-            outz->data[idx] = 0.;
-            outp->data[idx] =
-                    -0.25 * A * A * (cos(2 * (xi(coords_i, X1, dx) - t)) + cos(2 * (yj(coords_j, Y1, dy) - t))) * exp(-4 * nu * t);
+            out_x[idx] = 1. - A * cos(xi(coords_i, X1, dx) - t) * sin(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
+            out_y[idx] = 1. + A * sin(xi(coords_i, X1, dx) - t) * cos(yj(coords_j, Y1, dy) - t) * exp(-2 * nu * t);
+            out_z[idx] = 0.;
+            out_p[idx] = -0.25 * A * A * (cos(2 * (xi(coords_i, X1, dx) - t)) + cos(2 * (yj(coords_j, Y1, dy) - t))) * exp(-4 * nu * t);
         }
     }
 
@@ -1135,34 +1173,34 @@ namespace Functions {
 /// \param  seed         custom seed if given, else seed <= 0
 /// \param  step_size    interval steps of random numbers
 // ***************************************************************************************
-    void Random(Field *out, real range, bool is_absolute, int seed, real step_size) {
+    void Random(Field &out, real range, bool is_absolute, int seed, real step_size) {
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t *oList = boundary->get_obstacle_list();
         size_t size_oList = boundary->get_size_obstacle_list();
 
         std::mt19937 mt;
-        double steps = range/step_size;
+        double steps = range / step_size;
         if (seed > 0) {
           mt = std::mt19937(seed);
         } else {
           std::random_device rd;
           mt = std::mt19937(rd());
         }
-        std::uniform_int_distribution<int> dist(-steps, steps);
+        std::uniform_real_distribution<real> dist(-steps, steps);
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             // generate secret number between -range and range:
             double no = dist(mt) * step_size;
             if (is_absolute) {
-                out->data[idx] += (no);
+                out[idx] += (no);
             } else {
-                out->data[idx] *= (1 + no);
+                out[idx] *= (1 + no);
             }
         }
     }
@@ -1172,48 +1210,46 @@ namespace Functions {
 /// \brief  Initial set up for Pressure Test (sin*sin*sin)
 /// \param  out   pressure
 // ***************************************************************************************
-    void SinSinSin(Field *out) {
+    void SinSinSin(Field &out) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(out->get_level());
-        size_t Ny = domain->get_Ny(out->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
         real Z1 = domain->get_Z1();
 
-        real dx = domain->get_dx(out->get_level());
-        real dy = domain->get_dy(out->get_level());
-        real dz = domain->get_dz(out->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
+        real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
         real l = params->get_real("initial_conditions/l"); //2;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out->data[idx] =
-                    sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) * sin(l * M_PI * zk(coords_k, Z1, dz));
+            out[idx] = sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out->data[idx] =
-                    sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) * sin(l * M_PI * zk(coords_k, Z1, dz));
+            out[idx] = sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
     }
 
@@ -1223,45 +1259,43 @@ namespace Functions {
 /// \param  out   force
 /// \param  val   value of uniform distribution
 // ***************************************************************************************
-    void Uniform(Field *out, real val) {
-
+    void Uniform(Field &out, real val) {
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
-            out->data[idx] = val;
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
+            out[idx] = val;
         }
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
-            out->data[idx] = val;
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
+            out[idx] = val;
         }
     }
 
 // ============================= NS Test - Vortex IC for u,v,w,p =========================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - Vertex
-/// \param  outx    x-velocity
-/// \param  outy    y-velocity
-/// \param  outz    z-velocity
-/// \param  outp    pressure
+/// \param  out_x    x-velocity
+/// \param  out_y    y-velocity
+/// \param  out_z    z-velocity
+/// \param  out_p    pressure
 // ***************************************************************************************
-    void Vortex(Field *outx, Field *outy, Field *outz, Field *outp) {
-
+    void Vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->get_level());
-        size_t Ny = domain->get_Ny(outx->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx->get_level());
-        real dy = domain->get_dy(outx->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
 
         auto params = Parameters::getInstance();
 
@@ -1279,56 +1313,53 @@ namespace Functions {
         real rhoGrR_c = rhoa * G * G * rR_c;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            outx->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
+            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            outy->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
+            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            outz->data[idx] = 0.;
-            outp->data[idx] =
-                    pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_z[idx] = 0.;
+            out_p[idx] = pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
         }
 
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            outx->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
+            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            outy->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
+            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            outz->data[idx] = 0.;
-            outp->data[idx] =
-                    pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_z[idx] = 0.;
+            out_p[idx] = pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
         }
     }
 
-    void VortexY(Field *outx, Field *outy, Field *outz, Field *outp) {
-
+    void VortexY(Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
         auto domain = Domain::getInstance();
-        size_t Nx = domain->get_Nx(outx->get_level());
-        size_t Ny = domain->get_Ny(outx->get_level());
+        size_t Nx = domain->get_Nx();
+        size_t Ny = domain->get_Ny();
 
         real X1 = domain->get_X1();
         real Y1 = domain->get_Y1();
 
-        real dx = domain->get_dx(outx->get_level());
-        real dy = domain->get_dy(outx->get_level());
+        real dx = domain->get_dx();
+        real dy = domain->get_dy();
 
         auto params = Parameters::getInstance();
 
@@ -1346,49 +1377,46 @@ namespace Functions {
         real rhoGrR_c = rhoa * G * G * rR_c;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *iList = boundary->get_inner_list_level_joined();
-        size_t size_iList = boundary->get_size_inner_list();
-        size_t *bList = boundary->get_boundary_list_level_joined();
-        size_t size_bList = boundary->get_size_boundary_list();
+        size_t *inner_list = boundary->get_inner_list_level_joined();
+        size_t size_inner_list = boundary->get_size_inner_list();
+        size_t *boundary_list = boundary->get_boundary_list_level_joined();
+        size_t size_boundary_list = boundary->get_size_boundary_list();
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
-        for (size_t i = 0; i < size_iList; i++) {
-            size_t idx = iList[i];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            size_t idx = inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            outx->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
+            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            outy->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
+            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            outz->data[idx] = 0.;
-            outp->data[idx] =
-                    pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_z[idx] = 0.;
+            out_p[idx] = pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
         }
 
         // boundary cells
-        for (size_t i = 0; i < size_bList; i++) {
-            size_t idx = bList[i];
+        for (size_t i = 0; i < size_boundary_list; i++) {
+            size_t idx = boundary_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            outx->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
+            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            outy->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
+            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            outz->data[idx] = 0.;
-            outp->data[idx] =
-                    pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_z[idx] = 0.;
+            out_p[idx] = pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
         }
     }
 
-    void Zero(Field *field, size_t *arr_idx, size_t arr_idx_size) {
-        auto data = field->data;
+    void Zero(Field &field, size_t *arr_idx, size_t arr_idx_size) {
         for (size_t idx = 0; idx < arr_idx_size; idx++) {
-            *(data + arr_idx[idx]) = 0;
+            field[arr_idx[idx]] = 0;
         }
     }
-}//end of namespace
+}

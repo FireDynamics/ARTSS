@@ -8,31 +8,27 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-void Cube::update_source(Field *out, real t_cur) {
-    out->copy_data(*m_source_field);
-
+void Cube::update_source(Field &out, real) {
+    auto boundary = BoundaryController::getInstance();
+    out.copy_data(m_source_field);
     if (m_has_noise) {
-        (*out) *= m_noise_maker->random_field(out->get_size());
+        out *= m_noise_maker->random_field(out.get_size());
     }
 }
 
-Cube::Cube(real value, real x_start, real y_start, real z_start, real x_end, real y_end, real z_end) {
-    m_source_field = new Field(FieldType::T);
+Cube::Cube(
+        real value,
+        real x_start, real y_start, real z_start,
+        real x_end, real y_end, real z_end) :
+    m_source_field(FieldType::T) {
     set_up(value, x_start, y_start, z_start, x_end, y_end, z_end);
 }
 
-Cube::~Cube() {
-    real *data = m_source_field->data;
-    size_t size = Domain::getInstance()->get_size();
-#pragma acc exit data delete(data[:size])
-    delete m_source_field;
-}
-
-void Cube::set_up(real value, real x_start, real y_start, real z_start, real x_end, real y_end, real z_end) {
+void Cube::set_up(
+        real value,
+        real x_start, real y_start, real z_start,
+        real x_end, real y_end, real z_end) {
     Domain *domain = Domain::getInstance();
-    real *data = m_source_field->data;
-    size_t size = domain->get_size();
-
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
@@ -55,9 +51,9 @@ void Cube::set_up(real value, real x_start, real y_start, real z_start, real x_e
         for (size_t j = index_start_y; j <= index_end_y; j++) {
             for (size_t k = index_start_z; k <= index_end_z; k++) {
                 size_t index = IX(i, j, k, Nx, Ny);
-                data[index] = value;
+                m_source_field[index] = value;
             }
         }
     }
-#pragma acc enter data copyin(data[:size])
+    m_source_field.copyin();
 }

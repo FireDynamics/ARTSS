@@ -11,4 +11,3 @@ Field UniformRandom::random_field(size_t size) {
 
     return ret;
 }
-
