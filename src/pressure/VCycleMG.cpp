@@ -221,9 +221,6 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
 // *****************************************************************************
 void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
     auto boundary = BoundaryController::getInstance();
-    size_t *data_inner_list = boundary->get_inner_list_level_joined();
-    size_t *data_boundary_list = boundary->get_boundary_list_level_joined();
-
 //===================== No refinement, when max_level = 0 =========//
     if (m_levels == 0) {
         Field *field_mg_temporal_level = m_mg_temporal_solution[0];
@@ -650,9 +647,6 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(level);
-    const size_t Ny = domain->get_Ny(level);
-
     const real dx = domain->get_dx(level);
     const real dy = domain->get_dy(level);
     const real dz = domain->get_dz(level);
@@ -661,16 +655,6 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
     real *data_out = out.data;
 
     BoundaryController *boundary = BoundaryController::getInstance();
-    size_t *data_inner_list = boundary->get_inner_list_level_joined();
-    size_t *data_boundary_list = boundary->get_boundary_list_level_joined();
-    size_t bsize_b = boundary->get_size_boundary_list_level_joined();
-    size_t bsize_i = boundary->get_size_inner_list_level_joined();
-
-    // start/end
-    // inner
-    size_t start_i = boundary->get_inner_list_level_joined_start(level);
-    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
-
     boundary->apply_boundary(data_out, level, type, sync);
 
     const real rdx2 = 1. / (dx * dx);
@@ -758,8 +742,8 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
 #pragma acc parallel loop independent present(out, tmp, data_inner_list[:bsize_i]) async
             for (size_t j = start_i; j < end_i; ++j) {
                 const size_t i = data_inner_list[j];
-                res = b[i] - (rdx2 * (data_out[i - neighbour_i] - 2 * data_out[i] + data_out[i + neighbour_i])\
-                           +  rdy2 * (data_out[i - neighbour_j] - 2 * data_out[i] + data_out[i + neighbour_j])\
+                res = b[i] - (rdx2 * (data_out[i - neighbour_i] - 2 * data_out[i] + data_out[i + neighbour_i])
+                           +  rdy2 * (data_out[i - neighbour_j] - 2 * data_out[i] + data_out[i + neighbour_j])
                            +  rdz2 * (data_out[i - neighbour_k] - 2 * data_out[i] + data_out[i + neighbour_k]));  //res = rbeta*(data_out[i] - data_tmp[i]);
                 sum += res * res;
             }
@@ -776,9 +760,6 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(out.get_level());
-    const size_t Ny = domain->get_Ny(out.get_level());
-
     const real dx = domain->get_dx(out.get_level());
     const real dy = domain->get_dy(out.get_level());
     const real dz = domain->get_dz(out.get_level());
