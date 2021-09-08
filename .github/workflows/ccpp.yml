@@ -94,7 +94,7 @@ jobs:
           git submodule update --init
           mkdir build
           ./compile.sh --docker-build
-          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "cd build && cmake .. && make artss_gtest && ctest --output-on-failure -R gtest"
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "cd build && cmake .. && make artss_gtest && gtests/bin/artss_gtest"
   test-xml:
     
     runs-on: ubuntu-latest

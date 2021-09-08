@@ -19,10 +19,10 @@ NSTurbSolver::NSTurbSolver(FieldController *field_controller) {
 
     auto params = Parameters::getInstance();
 
-    //Advection of velocity
+    // Advection of velocity
     SolverSelection::SetAdvectionSolver(&adv_vel, params->get("solver/advection/type"));
 
-    //Diffusion of velocity
+    // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(&dif_vel, params->get("solver/diffusion/type"));
 
     m_nu = params->get_real("physical_parameters/nu");
@@ -30,10 +30,11 @@ NSTurbSolver::NSTurbSolver(FieldController *field_controller) {
     // Turbulent viscosity
     SolverSelection::SetTurbulenceSolver(&mu_tub, params->get("solver/turbulence/type"));
 
-    //Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), m_field_controller->field_p, m_field_controller->field_rhs);
+    // Pressure
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
+            m_field_controller->get_field_p(), m_field_controller->get_field_rhs());
 
-    //Source
+    // Source
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
 
     m_force_function = params->get("solver/source/force_fct");
@@ -55,50 +56,27 @@ NSTurbSolver::~NSTurbSolver() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSTurbSolver::do_step(real t, bool sync) {
-
-    // local variables and parameters for GPU
-    auto u = m_field_controller->field_u;
-    auto v = m_field_controller->field_v;
-    auto w = m_field_controller->field_w;
-    auto u0 = m_field_controller->field_u0;
-    auto v0 = m_field_controller->field_v0;
-    auto w0 = m_field_controller->field_w0;
-    auto u_tmp = m_field_controller->field_u_tmp;
-    auto v_tmp = m_field_controller->field_v_tmp;
-    auto w_tmp = m_field_controller->field_w_tmp;
-    auto p = m_field_controller->field_p;
-    auto p0 = m_field_controller->field_p0;
-    auto rhs = m_field_controller->field_rhs;
-    auto f_x = m_field_controller->field_force_x;
-    auto f_y = m_field_controller->field_force_y;
-    auto f_z = m_field_controller->field_force_z;
-    auto nu_t = m_field_controller->field_nu_t;     //nu_t - Eddy Viscosity
-
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-    auto d_u_tmp = u_tmp->data;
-    auto d_v_tmp = v_tmp->data;
-    auto d_w_tmp = w_tmp->data;
-    auto d_p = p->data;
-    auto d_p0 = p0->data;
-    auto d_rhs = rhs->data;
-    auto d_fx = f_x->data;
-    auto d_fy = f_y->data;
-    auto d_fz = f_z->data;
-    auto d_nu_t = nu_t->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u->get_level());
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &u0 = m_field_controller->get_field_u0();
+    Field &v0 = m_field_controller->get_field_v0();
+    Field &w0 = m_field_controller->get_field_w0();
+    Field &u_tmp = m_field_controller->get_field_u_tmp();
+    Field &v_tmp = m_field_controller->get_field_v_tmp();
+    Field &w_tmp = m_field_controller->get_field_w_tmp();
+    Field &p = m_field_controller->get_field_p();
+    Field &rhs = m_field_controller->get_field_rhs();
+    Field &f_x = m_field_controller->get_field_force_x();
+    Field &f_y = m_field_controller->get_field_force_y();
+    Field &f_z = m_field_controller->get_field_force_z();
+    Field &nu_t = m_field_controller->get_field_nu_t();  // nu_t - Eddy Viscosity
 
     auto nu = m_nu;
 
-#pragma acc data present(    d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], \
-                            d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_nu_t[:bsize])
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, \
+                         p, rhs, fx, fy, fz, nu_t)
     {
-
 // 1. Solve advection equation
 #ifndef BENCHMARKING
         m_logger->info("Advect ...");
@@ -129,7 +107,6 @@ void NSTurbSolver::do_step(real t, bool sync) {
 
 // 3. Add force
         if (m_force_function != SourceMethods::Zero) {
-
 #ifndef BENCHMARKING
             m_logger->info("Add source ...");
 #endif
@@ -157,7 +134,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    }//end data
+    }
 }
 
 //======================================= Check data ==================================
