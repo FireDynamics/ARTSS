@@ -100,6 +100,11 @@ The coding guidelines of ARTSS are mainly based on the [google coding guidelines
   #endif /* ARTSS_ANALYSIS_SOLUTION_H_ */
   ```
 
+#### Implicit Inline Functions:
+  Functions that should be inlined (only one call to external function, very short, performance critical)
+  can be defined inside the class definition and therfore in the header file itself.
+  [ref](https://isocpp.org/wiki/faq/inline-functions#inline-member-fns-more)
+
 ## Scoping
 #### The auto keyword
   We like to use the `auto` type specifier to improve code readability. For example in situations where the variable type matches the initialiser expression. For more detailed information see Clang Tidy rule `moderinze-use-auto`.
