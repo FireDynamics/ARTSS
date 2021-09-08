@@ -4,10 +4,10 @@
 /// \author     Suryanarayana Maddu
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <string>
-
 
 #include "DiffusionTurbSolver.h"
+
+#include <string>
 
 
 DiffusionTurbSolver::DiffusionTurbSolver(FieldController *field_controller) {
