@@ -53,10 +53,3 @@ Field::~Field() {
     delete[] data;
 }
 
-real Field::get_sum() {
-    real sum = 0;
-    for (size_t i = 0; i < m_size; i++) {
-        sum += data[i];
-    }
-    return sum;
-}

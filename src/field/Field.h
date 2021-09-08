@@ -97,7 +97,6 @@ class Field {
         return *this;
     }
 
-    real get_sum();
     real *data;
 
  private:
