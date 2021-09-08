@@ -24,16 +24,14 @@
 VCycleMG::VCycleMG(Field const &out, Field const &b) :
         m_levels(Domain::getInstance()->get_levels()),
         m_n_cycle(Parameters::getInstance()->get_int("solver/pressure/n_cycle")),
-        m_n_relax(Parameters::getInstance()->get_int("solver/pressure/diffusion/n_relax"))
+        m_n_relax(Parameters::getInstance()->get_int("solver/pressure/diffusion/n_relax")),
+        m_dt(Parameters::getInstance()->get_real("physical_parameters/dt")),
+        m_w(Parameters::getInstance()->get_real("solver/pressure/diffusion/w"))
 {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     Parameters *params = Parameters::getInstance();
-
-    m_dt = params->get_real("physical_parameters/dt");
-    m_dsign = -1.;
-    m_w = params->get_real("solver/pressure/diffusion/w");
 
     std::string diffusion_type = params->get("solver/pressure/diffusion/type");
     if (diffusion_type == DiffusionMethods::Jacobi) {
@@ -51,7 +49,6 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
     m_diffusion_max_iter = static_cast<size_t>(params->get_int("solver/diffusion/max_iter"));
     m_diffusion_tol_res = params->get_real("solver/diffusion/tol_res");
 
-    // reserve memory, push_back can still be used
     m_residuum0 = new Field*[m_levels];
     m_residuum1 = new Field*[m_levels + 1];
     m_error0 = new Field*[m_levels];
@@ -69,7 +66,7 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
     out_err1->copyin();
     *(m_error1) = out_err1;
 
-// temporal solution
+    // temporal solution
     auto *out_tmp = new Field(out);
     out_tmp->copyin();
     *(m_mg_temporal_solution) = out_tmp;
@@ -107,19 +104,11 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
 VCycleMG::~VCycleMG() {
     for (size_t i = 0; i < m_levels; i++) {
         delete m_residuum0[i];
-    }
-    for (size_t i = 0; i < m_levels + 1; i++) {
-        delete m_residuum1[i];
-    }
-
-    for (size_t i = 0; i < m_levels; i++) {
         delete m_error0[i];
     }
     for (size_t i = 0; i < m_levels + 1; i++) {
+        delete m_residuum1[i];
         delete m_error1[i];
-    }
-
-    for (size_t i = 0; i < m_levels + 1; i++) {
         delete m_mg_temporal_solution[i];
     }
 }
@@ -133,8 +122,12 @@ VCycleMG::~VCycleMG() {
 // ************************************************************************
 void VCycleMG::UpdateInput(Field &out, const Field &b, bool sync) {
     m_error1[0]->copy_data(out);
-    m_mg_temporal_solution[0]->copy_data(out);  // TODO necessary?
+    m_mg_temporal_solution[0]->copy_data(out);
     m_residuum1[0]->copy_data(b);
+
+    if (sync) {
+#pragma acc wait
+    }
 }
 
 //==================================== Pressure =================================
@@ -147,7 +140,7 @@ void VCycleMG::UpdateInput(Field &out, const Field &b, bool sync) {
 // *****************************************************************************
 void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
     // Update first
-    UpdateInput(out, b);
+    UpdateInput(out, b, sync);
 
     // solve more accurately, in first time step
     Parameters *params = Parameters::getInstance();
@@ -174,13 +167,13 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
         const real rdy2 = 1. / (dy * dy);
         const real rdz2 = 1. / (dz * dz);
 
-        auto boundary = BoundaryController::getInstance();
-        auto bsize_i = boundary->get_size_inner_list();
+        BoundaryController *boundary = BoundaryController::getInstance();
+        const size_t bsize_i = boundary->get_size_inner_list();
         size_t *data_inner_list = boundary->get_inner_list_level_joined();
 
-        size_t neighbour_i = 1;
-        size_t neighbour_j = Nx;
-        size_t neighbour_k = Nx * Ny;
+        const size_t neighbour_i = 1;
+        const size_t neighbour_j = Nx;
+        const size_t neighbour_k = Nx * Ny;
         while (r > tol_res &&
                 act_cycles < max_cycles &&
                 set_relax < max_relaxs) {
@@ -230,80 +223,61 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         {
             Solve(out, *field_mg_temporal_level, *field_residuum1_level, m_levels, sync);
         }
-        return;
-    }
+    } else {
+        m_error1[0]->copy_data(out);
+        //===================== levels going down ====================//
+        for (size_t level = 0; level < m_levels; ++level) {
+            Field *field_residuum0_level = *(m_residuum0 + level);
+            Field *field_error1_level = *(m_error1 + level);
+            Field *field_error1_level_plus_1 = *(m_error1 + level + 1);
+            Field *field_mg_temporal_level = *(m_mg_temporal_solution + level);
+            Field *field_residuum1_level = *(m_residuum1 + level);
+            Field *field_residuum1_level_plus_1 = *(m_residuum1 + level + 1);
 
-   //TODO necessary or already done?
-   // m_error1[0]->copy_data(*out);
-//===================== levels going down ====================//
-    for (size_t level = 0; level < m_levels; ++level) {
-        Field *field_residuum0_level = *(m_residuum0 + level);
-        Field *field_error1_level = *(m_error1 + level);
-        Field *field_error1_level_plus_1 = *(m_error1 + level + 1);
-        Field *field_mg_temporal_level = *(m_mg_temporal_solution + level);
-        Field *field_residuum1_level = *(m_residuum1 + level);
-        Field *field_residuum1_level_plus_1 = *(m_residuum1 + level + 1);
+            real *data_residuum0_level = field_residuum0_level->data;
+            real *data_residuum1_level_plus_1 = field_residuum1_level_plus_1->data;
 
-        real *data_residuum0_level = field_residuum0_level->data;
-        real *data_residuum1_level_plus_1 = field_residuum1_level_plus_1->data;
-
-        FieldType type_r0 = field_residuum0_level->get_type();
-        FieldType type_r1 = field_residuum1_level_plus_1->get_type();
+            FieldType type_r0 = field_residuum0_level->get_type();
+            FieldType type_r1 = field_residuum1_level_plus_1->get_type();
 
 #pragma acc data present(residuum0_level, error1_level, error1_level_plus_1, \
                          mg_temporal_level, residuum1_level, residuum1_level_plus_1, \
                          out)
-        {
-            //TODO can be changed to field_error1_level = p ?
-            if (level == 0) {  // use p = out on finest grid
-                // smooth
-                Smooth(out, *field_mg_temporal_level, *field_residuum1_level, level, sync);
-
-                // calculate residuum, store in residuum0
-                Residuum(*field_residuum0_level, out, *field_residuum1_level, level, sync);
-                boundary->apply_boundary(data_residuum0_level, level, type_r0, sync); // for m_residuum0 only Dirichlet BC
-            } else {
+            {
                 // smooth
                 Smooth(*field_error1_level, *field_mg_temporal_level, *field_residuum1_level, level, sync);
 
                 // calculate residuum
                 Residuum(*field_residuum0_level, *field_error1_level, *field_residuum1_level, level, sync);
                 boundary->apply_boundary(data_residuum0_level, level, type_r0, sync); // for m_residuum0 only Dirichlet BC
+
+                // restrict
+                Restrict(*field_residuum1_level_plus_1, *field_residuum0_level, level, sync);
+                boundary->apply_boundary(data_residuum1_level_plus_1, level + 1, type_r1, sync); // for res only Dirichlet BC
+
+                // set err to zero at next level
+                field_error1_level_plus_1->set_value(0);
             }
-
-            // restrict
-            Restrict(*field_residuum1_level_plus_1, *field_residuum0_level, level, sync);
-            boundary->apply_boundary(data_residuum1_level_plus_1, level + 1, type_r1, sync); // for res only Dirichlet BC
-
-            // set err to zero at next level
-            field_error1_level_plus_1->set_value(0);
         }
-    }
 
-//===================== levels going up ====================//
-    for (size_t level = m_levels; level > 0; --level) {
-        Field *field_error0_level = *(m_error0 + level - 1);
-        Field *field_error1_level = *(m_error1 + level);
-        Field *field_error1_level_minus_1 = *(m_error1 + level - 1);
-        Field *field_mg_temporal_solution_level_minus_1 = *(m_mg_temporal_solution + level - 1);
-        Field *field_residuum1_level_minus_1 = *(m_residuum1 + level - 1);
+        //===================== levels going up ====================//
+        for (size_t level = m_levels; level > 0; --level) {
+            Field *field_error0_level = *(m_error0 + level - 1);
+            Field *field_error1_level = *(m_error1 + level);
+            Field *field_error1_level_minus_1 = *(m_error1 + level - 1);
+            Field *field_mg_temporal_solution_level_minus_1 = *(m_mg_temporal_solution + level - 1);
+            Field *field_residuum1_level_minus_1 = *(m_residuum1 + level - 1);
 
-        real *data_error0_level = field_error0_level->data;
+            real *data_error0_level = field_error0_level->data;
 
-        FieldType type_e0 = field_error0_level->get_type();
+            FieldType type_e0 = field_error0_level->get_type();
 
 #pragma acc data present(error0_level, error1_level, error1_level_minus_1, mg_temporal_solution_level_minus_1, residuum1_level_minus_1, out)
-        {
-            // prolongate
-            Prolongate(*field_error0_level, *field_error1_level, level, sync);
-            boundary->apply_boundary(data_error0_level, level - 1, type_e0, sync); // for m_error0 only Dirichlet BC
+            {
+                // prolongate
+                Prolongate(*field_error0_level, *field_error1_level, level, sync);
+                boundary->apply_boundary(data_error0_level, level - 1, type_e0, sync); // for m_error0 only Dirichlet BC
 
-            // correct
-            if (level == 1) {  // use p=out on finest grid // TODO remove loop and data_err1_level_minus_1 to p
-                out += *field_error0_level;
-                // smooth
-                Smooth(out, *field_mg_temporal_solution_level_minus_1, *field_residuum1_level_minus_1, level - 1, sync);
-            } else {
                 // correct
                 *field_error1_level_minus_1 += *field_error0_level;
                 // smooth
@@ -314,14 +288,14 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
                 }
             }
         }
-    }
-    // set boundaries
-    real *data_out = out.data;
-    FieldType type = out.get_type();
-    boundary->apply_boundary(data_out, type, sync);
+        // set boundaries
+        real *data_out = out.data;
+        FieldType type = out.get_type();
+        boundary->apply_boundary(data_out, type, sync);
 
-    if (sync) {
+        if (sync) {
 #pragma acc wait
+        }
     }
 }
 
@@ -374,18 +348,18 @@ void VCycleMG::Residuum(Field &out, Field const &in, Field const &b, const size_
     const real rdy2 = 1. / (dy * dy);
     const real rdz2 = 1. / (dz * dz);
 
-    auto boundary = BoundaryController::getInstance();
+    BoundaryController *boundary = BoundaryController::getInstance();
     size_t *data_inner_list = boundary->get_inner_list_level_joined();
 
     // starts/ends
     // inner
-    size_t start_i = boundary->get_inner_list_level_joined_start(level);
-    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = boundary->get_inner_list_level_joined_start(level);
+    const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 
     // neighbour cells, i/j/k represent the directions
-    size_t neighbour_cell_i = 1;
-    size_t neighbour_cell_j = Nx;
-    size_t neighbour_cell_k = Nx * Ny;
+    const size_t neighbour_cell_i = 1;
+    const size_t neighbour_cell_j = Nx;
+    const size_t neighbour_cell_k = Nx * Ny;
 #pragma acc data present(b, in, out, inner_list)
     {
 #pragma acc kernels async
@@ -429,8 +403,8 @@ void VCycleMG::Restrict(Field &out, Field const &in, const size_t level, bool sy
 
     // start/end
     // inner
-    size_t start_i = boundary->get_inner_list_level_joined_start(level + 1);
-    size_t end_i = boundary->get_inner_list_level_joined_end(level + 1) + 1;
+    const size_t start_i = boundary->get_inner_list_level_joined_start(level + 1);
+    const size_t end_i = boundary->get_inner_list_level_joined_end(level + 1) + 1;
 
 #ifndef BENCHMARKING
     if (end_i == start_i) {
@@ -440,9 +414,9 @@ void VCycleMG::Restrict(Field &out, Field const &in, const size_t level, bool sy
 #endif
 
     // neighbour cells, i/j/k represent the directions
-    size_t neighbour_cell_i = 1;
-    size_t neighbour_cell_j = Nx_coarse;
-    size_t neighbour_cell_k = Nx_coarse * Ny_coarse;
+    const size_t neighbour_cell_i = 1;
+    const size_t neighbour_cell_j = Nx_coarse;
+    const size_t neighbour_cell_k = Nx_coarse * Ny_coarse;
     // average from eight neighboring cells
     // obstacles not used in fine grid, since coarse grid only obstacle if one of 8 fine grids was an obstacle,
     // thus if coarse cell inner cell, then surrounding fine cells also inner cells!
@@ -452,9 +426,9 @@ void VCycleMG::Restrict(Field &out, Field const &in, const size_t level, bool sy
 #pragma acc loop independent
         for (size_t l = start_i; l < end_i; ++l) {
             const size_t idx = data_inner_list[l];
-            size_t k = getCoordinateK(idx, Nx_coarse, Ny_coarse);
-            size_t j = getCoordinateJ(idx, Nx_coarse, Ny_coarse, k);
-            size_t i = getCoordinateI(idx, Nx_coarse, Ny_coarse, j, k);
+            const size_t k = getCoordinateK(idx, Nx_coarse, Ny_coarse);
+            const size_t j = getCoordinateJ(idx, Nx_coarse, Ny_coarse, k);
+            const size_t i = getCoordinateI(idx, Nx_coarse, Ny_coarse, j, k);
 
             out[idx] = 0.125
                    * (in[IX(2 * i - neighbour_cell_i, 2 * j - neighbour_cell_j, 2 * k - neighbour_cell_k, Nx_fine, Ny_fine)]
@@ -499,13 +473,13 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
 
     // start/end (going backwards)
     // inner
-    size_t start_i = boundary->get_inner_list_level_joined_start(level);
-    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = boundary->get_inner_list_level_joined_start(level);
+    const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 
     // neighbour cells, i/j/k represent the directions
-    size_t neighbour_cell_i = 1;
-    size_t neighbour_cell_j = Nx_coarse;
-    size_t neighbour_cell_k = Nx_coarse * Ny_coarse;
+    const size_t neighbour_cell_i = 1;
+    const size_t neighbour_cell_j = Nx_coarse;
+    const size_t neighbour_cell_k = Nx_coarse * Ny_coarse;
 
     // prolongate
 #pragma acc data present(in, out, data_inner_list[start_i:(end_i-start_i)])
@@ -514,9 +488,9 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
 #pragma acc loop independent
         for (size_t l = start_i; l < end_i; ++l) {
             const size_t idx = data_inner_list[l];
-            size_t k = getCoordinateK(idx, Nx_coarse, Ny_coarse);
-            size_t j = getCoordinateJ(idx, Nx_coarse, Ny_coarse, k);
-            size_t i = getCoordinateI(idx, Nx_coarse, Ny_coarse, j, k);
+            const size_t k = getCoordinateK(idx, Nx_coarse, Ny_coarse);
+            const size_t j = getCoordinateJ(idx, Nx_coarse, Ny_coarse, k);
+            const size_t i = getCoordinateI(idx, Nx_coarse, Ny_coarse, j, k);
 
             // x + 1 and y + 1 and z + 1
             out[IX(2 * i, 2 * j, 2 * k, Nx_fine, Ny_fine)] =
@@ -663,9 +637,9 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
     const real rdz2 = 1. / (dz * dz);
 
     // preparation for diffusion step (alpha, beta)
-    real alphaX = rdx2;
-    real alphaY = rdy2;
-    real alphaZ = rdz2;
+    const real alphaX = rdx2;
+    const real alphaY = rdy2;
+    const real alphaZ = rdz2;
 
     const real rbeta = 2. * (alphaX + alphaY + alphaZ);
     const real beta = 1. / rbeta;
@@ -676,8 +650,8 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
         for (int i = 0; i < m_n_relax; i++) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
             boundary->apply_boundary(data_out, level, type, sync); // for res/err only Dirichlet BC
-        }  // end while
-    }  // end data region
+        }
+    }
 
 }
 void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
@@ -691,22 +665,18 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
     const real dy = domain->get_dy(level);
     const real dz = domain->get_dz(level);
 
-    auto data_out = out.data;
-
-    size_t bsize = domain->get_size(out.get_level());
+    real *data_out = out.data;
     FieldType type = out.get_type();
 
     BoundaryController *boundary = BoundaryController::getInstance();
 
     size_t *data_inner_list = boundary->get_inner_list_level_joined();
-    size_t *data_boundary_list = boundary->get_boundary_list_level_joined();
-    size_t bsize_b = boundary->get_size_boundary_list_level_joined();
-    size_t bsize_i = boundary->get_size_inner_list_level_joined();
+    const size_t bsize_i = boundary->get_size_inner_list_level_joined();
 
     // start/end
     // inner
-    size_t start_i = boundary->get_inner_list_level_joined_start(level);
-    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = boundary->get_inner_list_level_joined_start(level);
+    const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 
     boundary->apply_boundary(data_out, level, type, sync);
 
@@ -715,31 +685,31 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
     const real rdz2 = 1. / (dz * dz);
 
     // preparation for diffusion step (alpha, beta)
-    real alphaX = rdx2;
-    real alphaY = rdy2;
-    real alphaZ = rdz2;
+    const real alphaX = rdx2;
+    const real alphaY = rdy2;
+    const real alphaZ = rdz2;
 
     const real rbeta = 2. * (alphaX + alphaY + alphaZ);
     const real beta = 1. / rbeta;
+
+    const size_t max_it = m_diffusion_max_iter;
+    const real tol_res = m_diffusion_tol_res;
 
     tmp.copy_data(out);
 #pragma acc data present(out, tmp, b)
     {
         size_t it = 0;
-        const size_t max_it = m_diffusion_max_iter;
-        const real tol_res = m_diffusion_tol_res;
         real sum;
         real res = 10000.;
 
-        size_t neighbour_i = 1;
-        size_t neighbour_j = Nx;
-        size_t neighbour_k = Nx * Ny;
+        const size_t neighbour_i = 1;
+        const size_t neighbour_j = Nx;
+        const size_t neighbour_k = Nx * Ny;
         while (res > tol_res && it < max_it) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
             boundary->apply_boundary(data_out, level, type, sync); // for res/err only Dirichlet BC
 
             sum = 0.;
-
 #pragma acc parallel loop independent present(out, tmp, data_inner_list[:bsize_i]) async
             for (size_t j = start_i; j < end_i; ++j) {
                 const size_t i = data_inner_list[j];
@@ -761,9 +731,9 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    const real dx = domain->get_dx(out.get_level());
-    const real dy = domain->get_dy(out.get_level());
-    const real dz = domain->get_dz(out.get_level());
+    const real dx = domain->get_dx(level);
+    const real dy = domain->get_dy(level);
+    const real dz = domain->get_dz(level);
 
     real *data_out = out.data;
     real *data_tmp = tmp.data;
@@ -821,12 +791,12 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
     BoundaryController *boundary = BoundaryController::getInstance();
 
     size_t *data_inner_list = boundary->get_inner_list_level_joined();
-    size_t bsize_i = boundary->get_size_inner_list_level_joined();
+    const size_t bsize_i = boundary->get_size_inner_list_level_joined();
 
     // start/end
     // inner
-    size_t start_i = boundary->get_inner_list_level_joined_start(level);
-    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = boundary->get_inner_list_level_joined_start(level);
+    const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 
     boundary->apply_boundary(data_out, level, type, sync);
 
@@ -835,9 +805,9 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
     const real rdz2 = 1. / (dz * dz);
 
     // preparation for diffusion step (alpha, beta)
-    real alphaX = rdx2;
-    real alphaY = rdy2;
-    real alphaZ = rdz2;
+    const real alphaX = rdx2;
+    const real alphaY = rdy2;
+    const real alphaZ = rdz2;
 
     const real rbeta = 2. * (alphaX + alphaY + alphaZ);
     const real beta = 1. / rbeta;
@@ -849,9 +819,9 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
         real sum;
         real res = 10000.;
 
-        size_t neighbour_i = 1;
-        size_t neighbour_j = Nx;
-        size_t neighbour_k = Nx * Ny;
+        const size_t neighbour_i = 1;
+        const size_t neighbour_j = Nx;
+        const size_t neighbour_k = Nx * Ny;
         while (res > m_diffusion_tol_res && it < m_diffusion_max_iter) {
             JacobiDiffuse::JacobiStep(level, out, tmp, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
             boundary->apply_boundary(data_out, level, type, sync);

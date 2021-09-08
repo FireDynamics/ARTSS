@@ -13,7 +13,6 @@
 #include "../utility/Utility.h"
 
 
-
 class VCycleMG: public IPressure{
  public:
     VCycleMG(Field const &out, Field const &b);
@@ -44,9 +43,9 @@ class VCycleMG: public IPressure{
     size_t m_diffusion_max_iter;
     real m_diffusion_tol_res;
 
-    real m_dt;
-    real m_dsign;
-    real m_w;
+    const real m_dt;
+    const real m_dsign = -1;
+    const real m_w;
 
     Field **m_residuum0;
     /**
