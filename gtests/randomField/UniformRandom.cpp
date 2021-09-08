@@ -4,6 +4,9 @@
 #include "src/randomField/UniformRandom.h"
 
 
+#define EPS 10e-5
+
+
 class UniformRandomFieldTest : public testing::Test {
 };
 
@@ -67,7 +70,7 @@ TEST_F(UniformRandomFieldTest, uniq) {
 
     int count = 0;
     for (auto i = 0; i < size; ++i) {
-        count += a[i] == b[i];
+        count += abs(a[i] - b[i]) >= EPS;
     }
 
     // TODO calculate probability of failure
@@ -86,7 +89,7 @@ TEST_F(UniformRandomFieldTest, uniq2) {
 
     int count = 0;
     for (auto i = 0; i < size; ++i) {
-        count += a[i] == b[i];
+        count += abs(a[i] - b[i]) >= EPS;
     }
 
     // TODO calculate probability of failure
@@ -103,7 +106,7 @@ TEST_F(UniformRandomFieldTest, success_difference) {
 
     int count = 0;
     for (auto i = 0; i < size; ++i) {
-        count += a[i] == b[i];
+        count += abs(a[i] - b[i]) >= EPS;
     }
 
     // TODO calculate probability of failure
@@ -147,7 +150,7 @@ TEST_F(UniformRandomFieldTest, range_10_at_least_one) {
     for (int j = -range; j <= range; ++j) {
         bool found = false;
         for (size_t i = 0; i < size; ++i) {
-            if (a[i] == j) {
+            if (abs(a[i] - j) < EPS) {
                 found = true;
                 break;
             }
@@ -169,7 +172,7 @@ TEST_F(UniformRandomFieldTest, range_10_at_least_one2) {
         real no = -range + j * step_size;
         bool found = false;
         for (size_t i = 0; i < size; ++i) {
-            if (abs(a[i] - no) < 1e-5) {
+            if (abs(a[i] - no) < EPS) {
                 found = true;
                 break;
             }
@@ -191,7 +194,7 @@ TEST_F(UniformRandomFieldTest, range_10_at_least_one_h) {
         real no = -range + j * step_size;
         bool found = false;
         for (size_t i = 0; i < size; ++i) {
-            if (a[i] == no) {
+            if (abs(a[i] - no) < EPS) {
                 found = true;
                 break;
             }
@@ -213,7 +216,7 @@ TEST_F(UniformRandomFieldTest, range_100_at_least_one) {
         real no = -range + j * step_size;
         bool found = false;
         for (size_t i = 0; i < size; ++i) {
-            if (a[i] == no) {
+            if (abs(a[i] == no) < EPS) {
                 found = true;
                 break;
             }
@@ -235,7 +238,7 @@ TEST_F(UniformRandomFieldTest, range_100_at_least_one2) {
         real no = -range + j * step_size;
         bool found = false;
         for (size_t i = 0; i < size; ++i) {
-            if (a[i] == no) {
+            if (abs(a[i] - no) < EPS) {
                 found = true;
                 break;
             }
@@ -257,7 +260,7 @@ TEST_F(UniformRandomFieldTest, range_100_at_least_one_h) {
         real no = -range + j * step_size;
         bool found = false;
         for (size_t i = 0; i < size; ++i) {
-            if (a[i] == no) {
+            if (abs(a[i] - no) < EPS) {
                 found = true;
                 break;
             }
@@ -303,7 +306,7 @@ TEST_F(UniformRandomFieldTest, step_size) {
     for (int i = 0; i < size; ++i) {
         real tmp = a[i] * 10;
         int integer = static_cast<int>(tmp);
-        ASSERT_LE(tmp - integer, 1e-5);
+        ASSERT_LE(tmp - integer, EPS);
     }
 }
 
@@ -319,7 +322,7 @@ TEST_F(UniformRandomFieldTest, negative_positive) {
     for (int i = 0; i < size; ++i) {
         if (a[i] < 0) {
             counter_positive++;
-        }else if (a[i] > 0) {
+        } else if (a[i] > 0) {
             counter_negative++;
         }
     }
