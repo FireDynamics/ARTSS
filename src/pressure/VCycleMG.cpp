@@ -35,9 +35,11 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
 
     std::string diffusion_type = params->get("solver/pressure/diffusion/type");
     if (diffusion_type == DiffusionMethods::Jacobi) {
+        m_diffusion_max_iter = static_cast<size_t>(params->get_int("solver/pressure/diffusion/max_solve"));
         m_smooth_diffusion_function = &VCycleMG::call_smooth_jacobi;
         m_solve_diffusion_function = &VCycleMG::call_solve_jacobi;
     } else if (diffusion_type == DiffusionMethods::ColoredGaussSeidel) {
+        m_diffusion_max_iter = static_cast<size_t>(params->get_int("solver/pressure/diffusion/max_iter"));
         m_smooth_diffusion_function = &VCycleMG::call_smooth_colored_gauss_seidel;
         m_solve_diffusion_function = &VCycleMG::call_solve_colored_gauss_seidel;
     } else {
@@ -46,8 +48,7 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
 #endif
         // TODO Error handling
     }
-    m_diffusion_max_iter = static_cast<size_t>(params->get_int("solver/diffusion/max_iter"));
-    m_diffusion_tol_res = params->get_real("solver/diffusion/tol_res");
+    m_diffusion_tol_res = params->get_real("solver/pressure/diffusion/tol_res");
 
     m_residuum0 = new Field*[m_levels];
     m_residuum1 = new Field*[m_levels + 1];
