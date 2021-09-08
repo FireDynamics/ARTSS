@@ -463,13 +463,13 @@ bool Obstacle::is_obstacle_cell(size_t i, size_t j, size_t k) const {
 /// \param  index position in 1D array
 /// \return  bool true if yes false if no
 // *************************************************************************************************
-bool Obstacle::is_obstacle_cell(size_t idx) const {
+bool Obstacle::is_obstacle_cell(const size_t idx) const {
     Domain *domain = Domain::getInstance();
-    size_t Nx = domain->get_Nx(m_level);
-    size_t Ny = domain->get_Ny(m_level);
-    size_t k = getCoordinateK(idx, Nx, Ny);
-    size_t j = getCoordinateJ(idx, Nx, Ny, k);
-    size_t i = getCoordinateI(idx, Nx, Ny, j, k);
+    const size_t Nx = domain->get_Nx(m_level);
+    const size_t Ny = domain->get_Ny(m_level);
+    const size_t k = getCoordinateK(idx, Nx, Ny);
+    const size_t j = getCoordinateJ(idx, Nx, Ny, k);
+    const size_t i = getCoordinateI(idx, Nx, Ny, j, k);
     return is_obstacle_cell(i, j, k);
 }
 

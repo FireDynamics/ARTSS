@@ -1699,7 +1699,7 @@ size_t Multigrid::get_obstacle_stride_z(size_t id, size_t level) const {
     return (static_cast<Obstacle *>(m_MG_obstacle_object_list[level][id]))->get_stride_z();
 }
 
-bool Multigrid::is_obstacle_cell(size_t level, size_t index) {
+bool Multigrid::is_obstacle_cell(const size_t level, const size_t index) {
     bool is_obstacle_cell = false;
     Obstacle **obstacle_list = m_MG_obstacle_object_list[level];
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
@@ -1712,8 +1712,9 @@ bool Multigrid::is_obstacle_cell(size_t level, size_t index) {
     return is_obstacle_cell;
 }
 
-bool Multigrid::is_obstacle_cell(size_t level, size_t i, size_t j, size_t k) {
-    size_t Nx = Domain::getInstance()->get_Nx(level);
-    size_t Ny = Domain::getInstance()->get_Ny(level);
+bool Multigrid::is_obstacle_cell(const size_t level,
+                                 const size_t i, const size_t j, const size_t k) {
+    const size_t Nx = Domain::getInstance()->get_Nx(level);
+    const size_t Ny = Domain::getInstance()->get_Ny(level);
     return is_obstacle_cell(level, IX(i, j, k, Nx, Ny));
 }
