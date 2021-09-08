@@ -16,24 +16,24 @@
 
 
 class VCycleMG: public IPressure{
-public:
-    VCycleMG(Field* out, Field* b);
+ public:
+    VCycleMG(Field const &out, Field const &b);
     ~VCycleMG() override;
 
-    void pressure(Field* out, Field* b, real t, bool sync);
+    void pressure(Field &out, Field const &b, real t, bool sync) override;
 
-private:
-    void VCycleMultigrid(Field* out, bool sync = true);
-    void UpdateInput(Field* out, Field* b, bool sync = true);
-    void Smooth(Field* out, Field* tmp, Field* b, size_t level, bool sync = true);
-    void Residuum(Field* out, Field* in, Field* b, size_t level, bool sync = true);
-    void Restrict(Field* out, Field* in, size_t level, bool sync = true);
-    void Prolongate(Field* out, Field* in, size_t level, bool sync = true);
-    void Solve( Field* out, Field* tmp, Field* b, size_t level, bool sync = true);
+ private:
+    void VCycleMultigrid(Field &out, bool sync = true);
+    void UpdateInput(Field &out, Field const &b, bool sync = true);
+    void Smooth(Field &out, Field &tmp, Field const &b, size_t level, bool sync = true);
+    void Residuum(Field &out, Field const &in, Field const &b, size_t level, bool sync = true);
+    void Restrict(Field &out, Field const &in, size_t level, bool sync = true);
+    void Prolongate(Field &out, Field const &in, size_t level, bool sync = true);
+    void Solve(Field &out, Field &tmp, Field const &b, size_t level, bool sync = true);
 
-    int levels;
-    int cycles;
-    int relaxs;
+    size_t m_levels;
+    size_t m_cycles;
+    size_t m_relaxs;
 
     real m_dsign;
     real m_w;
