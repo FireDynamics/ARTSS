@@ -32,49 +32,47 @@ struct FunctionNames{
 
 namespace Functions {  // alphabetically ordered
 
-  void Beltrami(Field* outx, Field* outy, Field* outz, Field* outp, real t);
-  void BeltramiBC_p(Field* outx);
-  void BeltramiBC_u(Field* outx, real t);
-  void BeltramiBC_v(Field* outx, real t);
-  void BeltramiBC_w(Field* outx, real t);
-  void BuoyancyForce(Field* out, Field* T, Field* Ta);
-  void BuoyancyMMS(Field* outx, Field* outy, Field* outz, Field* outp, Field* outT, real t);
-  void BuoyancyST_MMS(Field* out, real t);
+  void Beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t);
+  void BeltramiBC_p(Field &out_x);
+  void BeltramiBC_u(Field &out_x, real t);
+  void BeltramiBC_v(Field &out_x, real t);
+  void BeltramiBC_w(Field &out_x, real t);
+  void BuoyancyForce(Field &out, Field &T, Field &T_ambient);
+  void BuoyancyMMS(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t);
+  void BuoyancyST_MMS(Field &out, real t);
 
-  void Drift(Field* outx, Field* outy, Field* outz, Field* outp);
+  void Drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
 
-  void ExpSinusProd(Field* out, real t);
-  void ExpSinusSum(Field* outx, Field* outy, Field* outz, real t);
+  void ExpSinusProd(Field &out, real t);
+  void ExpSinusSum(Field &out_x, Field &out_y, Field &out_z, real t);
 
-  void FacSinSinSin(Field* out);
+  void FacSinSinSin(Field &out);
 
-  void GaussBubble(Field* out, real t);
+  void GaussBubble(Field &out, real t);
 
-  void Hat(Field* out);
+  void Hat(Field &out);
 
   void Jet(
-          Field* out,
-          const size_t index_x1, const size_t index_x2,
-          const size_t index_y1, const size_t index_y2,
-          const size_t index_z1, const size_t index_z2,
-          const real value);
+          Field &out,
+          size_t index_x1, size_t index_x2,
+          size_t index_y1, size_t index_y2,
+          size_t index_z1, size_t index_z2,
+          real value);
 
-  void Layers(Field* out);
+  void Layers(Field &out);
 
-  void McDermott(Field* outx, Field* outy, Field* outz, Field* outp, real t);
+  void McDermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t);
 
-  real RampTanh(real t);
+  void Random(Field &out, real range, bool is_absolute, int seed, real step_size);
 
-  void Random(Field* out, real range, bool is_absolute, int seed, real step_size);
+  void SinSinSin(Field &out);
 
-  void SinSinSin(Field* out);
+  void Uniform(Field &out, real val);
 
-  void Uniform(Field* out, real val);
+  void Vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
+  void VortexY(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
 
-  void Vortex(Field *outx, Field *outy, Field *outz, Field *outp);
-  void VortexY(Field *outx, Field *outy, Field *outz, Field *outp);
-
-  void Zero(Field* field, size_t* arr_idx, size_t arr_idx_size);
+  void Zero(Field &field, size_t *arr_idx, size_t arr_idx_size);
 };
 
 #endif /* ARTSS_FUNCTIONS_H_ */

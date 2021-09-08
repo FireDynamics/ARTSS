@@ -15,8 +15,10 @@ public:
     ITurbulence() = default;
     virtual ~ITurbulence() = default;
 
-    virtual void CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Field *in_w, bool sync) = 0;
-    virtual void ExplicitFiltering(Field *out, const Field *in, bool sync) = 0;
+    virtual void CalcTurbViscosity(
+            Field &ev,
+            Field const &in_u, Field const &in_v, Field const &in_w, bool sync) = 0;
+    virtual void ExplicitFiltering(Field &out, Field const &in, bool sync) = 0;
 };
 
 #endif /* ARTSS_INTERFACES_ITURBULENCE_H_ */
