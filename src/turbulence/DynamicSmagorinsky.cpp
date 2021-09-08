@@ -474,8 +474,8 @@ void DynamicSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, 
     real sum = 0;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 // Velocity filter
     ExplicitFiltering(u_f, in_u, sync);
@@ -680,8 +680,8 @@ void DynamicSmagorinsky::ExplicitFiltering(Field *out, const Field *in, bool syn
 
     //Construction by product combination for trapezoidal
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    auto bsize_i = boundary->getSize_innerList();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc parallel loop independent present(d_out[:bsize], d_in[:bsize], a[:3], d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {

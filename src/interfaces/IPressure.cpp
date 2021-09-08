@@ -8,7 +8,6 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
-#include "../visualisation/Visual.h"
 
 //======================================== Divergence ====================================
 // ***************************************************************************************
@@ -42,11 +41,11 @@ void IPressure::divergence(Field *out, const Field *in_x, const Field *in_y, con
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
-    size_t *d_bList = boundary->get_boundaryList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_bList = boundary->get_boundary_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
-    auto bsize_b = boundary->getSize_boundaryList();
+    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_b = boundary->get_size_boundary_list();
 
 #pragma acc data present(d_out[:size], d_inx[:size], d_iny[:size], d_inz[:size], d_iList[:bsize_i], d_bList[:bsize_b])
     {
@@ -54,9 +53,10 @@ void IPressure::divergence(Field *out, const Field *in_x, const Field *in_y, con
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_iList[j];
-            d_out[i] = 0.5 * rdx * (d_inx[i + 1] - d_inx[i - 1]) \
- + 0.5 * rdy * (d_iny[i + Nx] - d_iny[i - Nx]) \
- + 0.5 * rdz * (d_inz[i + Nx * Ny] - d_inz[i - Nx * Ny]);
+            real inx = 0.5 * rdx * (d_inx[i + 1] - d_inx[i - 1]) ;
+            real iny = 0.5 * rdy * (d_iny[i + Nx] - d_iny[i - Nx]) ;
+            real inz = 0.5 * rdz * (d_inz[i + Nx*Ny] - d_inz[i - Nx*Ny]) ;
+            d_out[i] = inx + iny + inz;
         }
 
 //boundaries
@@ -118,9 +118,9 @@ void IPressure::projection(Field *out_u, Field *out_v, Field *out_w, const Field
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_iList = boundary->get_innerList_level_joined();
+    size_t *d_iList = boundary->get_inner_list_level_joined();
 
-    auto bsize_i = boundary->getSize_innerList();
+    auto bsize_i = boundary->get_size_inner_list();
 
 #pragma acc data present(d_outu[:size], d_outv[:size], d_outw[:size], d_inu[:size], d_inv[:size], d_inw[:size], d_inp[:size], d_iList[:bsize_i])
     {
@@ -134,9 +134,9 @@ void IPressure::projection(Field *out_u, Field *out_v, Field *out_w, const Field
         }
 
         //boundaries
-        boundary->applyBoundary(d_outu, typeu, false);
-        boundary->applyBoundary(d_outv, typev, false);
-        boundary->applyBoundary(d_outw, typew, false);
+        boundary->apply_boundary(d_outu, typeu, false);
+        boundary->apply_boundary(d_outv, typev, false);
+        boundary->apply_boundary(d_outw, typew, false);
 
         if (sync) {
 #pragma acc wait

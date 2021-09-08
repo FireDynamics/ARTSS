@@ -2,8 +2,8 @@
 // Created by linh on 01.10.19.
 //
 
-#ifndef JUROR_SURFACE_H
-#define JUROR_SURFACE_H
+#ifndef ARTSS_BOUNDARY_SURFACE_H_
+#define ARTSS_BOUNDARY_SURFACE_H_
 
 #include <vector>
 #include "BoundaryData.h"
@@ -65,4 +65,4 @@ class Surface {
 };
 
 
-#endif //JUROR_SURFACE_H
+#endif /* ARTSS_BOUNDARY_SURFACE_H_ */
