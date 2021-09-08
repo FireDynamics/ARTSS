@@ -75,11 +75,11 @@ void VTKWriter::write_numerical(
 }
 
 void VTKWriter::write_analytical(const Solution &solution, const std::string &filename) {
-    auto u = solution.GetU();
-    auto v = solution.GetV();
-    auto w = solution.GetW();
-    auto p = solution.GetP();
-    auto T = solution.GetT();
+    auto u = solution.get_data_u();
+    auto v = solution.get_data_v();
+    auto w = solution.get_data_w();
+    auto p = solution.get_data_p();
+    auto T = solution.get_data_T();
     VTKWriter::vtk_prepare_and_write((filename + ending).c_str(), u, v, w, p, T);
 }
 

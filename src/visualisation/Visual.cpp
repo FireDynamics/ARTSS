@@ -69,27 +69,15 @@ void Visual::write_csv(const FieldController &field_controller, std::string file
     auto S_C = field_controller.field_source_concentration;
     auto nu_t = field_controller.field_nu_t;
 
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_p = p->data;
-    auto d_rhs = rhs->data;
-    auto d_T = T->data;
-    auto d_C = C->data;
-    auto d_S_T = S_T->data;
-    auto d_S_C = S_C->data;
-    auto d_nu_t = nu_t->data;
-
-    auto bsize = Domain::getInstance()->get_size();
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_C[:bsize])
-#pragma acc update host(d_nu_t[:bsize])
-#pragma acc update host(d_S_T[:bsize]) wait
+    u.update_host();
+    v.update_host();
+    w.update_host();
+    p.update_host();
+    rhs.update_host();
+    T.update_host();
+    C.update_host();
+    nu_t.update_host();
+    S_T.update_host();
     CSVWriter::write_numerical(field_controller, filename);
 }
 
@@ -106,27 +94,15 @@ void Visual::write_vtk(const FieldController &field_controller, std::string file
     auto S_C = field_controller.field_source_concentration;
     auto nu_t = field_controller.field_nu_t;
 
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_p = p->data;
-    auto d_rhs = rhs->data;
-    auto d_T = T->data;
-    auto d_C = C->data;
-    auto d_S_T = S_T->data;
-    auto d_S_C = S_C->data;
-    auto d_nu_t = nu_t->data;
-
-    auto bsize = Domain::getInstance()->get_size();
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_C[:bsize])
-#pragma acc update host(d_nu_t[:bsize])
-#pragma acc update host(d_S_T[:bsize]) wait
+    u.update_host();
+    v.update_host();
+    w.update_host();
+    p.update_host();
+    rhs.update_host();
+    T.update_host();
+    C.update_host();
+    nu_t.update_host();
+    S_T.update_host();
     VTKWriter::write_numerical(field_controller, filename);
 }
 

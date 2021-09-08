@@ -21,7 +21,7 @@
 /// \param  out     pressure
 /// \param  b       rhs
 // *****************************************************************************
-VCycleMG::VCycleMG(Field *out, Field *b) {
+VCycleMG::VCycleMG(Field const &out, Field const &b) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -130,54 +130,22 @@ VCycleMG::VCycleMG(Field *out, Field *b) {
 }
 
 VCycleMG::~VCycleMG() {
-    while (!m_residuum0.empty()) {
-        Field *field = m_residuum0.back();
-        // TODO(issue 124)
-        real *data = field->data;
-        size_t bsize = field->get_size();
-#pragma acc exit data delete(data[:bsize])
-        delete field;
-        m_residuum0.pop_back();
+    for (size_t i = 0; i < residuum0.size(); i++) {
+        delete residuum0[i];
+    }
+    for (size_t i = 0; i < residuum1.size(); i++) {
+        delete residuum1[i];
     }
 
-    while (!m_residuum1.empty()) {
-        Field *field = m_residuum1.back();
-        real *data = field->data;
-        // TODO(issue 124)
-        size_t bsize = field->get_size();
-#pragma acc exit data delete(data[:bsize])
-        delete field;
-        m_residuum1.pop_back();
+    for (size_t i = 0; i < err0.size(); i++) {
+        delete err0[i];
+    }
+    for (size_t i = 0; i < error1.size(); i++) {
+        delete error1[i];
     }
 
-    while (!m_error0.empty()) {
-        Field *field = m_error0.back();
-        real *data = field->data;
-        // TODO(issue 124)
-        size_t bsize = field->get_size();
-#pragma acc exit data delete(data[:bsize])
-        delete field;
-        m_error0.pop_back();
-    }
-
-    while (!m_error1.empty()) {
-        Field *field = m_error1.back();
-        real *data = field->data;
-        // TODO(issue 124)
-        size_t bsize = field->get_size();
-#pragma acc exit data delete(data[:bsize])
-        delete field;
-        m_error1.pop_back();
-    }
-
-    while (!m_mg_temporal_solution.empty()) {
-        Field *field = m_mg_temporal_solution.back();
-        real *data = field->data;
-        // TODO(issue 124)
-        size_t bsize = field->get_size();
-#pragma acc exit data delete(data[:bsize])
-        delete field;
-        m_mg_temporal_solution.pop_back();
+    for (size_t i = 0; i < mg_temporal_solution.size(); i++) {
+        delete mg_temporal_solution[i];
     }
 }
 
@@ -202,7 +170,7 @@ void VCycleMG::UpdateInput(Field *out, Field *b, bool sync) {
 /// \param  t           current time
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
-void VCycleMG::pressure(Field *out, Field *b, const real t, bool sync) {
+void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
     // Update first
     UpdateInput(out, b);
 
@@ -215,11 +183,11 @@ void VCycleMG::pressure(Field *out, Field *b, const real t, bool sync) {
     const int set_relaxs = m_n_relax;
     const int set_cycles = m_n_cycle;
 
-    int act_cycles = 0;
+    size_t act_cycles = 0;
 
     if (Nt == 1) {
-        const int max_cycles = params->get_int("solver/pressure/max_cycle");
-        const int max_relaxs = params->get_int("solver/pressure/diffusion/max_solve");
+        const size_t max_cycles = params->get_int("solver/pressure/max_cycle");
+        const size_t max_relaxs = params->get_int("solver/pressure/diffusion/max_solve");
 
         real r = 10000.;
         real sum;
@@ -227,7 +195,6 @@ void VCycleMG::pressure(Field *out, Field *b, const real t, bool sync) {
 
         const size_t Nx = domain->get_Nx();
         const size_t Ny = domain->get_Ny();
-        size_t bsize = domain->get_size();
 
         const real dx = domain->get_dx();
         const real dy = domain->get_dy();
@@ -237,27 +204,26 @@ void VCycleMG::pressure(Field *out, Field *b, const real t, bool sync) {
         const real rdy2 = 1. / (dy * dy);
         const real rdz2 = 1. / (dz * dz);
 
-        auto data_out = out->data;
-        auto data_b = b->data;
-
         auto boundary = BoundaryController::getInstance();
         auto bsize_i = boundary->get_size_inner_list();
         size_t *data_inner_list = boundary->get_inner_list_level_joined();
 
-        while (r > tol_res && act_cycles < max_cycles && m_n_relax < max_relaxs) {
-            for (size_t i = 0; i < m_n_cycle; i++) {
+        while (r > tol_res &&
+                act_cycles < max_cycles &&
+                m_relaxs < max_relaxs) {
+            for (size_t i = 0; i < m_cycles; i++) {
                 VCycleMultigrid(out, sync);
                 act_cycles++;
             }
             sum = 0.;
 
             // calculate residuum in inner cells
-#pragma acc parallel loop independent present(data_out[:bsize], data_b[:bsize], data_inner_list[:bsize_i]) async
+#pragma acc parallel loop independent present(out, b, d_iList[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
-                const size_t i = data_inner_list[j];
-                r = data_b[i] - (rdx2 * (data_out[i - 1]       - 2 * data_out[i] + data_out[i + 1])
-                              +  rdy2 * (data_out[i - Nx]      - 2 * data_out[i] + data_out[i + Nx])
-                              +  rdz2 * (data_out[i - Nx * Ny] - 2 * data_out[i] + data_out[i + Nx * Ny]));
+                const size_t i = d_iList[j];
+                r = b[i] - (rdx2 * (out[i - 1] - 2 * out[i] + out[i + 1])
+                     + rdy2 * (out[i - Nx] - 2 * out[i] + out[i + Nx])
+                     + rdz2 * (out[i - Nx * Ny] - 2 * out[i] + out[i + Nx * Ny]));
                 sum += r * r;
             }
 #pragma acc wait
@@ -303,6 +269,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
         size_t size_out = field_out->get_size();
 
 #pragma acc data present(data_out[:size_out], data_mg_temporal_level[:size_mg_temporal_level], data_residuum1_level[:size_residuum1_level])
+#pragma acc data present(out, mg_tmpi, res1i)
         {
             Solve(field_out, field_mg_temporal_level, field_residuum1_level, m_levels, sync);
         }
@@ -434,6 +401,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
                 // correct
                 // inner
 #pragma acc kernels present(data_error0_level[:size_error0_level], data_error1_level_minus_1[:size_error1_level_minus_1], data_inner_list[start_i:(end_i-start_i)]) async
+#pragma acc kernels present(f_err0i, f_err1im, d_iList[start_i:(end_i-start_i)]) async
                 {
 #pragma acc loop independent
                     for (size_t j = start_i; j < end_i; ++j) {
@@ -443,6 +411,7 @@ void VCycleMG::VCycleMultigrid(Field *field_out, bool sync) {
                 }
                 // boundary
 #pragma acc kernels present(data_error0_level[:size_error0_level], data_error1_level_minus_1[:size_error1_level_minus_1], data_boundary_list[start_b:(end_b-start_b)]) async
+#pragma acc kernels present(err0i, err1im, d_bList[start_b:(end_b-start_b)]) async
                 {
 #pragma acc loop independent
                     for (size_t j = start_b; j < end_b; ++j) {
@@ -507,12 +476,12 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, const size_t level, boo
     Domain *domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(in->get_level());
-    const size_t Ny = domain->get_Ny(in->get_level());
+    const size_t Nx = domain->get_Nx(in.get_level());
+    const size_t Ny = domain->get_Ny(in.get_level());
 
-    const real dx = domain->get_dx(in->get_level());
-    const real dy = domain->get_dy(in->get_level());
-    const real dz = domain->get_dz(in->get_level());
+    const real dx = domain->get_dx(in.get_level());
+    const real dy = domain->get_dy(in.get_level());
+    const real dz = domain->get_dz(in.get_level());
 
     const real rdx2 = 1. / (dx * dx);
     const real rdy2 = 1. / (dy * dy);
@@ -551,7 +520,7 @@ void VCycleMG::Residuum(Field *out, Field *in, Field *b, const size_t level, boo
         if (sync) {
 #pragma acc wait
         }
-    }//end data region
+    }
 }
 
 //================================== Restrict ===============================
@@ -603,6 +572,9 @@ void VCycleMG::Restrict(Field *out, Field *in, const size_t level, bool sync) {
     // obstacles not used in fine grid, since coarse grid only obstacle if one of 8 fine grids was an obstacle,
     // thus if coarse cell inner cell, then surrounding fine cells also inner cells!
 #pragma acc data present(data_in[:bsize_in], data_out[:bsize_out], data_inner_list[start_i:(end_i-start_i)])
+    size_t i, j, k;
+
+#pragma acc data present(in, out, d_iList[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
 #pragma acc loop independent
@@ -638,6 +610,8 @@ void VCycleMG::Restrict(Field *out, Field *in, const size_t level, bool sync) {
 /// \param  level       Multigrid level
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
+void VCycleMG::Prolongate(Field &out, Field const &in, size_t level, bool sync) {
+    auto domain = Domain::getInstance();
 void VCycleMG::Prolongate(Field *out, Field *in, const size_t level, bool sync) {
     Domain *domain = Domain::getInstance();
 
@@ -671,6 +645,9 @@ void VCycleMG::Prolongate(Field *out, Field *in, const size_t level, bool sync) 
     size_t neighbour_cell_k = Nx_coarse * Ny_coarse;
 
     // prolongate
+    size_t i, j, k;
+
+#pragma acc data present(in, out, d_iList[start_i:(end_i-start_i)])
 #pragma acc data present(data_in[:bsize_in], data_out[:bsize_out], data_inner_list[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
@@ -765,7 +742,7 @@ void VCycleMG::Prolongate(Field *out, Field *in, const size_t level, bool sync) 
         if (sync) {
 #pragma acc wait
         }
-    }// end data region
+    }
 }
 
 //==================================== Smooth ==================================
@@ -824,8 +801,7 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field *out, Field *tmp, Field *b
 
     Parameters *params = Parameters::getInstance();
 
-    size_t bsize = domain->get_size(out->get_level());
-    FieldType type = out->get_type();
+    FieldType type = out.get_type();
 
     BoundaryController *boundary = BoundaryController::getInstance();
 

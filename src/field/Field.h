@@ -31,14 +31,29 @@ class Field {
     ~Field();
 
     // getter
-    FieldType get_type() const { return this->m_type; }
-    size_t get_level() const { return this->m_level; }
-    size_t get_size() const { return this->m_size; }
+    FieldType get_type() const { return m_type; }
+    return_ptr get_data() const { return data; }
 
+    // read_ptr get_data_ro() const { return data; }
+    size_t get_level() const { return m_level; }
+    size_t get_size() const { return m_size; }
+
+    // setter
     inline real& operator[](size_t i) const { return data[i]; }
 
-    void set_value(real val) { std::fill(data, data + m_size, val); }
-    void copy_data(const Field &other) {
+    // acc functions
+    void update_host() {
+        #pragma acc update host(data[:m_size])
+    }
+    void update_dev() {
+        #pragma acc update device(data[:m_size])
+    }
+    void copyin() {
+        #pragma acc enter data copyin(data[:m_size])
+    }
+
+    void set_value(real val) const { std::fill(data, data + m_size, val); }
+    void copy_data(const Field &other) const {
         // TODO parallelise copy data function for GPU
         std::copy(other.data, other.data + other.m_size, data);
     }

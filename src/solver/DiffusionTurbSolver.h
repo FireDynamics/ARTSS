@@ -18,13 +18,13 @@
 #include "../utility/Utility.h"
 
 class DiffusionTurbSolver: public ISolver {
-public:
+ public:
     explicit DiffusionTurbSolver(FieldController *field_controller);
     ~DiffusionTurbSolver();
 
     void do_step(real t, bool sync) override;
 
-private:
+ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
