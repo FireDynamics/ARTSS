@@ -68,6 +68,21 @@ TEST_F(BoundaryDataTest, get_field_type_name) {
     ASSERT_EQ("p", p);
     std::string T = BoundaryData::get_field_type_name(FieldType::T);
     ASSERT_STRCASEEQ("T", T.c_str());
-    //std::string unknown = BoundaryData::get_field_type_name(FieldType::UNKNOWN_FIELD);
-    //ASSERT_EQ("unknown field", unknown);
+
+//    ASSERT_EXIT((BoundaryData::get_field_type_name(FieldType::UNKNOWN_FIELD),exit(0)),::testing::KilledBySignal(SIGEV_SIGNAL),".*");
+}
+
+TEST_F(BoundaryDataTest, get_boundary_patch_name) {
+    std::string front = BoundaryData::get_patch_name(Patch::FRONT);
+    ASSERT_EQ("front", front);
+    std::string back = BoundaryData::get_patch_name(Patch::BACK);
+    ASSERT_EQ("back", back);
+    std::string bottom = BoundaryData::get_patch_name(Patch::BOTTOM);
+    ASSERT_EQ("bottom", bottom);
+    std::string top = BoundaryData::get_patch_name(Patch::TOP);
+    ASSERT_EQ("top", top);
+    std::string left = BoundaryData::get_patch_name(Patch::LEFT);
+    ASSERT_EQ("left", left);
+    std::string right = BoundaryData::get_patch_name(Patch::RIGHT);
+    ASSERT_EQ("right", right);
 }
