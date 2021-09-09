@@ -44,7 +44,8 @@ Field::Field(Field const &orig) :
     data(new real[orig.get_size()]),
     m_level(orig.get_level()), m_size(orig.get_size()), m_type(orig.get_type()) {
     this->copy_data(orig);
-#pragma acc enter data copyin(this[:1]) create(m_data[:m_size])
+#pragma acc enter data copyin(this)
+#pragma acc enter data create(m_data[:m_size])
 }
 
 Field::~Field() {

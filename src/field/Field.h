@@ -42,13 +42,13 @@ class Field {
     inline real& operator[](size_t i) const { return data[i]; }
 
     // acc functions
-    void update_host() {
+    void update_host() const {
         #pragma acc update host(data[:m_size])
     }
-    void update_dev() {
+    void update_dev() const {
         #pragma acc update device(data[:m_size])
     }
-    void copyin() {
+    void copyin() const {
         #pragma acc enter data copyin(data[:m_size])
     }
 
@@ -60,40 +60,37 @@ class Field {
     static void swap(Field &a, Field &b) { std::swap(a.data, b.data); }
 
     Field &operator+=(const real x) {
-#pragma acc parallel loop independent present(this->data[:m_size]) async
+#pragma acc parallel loop
         for (size_t i=0; i < m_size; ++i)
             this->data[i] += x;
 
-#pragma acc wait
+
         return *this;
     }
 
     Field &operator+=(const Field &rhs) {
         auto rhs_data = rhs.data;
-#pragma acc parallel loop independent present(this->data[:m_size], rhs_data[:m_size]) async
+#pragma acc parallel loop present(rhs_data[:m_size])
         for (size_t i=0; i < m_size; ++i)
             this->data[i] += rhs_data[i];
 
-#pragma acc wait
         return *this;
     }
 
     Field &operator*=(const real x) {
-#pragma acc parallel loop independent present(this->data[:m_size]) async
+#pragma acc parallel loop
         for (size_t i=0; i < m_size; ++i)
             this->data[i] *= x;
 
-#pragma acc wait
         return *this;
     }
 
     Field &operator*=(const Field &rhs) {
         auto rhs_data = rhs.data;
-#pragma acc parallel loop independent present(this->data[:m_size], rhs_data[:m_size]) async
+#pragma acc parallel loop present(rhs_data[:m_size])
         for (size_t i=0; i < m_size; ++i)
             this->data[i] *= rhs_data[i];
 
-#pragma acc wait
         return *this;
     }
 

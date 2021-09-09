@@ -147,7 +147,10 @@ TEST_F(FieldTest, add_two_fields) {
         x += 1.0;
     }
 
+    a.update_dev();
+    b.update_dev();
     a += b;
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -167,9 +170,12 @@ TEST_F(FieldTest, stress_add_two_fields) {
         x += 1.0;
     }
 
+    a.update_dev();
+    b.update_dev();
     for (int i = 0; i <= 100000; ++i) {
         a += b;
     }
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -190,7 +196,10 @@ TEST_F(FieldTest, mul_two_fields) {
         x += 1.0;
     }
 
+    a.update_dev();
+    b.update_dev();
     a *= b;
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -210,9 +219,12 @@ TEST_F(FieldTest, stress_mul_two_fields) {
         x += 1.0;
     }
 
+    a.update_dev();
+    b.update_dev();
     for (int i = 0; i < 100000; ++i) {
         a *= b;
     }
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -230,8 +242,9 @@ TEST_F(FieldTest, add_scalar) {
         a[i] = x;
         x += 1.0;
     }
-
+    a.update_dev();
     a += 0.5;
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -250,9 +263,11 @@ TEST_F(FieldTest, stress_add_scalar) {
         x += 1.0;
     }
 
+    a.update_dev();
     for (int i = 0; i < 100000; ++i) {
         a += 0.5;
     }
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -271,7 +286,9 @@ TEST_F(FieldTest, mul_scalar) {
         x += 1.0;
     }
 
+    a.update_dev();
     a *= 0.5;
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
