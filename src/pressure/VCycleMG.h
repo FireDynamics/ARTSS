@@ -47,17 +47,32 @@ class VCycleMG: public IPressure{
     const real m_dsign = -1;
     const real m_w;
 
+    /**
+     * size: 0 .. m_levels
+     * level's going coarse: residuum: result of error1 + residuum1
+     */
     Field **m_residuum0;
     /**
      * stores on level 0 rhs/b field
+     * size: 0 ... m_levels + 1
      */
     Field **m_residuum1;
+    /**
+     * size: 0 .. m_levels
+     * level's going coarse: restrict: result from residuum0
+     * level's going fine: prolongate: result from error1
+     */
     Field **m_error0;
     /**
      * stores on level 0 out/p field
+     * size: 0 ... m_levels + 1
+     * level's going coarse: smooth: result of residuum1
+     * level's going fine: correction through error0
+     * level's going fine: solve/smooth: result from residuum1
      */
     Field **m_error1;
-    Field **m_mg_temporal_solution; // only as storage? or even sometimes as output field?
+    // storage only
+    Field **m_mg_temporal_solution;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
