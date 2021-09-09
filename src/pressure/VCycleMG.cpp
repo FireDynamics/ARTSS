@@ -99,7 +99,7 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
         auto *mg = new Field(FieldType::P, 0.0, level + 1);
         mg->copyin();
         *(m_mg_temporal_solution + level + 1) = mg;
-    } // end level loop
+    }
 }
 
 VCycleMG::~VCycleMG() {
@@ -250,11 +250,13 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
 
                 // calculate residuum
                 Residuum(*field_residuum0_level, *field_error1_level, *field_residuum1_level, level, sync);
-                boundary->apply_boundary(data_residuum0_level, level, type_r0, sync); // for m_residuum0 only Dirichlet BC
+                // for m_residuum0 only Dirichlet BC
+                boundary->apply_boundary(data_residuum0_level, level, type_r0, sync);
 
                 // restrict
                 Restrict(*field_residuum1_level_plus_1, *field_residuum0_level, level, sync);
-                boundary->apply_boundary(data_residuum1_level_plus_1, level + 1, type_r1, sync); // for res only Dirichlet BC
+                // for res only Dirichlet BC
+                boundary->apply_boundary(data_residuum1_level_plus_1, level + 1, type_r1, sync);
 
                 // set err to zero at next level
                 field_error1_level_plus_1->set_value(0);
@@ -277,7 +279,8 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
             {
                 // prolongate
                 Prolongate(*field_error0_level, *field_error1_level, level, sync);
-                boundary->apply_boundary(data_error0_level, level - 1, type_e0, sync); // for m_error0 only Dirichlet BC
+                // for m_error0 only Dirichlet BC
+                boundary->apply_boundary(data_error0_level, level - 1, type_e0, sync);
 
                 // correct
                 *field_error1_level_minus_1 += *field_error0_level;
@@ -285,7 +288,8 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
                 if (level == m_levels) {
                     Solve(*field_error1_level_minus_1, *field_mg_temporal_solution_level_minus_1, *field_residuum1_level_minus_1, level - 1, sync);
                 } else {
-                    Smooth(*field_error1_level_minus_1, *field_mg_temporal_solution_level_minus_1, *field_residuum1_level_minus_1, level - 1, sync); // for err only Dirichlet BC
+                    // for err only Dirichlet BC
+                    Smooth(*field_error1_level_minus_1, *field_mg_temporal_solution_level_minus_1, *field_residuum1_level_minus_1, level - 1, sync);
                 }
             }
         }
@@ -650,7 +654,8 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
     {
         for (int i = 0; i < m_n_relax; i++) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
-            boundary->apply_boundary(data_out, level, type, sync); // for res/err only Dirichlet BC
+            // for res/err only Dirichlet BC
+            boundary->apply_boundary(data_out, level, type, sync);
         }
     }
 
@@ -708,7 +713,8 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
         const size_t neighbour_k = Nx * Ny;
         while (res > tol_res && it < max_it) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
-            boundary->apply_boundary(data_out, level, type, sync); // for res/err only Dirichlet BC
+            // for res/err only Dirichlet BC
+            boundary->apply_boundary(data_out, level, type, sync);
 
             sum = 0.;
 #pragma acc parallel loop independent present(out, tmp, data_inner_list[:bsize_i]) async
@@ -766,12 +772,12 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
             Field::swap(tmp, out);
             std::swap(data_tmp, data_out);
             it++;
-        }  // end while
+        }
 
         if (it % 2 != 0) {  // get data from tmp field when number of iterations is odd
             out.copy_data(tmp);
         }
-    } //end data region
+    }
 }
 void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
     auto domain = Domain::getInstance();
@@ -846,10 +852,10 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
 
             Field::swap(tmp, out);
             std::swap(data_tmp, data_out);
-        }  // end while
+        }
 
         if (it % 2 != 0) {  // get data from tmp field when number of iterations is odd
             out.copy_data(tmp);
         }
-    } //end data region
+    }
 }
