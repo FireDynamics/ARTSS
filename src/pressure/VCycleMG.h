@@ -38,8 +38,16 @@ class VCycleMG: public IPressure{
     const int m_n_cycle;
     const int m_n_relax;
 
-    void (VCycleMG::*m_smooth_diffusion_function)(Field &, Field &, Field const &, const size_t, bool);
-    void (VCycleMG::*m_solve_diffusion_function)(Field &, Field &, Field const &, const size_t, bool);
+    /**
+     * difference between smooth and solve function:
+     * - solve function repeats the chosen algorithm (m_solve_function) until the residuum is
+     *   smaller than the given residual number or the number of repetitions exceeds the set number
+     *   of iterations
+     * - smooth function repeats the chosen algorithm (m_smooth_function) for a set number of times
+     *   (m_n_cycles)
+     */
+    void (VCycleMG::*m_smooth_function)(Field &, Field &, Field const &, const size_t, bool);
+    void (VCycleMG::*m_solve_function)(Field &, Field &, Field const &, const size_t, bool);
     size_t m_diffusion_max_iter;
     real m_diffusion_tol_res;
 
