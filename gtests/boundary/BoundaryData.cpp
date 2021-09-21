@@ -86,3 +86,12 @@ TEST_F(BoundaryDataTest, get_boundary_patch_name) {
     std::string right = BoundaryData::get_patch_name(Patch::RIGHT);
     ASSERT_EQ("right", right);
 }
+
+TEST_F(BoundaryDataTest, get_boundary_condition_name) {
+    std::string neumann = BoundaryData::get_boundary_condition_name(BoundaryCondition::NEUMANN);
+    ASSERT_EQ(neumann, "neumann");
+    std::string dirichlet = BoundaryData::get_boundary_condition_name(BoundaryCondition::DIRICHLET);
+    ASSERT_EQ(dirichlet, "dirichlet");
+    std::string periodic = BoundaryData::get_boundary_condition_name(BoundaryCondition::PERIODIC);
+    ASSERT_EQ(periodic, "periodic");
+}
