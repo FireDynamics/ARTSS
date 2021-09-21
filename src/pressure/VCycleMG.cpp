@@ -26,8 +26,7 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
         m_n_cycle(Parameters::getInstance()->get_int("solver/pressure/n_cycle")),
         m_n_relax(Parameters::getInstance()->get_int("solver/pressure/diffusion/n_relax")),
         m_dt(Parameters::getInstance()->get_real("physical_parameters/dt")),
-        m_w(Parameters::getInstance()->get_real("solver/pressure/diffusion/w"))
-{
+        m_w(Parameters::getInstance()->get_real("solver/pressure/diffusion/w")) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -50,11 +49,11 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
     }
     m_diffusion_tol_res = params->get_real("solver/pressure/diffusion/tol_res");
 
-    m_residuum0 = new Field*[m_levels];
-    m_residuum1 = new Field*[m_levels + 1];
-    m_error0 = new Field*[m_levels];
-    m_error1 = new Field*[m_levels + 1];
-    m_mg_temporal_solution = new Field*[m_levels + 1];
+    m_residuum0 = new Field *[m_levels];
+    m_residuum1 = new Field *[m_levels + 1];
+    m_error0 = new Field *[m_levels];
+    m_error1 = new Field *[m_levels + 1];
+    m_mg_temporal_solution = new Field *[m_levels + 1];
 
     // copies of out and b to prevent aliasing
     // residuum
@@ -176,8 +175,8 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
         const size_t neighbour_j = Nx;
         const size_t neighbour_k = Nx * Ny;
         while (r > tol_res &&
-                act_cycles < max_cycles &&
-                set_relax < max_relaxs) {
+               act_cycles < max_cycles &&
+               set_relax < max_relaxs) {
             for (int i = 0; i < m_n_cycle; i++) {
                 VCycleMultigrid(out, sync);
                 act_cycles++;
@@ -189,8 +188,8 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = data_inner_list[j];
                 r = b[i] - (rdx2 * (out[i - neighbour_i] - 2 * out[i] + out[i + neighbour_i])
-                         +  rdy2 * (out[i - neighbour_j] - 2 * out[i] + out[i + neighbour_j])
-                         +  rdz2 * (out[i - neighbour_k] - 2 * out[i] + out[i + neighbour_k]));
+                            + rdy2 * (out[i - neighbour_j] - 2 * out[i] + out[i + neighbour_j])
+                            + rdz2 * (out[i - neighbour_k] - 2 * out[i] + out[i + neighbour_k]));
                 sum += r * r;
             }
 #pragma acc wait
@@ -286,10 +285,12 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
                 *field_error1_level_minus_1 += *field_error0_level;
                 // smooth
                 if (level == m_levels) {
-                    Solve(*field_error1_level_minus_1, *field_mg_temporal_solution_level_minus_1, *field_residuum1_level_minus_1, level - 1, sync);
+                    Solve(*field_error1_level_minus_1, *field_mg_temporal_solution_level_minus_1,
+                          *field_residuum1_level_minus_1, level - 1, sync);
                 } else {
                     // for err only Dirichlet BC
-                    Smooth(*field_error1_level_minus_1, *field_mg_temporal_solution_level_minus_1, *field_residuum1_level_minus_1, level - 1, sync);
+                    Smooth(*field_error1_level_minus_1, *field_mg_temporal_solution_level_minus_1,
+                           *field_residuum1_level_minus_1, level - 1, sync);
                 }
             }
         }
@@ -653,13 +654,15 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
 #pragma acc data present(out, tmp, b)
     {
         for (int i = 0; i < m_n_relax; i++) {
-            ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
+            ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
+                    out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
             // for res/err only Dirichlet BC
             boundary->apply_boundary(data_out, level, type, sync);
         }
     }
 
 }
+
 void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
     auto domain = Domain::getInstance();
 
@@ -712,7 +715,8 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
         const size_t neighbour_j = Nx;
         const size_t neighbour_k = Nx * Ny;
         while (res > tol_res && it < max_it) {
-            ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
+            ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
+                    out, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
             // for res/err only Dirichlet BC
             boundary->apply_boundary(data_out, level, type, sync);
 
@@ -734,6 +738,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
     }  // end data region
 
 }
+
 void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
     auto domain = Domain::getInstance();
 
@@ -766,7 +771,7 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
 #pragma acc data present(out, tmp, b)
     {
         size_t it = 0;
-        for (int i = 0; i < m_n_relax; i++){
+        for (int i = 0; i < m_n_relax; i++) {
             JacobiDiffuse::JacobiStep(level, out, tmp, b, alphaX, alphaY, alphaZ, beta, m_dsign, m_w, sync);
             boundary->apply_boundary(data_out, level, type, sync);
             Field::swap(tmp, out);
@@ -779,6 +784,7 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
         }
     }
 }
+
 void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
     auto domain = Domain::getInstance();
 
@@ -840,7 +846,8 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
                 const size_t i = data_inner_list[j];
                 res = b[i] - (rdx2 * (out[i - neighbour_i] - 2 * out[i] + data_out[i + neighbour_i])
                            +  rdy2 * (out[i - neighbour_j] - 2 * out[i] + data_out[i + neighbour_j])
-                           +  rdz2 * (out[i - neighbour_k] - 2 * out[i] + data_out[i + neighbour_k])); //res = rbeta*(data_out[i] - data_tmp[i]);
+                           +  rdz2 * (out[i - neighbour_k] - 2 * out[i] + data_out[i + neighbour_k]));
+                // res = rbeta*(data_out[i] - data_tmp[i]);
                 sum += res * res;
             }
             // info: in nvvp profile 8byte size copy from to device to/from pageable due to sum!
