@@ -93,12 +93,6 @@ namespace {
     void apply_neumann(Field &field, size_t *d_patch, Patch patch,
                        size_t patch_start, size_t patch_end, real value) {
         size_t level = field.get_level();
-#ifndef BENCHMARKING
-        auto logger = Utility::create_logger("DomainBoundary");
-        if (level > 0) {
-            logger->error("neumann boundary condition for level {}", level);
-        }
-#endif
         Domain *domain = Domain::getInstance();
         size_t reference_index = 0;
         int8_t sign_reference_index = POSITIVE_SIGN;
@@ -120,6 +114,7 @@ namespace {
                 break;
             default:
 #ifndef BENCHMARKING
+                auto logger = Utility::create_logger("DomainBoundary");
                 logger->error("Unknown Patch for neumann boundary condition: {}", patch);
 #endif
                 break;
@@ -149,12 +144,6 @@ namespace {
         size_t Nx = domain->get_Nx(level);
         size_t Ny = domain->get_Ny(level);
 
-#ifndef BENCHMARKING
-        auto logger = Utility::create_logger("DomainBoundary");
-        if (level > 0) {
-            logger->error("periodic boundary condition for level {}", level);
-        }
-#endif
         size_t reference_index = 0;
         int8_t sign_reference_index = POSITIVE_SIGN;
 
@@ -173,6 +162,7 @@ namespace {
                 break;
             default:
 #ifndef BENCHMARKING
+                auto logger = Utility::create_logger("DomainBoundary");
                 logger->error("Unknown Patch for periodic boundary condition: {}", patch);
 #endif
                 break;
