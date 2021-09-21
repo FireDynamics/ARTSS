@@ -660,7 +660,6 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
             boundary->apply_boundary(data_out, level, type, sync);
         }
     }
-
 }
 
 void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
@@ -736,7 +735,6 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
             it++;
         }  // end while
     }  // end data region
-
 }
 
 void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
