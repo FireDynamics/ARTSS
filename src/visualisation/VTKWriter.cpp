@@ -31,7 +31,7 @@ void VTKWriter::write_numerical_debug(
 
     int size_vars = 16;
     read_ptr data[16] = {u, v, w, p, div, T, C, s, nu_t, S_T, S_C, f_x, f_y, f_z, kappa, gamma};
-    // Initialize variables
+    // Initialise variables
     int var_dims[size_vars + 6]; // Dimensions of variables (x,y,z,u,v,w,p,div,T)
     int centering[size_vars + 6]; // Whether the variables are centered in a cell: 0 for zonal!
     for (int i = 0; i < size_vars + 6; i++) {
@@ -109,21 +109,21 @@ void VTKWriter::write_field(const Field &field, const std::string &file_name, co
 
     int size = static_cast<int>(domain->get_size());
 
-    // Initialize variables
+    // Initialise variables
     int size_vars = 7; // Number of variables
-    int var_dims[] = {1, 1, 1, 1, 1, 1, 1}; // Dimensions of variables
-    int centering[] = {0, 0, 0, 0, 0, 0, 0}; // Whether the variables are centered in a cell: 0 for zonal!
+    int var_dims[] = {1, 1, 1, 1, 1, 1, 1};  // Dimensions of variables
+    int centering[] = {0, 0, 0, 0, 0, 0, 0};  // Whether the variables are centered in a cell: 0 for zonal!
     const char *var_names[] = {"x-coords", "y-coords", "z-coords",
                                "i", "j", "k",
                                var_name.c_str()};
 
-    int dims[] = {Nx + 1, Ny + 1, Nz + 1};            // Dimensions of the rectilinear array (+1 for zonal values)
+    int dims[] = {Nx + 1, Ny + 1, Nz + 1};  // Dimensions of the rectilinear array (+1 for zonal values)
 
     auto *x_coords = new float[(Nx + 1)];
     auto *y_coords = new float[(Ny + 1)];
     auto *z_coords = new float[(Nz + 1)];
 
-    // Initialize grid
+    // Initialise grid
     // faces of the grid cells
     for (int i = 0; i < Nx + 1; i++) {
         x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
@@ -149,7 +149,7 @@ void VTKWriter::write_field(const Field &field, const std::string &file_name, co
     // velocities
     auto *field_of_var_name = new float[size];
 
-// Cast variables to floats
+    // Cast variables to floats
     for (int k = 0; k < Nz; k++) {
         for (int j = 0; j < Ny; j++) {
             for (int i = 0; i < Nx; i++) {
@@ -233,7 +233,7 @@ void VTKWriter::vtk_prepare_and_write(
 
     int size = static_cast<int>(domain->get_size());
 
-// Initialize variables
+    // Initialise variables
     int size_vars = 13; // Number of variables
     // Dimensions of variables (x,y,z,u,v,w,p,div,T,C,s,nu_t)
     int var_dims[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
@@ -256,7 +256,7 @@ void VTKWriter::vtk_prepare_and_write(
     auto *y_coords = new float[(Ny + 1)];
     auto *z_coords = new float[(Nz + 1)];
 
-    // Initialize grid
+    // Initialise grid
     // faces of the grid cells
     for (int i = 0; i < Nx + 1; i++) {
         x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
@@ -294,7 +294,7 @@ void VTKWriter::vtk_prepare_and_write(
     // energy source
     auto source_T = new float[size];
 
-// Cast variables to floats
+    // Cast variables to floats
     for (int k = 0; k < Nz; k++) {
         for (int j = 0; j < Ny; j++) {
             for (int i = 0; i < Nx; i++) {
@@ -386,7 +386,7 @@ void VTKWriter::vtk_prepare_and_write(
 
     int size = static_cast<int>(domain->get_size());
 
-    // Initialize variables
+    // Initialise variables
     int size_vars = 8; // Number of variables
     // Dimensions of variables (x,y,z,u,v,w,p,div,T)
     int var_dims[] = {1, 1, 1, 1, 1, 1, 1, 1};
@@ -404,7 +404,7 @@ void VTKWriter::vtk_prepare_and_write(
     auto y_coords = new float[(Ny + 1)];
     auto z_coords = new float[(Nz + 1)];
 
-    // Initialize grid
+    // Initialise grid
     // faces of the grid cells
     for (int i = 0; i < Nx + 1; i++) {
         x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
@@ -516,7 +516,7 @@ void VTKWriter::vtk_prepare_and_write_debug(
     auto y_coords = new float[(Ny + 1)];
     auto z_coords = new float[(Nz + 1)];
 
-    // Initialize grid
+    // Initialise grid
     // faces of the grid cells
     for (int i = 0; i < Nx + 1; i++) {
         x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
