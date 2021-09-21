@@ -51,8 +51,14 @@ class BoundaryController {
 
     std::vector<FieldType> get_used_fields() const;
 
-    bool is_obstacle_cell(size_t level, size_t idx);
-    bool is_obstacle_cell(size_t level, size_t i, size_t j, size_t k);
+    bool inline is_obstacle_cell(const size_t level, const size_t idx) {
+        return m_multigrid->is_obstacle_cell(level, idx);
+    }
+
+    bool inline is_obstacle_cell(const size_t level,
+                          const size_t i, const size_t j, const size_t k) {
+        return m_multigrid->is_obstacle_cell(level, i, j, k);
+    }
 
  private:
 #ifndef BENCHMARKING
