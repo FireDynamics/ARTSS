@@ -982,12 +982,13 @@ void Multigrid::send_obstacle_lists_to_GPU() {
 // ================================= Apply boundary condition ======================================
 // *************************************************************************************************
 /// \brief  Apply boundary condition for obstacles, surfaces and domain
-/// \param  d Field
-/// \param  level Multigrid level
-/// \param  f Field type
+/// \param  &field Field
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void Multigrid::apply_boundary_condition(real *d, size_t level, FieldType f, bool sync) {
+void Multigrid::apply_boundary_condition(Field &field, bool sync) {
+    real *d = field.data;
+    size_t level = field.get_level();
+    FieldType f = field.get_type();
     if (m_number_of_surface_objects > 0) {
         Surface **surface_list = *(m_MG_surface_object_list + level);
         for (size_t id = 0; id < m_number_of_surface_objects; ++id) {
@@ -1031,7 +1032,7 @@ void Multigrid::apply_boundary_condition(real *d, size_t level, FieldType f, boo
     size_t patch_end[] = {get_first_index_of_boundary_slice_z(level + 1), get_first_index_of_boundary_slice_z(level + 1),
                           get_first_index_of_boundary_slice_y(level + 1), get_first_index_of_boundary_slice_y(level + 1),
                           get_first_index_of_boundary_slice_x(level + 1), get_first_index_of_boundary_slice_x(level + 1)};
-    m_bdc_boundary->apply_boundary_condition(d, m_data_boundary_patches_joined, patch_start, patch_end, f, level, sync);
+    m_bdc_boundary->apply_boundary_condition(field, m_data_boundary_patches_joined, patch_start, patch_end, sync);
 }
 
 //======================================== Update lists ====================================

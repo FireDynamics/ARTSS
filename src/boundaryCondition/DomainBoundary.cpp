@@ -12,27 +12,24 @@ namespace {
     //======================================== Apply boundary condition ============================
     // *********************************************************************************************
     /// \brief  Set boundary condition for domain boundary
-    /// \param  data_field   Field
+    /// \param  field   Field
     /// \param  d_patch List of indices for given patch
     /// \param  patch_start Start Index of Patch
     /// \param  patch_end End index of patch
-    /// \param  level Multigrid level
     /// \param  sign_reference_index Sign of reference index ( POSITIVE_SIGN or NEGATIVE_SIGN )
     /// \param  reference_index Index of reference
     /// \param  value Value of boundary condition
     /// \param  sign Sign of boundary condition ( POSITIVE_SIGN or NEGATIVE_SIGN )
     // *********************************************************************************************
-    void apply_boundary_condition(real *data_field, const size_t *d_patch, size_t patch_start,
-                                  size_t patch_end, size_t level, int8_t sign_reference_index,
-                                  size_t reference_index, real value, int8_t sign) {
-        Domain *domain = Domain::getInstance();
-        size_t b_size = domain->get_size(level);
-#pragma acc data present(data_field[:b_size])
+    void apply_boundary_condition(
+            Field &field, const size_t *d_patch, const size_t patch_start, const size_t patch_end,
+            int8_t sign_reference_index, size_t reference_index, real value, int8_t sign) {
+#pragma acc data present(field)
         {
 #pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
             for (size_t j = patch_start; j < patch_end; ++j) {
                 const size_t index = d_patch[j];
-                data_field[index] = sign * data_field[index + sign_reference_index * reference_index] + value;
+                field[index] = sign * field[index + sign_reference_index * reference_index] + value;
             }
 #pragma acc wait
         }
@@ -41,21 +38,17 @@ namespace {
     //======================================== Apply dirichlet =====================================
     // *********************************************************************************************
     /// \brief  Apply dirichlet boundary condition
-    /// \param  data_field   Field
+    /// \param  field   Field
     /// \param  d_patch List of indices for given patch
     /// \param  patch Patch
     /// \param  patch_start Start Index of Patch
     /// \param  patch_end End index of patch
-    /// \param  level Multigrid level
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_dirichlet(real *data_field, size_t *d_patch, Patch patch, size_t patch_start,
-                         size_t patch_end, size_t level, real value) {
-        if (level > 0) {
-            value = 0;
-        }
-
+    void apply_dirichlet(Field &field, size_t *d_patch, Patch patch,
+                         const size_t patch_start, const size_t patch_end, real value) {
         Domain *domain = Domain::getInstance();
+        size_t level = field.get_level();
         size_t reference_index = 0;
         int8_t sign_reference_index = POSITIVE_SIGN;
         switch (patch) {
@@ -83,27 +76,29 @@ namespace {
             sign_reference_index = NEGATIVE_SIGN;
         }
 
-        apply_boundary_condition(
-                data_field, d_patch, patch_start, patch_end,
-                level, sign_reference_index, reference_index, value * 2, NEGATIVE_SIGN);
+        apply_boundary_condition(field, d_patch, patch_start, patch_end,
+                                 sign_reference_index, reference_index, value * 2, NEGATIVE_SIGN);
     }
 
     //======================================== Apply neumann =======================================
     // *********************************************************************************************
     /// \brief  Apply neumann boundary condition
-    /// \param  data_field   Field
+    /// \param  field   Field
     /// \param  d_patch List of indices for given patch
     /// \param  patch Patch
     /// \param  patch_start Start Index of Patch
     /// \param  patch_end End index of patch
-    /// \param  level Multigrid level
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_neumann(real *data_field, size_t *d_patch, Patch patch, size_t patch_start,
-                       size_t patch_end, size_t level, real value) {
+    void apply_neumann(Field &field, size_t *d_patch, Patch patch,
+                       size_t patch_start, size_t patch_end, real value) {
+        size_t level = field.get_level();
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger("DomainBoundary");
         if (level > 0) {
-            value = 0;
+            logger->error("neumann boundary condition for level {}", level);
         }
+#endif
         Domain *domain = Domain::getInstance();
         size_t reference_index = 0;
         int8_t sign_reference_index = POSITIVE_SIGN;
@@ -125,7 +120,6 @@ namespace {
                 break;
             default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("DomainBoundary");
                 logger->error("Unknown Patch for neumann boundary condition: {}", patch);
 #endif
                 break;
@@ -134,9 +128,8 @@ namespace {
         if (patch == BACK || patch == TOP || patch == RIGHT){
             sign_reference_index = NEGATIVE_SIGN;
         }
-        apply_boundary_condition(
-                data_field, d_patch, patch_start, patch_end,
-                level, sign_reference_index, reference_index, value, POSITIVE_SIGN);
+        apply_boundary_condition(field, d_patch, patch_start, patch_end,
+                                 sign_reference_index, reference_index, value, POSITIVE_SIGN);
     }
 
     //======================================== Apply periodic ======================================
@@ -149,14 +142,21 @@ namespace {
     /// \param  patch_end End index of patch
     /// \param  level Multigrid level
     // *********************************************************************************************
-    void apply_periodic(real *data_field, size_t *d_patch, Patch patch, size_t patch_start,
-                        size_t patch_end, size_t level) {
+    void apply_periodic(Field &field, size_t *d_patch, Patch patch,
+                        const size_t patch_start, const size_t patch_end) {
+        size_t level = field.get_level();
         Domain *domain = Domain::getInstance();
         size_t Nx = domain->get_Nx(level);
         size_t Ny = domain->get_Ny(level);
 
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger("DomainBoundary");
+        if (level > 0) {
+            logger->error("periodic boundary condition for level {}", level);
+        }
+#endif
         size_t reference_index = 0;
-        int sign_reference_index = POSITIVE_SIGN;
+        int8_t sign_reference_index = POSITIVE_SIGN;
 
         switch (patch) {
             case FRONT:
@@ -173,7 +173,6 @@ namespace {
                 break;
             default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("DomainBoundary");
                 logger->error("Unknown Patch for periodic boundary condition: {}", patch);
 #endif
                 break;
@@ -183,9 +182,8 @@ namespace {
             sign_reference_index = NEGATIVE_SIGN;
         }
 
-        apply_boundary_condition(
-                data_field, d_patch, patch_start, patch_end,
-                level, sign_reference_index, reference_index, 0, POSITIVE_SIGN);
+        apply_boundary_condition(field, d_patch, patch_start, patch_end,
+                                 sign_reference_index, reference_index, 0, POSITIVE_SIGN);
     }
 }
 
@@ -200,26 +198,30 @@ namespace {
 /// \param  boundary_data Boundary data_field object of Domain
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void apply_boundary_condition(real *data_field, size_t **index_fields, const size_t *patch_starts,
-                              const size_t *patch_ends, size_t level, BoundaryData *boundary_data,
-                              bool sync) {
+void apply_boundary_condition(Field &field, size_t **index_fields, const size_t *patch_starts,
+                              const size_t *patch_ends, BoundaryData *boundary_data, bool sync) {
     for (size_t i = 0; i < number_of_patches; i++) {
         size_t *d_patch = *(index_fields + i);
         size_t patch_start = *(patch_starts + i);
         size_t patch_end = *(patch_ends + i);
-        Patch p = static_cast<Patch>(i);
+        auto p = static_cast<Patch>(i);
         BoundaryCondition bc = boundary_data->get_boundary_condition(p);
+        real value = 0;
         switch (bc) {
             case BoundaryCondition::DIRICHLET:
-                apply_dirichlet(data_field, d_patch, p, patch_start, patch_end, level,
-                                boundary_data->get_value(p));
+                if (field.get_level() == 0) {
+                    value = boundary_data->get_value(p);
+                }
+                apply_dirichlet(field, d_patch, p, patch_start, patch_end, value);
                 break;
             case BoundaryCondition::NEUMANN:
-                apply_neumann(data_field, d_patch, p, patch_start, patch_end, level,
-                              boundary_data->get_value(p));
+                if (field.get_level() == 0) {
+                    value = boundary_data->get_value(p);
+                }
+                apply_neumann(field, d_patch, p, patch_start, patch_end, value);
                 break;
             case BoundaryCondition::PERIODIC:
-                apply_periodic(data_field, d_patch, p, patch_start, patch_end, level);
+                apply_periodic(field, d_patch, p, patch_start, patch_end);
                 break;
             default:
 #ifndef BENCHMARKING

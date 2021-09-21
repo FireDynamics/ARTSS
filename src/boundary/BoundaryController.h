@@ -22,8 +22,7 @@ class BoundaryController {
     static BoundaryController* getInstance();
     ~BoundaryController();
 
-    void apply_boundary(real *d, FieldType f, bool sync = true);
-    void apply_boundary(real *d, size_t level, FieldType f, bool sync = true);
+    void apply_boundary(Field &field, bool sync = true);
 
     void print_boundaries();
     void update_lists();

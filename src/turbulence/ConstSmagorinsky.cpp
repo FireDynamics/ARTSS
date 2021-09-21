@@ -26,19 +26,19 @@ ConstSmagorinsky::ConstSmagorinsky() {
     m_Cs = params->get_real("solver/turbulence/Cs");
 }
 
-//============================ Calculate turbulent viscosity =============================
-// ***************************************************************************************
+//============================ Calculate turbulent viscosity =======================================
+// *************************************************************************************************
 /// \brief  calculates turbulent viscosity
 /// \param  ev            output pointer
 /// \param  in_u          input pointer of x-velocity
 /// \param  in_v          input pointer of y-velocity
 /// \param  in_w          input pointer of z-velocity
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
+// *************************************************************************************************
 void ConstSmagorinsky::CalcTurbViscosity(Field &ev,
-                                         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
+                                         Field const &in_u, Field const &in_v, Field const &in_w,
+                                         bool sync) {
     auto domain = Domain::getInstance();
-
 #pragma acc data present(ev, u, v, w)
     {
         const size_t Nx = domain->get_Nx();
@@ -48,9 +48,9 @@ void ConstSmagorinsky::CalcTurbViscosity(Field &ev,
         const real dy = domain->get_dy();
         const real dz = domain->get_dz();
 
-        const real rdx = 1. / dx;
-        const real rdy = 1. / dy;
-        const real rdz = 1. / dz;
+        const real reciprocal_dx = 1. / dx;
+        const real reciprocal_dy = 1. / dy;
+        const real reciprocal_dz = 1. / dz;
 
         const real delta_s = cbrt(dx * dy * dz);  // implicit filter
         real S_bar;
@@ -67,15 +67,15 @@ void ConstSmagorinsky::CalcTurbViscosity(Field &ev,
 #pragma acc parallel loop independent present(ev, u, v, w, d_inner_list[:bsize_i]) async
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_inner_list[j];
-            S11 = (in_u[i + neighbour_i] - in_u[i - neighbour_i]) * 0.5 * rdx;
-            S22 = (in_v[i + neighbour_j] - in_v[i - neighbour_j]) * 0.5 * rdy;
-            S33 = (in_w[i + neighbour_k] - in_w[i - neighbour_k]) * 0.5 * rdz;
-            S12 = 0.5 * ((in_u[i + neighbour_j] - in_u[i - neighbour_j]) * 0.5 * rdy
-                       + (in_v[i + neighbour_i] - in_v[i - neighbour_i]) * 0.5 * rdx);
-            S13 = 0.5 * ((in_u[i + neighbour_k] - in_u[i - neighbour_k]) * 0.5 * rdz
-                       + (in_w[i + neighbour_i] - in_w[i - neighbour_i]) * 0.5 * rdx);
-            S23 = 0.5 * ((in_v[i + neighbour_k] - in_v[i - neighbour_k]) * 0.5 * rdz
-                       + (in_w[i + neighbour_j] - in_w[i - neighbour_j]) * 0.5 * rdy);
+            S11 = (in_u[i + neighbour_i] - in_u[i - neighbour_i]) * 0.5 * reciprocal_dx;
+            S22 = (in_v[i + neighbour_j] - in_v[i - neighbour_j]) * 0.5 * reciprocal_dy;
+            S33 = (in_w[i + neighbour_k] - in_w[i - neighbour_k]) * 0.5 * reciprocal_dz;
+            S12 = 0.5 * ((in_u[i + neighbour_j] - in_u[i - neighbour_j]) * 0.5 * reciprocal_dy
+                       + (in_v[i + neighbour_i] - in_v[i - neighbour_i]) * 0.5 * reciprocal_dx);
+            S13 = 0.5 * ((in_u[i + neighbour_k] - in_u[i - neighbour_k]) * 0.5 * reciprocal_dz
+                       + (in_w[i + neighbour_i] - in_w[i - neighbour_i]) * 0.5 * reciprocal_dx);
+            S23 = 0.5 * ((in_v[i + neighbour_k] - in_v[i - neighbour_k]) * 0.5 * reciprocal_dz
+                       + (in_w[i + neighbour_j] - in_w[i - neighbour_j]) * 0.5 * reciprocal_dy);
 
             S_bar = sqrt(2. * (S11 * S11 + S22 * S22 + S33 * S33 + 2. * (S12 * S12) + 2. * (S13 * S13) + 2. * (S23 * S23)));
 
@@ -85,7 +85,7 @@ void ConstSmagorinsky::CalcTurbViscosity(Field &ev,
         if (sync) {
 #pragma acc wait
         }
-        boundary->apply_boundary(ev.data, ev.get_type(), sync);
+        boundary->apply_boundary(ev, sync);
     }
 }
 

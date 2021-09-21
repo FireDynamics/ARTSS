@@ -225,12 +225,6 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         Field *field_residuum1_level = *(m_residuum1 + level);
         Field *field_residuum1_level_plus_1 = *(m_residuum1 + level + 1);
 
-        real *data_residuum0_level = field_residuum0_level->data;
-        real *data_residuum1_level_plus_1 = field_residuum1_level_plus_1->data;
-
-        FieldType type_r0 = field_residuum0_level->get_type();
-        FieldType type_r1 = field_residuum1_level_plus_1->get_type();
-
 #pragma acc data present(residuum0_level, error1_level, error1_level_plus_1, \
                          mg_temporal_level, residuum1_level, residuum1_level_plus_1, \
                          out)
@@ -238,10 +232,10 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
             Smooth(*field_error1_level, *field_mg_temporal_level, *field_residuum1_level, level, sync);
 
             Residuum(*field_residuum0_level, *field_error1_level, *field_residuum1_level, level, sync);
-            boundary->apply_boundary(data_residuum0_level, level, type_r0, sync);  // for m_residuum0 only Dirichlet BC
+            boundary->apply_boundary(*field_residuum0_level, sync);  // for m_residuum0 only Dirichlet BC
 
             Restrict(*field_residuum1_level_plus_1, *field_residuum0_level, level, sync);
-            boundary->apply_boundary(data_residuum1_level_plus_1, level + 1, type_r1, sync);  // for m_residuum1 only Dirichlet BC
+            boundary->apply_boundary(*field_residuum1_level_plus_1, sync);  // for m_residuum1 only Dirichlet BC
 
             field_error1_level_plus_1->set_value(0);
         }
@@ -254,14 +248,11 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         Field *field_mg_temporal_solution_level_minus_1 = *(m_mg_temporal_solution + level - 1);
         Field *field_residuum1_level_minus_1 = *(m_residuum1 + level - 1);
 
-        real *data_error0_level = field_error0_level->data;
-        FieldType type_error0 = field_error0_level->get_type();
-
 #pragma acc data present(error0_level, error1_level, error1_level_minus_1, \
                          mg_temporal_solution_level_minus_1, residuum1_level_minus_1, out)
         {
             Prolongate(*field_error0_level, *field_error1_level, level, sync);
-            boundary->apply_boundary(data_error0_level, level - 1, type_error0, sync);
+            boundary->apply_boundary(*field_error0_level, sync);
 
             // correct
             *field_error1_level_minus_1 += *field_error0_level;
@@ -275,10 +266,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
             }
         }
     }
-    // set boundaries
-    real *data_out = out.data;
-    FieldType type = out.get_type();
-    boundary->apply_boundary(data_out, type, sync);
+    boundary->apply_boundary(out, sync);
 
     if (sync) {
 #pragma acc wait
@@ -296,7 +284,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
 // *****************************************************************************
 void VCycleMG::Smooth(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
     BoundaryController *boundary = BoundaryController::getInstance();
-    boundary->apply_boundary(out.data, level, out.get_type(), sync);
+    boundary->apply_boundary(out, sync);
 
     (this->*m_smooth_function)(out, tmp, b, level, sync);
 
@@ -593,7 +581,7 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
     const real dz = domain->get_dz(level);
 
     BoundaryController *boundary = BoundaryController::getInstance();
-    boundary->apply_boundary(out.data, level, out.get_type(), sync);
+    boundary->apply_boundary(out, sync);
 
     const real reciprocal_dx2 = 1. / (dx * dx);
     const real reciprocal_dy2 = 1. / (dy * dy);
@@ -612,7 +600,7 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
         for (int i = 0; i < m_n_relax; i++) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
                     out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
-            boundary->apply_boundary(out.data, level, out.get_type(), sync);
+            boundary->apply_boundary(out, sync);
         }
     }
 }
@@ -635,7 +623,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
     const size_t start_i = boundary->get_inner_list_level_joined_start(level);
     const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 
-    boundary->apply_boundary(out.data, level, out.get_type(), sync);
+    boundary->apply_boundary(out, sync);
 
     const real reciprocal_dx2 = 1. / (dx * dx);
     const real reciprocal_dy2 = 1. / (dy * dy);
@@ -664,7 +652,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
         while (res > tol_res && it < max_it) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
                     out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
-            boundary->apply_boundary(out.data, level, out.get_type(), sync);
+            boundary->apply_boundary(out, sync);
 
             sum = 0.;
 #pragma acc parallel loop independent present(out, tmp, data_inner_list[:bsize_i]) async
@@ -693,7 +681,7 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
     const real dz = domain->get_dz(level);
 
     BoundaryController *boundary = BoundaryController::getInstance();
-    boundary->apply_boundary(out.data, level, out.get_type(), sync);
+    boundary->apply_boundary(out, sync);
 
     const real reciprocal_dx2 = 1. / (dx * dx);
     const real reciprocal_dy2 = 1. / (dy * dy);
@@ -713,7 +701,7 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
         size_t it = 0;
         for (int i = 0; i < m_n_relax; i++) {
             JacobiDiffuse::JacobiStep(level, out, tmp, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
-            boundary->apply_boundary(out.data, level, out.get_type(), sync);
+            boundary->apply_boundary(out, sync);
             Field::swap(tmp, out);
             it++;
         }
@@ -743,7 +731,7 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
     const size_t start_i = boundary->get_inner_list_level_joined_start(level);
     const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
 
-    boundary->apply_boundary(out.data, level, out.get_type(), sync);
+    boundary->apply_boundary(out, sync);
 
     const real reciprocal_dx2 = 1. / (dx * dx);
     const real reciprocal_dy2 = 1. / (dy * dy);
@@ -769,7 +757,7 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
         const size_t neighbour_k = Nx * Ny;
         while (res > m_diffusion_tol_res && it < m_diffusion_max_iter) {
             JacobiDiffuse::JacobiStep(level, out, tmp, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
-            boundary->apply_boundary(out.data, level, out.get_type(), sync);
+            boundary->apply_boundary(out, sync);
 
             sum = 0.;
 

@@ -44,10 +44,6 @@ void SLAdvect::advect(
         Field const &u_vel, Field const &v_vel, Field const &w_vel,
         bool sync) {
     auto domain = Domain::getInstance();
-
-    // local variables and parameters for GPU
-    FieldType type = out.get_type();
-
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
@@ -55,12 +51,12 @@ void SLAdvect::advect(
 
 #pragma acc data present(out, in, u_vel, v_vel, w_vel, d_iList[:bsize_i])
     {
-        const size_t Nx = domain->get_Nx(out.get_level());
-        const size_t Ny = domain->get_Ny(out.get_level());
+        const size_t Nx = domain->get_Nx();
+        const size_t Ny = domain->get_Ny();
 
-        const real dx = domain->get_dx(out.get_level());
-        const real dy = domain->get_dy(out.get_level());
-        const real dz = domain->get_dz(out.get_level());
+        const real dx = domain->get_dx();
+        const real dy = domain->get_dy();
+        const real dz = domain->get_dz();
 
         const real dt = m_dt;
 
@@ -175,7 +171,7 @@ void SLAdvect::advect(
             auto tmp = s110 + t * (s111 - s110);  // row-major
             out[idx] = tmp;
         }
-        boundary->apply_boundary(out.data, type, sync);
+        boundary->apply_boundary(out, sync);
 
         if (sync) {
 #pragma acc wait

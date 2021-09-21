@@ -42,7 +42,7 @@ class Multigrid {
 
     void update_lists();
 
-    void apply_boundary_condition(real* d, size_t level, FieldType f, bool sync = false);
+    void apply_boundary_condition(Field &field, bool sync = false);
 
     size_t get_obstacle_stride_x(size_t id, size_t level) const;
     size_t get_obstacle_stride_y(size_t id, size_t level) const;

@@ -34,18 +34,13 @@ JacobiDiffuse::JacobiDiffuse() {
 /// \param  out     output pointer
 /// \param  in      input pointer
 /// \param  b       source pointer
-/// \param  D     diffusion coefficient (nu - velocity, kappa - temperature)
+/// \param  D       diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void JacobiDiffuse::diffuse(
         Field &out, Field &in, Field const &b,
         real const D, bool sync) {
     auto domain = Domain::getInstance();
-    // local variables and parameters for GPU
-    FieldType type = out.get_type();
-
-    auto d_out = out.data;
-
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
@@ -60,15 +55,15 @@ void JacobiDiffuse::diffuse(
         const real dy = domain->get_dy();
         const real dz = domain->get_dz();
 
-        const real rdx = 1. / dx;  // due to unnecessary parameter passing of *this
-        const real rdy = 1. / dy;
-        const real rdz = 1. / dz;
+        const real reciprocal_dx = 1. / dx;  // due to unnecessary parameter passing of *this
+        const real reciprocal_dy = 1. / dy;
+        const real reciprocal_dz = 1. / dz;
 
-        const real alpha_x = D * m_dt * rdx * rdx;  // due to better pgi handling of scalars (instead of arrays)
-        const real alpha_y = D * m_dt * rdy * rdy;
-        const real alpha_z = D * m_dt * rdz * rdz;
+        const real alpha_x = D * m_dt * reciprocal_dx * reciprocal_dx;  // due to better pgi handling of scalars (instead of arrays)
+        const real alpha_y = D * m_dt * reciprocal_dy * reciprocal_dy;
+        const real alpha_z = D * m_dt * reciprocal_dz * reciprocal_dz;
 
-        const real rbeta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
+        const real reciprocal_beta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
 
         const real dsign = m_dsign;
         const real w = m_w;
@@ -80,25 +75,24 @@ void JacobiDiffuse::diffuse(
         real res = 1.;
 
         while (res > tol_res && it < max_it) {
-            JacobiStep(out, in, b, alpha_x, alpha_y, alpha_z, rbeta, dsign, w, sync);
-            boundary->apply_boundary(d_out, type, sync);
+            JacobiStep(out, in, b, alpha_x, alpha_y, alpha_z, reciprocal_beta, dsign, w, sync);
+            boundary->apply_boundary(out, sync);
 
             sum = 0.;
 
 #pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_inner_list[j];
-                res = rbeta * (out[i] - in[i]);  // = rbeta*(beta*(b - sum_j!=i(alpha*in))) - rbeta*in = b - sum(alpha*in) = b - A*x(k)
+                res = reciprocal_beta * (out[i] - in[i]);  // = reciprocal_beta*(beta*(b - sum_j!=i(alpha*in))) - reciprocal_beta*in = b - sum(alpha*in) = b - A*x(k)
                 sum += res * res;
             }
-
-// info: in nvvp profile 8byte size copy from to device to/from pageable due to sum!
+            // info: in nvvp profile 8byte size copy from to device to/from pageable due to sum!
 
 #pragma acc wait
             res = sqrt(sum);
             it++;
 
-// swap (no pointer swap due to uncontrolled behavior in TimeIntegration Update)
+            // swap (no pointer swap due to uncontrolled behavior in TimeIntegration Update)
 #pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_inner_list[j];
@@ -112,7 +106,7 @@ void JacobiDiffuse::diffuse(
             }
         }
 
-        if (it % 2 != 0) // swap necessary when odd number of iterations
+        if (it % 2 != 0)  // swap necessary when odd number of iterations
         {
 #pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
@@ -135,7 +129,7 @@ void JacobiDiffuse::diffuse(
         m_logger->info("Number of iterations: {}", it);
         m_logger->info("Jacobi ||res|| = {:0.5e}", res);
 #endif
-    }  // end data region
+    }
 }
 
 // ======================= Turbulent version ================================
@@ -154,10 +148,6 @@ void JacobiDiffuse::diffuse(
         real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    FieldType type = out.get_type();
-
-    auto d_out = out.data;
-
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_inner_list = boundary->get_inner_list_level_joined();
@@ -168,17 +158,17 @@ void JacobiDiffuse::diffuse(
 
 #pragma acc data present(out, in, b, EV)
     {
-        const real dx = domain->get_dx(out.get_level()); //due to unnecessary parameter passing of *this
-        const real dy = domain->get_dy(out.get_level());
-        const real dz = domain->get_dz(out.get_level());
+        const real dx = domain->get_dx();
+        const real dy = domain->get_dy();
+        const real dz = domain->get_dz();
 
-        const real rdx = 1. / dx; //due to unnecessary parameter passing of *this
-        const real rdy = 1. / dy;
-        const real rdz = 1. / dz;
+        const real reciprocal_dx = 1. / dx;
+        const real reciprocal_dy = 1. / dy;
+        const real reciprocal_dz = 1. / dz;
 
         real dt = m_dt;
 
-        real alpha_x, alpha_y, alpha_z, rbeta; //calculated in JacobiStep!
+        real alpha_x, alpha_y, alpha_z, reciprocal_beta;  // calculated in JacobiStep!
 
         const real dsign = m_dsign;
         const real w = m_w;
@@ -191,19 +181,19 @@ void JacobiDiffuse::diffuse(
 
         while (res > tol_res && it < max_it) {
             JacobiStep(out, in, b, dsign, w, D, EV, dt, sync);
-            boundary->apply_boundary(d_out, type, sync);
+            boundary->apply_boundary(out, sync);
 
             sum = 0.;
 
 #pragma acc parallel loop independent present(out, b, EV, d_inner_list[:bsize_i]) async
             for (size_t j = 0; j < bsize_i; ++j) {
                 const size_t i = d_inner_list[j];
-                alpha_x = (D + EV[i]) * dt * rdx * rdx;
-                alpha_y = (D + EV[i]) * dt * rdy * rdy;
-                alpha_z = (D + EV[i]) * dt * rdz * rdz;
-                rbeta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
+                alpha_x = (D + EV[i]) * dt * reciprocal_dx * reciprocal_dx;
+                alpha_y = (D + EV[i]) * dt * reciprocal_dy * reciprocal_dy;
+                alpha_z = (D + EV[i]) * dt * reciprocal_dz * reciprocal_dz;
+                reciprocal_beta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
 
-                res = rbeta * (out[i] - in[i]);
+                res = reciprocal_beta * (out[i] - in[i]);
                 sum += res * res;
             }
 
@@ -271,7 +261,7 @@ void JacobiDiffuse::diffuse(
 void JacobiDiffuse::JacobiStep(
         Field &out, Field const &in, Field const &b,
         real const alpha_x, real const alpha_y, real const alpha_z,
-        real const rbeta, real const dsign, real const w, bool sync) {
+        real const reciprocal_beta, real const dsign, real const w, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
@@ -291,7 +281,7 @@ void JacobiDiffuse::JacobiStep(
         real out_h = (dsign * b[i]
                 + alpha_x * (in[i + neighbour_i] + in[i - neighbour_i])
                 + alpha_y * (in[i + neighbour_j] + in[i - neighbour_j])
-                + alpha_z * (in[i + neighbour_k] + in[i - neighbour_k])) / rbeta;
+                + alpha_z * (in[i + neighbour_k] + in[i - neighbour_k])) / reciprocal_beta;
         out[i] = (1 - w) * in[i] + w * out_h;
     }
 
@@ -377,9 +367,9 @@ void JacobiDiffuse::JacobiStep(
     const real dy = domain->get_dy();
     const real dz = domain->get_dz();
 
-    const real rdx = 1. / dx;
-    const real rdy = 1. / dy;
-    const real rdz = 1. / dz;
+    const real reciprocal_dx = 1. / dx;
+    const real reciprocal_dy = 1. / dy;
+    const real reciprocal_dz = 1. / dz;
 
     auto boundary = BoundaryController::getInstance();
 
@@ -393,9 +383,9 @@ void JacobiDiffuse::JacobiStep(
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_inner_list[j];
 
-        auto aX = (D + EV[i]) * dt * rdx * rdx;
-        auto aY = (D + EV[i]) * dt * rdy * rdy;
-        auto aZ = (D + EV[i]) * dt * rdz * rdz;
+        auto aX = (D + EV[i]) * dt * reciprocal_dx * reciprocal_dx;
+        auto aY = (D + EV[i]) * dt * reciprocal_dy * reciprocal_dy;
+        auto aZ = (D + EV[i]) * dt * reciprocal_dz * reciprocal_dz;
 
         auto rb = (1. + 2. * (aX + aY + aZ));
         auto bb = 1. / rb;

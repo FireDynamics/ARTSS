@@ -76,22 +76,20 @@ void ISource::dissipate(
         Field &out,
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
     auto domain = Domain::getInstance();
-    size_t Nx = domain->get_Nx(out.get_level());
-    size_t Ny = domain->get_Ny(out.get_level());
+    size_t Nx = domain->get_Nx();
+    size_t Ny = domain->get_Ny();
 
-    real dx = domain->get_dx(out.get_level());
-    real dy = domain->get_dy(out.get_level());
-    real dz = domain->get_dz(out.get_level());
-    auto rdx = 1. / dx;
-    auto rdy = 1. / dy;
-    auto rdz = 1. / dz;
+    real dx = domain->get_dx();
+    real dy = domain->get_dy();
+    real dz = domain->get_dz();
+    real reciprocal_dx = 1. / dx;
+    real reciprocal_dy = 1. / dy;
+    real reciprocal_dz = 1. / dz;
 
     auto params = Parameters::getInstance();
 
     real dt = params->get_real("physical_parameters/dt");
     real nu = params->get_real("physical_parameters/nu");
-
-    auto type = out.get_type();
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_inner_list_level_joined();
@@ -107,29 +105,29 @@ void ISource::dissipate(
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_iList[j];
-            real out_h = nu * (2 * (0.5 * rdx * (in_u[i + neighbour_i] - in_u[i - neighbour_i]))
-                                 * (0.5 * rdx * (in_u[i + neighbour_i] - in_u[i - neighbour_i]))
-                             + 2 * (0.5 * rdy * (in_v[i + neighbour_j] - in_v[i - neighbour_j]))
-                                 * (0.5 * rdy * (in_v[i + neighbour_j] - in_v[i - neighbour_j]))
-                             + 2 * (0.5 * rdz * (in_w[i + neighbour_k] - in_w[i - neighbour_k]))
-                                 * (0.5 * rdz * (in_w[i + neighbour_k] - in_w[i - neighbour_k]))
-                                + ((0.5 * rdx * (in_v[i + neighbour_i] - in_v[i - neighbour_i]))
-                                +  (0.5 * rdy * (in_u[i + neighbour_j] - in_u[i - neighbour_j])))
-                                * ((0.5 * rdx * (in_v[i + neighbour_i] - in_v[i - neighbour_i]))
-                                +  (0.5 * rdy * (in_u[i + neighbour_j] - in_u[i - neighbour_j])))
-                                + ((0.5 * rdy * (in_w[i + neighbour_j] - in_w[i - neighbour_j]))
-                                +  (0.5 * rdz * (in_v[i + neighbour_k] - in_v[i - neighbour_k])))
-                                * ((0.5 * rdy * (in_w[i + neighbour_j] - in_w[i - neighbour_j]))
-                                +  (0.5 * rdz * (in_v[i + neighbour_k] - in_v[i - neighbour_k])))
-                                + ((0.5 * rdz * (in_u[i + neighbour_k] - in_u[i - neighbour_k]))
-                                +  (0.5 * rdx * (in_w[i + neighbour_i] - in_w[i - neighbour_i])))
-                                * ((0.5 * rdz * (in_u[i + neighbour_k] - in_u[i - neighbour_k]))
-                                +  (0.5 * rdx * (in_w[i + neighbour_i] - in_w[i - neighbour_i]))));
+            real out_h = nu * (2 * (0.5 * reciprocal_dx * (in_u[i + neighbour_i] - in_u[i - neighbour_i]))
+                                 * (0.5 * reciprocal_dx * (in_u[i + neighbour_i] - in_u[i - neighbour_i]))
+                             + 2 * (0.5 * reciprocal_dy * (in_v[i + neighbour_j] - in_v[i - neighbour_j]))
+                                 * (0.5 * reciprocal_dy * (in_v[i + neighbour_j] - in_v[i - neighbour_j]))
+                             + 2 * (0.5 * reciprocal_dz * (in_w[i + neighbour_k] - in_w[i - neighbour_k]))
+                                 * (0.5 * reciprocal_dz * (in_w[i + neighbour_k] - in_w[i - neighbour_k]))
+                                + ((0.5 * reciprocal_dx * (in_v[i + neighbour_i] - in_v[i - neighbour_i]))
+                                +  (0.5 * reciprocal_dy * (in_u[i + neighbour_j] - in_u[i - neighbour_j])))
+                                * ((0.5 * reciprocal_dx * (in_v[i + neighbour_i] - in_v[i - neighbour_i]))
+                                +  (0.5 * reciprocal_dy * (in_u[i + neighbour_j] - in_u[i - neighbour_j])))
+                                + ((0.5 * reciprocal_dy * (in_w[i + neighbour_j] - in_w[i - neighbour_j]))
+                                +  (0.5 * reciprocal_dz * (in_v[i + neighbour_k] - in_v[i - neighbour_k])))
+                                * ((0.5 * reciprocal_dy * (in_w[i + neighbour_j] - in_w[i - neighbour_j]))
+                                +  (0.5 * reciprocal_dz * (in_v[i + neighbour_k] - in_v[i - neighbour_k])))
+                                + ((0.5 * reciprocal_dz * (in_u[i + neighbour_k] - in_u[i - neighbour_k]))
+                                +  (0.5 * reciprocal_dx * (in_w[i + neighbour_i] - in_w[i - neighbour_i])))
+                                * ((0.5 * reciprocal_dz * (in_u[i + neighbour_k] - in_u[i - neighbour_k]))
+                                +  (0.5 * reciprocal_dx * (in_w[i + neighbour_i] - in_w[i - neighbour_i]))));
             out[i] += dt * out_h;
         }
 
         // boundaries
-        boundary->apply_boundary(out.data, type, sync);
+        boundary->apply_boundary(out, sync);
 
         if (sync) {
 #pragma acc wait

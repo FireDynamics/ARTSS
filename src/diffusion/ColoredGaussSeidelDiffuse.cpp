@@ -47,12 +47,6 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
 // ***************************************************************************************
 void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, const real D, bool sync) {
     auto domain = Domain::getInstance();
-    // local parameters for GPU
-    FieldType type = out.get_type();
-
-    auto d_out = out.data;
-    auto d_b = b.data;
-
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
@@ -63,20 +57,20 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, con
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize])
 {
-    const size_t Nx = domain->get_Nx(out.get_level());  // due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny(out.get_level());
+    const size_t Nx = domain->get_Nx();  // due to unnecessary parameter passing of *this
+    const size_t Ny = domain->get_Ny();
 
-    const real dx = domain->get_dx(out.get_level());  // due to unnecessary parameter passing of *this
-    const real dy = domain->get_dy(out.get_level());
-    const real dz = domain->get_dz(out.get_level());
+    const real dx = domain->get_dx();  // due to unnecessary parameter passing of *this
+    const real dy = domain->get_dy();
+    const real dz = domain->get_dz();
 
-    const real rdx = 1. / dx;
-    const real rdy = 1. / dy;
-    const real rdz = 1. / dz;
+    const real reciprocal_dx = 1. / dx;
+    const real reciprocal_dy = 1. / dy;
+    const real reciprocal_dz = 1. / dz;
 
-    const real alpha_x = D * m_dt * rdx * rdx;  // due to better pgi handling of scalars (instead of arrays)
-    const real alpha_y = D * m_dt * rdy * rdy;
-    const real alpha_z = D * m_dt * rdz * rdz;
+    const real alpha_x = D * m_dt * reciprocal_dx * reciprocal_dx;  // due to better pgi handling of scalars (instead of arrays)
+    const real alpha_y = D * m_dt * reciprocal_dy * reciprocal_dy;
+    const real alpha_z = D * m_dt * reciprocal_dz * reciprocal_dz;
 
     const real rbeta    = (1. + 2. * (alpha_x + alpha_y + alpha_z));
     const real beta     = 1. / rbeta;
@@ -91,19 +85,22 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, con
     real sum;
     real res = 1.;
 
+    const size_t neighbour_i = 1;
+    const size_t neighbour_j = Nx;
+    const size_t neighbour_k = Nx * Ny;
     while (res > tol_res && it < max_it) {
         colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, dsign, w, sync);
-        boundary->apply_boundary(d_out, type, sync);
+        boundary->apply_boundary(out, sync);
 
         sum = 0;
 
 //#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_iList[:bsize_i]) async
         for (size_t j = 0; j < bsize_i; ++j){
-        const size_t i = d_iList[j];
-            res = (- alpha_x * (d_out[i + 1] + d_out[i - 1])
-                   - alpha_y * (d_out[i + Nx] + d_out[i - Nx])
-                   - alpha_z * (d_out[i + Nx * Ny] + d_out[i - Nx * Ny])
-                   + rbeta * d_out[i] - d_b[i]);
+        const size_t index = d_iList[j];
+            res = (- alpha_x * (out[index + neighbour_i] + out[index - neighbour_i])
+                   - alpha_y * (out[index + neighbour_j] + out[index - neighbour_j])
+                   - alpha_z * (out[index + neighbour_k] + out[index - neighbour_k])
+                   + rbeta * out[index] - b[index]);
             // TODO: find a way to exclude obstacle indices! Jacobi now uses res=D*(out-in)
             sum += res * res;
         }
@@ -138,13 +135,6 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, con
 void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
         real const D, Field const &EV, bool sync) {
     auto domain = Domain::getInstance();
-    // local parameters for GPU
-    FieldType type = out.get_type();
-
-    auto d_out  = out.data;
-    auto d_b    = b.data;
-    auto d_EV   = EV.data;
-
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
@@ -162,9 +152,9 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
     const real dy = domain->get_dy(out.get_level());
     const real dz = domain->get_dz(out.get_level());
 
-    const real rdx = 1. / dx;
-    const real rdy = 1. / dy;
-    const real rdz = 1. / dz;
+    const real reciprocal_dx = 1. / dx;
+    const real reciprocal_dy = 1. / dy;
+    const real reciprocal_dz = 1. / dz;
 
     real dt = m_dt;
 
@@ -179,24 +169,27 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
     real sum;
     real res = 1.;
 
+    const size_t neighbour_i = 1;
+    const size_t neighbour_j = Nx;
+    const size_t neighbour_k = Nx * Ny;
     while (res > tol_res && it < max_it) {
         colored_gauss_seidel_step(out, b, dsign, w, D, EV, dt, sync);
-        boundary->apply_boundary(d_out, type, sync);
+        boundary->apply_boundary(out, sync);
 
         sum = 0;
 
 //#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_EV[:bsize], d_iList[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j){
         const size_t i = d_iList[j];
-        alpha_x = (D + d_EV[i]) * dt * rdx * rdx;
-        alpha_y = (D + d_EV[i]) * dt * rdy * rdy;
-        alpha_z = (D + d_EV[i]) * dt * rdz * rdz;
+        alpha_x = (D + EV[i]) * dt * reciprocal_dx * reciprocal_dx;
+        alpha_y = (D + EV[i]) * dt * reciprocal_dy * reciprocal_dy;
+        alpha_z = (D + EV[i]) * dt * reciprocal_dz * reciprocal_dz;
         rbeta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
 
-            res = (- alpha_x * (d_out[i + 1      ] + d_out[i - 1      ])
-                   - alpha_y * (d_out[i + Nx     ] + d_out[i - Nx     ])
-                   - alpha_z * (d_out[i + Nx * Ny] + d_out[i - Nx * Ny])
-                   + rbeta * d_out[i] - d_b[i]);
+            res = (- alpha_x * (out[i + neighbour_i] + out[i - neighbour_i])
+                   - alpha_y * (out[i + neighbour_j] + out[i - neighbour_j])
+                   - alpha_z * (out[i + neighbour_k] + out[i - neighbour_k])
+                   + rbeta * out[i] - b[i]);
             sum += res * res;
         }
 
@@ -223,9 +216,9 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
 /// \param  out      output pointer
 /// \param  b        source pointer
 /// \param  alpha    2-dimensional array;
-///                      \f$ (rdx^2, rdy^2)\f$ for pressure,
-///                      \f$ (\nu\cdot dt\cdot rdx^2, \nu\cdot dt\cdot rdy^2)\f$  for velocity,
-///                      \f$ (\kappa\cdot dt\cdot rdx^2, \kappa\cdot dt\cdot rdy^2)\f$ for temperature
+///                      \f$ (reciprocal_dx^2, reciprocal_dy^2)\f$ for pressure,
+///                      \f$ (\nu\cdot dt\cdot reciprocal_dx^2, \nu\cdot dt\cdot reciprocal_dy^2)\f$  for velocity,
+///                      \f$ (\kappa\cdot dt\cdot reciprocal_dx^2, \kappa\cdot dt\cdot reciprocal_dy^2)\f$ for temperature
 /// \param  beta     \f$ 1./(2\cdot(\alpha_0 + \alpha_1) + 0.5)\f$ for pressure
 ///                  \f$ 1/(2\cdot(\alpha_0 + \alpha_1) + 1)\f$ for velocity
 /// \param  dsign    sign (\a -1. for pressure, \a 1. else)
@@ -351,9 +344,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
     const real dy = domain->get_dy(out.get_level());
     const real dz = domain->get_dz(out.get_level());
 
-    const real rdx = 1. / dx;  // due to unnecessary parameter passing of *this
-    const real rdy = 1. / dy;
-    const real rdz = 1. / dz;
+    const real reciprocal_dx = 1. / dx;  // due to unnecessary parameter passing of *this
+    const real reciprocal_dy = 1. / dy;
+    const real reciprocal_dz = 1. / dz;
 
     real aX, aY, aZ, bb, rb;  // multipliers calculated
 
@@ -369,9 +362,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
     for (size_t k = 1; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
             for (size_t i = 1; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdx * rdx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdy * rdy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdz * rdz;
+                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
                 rb = (1. + 2. * (aX + aY + aZ));
                 bb = 1. / rb;
@@ -381,9 +374,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
         }
         for (size_t j = 2; j < Ny - 1; j += 2) {
             for (size_t i = 2; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdx * rdx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdy * rdy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdz * rdz;
+                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
                 rb = (1. + 2. * (aX + aY + aZ));
                 bb = 1. / rb;
@@ -396,9 +389,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
     for (size_t k = 2; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
             for (size_t i = 2; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdx * rdx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdy * rdy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdz * rdz;
+                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
                 rb = (1. + 2. * (aX + aY + aZ));
                 bb = 1. / rb;
@@ -408,9 +401,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
         }
         for (size_t j = 2; j < Ny - 1; j += 2) {
             for (size_t i = 1; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdx * rdx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdy * rdy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdz * rdz;
+                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
                 rb = (1. + 2. * (aX + aY + aZ));
                 bb = 1. / rb;
@@ -428,9 +421,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
     for (size_t k = 1; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
             for (size_t i = 2; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdx * rdx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdy * rdy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdz * rdz;
+                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
                 rb = (1. + 2. * (aX + aY + aZ));
                 bb = 1. / rb;
@@ -443,9 +436,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
     for (size_t k = 1; k < Nz - 1; k += 2) {
         for (size_t j = 2; j < Ny - 1; j += 2) {
             for (size_t i = 1; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdx * rdx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdy * rdy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdz * rdz;
+                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
                 rb = (1. + 2. * (aX + aY + aZ));
                 bb = 1. / rb;
@@ -458,9 +451,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
     for (size_t k = 2; k < Nz - 1; k += 2) {
         for (size_t j = 1; j < Ny - 1; j += 2) {
             for (size_t i = 1; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdx * rdx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdy * rdy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdz * rdz;
+                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
                 rb = (1. + 2. * (aX + aY + aZ));
                 bb = 1. / rb;
@@ -473,9 +466,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
     for (size_t k = 2; k < Nz - 1; k += 2) {
         for (size_t j = 2; j < Ny - 1; j += 2) {
             for (size_t i = 2; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdx * rdx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdy * rdy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * rdz * rdz;
+                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
                 rb = (1. + 2. * (aX + aY + aZ));
                 bb = 1. / rb;
@@ -497,9 +490,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
 /// \param  out      output pointer
 /// \param  b        source pointer
 /// \param  alpha    2-dimensional array;
-///                      \f$ (rdx^2, rdy^2)\f$ for pressure,
-///                      \f$ (\nu\cdot dt\cdot rdx^2, \nu\cdot dt\cdot rdy^2)\f$  for velocity,
-///                      \f$ (\kappa\cdot dt\cdot rdx^2, \kappa\cdot dt\cdot rdy^2)\f$ for temperature
+///                      \f$ (reciprocal_dx^2, reciprocal_dy^2)\f$ for pressure,
+///                      \f$ (\nu\cdot dt\cdot reciprocal_dx^2, \nu\cdot dt\cdot reciprocal_dy^2)\f$  for velocity,
+///                      \f$ (\kappa\cdot dt\cdot reciprocal_dx^2, \kappa\cdot dt\cdot reciprocal_dy^2)\f$ for temperature
 /// \param  beta     \f$ 1./(2\cdot(\alpha_0 + \alpha_1) + 0.5)\f$ for pressure
 ///                  \f$ 1/(2\cdot(\alpha_0 + \alpha_1) + 1)\f$ for velocity
 /// \param  dsign    sign (\a -1. for pressure, \a 1. else)
