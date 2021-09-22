@@ -95,3 +95,8 @@ TEST_F(BoundaryDataTest, get_boundary_condition_name) {
     std::string periodic = BoundaryData::get_boundary_condition_name(BoundaryCondition::PERIODIC);
     ASSERT_EQ(periodic, "periodic");
 }
+
+TEST_F(BoundaryDataTest, constructor) {
+    BoundaryData b;
+    ASSERT_EQ(true, b.is_empty());
+}
