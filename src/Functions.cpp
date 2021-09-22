@@ -1123,12 +1123,12 @@ namespace Functions {
         size_t size_oList = boundary->get_size_obstacle_list();
 
         std::mt19937 mt;
-        double steps = range/step_size;
+        double steps = range / step_size;
         if (seed > 0) {
-          mt = std::mt19937(seed);
+            mt = std::mt19937(seed);
         } else {
-          std::random_device rd;
-          mt = std::mt19937(rd());
+            std::random_device rd;
+            mt = std::mt19937(rd());
         }
         std::uniform_int_distribution<int> dist(-steps, steps);
 
@@ -1269,9 +1269,9 @@ namespace Functions {
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
             out_x->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_y->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_z->data[idx] = 0.;
             out_p->data[idx] =
                     pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
@@ -1285,9 +1285,9 @@ namespace Functions {
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
             out_x->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_y->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_z->data[idx] = 0.;
             out_p->data[idx] =
                     pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
@@ -1335,9 +1335,9 @@ namespace Functions {
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
             out_x->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_y->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_z->data[idx] = 0.;
             out_p->data[idx] =
                     pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
@@ -1351,9 +1351,9 @@ namespace Functions {
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
             out_x->data[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_y->data[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+                                       exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_z->data[idx] = 0.;
             out_p->data[idx] =
                     pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
