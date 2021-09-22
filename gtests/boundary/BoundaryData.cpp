@@ -5,7 +5,7 @@
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 //
 #include <gtest/gtest.h>
-#include <src/boundary/BoundaryData.h>
+#include "src/boundary/BoundaryData.h"
 
 class BoundaryDataTest : public testing::Test {
 };
@@ -98,5 +98,5 @@ TEST_F(BoundaryDataTest, get_boundary_condition_name) {
 
 TEST_F(BoundaryDataTest, constructor) {
     BoundaryData b;
-    ASSERT_EQ(true, b.is_empty());
+    ASSERT_TRUE(b.is_empty());
 }
