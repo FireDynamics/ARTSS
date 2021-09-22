@@ -4,21 +4,21 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_BUOYANCYMMS_H
-#define ARTSS_BUOYANCYMMS_H
+#ifndef ARTSS_SOURCE_BUOYANCYMMS_H_
+#define ARTSS_SOURCE_BUOYANCYMMS_H_
 
 
 #include "../interfaces/ISourceFunction.h"
 
 class BuoyancyMMS: public ISourceFunction {
-public:
+ public:
     BuoyancyMMS();
     ~BuoyancyMMS();
-    void update_source(Field *out, real t_cur) override;
-private:
+    void update_source(Field &out, real t_cur) override;
+ private:
     void set_up();
-    Field *m_source_field;
+    Field m_source_field;
 };
 
 
-#endif /* ARTSS_BUOYANCYMMS_H */
+#endif /* ARTSS_SOURCE_BUOYANCYMMS_H_ */

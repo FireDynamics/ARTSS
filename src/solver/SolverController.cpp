@@ -27,6 +27,7 @@
 #include "../source/ExplicitEulerSource.h"
 #include "../source/Zero.h"
 #include "../utility/Parameters.h"
+#include "../randomField/UniformRandom.h"
 
 SolverController::SolverController() {
 #ifndef BENCHMARKING
@@ -39,7 +40,7 @@ SolverController::SolverController() {
 #ifndef BENCHMARKING
     m_logger->info("Start initialising....");
 #endif
-    set_up_sources(string_solver);
+    set_up_sources();
     set_up_fields(string_solver);
     // TODO unclean, first updating device to apply boundary and then updating host to create temporary fields.
     m_field_controller->update_device();
@@ -63,7 +64,7 @@ SolverController::~SolverController() {
     delete source_concentration;
 }
 
-void SolverController::set_up_sources(const std::string &string_solver) {
+void SolverController::set_up_sources() {
     auto params = Parameters::getInstance();
     // source of temperature
     if (m_has_temperature) {
@@ -90,13 +91,7 @@ void SolverController::set_up_sources(const std::string &string_solver) {
             real sigma_y = params->get_real("solver/temperature/source/sigma_y");
             real sigma_z = params->get_real("solver/temperature/source/sigma_z");
             real tau = params->get_real("solver/temperature/source/tau");
-            bool has_noise = false;  // params->get("solver/temperature/source/noise") == XML_TRUE;
-            if (has_noise) {
-                m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
-            } else {
-                m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
-                // TODO has noise
-            }
+            m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
         } else if (temp_fct == SourceMethods::BuoyancyST_MMS) {
             m_source_function_temperature = new BuoyancyMMS();
         } else if (temp_fct == SourceMethods::Cube) {
@@ -114,6 +109,25 @@ void SolverController::set_up_sources(const std::string &string_solver) {
 #ifndef BENCHMARKING
             m_logger->warn("Source method {} not yet implemented!", temp_fct);
 #endif
+        }
+        bool has_noise = params->get("solver/temperature/source/random") == XML_TRUE;
+        if (has_noise) {
+            real range = params->get_real("solver/temperature/source/random/range");  // +- range of random numbers
+            bool has_custom_seed = params->get("solver/temperature/source/random/custom_seed") == XML_TRUE;
+            bool has_custom_steps = params->get("solver/temperature/source/random/custom_steps") == XML_TRUE;
+
+            int seed = -1;
+            if (has_custom_seed) {
+                seed = params->get_int("solver/temperature/source/random/seed");
+            }
+
+            real step_size = 1.0;
+            if (has_custom_steps) {
+                step_size = params->get_real("solver/temperature/source/random/step_size");
+            }
+
+            IRandomField *noise_maker = new UniformRandom(range, step_size, seed);
+            m_source_function_temperature->set_noise(noise_maker);
         }
     }
 
@@ -165,7 +179,7 @@ void SolverController::set_up_sources(const std::string &string_solver) {
             m_logger->critical("Source function {} not yet implemented! Simulation stopped!", source_type);
 #endif
             std::exit(1);
-            // TODO Error handling
+            // TODO(issue 6) Error handling
         }
     }
 }
@@ -223,7 +237,7 @@ void SolverController::init_solver(const std::string &string_solver) {
 void SolverController::set_up_fields(const std::string &string_solver) {
     auto params = Parameters::getInstance();
     std::string string_init_usr_fct = params->get("initial_conditions/usr_fct");
-    bool random = params->get("initial_conditions/random") == "Yes";
+    bool random = params->get("initial_conditions/random") == XML_TRUE;
 
     if (string_init_usr_fct == FunctionNames::GaussBubble) {
         if (string_solver == SolverTypes::AdvectionSolver) {
@@ -355,7 +369,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             real val = params->get_real("initial_conditions/val");
             Functions::Uniform(m_field_controller->field_T, val);
             if (random) {
-                call_random(m_field_controller->field_T);
+                call_random(*m_field_controller->field_T);
             }
             force_source();
             temperature_source();
@@ -367,7 +381,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbSolver) {
             Functions::Layers(m_field_controller->field_T);
             if (random) {
-                call_random(m_field_controller->field_T);
+                call_random(*m_field_controller->field_T);
             }
             force_source();
             temperature_source();
@@ -396,12 +410,12 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 #endif
         }
         // Random concentration
-        if ((string_solver == SolverTypes::NSTempConSolver || \
+        if ((string_solver == SolverTypes::NSTempConSolver ||
              string_solver == SolverTypes::NSTempTurbConSolver)
             && params->get("initial_conditions/con_fct") == FunctionNames::RandomC) {
             real Ca = params->get_real("initial_conditions/Ca");        // ambient concentration
             Functions::Uniform(m_field_controller->field_concentration, Ca);
-            call_random(m_field_controller->field_concentration);
+            call_random(*m_field_controller->field_concentration);
         }
     }
 
@@ -421,7 +435,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 /// \brief  Calls random function and reads necessary input variables
 /// \param  field       field as a pointer
 // ***************************************************************************************
-void SolverController::call_random(Field *field) {
+void SolverController::call_random(Field &field) {
     auto params = Parameters::getInstance();
     real range = params->get_real("initial_conditions/random/range");  // +- range of random numbers
     bool is_absolute = params->get("initial_conditions/random/absolute") == "Yes";
@@ -438,7 +452,7 @@ void SolverController::call_random(Field *field) {
         step_size = params->get_real("initial_conditions/random/step_size");
     }
 
-    Functions::Random(field, range, is_absolute, seed, step_size);
+    Functions::Random(&field, range, is_absolute, seed, step_size);
 }
 
 //======================================= Update data ==================================
@@ -535,13 +549,13 @@ void SolverController::update_sources(real t_cur, bool sync) {
 
 // Temperature source
     if (m_has_temperature) {
-        m_source_function_temperature->update_source(m_field_controller->field_source_T, t_cur);
+        m_source_function_temperature->update_source(*m_field_controller->field_source_T, t_cur);
         std::string tempFct = params->get("solver/temperature/source/temp_fct");
     }
 
 // Concentration source
     if (m_has_concentration) {
-        m_source_function_concentration->update_source(m_field_controller->field_source_concentration, t_cur);
+        m_source_function_concentration->update_source(*m_field_controller->field_source_concentration, t_cur);
     }
 }
 
