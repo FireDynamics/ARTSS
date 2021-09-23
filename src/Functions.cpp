@@ -860,8 +860,8 @@ namespace Functions {
         size_t size_inner_list = boundary->get_size_inner_list();
         size_t *boundary_list = boundary->get_boundary_list_level_joined();
         size_t size_boundary_list = boundary->get_size_boundary_list();
-        size_t *oList = boundary->get_obstacle_list();
-        size_t size_oList = boundary->get_size_obstacle_list();
+        size_t *obstacle_list = boundary->get_obstacle_list();
+        size_t size_obstacle_list = boundary->get_size_obstacle_list();
         size_t coords_i, coords_j, coords_k;
         real x, y, z;
 
@@ -938,8 +938,8 @@ namespace Functions {
                 }
             }
             //obstacles
-            for (size_t i = 0; i < size_oList; i++) {
-                size_t idx = oList[i];
+            for (size_t i = 0; i < size_obstacle_list; i++) {
+                size_t idx = obstacle_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -1140,7 +1140,7 @@ namespace Functions {
         }
     }
 
-// === Random Function - Superposition of field values with random values ===
+// ======== Random Function - Superposition of field values with random values ===========
 // ***************************************************************************************
 /// \brief  Creates random absolute/relative noise on given field
 /// \param  out          field
@@ -1153,10 +1153,6 @@ namespace Functions {
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
         size_t size_inner_list = boundary->get_size_inner_list();
-        size_t *boundary_list = boundary->get_boundary_list_level_joined();
-        size_t size_boundary_list = boundary->get_size_boundary_list();
-        size_t *oList = boundary->get_obstacle_list();
-        size_t size_oList = boundary->get_size_obstacle_list();
 
         std::mt19937 mt;
         double steps = range / step_size;
@@ -1216,7 +1212,9 @@ namespace Functions {
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out[idx] = sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) * sin(l * M_PI * zk(coords_k, Z1, dz));
+            out[idx] = sin(l * M_PI * xi(coords_i, X1, dx))
+                     * sin(l * M_PI * yj(coords_j, Y1, dy))
+                     * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
         // boundary cells
         for (size_t i = 0; i < size_boundary_list; i++) {
@@ -1225,7 +1223,9 @@ namespace Functions {
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out[idx] = sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) * sin(l * M_PI * zk(coords_k, Z1, dz));
+            out[idx] = sin(l * M_PI * xi(coords_i, X1, dx))
+                     * sin(l * M_PI * yj(coords_j, Y1, dy))
+                     * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
     }
 
