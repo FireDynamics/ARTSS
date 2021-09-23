@@ -174,7 +174,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Calculating Turbulent viscosity ...");
 #endif
-        mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
+        mu_tub->calc_turbulent_viscosity(*nu_t, *u, *v, *w, true);
 
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");

@@ -17,87 +17,85 @@
 
 ConstSmagorinsky::ConstSmagorinsky() {
     auto params = Parameters::getInstance();
-
-    m_nu = params->get_real("physical_parameters/nu");
-    m_dt = params->get_real("physical_parameters/dt");
-
-    m_Cs = 0.1; //Cs value of 0.1 is found to yield the best results for wide range of flows
+    // Cs value of 0.1 is found to yield the best results for wide range of flows
     // reference from Ansys Fluent Subgrid Scale models
     m_Cs = params->get_real("solver/turbulence/Cs");
 }
 
-//============================ Calculate turbulent viscosity =============================
-// ***************************************************************************************
+//============================ Calculate turbulent viscosity =======================================
+// *************************************************************************************************
 /// \brief  calculates turbulent viscosity
 /// \param  ev            output pointer
 /// \param  in_u          input pointer of x-velocity
 /// \param  in_v          input pointer of y-velocity
 /// \param  in_w          input pointer of z-velocity
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
-void ConstSmagorinsky::CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Field *in_w, bool sync) {
-
+// *************************************************************************************************
+void ConstSmagorinsky::calc_turbulent_viscosity(
+            Field &ev,
+            Field const &in_u, Field const &in_v, Field const &in_w,
+            bool sync) {
     auto domain = Domain::getInstance();
-    // local parameters for GPU
-    auto bsize = domain->get_size(in_u->get_level());
-
-    auto d_u = in_u->data;
-    auto d_v = in_v->data;
-    auto d_w = in_w->data;
-    auto d_ev = ev->data;
-
-#pragma acc data present(d_ev[:bsize], d_u[:bsize], d_v[:bsize], d_w[:bsize])
+#pragma acc data present(ev, u, v, w)
     {
-        const size_t Nx = domain->get_Nx(in_u->get_level());
-        const size_t Ny = domain->get_Ny(in_v->get_level());
+        const size_t Nx = domain->get_Nx();
+        const size_t Ny = domain->get_Ny();
 
-        const real dx = domain->get_dx(in_u->get_level());
-        const real dy = domain->get_dy(in_v->get_level());
-        const real dz = domain->get_dz(in_w->get_level());
+        const real dx = domain->get_dx();
+        const real dy = domain->get_dy();
+        const real dz = domain->get_dz();
 
-        const real rdx = 1. / dx;
-        const real rdy = 1. / dy;
-        const real rdz = 1. / dz;
+        const real reciprocal_dx = 1. / dx;
+        const real reciprocal_dy = 1. / dy;
+        const real reciprocal_dz = 1. / dz;
 
-        const real delta_s = cbrt(dx * dy * dz); // implicit filter
+        const real delta_s = cbrt(dx * dy * dz);  // implicit filter
         real S_bar;
         real S11, S22, S33, S12, S13, S23;
         real Cs = m_Cs;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *d_iList = boundary->get_inner_list_level_joined();
+        size_t *d_inner_list = boundary->get_inner_list_level_joined();
         auto bsize_i = boundary->get_size_inner_list();
 
-#pragma acc parallel loop independent present(d_ev[:bsize], d_u[:bsize], d_v[:bsize], d_w[:bsize], d_iList[:bsize_i]) async
+        size_t neighbour_i = 1;
+        size_t neighbour_j = Nx;
+        size_t neighbour_k = Nx * Ny;
+#pragma acc parallel loop independent present(ev, u, v, w, d_inner_list[:bsize_i]) async
         for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_iList[j];
-            S11 = (d_u[i + 1] - d_u[i - 1]) * 0.5 * rdx;
-            S22 = (d_v[i + Nx] - d_v[i - Nx]) * 0.5 * rdy;
-            S33 = (d_w[i + Nx * Ny] - d_w[i - Nx * Ny]) * 0.5 * rdz;
-            S12 = 0.5 * ((d_u[i + Nx] - d_u[i - Nx]) * 0.5 * rdy \
- + (d_v[i + 1] - d_v[i - 1]) * 0.5 * rdx);
-            S13 = 0.5 * ((d_u[i + Nx * Ny] - d_u[i - Nx * Ny]) * 0.5 * rdz  \
- + (d_w[i + 1] - d_w[i - 1]) * 0.5 * rdx);
-            S23 = 0.5 * ((d_v[i + Nx * Ny] - d_v[i - Nx * Ny]) * 0.5 * rdz  \
- + (d_w[i + Nx] - d_w[i - Nx]) * 0.5 * rdy);
+            const size_t i = d_inner_list[j];
+            S11 = (in_u[i + neighbour_i] - in_u[i - neighbour_i]) * 0.5 * reciprocal_dx;
+            S22 = (in_v[i + neighbour_j] - in_v[i - neighbour_j]) * 0.5 * reciprocal_dy;
+            S33 = (in_w[i + neighbour_k] - in_w[i - neighbour_k]) * 0.5 * reciprocal_dz;
+            S12 = 0.5 * ((in_u[i + neighbour_j] - in_u[i - neighbour_j]) * 0.5 * reciprocal_dy
+                       + (in_v[i + neighbour_i] - in_v[i - neighbour_i]) * 0.5 * reciprocal_dx);
+            S13 = 0.5 * ((in_u[i + neighbour_k] - in_u[i - neighbour_k]) * 0.5 * reciprocal_dz
+                       + (in_w[i + neighbour_i] - in_w[i - neighbour_i]) * 0.5 * reciprocal_dx);
+            S23 = 0.5 * ((in_v[i + neighbour_k] - in_v[i - neighbour_k]) * 0.5 * reciprocal_dz
+                       + (in_w[i + neighbour_j] - in_w[i - neighbour_j]) * 0.5 * reciprocal_dy);
 
-            S_bar = sqrt(2. * (S11 * S11 + S22 * S22 + S33 * S33 + 2. * (S12 * S12) + 2. * (S13 * S13) + 2. * (S23 * S23)));
+            S_bar = sqrt(2. * (S11 * S11 + S22
+                            *  S22 + S33 * S33
+                       + 2. * (S12 * S12)
+                       + 2. * (S13 * S13)
+                       + 2. * (S23 * S23)));
 
-            d_ev[i] = Cs * Cs * delta_s * delta_s * S_bar;
+            ev[i] = Cs * Cs * delta_s * delta_s * S_bar;
         }
 
         if (sync) {
 #pragma acc wait
         }
-    } // end data
+        boundary->apply_boundary(ev.data, ev.get_type(), sync);
+    }
 }
 
-//============================ Explicit filtering =============================
-// ***************************************************************************************
+//============================ Explicit filtering ==============================
+// *****************************************************************************
 /// \brief  explicitly filters variables
 /// \param  out           output pointer
 /// \param  in            input pointer
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
-void ConstSmagorinsky::ExplicitFiltering(Field *out, const Field *in, bool sync) {
+// *****************************************************************************
+void ConstSmagorinsky::explicit_filtering(Field &, Field const &, bool) {
 }

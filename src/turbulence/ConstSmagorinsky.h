@@ -14,13 +14,14 @@ public:
     ConstSmagorinsky();
     ~ConstSmagorinsky() override = default;
 
-    void CalcTurbViscosity(Field *ev, Field *in_u, Field *in_v, Field *in_w, bool sync) override;
+    void calc_turbulent_viscosity(
+            Field &ev,
+            const Field &in_u, const Field &in_v, const Field &in_w,
+            bool sync) override;
 
-    void ExplicitFiltering(Field *out, const Field *in, bool sync) override;
+    void explicit_filtering(Field &out, const Field &in, bool sync) override;
 
 private:
-    real m_nu;
-    real m_dt;
     real m_Cs;
 };
 
