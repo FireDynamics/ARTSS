@@ -1,5 +1,5 @@
 /// \file       FieldController.cpp
-/// \brief      manages everything reagarding any field object
+/// \brief      manages everything regarding any field object
 /// \date       Aug 12, 2020
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
@@ -8,8 +8,6 @@
 #include <string>
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
-#include "../solver/SolverSelection.h"
-#include "../utility/Parameters.h"
 
 FieldController::FieldController() {
     // Variables
@@ -309,6 +307,57 @@ void FieldController::update_data(bool sync) {
     }  // end data region
 }
 
+//======================================== Couple velocity ====================================
+// ***************************************************************************************
+/// \brief  couples vector (sets tmp and zero-th variables to current numerical solution)
+/// \param  a   current field in x- direction (const)
+/// \param  a0    zero-th field in x- direction
+/// \param  a_tmp temporal field in x- direction
+/// \param  b   current field in y- direction (const)
+/// \param  b0    zero-th field in y- direction
+/// \param  b_tmp temporal field in y- direction
+/// \param  c   current field in z- direction (const)
+/// \param  c0    zero-th field in z- direction
+/// \param  c_tmp temporal field in z- direction
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
+// ***************************************************************************************
+void FieldController::couple_vector(const Field &a, Field &a0, Field &a_tmp,
+                                    const Field &b, Field &b0, Field &b_tmp,
+                                    const Field &c, Field &c0, Field &c_tmp,
+                                    bool sync) {
+    // TODO parallelisable ?
+    a0.copy_data(a);
+    a_tmp.copy_data(a);
+
+    b0.copy_data(b);
+    b_tmp.copy_data(b);
+
+    c0.copy_data(c);
+    c_tmp.copy_data(c);
+
+    if (sync) {
+#pragma acc wait
+    }
+}
+
+//======================================= Couple scalar ==================================
+// ***************************************************************************************
+/// \brief  couples vector (sets tmp and zero-th variables to current numerical solution)
+/// \param  a   current field in x- direction (const)
+/// \param  a0    zero-th field in x- direction
+/// \param  a_tmp temporal field in x- direction
+/// \param  sync  synchronization boolean (true=sync (default), false=async)
+// ***************************************************************************************
+void FieldController::couple_scalar(const Field &a, Field &a0, Field &a_tmp, bool sync) {
+    // TODO parallelisable ?
+    a0.copy_data(a);
+    a_tmp.copy_data(a);
+
+    if (sync) {
+#pragma acc wait
+    }
+}
+
 void FieldController::update_device() {
     field_u->update_dev();
     field_v->update_dev();
@@ -347,34 +396,5 @@ void FieldController::update_host(){
     field_kappa_t->update_host();
     field_gamma_t->update_host();
 #pragma acc wait
-}
-
-void FieldController::couple_vector(const Field &a, Field &a0, Field &a_tmp,
-                                    const Field &b, Field &b0, Field &b_tmp,
-                                    const Field &c, Field &c0, Field &c_tmp,
-                                    bool sync) {
-    // TODO parallelisable ?
-    a0.copy_data(a);
-    a_tmp.copy_data(a);
-
-    b0.copy_data(b);
-    b_tmp.copy_data(b);
-
-    c0.copy_data(c);
-    c_tmp.copy_data(c);
-
-    if (sync) {
-#pragma acc wait
-    }
-}
-
-void FieldController::couple_scalar(const Field &a, Field &a0, Field &a_tmp, bool sync) {
-    // TODO parallelisable ?
-    a0.copy_data(a);
-    a_tmp.copy_data(a);
-
-    if (sync) {
-#pragma acc wait
-    }
 }
 

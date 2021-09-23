@@ -78,31 +78,27 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     auto params = Parameters::getInstance();
 
     // local variables and parameters for GPU
-    auto u = *m_field_controller->field_u;
-    auto v = *m_field_controller->field_v;
-    auto w = *m_field_controller->field_w;
-    auto u0 = *m_field_controller->field_u0;
-    auto v0 = *m_field_controller->field_v0;
-    auto w0 = *m_field_controller->field_w0;
-    auto u_tmp = *m_field_controller->field_u_tmp;
-    auto v_tmp = *m_field_controller->field_v_tmp;
-    auto w_tmp = *m_field_controller->field_w_tmp;
-    auto p = *m_field_controller->field_p;
-    auto p0 = *m_field_controller->field_p0;
-    auto rhs = *m_field_controller->field_rhs;
-    auto T = *m_field_controller->field_T;
-    auto T0 = *m_field_controller->field_T0;
-    auto T_tmp = *m_field_controller->field_T_tmp;
-    auto f_x = *m_field_controller->field_force_x;
-    auto f_y = *m_field_controller->field_force_y;
-    auto f_z = *m_field_controller->field_force_z;
-    auto S_T = *m_field_controller->field_source_T;
-    auto nu_t = *m_field_controller->field_nu_t;           // nu_t - Eddy Viscosity
-    auto kappa_t = *m_field_controller->field_kappa_t;     // kappa_t - Eddy thermal diffusivity
-
-    auto nu = m_nu;
-    auto kappa = m_kappa;
-    auto dir_vel = m_dir_vel;
+    Field &u = *m_field_controller->field_u;
+    Field &v = *m_field_controller->field_v;
+    Field &w = *m_field_controller->field_w;
+    Field &u0 = *m_field_controller->field_u0;
+    Field &v0 = *m_field_controller->field_v0;
+    Field &w0 = *m_field_controller->field_w0;
+    Field &u_tmp = *m_field_controller->field_u_tmp;
+    Field &v_tmp = *m_field_controller->field_v_tmp;
+    Field &w_tmp = *m_field_controller->field_w_tmp;
+    Field &p = *m_field_controller->field_p;
+    Field &p0 = *m_field_controller->field_p0;
+    Field &rhs = *m_field_controller->field_rhs;
+    Field &T = *m_field_controller->field_T;
+    Field &T0 = *m_field_controller->field_T0;
+    Field &T_tmp = *m_field_controller->field_T_tmp;
+    Field &f_x = *m_field_controller->field_force_x;
+    Field &f_y = *m_field_controller->field_force_y;
+    Field &f_z = *m_field_controller->field_force_z;
+    Field &S_T = *m_field_controller->field_source_T;
+    Field &nu_t = *m_field_controller->field_nu_t;           // nu_t - Eddy Viscosity
+    Field &kappa_t = *m_field_controller->field_kappa_t;     // kappa_t - Eddy thermal diffusivity
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
                          w0, w_tmp, p, p0, rhs, T, T0, T_tmp, \
@@ -129,9 +125,9 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(u, u0, u_tmp, m_nu, nu_t, sync);
+        dif_vel->diffuse(v, v0, v_tmp, m_nu, nu_t, sync);
+        dif_vel->diffuse(w, w0, w_tmp, m_nu, nu_t, sync);
 
         // Couple data to prepare for adding source
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
@@ -185,17 +181,17 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Temperature ...");
 #endif
-            dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
+            dif_temp->diffuse(T, T0, T_tmp, m_kappa, kappa_t, sync);
 
             // Couple temperature to prepare for adding source
             FieldController::couple_scalar(T, T0, T_tmp, sync);
         } else {
             // no turbulence
-            if (kappa != 0.) {
+            if (m_kappa != 0.) {
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Temperature ...");
 #endif
-                dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
+                dif_temp->diffuse(T, T0, T_tmp, m_kappa, sync);
 
                 // Couple temperature to prepare for adding source
                 FieldController::couple_scalar(T, T0, T_tmp, sync);
