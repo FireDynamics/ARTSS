@@ -136,7 +136,7 @@ void Solution::buoyancy_mms(const real t) {
 /// \brief  calculates analytical solution
 /// \param  t   time
 // ***************************************************************************************
-void Solution::calc_analytical_solution(real t) {
+void Solution::calc_analytical_solution(const real t) {
     if (m_current_time_step == t) {
         return;
     }

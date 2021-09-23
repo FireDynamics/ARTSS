@@ -15,12 +15,17 @@
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
-Visual::Visual(const Solution &solution) : m_solution(solution) {
+Visual::Visual(const Solution &solution, bool has_analytical_solution) :
+        m_solution(solution),
+        m_has_analytical_solution(has_analytical_solution) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
     m_filename = Utility::remove_extension(params->get_filename());
 
-    m_save_csv = (params->get("visualisation/save_csv") == "Yes");
-    m_save_vtk = (params->get("visualisation/save_vtk") == "Yes");
+    m_save_csv = (params->get("visualisation/save_csv") == XML_TRUE);
+    m_save_vtk = (params->get("visualisation/save_vtk") == XML_TRUE);
 
     m_dt = params->get_real("physical_parameters/dt");
     m_t_end = params->get_real("physical_parameters/t_end");
@@ -30,10 +35,12 @@ Visual::Visual(const Solution &solution) : m_solution(solution) {
     if (m_save_vtk) {
         m_vtk_plots = params->get_int("visualisation/vtk_nth_plot");
     }
-    m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
 }
 
 void Visual::visualise(const FieldController &field_controller, real t) {
+#ifndef BENCHMARKING
+    m_logger->info("Visualise ...");
+#endif
     int n = static_cast<int> (std::round(t / m_dt));
     std::string filename = create_filename(m_filename, n, false);
     if (m_save_vtk) {
@@ -55,7 +62,7 @@ void Visual::visualise(const FieldController &field_controller, real t) {
     }
 }
 
-void Visual::write_csv(const FieldController &field_controller, const std::string& filename){
+void Visual::write_csv(const FieldController &field_controller, const std::string &filename){
     // local variables and parameters for GPU
     field_controller.field_u->update_host();
     field_controller.field_v->update_host();
@@ -70,7 +77,7 @@ void Visual::write_csv(const FieldController &field_controller, const std::strin
     CSVWriter::write_numerical(field_controller, filename);
 }
 
-void Visual::write_vtk(const FieldController &field_controller, const std::string& filename){
+void Visual::write_vtk(const FieldController &field_controller, const std::string &filename){
     field_controller.field_u->update_host();
     field_controller.field_v->update_host();
     field_controller.field_w->update_host();
@@ -84,7 +91,7 @@ void Visual::write_vtk(const FieldController &field_controller, const std::strin
     VTKWriter::write_numerical(field_controller, filename);
 }
 
-void Visual::write_vtk_debug(const FieldController &field_controller, const std::string& filename){
+void Visual::write_vtk_debug(const FieldController &field_controller, const std::string &filename){
     field_controller.field_u->update_host();
     field_controller.field_v->update_host();
     field_controller.field_w->update_host();
@@ -103,7 +110,8 @@ void Visual::write_vtk_debug(const FieldController &field_controller, const std:
     VTKWriter::write_numerical_debug(field_controller, filename);
 }
 
-void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
+void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords,
+                             int Nx, int Ny, int Nz, real dx, real dy, real dz) {
     Domain *domain = Domain::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();

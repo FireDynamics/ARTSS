@@ -29,17 +29,14 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
     m_adaption = new Adaption(m_field_controller);
 #ifndef BENCHMARKING
     std::string initial_condition = params->get("initial_conditions/usr_fct");
-    bool has_analytical_solution = (params->get("solver/solution/available") == "Yes");
+    bool has_analytical_solution = (params->get("solver/solution/available") == XML_TRUE);
     m_solution = new Solution(initial_condition, has_analytical_solution);
-    m_analysis = new Analysis(m_solution);
-    m_visual = new Visual(*m_solution);
+    m_analysis = new Analysis(*m_solution, has_analytical_solution);
+    m_visual = new Visual(*m_solution, has_analytical_solution);
 #endif
 }
 
 void TimeIntegration::run() {
-    Domain *domain = Domain::getInstance();
-
-    // local variables and parameters for GPU
     Field &u = *m_field_controller->field_u;
     Field &v = *m_field_controller->field_v;
     Field &w = *m_field_controller->field_w;
@@ -124,7 +121,7 @@ void TimeIntegration::run() {
             m_analysis->calc_L2_norm_mid_point(m_field_controller, t_cur, Sum);
 
             // check CFL
-            real cfl = m_analysis->calc_CFL(&u, &v, &w, dt);
+            real cfl = m_analysis->calc_CFL(u, v, w, dt);
 
             // CFL condition not met
             if (cfl > 1) {

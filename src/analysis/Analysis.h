@@ -9,23 +9,22 @@
 
 #include "../utility/GlobalMacrosTypes.h"
 #include "Solution.h"
+#include "../field/Field.h"
 #include "../field/FieldController.h"
 
 class Analysis {
  public:
-    explicit Analysis(Solution *solution);
+    Analysis(Solution &solution, bool has_analytical_solution);
 
     void analyse(FieldController *solver, real t);
 
     void calc_L2_norm_mid_point(FieldController *solver, real t, real *sum);
     void calc_RMS_error(real sum_u, real sum_p, real sum_T);
-    real calc_CFL(Field *u, Field *v, Field *w, real dt);
+    real calc_CFL(Field const &u, Field const &v, Field const &w, real dt) const;
 
-    bool check_time_step_VN(Field *u, real dt);
+    bool check_time_step_VN(real dt);
 
-    real set_DT_with_CFL(Field *u, Field *v, Field *w);
-
-    void save_variables_in_file(FieldController *solv);
+    void save_variables_in_file(FieldController *field_controller);
 
  private:
     real m_tol = 1e-7;
@@ -35,11 +34,14 @@ class Analysis {
     real calc_absolute_spatial_error(read_ptr num, read_ptr ana);
     real calc_relative_spatial_error(read_ptr num, read_ptr ana);
 
-    static void write_file(const real *field, const std::string& filename, size_t *inner_list, size_t size_inner_list, size_t *boundary_list, size_t size_boundary_list, size_t *obstacle_list,
-                    size_t size_obstacle_list);
+    static void write_file(
+            const real *field, const std::string& filename,
+            size_t *inner_list, size_t size_inner_list,
+            size_t *boundary_list, size_t size_boundary_list,
+            size_t *obstacle_list, size_t size_obstacle_list);
 
-    bool has_analytic_solution = false;
-    Solution *m_solution;
+    bool m_has_analytic_solution = false;
+    Solution &m_solution;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

@@ -15,7 +15,6 @@
 class Solution {
  public:
     explicit Solution(const std::string &initial_condition, bool has_analytical_solution);
-
     void calc_analytical_solution(real t);
 
     // Getter
