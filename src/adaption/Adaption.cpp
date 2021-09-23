@@ -65,8 +65,7 @@ Adaption::Adaption(FieldController *field_controller) {
 /// \brief  starts adaption process
 /// \param  t_cur current timestep
 // ***************************************************************************************
-void Adaption::run(real t_cur) {
-
+void Adaption::run(real) {
     if (m_dynamic && isUpdateNecessary()) {
         applyChanges();
 #ifndef BENCHMARKING

@@ -8,7 +8,10 @@
 #include "../utility/Parameters.h"
 #include "../Domain.h"
 
-Vortex::Vortex(FieldController *field_controller) {
+Vortex::Vortex(FieldController *field_controller) :
+        m_u(field_controller->get_field_u()),
+        m_v(field_controller->get_field_v()),
+        m_w(field_controller->get_field_w()) {
     auto domain = Domain::getInstance();
     auto params = Parameters::getInstance();
     m_u_lin = params->get_real("initial_conditions/u_lin");
@@ -24,10 +27,6 @@ Vortex::Vortex(FieldController *field_controller) {
     }
     m_buffer = params->get_int("adaption/class/buffer");
     m_threshold = m_u_lin * params->get_real("adaption/class/threshold");
-
-    u = &field_controller->get_field_u();
-    v = &field_controller->get_field_v();
-    w = &field_controller->get_field_w();
 }
 
 // ==================================== Has reduction ===============================
@@ -44,9 +43,12 @@ bool Vortex::has_reduction() {
 /// \brief  Checks for adaption
 /// \return  bool if adaption is possible true
 // ********************************************************************************
-bool Vortex::update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) {
-    auto d_u = u->data;
-    auto d_v = v->data;
+bool Vortex::update(
+        long *p_shift_x1, long *p_shift_x2,
+        long *p_shift_y1, long *p_shift_y2,
+        long *p_shift_z1, long *p_shift_z2) {
+    auto d_u = m_u.data;
+    auto d_v = m_v.data;
     bool adaption = false;
 
     *p_shift_x1 = 0;
@@ -184,7 +186,7 @@ void Vortex::apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1,
 /// \param  arr_idx_size Size of arr_idx
 // ********************************************************************************
 void Vortex::Zero(size_t *arr_idx, size_t arr_idx_size) {
-    auto data_u = u->data;
+    auto data_u = m_u.data;
     //  auto data_v = v->data;
     //  auto data_w = w->data;
 #pragma acc parallel loop independent present(data_u[:arr_idx_size], arr_idx[:arr_idx_size])
@@ -202,9 +204,9 @@ void Vortex::Zero(size_t *arr_idx, size_t arr_idx_size) {
 /// \param  arr_idx_size Size of arr_idx
 // ********************************************************************************
 void Vortex::Drift_dynamic(const size_t *arr_idx, size_t arr_idx_size) {
-    auto data_x = u->data;
-    auto data_y = v->data;
-    auto data_z = w->data;
+    auto data_x = m_u.data;
+    auto data_y = m_v.data;
+    auto data_z = m_w.data;
     // inner cells
 
 #pragma acc parallel loop independent present(data_x[:arr_idx_size], data_z[:arr_idx_size], data_y[:arr_idx_size], arr_idx[:arr_idx_size])

@@ -128,14 +128,12 @@ void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, lo
     real *data_temp = m_T->data;
     real *data_tempA = m_Ta->data;
 
-    size_t size = domain->get_size();
-
     if (start) {
         size_t nx_begin = static_cast<size_t> (std::round((m_x1 - domain->get_X1()) / domain->get_dx()));
         long shift = *p_shift_x1;
         size_t index;
         size_t idx;
-#pragma acc parallel loop collapse(3) present(data_nu[:size], data_gamma[:size], data_kappa[:size], data_temp[:size], data_tempA[:size])
+#pragma acc parallel loop collapse(3) present(m_nu, m_gamma, m_kappa, m_T, m_Ta)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 for (int i = 0; i >= shift; i--) {
@@ -154,7 +152,7 @@ void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, lo
         long shift = *p_shift_x2;
         size_t index;
         size_t idx;
-#pragma acc parallel loop collapse(3) present(data_nu[:size], data_gamma[:size], data_kappa[:size], data_temp[:size], data_tempA[:size])
+#pragma acc parallel loop collapse(3) present(m_nu, m_gamma, m_kappa, m_T, m_Ta)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 for (int i = 0; i <= shift; i++) {
