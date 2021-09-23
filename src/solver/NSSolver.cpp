@@ -124,7 +124,7 @@ void NSSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Add source ...");
 #endif
-            sou->add_source(u, v, w, f_x, f_y, f_z, sync);
+            sou->add_source(*u, *v, *w, *f_x, *f_y, *f_z, sync);
             // Couple data
             FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }

@@ -599,19 +599,19 @@ void SolverController::momentum_source() {
     auto params = Parameters::getInstance();
     std::string dir_vel = params->get("solver/source/dir");
     if (dir_vel.find('x') != std::string::npos) {
-        source_velocity->buoyancy_force(m_field_controller->field_force_x,
-                                        m_field_controller->field_T,
-                                        m_field_controller->field_T_ambient);
+        source_velocity->buoyancy_force(*m_field_controller->field_force_x,
+                                        *m_field_controller->field_T,
+                                        *m_field_controller->field_T_ambient);
     }
     if (dir_vel.find('y') != std::string::npos) {
-        source_velocity->buoyancy_force(m_field_controller->field_force_y,
-                                        m_field_controller->field_T,
-                                        m_field_controller->field_T_ambient);
+        source_velocity->buoyancy_force(*m_field_controller->field_force_y,
+                                        *m_field_controller->field_T,
+                                        *m_field_controller->field_T_ambient);
     }
     if (dir_vel.find('z') != std::string::npos) {
-        source_velocity->buoyancy_force(m_field_controller->field_force_z,
-                                        m_field_controller->field_T,
-                                        m_field_controller->field_T_ambient);
+        source_velocity->buoyancy_force(*m_field_controller->field_force_z,
+                                        *m_field_controller->field_T,
+                                        *m_field_controller->field_T_ambient);
     }
 }
 

@@ -191,7 +191,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Add momentum source ...");
 #endif
-            sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
+            sou_vel->add_source(*u, *v, *w, *f_x, *f_y, *f_z, sync);
 
             // Couple data to prepare for adding source
             FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
@@ -259,7 +259,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Add dissipation ...");
 #endif
-            sou_temp->dissipate(T, u, v, w, sync);
+            sou_temp->dissipate(*T, *u, *v, *w, sync);
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -271,7 +271,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Add temperature source ...");
 #endif
-            sou_temp->add_source(T, S_T, sync);
+            sou_temp->add_source(*T, *S_T, sync);
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -323,7 +323,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Add concentration source ...");
 #endif
-            sou_con->add_source(C, S_C, sync);
+            sou_con->add_source(*C, *S_C, sync);
 
             // Couple concentration
             FieldController::couple_scalar(C, C0, C_tmp, sync);

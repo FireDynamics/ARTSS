@@ -16,8 +16,10 @@ class ExplicitEulerSource : public ISource {
  public:
     ExplicitEulerSource();
 
-    void add_source(Field* out_x, Field* out_y, Field* out_z, Field* S_x, Field* S_y, Field* S_z, bool sync) override;
-    void add_source(Field* out, Field* S, bool sync) override;
+    void add_source(Field &out_x, Field &out_y, Field &out_z,
+                    const Field &S_x, const Field &S_y, const Field &S_z,
+                    bool sync) override;
+    void add_source(Field &out, const Field &S, bool sync) override;
 
  private:
 #ifndef BENCHMARKING
