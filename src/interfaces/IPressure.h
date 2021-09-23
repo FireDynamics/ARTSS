@@ -14,7 +14,7 @@ class IPressure {
 public:
     IPressure() = default;
     virtual ~IPressure() = default;
-    virtual void pressure(Field *out, Field *b, real t, bool sync) = 0;
+    virtual void pressure(Field &out, const Field &b, real t, bool sync) = 0;
 
     void divergence(Field &out,
                     const Field &in_x, const Field &in_y, const Field &in_z,

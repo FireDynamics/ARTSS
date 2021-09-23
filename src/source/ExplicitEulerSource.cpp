@@ -59,7 +59,7 @@ void ExplicitEulerSource::add_source(
                 out_x[i] += dt * s_x[i];
             }
 
-            boundary->apply_boundary(out_x.data, out_x.get_type(), sync);
+            boundary->apply_boundary(out_x, sync);
         } // end x- direction
 
         // y - direction
@@ -70,7 +70,7 @@ void ExplicitEulerSource::add_source(
                 out_y[i] += dt * s_y[i];
             }
 
-            boundary->apply_boundary(out_y.data, out_y.get_type(), sync);
+            boundary->apply_boundary(out_y, sync);
         } // end y- direction
 
         // z - direction
@@ -81,7 +81,7 @@ void ExplicitEulerSource::add_source(
                 out_z[i] += dt * s_z[i];
             }
 
-            boundary->apply_boundary(out_z.data, out_z.get_type(), sync);
+            boundary->apply_boundary(out_z, sync);
         } // end z- direction
 
         if (sync) {
@@ -109,7 +109,7 @@ void ExplicitEulerSource::add_source(Field &out, Field const &s, bool sync) {
             out[i] += m_dt * s[i];
         }
 
-        boundary->apply_boundary(out.data, out.get_type(), sync);
+        boundary->apply_boundary(out, sync);
 
         if (sync) {
 #pragma acc wait

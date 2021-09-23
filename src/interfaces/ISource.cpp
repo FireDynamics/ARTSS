@@ -129,7 +129,7 @@ void ISource::dissipate(
         }
 
         // boundaries
-        boundary->apply_boundary(out.data, out.get_type(), sync);
+        boundary->apply_boundary(out, sync);
 
         if (sync) {
 #pragma acc wait

@@ -46,8 +46,8 @@ NSTempConSolver::NSTempConSolver(FieldController *field_controller) {
 
     // Pressure
     SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
-                                       &m_field_controller->get_field_p(),
-                                       &m_field_controller->get_field_rhs());
+                                       m_field_controller->get_field_p(),
+                                       m_field_controller->get_field_rhs());
 
     // Source of velocity
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
@@ -161,7 +161,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Pressure ...");
 #endif
-        pres->pressure(&p, &rhs, t, sync);        //only multigrid cycle, divergence and velocity update (in case of NS) need to be added
+        pres->pressure(p, rhs, t, sync);        //only multigrid cycle, divergence and velocity update (in case of NS) need to be added
 
         // Correct
         pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);

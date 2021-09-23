@@ -101,15 +101,15 @@ FieldController::FieldController():
 // ***************************************************************************************
 void FieldController::set_up_boundary() {
     auto boundary = BoundaryController::getInstance();
-    boundary->apply_boundary(field_u.data, field_u.get_type());
-    boundary->apply_boundary(field_v.data, field_v.get_type());
-    boundary->apply_boundary(field_w.data, field_w.get_type());
-    boundary->apply_boundary(field_p.data, field_p.get_type());
-    boundary->apply_boundary(field_T.data, field_T.get_type());
-    boundary->apply_boundary(field_concentration.data, field_concentration.get_type());
+    boundary->apply_boundary(field_u);
+    boundary->apply_boundary(field_v);
+    boundary->apply_boundary(field_w);
+    boundary->apply_boundary(field_p);
+    boundary->apply_boundary(field_T);
+    boundary->apply_boundary(field_concentration);
 
     // TODO necessary?
-    boundary->apply_boundary(field_T_ambient.data, field_T_ambient.get_type());
+    boundary->apply_boundary(field_T_ambient);
 }
 
 //======================================= Update data ==================================

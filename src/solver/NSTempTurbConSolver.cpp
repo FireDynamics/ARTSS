@@ -48,8 +48,8 @@ NSTempTurbConSolver::NSTempTurbConSolver(FieldController *field_controller) {
 
     // Pressure
     SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
-                                       &m_field_controller->get_field_p(),
-                                       &m_field_controller->get_field_rhs());
+                                       m_field_controller->get_field_p(),
+                                       m_field_controller->get_field_rhs());
 
     // Source of velocity
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
@@ -121,11 +121,6 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
     size_t bsize = Domain::getInstance()->get_size(u.get_level());
 
-    auto nu = m_nu;
-    auto kappa = m_kappa;
-    auto gamma = m_gamma;
-    auto dir_vel = m_dir_vel;
-
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
                          w0, w_tmp, p, p0, rhs, T, T0, T_tmp, \
                          C, C0, C_tmp, fx, fy, fz, S_T, S_C, \
@@ -151,9 +146,9 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(u, u0, u_tmp, m_nu, nu_t, sync);
+        dif_vel->diffuse(v, v0, v_tmp, m_nu, nu_t, sync);
+        dif_vel->diffuse(w, w0, w_tmp, m_nu, nu_t, sync);
 
         // Couple data to prepare for adding source
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
@@ -177,7 +172,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Pressure ...");
 #endif
-        pres->pressure(&p, &rhs, t, sync);
+        pres->pressure(p, rhs, t, sync);
 
         // Correct
         pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
@@ -208,18 +203,18 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Temperature ...");
 #endif
-            dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
+            dif_temp->diffuse(T, T0, T_tmp, m_kappa, kappa_t, sync);
 
             // Couple temperature to prepare for adding source
             FieldController::couple_scalar(T, T0, T_tmp, sync);
         } else {
             // no turbulence
-            if (kappa != 0.) {
+            if (m_kappa != 0.) {
 
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Temperature ...");
 #endif
-                dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
+                dif_temp->diffuse(T, T0, T_tmp, m_kappa, sync);
 
                 // Couple temperature to prepare for adding source
                 FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -272,17 +267,17 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Concentration ...");
 #endif
-            dif_con->diffuse(C, C0, C_tmp, gamma, gamma_t, sync);
+            dif_con->diffuse(C, C0, C_tmp, m_gamma, gamma_t, sync);
 
             // Couple concentration to prepare for adding source
             FieldController::couple_scalar(C, C0, C_tmp, sync);
         } else {
             // no turbulence
-            if (gamma != 0.) {
+            if (m_gamma != 0.) {
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Concentration ...");
 #endif
-                dif_con->diffuse(C, C0, C_tmp, gamma, sync);
+                dif_con->diffuse(C, C0, C_tmp, m_gamma, sync);
 
                 // Couple concentration to prepare for adding source
                 FieldController::couple_scalar(C, C0, C_tmp, sync);

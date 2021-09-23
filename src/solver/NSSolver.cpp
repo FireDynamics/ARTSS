@@ -32,8 +32,8 @@ NSSolver::NSSolver(FieldController *field_controller) {
     //Pressure
     std::string pressureType = params->get("solver/pressure/type");
     SolverSelection::SetPressureSolver(&pres, pressureType,
-                                       &m_field_controller->get_field_p(),
-                                       &m_field_controller->get_field_rhs());
+                                       m_field_controller->get_field_p(),
+                                       m_field_controller->get_field_rhs());
 
     //Source
     std::string sourceType = params->get("solver/source/type");
@@ -119,7 +119,7 @@ void NSSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Pressure ...");
 #endif
-        pres->pressure(&p, &rhs, t, sync);
+        pres->pressure(p, rhs, t, sync);
 
         // Correct
         pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);

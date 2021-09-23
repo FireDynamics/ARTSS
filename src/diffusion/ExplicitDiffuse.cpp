@@ -30,7 +30,7 @@ ExplicitDiffuse::ExplicitDiffuse() {
 // ***************************************************************************************
 void ExplicitDiffuse::diffuse(Field &out, const Field &in, Field const &, real const D, bool sync) {
     ExplicitStep(out, in, D, sync);
-    BoundaryController::getInstance()->apply_boundary(out.data, out.get_type(), sync);
+    BoundaryController::getInstance()->apply_boundary(out, sync);
 }
 
 //====================================== Turbulent Diffuse ===============================================
@@ -46,7 +46,7 @@ void ExplicitDiffuse::diffuse(
         Field &out, Field const &in,
         Field const &, real const D, Field const &EV, bool sync) {
     ExplicitStep(out, in, D, EV, sync);
-    BoundaryController::getInstance()->apply_boundary(out.data, out.get_type(), sync);
+    BoundaryController::getInstance()->apply_boundary(out, sync);
 }
 
 

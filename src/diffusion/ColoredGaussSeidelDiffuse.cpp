@@ -90,7 +90,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, const Field &, Field const &
     const size_t neighbour_k = Nx * Ny;
     while (res > tol_res && it < max_it) {
         colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, dsign, w, sync);
-        boundary->apply_boundary(out.data, out.get_type(), sync);
+        boundary->apply_boundary(out, sync);
 
         sum = 0;
 
@@ -174,7 +174,7 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, const Field &, const Field &
     const size_t neighbour_k = Nx * Ny;
     while (res > tol_res && it < max_it) {
         colored_gauss_seidel_step(out, b, dsign, w, D, EV, dt, sync);
-        boundary->apply_boundary(out.data, out.get_type(), sync);
+        boundary->apply_boundary(out, sync);
 
         sum = 0;
 

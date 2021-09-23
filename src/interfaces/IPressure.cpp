@@ -122,9 +122,9 @@ void IPressure::projection(
         }
 
         // boundaries
-        boundary->apply_boundary(out_u.data, out_u.get_type(), false);
-        boundary->apply_boundary(out_v.data, out_v.get_type(), false);
-        boundary->apply_boundary(out_w.data, out_w.get_type(), false);
+        boundary->apply_boundary(out_u, false);
+        boundary->apply_boundary(out_v, false);
+        boundary->apply_boundary(out_w, false);
 
         if (sync) {
 #pragma acc wait

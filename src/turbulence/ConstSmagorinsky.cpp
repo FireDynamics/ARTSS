@@ -86,7 +86,7 @@ void ConstSmagorinsky::calc_turbulent_viscosity(
         if (sync) {
 #pragma acc wait
         }
-        boundary->apply_boundary(ev.data, ev.get_type(), sync);
+        boundary->apply_boundary(ev, sync);
     }
 }
 

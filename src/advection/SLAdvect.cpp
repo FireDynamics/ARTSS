@@ -165,7 +165,7 @@ void SLAdvect::advect(Field &out, const Field &in,
             auto tmp = s110 + t * (s111 - s110);  // row-major
             out[idx] = tmp;
         }
-        boundary->apply_boundary(out.data, out.get_type(), sync);
+        boundary->apply_boundary(out, sync);
 
         if (sync) {
 #pragma acc wait

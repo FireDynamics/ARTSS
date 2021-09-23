@@ -73,7 +73,7 @@ void JacobiDiffuse::diffuse(Field &out, const Field &in, const Field &b, const r
 
         while (res > tol_res && it < max_it) {
             JacobiStep(out, in, b, alpha_x, alpha_y, alpha_z, reciprocal_beta, dsign, w, sync);
-            boundary->apply_boundary(out.data, out.get_type(), sync);
+            boundary->apply_boundary(out, sync);
 
             sum = 0.;
 
@@ -178,7 +178,7 @@ void JacobiDiffuse::diffuse(
 
         while (res > tol_res && it < max_it) {
             JacobiStep(out, in, b, dsign, w, D, EV, dt, sync);
-            boundary->apply_boundary(out.data, out.get_type(), sync);
+            boundary->apply_boundary(out, sync);
 
             sum = 0.;
 
