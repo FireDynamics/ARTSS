@@ -120,9 +120,9 @@ void NSTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(*u, *u0, *u_tmp, nu, *nu_t, sync);
+        dif_vel->diffuse(*v, *v0, *v_tmp, nu, *nu_t, sync);
+        dif_vel->diffuse(*w, *w0, *w_tmp, nu, *nu_t, sync);
 
         // Couple data to prepare for adding source
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);

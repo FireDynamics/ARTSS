@@ -63,9 +63,9 @@ void DiffusionSolver::do_step(real t, bool sync) {
 
 #pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize])
     {
-        dif->diffuse(u, u0, u_tmp, m_nu, sync);
-        dif->diffuse(v, v0, v_tmp, m_nu, sync);
-        dif->diffuse(w, w0, w_tmp, m_nu, sync);
+        dif->diffuse(*u, *u0, *u_tmp, m_nu, sync);
+        dif->diffuse(*v, *v0, *v_tmp, m_nu, sync);
+        dif->diffuse(*w, *w0, *w_tmp, m_nu, sync);
     }//end data
 }
 

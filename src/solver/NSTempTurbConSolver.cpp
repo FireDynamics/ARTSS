@@ -179,9 +179,9 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(*u, *u0, *u_tmp, nu, *nu_t, sync);
+        dif_vel->diffuse(*v, *v0, *v_tmp, nu, *nu_t, sync);
+        dif_vel->diffuse(*w, *w0, *w_tmp, nu, *nu_t, sync);
 
         // Couple data to prepare for adding source
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
@@ -235,7 +235,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Temperature ...");
 #endif
-            dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
+            dif_temp->diffuse(*T, *T0, *T_tmp, kappa, *kappa_t, sync);
 
             // Couple temperature to prepare for adding source
             FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -246,7 +246,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Temperature ...");
 #endif
-                dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
+                dif_temp->diffuse(*T, *T0, *T_tmp, kappa, sync);
 
                 // Couple temperature to prepare for adding source
                 FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -300,7 +300,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Concentration ...");
 #endif
-            dif_con->diffuse(C, C0, C_tmp, gamma, gamma_t, sync);
+            dif_con->diffuse(*C, *C0, *C_tmp, gamma, *gamma_t, sync);
 
             // Couple concentration to prepare for adding source
             FieldController::couple_scalar(C, C0, C_tmp, sync);
@@ -310,7 +310,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Concentration ...");
 #endif
-                dif_con->diffuse(C, C0, C_tmp, gamma, sync);
+                dif_con->diffuse(*C, *C0, *C_tmp, gamma, sync);
 
                 // Couple concentration to prepare for adding source
                 FieldController::couple_scalar(C, C0, C_tmp, sync);

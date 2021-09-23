@@ -16,12 +16,12 @@ class JacobiDiffuse : public IDiffusion {
 public:
     JacobiDiffuse();
 
-    void diffuse(Field *out, Field *in, const Field *b, real D, bool sync) override;
-    void diffuse(Field *out, Field *in, const Field *b, real D, const Field *EV, bool sync) override;  // turbulent version
+    void diffuse(Field &out, const Field &in, const Field &b, real D, bool sync) override;
+    void diffuse(Field &out, const Field &in, const Field &b, real D, const Field &EV, bool sync) override;  // turbulent version
 
-    static void JacobiStep(Field *out, const Field *in, const Field *b, real alphaX, real alphaY, real alphaZ, real beta, real dsign, real w, bool sync = true);
-    static void JacobiStep(size_t level, Field *out, const Field *in, const Field *b, real alphaX, real alphaY, real alphaZ, real beta, real dsign, real w, bool sync = true); // Multigrid version
-    static void JacobiStep(Field *out, const Field *in, const Field *b, real dsign, real w, real D, const Field *EV, real dt, bool sync = true); // turbulent version
+    static void JacobiStep(Field &out, const Field &in, const Field &b, real alphaX, real alphaY, real alphaZ, real beta, real dsign, real w, bool sync = true);
+    static void JacobiStep(size_t level, Field &out, const Field &in, const Field &b, real alphaX, real alphaY, real alphaZ, real beta, real dsign, real w, bool sync = true); // Multigrid version
+    static void JacobiStep(Field &out, const Field &in, const Field &b, real dsign, real w, real D, const Field &EV, real dt, bool sync = true); // turbulent version
 
 private:
 #ifndef BENCHMARKING
