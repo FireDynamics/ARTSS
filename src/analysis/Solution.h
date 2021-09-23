@@ -19,16 +19,11 @@ class Solution {
     void calc_analytical_solution(real t);
 
     // Getter
-    real* GetU_data() const { return m_u_analytical_solution.data; }
-    real* GetV_data() const { return m_v_analytical_solution.data; }
-    real* GetW_data() const { return m_w_analytical_solution.data; }
-    real* GetP_data() const { return m_p_analytical_solution.data; }
-    real* GetT_data() const { return m_T_analytical_solution.data; }
-    return_ptr GetU() const { return m_u_analytical_solution.data; }
-    return_ptr GetV() const { return m_v_analytical_solution.data; }
-    return_ptr GetW() const { return m_w_analytical_solution.data; }
-    return_ptr GetP() const { return m_p_analytical_solution.data; }
-    return_ptr GetT() const { return m_T_analytical_solution.data; }
+    return_ptr get_return_ptr_data_u() const { return m_u_analytical_solution.data; }
+    return_ptr get_return_ptr_data_v() const { return m_v_analytical_solution.data; }
+    return_ptr get_return_ptr_data_w() const { return m_w_analytical_solution.data; }
+    return_ptr get_return_ptr_data_p() const { return m_p_analytical_solution.data; }
+    return_ptr get_return_ptr_data_T() const { return m_T_analytical_solution.data; }
 
  private:
     void gauss_bubble(real t);

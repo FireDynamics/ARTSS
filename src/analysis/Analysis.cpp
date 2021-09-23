@@ -56,19 +56,19 @@ void Analysis::analyse(FieldController *field_controller, real t) {
             if (nodeName == "boundary") {
                 std::string field = curElem->Attribute("field");
                 if (field.find(BoundaryData::get_field_type_name(FieldType::U)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_u_data(), m_solution->GetU(), FieldType::U, t);
+                    compare_solutions(field_controller->get_field_u_data(), m_solution->get_return_ptr_data_u(), FieldType::U, t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::V)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_v_data(), m_solution->GetV(), FieldType::V, t);
+                    compare_solutions(field_controller->get_field_v_data(), m_solution->get_return_ptr_data_v(), FieldType::V, t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::W)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_w_data(), m_solution->GetW(), FieldType::W, t);
+                    compare_solutions(field_controller->get_field_w_data(), m_solution->get_return_ptr_data_w(), FieldType::W, t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::P)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_p_data(), m_solution->GetP(), FieldType::P, t);
+                    compare_solutions(field_controller->get_field_p_data(), m_solution->get_return_ptr_data_p(), FieldType::P, t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::T)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_T_data(), m_solution->GetT(), FieldType::T, t);
+                    compare_solutions(field_controller->get_field_T_data(), m_solution->get_return_ptr_data_T(), FieldType::T, t);
                 }
             }  // end if
             curElem = curElem->NextSiblingElement();
@@ -227,9 +227,9 @@ void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t,
         m_solution->calc_analytical_solution(t);
 
         // local variables and parameters
-        auto d_ua = m_solution->GetU();
-        auto d_pa = m_solution->GetP();
-        auto d_Ta = m_solution->GetT();
+        auto d_ua = m_solution->get_return_ptr_data_u();
+        auto d_pa = m_solution->get_return_ptr_data_p();
+        auto d_Ta = m_solution->get_return_ptr_data_T();
 
         auto d_u = field_controller->get_field_u_data();
         auto d_p = field_controller->get_field_p_data();

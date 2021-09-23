@@ -22,35 +22,43 @@ class FieldController {
     void update_data(bool sync);
 
     // Getter
-    real* get_field_u_data() const { return field_u->data; }
-    real* get_field_v_data() const { return field_v->data; }
-    real* get_field_w_data() const { return field_w->data; }
+    return_ptr get_field_u_data() const { return field_u->data; }
+    return_ptr get_field_v_data() const { return field_v->data; }
+    return_ptr get_field_w_data() const { return field_w->data; }
 
-    real* get_field_u0_data() const { return field_u0->data; }
-    real* get_field_v0_data() const { return field_v0->data; }
-    real* get_field_w0_data() const { return field_w0->data; }
+    return_ptr get_field_u0_data() const { return field_u0->data; }
+    return_ptr get_field_v0_data() const { return field_v0->data; }
+    return_ptr get_field_w0_data() const { return field_w0->data; }
 
-    real* get_field_u_tmp_data() const { return field_u_tmp->data; }
-    real* get_field_v_tmp_data() const { return field_v_tmp->data; }
-    real* get_field_w_tmp_data() const { return field_w_tmp->data; }
+    return_ptr get_field_u_tmp_data() const { return field_u_tmp->data; }
+    return_ptr get_field_v_tmp_data() const { return field_v_tmp->data; }
+    return_ptr get_field_w_tmp_data() const { return field_w_tmp->data; }
 
-    real* get_field_p_data() const { return field_p->data; }
-    real* get_field_p0_data() const { return field_p0->data; }
-    real* get_field_rhs_data() const { return field_rhs->data; }
+    return_ptr get_field_p_data() const { return field_p->data; }
+    return_ptr get_field_p0_data() const { return field_p0->data; }
+    return_ptr get_field_rhs_data() const { return field_rhs->data; }
 
-    real* get_field_T_data() const { return field_T->data; }
-    real* get_field_T0_data() const { return field_T0->data; }
-    real* get_field_T_tmp_data() const { return field_T_tmp->data; }
+    return_ptr get_field_T_data() const { return field_T->data; }
+    return_ptr get_field_T0_data() const { return field_T0->data; }
+    return_ptr get_field_T_tmp_data() const { return field_T_tmp->data; }
 
-    real* get_field_concentration_data() const { return field_concentration->data; }
-    real* get_field_concentration0_data() const { return field_concentration0->data; }
-    real* get_field_concentration_tmp_data() const { return field_concentration_tmp->data; }
+    return_ptr get_field_concentration_data() const { return field_concentration->data; }
+    return_ptr get_field_concentration0_data() const { return field_concentration0->data; }
+    return_ptr get_field_concentration_tmp_data() const { return field_concentration_tmp->data; }
 
-    real* get_field_sight_data() const { return sight->data; }
+    return_ptr get_field_sight_data() const { return sight->data; }
 
-    real* get_field_nu_t_data() const { return field_nu_t->data; }
+    return_ptr get_field_nu_t_data() const { return field_nu_t->data; }
 
-    real* get_field_source_T_data() const { return field_source_T->data; }
+    return_ptr get_field_source_T_data() const { return field_source_T->data; }
+    real *get_field_source_concentration_data() const { return field_source_concentration->data; }
+
+    real *get_field_force_x_data() const { return field_force_x->data; }
+    real *get_field_force_y_data() const { return field_force_y->data; }
+    real *get_field_force_z_data() const { return field_force_z->data; }
+
+    real *get_field_kappa_data() const { return field_kappa_t->data; }
+    real *get_field_gamma_data() const { return field_gamma_t->data; }
 
     Field *field_u, *field_v, *field_w;          // velocities
     Field *field_u0, *field_v0, *field_w0;
