@@ -17,11 +17,7 @@
 
 ConstSmagorinsky::ConstSmagorinsky() {
     auto params = Parameters::getInstance();
-
-    m_nu = params->get_real("physical_parameters/nu");
-    m_dt = params->get_real("physical_parameters/dt");
-
-    m_Cs = 0.1; //Cs value of 0.1 is found to yield the best results for wide range of flows
+    // Cs value of 0.1 is found to yield the best results for wide range of flows
     // reference from Ansys Fluent Subgrid Scale models
     m_Cs = params->get_real("solver/turbulence/Cs");
 }
@@ -35,9 +31,10 @@ ConstSmagorinsky::ConstSmagorinsky() {
 /// \param  in_w          input pointer of z-velocity
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // *************************************************************************************************
-void ConstSmagorinsky::CalcTurbViscosity(Field &ev,
-                                         Field const &in_u, Field const &in_v, Field const &in_w,
-                                         bool sync) {
+void ConstSmagorinsky::calc_turbulent_viscosity(
+            Field &ev,
+            Field const &in_u, Field const &in_v, Field const &in_w,
+            bool sync) {
     auto domain = Domain::getInstance();
 #pragma acc data present(ev, u, v, w)
     {
@@ -77,7 +74,11 @@ void ConstSmagorinsky::CalcTurbViscosity(Field &ev,
             S23 = 0.5 * ((in_v[i + neighbour_k] - in_v[i - neighbour_k]) * 0.5 * reciprocal_dz
                        + (in_w[i + neighbour_j] - in_w[i - neighbour_j]) * 0.5 * reciprocal_dy);
 
-            S_bar = sqrt(2. * (S11 * S11 + S22 * S22 + S33 * S33 + 2. * (S12 * S12) + 2. * (S13 * S13) + 2. * (S23 * S23)));
+            S_bar = sqrt(2. * (S11 * S11 + S22
+                            *  S22 + S33 * S33
+                       + 2. * (S12 * S12)
+                       + 2. * (S13 * S13)
+                       + 2. * (S23 * S23)));
 
             ev[i] = Cs * Cs * delta_s * delta_s * S_bar;
         }
@@ -96,5 +97,5 @@ void ConstSmagorinsky::CalcTurbViscosity(Field &ev,
 /// \param  in            input pointer
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
-void ConstSmagorinsky::ExplicitFiltering(Field &, Field const &, bool) {
+void ConstSmagorinsky::explicit_filtering(Field &, Field const &, bool) {
 }

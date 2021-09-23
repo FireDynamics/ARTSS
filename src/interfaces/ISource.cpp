@@ -25,8 +25,9 @@
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::buoyancy_force(
-        Field &out, Field const &in,
-        Field const &ina, bool sync) {
+        Field &out,
+        const Field &in, const Field &in_a,
+        bool sync) {
     auto params = Parameters::getInstance();
     real beta = params->get_real("physical_parameters/beta");
     real g = params->get_real("physical_parameters/g");
@@ -46,7 +47,7 @@ void ISource::buoyancy_force(
 #pragma acc loop independent
         for (size_t i = 0; i < bsize_i; ++i) {
             const size_t idx = d_iList[i];
-            out[idx] = -beta * (in[idx] - ina[idx]) * g;
+            out[idx] = -beta * (in[idx] - in_a[idx]) * g;
         }
 
         // boundary cells
@@ -54,7 +55,7 @@ void ISource::buoyancy_force(
 #pragma acc loop independent
         for (size_t i = 0; i < bsize_b; ++i) {
             const size_t idx = d_bList[i];
-            out[idx] = -beta * (in[idx] - ina[idx]) * g;
+            out[idx] = -beta * (in[idx] - in_a[idx]) * g;
         }
 
         if (sync) {
@@ -74,7 +75,8 @@ void ISource::buoyancy_force(
 // ***************************************************************************************
 void ISource::dissipate(
         Field &out,
-        Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
+        const Field &in_u, const Field &in_v, const Field &in_w,
+        bool sync) {
     auto domain = Domain::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();

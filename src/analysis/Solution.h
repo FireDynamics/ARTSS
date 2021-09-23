@@ -8,35 +8,23 @@
 #ifndef ARTSS_ANALYSIS_SOLUTION_H_
 #define ARTSS_ANALYSIS_SOLUTION_H_
 
-#include <string>
-#include "../Domain.h"
-#include "../Functions.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
-#include "../utility/Parameters.h"
 #include "../utility/GlobalMacrosTypes.h"
 
 class Solution {
  public:
-    explicit Solution(std::string &initial_condition);
-
+    explicit Solution(const std::string &initial_condition, bool has_analytical_solution);
     void calc_analytical_solution(real t);
 
     // Getter
-    real *get_field_data_u() const { return u_a.data; }
-    real *get_field_data_v() const { return v_a.data; }
-    real *get_field_data_w() const { return w_a.data; }
-    real *get_field_data_p() const { return p_a.data; }
-    real *get_field_data_T() const { return T_a.data; }
-    return_ptr get_data_u() const { return u_a.data; }
-    return_ptr get_data_v() const { return v_a.data; }
-    return_ptr get_data_w() const { return w_a.data; }
-    return_ptr get_data_p() const { return p_a.data; }
-    return_ptr get_data_T() const { return T_a.data; }
+    return_ptr get_return_ptr_data_u() const { return m_u_analytical_solution.data; }
+    return_ptr get_return_ptr_data_v() const { return m_v_analytical_solution.data; }
+    return_ptr get_return_ptr_data_w() const { return m_w_analytical_solution.data; }
+    return_ptr get_return_ptr_data_p() const { return m_p_analytical_solution.data; }
+    return_ptr get_return_ptr_data_T() const { return m_T_analytical_solution.data; }
 
  private:
-    void init(std::string &initial_condition);
-
     void gauss_bubble(real t);
     void exp_sinus_prod(real t);
     void exp_sinus_sum(real t);
@@ -49,10 +37,11 @@ class Solution {
     void buoyancy_mms(real t);
     void zero(real t);
 
-
-    Field u_a, v_a, w_a;
-    Field p_a;
-    Field T_a;
+    Field m_u_analytical_solution;
+    Field m_v_analytical_solution;
+    Field m_w_analytical_solution;
+    Field m_p_analytical_solution;
+    Field m_T_analytical_solution;
     void (Solution::*m_init_function)(const real);
 
     real m_current_time_step = -1;

@@ -37,12 +37,10 @@ JacobiDiffuse::JacobiDiffuse() {
 /// \param  D       diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void JacobiDiffuse::diffuse(
-        Field &out, Field &in, Field const &b,
-        real const D, bool sync) {
+void JacobiDiffuse::diffuse(Field &out, const Field &in, const Field &b,
+                            const real D, bool sync) {
     auto domain = Domain::getInstance();
     auto boundary = BoundaryController::getInstance();
-
     auto bsize_i = boundary->get_size_inner_list();
     auto bsize_b = boundary->get_size_boundary_list();
 
@@ -144,8 +142,8 @@ void JacobiDiffuse::diffuse(
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void JacobiDiffuse::diffuse(
-        Field &out, Field &in, Field const &b,
-        real const D, Field const &EV, bool sync) {
+        Field &out, const Field &in, const Field &b,
+        const real D, const Field &EV, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto boundary = BoundaryController::getInstance();
@@ -196,9 +194,7 @@ void JacobiDiffuse::diffuse(
                 res = reciprocal_beta * (out[i] - in[i]);
                 sum += res * res;
             }
-
-// info: in nvvp profile 8byte size copy from to device to/from pageable due to sum!
-
+            // info: in nvvp profile 8byte size copy from to device to/from pageable due to sum!
 #pragma acc wait
             res = sqrt(sum);
             it++;
@@ -389,7 +385,7 @@ void JacobiDiffuse::JacobiStep(
 
         auto rb = (1. + 2. * (aX + aY + aZ));
         auto bb = 1. / rb;
-      
+
         auto d_aX = aX * (in[i + neighbour_i] + in[i - neighbour_i]) ;
         auto d_aY = aY * (in[i + neighbour_j] + in[i - neighbour_j]) ;
         auto d_aZ = aZ * (in[i + neighbour_k] + in[i - neighbour_k]);

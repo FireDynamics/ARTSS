@@ -16,22 +16,18 @@
 #include <accelmath.h>
 #endif
 
-#include <algorithm>
 #include "SLAdvect.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 
-// ==================================== Constructor ====================================
-// ***************************************************************************************
 SLAdvect::SLAdvect() {
-    auto params = Parameters::getInstance();
-    m_dt = params->get_real("physical_parameters/dt");
+    m_dt = Parameters::getInstance()->get_real("physical_parameters/dt");
 }
 
 // ***************************************************************************************
-/// \brief  solves advection \f$ \partial_t \phi_1 = - (u \cdot \nabla) \phi_0 \f$ via unconditionally
-///     stable semi-Lagrangian approach (backtrace and linear interpolation)
+/// \brief  solves advection \f$ \partial_t \phi_1 = - (u \cdot \nabla) \phi_0 \f$ via
+///         unconditionally stable semi-Lagrangian approach (backtrace and linear interpolation)
 /// \param  out   output pointer
 /// \param  in    input pointer
 /// \param  u_vel x -velocity
@@ -39,17 +35,16 @@ SLAdvect::SLAdvect() {
 /// \param  w_vel z -velocity
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SLAdvect::advect(
-        Field &out, Field const &in,
-        Field const &u_vel, Field const &v_vel, Field const &w_vel,
-        bool sync) {
+void SLAdvect::advect(Field &out, const Field &in,
+                      const Field &u_vel, const Field &v_vel, const Field &w_vel,
+                      bool sync) {
     auto domain = Domain::getInstance();
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
-    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_inner_list = boundary->get_inner_list_level_joined();
 
-#pragma acc data present(out, in, u_vel, v_vel, w_vel, d_iList[:bsize_i])
+#pragma acc data present(out, in, u_vel, v_vel, w_vel, d_inner_list[:bsize_i])
     {
         const size_t Nx = domain->get_Nx();
         const size_t Ny = domain->get_Ny();
@@ -78,7 +73,7 @@ void SLAdvect::advect(
 
 #pragma acc loop independent
         for (size_t l = 0; l < bsize_i; ++l) {
-            const size_t idx = d_iList[l];
+            const size_t idx = d_inner_list[l];
             auto k = static_cast<long int> (getCoordinateK(idx, Nx, Ny));
             auto j = static_cast<long int> (getCoordinateJ(idx, Nx, Ny, k));
             auto i = static_cast<long int> (getCoordinateI(idx, Nx, Ny, j, k));
@@ -157,7 +152,6 @@ void SLAdvect::advect(
             auto d_011 = in[idx_011];
 
             size_t idx_111 = IX(i1, j1, k1, Nx, Ny);
-
             auto d_111 = in[idx_111];
 
             auto r100 = d_000 + r * (d_100 - d_000);

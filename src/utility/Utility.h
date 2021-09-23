@@ -23,11 +23,12 @@ class Field;
 
 namespace Utility {
     size_t get_index(real physical_coordinate, real spacing, real start_coordinate);
-    std::vector<std::string> split(const char* text, char delimiter);
-    std::vector<std::string> split(const std::string& text, char delimiter);
+    std::vector<std::string> split(const char *text, char delimiter);
+    std::vector<std::string> split(const std::string &text, char delimiter);
     std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list1, size_t *list2, size_t size_list2);
     std::string remove_extension(const std::string &filename);
-    void log_field_info(Field *field, const std::string& text, const std::string& logger_name);
+    void log_field_info(Field &field, const std::string &text, const std::string &logger_name);
+
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
 #endif

@@ -982,7 +982,7 @@ void Multigrid::send_obstacle_lists_to_GPU() {
 // ================================= Apply boundary condition ======================================
 // *************************************************************************************************
 /// \brief  Apply boundary condition for obstacles, surfaces and domain
-/// \param  &field Field
+/// \param  field Field
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
 void Multigrid::apply_boundary_condition(Field &field, bool sync) {

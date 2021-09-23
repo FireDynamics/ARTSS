@@ -34,7 +34,6 @@ class Field {
     FieldType get_type() const { return m_type; }
     return_ptr get_data() const { return data; }
 
-    // read_ptr get_data_ro() const { return data; }
     size_t get_level() const { return m_level; }
     size_t get_size() const { return m_size; }
 

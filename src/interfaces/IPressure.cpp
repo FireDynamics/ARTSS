@@ -20,14 +20,14 @@
 // ***************************************************************************************
 void IPressure::divergence(
         Field &out,
-        Field const &in_x, Field const &in_y, Field const &in_z, bool sync) {
+        const Field &in_x, const Field &in_y, const Field &in_z, bool sync) {
     auto domain = Domain::getInstance();
 
-    auto Nx = domain->get_Nx(out.get_level());
-    auto Ny = domain->get_Ny(out.get_level());
-    auto dx = domain->get_dx(out.get_level());
-    auto dy = domain->get_dy(out.get_level());
-    auto dz = domain->get_dz(out.get_level());
+    auto Nx = domain->get_Nx();
+    auto Ny = domain->get_Ny();
+    auto dx = domain->get_dx();
+    auto dy = domain->get_dy();
+    auto dz = domain->get_dz();
     auto reciprocal_dx = 1. / dx;
     auto reciprocal_dy = 1. / dy;
     auto reciprocal_dz = 1. / dz;
@@ -85,8 +85,8 @@ void IPressure::divergence(
 // ***************************************************************************************
 void IPressure::projection(
         Field &out_u, Field &out_v, Field &out_w,
-        Field const &in_u, Field const &in_v, Field const &in_w,
-        Field const &in_p, bool sync) {
+        const Field &in_u, const Field &in_v, const Field &in_w,
+        const Field &in_p, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
     auto Nx = domain->get_Nx();
@@ -121,7 +121,7 @@ void IPressure::projection(
             out_w[i] = in_w[i] - 0.5 * reciprocal_dz * (in_p[i + neighbour_k] - in_p[i - neighbour_k]);
         }
 
-        //boundaries
+        // boundaries
         boundary->apply_boundary(out_u, false);
         boundary->apply_boundary(out_v, false);
         boundary->apply_boundary(out_w, false);

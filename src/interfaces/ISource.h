@@ -16,15 +16,16 @@ class ISource {
 
     virtual void add_source(
             Field &out_x, Field &out_y, Field &out_z,
-            Field const &S_x, Field const &S_y, Field const &S_z, bool sync) = 0;
+            Field const &S_x, Field const &S_y, Field const &S_z,
+            bool sync) = 0;
     virtual void add_source(Field &out, Field const &S, bool sync) = 0;
 
-    void buoyancy_force(
-            Field &out,
-            Field const &in, Field const &in_temperature_ambient, bool sync = true);
-    void dissipate(
-            Field &out,
-            Field const &in_u, Field const &in_v, Field const &in_w, bool sync = true);
+    void buoyancy_force(Field &out,
+                        const Field &in, const Field &in_a,
+                        bool sync = true);
+    void dissipate(Field &out,
+                   const Field &in_u, const Field &in_v, const Field &in_w,
+                   bool sync = true);
 };
 
 #endif /* ARTSS_INTERFACES_ISOURCE_H_ */

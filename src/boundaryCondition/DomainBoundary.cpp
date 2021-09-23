@@ -24,12 +24,13 @@ namespace {
     void apply_boundary_condition(
             Field &field, const size_t *d_patch, const size_t patch_start, const size_t patch_end,
             int8_t sign_reference_index, size_t reference_index, real value, int8_t sign) {
+        real *data = field.data;
 #pragma acc data present(field)
         {
 #pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
             for (size_t j = patch_start; j < patch_end; ++j) {
                 const size_t index = d_patch[j];
-                field[index] = sign * field[index + sign_reference_index * reference_index] + value;
+                *(data + index) = sign * *(data + index + sign_reference_index * reference_index) + value;
             }
 #pragma acc wait
         }

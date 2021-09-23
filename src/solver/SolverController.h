@@ -9,6 +9,7 @@
 
 #include <string>
 #include "../interfaces/ISolver.h"
+#include "../interfaces/ISource.h"
 #include "../interfaces/ISourceFunction.h"
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
@@ -21,7 +22,7 @@ class SolverController {
     void solver_do_step(real t, bool sync);
     void update_sources(real t_cur, bool sync);
 
-    FieldController* get_field_controller() { return m_field_controller; }
+    FieldController *get_field_controller() { return m_field_controller; }
 
  private:
     void set_up_sources();

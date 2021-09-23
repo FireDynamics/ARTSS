@@ -45,15 +45,17 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
 /// \param  D     diffusion coefficient (nu - velocity, kappa - temperature)
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, const real D, bool sync) {
+void ColoredGaussSeidelDiffuse::diffuse(
+        Field &out, const Field &, Field const &b,
+        const real D, bool sync) {
     auto domain = Domain::getInstance();
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
     auto bsize_b = boundary->get_size_boundary_list();
 
-    size_t* d_iList = boundary->get_inner_list_level_joined();
-    size_t* d_bList = boundary->get_boundary_list_level_joined();
+    size_t* d_inner_list = boundary->get_inner_list_level_joined();
+    size_t* d_boundary_list = boundary->get_boundary_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize])
 {
@@ -94,9 +96,9 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, con
 
         sum = 0;
 
-//#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_iList[:bsize_i]) async
+//#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_inner_list[:bsize_i]) async
         for (size_t j = 0; j < bsize_i; ++j){
-        const size_t index = d_iList[j];
+        const size_t index = d_inner_list[j];
             res = (- alpha_x * (out[index + neighbour_i] + out[index - neighbour_i])
                    - alpha_y * (out[index + neighbour_j] + out[index - neighbour_j])
                    - alpha_z * (out[index + neighbour_k] + out[index - neighbour_k])
@@ -132,25 +134,26 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b, con
 /// \param  EV          eddy viscosity (nu_turb)
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // ************************************************************************
-void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
-        real const D, Field const &EV, bool sync) {
+void ColoredGaussSeidelDiffuse::diffuse(
+        Field &out, const Field &, const Field &b,
+        const real D, const Field &EV, bool sync) {
     auto domain = Domain::getInstance();
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
     auto bsize_b = boundary->get_size_boundary_list();
 
-    size_t* d_iList = boundary->get_inner_list_level_joined();
-    size_t* d_bList = boundary->get_boundary_list_level_joined();
+    size_t* d_inner_list = boundary->get_inner_list_level_joined();
+    size_t* d_boundary_list = boundary->get_boundary_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize], d_EV[:bsize])
 {
-    const size_t Nx = domain->get_Nx(out.get_level());
-    const size_t Ny = domain->get_Ny(out.get_level());
+    const size_t Nx = domain->get_Nx();
+    const size_t Ny = domain->get_Ny();
 
-    const real dx = domain->get_dx(out.get_level());
-    const real dy = domain->get_dy(out.get_level());
-    const real dz = domain->get_dz(out.get_level());
+    const real dx = domain->get_dx();
+    const real dy = domain->get_dy();
+    const real dz = domain->get_dz();
 
     const real reciprocal_dx = 1. / dx;
     const real reciprocal_dy = 1. / dy;
@@ -178,9 +181,9 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
 
         sum = 0;
 
-//#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_EV[:bsize], d_iList[:bsize_i]) async
+//#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_EV[:bsize], d_inner_list[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j){
-        const size_t i = d_iList[j];
+        const size_t i = d_inner_list[j];
         alpha_x = (D + EV[i]) * dt * reciprocal_dx * reciprocal_dx;
         alpha_y = (D + EV[i]) * dt * reciprocal_dy * reciprocal_dy;
         alpha_z = (D + EV[i]) * dt * reciprocal_dz * reciprocal_dz;
@@ -226,14 +229,15 @@ void ColoredGaussSeidelDiffuse::diffuse(Field &out, Field &, Field const &b,
 /// \param  sync     synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
-        Field &out, Field const &b,
-        real const alpha_x, real const alpha_y, real const alpha_z,
-        real const beta, real const dsign, real const w, bool) {
+        Field &out, const Field &b,
+        const real alpha_x, const real alpha_y, const real alpha_z,
+        const real beta, const real dsign, const real w, bool) {
+
     auto domain = Domain::getInstance();
     // local parameters for GPU
-    const size_t nx = domain->get_Nx(out.get_level());
-    const size_t ny = domain->get_Ny(out.get_level());
-    const size_t nz = domain->get_Nz(out.get_level());
+    const size_t nx = domain->get_Nx();
+    const size_t ny = domain->get_Ny();
+    const size_t nz = domain->get_Nz();
 
     auto d_out = out.data;
     auto d_b = b.data;
@@ -313,9 +317,9 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
-} //end data region
+}
 
-//#pragma acc wait
+#pragma acc wait
 }
 
 // ============== Turbulent version of iteration step =================
@@ -331,9 +335,11 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
 /// \param  sync     synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
-        Field &out, Field const &b,
-        real const dsign, real const w, real const D,
-        Field const &EV, real const dt, bool) {
+        Field &out, const Field &b,
+        const real dsign, const real w, const real D,
+        const Field &EV,
+        const real dt, bool) {
+
     auto domain = Domain::getInstance();
     // local parameters for GPU
     const size_t Nx = domain->get_Nx(out.get_level());
@@ -412,8 +418,8 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
             }
         }
     }
-} // end data region
-//#pragma acc wait
+}
+#pragma acc wait
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize], d_EV[:bsize]) async
 {
     // black
@@ -501,11 +507,11 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
 /// \param  Ny       number of cells in y-direction
 // ***************************************************************************************
 void ColoredGaussSeidelDiffuse::colored_gauss_seidel_stencil(
-        size_t i, size_t j, size_t k,
-        real *out, real *b,
-        real const alpha_x, real const alpha_y, real const alpha_z,
-        real const dsign, real const beta, real const w,
-        size_t const Nx, size_t const Ny) {
+        const size_t i, const size_t j, const size_t k,
+        real *out, const real *b,
+        const real alpha_x, const real alpha_y, const real alpha_z,
+        const real dsign, const real beta, const real w,
+        const size_t Nx, const size_t Ny) {
     real d_out_x    = *(out + IX(i + 1, j, k, Nx, Ny)); // per value (not access) necessary due to performance issues
     real d_out_x2   = *(out + (IX(i - 1, j, k, Nx, Ny)));
     real d_out_y    = *(out + (IX(i, j + 1, k, Nx, Ny)));

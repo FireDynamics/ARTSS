@@ -52,4 +52,3 @@ Field::~Field() {
 #pragma acc exit data delete(this)
     delete[] data;
 }
-

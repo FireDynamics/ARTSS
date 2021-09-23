@@ -10,21 +10,21 @@
 #include "../analysis/Solution.h"
 #include "../interfaces/ISolver.h"
 #include "../field/FieldController.h"
+#include "../utility/Utility.h"
 
 class Visual {
 public:
-    explicit Visual(const Solution &solution);
+    Visual(const Solution &solution, bool has_analytical_solution);
 
     void visualise(const FieldController &field_controller, real t);
 
     static void initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
 
-    static void write_csv(const FieldController &field_controller, std::string filename);
-    static void write_vtk(const FieldController &field_controller, std::string filename);
-    static void write_vtk_debug(const FieldController &field_controller, std::string filename);
+    static void write_csv(FieldController &field_controller, const std::string& filename);
+    static void write_vtk(FieldController &field_controller, const std::string& filename);
+    static void write_vtk_debug(FieldController &field_controller, const std::string& filename);
 
 private:
-
     std::string m_filename;
     const Solution &m_solution;
     bool m_save_csv = false;
@@ -34,9 +34,12 @@ private:
     real m_dt;
     real m_t_end;
 
-    static std::string create_filename(std::string filename, int counter, bool analytical);
+    static std::string create_filename(const std::string &filename, int counter, bool analytical);
 
     bool m_has_analytical_solution = false;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_VISUALISATION_VISUAL_H_ */
