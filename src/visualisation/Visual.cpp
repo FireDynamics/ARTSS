@@ -62,51 +62,53 @@ void Visual::visualise(const FieldController &field_controller, real t) {
     }
 }
 
-void Visual::write_csv(const FieldController &field_controller, const std::string &filename){
-    // local variables and parameters for GPU
-    field_controller.field_u->update_host();
-    field_controller.field_v->update_host();
-    field_controller.field_w->update_host();
-    field_controller.field_p->update_host();
-    field_controller.field_rhs->update_host();
-    field_controller.field_T->update_host();
-    field_controller.field_concentration->update_host();
-    field_controller.field_source_T->update_host();
-    field_controller.field_source_concentration->update_host();
-    field_controller.field_nu_t->update_host();
+void Visual::write_csv(FieldController &field_controller, const std::string &filename){
+    //TODO method update host/device whatever
+    field_controller.get_field_u().update_host();
+    field_controller.get_field_v().update_host();
+    field_controller.get_field_w().update_host();
+    field_controller.get_field_p().update_host();
+    field_controller.get_field_rhs().update_host();
+    field_controller.get_field_T().update_host();
+    field_controller.get_field_concentration().update_host();
+    field_controller.get_field_source_T().update_host();
+    field_controller.get_field_source_concentration().update_host();
+    field_controller.get_field_nu_t().update_host();
     CSVWriter::write_numerical(field_controller, filename);
 }
 
-void Visual::write_vtk(const FieldController &field_controller, const std::string &filename){
-    field_controller.field_u->update_host();
-    field_controller.field_v->update_host();
-    field_controller.field_w->update_host();
-    field_controller.field_p->update_host();
-    field_controller.field_rhs->update_host();
-    field_controller.field_T->update_host();
-    field_controller.field_concentration->update_host();
-    field_controller.field_source_T->update_host();
-    field_controller.field_source_concentration->update_host();
-    field_controller.field_nu_t->update_host();
+void Visual::write_vtk(FieldController &field_controller, const std::string &filename){
+    //TODO method update host/device whatever
+    field_controller.get_field_u().update_host();
+    field_controller.get_field_v().update_host();
+    field_controller.get_field_w().update_host();
+    field_controller.get_field_p().update_host();
+    field_controller.get_field_rhs().update_host();
+    field_controller.get_field_T().update_host();
+    field_controller.get_field_concentration().update_host();
+    field_controller.get_field_source_T().update_host();
+    field_controller.get_field_source_concentration().update_host();
+    field_controller.get_field_nu_t().update_host();
     VTKWriter::write_numerical(field_controller, filename);
 }
 
-void Visual::write_vtk_debug(const FieldController &field_controller, const std::string &filename){
-    field_controller.field_u->update_host();
-    field_controller.field_v->update_host();
-    field_controller.field_w->update_host();
-    field_controller.field_p->update_host();
-    field_controller.field_rhs->update_host();
-    field_controller.field_T->update_host();
-    field_controller.field_concentration->update_host();
-    field_controller.field_source_T->update_host();
-    field_controller.field_source_concentration->update_host();
-    field_controller.field_nu_t->update_host();
-    field_controller.field_force_x->update_host();
-    field_controller.field_force_y->update_host();
-    field_controller.field_force_z->update_host();
-    field_controller.field_kappa_t->update_host();
-    field_controller.field_gamma_t->update_host();
+void Visual::write_vtk_debug(FieldController &field_controller, const std::string &filename){
+    //TODO method update host/device whatever
+    field_controller.get_field_u().update_host();
+    field_controller.get_field_v().update_host();
+    field_controller.get_field_w().update_host();
+    field_controller.get_field_p().update_host();
+    field_controller.get_field_rhs().update_host();
+    field_controller.get_field_T().update_host();
+    field_controller.get_field_concentration().update_host();
+    field_controller.get_field_source_T().update_host();
+    field_controller.get_field_source_concentration().update_host();
+    field_controller.get_field_nu_t().update_host();
+    field_controller.get_field_force_x().update_host();
+    field_controller.get_field_force_y().update_host();
+    field_controller.get_field_force_z().update_host();
+    field_controller.get_field_kappa().update_host();
+    field_controller.get_field_gamma().update_host();
     VTKWriter::write_numerical_debug(field_controller, filename);
 }
 

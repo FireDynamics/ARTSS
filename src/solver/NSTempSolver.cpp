@@ -36,7 +36,9 @@ NSTempSolver::NSTempSolver(FieldController *field_controller) {
     m_kappa = params->get_real("physical_parameters/kappa");
 
     // Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), m_field_controller->field_p, m_field_controller->field_rhs);
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
+                                       &m_field_controller->get_field_p(),
+                                       &m_field_controller->get_field_rhs());
 
     // Source of velocity
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
@@ -72,24 +74,24 @@ NSTempSolver::~NSTempSolver() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSTempSolver::do_step(real t, bool sync) {
-    Field &u = *m_field_controller->field_u;
-    Field &v = *m_field_controller->field_v;
-    Field &w = *m_field_controller->field_w;
-    Field &u0 = *m_field_controller->field_u0;
-    Field &v0 = *m_field_controller->field_v0;
-    Field &w0 = *m_field_controller->field_w0;
-    Field &u_tmp = *m_field_controller->field_u_tmp;
-    Field &v_tmp = *m_field_controller->field_v_tmp;
-    Field &w_tmp = *m_field_controller->field_w_tmp;
-    Field &p = *m_field_controller->field_p;
-    Field &rhs = *m_field_controller->field_rhs;
-    Field &T = *m_field_controller->field_T;
-    Field &T0 = *m_field_controller->field_T0;
-    Field &T_tmp = *m_field_controller->field_T_tmp;
-    Field &f_x = *m_field_controller->field_force_x;
-    Field &f_y = *m_field_controller->field_force_y;
-    Field &f_z = *m_field_controller->field_force_z;
-    Field &S_T = *m_field_controller->field_source_T;
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &u0 = m_field_controller->get_field_u0();
+    Field &v0 = m_field_controller->get_field_v0();
+    Field &w0 = m_field_controller->get_field_w0();
+    Field &u_tmp = m_field_controller->get_field_u_tmp();
+    Field &v_tmp = m_field_controller->get_field_v_tmp();
+    Field &w_tmp = m_field_controller->get_field_w_tmp();
+    Field &p = m_field_controller->get_field_p();
+    Field &rhs = m_field_controller->get_field_rhs();
+    Field &T = m_field_controller->get_field_T();
+    Field &T0 = m_field_controller->get_field_T0();
+    Field &T_tmp = m_field_controller->get_field_T_tmp();
+    Field &f_x = m_field_controller->get_field_force_x();
+    Field &f_y = m_field_controller->get_field_force_y();
+    Field &f_z = m_field_controller->get_field_force_z();
+    Field &S_T = m_field_controller->get_field_source_T();
 
     auto nu = m_nu;
     auto kappa = m_kappa;

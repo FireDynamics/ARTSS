@@ -37,16 +37,16 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
 }
 
 void TimeIntegration::run() {
-    Field &u = *m_field_controller->field_u;
-    Field &v = *m_field_controller->field_v;
-    Field &w = *m_field_controller->field_w;
-    Field &p = *m_field_controller->field_p;
-    Field &rhs = *m_field_controller->field_rhs;
-    Field &T = *m_field_controller->field_T;
-    Field &C = *m_field_controller->field_concentration;
-    Field &S_T = *m_field_controller->field_source_T;
-    Field &S_C = *m_field_controller->field_source_concentration;
-    Field &nu_t = *m_field_controller->field_nu_t;
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &p = m_field_controller->get_field_p();
+    Field &rhs = m_field_controller->get_field_rhs();
+    Field &T = m_field_controller->get_field_T();
+    Field &C = m_field_controller->get_field_concentration();
+    Field &S_T = m_field_controller->get_field_source_T();
+    Field &S_C = m_field_controller->get_field_source_T();
+    Field &nu_t = m_field_controller->get_field_nu_t();
 
 #ifndef BENCHMARKING
     u.update_host();

@@ -25,9 +25,9 @@ Vortex::Vortex(FieldController *field_controller) {
     m_buffer = params->get_int("adaption/class/buffer");
     m_threshold = m_u_lin * params->get_real("adaption/class/threshold");
 
-    u = field_controller->field_u;
-    v = field_controller->field_v;
-    w = field_controller->field_w;
+    u = &field_controller->get_field_u();
+    v = &field_controller->get_field_v();
+    w = &field_controller->get_field_w();
 }
 
 // ==================================== Has reduction ===============================

@@ -14,7 +14,7 @@ PressureSolver::PressureSolver(FieldController *field_controller) {
     m_field_controller = field_controller;
     auto params = Parameters::getInstance();
     auto p_type = params->get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(&this->pres, p_type, m_field_controller->field_p, m_field_controller->field_rhs);
+    SolverSelection::SetPressureSolver(&this->pres, p_type, &m_field_controller->get_field_p(), &m_field_controller->get_field_rhs());
     control();
 }
 
@@ -36,8 +36,8 @@ void PressureSolver::do_step(real t, bool sync) {
 // 1. Solve pressure Poisson equation
 
     // local variables and parameters for GPU
-    auto p = m_field_controller->field_p;
-    auto rhs = m_field_controller->field_rhs;
+    auto p = &m_field_controller->get_field_p();
+    auto rhs = &m_field_controller->get_field_rhs();
     auto d_p = p->data;
     auto d_rhs = rhs->data;
 

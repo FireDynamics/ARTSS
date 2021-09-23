@@ -20,9 +20,9 @@ public:
 
     static void initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
 
-    static void write_csv(const FieldController &field_controller, const std::string& filename);
-    static void write_vtk(const FieldController &field_controller, const std::string& filename);
-    static void write_vtk_debug(const FieldController &field_controller, const std::string& filename);
+    static void write_csv(FieldController &field_controller, const std::string& filename);
+    static void write_vtk(FieldController &field_controller, const std::string& filename);
+    static void write_vtk_debug(FieldController &field_controller, const std::string& filename);
 
 private:
     std::string m_filename;

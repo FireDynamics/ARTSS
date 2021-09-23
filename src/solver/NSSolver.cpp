@@ -31,7 +31,9 @@ NSSolver::NSSolver(FieldController *field_controller) {
 
     //Pressure
     std::string pressureType = params->get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(&pres, pressureType, m_field_controller->field_p, m_field_controller->field_rhs);
+    SolverSelection::SetPressureSolver(&pres, pressureType,
+                                       &m_field_controller->get_field_p(),
+                                       &m_field_controller->get_field_rhs());
 
     //Source
     std::string sourceType = params->get("solver/source/type");
@@ -55,20 +57,20 @@ NSSolver::~NSSolver() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSSolver::do_step(real t, bool sync) {
-    Field &u = *m_field_controller->field_u;
-    Field &v = *m_field_controller->field_v;
-    Field &w = *m_field_controller->field_w;
-    Field &u0 = *m_field_controller->field_u0;
-    Field &v0 = *m_field_controller->field_v0;
-    Field &w0 = *m_field_controller->field_w0;
-    Field &u_tmp = *m_field_controller->field_u_tmp;
-    Field &v_tmp = *m_field_controller->field_v_tmp;
-    Field &w_tmp = *m_field_controller->field_w_tmp;
-    Field &p = *m_field_controller->field_p;
-    Field &rhs = *m_field_controller->field_rhs;
-    Field &f_x = *m_field_controller->field_force_x;
-    Field &f_y = *m_field_controller->field_force_y;
-    Field &f_z = *m_field_controller->field_force_z;
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &u0 = m_field_controller->get_field_u0();
+    Field &v0 = m_field_controller->get_field_v0();
+    Field &w0 = m_field_controller->get_field_w0();
+    Field &u_tmp = m_field_controller->get_field_u_tmp();
+    Field &v_tmp = m_field_controller->get_field_v_tmp();
+    Field &w_tmp = m_field_controller->get_field_w_tmp();
+    Field &p = m_field_controller->get_field_p();
+    Field &rhs = m_field_controller->get_field_rhs();
+    Field &f_x = m_field_controller->get_field_force_x();
+    Field &f_y = m_field_controller->get_field_force_y();
+    Field &f_z = m_field_controller->get_field_force_z();
 
     auto nu = m_nu;
 

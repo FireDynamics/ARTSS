@@ -21,13 +21,13 @@ Layers::Layers(FieldController *field_controller) {
     m_timestep = static_cast<size_t> (params->get_int("adaption/class/timestep"));
     m_expansion_size = static_cast<size_t> (params->get_int("adaption/class/expansion_size"));
 
-    m_T = field_controller->field_T;
-    m_Ta = field_controller->field_T_ambient;
+    m_T = &field_controller->get_field_T();
+    m_Ta = &field_controller->get_field_T_ambient();
 
-    m_Nu = field_controller->field_nu_t;
+    m_Nu = &field_controller->get_field_nu_t();
 
-    m_kappa = field_controller->field_kappa_t;
-    m_gamma = field_controller->field_gamma_t;
+    m_kappa = &field_controller->get_field_kappa();
+    m_gamma = &field_controller->get_field_gamma();
 }
 
 

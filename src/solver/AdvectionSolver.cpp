@@ -50,12 +50,12 @@ AdvectionSolver::~AdvectionSolver() {
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void AdvectionSolver::do_step(real, bool sync) {
-    Field &u = *m_field_controller->field_u;
-    Field &v = *m_field_controller->field_v;
-    Field &w = *m_field_controller->field_w;
-    Field &u0 = *m_field_controller->field_u0;
-    Field &v0 = *m_field_controller->field_v0;
-    Field &w0 = *m_field_controller->field_w0;
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &u0 = m_field_controller->get_field_u0();
+    Field &v0 = m_field_controller->get_field_v0();
+    Field &w0 = m_field_controller->get_field_w0();
 
 #pragma acc data present(u_lin, v_lin, w_lin, u, u0, v, v0, w, w0)
     {
