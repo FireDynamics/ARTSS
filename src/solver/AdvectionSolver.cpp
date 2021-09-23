@@ -96,9 +96,9 @@ void AdvectionSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Advect ...");
 #endif
-        adv->advect(u, u0, u_lin, v_lin, w_lin, sync);
-        adv->advect(v, v0, u_lin, v_lin, w_lin, sync);
-        adv->advect(w, w0, u_lin, v_lin, w_lin, sync);
+        adv->advect(*u, *u0, *u_lin, *v_lin, *w_lin, sync);
+        adv->advect(*v, *v0, *u_lin, *v_lin, *w_lin, sync);
+        adv->advect(*w, *w0, *u_lin, *v_lin, *w_lin, sync);
     }//end data
 }
 

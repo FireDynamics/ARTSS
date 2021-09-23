@@ -103,9 +103,9 @@ void NSTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Advect ...");
 #endif
-        adv_vel->advect(u, u0, u0, v0, w0, sync);
-        adv_vel->advect(v, v0, u0, v0, w0, sync);
-        adv_vel->advect(w, w0, u0, v0, w0, sync);
+        adv_vel->advect(*u, *u0, *u0, *v0, *w0, sync);
+        adv_vel->advect(*v, *v0, *u0, *v0, *w0, sync);
+        adv_vel->advect(*w, *w0, *u0, *v0, *w0, sync);
 
         // Couple velocity to prepare for diffusion
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);

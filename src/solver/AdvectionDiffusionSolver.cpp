@@ -73,9 +73,9 @@ void AdvectionDiffusionSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Advect ...");
 #endif
-        adv->advect(u, u0, u0, v0, w0, sync);
-        adv->advect(v, v0, u0, v0, w0, sync);
-        adv->advect(w, w0, u0, v0, w0, sync);
+        adv->advect(*u, *u0, *u0, *v0, *w0, sync);
+        adv->advect(*v, *v0, *u0, *v0, *w0, sync);
+        adv->advect(*w, *w0, *u0, *v0, *w0, sync);
 
 // 2. Couple data to prepare for diffusion
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
