@@ -93,79 +93,50 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
     auto params = Parameters::getInstance();
 
     // local variables and parameters for GPU
-    auto u = m_field_controller->field_u;
-    auto v = m_field_controller->field_v;
-    auto w = m_field_controller->field_w;
-    auto u0 = m_field_controller->field_u0;
-    auto v0 = m_field_controller->field_v0;
-    auto w0 = m_field_controller->field_w0;
-    auto u_tmp = m_field_controller->field_u_tmp;
-    auto v_tmp = m_field_controller->field_v_tmp;
-    auto w_tmp = m_field_controller->field_w_tmp;
-    auto p = m_field_controller->field_p;
-    auto p0 = m_field_controller->field_p0;
-    auto rhs = m_field_controller->field_rhs;
-    auto T = m_field_controller->field_T;
-    auto T0 = m_field_controller->field_T0;
-    auto T_tmp = m_field_controller->field_T_tmp;
-    auto C = m_field_controller->field_concentration;
-    auto C0 = m_field_controller->field_concentration0;
-    auto C_tmp = m_field_controller->field_concentration_tmp;
-    auto f_x = m_field_controller->field_force_x;
-    auto f_y = m_field_controller->field_force_y;
-    auto f_z = m_field_controller->field_force_z;
-    auto S_T = m_field_controller->field_source_T;
-    auto S_C = m_field_controller->field_source_concentration;
-    auto nu_t = m_field_controller->field_nu_t;            //nu_t - Eddy Viscosity
-    auto kappa_t = m_field_controller->field_kappa_t;        //kappa_t - Eddy thermal diffusivity
-    auto gamma_t = m_field_controller->field_gamma_t;        //gamma_t - Eddy mass diffsusivity
-
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-    auto d_u_tmp = u_tmp->data;
-    auto d_v_tmp = v_tmp->data;
-    auto d_w_tmp = w_tmp->data;
-    auto d_p = p->data;
-    auto d_p0 = p0->data;
-    auto d_rhs = rhs->data;
-    auto d_T = T->data;
-    auto d_T0 = T0->data;
-    auto d_T_tmp = T_tmp->data;
-    auto d_C = C->data;
-    auto d_C0 = C0->data;
-    auto d_C_tmp = C_tmp->data;
-    auto d_fx = f_x->data;
-    auto d_fy = f_y->data;
-    auto d_fz = f_z->data;
-    auto d_S_T = S_T->data;
-    auto d_S_C = S_C->data;
-    auto d_nu_t = nu_t->data;
-    auto d_kappa_t = kappa_t->data;
-    auto d_gamma_t = gamma_t->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u->get_level());
+    auto u = *m_field_controller->field_u;
+    auto v = *m_field_controller->field_v;
+    auto w = *m_field_controller->field_w;
+    auto u0 = *m_field_controller->field_u0;
+    auto v0 = *m_field_controller->field_v0;
+    auto w0 = *m_field_controller->field_w0;
+    auto u_tmp = *m_field_controller->field_u_tmp;
+    auto v_tmp = *m_field_controller->field_v_tmp;
+    auto w_tmp = *m_field_controller->field_w_tmp;
+    auto p = *m_field_controller->field_p;
+    auto p0 = *m_field_controller->field_p0;
+    auto rhs = *m_field_controller->field_rhs;
+    auto T = *m_field_controller->field_T;
+    auto T0 = *m_field_controller->field_T0;
+    auto T_tmp = *m_field_controller->field_T_tmp;
+    auto C = *m_field_controller->field_concentration;
+    auto C0 = *m_field_controller->field_concentration0;
+    auto C_tmp = *m_field_controller->field_concentration_tmp;
+    auto f_x = *m_field_controller->field_force_x;
+    auto f_y = *m_field_controller->field_force_y;
+    auto f_z = *m_field_controller->field_force_z;
+    auto S_T = *m_field_controller->field_source_T;
+    auto S_C = *m_field_controller->field_source_concentration;
+    auto nu_t = *m_field_controller->field_nu_t;            //nu_t - Eddy Viscosity
+    auto kappa_t = *m_field_controller->field_kappa_t;        //kappa_t - Eddy thermal diffusivity
+    auto gamma_t = *m_field_controller->field_gamma_t;        //gamma_t - Eddy mass diffsusivity
 
     auto nu = m_nu;
     auto kappa = m_kappa;
     auto gamma = m_gamma;
     auto dir_vel = m_dir_vel;
 
-#pragma acc data present(    d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], \
-                            d_w0[:bsize], d_w_tmp[:bsize], d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_T[:bsize], d_T0[:bsize], d_T_tmp[:bsize], \
-                            d_C[:bsize], d_C0[:bsize], d_C_tmp[:bsize], d_fx[:bsize], d_fy[:bsize], d_fz[:bsize], d_S_T[:bsize], d_S_C[:bsize], \
-                            d_nu_t[:bsize], d_kappa_t[:bsize], d_gamma_t[:bsize])
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
+                         w0, w_tmp, p, p0, rhs, T, T0, T_tmp, \
+                         C, C0, C_tmp, fx, fy, fz, S_T, S_C, \
+                         nu_t, kappa_t, gamma_t)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
         m_logger->info("Advect ...");
 #endif
-        adv_vel->advect(*u, *u0, *u0, *v0, *w0, sync);
-        adv_vel->advect(*v, *v0, *u0, *v0, *w0, sync);
-        adv_vel->advect(*w, *w0, *u0, *v0, *w0, sync);
+        adv_vel->advect(u, u0, u0, v0, w0, sync);
+        adv_vel->advect(v, v0, u0, v0, w0, sync);
+        adv_vel->advect(w, w0, u0, v0, w0, sync);
 
         // Couple velocity to prepare for diffusion
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
@@ -174,14 +145,14 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Calculating Turbulent viscosity ...");
 #endif
-        mu_tub->calc_turbulent_viscosity(*nu_t, *u, *v, *w, true);
+        mu_tub->calc_turbulent_viscosity(nu_t, u, v, w, true);
 
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        dif_vel->diffuse(*u, *u0, *u_tmp, nu, *nu_t, sync);
-        dif_vel->diffuse(*v, *v0, *v_tmp, nu, *nu_t, sync);
-        dif_vel->diffuse(*w, *w0, *w_tmp, nu, *nu_t, sync);
+        dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
 
         // Couple data to prepare for adding source
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
@@ -191,7 +162,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Add momentum source ...");
 #endif
-            sou_vel->add_source(*u, *v, *w, *f_x, *f_y, *f_z, sync);
+            sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
 
             // Couple data to prepare for adding source
             FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
@@ -199,16 +170,16 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
 // 4. Solve pressure equation and project
         // Calculate divergence of u
-        pres->divergence(*rhs, *u_tmp, *v_tmp, *w_tmp, sync);
+        pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
         // Solve pressure equation
 #ifndef BENCHMARKING
         m_logger->info("Pressure ...");
 #endif
-        pres->pressure(p, rhs, t, sync);
+        pres->pressure(&p, &rhs, t, sync);
 
         // Correct
-        pres->projection(*u, *v, *w, *u_tmp, *v_tmp, *w_tmp, *p, sync);
+        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
 
 // 5. Solve Temperature and link back to force
 
@@ -216,7 +187,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Advect Temperature ...");
 #endif
-        adv_temp->advect(*T, *T0, *u, *v, *w, sync);
+        adv_temp->advect(T, T0, u, v, w, sync);
 
         // Couple temperature to prepare for diffusion
         FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -227,15 +198,16 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
             real Pr_T = params->get_real("solver/temperature/turbulence/Pr_T");
             real rPr_T = 1. / Pr_T;
 
-#pragma acc parallel loop independent present(d_kappa_t[:bsize], d_nu_t[:bsize]) async
+            size_t bsize = kappa_t.get_size();
+#pragma acc parallel loop independent present(kappa_t, nu_t) async
             for (size_t i = 0; i < bsize; ++i) {
-                d_kappa_t[i] = d_nu_t[i] * rPr_T; // kappa_turb = nu_turb/Pr_turb
+                kappa_t[i] = nu_t[i] * rPr_T;  // kappa_turb = nu_turb/Pr_turb
             }
 
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Temperature ...");
 #endif
-            dif_temp->diffuse(*T, *T0, *T_tmp, kappa, *kappa_t, sync);
+            dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
 
             // Couple temperature to prepare for adding source
             FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -246,7 +218,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Temperature ...");
 #endif
-                dif_temp->diffuse(*T, *T0, *T_tmp, kappa, sync);
+                dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
 
                 // Couple temperature to prepare for adding source
                 FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -259,19 +231,15 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Add dissipation ...");
 #endif
-            sou_temp->dissipate(*T, *u, *v, *w, sync);
+            sou_temp->dissipate(T, u, v, w, sync);
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);
-        }
-
-            // Add source
-        else if (m_tempFct != SourceMethods::Zero) {
-
+        } else if (m_tempFct != SourceMethods::Zero) {  // Add source
 #ifndef BENCHMARKING
             m_logger->info("Add temperature source ...");
 #endif
-            sou_temp->add_source(*T, *S_T, sync);
+            sou_temp->add_source(T, S_T, sync);
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -283,7 +251,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Advect Concentration ...");
 #endif
-        adv_con->advect(*C, *C0, *u, *v, *w, sync);
+        adv_con->advect(C, C0, u, v, w, sync);
 
         // Couple concentration to prepare for diffusion
         FieldController::couple_scalar(C, C0, C_tmp, sync);
@@ -294,13 +262,16 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
             real Sc_T = params->get_real("solver/concentration/turbulence/Sc_T");
             real rSc_T = 1. / Sc_T;
 
-#pragma acc parallel loop independent present(d_gamma_t[:bsize], d_nu_t[:bsize]) async
-            for (size_t i = 0; i < bsize; ++i) d_gamma_t[i] = d_nu_t[i] * rSc_T; // gamma_turb = nu_turb/Sc_turb
+            size_t bsize = gamma_t.get_size();
+#pragma acc parallel loop independent present(gamma_t, nu_t) async
+            for (size_t i = 0; i < bsize; ++i) {
+                gamma_t[i] = nu_t[i] * rSc_T;  // gamma_turb = nu_turb/Sc_turb
+            }
 
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Concentration ...");
 #endif
-            dif_con->diffuse(*C, *C0, *C_tmp, gamma, *gamma_t, sync);
+            dif_con->diffuse(C, C0, C_tmp, gamma, gamma_t, sync);
 
             // Couple concentration to prepare for adding source
             FieldController::couple_scalar(C, C0, C_tmp, sync);
@@ -310,7 +281,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Concentration ...");
 #endif
-                dif_con->diffuse(*C, *C0, *C_tmp, gamma, sync);
+                dif_con->diffuse(C, C0, C_tmp, gamma, sync);
 
                 // Couple concentration to prepare for adding source
                 FieldController::couple_scalar(C, C0, C_tmp, sync);
@@ -319,11 +290,10 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
         // Add source
         if (m_conFct != SourceMethods::Zero) {
-
 #ifndef BENCHMARKING
             m_logger->info("Add concentration source ...");
 #endif
-            sou_con->add_source(*C, *S_C, sync);
+            sou_con->add_source(C, S_C, sync);
 
             // Couple concentration
             FieldController::couple_scalar(C, C0, C_tmp, sync);
@@ -334,7 +304,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
         if (sync) {
 #pragma acc wait
         }
-    }//end data
+    }
 }
 
 //======================================= Check data ==================================

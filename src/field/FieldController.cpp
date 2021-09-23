@@ -309,221 +309,72 @@ void FieldController::update_data(bool sync) {
     }  // end data region
 }
 
-//======================================== Couple velocity ====================================
-// ***************************************************************************************
-/// \brief  couples vector (sets tmp and zero-th variables to current numerical solution)
-/// \param  a   current field in x- direction (const)
-/// \param  a0    zero-th field in x- direction
-/// \param  a_tmp temporal field in x- direction
-/// \param  b   current field in y- direction (const)
-/// \param  b0    zero-th field in y- direction
-/// \param  b_tmp temporal field in y- direction
-/// \param  c   current field in z- direction (const)
-/// \param  c0    zero-th field in z- direction
-/// \param  c_tmp temporal field in z- direction
-/// \param  sync  synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
-void FieldController::couple_vector(const Field *a, Field *a0, Field *a_tmp, const Field *b, Field *b0, Field *b_tmp, const Field *c, Field *c0, Field *c_tmp, bool sync) {
-    // local variables and parameters for GPU
-    auto d_a = a->data;
-    auto d_a0 = a0->data;
-    auto d_a_tmp = a_tmp->data;
-    auto d_b = b->data;
-    auto d_b0 = b0->data;
-    auto d_b_tmp = b_tmp->data;
-    auto d_c = c->data;
-    auto d_c0 = c0->data;
-    auto d_c_tmp = c_tmp->data;
-
-    auto size = Domain::getInstance()->get_size(a0->get_level());
-
-    auto boundary = BoundaryController::getInstance();
-
-    size_t *d_iList = boundary->get_inner_list_level_joined();
-    size_t bsize_i = boundary->get_size_inner_list();
-    size_t *d_bList = boundary->get_boundary_list_level_joined();
-    size_t bsize_b = boundary->get_size_boundary_list();
-    size_t *d_oList = boundary->get_obstacle_list();
-    size_t bsize_o = boundary->get_size_obstacle_list();
-
-#pragma acc data present(d_a[:size], d_a0[:size], d_a_tmp[:size], d_b[:size], d_b0[:size], d_b_tmp[:size], \
-                         d_c[:size], d_c0[:size], d_c_tmp[:size], d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
-    {
-        // inner
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_iList[j];
-            d_a0[i] = d_a[i];
-            d_b0[i] = d_b[i];
-            d_c0[i] = d_c[i];
-            d_a_tmp[i] = d_a[i];
-            d_b_tmp[i] = d_b[i];
-            d_c_tmp[i] = d_c[i];
-        }
-        // boundary
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_b; ++j) {
-            const size_t i = d_bList[j];
-            d_a0[i] = d_a[i];
-            d_b0[i] = d_b[i];
-            d_c0[i] = d_c[i];
-            d_a_tmp[i] = d_a[i];
-            d_b_tmp[i] = d_b[i];
-            d_c_tmp[i] = d_c[i];
-        }
-        // obstacles
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_o; ++j) {
-            const size_t i = d_oList[j];
-            d_a0[i] = d_a[i];
-            d_b0[i] = d_b[i];
-            d_c0[i] = d_c[i];
-            d_a_tmp[i] = d_a[i];
-            d_b_tmp[i] = d_b[i];
-            d_c_tmp[i] = d_c[i];
-        }
-
-        if (sync) {
-#pragma acc wait
-        }
-    }  // end data region
-}
-
-//======================================= Couple scalar ==================================
-// ***************************************************************************************
-/// \brief  couples vector (sets tmp and zero-th variables to current numerical solution)
-/// \param  a   current field in x- direction (const)
-/// \param  a0    zero-th field in x- direction
-/// \param  a_tmp temporal field in x- direction
-/// \param  sync  synchronization boolean (true=sync (default), false=async)
-// ***************************************************************************************
-void FieldController::couple_scalar(const Field *a, Field *a0, Field *a_tmp, bool sync) {
-    // local variables and parameters for GPU
-    auto d_a = a->data;
-    auto d_a0 = a0->data;
-    auto d_a_tmp = a_tmp->data;
-
-    auto size = Domain::getInstance()->get_size(a0->get_level());
-
-    auto boundary = BoundaryController::getInstance();
-
-    size_t *d_iList = boundary->get_inner_list_level_joined();
-    size_t bsize_i = boundary->get_size_inner_list();
-    size_t *d_bList = boundary->get_boundary_list_level_joined();
-    size_t bsize_b = boundary->get_size_boundary_list();
-    size_t *d_oList = boundary->get_obstacle_list();
-    size_t bsize_o = boundary->get_size_obstacle_list();
-
-#pragma acc data present(d_a[:size], d_a0[:size], d_a_tmp[:size], d_iList[:bsize_i], d_bList[:bsize_b], d_oList[:bsize_o])
-    {
-        // inner
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_iList[j];
-            d_a0[i] = d_a[i];
-            d_a_tmp[i] = d_a[i];
-        }
-        // boundary
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_b; ++j) {
-            const size_t i = d_bList[j];
-            d_a0[i] = d_a[i];
-            d_a_tmp[i] = d_a[i];
-        }
-        // obstacles
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t j = 0; j < bsize_o; ++j) {
-            const size_t i = d_oList[j];
-            d_a0[i] = d_a[i];
-            d_a_tmp[i] = d_a[i];
-        }
-        if (sync) {
-#pragma acc wait
-        }
-    }  // end data region
-}
-
 void FieldController::update_device() {
-    auto d_u = field_u->data;
-    auto d_v = field_v->data;
-    auto d_w = field_w->data;
-    auto d_p = field_p->data;
-    auto d_rhs = field_rhs->data;
-    auto d_T = field_T->data;
-    auto d_T_a = field_T_ambient->data;
-    auto d_C = field_concentration->data;
-    auto d_f_x = field_force_x->data;
-    auto d_f_y = field_force_y->data;
-    auto d_f_z = field_force_z->data;
-    auto d_S_T = field_source_T->data;
-    auto d_S_C = field_source_concentration->data;
-    auto d_nu_t = field_nu_t->data;
-    auto d_kappa_t = field_kappa_t->data;
-    auto d_gamma_t = field_gamma_t->data;
-
-    Domain *domain = Domain::getInstance();
-    auto bsize = domain->get_size();
-    // copyin fields
-#pragma acc update device(d_u[:bsize])
-#pragma acc update device(d_v[:bsize])
-#pragma acc update device(d_w[:bsize])
-#pragma acc update device(d_p[:bsize])
-#pragma acc update device(d_rhs[:bsize])
-#pragma acc update device(d_T[:bsize])
-#pragma acc update device(d_T_a[:bsize])
-#pragma acc update device(d_C[:bsize])
-#pragma acc update device(d_f_x[:bsize])
-#pragma acc update device(d_f_y[:bsize])
-#pragma acc update device(d_f_z[:bsize])
-#pragma acc update device(d_S_T[:bsize])
-#pragma acc update device(d_S_C[:bsize])
-#pragma acc update device(d_nu_t[:bsize])
-#pragma acc update device(d_kappa_t[:bsize])
-#pragma acc update device(d_gamma_t[:bsize]) wait    // all in one update does not work!
+    field_u->update_dev();
+    field_v->update_dev();
+    field_w->update_dev();
+    field_p->update_dev();
+    field_rhs->update_dev();
+    field_T->update_dev();
+    field_T_ambient->update_dev();
+    field_concentration->update_dev();
+    field_force_x->update_dev();
+    field_force_y->update_dev();
+    field_force_z->update_dev();
+    field_source_T->update_dev();
+    field_source_concentration->update_dev();
+    field_nu_t->update_dev();
+    field_kappa_t->update_dev();
+    field_gamma_t->update_dev();
+#pragma acc wait
 }
 
 void FieldController::update_host(){
-    auto d_u = field_u->data;
-    auto d_v = field_v->data;
-    auto d_w = field_w->data;
-    auto d_p = field_p->data;
-    auto d_rhs = field_rhs->data;
-    auto d_T = field_T->data;
-    auto d_T_a = field_T_ambient->data;
-    auto d_C = field_concentration->data;
-    auto d_f_x = field_force_x->data;
-    auto d_f_y = field_force_y->data;
-    auto d_f_z = field_force_z->data;
-    auto d_S_T = field_source_T->data;
-    auto d_S_C = field_source_concentration->data;
-    auto d_nu_t = field_nu_t->data;
-    auto d_kappa_t = field_kappa_t->data;
-    auto d_gamma_t = field_gamma_t->data;
+    field_u->update_host();
+    field_v->update_host();
+    field_w->update_host();
+    field_p->update_host();
+    field_rhs->update_host();
+    field_T->update_host();
+    field_T_ambient->update_host();
+    field_concentration->update_host();
+    field_force_x->update_host();
+    field_force_y->update_host();
+    field_force_z->update_host();
+    field_source_T->update_host();
+    field_source_concentration->update_host();
+    field_nu_t->update_host();
+    field_kappa_t->update_host();
+    field_gamma_t->update_host();
+#pragma acc wait
+}
 
-    Domain *domain = Domain::getInstance();
-    auto bsize = domain->get_size();
-    // copyin fields
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_T_a[:bsize])
-#pragma acc update host(d_C[:bsize])
-#pragma acc update host(d_f_x[:bsize])
-#pragma acc update host(d_f_y[:bsize])
-#pragma acc update host(d_f_z[:bsize])
-#pragma acc update host(d_S_T[:bsize])
-#pragma acc update host(d_S_C[:bsize])
-#pragma acc update host(d_nu_t[:bsize])
-#pragma acc update host(d_kappa_t[:bsize])
-#pragma acc update host(d_gamma_t[:bsize]) wait    // all in one update does not work!
+void FieldController::couple_vector(const Field &a, Field &a0, Field &a_tmp,
+                                    const Field &b, Field &b0, Field &b_tmp,
+                                    const Field &c, Field &c0, Field &c_tmp,
+                                    bool sync) {
+    // TODO parallelisable ?
+    a0.copy_data(a);
+    a_tmp.copy_data(a);
+
+    b0.copy_data(b);
+    b_tmp.copy_data(b);
+
+    c0.copy_data(c);
+    c_tmp.copy_data(c);
+
+    if (sync) {
+#pragma acc wait
+    }
+}
+
+void FieldController::couple_scalar(const Field &a, Field &a0, Field &a_tmp, bool sync) {
+    // TODO parallelisable ?
+    a0.copy_data(a);
+    a_tmp.copy_data(a);
+
+    if (sync) {
+#pragma acc wait
+    }
 }
 
