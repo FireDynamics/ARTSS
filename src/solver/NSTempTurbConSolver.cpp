@@ -199,7 +199,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
 // 4. Solve pressure equation and project
         // Calculate divergence of u
-        pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
+        pres->divergence(*rhs, *u_tmp, *v_tmp, *w_tmp, sync);
 
         // Solve pressure equation
 #ifndef BENCHMARKING
@@ -208,7 +208,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
         pres->pressure(p, rhs, t, sync);
 
         // Correct
-        pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
+        pres->projection(*u, *v, *w, *u_tmp, *v_tmp, *w_tmp, *p, sync);
 
 // 5. Solve Temperature and link back to force
 
