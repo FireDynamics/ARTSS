@@ -17,7 +17,7 @@
 
 Visual::Visual(const Solution &solution) : m_solution(solution) {
     auto params = Parameters::getInstance();
-    m_filename = remove_extension(params->get_filename());
+    m_filename = Utility::remove_extension(params->get_filename());
 
     m_save_csv = (params->get("visualisation/save_csv") == "Yes");
     m_save_vtk = (params->get("visualisation/save_vtk") == "Yes");
@@ -35,13 +35,12 @@ Visual::Visual(const Solution &solution) : m_solution(solution) {
 
 void Visual::visualise(const FieldController &field_controller, real t) {
     int n = static_cast<int> (std::round(t / m_dt));
-
-    std::string filename = create_filename(m_filename, static_cast<int>(std::round(t / m_dt)), false);
+    std::string filename = create_filename(m_filename, n, false);
     if (m_save_vtk) {
         if (fmod(n, m_vtk_plots) == 0 || t >= m_t_end) {
             VTKWriter::write_numerical(field_controller, filename);
             if (m_has_analytical_solution) {
-                VTKWriter::write_analytical(m_solution, create_filename(m_filename, static_cast<int>(t/m_dt), true));
+                VTKWriter::write_analytical(m_solution, filename);
             }
         }
     }
@@ -50,14 +49,58 @@ void Visual::visualise(const FieldController &field_controller, real t) {
         if (fmod(n, m_csv_plots) == 0 || t >= m_t_end) {
             CSVWriter::write_numerical(field_controller, filename);
             if (m_has_analytical_solution) {
-                CSVWriter::write_analytical(m_solution, create_filename(m_filename, static_cast<int>(t/m_dt), true));
+                CSVWriter::write_analytical(m_solution, filename);
             }
         }
     }
 }
 
-void Visual::write_csv(const FieldController &solver, std::string filename){
-    CSVWriter::write_numerical(solver, filename);
+void Visual::write_csv(const FieldController &field_controller, const std::string& filename){
+    // local variables and parameters for GPU
+    field_controller.field_u->update_host();
+    field_controller.field_v->update_host();
+    field_controller.field_w->update_host();
+    field_controller.field_p->update_host();
+    field_controller.field_rhs->update_host();
+    field_controller.field_T->update_host();
+    field_controller.field_concentration->update_host();
+    field_controller.field_source_T->update_host();
+    field_controller.field_source_concentration->update_host();
+    field_controller.field_nu_t->update_host();
+    CSVWriter::write_numerical(field_controller, filename);
+}
+
+void Visual::write_vtk(const FieldController &field_controller, const std::string& filename){
+    field_controller.field_u->update_host();
+    field_controller.field_v->update_host();
+    field_controller.field_w->update_host();
+    field_controller.field_p->update_host();
+    field_controller.field_rhs->update_host();
+    field_controller.field_T->update_host();
+    field_controller.field_concentration->update_host();
+    field_controller.field_source_T->update_host();
+    field_controller.field_source_concentration->update_host();
+    field_controller.field_nu_t->update_host();
+    VTKWriter::write_numerical(field_controller, filename);
+}
+
+void Visual::write_vtk_debug(const FieldController &field_controller, const std::string& filename){
+    field_controller.field_u->update_host();
+    field_controller.field_v->update_host();
+    field_controller.field_w->update_host();
+    field_controller.field_p->update_host();
+    field_controller.field_rhs->update_host();
+    field_controller.field_T->update_host();
+    field_controller.field_concentration->update_host();
+    field_controller.field_source_T->update_host();
+    field_controller.field_source_concentration->update_host();
+    field_controller.field_nu_t->update_host();
+    field_controller.field_force_x->update_host();
+    field_controller.field_force_y->update_host();
+    field_controller.field_force_z->update_host();
+    field_controller.field_kappa_t->update_host();
+    field_controller.field_gamma_t->update_host();
+    VTKWriter::write_numerical_debug(field_controller, filename);
 }
 
 void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
@@ -79,7 +122,8 @@ void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords, int
     }
 }
 
-std::string Visual::create_filename(std::string filename, int counter, bool analytical) {
+std::string Visual::create_filename(const std::string &filename,
+                                    int counter, bool analytical) {
     std::string fname = std::move(filename);
     if (analytical) {
         fname.append("_ana_");
@@ -90,15 +134,4 @@ std::string Visual::create_filename(std::string filename, int counter, bool anal
     tstep << std::setw(6) << std::setfill('0') << counter;
     fname.append(tstep.str());
     return fname;
-}
-
-//================================= Remove extension ==================================
-// ***************************************************************************************
-/// \brief  Removes extension from filename
-/// \param  filename    xml-file name (via argument)
-// ***************************************************************************************
-std::string Visual::remove_extension(const std::string &filename) {
-    size_t lastdot = filename.find_last_of('.');
-    if (lastdot == std::string::npos) return filename;
-    return filename.substr(0, lastdot);
 }

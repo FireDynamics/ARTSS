@@ -19,11 +19,11 @@ public:
 
     static void initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
 
-    static void write_csv(const FieldController &solver, std::string filename);
+    static void write_csv(const FieldController &field_controller, const std::string& filename);
+    static void write_vtk(const FieldController &field_controller, const std::string& filename);
+    static void write_vtk_debug(const FieldController &field_controller, const std::string& filename);
 
 private:
-    static std::string remove_extension(const std::string &filename);
-
     std::string m_filename;
     const Solution &m_solution;
     bool m_save_csv = false;
@@ -33,7 +33,7 @@ private:
     real m_dt;
     real m_t_end;
 
-    static std::string create_filename(std::string filename, int counter, bool analytical);
+    static std::string create_filename(const std::string &filename, int counter, bool analytical);
 
     bool m_has_analytical_solution = false;
 };
