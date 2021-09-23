@@ -241,51 +241,57 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 
     if (string_init_usr_fct == FunctionNames::GaussBubble) {
         if (string_solver == SolverTypes::AdvectionSolver) {
-            Functions::GaussBubble(m_field_controller->field_u, 0.);
-            Functions::GaussBubble(m_field_controller->field_v, 0.);
-            Functions::GaussBubble(m_field_controller->field_w, 0.);
+            Functions::GaussBubble(*m_field_controller->field_u, 0.);
+            Functions::GaussBubble(*m_field_controller->field_v, 0.);
+            Functions::GaussBubble(*m_field_controller->field_w, 0.);
         }
     } else if (string_init_usr_fct == FunctionNames::Drift) {
-        if (string_solver == SolverTypes::AdvectionSolver || \
-            string_solver == SolverTypes::NSSolver || \
-            string_solver == SolverTypes::NSTempSolver || \
-            string_solver == SolverTypes::NSTempConSolver || \
-            string_solver == SolverTypes::NSTempTurbConSolver || \
-            string_solver == SolverTypes::NSTempTurbSolver || \
+        if (string_solver == SolverTypes::AdvectionSolver ||
+            string_solver == SolverTypes::NSSolver ||
+            string_solver == SolverTypes::NSTempSolver ||
+            string_solver == SolverTypes::NSTempConSolver ||
+            string_solver == SolverTypes::NSTempTurbConSolver ||
+            string_solver == SolverTypes::NSTempTurbSolver ||
             string_solver == SolverTypes::NSTurbSolver) {
-            Functions::Drift(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, m_field_controller->field_p);
+            Functions::Drift(*m_field_controller->field_u,
+                             *m_field_controller->field_v,
+                             *m_field_controller->field_w,
+                             *m_field_controller->field_p);
         }
-        if (string_solver == SolverTypes::NSTempSolver || \
-            string_solver == SolverTypes::NSTempConSolver || \
-            string_solver == SolverTypes::NSTempTurbConSolver || \
+        if (string_solver == SolverTypes::NSTempSolver ||
+            string_solver == SolverTypes::NSTempConSolver ||
+            string_solver == SolverTypes::NSTempTurbConSolver ||
             string_solver == SolverTypes::NSTempTurbSolver) {
             force_source();
             temperature_source();
         }
     } else if (string_init_usr_fct == FunctionNames::ExpSinusProd) {
         // Diffusion test case
-        if (string_solver == SolverTypes::DiffusionSolver || \
+        if (string_solver == SolverTypes::DiffusionSolver ||
             string_solver == SolverTypes::DiffusionTurbSolver) {
-            Functions::ExpSinusProd(m_field_controller->field_u, 0.);
-            Functions::ExpSinusProd(m_field_controller->field_v, 0.);
-            Functions::ExpSinusProd(m_field_controller->field_w, 0.);
+            Functions::ExpSinusProd(*m_field_controller->field_u, 0.);
+            Functions::ExpSinusProd(*m_field_controller->field_v, 0.);
+            Functions::ExpSinusProd(*m_field_controller->field_w, 0.);
         }
     } else if (string_init_usr_fct == FunctionNames::Hat) {
-        if (string_solver == SolverTypes::DiffusionSolver || \
+        if (string_solver == SolverTypes::DiffusionSolver ||
             string_solver == SolverTypes::DiffusionTurbSolver) {
-            Functions::Hat(m_field_controller->field_u);
-            Functions::Hat(m_field_controller->field_v);
-            Functions::Hat(m_field_controller->field_w);
+            Functions::Hat(*m_field_controller->field_u);
+            Functions::Hat(*m_field_controller->field_v);
+            Functions::Hat(*m_field_controller->field_w);
         }
     } else if (string_init_usr_fct == FunctionNames::ExpSinusSum) {
         // Burgers (=nonlinear Advection + Diffusion) test case
         if (string_solver == SolverTypes::AdvectionDiffusionSolver) {
-            Functions::ExpSinusSum(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, 0.);
+            Functions::ExpSinusSum(*m_field_controller->field_u,
+                                   *m_field_controller->field_v,
+                                   *m_field_controller->field_w,
+                                   0.);
         }
     } else if (string_init_usr_fct == FunctionNames::SinSinSin) {
         if (string_solver == SolverTypes::PressureSolver) {
             // Pressure test case
-            Functions::SinSinSin(m_field_controller->field_rhs);
+            Functions::SinSinSin(*m_field_controller->field_rhs);
         }
     } else if (string_init_usr_fct == FunctionNames::McDermott) {
         // NavierStokes test case: McDermott (no force, no temperature) 2D
@@ -295,7 +301,11 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempConSolver || \
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::McDermott(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, m_field_controller->field_p, 0.);
+            Functions::McDermott(*m_field_controller->field_u,
+                                 *m_field_controller->field_v,
+                                 *m_field_controller->field_w,
+                                 *m_field_controller->field_p,
+                                 0.);
             m_field_controller->field_p->set_value(0.);
         }
         if (string_solver == SolverTypes::NSTempSolver || \
@@ -313,7 +323,10 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver || \
             string_solver == SolverTypes::NSTempSolver) {
-            Functions::Vortex(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, m_field_controller->field_p);
+            Functions::Vortex(*m_field_controller->field_u,
+                              *m_field_controller->field_v,
+                              *m_field_controller->field_w,
+                              *m_field_controller->field_p);
             m_field_controller->field_p->set_value(0.);
         }
         if (string_solver == SolverTypes::NSTempSolver || \
@@ -331,7 +344,10 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver || \
             string_solver == SolverTypes::NSTempSolver) {
-            Functions::VortexY(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, m_field_controller->field_p);
+            Functions::VortexY(*m_field_controller->field_u,
+                               *m_field_controller->field_v,
+                               *m_field_controller->field_w,
+                               *m_field_controller->field_p);
             m_field_controller->field_p->set_value(0.);
         }
         if (string_solver == SolverTypes::NSTempSolver || \
@@ -345,7 +361,11 @@ void SolverController::set_up_fields(const std::string &string_solver) {
         // NavierStokes test case: Beltrami  (no force, no temperature) 3D
         if (string_solver == SolverTypes::NSSolver || \
             string_solver == SolverTypes::NSTurbSolver) {
-            Functions::Beltrami(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, m_field_controller->field_p, 0.);
+            Functions::Beltrami(*m_field_controller->field_u,
+                                *m_field_controller->field_v,
+                                *m_field_controller->field_w,
+                                *m_field_controller->field_p,
+                                0.);
             // m_field_controller->field_p->set_value(0.);
         }
     } else if (string_init_usr_fct == FunctionNames::BuoyancyMMS) {
@@ -355,7 +375,12 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempConSolver || \
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::BuoyancyMMS(m_field_controller->field_u, m_field_controller->field_v, m_field_controller->field_w, m_field_controller->field_p, m_field_controller->field_T, 0.);
+            Functions::BuoyancyMMS(*m_field_controller->field_u,
+                                   *m_field_controller->field_v,
+                                   *m_field_controller->field_w,
+                                   *m_field_controller->field_p,
+                                   *m_field_controller->field_T,
+                                   0.);
             m_field_controller->field_p->set_value(0.);
             force_source();
             temperature_source();
@@ -367,7 +392,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver) {
             real val = params->get_real("initial_conditions/val");
-            Functions::Uniform(m_field_controller->field_T, val);
+            Functions::Uniform(*m_field_controller->field_T, val);
             if (random) {
                 call_random(*m_field_controller->field_T);
             }
@@ -379,7 +404,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempConSolver || \
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::Layers(m_field_controller->field_T);
+            Functions::Layers(*m_field_controller->field_T);
             if (random) {
                 call_random(*m_field_controller->field_T);
             }
@@ -396,13 +421,13 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             std::string dir = params->get("solver/source/dir");
 
             if (dir.find('x') != std::string::npos) {
-                Functions::Uniform(m_field_controller->field_force_x, val_x);
+                Functions::Uniform(*m_field_controller->field_force_x, val_x);
             }
             if (dir.find('y') != std::string::npos) {
-                Functions::Uniform(m_field_controller->field_force_y, val_y);
+                Functions::Uniform(*m_field_controller->field_force_y, val_y);
             }
             if (dir.find('z') != std::string::npos) {
-                Functions::Uniform(m_field_controller->field_force_z, val_z);
+                Functions::Uniform(*m_field_controller->field_force_z, val_z);
             }
         } else {
 #ifndef BENCHMARKING
@@ -414,7 +439,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
              string_solver == SolverTypes::NSTempTurbConSolver)
             && params->get("initial_conditions/con_fct") == FunctionNames::RandomC) {
             real Ca = params->get_real("initial_conditions/Ca");        // ambient concentration
-            Functions::Uniform(m_field_controller->field_concentration, Ca);
+            Functions::Uniform(*m_field_controller->field_concentration, Ca);
             call_random(*m_field_controller->field_concentration);
         }
     }
@@ -438,9 +463,9 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 void SolverController::call_random(Field &field) {
     auto params = Parameters::getInstance();
     real range = params->get_real("initial_conditions/random/range");  // +- range of random numbers
-    bool is_absolute = params->get("initial_conditions/random/absolute") == "Yes";
-    bool has_custom_seed = params->get("initial_conditions/random/custom_seed") == "Yes";
-    bool has_custom_steps = params->get("initial_conditions/random/custom_steps") == "Yes";
+    bool is_absolute = params->get("initial_conditions/random/absolute") == XML_TRUE;
+    bool has_custom_seed = params->get("initial_conditions/random/custom_seed") == XML_TRUE;
+    bool has_custom_steps = params->get("initial_conditions/random/custom_steps") == XML_TRUE;
 
     int seed = -1;
     if (has_custom_seed) {
@@ -452,7 +477,7 @@ void SolverController::call_random(Field &field) {
         step_size = params->get_real("initial_conditions/random/step_size");
     }
 
-    Functions::Random(&field, range, is_absolute, seed, step_size);
+    Functions::Random(field, range, is_absolute, seed, step_size);
 }
 
 //======================================= Update data ==================================
@@ -462,7 +487,7 @@ void SolverController::call_random(Field &field) {
 void SolverController::temperature_source() {
 // Temperature source
     if (Parameters::getInstance()->get("solver/temperature/source/temp_fct") == FunctionNames::BuoyancyST_MMS) {
-        Functions::BuoyancyST_MMS(m_field_controller->field_source_T, 0.);
+        Functions::BuoyancyST_MMS(*m_field_controller->field_source_T, 0.);
     }
 }
 
@@ -482,13 +507,19 @@ void SolverController::force_source() {
         }
 
         if (dir.find('x') != std::string::npos) {
-            Functions::BuoyancyForce(m_field_controller->field_force_x, m_field_controller->field_T, m_field_controller->field_T_ambient);
+            Functions::BuoyancyForce(*m_field_controller->field_force_x,
+                                     *m_field_controller->field_T,
+                                     *m_field_controller->field_T_ambient);
         }
         if (dir.find('y') != std::string::npos) {
-            Functions::BuoyancyForce(m_field_controller->field_force_y, m_field_controller->field_T, m_field_controller->field_T_ambient);
+            Functions::BuoyancyForce(*m_field_controller->field_force_y,
+                                     *m_field_controller->field_T,
+                                     *m_field_controller->field_T_ambient);
         }
         if (dir.find('z') != std::string::npos) {
-            Functions::BuoyancyForce(m_field_controller->field_force_z, m_field_controller->field_T, m_field_controller->field_T_ambient);
+            Functions::BuoyancyForce(*m_field_controller->field_force_z,
+                                     *m_field_controller->field_T,
+                                     *m_field_controller->field_T_ambient);
         }
     }
 }
@@ -502,13 +533,19 @@ void SolverController::momentum_source() {
     auto params = Parameters::getInstance();
     std::string dir_vel = params->get("solver/source/dir");
     if (dir_vel.find('x') != std::string::npos) {
-        source_velocity->buoyancy_force(m_field_controller->field_force_x, m_field_controller->field_T, m_field_controller->field_T_ambient);
+        source_velocity->buoyancy_force(m_field_controller->field_force_x,
+                                        m_field_controller->field_T,
+                                        m_field_controller->field_T_ambient);
     }
     if (dir_vel.find('y') != std::string::npos) {
-        source_velocity->buoyancy_force(m_field_controller->field_force_y, m_field_controller->field_T, m_field_controller->field_T_ambient);
+        source_velocity->buoyancy_force(m_field_controller->field_force_y,
+                                        m_field_controller->field_T,
+                                        m_field_controller->field_T_ambient);
     }
     if (dir_vel.find('z') != std::string::npos) {
-        source_velocity->buoyancy_force(m_field_controller->field_force_z, m_field_controller->field_T, m_field_controller->field_T_ambient);
+        source_velocity->buoyancy_force(m_field_controller->field_force_z,
+                                        m_field_controller->field_T,
+                                        m_field_controller->field_T_ambient);
     }
 }
 
@@ -556,6 +593,9 @@ void SolverController::update_sources(real t_cur, bool sync) {
 // Concentration source
     if (m_has_concentration) {
         m_source_function_concentration->update_source(*m_field_controller->field_source_concentration, t_cur);
+    }
+    if (sync) {
+#pragma acc wait
     }
 }
 
