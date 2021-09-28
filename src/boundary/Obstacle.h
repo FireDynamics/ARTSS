@@ -45,6 +45,7 @@ class Obstacle {
     size_t get_size_obstacle_right() const { return m_size_obstacle_right; }
 
     bool is_obstacle_cell(size_t i, size_t j, size_t k) const;
+    bool is_obstacle_cell(size_t index) const;
 
     void print();
 

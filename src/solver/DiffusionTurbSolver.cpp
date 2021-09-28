@@ -6,7 +6,6 @@
 
 
 #include "DiffusionTurbSolver.h"
-
 #include <string>
 
 
@@ -29,7 +28,6 @@ DiffusionTurbSolver::DiffusionTurbSolver(FieldController *field_controller) {
     SolverSelection::SetTurbulenceSolver(&this->mu_tub, turbluenceType);
     control();
 }
-
 
 DiffusionTurbSolver::~DiffusionTurbSolver() {
     delete dif;
@@ -63,7 +61,7 @@ void DiffusionTurbSolver::do_step(real, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Calculating Turbulent viscosity ...");
 #endif
-        mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
+        mu_tub->calc_turbulent_viscosity(nu_t, u, v, w, true);
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
@@ -85,6 +83,6 @@ void DiffusionTurbSolver::control() {
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
-        // TODO Error handling
+        // TODO(issue 6) Error handling
     }
 }

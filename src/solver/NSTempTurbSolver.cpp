@@ -40,7 +40,9 @@ NSTempTurbSolver::NSTempTurbSolver(FieldController *field_controller) {
     m_kappa = params->get_real("physical_parameters/kappa");
 
     // Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), m_field_controller->field_p, m_field_controller->field_rhs);
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
+                                       m_field_controller->get_field_p(),
+                                       m_field_controller->get_field_rhs());
 
     // Source of velocity
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
@@ -96,14 +98,8 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     Field &f_y = m_field_controller->get_field_force_y();
     Field &f_z = m_field_controller->get_field_force_z();
     Field &S_T = m_field_controller->get_field_source_T();
-    Field &nu_t = m_field_controller->get_field_nu_t();        // nu_t - Eddy Viscosity
-    Field &kappa_t = m_field_controller->get_field_kappa_t();  // kappa_t - Eddy thermal diffusivity
-
-    size_t bsize = Domain::getInstance()->get_size(u.get_level());
-
-    auto nu = m_nu;
-    auto kappa = m_kappa;
-    auto dir_vel = m_dir_vel;
+    Field &nu_t = m_field_controller->get_field_nu_t();      // nu_t - Eddy Viscosity
+    Field &kappa_t = m_field_controller->get_field_kappa();  // kappa_t - Eddy thermal diffusivity
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
                          w0, w_tmp, p, p0, rhs, T, T0, T_tmp, \
@@ -124,15 +120,15 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Calculating Turbulent viscosity ...");
 #endif
-        mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
+        mu_tub->calc_turbulent_viscosity(nu_t, u, v, w, true);
 
 
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
-        dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(u, u0, u_tmp, m_nu, nu_t, sync);
+        dif_vel->diffuse(v, v0, v_tmp, m_nu, nu_t, sync);
+        dif_vel->diffuse(w, w0, w_tmp, m_nu, nu_t, sync);
 
         // Couple data to prepare for adding source
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
@@ -177,6 +173,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
             real Pr_T = params->get_real("solver/temperature/turbulence/Pr_T");
             real rPr_T = 1. / Pr_T;
 
+            size_t bsize = kappa_t.get_size();
             // kappa_turb = nu_turb/Pr_turb
 #pragma acc parallel loop independent present(kappa_t, nu_t) async
             for (size_t i = 0; i < bsize; ++i) {
@@ -185,17 +182,17 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Temperature ...");
 #endif
-            dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
+            dif_temp->diffuse(T, T0, T_tmp, m_kappa, kappa_t, sync);
 
             // Couple temperature to prepare for adding source
             FieldController::couple_scalar(T, T0, T_tmp, sync);
         } else {
             // no turbulence
-            if (kappa != 0.) {
+            if (m_kappa != 0.) {
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Temperature ...");
 #endif
-                dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
+                dif_temp->diffuse(T, T0, T_tmp, m_kappa, sync);
 
                 // Couple temperature to prepare for adding source
                 FieldController::couple_scalar(T, T0, T_tmp, sync);

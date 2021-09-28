@@ -71,8 +71,6 @@ namespace Functions {  // alphabetically ordered
 
   void Vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
   void VortexY(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
-
-  void Zero(Field &field, size_t *arr_idx, size_t arr_idx_size);
 };
 
 #endif /* ARTSS_FUNCTIONS_H_ */

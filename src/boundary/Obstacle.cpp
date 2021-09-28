@@ -457,6 +457,22 @@ bool Obstacle::is_obstacle_cell(size_t i, size_t j, size_t k) const {
     return m_i1 <= i && i <= m_i2 && m_j1 <= j && j <= m_j2 && m_k1 <= k && k <= m_k2;
 }
 
+//======================================== Is obstacle cell ========================================
+// *************************************************************************************************
+/// \brief  Check if cell is an obstacle cell
+/// \param  index position in 1D array
+/// \return  bool true if yes false if no
+// *************************************************************************************************
+bool Obstacle::is_obstacle_cell(const size_t idx) const {
+    Domain *domain = Domain::getInstance();
+    const size_t Nx = domain->get_Nx(m_level);
+    const size_t Ny = domain->get_Ny(m_level);
+    const size_t k = getCoordinateK(idx, Nx, Ny);
+    const size_t j = getCoordinateJ(idx, Nx, Ny, k);
+    const size_t i = getCoordinateI(idx, Nx, Ny, j, k);
+    return is_obstacle_cell(i, j, k);
+}
+
 //======================================== Match grid ==============================================
 // *************************************************************************************************
 /// \brief  Snaps value to grid discretisation
