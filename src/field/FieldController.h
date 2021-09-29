@@ -18,7 +18,7 @@ class FieldController {
 
     void set_up_boundary();
     void update_data(bool sync = true);
-    void replace_data(Field *u, Field *v, Field *w, Field *p, Field *T, Field *C);
+    void replace_data(Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
 
     // Getter
     Field & get_field_u() { return field_u; }

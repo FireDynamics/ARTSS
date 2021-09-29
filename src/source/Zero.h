@@ -13,7 +13,7 @@
 class Zero: public ISourceFunction {
 public:
     void update_source(Field &, real) override { }
-    void read_header_part(std::string) override { }
+    void read_header_part(std::string &) override { }
     std::string write_header_part() override { return {}; }
 };
 
