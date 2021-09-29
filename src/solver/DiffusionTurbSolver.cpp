@@ -4,7 +4,10 @@
 /// \author     Suryanarayana Maddu
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+
 #include "DiffusionTurbSolver.h"
+#include <string>
+
 
 DiffusionTurbSolver::DiffusionTurbSolver(FieldController *field_controller) {
 #ifndef BENCHMARKING
@@ -26,7 +29,6 @@ DiffusionTurbSolver::DiffusionTurbSolver(FieldController *field_controller) {
     control();
 }
 
-
 DiffusionTurbSolver::~DiffusionTurbSolver() {
     delete dif;
     delete mu_tub;
@@ -38,48 +40,35 @@ DiffusionTurbSolver::~DiffusionTurbSolver() {
 /// \param  dt      time step
 /// \param  sync    synchronous kernel launching (true, default: false)
 // ***************************************************************************************
-void DiffusionTurbSolver::do_step(real t, bool sync) {
+void DiffusionTurbSolver::do_step(real, bool sync) {
 // 1. Solve diffusion equation
 // local variables and parameters for GPU
-    auto u = m_field_controller->field_u;
-    auto v = m_field_controller->field_v;
-    auto w = m_field_controller->field_w;
-    auto u0 = m_field_controller->field_u0;
-    auto v0 = m_field_controller->field_v0;
-    auto w0 = m_field_controller->field_w0;
-    auto u_tmp = m_field_controller->field_u_tmp;
-    auto v_tmp = m_field_controller->field_v_tmp;
-    auto w_tmp = m_field_controller->field_w_tmp;
-    auto nu_t = m_field_controller->field_nu_t;     //Eddy Viscosity
-
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-    auto d_u_tmp = u_tmp->data;
-    auto d_v_tmp = v_tmp->data;
-    auto d_w_tmp = w_tmp->data;
-    auto d_nu_t = nu_t->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u->get_level());
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &u0 = m_field_controller->get_field_u0();
+    Field &v0 = m_field_controller->get_field_v0();
+    Field &w0 = m_field_controller->get_field_w0();
+    Field &u_tmp = m_field_controller->get_field_u_tmp();
+    Field &v_tmp = m_field_controller->get_field_v_tmp();
+    Field &w_tmp = m_field_controller->get_field_w_tmp();
+    Field &nu_t = m_field_controller->get_field_nu_t();  // Eddy Viscosity
 
     auto nu = m_nu;
 
-#pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_nu_t[:bsize]) //EV
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, nu_t)
     {
 #ifndef BENCHMARKING
         m_logger->info("Calculating Turbulent viscosity ...");
 #endif
-        mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
+        mu_tub->calc_turbulent_viscosity(nu_t, u, v, w, true);
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
         dif->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif->diffuse(v, v0, v_tmp, nu, nu_t, sync);
         dif->diffuse(w, w0, w_tmp, nu, nu_t, sync);
-    }//end data
+    }
 }
 
 //======================================= Check data ==================================
@@ -94,6 +83,6 @@ void DiffusionTurbSolver::control() {
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
-        //TODO Error handling
+        // TODO(issue 6) Error handling
     }
 }

@@ -31,7 +31,9 @@ NSSolver::NSSolver(FieldController *field_controller) {
 
     //Pressure
     std::string pressureType = params->get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(&pres, pressureType, m_field_controller->field_p, m_field_controller->field_rhs);
+    SolverSelection::SetPressureSolver(&pres, pressureType,
+                                       m_field_controller->get_field_p(),
+                                       m_field_controller->get_field_rhs());
 
     //Source
     std::string sourceType = params->get("solver/source/type");
@@ -55,44 +57,24 @@ NSSolver::~NSSolver() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSSolver::do_step(real t, bool sync) {
-// local variables and parameters for GPU
-    auto u = m_field_controller->field_u;
-    auto v = m_field_controller->field_v;
-    auto w = m_field_controller->field_w;
-    auto u0 = m_field_controller->field_u0;
-    auto v0 = m_field_controller->field_v0;
-    auto w0 = m_field_controller->field_w0;
-    auto u_tmp = m_field_controller->field_u_tmp;
-    auto v_tmp = m_field_controller->field_v_tmp;
-    auto w_tmp = m_field_controller->field_w_tmp;
-    auto p = m_field_controller->field_p;
-    auto p0 = m_field_controller->field_p0;
-    auto rhs = m_field_controller->field_rhs;
-    auto f_x = m_field_controller->field_force_x;
-    auto f_y = m_field_controller->field_force_y;
-    auto f_z = m_field_controller->field_force_z;
-
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-    auto d_u0 = u0->data;
-    auto d_v0 = v0->data;
-    auto d_w0 = w0->data;
-    auto d_u_tmp = u_tmp->data;
-    auto d_v_tmp = v_tmp->data;
-    auto d_w_tmp = w_tmp->data;
-    auto d_p = p->data;
-    auto d_p0 = p0->data;
-    auto d_rhs = rhs->data;
-    auto d_fx = f_x->data;
-    auto d_fy = f_y->data;
-    auto d_fz = f_z->data;
-
-    size_t bsize = Domain::getInstance()->get_size(u->get_level());
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &u0 = m_field_controller->get_field_u0();
+    Field &v0 = m_field_controller->get_field_v0();
+    Field &w0 = m_field_controller->get_field_w0();
+    Field &u_tmp = m_field_controller->get_field_u_tmp();
+    Field &v_tmp = m_field_controller->get_field_v_tmp();
+    Field &w_tmp = m_field_controller->get_field_w_tmp();
+    Field &p = m_field_controller->get_field_p();
+    Field &rhs = m_field_controller->get_field_rhs();
+    Field &f_x = m_field_controller->get_field_force_x();
+    Field &f_y = m_field_controller->get_field_force_y();
+    Field &f_z = m_field_controller->get_field_force_z();
 
     auto nu = m_nu;
 
-#pragma acc data present(d_u[:bsize], d_u0[:bsize], d_u_tmp[:bsize], d_v[:bsize], d_v0[:bsize], d_v_tmp[:bsize], d_w[:bsize], d_w0[:bsize], d_w_tmp[:bsize], d_p[:bsize], d_p0[:bsize], d_rhs[:bsize], d_fx[:bsize], d_fy[:bsize], d_fz[:bsize])
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, rhs, fx, fy, fz)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING

@@ -16,11 +16,29 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
  public:
     ColoredGaussSeidelDiffuse();
 
-    void diffuse(Field* out, Field* in, const Field* b, const real D, bool sync = true);
-    void diffuse(Field* out, Field* in, const Field* b, const real D, const Field* EV, bool sync = true);  // turbulent version
-    static void colored_gauss_seidel_step(Field* out, const Field* b, const real alpha_x, const real alpha_y, const real alpha_z, const real beta, const real dsign, const real w, bool sync = true);
-    static void colored_gauss_seidel_step(Field* out, const Field* b, const real dsign, const real w, const real D, const Field* EV, const real dt, bool sync = true); // turbulent version
-    static void colored_gauss_seidel_stencil(size_t i, size_t j, size_t k, real* out, real* b, const real alpha_x, const real alpha_y, const real alpha_z, const real dsign, const real beta, const real w, const size_t Nx, const size_t Ny);
+    void diffuse(
+            Field &out, const Field &in, const Field &b,
+            real D, bool sync = true) override;
+    void diffuse(
+            Field &out, const Field &in, const Field &b,
+            real D, const Field &EV, bool sync = true) override;
+
+    static void colored_gauss_seidel_step(
+            Field &out, const Field &b,
+            real alpha_x, real alpha_y, real alpha_z,
+            real beta, real dsign, real w, bool sync = true);
+
+    static void colored_gauss_seidel_step(
+            Field &out, const Field &b,
+            real dsign, real w, real D,
+            const Field &EV, real dt, bool sync = true);  // turbulent version
+
+    static void colored_gauss_seidel_stencil(
+            size_t i, size_t j, size_t k,
+            real *out, const real *b,
+            real alpha_x, real alpha_y, real alpha_z,
+            real dsign, real beta, real w,
+            size_t Nx, size_t Ny);
 
  private:
 #ifndef BENCHMARKING

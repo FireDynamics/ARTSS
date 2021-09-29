@@ -12,12 +12,28 @@
 
 class VTKWriter {
 public:
-    static void write_numerical(const FieldController& field_controller, const std::string& filename);
-    static void write_analytical(const Solution& solution, const std::string& filename);
+    static void write_numerical(const FieldController &field_controller, const std::string &filename);
+    static void write_analytical(const Solution &solution, const std::string &filename);
+    static void write_field(const Field &field, const std::string &filename, const std::string &var_name);
+    static void write_numerical_debug(const FieldController &field_controller, const std::string &filename);
 
 private:
-    static void vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr div, read_ptr T, read_ptr C, read_ptr s, read_ptr nu_t, read_ptr S_T);
-    static void vtkPrepareAndWrite(const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr T);
+    static void vtk_prepare_and_write_debug(const char *filename, read_ptr *data,
+                                            int size_vars, const char * const *var_names,
+                                            int *centering, int *var_dims);
+    static void vtk_prepare_and_write(const char *filename,
+                                      read_ptr u, read_ptr v, read_ptr w,
+                                      read_ptr p,
+                                      read_ptr div,
+                                      read_ptr T,
+                                      read_ptr C,
+                                      read_ptr sight,
+                                      read_ptr nu_t,
+                                      read_ptr source_T);
+    static void vtk_prepare_and_write(const char *filename,
+                                      read_ptr u, read_ptr v, read_ptr w,
+                                      read_ptr p,
+                                      read_ptr T);
 };
 
 #endif /* ARTSS_VISUALISATION_VTKWRITER_H */

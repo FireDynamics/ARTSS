@@ -7,15 +7,25 @@
 #ifndef ARTSS_INTERFACES_ISOURCEFUNCTION_H
 #define ARTSS_INTERFACES_ISOURCEFUNCTION_H
 
+#include "./IRandomField.h"
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include <string>
 
 class ISourceFunction {
-public:
-    virtual void update_source(Field *out, real t_cur) = 0;
+ public:
+    void set_noise(IRandomField *noise_maker) {
+        m_has_noise = true;
+        m_noise_maker = noise_maker;
+    }
+
+    virtual void update_source(Field &out, real t_cur) = 0;
     virtual void read_header_part(std::string &header) = 0;
     virtual std::string write_header_part() = 0;
+
+ protected:
+    bool m_has_noise;
+    IRandomField *m_noise_maker;
 };
 
 

@@ -6,7 +6,6 @@
 
 #include <vector>
 #include <cmath>
-#include <algorithm>
 #include <fstream>
 
 #include "Analysis.h"
@@ -15,20 +14,19 @@
 #include "../Domain.h"
 #include "../utility/Utility.h"
 
-Analysis::Analysis(Solution *solution) {
+Analysis::Analysis(Solution &solution, bool has_analytical_solution) :
+        m_has_analytic_solution(has_analytical_solution),
+        m_solution(solution) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    auto params = Parameters::getInstance();
-    has_analytic_solution = params->get("solver/solution/available") == "Yes";
-    if (has_analytic_solution) {
-        m_tol = params->get_real("solver/solution/tol");
+    if (m_has_analytic_solution) {
+        m_tol = Parameters::getInstance()->get_real("solver/solution/tol");
     } else {
 #ifndef BENCHMARKING
         m_logger->info("No analytical solution available!");
 #endif
     }
-    m_solution = solution;
 }
 
 // ================================ Start analysis =============================
@@ -38,41 +36,54 @@ Analysis::Analysis(Solution *solution) {
 /// \param  t     current time
 // ***************************************************************************************
 void Analysis::analyse(FieldController *field_controller, real t) {
-    if (has_analytic_solution) {
-        m_solution->calc_analytical_solution(t);
+    if (m_has_analytic_solution) {
+        m_solution.calc_analytical_solution(t);
 
         auto params = Parameters::getInstance();
 
         tinyxml2::XMLElement *xmlParameter = params->get_first_child("boundaries");
         auto curElem = xmlParameter->FirstChildElement();
 
-        #ifndef BENCHMARKING
+#ifndef BENCHMARKING
         m_logger->info("Compare to analytical solution:");
 #endif
-
         while (curElem) {
             std::string nodeName(curElem->Value());
-
             if (nodeName == "boundary") {
                 std::string field = curElem->Attribute("field");
                 if (field.find(BoundaryData::get_field_type_name(FieldType::U)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_u_data(), m_solution->GetU(), FieldType::U, t);
+                    compare_solutions(field_controller->get_field_u_data(),
+                                      m_solution.get_return_ptr_data_u(),
+                                      FieldType::U,
+                                      t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::V)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_v_data(), m_solution->GetV(), FieldType::V, t);
+                    compare_solutions(field_controller->get_field_v_data(),
+                                      m_solution.get_return_ptr_data_v(),
+                                      FieldType::V,
+                                      t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::W)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_w_data(), m_solution->GetW(), FieldType::W, t);
+                    compare_solutions(field_controller->get_field_w_data(),
+                                      m_solution.get_return_ptr_data_w(),
+                                      FieldType::W,
+                                      t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::P)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_p_data(), m_solution->GetP(), FieldType::P, t);
+                    compare_solutions(field_controller->get_field_p_data(),
+                                      m_solution.get_return_ptr_data_p(),
+                                      FieldType::P,
+                                      t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::T)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_T_data(), m_solution->GetT(), FieldType::T, t);
+                    compare_solutions(field_controller->get_field_T_data(),
+                                      m_solution.get_return_ptr_data_T(),
+                                      FieldType::T,
+                                      t);
                 }
-            }  // end if
+            }
             curElem = curElem->NextSiblingElement();
-        }  // end while
+        }
     }
 }
 
@@ -87,20 +98,20 @@ void Analysis::analyse(FieldController *field_controller, real t) {
 bool Analysis::compare_solutions(read_ptr num, read_ptr ana, FieldType type, real t) {
     bool verification = false;
 
-// Choose absolute or relative based error calculation
+    // Choose absolute or relative based error calculation
     real res = calc_absolute_spatial_error(num, ana);
     //real res = calc_relative_spatial_error(num, ana);
 
     if (res <= m_tol) {
 #ifndef BENCHMARKING
         m_logger->info("{} PASSED Test at time {} with error e = {}",
-                BoundaryData::get_field_type_name(type), t, res);
+                       BoundaryData::get_field_type_name(type), t, res);
 #endif
         verification = true;
     } else {
 #ifndef BENCHMARKING
         m_logger->warn("{} FAILED Test at time {} with error e = {}",
-                BoundaryData::get_field_type_name(type), t, res);
+                       BoundaryData::get_field_type_name(type), t, res);
 #endif
     }
     return verification;
@@ -117,22 +128,22 @@ real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
     real r;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *innerList = boundary->get_inner_list_level_joined();
-    size_t size_iList = boundary->get_size_inner_list();
+    size_t *inner_list = boundary->get_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_inner_list();
 
     // weighted 2-norm
     // absolute error
-    for (size_t i = 0; i < size_iList; i++) {
-        size_t idx = innerList[i];
+    for (size_t i = 0; i < size_inner_list; i++) {
+        size_t idx = inner_list[i];
         r = fabs(num[idx] - ana[idx]);
         sum += r * r;
     }
 
-    //weight
-    real nr = static_cast<real>(size_iList);
+    // weight
+    real nr = static_cast<real>(size_inner_list);
     real eps = sqrt(1. / nr * sum);
 
-    //TODO(n16h7) add. output
+    // TODO(n16h7) add. output
 #ifndef BENCHMARKING
     m_logger->info("Absolute error ||e|| = {}", eps);
 #endif
@@ -154,17 +165,17 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
     real rr;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *innerList = boundary->get_inner_list_level_joined();
-    size_t size_iList = boundary->get_size_inner_list();
+    size_t *inner_list = boundary->get_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_inner_list();
 
     // relative part with norm of analytical solution as denominator
-    for (size_t i = 0; i < size_iList; i++) {
-        rr = ana[innerList[i]];
+    for (size_t i = 0; i < size_inner_list; i++) {
+        rr = ana[inner_list[i]];
         sumr += rr * rr;
     }
 
-    //weight
-    real nr = static_cast<real>(size_iList);
+    // weight
+    real nr = static_cast<real>(size_inner_list);
     real adenom = sqrt(1. / nr * sumr);
 
     real eps;
@@ -180,8 +191,8 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
         sumr = 0.;
 
         // relative part with norm of numerical solution as quotient
-        for (size_t i = 0; i < size_iList; i++) {
-            rr = num[innerList[i]];
+        for (size_t i = 0; i < size_inner_list; i++) {
+            rr = num[inner_list[i]];
             sumr += rr * rr;
         }
 
@@ -193,7 +204,7 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
         eps = epsa / adenom;
     }
 
-    //TODO(n16h7) add. output
+    // TODO(n16h7) add. output
 #ifndef BENCHMARKING
     m_logger->info("Relative error ||e|| = {}", eps);
 #endif
@@ -214,22 +225,20 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
 // ***************************************************************************************
 void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t, real *sum) {
     auto boundary = BoundaryController::getInstance();
-    size_t *iList = boundary->get_inner_list_level_joined();
+    size_t *inner_list = boundary->get_inner_list_level_joined();
 
-    //take median of indices in iList to get center point ix
-    //std::nth_element(iList.begin(), iList.begin() + iList.size()/2, iList.end());
-    //size_t ix = iList[iList.size()/2];
+    size_t ix = inner_list[boundary->get_size_inner_list() / 2];
+    //take median of indices in inner_list to get center point ix
+    //std::nth_element(inner_list.begin(), inner_list.begin() + inner_list.size()/2, inner_list.end());
+    //size_t ix = inner_list[inner_list.size()/2];
 
-    size_t ix = iList[boundary->get_size_inner_list() / 2];
-
-    auto params = Parameters::getInstance();
-    if (has_analytic_solution) {
-        m_solution->calc_analytical_solution(t);
+    if (m_has_analytic_solution) {
+        m_solution.calc_analytical_solution(t);
 
         // local variables and parameters
-        auto d_ua = m_solution->GetU();
-        auto d_pa = m_solution->GetP();
-        auto d_Ta = m_solution->GetT();
+        auto d_ua = m_solution.get_return_ptr_data_u();
+        auto d_pa = m_solution.get_return_ptr_data_p();
+        auto d_Ta = m_solution.get_return_ptr_data_T();
 
         auto d_u = field_controller->get_field_u_data();
         auto d_p = field_controller->get_field_p_data();
@@ -254,7 +263,7 @@ void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t,
 void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
     auto params = Parameters::getInstance();
 
-    if (has_analytic_solution) {
+    if (m_has_analytic_solution) {
         // local variables and parameters
         real dt = params->get_real("physical_parameters/dt");
         real t_end = params->get_real("physical_parameters/t_end");
@@ -278,7 +287,7 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
 /// \param  u     x-velocity field
 /// \param  dt      time step size
 // ***************************************************************************************
-bool Analysis::check_time_step_VN(Field *u, real dt) {
+bool Analysis::check_time_step_VN(const real dt) {
     bool VN_check;
 
     auto params = Parameters::getInstance();
@@ -287,9 +296,9 @@ bool Analysis::check_time_step_VN(Field *u, real dt) {
     // local variables and parameters
     real nu = params->get_real("physical_parameters/nu");
 
-    real dx = domain->get_dx(u->get_level());
-    real dy = domain->get_dy(u->get_level());
-    real dz = domain->get_dz(u->get_level());
+    real dx = domain->get_dx();
+    real dy = domain->get_dy();
+    real dz = domain->get_dz();
 
     real dx2sum = (dx * dx + dy * dy + dz * dz);
     real rdx2 = 1. / dx2sum;
@@ -313,43 +322,37 @@ bool Analysis::check_time_step_VN(Field *u, real dt) {
 /// \param  w     z-velocity field
 /// \param  dt      time step size
 // *****************************************************************************
-real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
-    real cfl_max = 0;  // highest seen C. C is always positiv, so 0 is a lower
-                       // bound
+real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt) const {
+    real cfl_max = 0;  // highest seen C. C is always positiv, so 0 is a lower bound
     real cfl_local;    // C in the local cell
 
     auto boundary = BoundaryController::getInstance();
     auto domain = Domain::getInstance();
 
     // local variables and parameters
-    size_t bsize = domain->get_size(u->get_level());
-    size_t *innerList = boundary->get_inner_list_level_joined();
-    size_t sizei = boundary->get_size_inner_list();
+    size_t *inner_list = boundary->get_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_inner_list();
 
     real dx = domain->get_dx();
     real dy = domain->get_dy();
     real dz = domain->get_dz();
 
-    auto d_u = u->data;
-    auto d_v = v->data;
-    auto d_w = w->data;
-
     // calc C for every cell and get the maximum
-#pragma acc data present(d_u[:bsize], d_v[:bsize], d_w[:bsize])
+#pragma acc data present(u, v, w)
 #pragma acc parallel loop reduction(max:cfl_max)
-    for (size_t i=0; i < sizei; i++) {
-        size_t idx = innerList[i];
+    for (size_t i = 0; i < size_inner_list; i++) {
+        size_t idx = inner_list[i];
         // \frac{C}{\Delta t} = \frac{\Delta u}{\Delta x} +
         //                      \frac{\Delta v}{\Delta y} +
         //                      \frac{\Delta w}{\Delta z} +
         // https://en.wikipedia.org/wiki/Courant%E2%80%93Friedrichs%E2%80%93Lewy_condition#The_two_and_general_n-dimensional_case
-        cfl_local = std::fabs(d_u[idx]) / dx +
-                    std::fabs(d_v[idx]) / dy +
-                    std::fabs(d_w[idx]) / dz;
+        cfl_local = std::fabs(u[idx]) / dx +
+                    std::fabs(v[idx]) / dy +
+                    std::fabs(w[idx]) / dz;
         cfl_max = std::max(cfl_max, cfl_local);
     }
 
-    return dt*cfl_max;
+    return dt * cfl_max;
 }
 
 // =============================== Save variables ==============================
@@ -360,12 +363,12 @@ real Analysis::calc_CFL(Field *u, Field *v, Field *w, real dt) {
 void Analysis::save_variables_in_file(FieldController *field_controller) {
     //TODO do not write field out if not used
     auto boundary = BoundaryController::getInstance();
-    size_t *innerList = boundary->get_inner_list_level_joined();
-    size_t size_innerList = boundary->get_size_inner_list();
-    size_t *boundaryList = boundary->get_boundary_list_level_joined();
-    size_t size_boundaryList = boundary->get_size_boundary_list();
-    size_t *obstacleList = boundary->get_obstacle_list();
-    size_t size_obstacleList = boundary->get_size_obstacle_list();
+    size_t *inner_list = boundary->get_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_inner_list();
+    size_t *boundary_list = boundary->get_boundary_list_level_joined();
+    size_t size_boundary_list = boundary->get_size_boundary_list();
+    size_t *obstacle_list = boundary->get_obstacle_list();
+    size_t size_obstacle_list = boundary->get_size_obstacle_list();
 
     std::vector<FieldType> v_fields = boundary->get_used_fields();
 
@@ -377,13 +380,21 @@ void Analysis::save_variables_in_file(FieldController *field_controller) {
     dataField[FieldType::P] = field_controller->get_field_p_data();
     dataField[FieldType::T] = field_controller->get_field_T_data();
 
-    for (auto & v_field : v_fields) {
-        write_file(dataField[v_field], BoundaryData::get_field_type_name(v_field), innerList, size_innerList, boundaryList, size_boundaryList, obstacleList, size_obstacleList);
+    for (auto &v_field: v_fields) {
+        write_file(
+                dataField[v_field],
+                BoundaryData::get_field_type_name(v_field),
+                inner_list, size_inner_list,
+                boundary_list, size_boundary_list,
+                obstacle_list, size_obstacle_list);
     }
 }
 
-void Analysis::write_file(const real *field, const std::string& filename, size_t *inner_list, size_t size_inner_list, size_t *boundary_list, size_t size_boundary_list, size_t *obstacle_list, size_t size_obstacle_list) {
-
+void Analysis::write_file(
+        const real *field, const std::string &filename,
+        size_t *inner_list, size_t size_inner_list,
+        size_t *boundary_list, size_t size_boundary_list,
+        size_t *obstacle_list, size_t size_obstacle_list) {
     std::ofstream out;
     out.open(filename + ".dat", std::ofstream::out);
 

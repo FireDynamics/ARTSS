@@ -4,17 +4,17 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_ZERO_H
-#define ARTSS_ZERO_H
+#ifndef ARTSS_SOURCE_ZERO_H
+#define ARTSS_SOURCE_ZERO_H
 
 
 #include "../interfaces/ISourceFunction.h"
 
 class Zero: public ISourceFunction {
 public:
-    void update_source(Field *out, real t_cur) override { }
-    void read_header_part(std::string &header) override { }
+    void update_source(Field &, real) override { }
+    void read_header_part(std::string) override { }
     std::string write_header_part() override { return {}; }
 };
 
-#endif /* ARTSS_ZERO_H */
+#endif /* ARTSS_SOURCE_ZERO_H */

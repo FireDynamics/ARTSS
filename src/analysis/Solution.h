@@ -13,28 +13,18 @@
 #include "../utility/GlobalMacrosTypes.h"
 
 class Solution {
-public:
-    Solution();
-
-    virtual ~Solution();
-
+ public:
+    explicit Solution(const std::string &initial_condition, bool has_analytical_solution);
     void calc_analytical_solution(real t);
 
     // Getter
-    real* GetU_data() const { return u_a->data; }
-    real* GetV_data() const { return v_a->data; }
-    real* GetW_data() const { return w_a->data; }
-    real* GetP_data() const { return p_a->data; }
-    real* GetT_data() const { return T_a->data; }
-    return_ptr GetU() const { return u_a->data; }
-    return_ptr GetV() const { return v_a->data; }
-    return_ptr GetW() const { return w_a->data; }
-    return_ptr GetP() const { return p_a->data; }
-    return_ptr GetT() const { return T_a->data; }
+    return_ptr get_return_ptr_data_u() const { return m_u_analytical_solution.data; }
+    return_ptr get_return_ptr_data_v() const { return m_v_analytical_solution.data; }
+    return_ptr get_return_ptr_data_w() const { return m_w_analytical_solution.data; }
+    return_ptr get_return_ptr_data_p() const { return m_p_analytical_solution.data; }
+    return_ptr get_return_ptr_data_T() const { return m_T_analytical_solution.data; }
 
-private:
-    void init();
-
+ private:
     void gauss_bubble(real t);
     void exp_sinus_prod(real t);
     void exp_sinus_sum(real t);
@@ -47,10 +37,11 @@ private:
     void buoyancy_mms(real t);
     void zero(real t);
 
-
-    Field *u_a, *v_a, *w_a;
-    Field *p_a;
-    Field *T_a;
+    Field m_u_analytical_solution;
+    Field m_v_analytical_solution;
+    Field m_w_analytical_solution;
+    Field m_p_analytical_solution;
+    Field m_T_analytical_solution;
     void (Solution::*m_init_function)(const real);
 
     real m_current_time_step = -1;

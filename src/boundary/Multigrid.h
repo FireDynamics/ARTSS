@@ -26,7 +26,7 @@ class Multigrid {
     ~Multigrid();
 
     size_t get_size_inner_list(size_t level = 0) const;
-    size_t get_size_boundary_ist(size_t level = 0) const;
+    size_t get_size_boundary_list(size_t level = 0) const;
     size_t get_size_obstacle_list() const;
     size_t *get_obstacle_list() const;
 
@@ -42,13 +42,16 @@ class Multigrid {
 
     void update_lists();
 
-    void apply_boundary_condition(real* d, size_t level, FieldType f, bool sync = false);
+    void apply_boundary_condition(Field &field, bool sync = false);
 
     size_t get_obstacle_stride_x(size_t id, size_t level) const;
     size_t get_obstacle_stride_y(size_t id, size_t level) const;
     size_t get_obstacle_stride_z(size_t id, size_t level) const;
 
- private:
+    bool is_obstacle_cell(size_t level, size_t index);
+    bool is_obstacle_cell(size_t level, size_t i, size_t j, size_t k);
+
+private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -167,16 +170,16 @@ class Multigrid {
     void send_obstacle_lists_to_GPU();
 
     void surface_dominant_restriction(size_t level);
-    Obstacle** obstacle_dominant_restriction(size_t level);
+    Obstacle **obstacle_dominant_restriction(size_t level);
 
     void control();
     void print();
 
-    size_t** m_data_boundary_patches_joined;
-    // size_t** m_data_surfaces_patches_joined;
-    size_t** m_data_obstacles_patches_joined;
-    BoundaryDataController* m_bdc_boundary;
-    BoundaryDataController** m_bdc_obstacle;
+    size_t **m_data_boundary_patches_joined;
+    // size_t **m_data_surfaces_patches_joined;
+    size_t **m_data_obstacles_patches_joined;
+    BoundaryDataController *m_bdc_boundary;
+    BoundaryDataController **m_bdc_obstacle;
 
     void remove_boundary_lists_from_GPU();
 

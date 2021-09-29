@@ -13,19 +13,13 @@
     </solution>
   </solver>
 
-  <domain_parameters>
+  <domain_parameters enable_computational_domain="No">
     <X1> 0. </X1>  <!-- physical domain -->
     <X2> 2.0 </X2>
     <Y1> 0. </Y1>
     <Y2> 2.0 </Y2>
     <Z1> 0. </Z1>
     <Z2> 1.0 </Z2>
-    <x1> 0. </x1>  <!-- computational domain -->
-    <x2> 2.0 </x2>
-    <y1> 0. </y1>
-    <y2> 2.0 </y2>
-    <z1> 0. </z1>
-    <z2> 1.0 </z2>
     <nx> 40 </nx>  <!-- grid resolution (number of cells excl. ghost cells) -->
     <ny> 40 </ny>
     <nz> 1 </nz>
@@ -44,13 +38,13 @@
   <surfaces enabled="No"/>
 
   <initial_conditions usr_fct="GaussBubble"  random="No">  <!-- Gaussian function  -->
-    <u_lin> 0.5 </u_lin>      <!-- x-velocity in linear case  -->
-    <v_lin> 0.5 </v_lin>      <!-- y-velocity in linear case  -->
-    <w_lin> 0.25 </w_lin>     <!-- z-velocity in linear case  -->
-    <xshift> 1.025 </xshift>  <!-- xshift of Gauss Bubble in domain  -->
-    <yshift> 1.025 </yshift>  <!-- yshift of Gauss Bubble in domain  -->
-    <zshift> 0.5 </zshift>    <!-- zshift of Gauss Bubble in domain  -->
-    <l> 0.03125 </l>          <!-- sigma in Gaussian -->
+    <u_lin> 0.5 </u_lin>        <!-- x-velocity in linear case  -->
+    <v_lin> 0.5 </v_lin>        <!-- y-velocity in linear case  -->
+    <w_lin> 0.25 </w_lin>       <!-- z-velocity in linear case  -->
+    <x_shift> 1.025 </x_shift>  <!-- xshift of Gauss Bubble in domain  -->
+    <y_shift> 1.025 </y_shift>  <!-- yshift of Gauss Bubble in domain  -->
+    <z_shift> 0.5 </z_shift>    <!-- zshift of Gauss Bubble in domain  -->
+    <l> 0.03125 </l>            <!-- sigma in Gaussian -->
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">

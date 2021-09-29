@@ -35,19 +35,13 @@
     </solution>
   </solver>
 
-  <domain_parameters>
+  <domain_parameters enable_computational_domain="No">
     <X1> -3. </X1>  <!-- physical domain -->
     <X2> 7. </X2>
     <Y1> 0. </Y1>
     <Y2> 2. </Y2>
     <Z1> -3.5 </Z1>
     <Z2> 3.5 </Z2>
-    <x1> -3. </x1>  <!-- computational domain -->
-    <x2> 7. </x2>
-    <y1> 0. </y1>
-    <y2> 2. </y2>
-    <z1> -3.5 </z1>
-    <z2> 3.5 </z2>
     <nx> 256 </nx>  <!-- grid resolution (number of cells excl. ghost cells) -->
     <ny> 128 </ny>
     <nz> 256 </nz>

@@ -202,28 +202,14 @@ void BoundaryController::update_lists() {
     m_multigrid->update_lists();
 }
 
-//======================================== Update lists ============================================
+// =========================================== Apply BCs ===========================================
 // *************************************************************************************************
-/// \brief  Apply boundary for level 0
-/// \param  d data field
-/// \param  f Field
-/// \param  sync synchronous kernel launching (true, default: false)
-// *************************************************************************************************
-void BoundaryController::apply_boundary(real *d, FieldType f, bool sync) {
-    apply_boundary(d, 0, f, sync);
-}
-
-// ================================= Apply BCs in level l > 0 ======================================
-// *************************************************************************************************
-/// \brief  applies zero-value boundary conditions to all boundaries (domain, surfaces, obstacles)
-/// for level l
-/// \param  d           data field
-/// \param  level       Multigrid level
-/// \param  f           type of output pointer
+/// \brief  applies boundary conditions to all boundaries (domain, surfaces, obstacles)
+/// \param  field   field
 /// \param  sync    synchronization (default: false)
 // *************************************************************************************************
-void BoundaryController::apply_boundary(real *d, size_t level, FieldType f, bool sync) {
-    m_multigrid->apply_boundary_condition(d, level, f, sync);
+void BoundaryController::apply_boundary(Field &field, bool sync) {
+    m_multigrid->apply_boundary_condition(field, sync);
 }
 
 // ================================= detect neighbouring obstacles =================================
@@ -260,7 +246,7 @@ size_t *BoundaryController::get_obstacle_list() const {
 }
 
 size_t BoundaryController::get_size_boundary_list() const {
-    return m_multigrid->get_size_boundary_ist();
+    return m_multigrid->get_size_boundary_list();
 }
 
 size_t BoundaryController::get_size_inner_list() const {

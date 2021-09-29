@@ -16,29 +16,37 @@ static std::string ending = ".csv";
 const static std::string_view delimiter = ",";
 
 void CSVWriter::write_numerical(const FieldController &field_controller, const std::string &filename) {
-    auto u = field_controller.field_u->data;
-    auto v = field_controller.field_v->data;
-    auto w = field_controller.field_w->data;
-    auto p = field_controller.field_p->data;
-    auto div = field_controller.field_rhs->data;
-    auto T = field_controller.field_T->data;
-    auto C = field_controller.field_concentration->data;
-    auto s = field_controller.sight->data;
-    auto nu_t = field_controller.field_nu_t->data;
-    auto S_T = field_controller.field_source_T->data;
-    CSVWriter::csvPrepareAndWrite(filename + ending, u, v, w, p, div, T, C, s, nu_t, S_T);
+    auto u = field_controller.get_field_u_data();
+    auto v = field_controller.get_field_v_data();
+    auto w = field_controller.get_field_w_data();
+    auto p = field_controller.get_field_p_data();
+    auto div = field_controller.get_field_rhs_data();
+    auto T = field_controller.get_field_T_data();
+    auto C = field_controller.get_field_concentration_data();
+    auto sight = field_controller.get_field_sight_data();
+    auto nu_t = field_controller.get_field_nu_t_data();
+    auto source_T = field_controller.get_field_source_T_data();
+    CSVWriter::csv_prepare_and_write(filename + ending, u, v, w, p, div, T, C, sight, nu_t, source_T);
 }
 
 void CSVWriter::write_analytical(const Solution &solution, const std::string &filename) {
-    auto u = solution.GetU_data();
-    auto v = solution.GetV_data();
-    auto w = solution.GetW_data();
-    auto p = solution.GetP_data();
-    auto T = solution.GetT_data();
-    CSVWriter::csvPrepareAndWrite(filename + ending, u, v, w, p, T);
+    auto u = solution.get_return_ptr_data_u();
+    auto v = solution.get_return_ptr_data_v();
+    auto w = solution.get_return_ptr_data_w();
+    auto p = solution.get_return_ptr_data_p();
+    auto T = solution.get_return_ptr_data_T();
+    CSVWriter::csv_prepare_and_write(filename + ending, u, v, w, p, T);
 }
 
-void CSVWriter::csvPrepareAndWrite(const std::string &filename, real *u, real *v, real *w, real *p, real *div, real *T, real *C, real *s, real *nu_t, real *S_T) {
+void CSVWriter::csv_prepare_and_write(const std::string &filename,
+                                      return_ptr u, return_ptr v, return_ptr w,
+                                      return_ptr p,
+                                      return_ptr div,
+                                      return_ptr T,
+                                      return_ptr C,
+                                      return_ptr sight,
+                                      return_ptr nu_t,
+                                      return_ptr source_T) {
     // Initialize variables
     int size_vars = 10; // Number of variables
     std::vector<std::string> var_names = {"x-velocity (m/s)", "y-velocity (m/s)", "z-velocity (m/s)",
@@ -50,24 +58,24 @@ void CSVWriter::csvPrepareAndWrite(const std::string &filename, real *u, real *v
                                            "turb viscosity (m^2/s)",
                                            "temperature source (K/s)"};
 
-    real* fields[] = {u, v, w, p, div, T, C, s, nu_t, S_T};
+    return_ptr fields[] = {u, v, w, p, div, T, C, sight, nu_t, source_T};
     CSVWriter::csv_write(filename, fields, size_vars, var_names);
 }
 
-void CSVWriter::csvPrepareAndWrite(const std::string &filename, real *u, real *v, real *w, real *p, real *T) {
+void CSVWriter::csv_prepare_and_write(const std::string &filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr T) {
     // Initialize variables
-    int size_vars = 5; // Number of variables
+    int size_vars = 5;  // Number of variables
     std::vector<std::string> var_names = {"x-velocity (m/s)", "y-velocity (m/s)", "z-velocity (m/s)",
                                            "pressure (kg/(m s^2))",
                                            "temperature (Celsius)"};
 
     // Summarize pointers to variables in an array
-    real* fields[] = {u, v, w, p, T};
+    return_ptr fields[] = {u, v, w, p, T};
 
     CSVWriter::csv_write(filename, fields, size_vars, var_names);
 }
 
-void CSVWriter::csv_write(const std::string &filename, real **vars, int size_vars, const std::vector<std::string> &var_names) {
+void CSVWriter::csv_write(const std::string &filename, return_ptr *vars, int size_vars, const std::vector<std::string> &var_names) {
 #ifndef BENCHMARKING
     Domain *domain = Domain::getInstance();
 
@@ -89,7 +97,8 @@ void CSVWriter::csv_write(const std::string &filename, real **vars, int size_var
     auto *z_centres = new real[size];
     real *coords[] = {x_centres, y_centres, z_centres};
     Visual::initialise_grid(x_centres, y_centres, z_centres,
-                            Nx, Ny, Nz, dx, dy, dz);
+                            Nx, Ny, Nz,
+                            dx, dy, dz);
 
     // write data to csv
     std::ofstream output_file(filename, std::ofstream::binary);
