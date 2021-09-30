@@ -22,8 +22,7 @@ class BoundaryController {
     static BoundaryController* getInstance();
     ~BoundaryController();
 
-    void apply_boundary(real *d, FieldType f, bool sync = true);
-    void apply_boundary(real *d, size_t level, FieldType f, bool sync = true);
+    void apply_boundary(Field &field, bool sync = true);
 
     void print_boundaries();
     void update_lists();
@@ -52,6 +51,15 @@ class BoundaryController {
     size_t get_obstacle_stride_z(size_t id, size_t level) const;
 
     std::vector<FieldType> get_used_fields() const;
+
+    bool inline is_obstacle_cell(const size_t level, const size_t idx) {
+        return m_multigrid.is_obstacle_cell(level, idx);
+    }
+
+    bool inline is_obstacle_cell(const size_t level,
+                          const size_t i, const size_t j, const size_t k) {
+        return m_multigrid.is_obstacle_cell(level, i, j, k);
+    }
 
  private:
 #ifndef BENCHMARKING

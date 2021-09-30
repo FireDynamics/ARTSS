@@ -9,11 +9,12 @@
 
 #include "../utility/GlobalMacrosTypes.h"
 #include "Solution.h"
+#include "../field/Field.h"
 #include "../field/FieldController.h"
 
 class Analysis {
  public:
-    explicit Analysis(Solution *solution);
+    Analysis(Solution &solution, bool has_analytical_solution);
 
     void analyse(FieldController *solver, real t);
 
@@ -23,7 +24,7 @@ class Analysis {
 
     bool check_time_step_VN(real dt);
 
-    void save_variables_in_file(FieldController *solv);
+    void save_variables_in_file(FieldController *field_controller);
 
  private:
     real m_tol = 1e-7;
@@ -39,8 +40,8 @@ class Analysis {
             size_t *boundary_list, size_t size_boundary_list,
             size_t *obstacle_list, size_t size_obstacle_list);
 
-    bool has_analytic_solution = false;
-    Solution *m_solution;
+    bool m_has_analytic_solution = false;
+    Solution &m_solution;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

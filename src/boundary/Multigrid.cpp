@@ -983,12 +983,13 @@ void Multigrid::send_obstacle_lists_to_GPU() {
 // ================================= Apply boundary condition ======================================
 // *************************************************************************************************
 /// \brief  Apply boundary condition for obstacles, surfaces and domain
-/// \param  d Field
-/// \param  level Multigrid level
-/// \param  f Field type
+/// \param  field Field
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void Multigrid::apply_boundary_condition(real *d, size_t level, FieldType f, bool sync) {
+void Multigrid::apply_boundary_condition(Field &field, bool sync) {
+    real *d = field.data;
+    size_t level = field.get_level();
+    FieldType f = field.get_type();
     if (m_number_of_surface_objects > 0) {
         Surface **surface_list = *(m_MG_surface_object_list + level);
         for (size_t id = 0; id < m_number_of_surface_objects; ++id) {
@@ -1032,7 +1033,7 @@ void Multigrid::apply_boundary_condition(real *d, size_t level, FieldType f, boo
     size_t patch_end[] = {get_first_index_of_boundary_slice_z(level + 1), get_first_index_of_boundary_slice_z(level + 1),
                           get_first_index_of_boundary_slice_y(level + 1), get_first_index_of_boundary_slice_y(level + 1),
                           get_first_index_of_boundary_slice_x(level + 1), get_first_index_of_boundary_slice_x(level + 1)};
-    m_bdc_boundary->apply_boundary_condition(d, m_data_boundary_patches_joined, patch_start, patch_end, f, level, sync);
+    m_bdc_boundary->apply_boundary_condition(field, m_data_boundary_patches_joined, patch_start, patch_end, sync);
 }
 
 //======================================== Update lists ====================================
@@ -1698,4 +1699,22 @@ size_t Multigrid::get_obstacle_stride_y(size_t id, size_t level) const {
 
 size_t Multigrid::get_obstacle_stride_z(size_t id, size_t level) const {
     return (static_cast<Obstacle *>(m_MG_obstacle_object_list[level][id]))->get_stride_z();
+}
+
+bool Multigrid::is_obstacle_cell(const size_t level, const size_t index) {
+    Obstacle **obstacle_list = m_MG_obstacle_object_list[level];
+    for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
+        Obstacle *obstacle = obstacle_list[id];
+        if (obstacle->is_obstacle_cell(index)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Multigrid::is_obstacle_cell(const size_t level,
+                                 const size_t i, const size_t j, const size_t k) {
+    const size_t Nx = Domain::getInstance()->get_Nx(level);
+    const size_t Ny = Domain::getInstance()->get_Ny(level);
+    return is_obstacle_cell(level, IX(i, j, k, Nx, Ny));
 }

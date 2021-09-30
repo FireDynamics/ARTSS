@@ -15,12 +15,17 @@
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
-Visual::Visual(const Solution &solution) : m_solution(solution) {
+Visual::Visual(const Solution &solution, bool has_analytical_solution) :
+        m_solution(solution),
+        m_has_analytical_solution(has_analytical_solution) {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
     auto params = Parameters::getInstance();
-    m_filename = remove_extension(params->get_filename());
+    m_filename = Utility::remove_extension(params->get_filename());
 
-    m_save_csv = (params->get("visualisation/save_csv") == "Yes");
-    m_save_vtk = (params->get("visualisation/save_vtk") == "Yes");
+    m_save_csv = (params->get("visualisation/save_csv") == XML_TRUE);
+    m_save_vtk = (params->get("visualisation/save_vtk") == XML_TRUE);
 
     m_dt = params->get_real("physical_parameters/dt");
     m_t_end = params->get_real("physical_parameters/t_end");
@@ -30,12 +35,13 @@ Visual::Visual(const Solution &solution) : m_solution(solution) {
     if (m_save_vtk) {
         m_vtk_plots = params->get_int("visualisation/vtk_nth_plot");
     }
-    m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
 }
 
 void Visual::visualise(const FieldController &field_controller, real t) {
+#ifndef BENCHMARKING
+    m_logger->info("Visualise ...");
+#endif
     int n = static_cast<int> (std::round(t / m_dt));
-
     std::string filename = create_filename(m_filename, n, false);
     if (m_save_vtk) {
         if (fmod(n, m_vtk_plots) == 0 || t >= m_t_end) {
@@ -56,94 +62,58 @@ void Visual::visualise(const FieldController &field_controller, real t) {
     }
 }
 
-void Visual::write_csv(const FieldController &field_controller, std::string filename){
-    // local variables and parameters for GPU
-    auto u = field_controller.field_u;
-    auto v = field_controller.field_v;
-    auto w = field_controller.field_w;
-    auto p = field_controller.field_p;
-    auto rhs = field_controller.field_rhs;
-    auto T = field_controller.field_T;
-    auto C = field_controller.field_concentration;
-    auto S_T = field_controller.field_source_T;
-    auto S_C = field_controller.field_source_concentration;
-    auto nu_t = field_controller.field_nu_t;
-
-    u.update_host();
-    v.update_host();
-    w.update_host();
-    p.update_host();
-    rhs.update_host();
-    T.update_host();
-    C.update_host();
-    nu_t.update_host();
-    S_T.update_host();
+void Visual::write_csv(FieldController &field_controller, const std::string &filename){
+    //TODO method update host/device whatever
+    field_controller.get_field_u().update_host();
+    field_controller.get_field_v().update_host();
+    field_controller.get_field_w().update_host();
+    field_controller.get_field_p().update_host();
+    field_controller.get_field_rhs().update_host();
+    field_controller.get_field_T().update_host();
+    field_controller.get_field_concentration().update_host();
+    field_controller.get_field_source_T().update_host();
+    field_controller.get_field_source_concentration().update_host();
+    field_controller.get_field_nu_t().update_host();
     CSVWriter::write_numerical(field_controller, filename);
 }
 
-void Visual::write_vtk(const FieldController &field_controller, std::string filename){
-    // local variables and parameters for GPU
-    auto u = field_controller.field_u;
-    auto v = field_controller.field_v;
-    auto w = field_controller.field_w;
-    auto p = field_controller.field_p;
-    auto rhs = field_controller.field_rhs;
-    auto T = field_controller.field_T;
-    auto C = field_controller.field_concentration;
-    auto S_T = field_controller.field_source_T;
-    auto S_C = field_controller.field_source_concentration;
-    auto nu_t = field_controller.field_nu_t;
-
-    u.update_host();
-    v.update_host();
-    w.update_host();
-    p.update_host();
-    rhs.update_host();
-    T.update_host();
-    C.update_host();
-    nu_t.update_host();
-    S_T.update_host();
+void Visual::write_vtk(FieldController &field_controller, const std::string &filename){
+    //TODO method update host/device whatever
+    field_controller.get_field_u().update_host();
+    field_controller.get_field_v().update_host();
+    field_controller.get_field_w().update_host();
+    field_controller.get_field_p().update_host();
+    field_controller.get_field_rhs().update_host();
+    field_controller.get_field_T().update_host();
+    field_controller.get_field_concentration().update_host();
+    field_controller.get_field_source_T().update_host();
+    field_controller.get_field_source_concentration().update_host();
+    field_controller.get_field_nu_t().update_host();
     VTKWriter::write_numerical(field_controller, filename);
 }
 
-void Visual::write_vtk_debug(const FieldController &field_controller, std::string filename){
-    // local variables and parameters for GPU
-    auto d_u = field_controller.get_field_u_data();
-    auto d_v = field_controller.get_field_v_data();
-    auto d_w = field_controller.get_field_w_data();
-    auto d_p = field_controller.get_field_p_data();
-    auto d_rhs = field_controller.get_field_rhs_data();
-    auto d_T = field_controller.get_field_T_data();
-    auto d_C = field_controller.get_field_concentration_data();
-    auto d_S_T = field_controller.get_field_source_T_data();
-    auto d_S_C = field_controller.get_field_source_concentration_data();
-    auto d_nu_t = field_controller.get_field_nu_t_data();
-    auto d_f_x = field_controller.get_field_force_x_data();
-    auto d_f_y = field_controller.get_field_force_y_data();
-    auto d_f_z = field_controller.get_field_force_z_data();
-    auto d_kappa = field_controller.get_field_kappa_data();
-    auto d_gamma = field_controller.get_field_gamma_data();
-
-    auto bsize = Domain::getInstance()->get_size();
-#pragma acc update host(d_u[:bsize])
-#pragma acc update host(d_v[:bsize])
-#pragma acc update host(d_w[:bsize])
-#pragma acc update host(d_p[:bsize])
-#pragma acc update host(d_rhs[:bsize])
-#pragma acc update host(d_T[:bsize])
-#pragma acc update host(d_C[:bsize])
-#pragma acc update host(d_nu_t[:bsize])
-#pragma acc update host(d_S_T[:bsize])
-#pragma acc update host(d_S_C[:bsize])
-#pragma acc update host(d_f_x[:bsize])
-#pragma acc update host(d_f_y[:bsize])
-#pragma acc update host(d_f_z[:bsize])
-#pragma acc update host(d_kappa[:bsize])
-#pragma acc update host(d_gamma[:bsize]) wait
+void Visual::write_vtk_debug(FieldController &field_controller, const std::string &filename){
+    //TODO method update host/device whatever
+    field_controller.get_field_u().update_host();
+    field_controller.get_field_v().update_host();
+    field_controller.get_field_w().update_host();
+    field_controller.get_field_p().update_host();
+    field_controller.get_field_rhs().update_host();
+    field_controller.get_field_T().update_host();
+    field_controller.get_field_concentration().update_host();
+    field_controller.get_field_source_T().update_host();
+    field_controller.get_field_source_concentration().update_host();
+    field_controller.get_field_nu_t().update_host();
+    field_controller.get_field_force_x().update_host();
+    field_controller.get_field_force_y().update_host();
+    field_controller.get_field_force_z().update_host();
+    field_controller.get_field_kappa().update_host();
+    field_controller.get_field_gamma().update_host();
     VTKWriter::write_numerical_debug(field_controller, filename);
 }
 
-void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz) {
+void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords,
+                             int Nx, int Ny, int Nz, real dx, real dy, real dz) {
     Domain *domain = Domain::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
@@ -162,7 +132,8 @@ void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords, int
     }
 }
 
-std::string Visual::create_filename(std::string filename, int counter, bool analytical) {
+std::string Visual::create_filename(const std::string &filename,
+                                    int counter, bool analytical) {
     std::string fname = std::move(filename);
     if (analytical) {
         fname.append("_ana_");
@@ -173,15 +144,4 @@ std::string Visual::create_filename(std::string filename, int counter, bool anal
     tstep << std::setw(6) << std::setfill('0') << counter;
     fname.append(tstep.str());
     return fname;
-}
-
-//================================= Remove extension ==================================
-// ***************************************************************************************
-/// \brief  Removes extension from filename
-/// \param  filename    xml-file name (via argument)
-// ***************************************************************************************
-std::string Visual::remove_extension(const std::string &filename) {
-    size_t lastdot = filename.find_last_of('.');
-    if (lastdot == std::string::npos) return filename;
-    return filename.substr(0, lastdot);
 }

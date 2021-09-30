@@ -636,8 +636,24 @@ bool Obstacle::line_crosses(int i0, int j0, int k0, int i, int j, int k) const {
 }
 
 
-//======================================== Match grid ====================================
-// ***************************************************************************************
+//======================================== Is obstacle cell ========================================
+// *************************************************************************************************
+/// \brief  Check if cell is an obstacle cell
+/// \param  index position in 1D array
+/// \return  bool true if yes false if no
+// *************************************************************************************************
+bool Obstacle::is_obstacle_cell(const size_t idx) const {
+    Domain *domain = Domain::getInstance();
+    const size_t Nx = domain->get_Nx(m_level);
+    const size_t Ny = domain->get_Ny(m_level);
+    const size_t k = getCoordinateK(idx, Nx, Ny);
+    const size_t j = getCoordinateJ(idx, Nx, Ny, k);
+    const size_t i = getCoordinateI(idx, Nx, Ny, j, k);
+    return is_obstacle_cell(i, j, k);
+}
+
+//======================================== Match grid ==============================================
+// *************************************************************************************************
 /// \brief  Snaps value to grid discretisation
 /// \param  obstacle_coordinate Coordinate of obstacle
 /// \param  spacing dx/dy/dz

@@ -10,8 +10,7 @@
 
 static std::string ending = ".vtk";
 
-void VTKWriter::write_numerical_debug(
-        const FieldController &field_controller, const std::string &filename) {
+void VTKWriter::write_numerical_debug(const FieldController &field_controller, const std::string &filename) {
     auto u = field_controller.get_field_u_data();
     auto v = field_controller.get_field_v_data();
     auto w = field_controller.get_field_w_data();
@@ -31,7 +30,7 @@ void VTKWriter::write_numerical_debug(
 
     int size_vars = 16;
     read_ptr data[16] = {u, v, w, p, div, T, C, s, nu_t, S_T, S_C, f_x, f_y, f_z, kappa, gamma};
-    // Initialize variables
+    // Initialise variables
     int var_dims[size_vars + 6]; // Dimensions of variables (x,y,z,u,v,w,p,div,T)
     int centering[size_vars + 6]; // Whether the variables are centered in a cell: 0 for zonal!
     for (int i = 0; i < size_vars + 6; i++) {
@@ -52,15 +51,14 @@ void VTKWriter::write_numerical_debug(
                                "kappa",
                                "gamma"};
 
-    VTKWriter::vtk_prepare_and_write_debug(
-            (filename + ending).c_str(), data, size_vars, var_names, centering, var_dims);
+    VTKWriter::vtk_prepare_and_write_debug((filename + ending).c_str(), data,
+                                           size_vars, var_names, centering, var_dims);
 
     delete[] (*var_names);
     delete[] (*data);
 }
 
-void VTKWriter::write_numerical(
-        const FieldController &field_controller, const std::string &filename) {
+void VTKWriter::write_numerical(const FieldController &field_controller, const std::string &filename) {
     auto u = field_controller.get_field_u_data();
     auto v = field_controller.get_field_v_data();
     auto w = field_controller.get_field_w_data();
@@ -68,25 +66,33 @@ void VTKWriter::write_numerical(
     auto div = field_controller.get_field_rhs_data();
     auto T = field_controller.get_field_T_data();
     auto C = field_controller.get_field_concentration_data();
-    auto s = field_controller.get_field_sight_data();
+    auto sight = field_controller.get_field_sight_data();
     auto nu_t = field_controller.get_field_nu_t_data();
-    auto S_T = field_controller.get_field_source_T_data();
-    VTKWriter::vtk_prepare_and_write((filename + ending).c_str(), u, v, w, p, div, T, C, s, nu_t, S_T);
+    auto source_T = field_controller.get_field_source_T_data();
+    VTKWriter::vtk_prepare_and_write((filename + ending).c_str(),
+                                     u, v, w,
+                                     p,
+                                     div,
+                                     T,
+                                     C,
+                                     sight,
+                                     nu_t,
+                                     source_T);
 }
 
 void VTKWriter::write_analytical(const Solution &solution, const std::string &filename) {
-    auto u = solution.get_data_u();
-    auto v = solution.get_data_v();
-    auto w = solution.get_data_w();
-    auto p = solution.get_data_p();
-    auto T = solution.get_data_T();
+    auto u = solution.get_return_ptr_data_u();
+    auto v = solution.get_return_ptr_data_v();
+    auto w = solution.get_return_ptr_data_w();
+    auto p = solution.get_return_ptr_data_p();
+    auto T = solution.get_return_ptr_data_T();
     VTKWriter::vtk_prepare_and_write((filename + ending).c_str(), u, v, w, p, T);
 }
 
-//================================= Visualization (VTK) ============================================
-// *************************************************************************************************
+//================================= Visualization (VTK) ==================================
+// ***************************************************************************************
 /// \brief  Prepares the (numerical) arrays in a correct format and writes the structured grid
-/// and its variables
+///         and its variables
 /// \param  fname xml-file name (via argument)
 /// \param  u     constant input value (\a x -velocity)
 /// \param  v     constant input value (\a y -velocity)
@@ -95,20 +101,20 @@ void VTKWriter::write_analytical(const Solution &solution, const std::string &fi
 /// \param  div   constant input value (divergence)
 /// \param  T     constant input value (temperature)
 /// \param  C     constant input value (concentration)
-/// \param  s     constant input value (sight)
+/// \param  sight     constant input value (sight)
 /// \param  nu_t    constant input value (turbulent viscosity)
-/// \param  S_T   constant input values (energy source)
+/// \param  source_T   constant input values (energy source)
 /// \author Severt
-// *************************************************************************************************
-void VTKWriter::vtk_prepare_and_write(
-        const char *filename,
-        read_ptr u, read_ptr v, read_ptr w,
-        read_ptr p, read_ptr div,
-        read_ptr T,
-        read_ptr C,
-        read_ptr s,
-        read_ptr nu_t,
-        read_ptr S_T) {
+// ***************************************************************************************
+void VTKWriter::vtk_prepare_and_write(const char *filename,
+                                      read_ptr u, read_ptr v, read_ptr w,
+                                      read_ptr p,
+                                      read_ptr div,
+                                      read_ptr T,
+                                      read_ptr C,
+                                      read_ptr sight,
+                                      read_ptr nu_t,
+                                      read_ptr source_T) {
     Domain *domain = Domain::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
@@ -124,11 +130,11 @@ void VTKWriter::vtk_prepare_and_write(
 
     int size = static_cast<int>(domain->get_size());
 
-// Initialize variables
-    int size_vars = 13; // Number of variables
+    // Initialise variables
+    int size_vars = 13;  // Number of variables
     // Dimensions of variables (x,y,z,u,v,w,p,div,T,C,s,nu_t)
     int var_dims[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-     // Whether the variables are centered in a cell: 0 for zonal!
+    // Whether the variables are centered in a cell: 0 for zonal!
     int centering[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     const char *var_names[] = {"x-coords", "y-coords", "z-coords",
                                "x-velocity", "y-velocity", "z-velocity",
@@ -147,7 +153,7 @@ void VTKWriter::vtk_prepare_and_write(
     auto *y_coords = new float[(Ny + 1)];
     auto *z_coords = new float[(Nz + 1)];
 
-    // Initialize grid
+    // Initialise grid
     // faces of the grid cells
     for (int i = 0; i < Nx + 1; i++) {
         x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
@@ -183,9 +189,9 @@ void VTKWriter::vtk_prepare_and_write(
     // turbulent viscosity
     auto turb_visc = new float[size];
     // energy source
-    auto source_T = new float[size];
+    auto Source_T = new float[size];
 
-// Cast variables to floats
+    // Cast variables to floats
     for (int k = 0; k < Nz; k++) {
         for (int j = 0; j < Ny; j++) {
             for (int i = 0; i < Nx; i++) {
@@ -200,14 +206,14 @@ void VTKWriter::vtk_prepare_and_write(
                 vel_div[index] = static_cast<float>(div[index]);
                 Temp[index] = static_cast<float>(T[index]);
                 Con[index] = static_cast<float>(C[index]);
-                Sight[index] = static_cast<float>(s[index]);
+                Sight[index] = static_cast<float>(sight[index]);
                 turb_visc[index] = static_cast<float>(nu_t[index]);
-                source_T[index] = static_cast<float>(S_T[index]);
+                Source_T[index] = static_cast<float>(source_T[index]);
             }
         }
     }
 
-    // Summarize pointers to variables in an array
+    // Summarise pointers to variables in an array
     float *vars[] = {static_cast<float *> (x_centres),
                      static_cast<float *> (y_centres),
                      static_cast<float *> (z_centres),
@@ -220,13 +226,13 @@ void VTKWriter::vtk_prepare_and_write(
                      static_cast<float *> (Con),
                      static_cast<float *> (Sight),
                      static_cast<float *> (turb_visc),
-                     static_cast<float *> (source_T)};
+                     static_cast<float *> (Source_T)};
 
     // Use visit_writer to write data on mesh
-    write_rectilinear_mesh(
-            filename, 1, dims,
-            x_coords, y_coords, z_coords,
-            size_vars, var_dims, centering, var_names, vars);
+    write_rectilinear_mesh(filename, 1, dims,
+                           x_coords, y_coords, z_coords,
+                           size_vars, var_dims, centering,
+                           var_names, vars);
 
     // Clean up
     delete[] (x_coords);
@@ -244,13 +250,13 @@ void VTKWriter::vtk_prepare_and_write(
     delete[] (Con);
     delete[] (Sight);
     delete[] (turb_visc);
-    delete[] (source_T);
+    delete[] (Source_T);
 }
 
 //================================= Visualization (VTK) ============================================
 // *************************************************************************************************
 /// \brief  Prepares the (analytical) arrays in a correct format and writes the structured grid
-/// and its variables
+///         and its variables
 /// \param  filename  xml filename (via argument)
 /// \param  u     constant input value (\a x -velocity)
 /// \param  v     constant input value (\a y -velocity)
@@ -260,8 +266,10 @@ void VTKWriter::vtk_prepare_and_write(
 /// \param  s     constant input value (sight)
 /// \author Severt
 // *************************************************************************************************
-void VTKWriter::vtk_prepare_and_write(
-        const char *filename, read_ptr u, read_ptr v, read_ptr w, read_ptr p, read_ptr T) {
+void VTKWriter::vtk_prepare_and_write(const char *filename,
+                                      read_ptr u, read_ptr v, read_ptr w,
+                                      read_ptr p,
+                                      read_ptr T) {
     Domain *domain = Domain::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
@@ -277,16 +285,16 @@ void VTKWriter::vtk_prepare_and_write(
 
     int size = static_cast<int>(domain->get_size());
 
-    // Initialize variables
+    // Initialise variables
     int size_vars = 8; // Number of variables
     // Dimensions of variables (x,y,z,u,v,w,p,div,T)
     int var_dims[] = {1, 1, 1, 1, 1, 1, 1, 1};
     // Whether the variables are centered in a cell: 0 for zonal!
     int centering[] = {0, 0, 0, 0, 0, 0, 0, 0};
-    const char *var_names[] = {
-            "x-coords", "y-coords", "z-coords",
-            "x-velocity", "y-velocity", "z-velocity",
-            "pressure", "temperature"};
+    const char *var_names[] = {"x-coords", "y-coords", "z-coords",
+                               "x-velocity", "y-velocity", "z-velocity",
+                               "pressure",
+                               "temperature"};
 
     // Dimensions of the rectilinear array (+1 for zonal values)
     int dims[] = {Nx + 1, Ny + 1, Nz + 1};
@@ -295,7 +303,7 @@ void VTKWriter::vtk_prepare_and_write(
     auto y_coords = new float[(Ny + 1)];
     auto z_coords = new float[(Nz + 1)];
 
-    // Initialize grid
+    // Initialise grid
     // faces of the grid cells
     for (int i = 0; i < Nx + 1; i++) {
         x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
@@ -339,7 +347,7 @@ void VTKWriter::vtk_prepare_and_write(
             }
         }
     }
-    // Summarize pointers to variables in an array
+    // Summarise pointers to variables in an array
     float *vars[] = {static_cast<float *> (x_centres),
                      static_cast<float *> (y_centres),
                      static_cast<float *> (z_centres),
@@ -350,10 +358,9 @@ void VTKWriter::vtk_prepare_and_write(
                      static_cast<float *> (Temp)};
 
     // Use visit_writer to write data on mesh
-    write_rectilinear_mesh(
-            filename, 1, dims,
-            x_coords, y_coords, z_coords,
-            size_vars, var_dims, centering, var_names, vars);
+    write_rectilinear_mesh(filename, 1, dims,
+                           x_coords, y_coords, z_coords,
+                           size_vars, var_dims, centering, var_names, vars);
 
     // Clean up
     delete[] (x_coords);
@@ -382,9 +389,9 @@ void VTKWriter::vtk_prepare_and_write(
 /// \param  var_dims  dimension of the respective field in data
 /// \author Severt
 // *************************************************************************************************
-void VTKWriter::vtk_prepare_and_write_debug(
-        const char *filename, read_ptr *data, int size_vars,
-        const char * const *var_names, int *centering, int *var_dims) {
+void VTKWriter::vtk_prepare_and_write_debug(const char *filename, read_ptr *data,
+                                            int size_vars, const char * const *var_names,
+                                            int *centering, int *var_dims) {
     Domain *domain = Domain::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
@@ -407,7 +414,7 @@ void VTKWriter::vtk_prepare_and_write_debug(
     auto y_coords = new float[(Ny + 1)];
     auto z_coords = new float[(Nz + 1)];
 
-    // Initialize grid
+    // Initialise grid
     // faces of the grid cells
     for (int i = 0; i < Nx + 1; i++) {
         x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
@@ -444,7 +451,7 @@ void VTKWriter::vtk_prepare_and_write_debug(
             }
         }
     }
-    // Summarize pointers to variables in an array
+    // Summarise pointers to variables in an array
     float *vars[size_vars + 6];
     for (int i = 0; i < size_vars + 6; i++){
         vars[i] = static_cast<float *> (write_out[i]);

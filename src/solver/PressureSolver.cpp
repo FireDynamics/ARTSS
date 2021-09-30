@@ -14,7 +14,9 @@ PressureSolver::PressureSolver(FieldController *field_controller) {
     m_field_controller = field_controller;
     auto params = Parameters::getInstance();
     auto p_type = params->get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(&this->pres, p_type, m_field_controller->field_p, m_field_controller->field_rhs);
+    SolverSelection::SetPressureSolver(&this->pres, p_type,
+                                       m_field_controller->get_field_p(),
+                                       m_field_controller->get_field_rhs());
     control();
 }
 
@@ -56,6 +58,6 @@ void PressureSolver::control() {
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
-        // TODO Error handling
+        // TODO(issue 6) Error handling
     }
 }

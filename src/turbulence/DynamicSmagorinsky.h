@@ -15,10 +15,11 @@ public:
     DynamicSmagorinsky();
     ~DynamicSmagorinsky() override = default;
 
-    void CalcTurbViscosity(
+    void calc_turbulent_viscosity(
             Field &ev,
-            Field const &in_u, Field const &in_v, Field const &in_w, bool sync) override;
-    void ExplicitFiltering(Field &out, Field const &in, bool sync) override;
+            Field const &in_u, Field const &in_v, Field const &in_w,
+            bool sync) override;
+    void explicit_filtering(Field &out, Field const &in, bool sync) override;
 
 private:
     Field u_f, v_f, w_f;                 // filtered velocities

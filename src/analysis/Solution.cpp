@@ -6,24 +6,20 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Solution.h"
+#include "../Functions.h"
 
 
-Solution::Solution(std::string &initial_condition) :
-    u_a(Field(FieldType::U)),
-    v_a(Field(FieldType::V)),
-    w_a(Field(FieldType::W)),
-    p_a(Field(FieldType::P)),
-    T_a(Field(FieldType::T))  {
+Solution::Solution(const std::string &initial_condition, bool has_analytical_solution) :
+        m_u_analytical_solution(Field(FieldType::U)),
+        m_v_analytical_solution(Field(FieldType::V)),
+        m_w_analytical_solution(Field(FieldType::W)),
+        m_p_analytical_solution(Field(FieldType::P)),
+        m_T_analytical_solution(Field(FieldType::T)),
+        m_has_analytical_solution(has_analytical_solution) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    init(initial_condition);
 
-    auto params = Parameters::getInstance();
-    m_has_analytical_solution = (params->get("solver/solution/available") == "Yes");
-}
-
-void Solution::init(std::string &initial_condition) {
     // set function pointer to chosen initial condition
     if (initial_condition == FunctionNames::GaussBubble) {
         m_init_function = &Solution::gauss_bubble;
@@ -50,55 +46,76 @@ void Solution::init(std::string &initial_condition) {
         m_logger->info("Analytical solution set to zero!");
 #endif
         m_init_function = &Solution::zero;
+
+        m_u_analytical_solution.set_value(0);
+        m_v_analytical_solution.set_value(0);
+        m_w_analytical_solution.set_value(0);
+        m_p_analytical_solution.set_value(0);
+        m_T_analytical_solution.set_value(0);
     }
 }
 
 void Solution::gauss_bubble(const real t) {
     // Advection test case
-    Functions::GaussBubble(u_a, t);
-    Functions::GaussBubble(v_a, t);
-    Functions::GaussBubble(w_a, t);
+    Functions::GaussBubble(m_u_analytical_solution, t);
+    Functions::GaussBubble(m_v_analytical_solution, t);
+    Functions::GaussBubble(m_w_analytical_solution, t);
 }
 
 void Solution::exp_sinus_prod(const real t) {
     // Diffusion test case
-    Functions::ExpSinusProd(u_a, t);
-    Functions::ExpSinusProd(v_a, t);
-    Functions::ExpSinusProd(w_a, t);
+    Functions::ExpSinusProd(m_u_analytical_solution, t);
+    Functions::ExpSinusProd(m_v_analytical_solution, t);
+    Functions::ExpSinusProd(m_w_analytical_solution, t);
 }
 
 void Solution::exp_sinus_sum(const real t) {
     // Diffusion test case
-    Functions::ExpSinusSum(u_a, v_a, w_a, t);
+    Functions::ExpSinusSum(m_u_analytical_solution,
+                           m_v_analytical_solution,
+                           m_w_analytical_solution, t);
 }
 
 void Solution::hat(const real) {
     // Diffusion test case
-    Functions::Hat(u_a);  // TODO time dependency?
-    Functions::Hat(v_a);
-    Functions::Hat(w_a);
+    Functions::Hat(m_u_analytical_solution);  // TODO time dependency?
+    Functions::Hat(m_v_analytical_solution);
+    Functions::Hat(m_w_analytical_solution);
 }
 
 void Solution::sin_sin_sin(const real) {
 // Pressure test case
-    Functions::FacSinSinSin(p_a);  // TODO time dependency?
+    Functions::FacSinSinSin(m_p_analytical_solution);  // TODO time dependency?
 }
 
 void Solution::mcDermott(const real t) {
 // NavierStokes test case
-    Functions::McDermott(u_a, v_a, w_a, p_a, t);
+    Functions::McDermott(m_u_analytical_solution,
+                         m_v_analytical_solution,
+                         m_w_analytical_solution,
+                         m_p_analytical_solution, t);
 }
 
 void Solution::vortex(const real) {
-    Functions::Vortex(u_a, v_a, w_a, p_a);  // TODO time dependency
+    Functions::Vortex(m_u_analytical_solution,
+                      m_v_analytical_solution,
+                      m_w_analytical_solution,
+                      m_p_analytical_solution);  // TODO time dependency
 }
 
 void Solution::vortex_y(const real) {
-    Functions::VortexY(u_a, v_a, w_a, p_a);  // TODO time dependency
+    Functions::VortexY(m_u_analytical_solution,
+                       m_v_analytical_solution,
+                       m_w_analytical_solution,
+                       m_p_analytical_solution);  // TODO time dependency
 }
 
 void Solution::beltrami(const real t) {
-    Functions::Beltrami(u_a, v_a, w_a, p_a, t);
+    Functions::Beltrami(m_u_analytical_solution,
+                        m_v_analytical_solution,
+                        m_w_analytical_solution,
+                        m_p_analytical_solution,
+                        t);
 }
 
 void Solution::zero(const real) {
@@ -106,7 +123,12 @@ void Solution::zero(const real) {
 }
 
 void Solution::buoyancy_mms(const real t) {
-    Functions::BuoyancyMMS(u_a, v_a, w_a, p_a, T_a, t);
+    Functions::BuoyancyMMS(m_u_analytical_solution,
+                           m_v_analytical_solution,
+                           m_w_analytical_solution,
+                           m_p_analytical_solution,
+                           m_T_analytical_solution,
+                           t);
 }
 
 // =================== Calculate analytical solution based on test case ==================
@@ -114,7 +136,7 @@ void Solution::buoyancy_mms(const real t) {
 /// \brief  calculates analytical solution
 /// \param  t   time
 // ***************************************************************************************
-void Solution::calc_analytical_solution(real t) {
+void Solution::calc_analytical_solution(const real t) {
     if (m_current_time_step == t) {
         return;
     }

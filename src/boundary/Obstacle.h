@@ -62,6 +62,7 @@ class Obstacle {
 
     bool is_obstacle_cell(size_t i, size_t j, size_t k) const;
     bool line_crosses(int i0, int j0, int k0, int i, int j, int k) const;
+    bool is_obstacle_cell(size_t index) const;
 
     void print();
 
