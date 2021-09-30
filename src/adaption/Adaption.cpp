@@ -65,8 +65,7 @@ Adaption::Adaption(FieldController *field_controller) {
 /// \brief  starts adaption process
 /// \param  t_cur current timestep
 // ***************************************************************************************
-void Adaption::run(real t_cur) {
-
+void Adaption::run(real) {
     if (m_dynamic && isUpdateNecessary()) {
         applyChanges();
 #ifndef BENCHMARKING
@@ -103,13 +102,13 @@ void Adaption::extractData(const std::string &filename, real height, real time) 
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
-    real *data_temp = m_field_controller->field_T->data;
-    real *data_tempA = m_field_controller->field_T_ambient->data;
-    real *data_u = m_field_controller->field_u->data;
-    real *data_v = m_field_controller->field_v->data;
-    real *data_w = m_field_controller->field_w->data;
-    real *data_nu = m_field_controller->field_nu_t->data;
-    real *data_kappa = m_field_controller->field_kappa_t->data;
+    real *data_temp = m_field_controller->field_T.data;
+    real *data_tempA = m_field_controller->field_T_ambient.data;
+    real *data_u = m_field_controller->field_u.data;
+    real *data_v = m_field_controller->field_v.data;
+    real *data_w = m_field_controller->field_w.data;
+    real *data_nu = m_field_controller->field_nu_t.data;
+    real *data_kappa = m_field_controller->field_kappa_t.data;
 
     std::ofstream file;
     file.open(filename, std::ios::app);
@@ -137,10 +136,10 @@ void Adaption::extractData(const std::string &filename) {
     size_t y_end = Ny;
     size_t z_end = domain->get_Nz();
 
-    real *data_temp = m_field_controller->field_T->data;
-    real *data_u = m_field_controller->field_u->data;
-    real *data_v = m_field_controller->field_v->data;
-    real *data_w = m_field_controller->field_w->data;
+    real *data_temp = m_field_controller->field_T.data;
+    real *data_u = m_field_controller->field_u.data;
+    real *data_v = m_field_controller->field_v.data;
+    real *data_w = m_field_controller->field_w.data;
 
     std::ofstream file;
     file.open(filename, std::ios::app);
@@ -234,17 +233,17 @@ void Adaption::expand_x_direction(long shift, bool start, size_t *arr_idx_expans
     auto domain = Domain::getInstance();
 #pragma acc data present(arr_idx_expansion[:len_e])
     {
-        size_t j_start = domain->get_index_y1();// (y1 - Y1) / dy;
-        size_t j_end = domain->get_index_y2() + 2;//(y2 - Y1) / dy + 2;
+        size_t j_start = domain->get_index_y1();
+        size_t j_end = domain->get_index_y2() + 1;
 
-        size_t k_start = domain->get_index_z1();//(z1 - Z1) / dz;
-        size_t k_end = domain->get_index_z2() + 2;//(z2 - Z1) / dz + 2;
+        size_t k_start = domain->get_index_z1();
+        size_t k_end = domain->get_index_z2() + 1;
 
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
         if (start) { // shift = negative
-            size_t i1 = domain->get_index_x1();//(x1 - X1) / dx;
+            size_t i1 = domain->get_index_x1();
             shift *= (-1);
 #pragma acc parallel loop collapse(3) present(arr_idx_expansion[:len_e])
             for (size_t k = k_start; k < k_end; k++) {
@@ -257,7 +256,7 @@ void Adaption::expand_x_direction(long shift, bool start, size_t *arr_idx_expans
                 }
             }
         } else { // shift = positive
-            size_t i2 = domain->get_index_x2();//(x2 - X1) / dx + 1;
+            size_t i2 = domain->get_index_x2();
 #pragma acc parallel loop collapse(3) present(arr_idx_expansion[:len_e])
             for (size_t j = j_start; j < j_end; j++) {
                 for (size_t k = k_start; k < k_end; k++) {
@@ -285,15 +284,15 @@ void Adaption::expand_y_direction(long shift, bool start, size_t *arr_idx_expans
 
 #pragma acc data present(arr_idx_expansion[:len_e])
     {
-        size_t i_start = domain->get_index_x1();//(x1 - X1) / dx;
-        size_t i_end = domain->get_index_x2() + 2;//(x2 - X1) / dx + 2;
-        size_t k_start = domain->get_index_z1();//(z1 - Z1) / dz;
-        size_t k_end = domain->get_index_z2() + 2;//(z2 - Z1) / dz + 2;
+        size_t i_start = domain->get_index_x1();
+        size_t i_end = domain->get_index_x2() + 1;
+        size_t k_start = domain->get_index_z1();
+        size_t k_end = domain->get_index_z2() + 1;
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
         if (start) { // shift = negative
-            size_t j1 = domain->get_index_y1();//(y1 - Y1) / dy;
+            size_t j1 = domain->get_index_y1();
             shift *= (-1);
 #pragma acc parallel loop collapse(3) present(arr_idx_expansion[:len_e])
             for (size_t k = k_start; k < k_end; k++) {
@@ -306,7 +305,7 @@ void Adaption::expand_y_direction(long shift, bool start, size_t *arr_idx_expans
                 }
             }
         } else { // shift = positive
-            size_t j2 = domain->get_index_y2() + 1;//(y2 - Y1) / dy + 1;
+            size_t j2 = domain->get_index_y2();
 #pragma acc parallel loop collapse(3) present(arr_idx_expansion[:len_e])
             for (size_t k = k_start; k < k_end; k++) {
                 for (size_t i = i_start; i < i_end; i++) {
@@ -330,23 +329,22 @@ void Adaption::expand_y_direction(long shift, bool start, size_t *arr_idx_expans
 /// \param len_e  size of arr_idx_reduction
 // ***************************************************************************************
 void Adaption::reduce_x_direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r) {
-
     auto domain = Domain::getInstance();
 #pragma acc data present(arr_idx_reduction[:len_r])
     {
-        size_t j_start = domain->get_index_y1();//(y1 - Y1) / dy;
-        size_t j_end = domain->get_index_y2() + 2;//(y2 - Y1) / dy + 2;
-        size_t k_start = domain->get_index_z1();//(z1 - Z1) / dz;
-        size_t k_end = domain->get_index_z2() + 2;//(z2 - Z1) / dz + 2;
+        size_t j_start = domain->get_index_y1();
+        size_t j_end = domain->get_index_y2() + 1;
+        size_t k_start = domain->get_index_z1();
+        size_t k_end = domain->get_index_z2() + 1;
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
         if (start) { // shift = positive
-            size_t i1 = domain->get_index_x1();//(domain->get_x1() - X1) / dx;
+            size_t i1 = domain->get_index_x1();
 #pragma acc parallel loop collapse(3) present(arr_idx_reduction[:len_r])
             for (size_t k = k_start; k < k_end; k++) {
                 for (size_t j = j_start; j < j_end; j++) {
-                    for (size_t ii = 0; ii < shift; ii++) {
+                    for (long ii = 0; ii < shift; ii++) {
                         size_t counter = (k - k_start) * (shift) * (j_end - j_start) + (j - j_start) * (shift) + ii;
                         auto idx = IX(i1 - ii - 1, j, k, Nx, Ny);
                         *(arr_idx_reduction + counter) = idx;
@@ -355,11 +353,11 @@ void Adaption::reduce_x_direction(long shift, bool start, size_t *arr_idx_reduct
             }
         } else { // shift = negative
             shift *= (-1);
-            size_t i2 = domain->get_index_x2();//(domain->get_x2() - X1) / dx;
+            size_t i2 = domain->get_index_x2();
 #pragma acc parallel loop collapse(3) present(arr_idx_reduction[:len_r])
             for (size_t k = k_start; k < k_end; k++) {
                 for (size_t j = j_start; j < j_end; j++) {
-                    for (size_t ii = 0; ii < shift; ii++) {
+                    for (long ii = 0; ii < shift; ii++) {
                         size_t counter = (k - k_start) * (shift) * (j_end - j_start) + (j - j_start) * (shift) + ii;
                         auto idx = IX(i2 + ii + 2, j, k, Nx, Ny);
                         *(arr_idx_reduction + counter) = idx;
@@ -379,25 +377,23 @@ void Adaption::reduce_x_direction(long shift, bool start, size_t *arr_idx_reduct
 /// \param len_e  size of arr_idx_reduction
 // ***************************************************************************************
 void Adaption::reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r) {
-    // std::cout << "reduce_y_Direction" << std::endl;
-
     auto domain = Domain::getInstance();
 #pragma acc data present(arr_idx_reduction[:len_r])
     {
-        size_t i_start = domain->get_index_x1();//(x1 - X1) / dx;
-        size_t i_end = domain->get_index_x2() + 2;//(x2 - X1) / dx + 2;
-        size_t k_start = domain->get_index_z1();//(z1 - Z1) / dz;
-        size_t k_end = domain->get_index_z2() + 2;//(z2 - Z1) / dz + 2;
+        size_t i_start = domain->get_index_x1();
+        size_t i_end = domain->get_index_x2() + 2;
+        size_t k_start = domain->get_index_z1();
+        size_t k_end = domain->get_index_z2() + 2;
 
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
         if (start) { // shift = positive
-            size_t j1 = domain->get_index_y1();//(domain->get_y1() - Y1) / dy;
+            size_t j1 = domain->get_index_y1();
 #pragma acc parallel loop collapse(3) present(arr_idx_reduction[:len_r])
             for (size_t k = k_start; k < k_end; k++) {
                 for (size_t i = i_start; i < i_end; i++) {
-                    for (size_t jj = 0; jj < shift; jj++) {
+                    for (long jj = 0; jj < shift; jj++) {
                         size_t counter = (k - k_start) * (shift) * (i_end - i_start) + (i - i_start) * (shift) + jj;
                         auto idx = IX(i, j1 - jj - 1, k, Nx, Ny);
                         *(arr_idx_reduction + counter) = idx;
@@ -406,11 +402,11 @@ void Adaption::reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduct
             }
         } else { // shift = negative
             shift *= (-1);
-            size_t j2 = domain->get_index_y2();//(domain->get_y2() - Y1) / dy;
+            size_t j2 = domain->get_index_y2();
 #pragma acc parallel loop collapse(3) present(arr_idx_reduction[:len_r])
             for (size_t k = k_start; k < k_end; k++) {
                 for (size_t i = i_start; i < i_end; i++) {
-                    for (size_t jj = 0; jj < shift; jj++) {
+                    for (long jj = 0; jj < shift; jj++) {
                         size_t counter = (k - k_start) * (shift) * (i_end - i_start) + (i - i_start) * (shift) + jj;
                         auto idx = IX(i, j2 + jj + 2, k, Nx, Ny);
                         *(arr_idx_reduction + counter) = idx;
@@ -434,15 +430,12 @@ bool Adaption::adapt_x_direction_serial(const real *f, real check_value, size_t 
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
-    size_t nx_begin = domain->get_index_x1();// ((domain->get_x1() - domain->get_X1()) / domain->get_dx());
-
-    size_t j_start = domain->get_index_y1();//((domain->get_y1() - domain->get_Y1()) / domain->get_dy());
-    size_t j_end = j_start + domain->get_ny() - 1;
-    size_t k_start = domain->get_index_z1();//((domain->get_z1() - domain->get_Z1()) / domain->get_dz());
-    size_t k_end = k_start + domain->get_nz() - 1;
-
-    size_t i_start = nx_begin;
-    size_t i_end = nx_begin + domain->get_nx() - 1;
+    size_t i_start = domain->get_index_x1();
+    size_t i_end = domain->get_index_x2() + 1;
+    size_t j_start = domain->get_index_y1();
+    size_t j_end = domain->get_index_y2() + 1;
+    size_t k_start = domain->get_index_z1();
+    size_t k_end = domain->get_index_z2() + 1;
 
     //expansion - expand if there is at least one cell in the buffer area fulfills the condition
     ADTypes expansion_start = ADTypes::UNKNOWN;
@@ -559,15 +552,12 @@ bool Adaption::adapt_x_direction(const real *f, real check_value, size_t no_buff
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
-        size_t nx_begin = domain->get_index_x1();// ((domain->get_x1() - domain->get_X1()) / domain->get_dx());
-
-        size_t j_start = domain->get_index_y1();//((domain->get_y1() - domain->get_Y1()) / domain->get_dy());
-        size_t j_end = j_start + domain->get_ny() - 1;
-        size_t k_start = domain->get_index_z1();//((domain->get_z1() - domain->get_Z1()) / domain->get_dz());
-        size_t k_end = k_start + domain->get_nz() - 1;
-
-        size_t i_start = nx_begin;
-        size_t i_end = nx_begin + domain->get_nx() - 1;
+        size_t i_start = domain->get_index_x1();
+        size_t i_end = domain->get_index_x2() + 1;
+        size_t j_start = domain->get_index_y1();
+        size_t j_end = domain->get_index_y2() + 1;
+        size_t k_start = domain->get_index_z1();
+        size_t k_end = domain->get_index_z2() + 1;
 
         //expansion - expand if there is at least one cell in the buffer area fulfills the condition
         //reduction - reduce if all cells do not fulfil the condition any longer
@@ -645,15 +635,12 @@ bool Adaption::adapt_y_direction_serial(const real *f, real check_value, size_t 
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
-
-    size_t i_start = domain->get_index_x1();//((domain->get_x1() - domain->get_X1()) / domain->get_dx());
-    size_t i_end = i_start + domain->get_nx() - 1;
-    size_t k_start = domain->get_index_z1();//((domain->get_z1() - domain->get_Z1()) / domain->get_dz());
-    size_t k_end = k_start + domain->get_nz() - 1;
-
-    size_t ny_begin = domain->get_index_y1();//((domain->get_y1() - domain->get_Y1()) / domain->get_dy());
-    size_t j_start = ny_begin;
-    size_t j_end = ny_begin + domain->get_ny() - 1;
+    size_t i_start = domain->get_index_x1();
+    size_t i_end = domain->get_index_x2() + 1;
+    size_t j_start = domain->get_index_y1();
+    size_t j_end = domain->get_index_y2() + 1;
+    size_t k_start = domain->get_index_z1();
+    size_t k_end = domain->get_index_z2() + 1;
 
     //expansion - expand if there is at least one cell in the buffer area fulfills the condition
     ADTypes expansion_start = ADTypes::UNKNOWN;
@@ -772,15 +759,12 @@ bool Adaption::adapt_y_direction(const real *f, real check_value, size_t no_buff
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
-        size_t ny_begin = domain->get_index_y1();//((domain->get_y1() - domain->get_Y1()) / domain->get_dy());
-
-        size_t i_start = domain->get_index_x1();//((domain->get_x1() - domain->get_X1()) / domain->get_dx());
-        size_t i_end = i_start + domain->get_nx() - 1;
-        size_t k_start = domain->get_index_z1();//((domain->get_z1() - domain->get_Z1()) / domain->get_dz());
-        size_t k_end = k_start + domain->get_nz() - 1;
-
-        size_t j_start = ny_begin;
-        size_t j_end = ny_begin + domain->get_ny() - 1;
+        size_t i_start = domain->get_index_x1();
+        size_t i_end = domain->get_index_x2() + 1;
+        size_t j_start = domain->get_index_y1();
+        size_t j_end = domain->get_index_y2() + 1;
+        size_t k_start = domain->get_index_z1();
+        size_t k_end = domain->get_index_z2() + 1;
 
         //expansion - expand if there is at least one cell in the buffer area fulfills the condition
         //loop through lower side of cuboid in y direction

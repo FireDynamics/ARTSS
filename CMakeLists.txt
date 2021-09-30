@@ -121,7 +121,7 @@ include_directories($ENV{CUDA_INC})
 # find spdlog lib
 if(NOT TARGET spdlog::spdlog)
     # Stand-alone build
-    find_package(spdlog QUIET)
+    find_package(spdlog::spdlog QUIET)
 endif()
 # use local fallback
 if(NOT TARGET spdlog::spdlog)
@@ -138,7 +138,8 @@ if(NOT TARGET fmt::fmt)
 endif()
 
 if(NOT TARGET gtest::gtest)
-    find_package(fmt::fmt QUIET)
+    # Stand-alone build
+    find_package(gtest::gtest QUIET)
 endif()
 # use local fallback
 if(NOT TARGET gtest::gtest)

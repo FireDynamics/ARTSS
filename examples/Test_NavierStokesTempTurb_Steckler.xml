@@ -46,7 +46,7 @@
       <turbulence include="Yes">
         <Pr_T> 0.5 </Pr_T>
       </turbulence>
-      <source type = "ExplicitEuler" temp_fct="GaussST" ramp_fct= "RampTanh" dissipation="No">
+      <source type = "ExplicitEuler" temp_fct="GaussST" dissipation="No" random="No">
         <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
         <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 0. </x0>
@@ -62,19 +62,13 @@
     </solution>
   </solver>
 
-  <domain_parameters>
+  <domain_parameters enable_computational_domain="No">
     <X1> -2.8 </X1>  <!-- physical domain -->
     <X2> 4.2 </X2>
     <Y1> 0. </Y1>
     <Y2> 4.26 </Y2>
     <Z1> -2.8 </Z1>
     <Z2> 2.8 </Z2>
-    <x1> -2.8 </x1>  <!-- computational domain -->
-    <x2> 4.2 </x2>
-    <y1> 0. </y1>
-    <y2> 4.26 </y2>
-    <z1> -2.8 </z1>
-    <z2> 2.8 </z2>
     <nx> 160 </nx>  <!-- grid resolution (number of cells excl. ghost cells) -->
     <ny> 128 </ny>
     <nz> 128 </nz>

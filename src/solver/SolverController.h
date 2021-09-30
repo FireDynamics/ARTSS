@@ -24,10 +24,10 @@ class SolverController {
     FieldController* get_field_controller() { return m_field_controller; }
 
  private:
-    void set_up_sources(const std::string &string_solver);
+    void set_up_sources();
     void init_solver(const std::string& string_solver);
     void set_up_fields(const std::string& string_solver);
-    void call_random(Field *field);
+    void call_random(Field &field);
 
     void force_source();
     void temperature_source();

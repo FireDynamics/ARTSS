@@ -39,32 +39,28 @@ SLAdvect::SLAdvect() {
 /// \param  w_vel z -velocity
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_vel, const Field *w_vel, bool sync) {
+void SLAdvect::advect(
+        Field &out, Field const &in,
+        Field const &u_vel, Field const &v_vel, Field const &w_vel,
+        bool sync) {
     auto domain = Domain::getInstance();
 
     // local variables and parameters for GPU
-    size_t bsize = domain->get_size(out->get_level());
-    FieldType type = out->get_type();
-
-    auto d_out = out->data;
-    auto d_in = in->data;
-    auto d_u_vel = u_vel->data;
-    auto d_v_vel = v_vel->data;
-    auto d_w_vel = w_vel->data;
+    FieldType type = out.get_type();
 
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
     size_t *d_iList = boundary->get_inner_list_level_joined();
 
-#pragma acc data present(d_out[:bsize], d_in[:bsize], d_u_vel[:bsize], d_v_vel[:bsize], d_w_vel[:bsize], d_iList[:bsize_i])
+#pragma acc data present(out, in, u_vel, v_vel, w_vel, d_iList[:bsize_i])
     {
-        const size_t Nx = domain->get_Nx(out->get_level());
-        const size_t Ny = domain->get_Ny(out->get_level());
+        const size_t Nx = domain->get_Nx(out.get_level());
+        const size_t Ny = domain->get_Ny(out.get_level());
 
-        const real dx = domain->get_dx(out->get_level());
-        const real dy = domain->get_dy(out->get_level());
-        const real dz = domain->get_dz(out->get_level());
+        const real dx = domain->get_dx(out.get_level());
+        const real dy = domain->get_dy(out.get_level());
+        const real dz = domain->get_dz(out.get_level());
 
         const real dt = m_dt;
 
@@ -93,9 +89,9 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
 
             // TODO: backtracking may be outside the computational region, it is not a reasonable solution to cut the vector; idea: enlarge ghost cell to CFL*dx
             // Linear Trace Back
-            real Ci = dtx * d_u_vel[idx];
-            real Cj = dty * d_v_vel[idx];
-            real Ck = dtz * d_w_vel[idx];
+            real Ci = dtx * u_vel[idx];
+            real Cj = dty * v_vel[idx];
+            real Ck = dtz * w_vel[idx];
 
             // Calculation of horizontal indices and interpolation weights
             long int i0 = i;
@@ -144,28 +140,29 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
 
             // Trilinear Interpolation
             size_t idx_000 = IX(i0, j0, k0, Nx, Ny);
-            auto d_000 = d_in[idx_000];
+            auto d_000 = in[idx_000];
 
             size_t idx_100 = IX(i1, j0, k0, Nx, Ny);
-            auto d_100 = d_in[idx_100];
+            auto d_100 = in[idx_100];
 
             size_t idx_010 = IX(i0, j1, k0, Nx, Ny);
-            auto d_010 = d_in[idx_010];
+            auto d_010 = in[idx_010];
 
             size_t idx_110 = IX(i1, j1, k0, Nx, Ny);
-            auto d_110 = d_in[idx_110];
+            auto d_110 = in[idx_110];
 
             size_t idx_001 = IX(i0, j0, k1, Nx, Ny);
-            auto d_001 = d_in[idx_001];
+            auto d_001 = in[idx_001];
 
             size_t idx_101 = IX(i1, j0, k1, Nx, Ny);
-            auto d_101 = d_in[idx_101];
+            auto d_101 = in[idx_101];
 
             size_t idx_011 = IX(i0, j1, k1, Nx, Ny);
-            auto d_011 = d_in[idx_011];
+            auto d_011 = in[idx_011];
 
             size_t idx_111 = IX(i1, j1, k1, Nx, Ny);
-            auto d_111 = d_in[idx_111];
+
+            auto d_111 = in[idx_111];
 
             auto r100 = d_000 + r * (d_100 - d_000);
             auto r110 = d_010 + r * (d_110 - d_010);
@@ -176,13 +173,13 @@ void SLAdvect::advect(Field *out, Field *in, const Field *u_vel, const Field *v_
             auto s111 = r101 + s * (r111 - r101);
 
             auto tmp = s110 + t * (s111 - s110);  // row-major
-            d_out[idx] = tmp;
+            out[idx] = tmp;
         }
-        boundary->apply_boundary(d_out, type, sync);
+        boundary->apply_boundary(out.data, type, sync);
 
         if (sync) {
 #pragma acc wait
         }
-    }  // end data region
+    }
 }
 

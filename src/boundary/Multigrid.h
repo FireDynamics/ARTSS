@@ -25,7 +25,7 @@ class Multigrid {
 
 
     size_t get_size_inner_list(size_t level = 0) const;
-    size_t get_size_boundary_ist(size_t level = 0) const;
+    size_t get_size_boundary_list(size_t level = 0) const;
     size_t get_size_obstacle_list() const;
     size_t *get_obstacle_list() const;
 

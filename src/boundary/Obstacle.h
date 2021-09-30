@@ -31,11 +31,6 @@ class Obstacle {
         size_t coords_i1, size_t coords_j1, size_t coords_k1,
         size_t coords_i2, size_t coords_j2, size_t coords_k2,
         size_t level,
-        const std::string& name);
-    Obstacle(
-        size_t coords_i1, size_t coords_j1, size_t coords_k1,
-        size_t coords_i2, size_t coords_j2, size_t coords_k2,
-        size_t level,
         const std::string& name,
         const Domain &domain);
 #ifndef BENCHMARKING
