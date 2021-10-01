@@ -96,7 +96,3 @@ TEST_F(BoundaryDataTest, get_boundary_condition_name) {
     ASSERT_EQ(periodic, "periodic");
 }
 
-TEST_F(BoundaryDataTest, constructor) {
-    BoundaryData b;
-    ASSERT_TRUE(b.is_empty());
-}
