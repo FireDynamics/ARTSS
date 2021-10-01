@@ -37,8 +37,7 @@ void DiffusionSolver::do_step(real, bool sync) {
 #ifndef BENCHMARKING
     m_logger->info("Diffuse ...");
 #endif
-// 1. Solve diffusion equation
-    // local variables and parameters for GPU
+    // 1. Solve diffusion equation
     Field &u = m_field_controller->get_field_u();
     Field &v = m_field_controller->get_field_v();
     Field &w = m_field_controller->get_field_w();

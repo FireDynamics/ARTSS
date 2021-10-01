@@ -36,7 +36,9 @@ NSTempSolver::NSTempSolver(FieldController *field_controller) {
     m_kappa = params->get_real("physical_parameters/kappa");
 
     // Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"), m_field_controller->field_p, m_field_controller->field_rhs);
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
+                                       m_field_controller->get_field_p(),
+                                       m_field_controller->get_field_rhs());
 
     // Source of velocity
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
@@ -72,8 +74,6 @@ NSTempSolver::~NSTempSolver() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSTempSolver::do_step(real t, bool sync) {
-
-    // local variables and parameters for GPU
     Field &u = m_field_controller->get_field_u();
     Field &v = m_field_controller->get_field_v();
     Field &w = m_field_controller->get_field_w();

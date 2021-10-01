@@ -172,7 +172,7 @@ DynamicSmagorinsky::DynamicSmagorinsky() :
 /// \param  in_w          input pointer of z-velocity
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void DynamicSmagorinsky::CalcTurbViscosity(
+void DynamicSmagorinsky::calc_turbulent_viscosity(
         Field &ev,
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
     auto domain = Domain::getInstance();
@@ -192,18 +192,15 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 
     const real delta_s = cbrt(dx * dy * dz);
 
-    real num = 0;
-    real den = 0;
-    real sum = 0;
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_inner_list = boundary->get_inner_list_level_joined();
     auto bsize_i = boundary->get_size_inner_list();
 
-// Velocity filter
-    ExplicitFiltering(u_f, in_u, sync);
-    ExplicitFiltering(v_f, in_v, sync);
-    ExplicitFiltering(w_f, in_w, sync);
+    // Velocity filter
+    explicit_filtering(u_f, in_u, sync);
+    explicit_filtering(v_f, in_v, sync);
+    explicit_filtering(w_f, in_w, sync);
 
 #pragma acc parallel loop independent present(u_f, v_f, w_f, \
                         uu, vv, ww, \
@@ -235,13 +232,13 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 #pragma acc wait
     }
 
-// calculation  of the filter of velocity products
-    ExplicitFiltering(uu_f, uu, sync);
-    ExplicitFiltering(vv_f, vv, sync);
-    ExplicitFiltering(ww_f, ww, sync);
-    ExplicitFiltering(uv_f, uv, sync);
-    ExplicitFiltering(vw_f, vw, sync);
-    ExplicitFiltering(ww_f, ww, sync);
+    // calculation  of the filter of velocity products
+    explicit_filtering(uu_f, uu, sync);
+    explicit_filtering(vv_f, vv, sync);
+    explicit_filtering(ww_f, ww, sync);
+    explicit_filtering(uv_f, uv, sync);
+    explicit_filtering(vw_f, vw, sync);
+    explicit_filtering(ww_f, ww, sync);
 
 #pragma acc parallel loop independent present(  L11, L22, L33, L12, L13, L23, \
                         S11, S22, S33, S12, S13, S23, \
@@ -300,21 +297,23 @@ void DynamicSmagorinsky::CalcTurbViscosity(
     }
 
     // filtering the strain tensor
-    ExplicitFiltering(S11_f, S11, sync);
-    ExplicitFiltering(S22_f, S22, sync);
-    ExplicitFiltering(S33_f, S33, sync);
-    ExplicitFiltering(S12_f, S12, sync);
-    ExplicitFiltering(S13_f, S13, sync);
-    ExplicitFiltering(S23_f, S23, sync);
+    explicit_filtering(S11_f, S11, sync);
+    explicit_filtering(S22_f, S22, sync);
+    explicit_filtering(S33_f, S33, sync);
+    explicit_filtering(S12_f, S12, sync);
+    explicit_filtering(S13_f, S13, sync);
+    explicit_filtering(S23_f, S23, sync);
 
     // filtering the product of strain tensor modulus and strain tensor
-    ExplicitFiltering(P11_f, P11, sync);
-    ExplicitFiltering(P22_f, P22, sync);
-    ExplicitFiltering(P33_f, P33, sync);
-    ExplicitFiltering(P12_f, P12, sync);
-    ExplicitFiltering(P13_f, P13, sync);
-    ExplicitFiltering(P23_f, P23, sync);
+    explicit_filtering(P11_f, P11, sync);
+    explicit_filtering(P22_f, P22, sync);
+    explicit_filtering(P33_f, P33, sync);
+    explicit_filtering(P12_f, P12, sync);
+    explicit_filtering(P13_f, P13, sync);
+    explicit_filtering(P23_f, P23, sync);
 
+    real num;
+    real den;
 #pragma acc parallel loop independent present(  S_bar_f, S11_f, S22_f, S33_f, \
                         S12_f, S13_f, S23_f, \
                         M11, M22, M33, \
@@ -360,6 +359,7 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 #pragma acc wait
     }
 
+    real sum;
     // local averaging of the coefficients
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_inner_list[j];
@@ -391,22 +391,22 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 /// \param  in            input pointer
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void DynamicSmagorinsky::ExplicitFiltering(Field &out, Field const &in, bool sync) {
+void DynamicSmagorinsky::explicit_filtering(Field &out, Field const &in, bool sync) {
     auto domain = Domain::getInstance();
 
     const size_t Nx = domain->get_Nx(out.get_level());
     const size_t Ny = domain->get_Ny(out.get_level());
-    real sum = 0;
 
-    //Implement a discrete filter by trapezoidal or simpsons rule.
-    real a[3] = {1. / 4., 1. / 2., 1. / 4.};  //trapezoidal weights
-    //real a[3] = {1./6.,1./3.,1./6.};  //simpsons weights
+    // Implement a discrete filter by trapezoidal or simpsons rule.
+    real a[3] = {1. / 4., 1. / 2., 1. / 4.};  // trapezoidal weights
+    // real a[3] = {1./6.,1./3.,1./6.};  // simpsons weights
 
-    //Construction by product combination for trapezoidal
+    // Construction by product combination for trapezoidal
     auto boundary = BoundaryController::getInstance();
     size_t *d_inner_list = boundary->get_inner_list_level_joined();
     auto bsize_i = boundary->get_size_inner_list();
 
+    real sum;
 #pragma acc parallel loop independent present(out, in, a[:3], d_inner_list[:bsize_i]) async
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_inner_list[j];

@@ -20,34 +20,34 @@
 
 
 namespace Utility {
-//======================================== get index =====================================
-// ***************************************************************************************
+//======================================== get index ===============================================
+// *************************************************************************************************
 /// \brief  Snaps value to grid discretisation
 /// \param  physical_coordinate physical coordinate
 /// \param  spacing dx/dy/dz
 /// \param  start_coordinate X1/Y1/Z1
 /// \return real Calculated index (i/j/k) in (x/y/z)-direction
-// ***************************************************************************************
+// *************************************************************************************************
 size_t get_index(real physical_coordinate, real spacing, real start_coordinate) {
     return std::round((-start_coordinate + physical_coordinate) / spacing) + 1;
 }
 
-// ================================= Split string at character ==========================================
-// ***************************************************************************************
+// ================================= Split string at character =====================================
+// *************************************************************************************************
 /// \brief  Splits a string at a defined char
 /// \param  text     String
 /// \param  delimiter Where to split
-// ***************************************************************************************
+// *************************************************************************************************
 std::vector<std::string> split(const std::string &text, char delimiter) {
     return split(text.c_str(), delimiter);
 }
 
-// ================================= Split string at character ==========================================
-// ***************************************************************************************
+// ================================= Split string at character =====================================
+// *************************************************************************************************
 /// \brief  Splits a string at a defined char
 /// \param  text     String
 /// \param  delimiter Where to split
-// ***************************************************************************************
+// *************************************************************************************************
 std::vector<std::string> split(const char *text, char delimiter) {
     std::vector<std::string> tokens;
     std::string token;
@@ -61,7 +61,8 @@ std::vector<std::string> split(const char *text, char delimiter) {
 #ifndef BENCHMARKING
 // ======================= creates a new logger ================================
 // *****************************************************************************
-/// \brief  creates a new named logger this function is only available if BENCHMARKING is not enabled
+/// \brief  creates a new named logger this function is only available
+///         if BENCHMARKING is not enabled
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
 std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
@@ -96,7 +97,8 @@ std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
 }
 #endif
 
-std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list1, size_t *list2, size_t size_list2) {
+std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list1,
+                                                 size_t *list2, size_t size_list2) {
     std::vector<size_t> result;
     size_t counter1 = 0;
     size_t counter2 = 0;
@@ -143,22 +145,21 @@ std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list
     return result;
 }
 
-void log_field_info(Field *field, const std::string& text, const std::string& logger_name) {
+void log_field_info(Field &field, const std::string &text, const std::string &logger_name) {
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(logger_name);
 #endif
-    auto data = field->data;
     auto boundary = BoundaryController::getInstance();
     size_t *inner_list = boundary->get_inner_list_level_joined();
     size_t size_inner_list = boundary->get_size_inner_list();
 
     size_t idx = inner_list[0];
-    real minimum_inner = data[idx];
-    real maximum_inner = data[idx];
-    real average_inner = data[idx];
+    real minimum_inner = field[idx];
+    real maximum_inner = field[idx];
+    real average_inner = field[idx];
     for (size_t i = 1; i < size_inner_list; i++) {
         idx = inner_list[i];
-        real value = data[idx];
+        real value = field[idx];
         if (value < minimum_inner) {
             minimum_inner = value;
         }
@@ -178,12 +179,12 @@ void log_field_info(Field *field, const std::string& text, const std::string& lo
     size_t size_boundary_list = boundary->get_size_boundary_list();
 
     idx = boundary_list[0];
-    real minimum_boundary = data[idx];
-    real maximum_boundary = data[idx];
-    real average_boundary = data[idx];
-    for (size_t i = 0; i < size_boundary_list; i++) {
-        size_t idx = boundary_list[i];
-        real value = data[idx];
+    real minimum_boundary = field[idx];
+    real maximum_boundary = field[idx];
+    real average_boundary = field[idx];
+    for (size_t i = 1; i < size_boundary_list; i++) {
+        idx = boundary_list[i];
+        real value = field[idx];
         if (value < minimum_boundary) {
             minimum_boundary = value;
         }
@@ -204,12 +205,12 @@ void log_field_info(Field *field, const std::string& text, const std::string& lo
 
     if (size_obstacle_list > 0) {
         idx = obstacle_list[0];
-        real minimum_obstacle = data[idx];
-        real maximum_obstacle = data[idx];
-        real average_obstacle = data[idx];
-        for (size_t i = 0; i < size_obstacle_list; i++) {
-            size_t idx = obstacle_list[i];
-            real value = data[idx];
+        real minimum_obstacle = field[idx];
+        real maximum_obstacle = field[idx];
+        real average_obstacle = field[idx];
+        for (size_t i = 1; i < size_obstacle_list; i++) {
+            idx = obstacle_list[i];
+            real value = field[idx];
             if (value < minimum_obstacle) {
                 minimum_obstacle = value;
             }
@@ -225,6 +226,17 @@ void log_field_info(Field *field, const std::string& text, const std::string& lo
         logger->info("average obstacle {}: {}", text, average_obstacle);
 #endif
     }
+}
+
+//================================= Remove extension ===============================================
+// *************************************************************************************************
+/// \brief  Removes extension from filename
+/// \param  filename    xml-file name (via argument)
+// *************************************************************************************************
+std::string remove_extension(const std::string &filename) {
+    size_t lastdot = filename.find_last_of('.');
+    if (lastdot == std::string::npos) return filename;
+    return filename.substr(0, lastdot);
 }
 
 }  // namespace Utility

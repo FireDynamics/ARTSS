@@ -30,9 +30,10 @@ NSTurbSolver::NSTurbSolver(FieldController *field_controller) {
     // Turbulent viscosity
     SolverSelection::SetTurbulenceSolver(&mu_tub, params->get("solver/turbulence/type"));
 
-    // Pressure
+    //Pressure
     SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
-            m_field_controller->get_field_p(), m_field_controller->get_field_rhs());
+                                       m_field_controller->get_field_p(),
+                                       m_field_controller->get_field_rhs());
 
     // Source
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
@@ -77,7 +78,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, \
                          p, rhs, fx, fy, fz, nu_t)
     {
-// 1. Solve advection equation
+        // 1. Solve advection equation
 #ifndef BENCHMARKING
         m_logger->info("Advect ...");
 #endif
@@ -88,12 +89,11 @@ void NSTurbSolver::do_step(real t, bool sync) {
         // Couple velocity to prepare for diffusion
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
-// 2. Solve turbulent diffusion equation
+        // 2. Solve turbulent diffusion equation
 #ifndef BENCHMARKING
         m_logger->info("Calculating Turbulent viscosity ...");
 #endif
-        mu_tub->CalcTurbViscosity(nu_t, u, v, w, true);
-
+        mu_tub->calc_turbulent_viscosity(nu_t, u, v, w, true);
 
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
@@ -105,7 +105,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
         // Couple data to prepare for adding source
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
-// 3. Add force
+        // 3. Add force
         if (m_force_function != SourceMethods::Zero) {
 #ifndef BENCHMARKING
             m_logger->info("Add source ...");
@@ -116,7 +116,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
             FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
 
-// 4. Solve pressure equation and project
+        // 4. Solve pressure equation and project
         // Calculate divergence of u
         pres->divergence(rhs, u_tmp, v_tmp, w_tmp, sync);
 
@@ -129,7 +129,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
         // Correct
         pres->projection(u, v, w, u_tmp, v_tmp, w_tmp, p, sync);
 
-// 5. Sources updated in Solver::update_sources, TimeIntegration
+        // 5. Sources updated in Solver::update_sources, TimeIntegration
 
         if (sync) {
 #pragma acc wait

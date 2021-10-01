@@ -20,17 +20,17 @@
 // ***************************************************************************************
 void IPressure::divergence(
         Field &out,
-        Field const &in_x, Field const &in_y, Field const &in_z, bool sync) {
+        const Field &in_x, const Field &in_y, const Field &in_z, bool sync) {
     auto domain = Domain::getInstance();
 
-    auto Nx = domain->get_Nx(out.get_level());
-    auto Ny = domain->get_Ny(out.get_level());
-    auto dx = domain->get_dx(out.get_level());
-    auto dy = domain->get_dy(out.get_level());
-    auto dz = domain->get_dz(out.get_level());
-    auto rdx = 1. / dx;
-    auto rdy = 1. / dy;
-    auto rdz = 1. / dz;
+    auto Nx = domain->get_Nx();
+    auto Ny = domain->get_Ny();
+    auto dx = domain->get_dx();
+    auto dy = domain->get_dy();
+    auto dz = domain->get_dz();
+    auto reciprocal_dx = 1. / dx;
+    auto reciprocal_dy = 1. / dy;
+    auto reciprocal_dz = 1. / dz;
 
     auto boundary = BoundaryController::getInstance();
 
@@ -50,9 +50,9 @@ void IPressure::divergence(
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_inner_list[j];
-            real value_in_x = 0.5 * rdx * (in_x[i + neighbour_i] - in_x[i - neighbour_i]) ;
-            real value_in_y = 0.5 * rdy * (in_y[i + neighbour_j] - in_y[i - neighbour_j]) ;
-            real value_in_z = 0.5 * rdz * (in_z[i + neighbour_k] - in_z[i - neighbour_k]) ;
+            real value_in_x = 0.5 * reciprocal_dx * (in_x[i + neighbour_i] - in_x[i - neighbour_i]) ;
+            real value_in_y = 0.5 * reciprocal_dy * (in_y[i + neighbour_j] - in_y[i - neighbour_j]) ;
+            real value_in_z = 0.5 * reciprocal_dz * (in_z[i + neighbour_k] - in_z[i - neighbour_k]) ;
             out[i] = value_in_x + value_in_y + value_in_z;
         }
 
@@ -85,24 +85,20 @@ void IPressure::divergence(
 // ***************************************************************************************
 void IPressure::projection(
         Field &out_u, Field &out_v, Field &out_w,
-        Field const &in_u, Field const &in_v, Field const &in_w,
-        Field const &in_p, bool sync) {
+        const Field &in_u, const Field &in_v, const Field &in_w,
+        const Field &in_p, bool sync) {
     auto domain = Domain::getInstance();
     // local variables and parameters for GPU
-    auto Nx = domain->get_Nx(out_u.get_level());
-    auto Ny = domain->get_Ny(out_u.get_level());
+    auto Nx = domain->get_Nx();
+    auto Ny = domain->get_Ny();
 
-    auto dx = domain->get_dx(out_u.get_level());
-    auto dy = domain->get_dy(out_u.get_level());
-    auto dz = domain->get_dz(out_u.get_level());
+    auto dx = domain->get_dx();
+    auto dy = domain->get_dy();
+    auto dz = domain->get_dz();
 
-    auto rdx = 1. / dx;
-    auto rdy = 1. / dy;
-    auto rdz = 1. / dz;
-
-    auto type_u = out_u.get_type();
-    auto type_v = out_v.get_type();
-    auto type_w = out_w.get_type();
+    auto reciprocal_dx = 1. / dx;
+    auto reciprocal_dy = 1. / dy;
+    auto reciprocal_dz = 1. / dz;
 
     auto boundary = BoundaryController::getInstance();
 
@@ -120,15 +116,15 @@ void IPressure::projection(
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_inner_list[j];
-            out_u[i] = in_u[i] - 0.5 * rdx * (in_p[i + neighbour_i] - in_p[i - neighbour_i]);
-            out_v[i] = in_v[i] - 0.5 * rdy * (in_p[i + neighbour_j] - in_p[i - neighbour_j]);
-            out_w[i] = in_w[i] - 0.5 * rdz * (in_p[i + neighbour_k] - in_p[i - neighbour_k]);
+            out_u[i] = in_u[i] - 0.5 * reciprocal_dx * (in_p[i + neighbour_i] - in_p[i - neighbour_i]);
+            out_v[i] = in_v[i] - 0.5 * reciprocal_dy * (in_p[i + neighbour_j] - in_p[i - neighbour_j]);
+            out_w[i] = in_w[i] - 0.5 * reciprocal_dz * (in_p[i + neighbour_k] - in_p[i - neighbour_k]);
         }
 
-        //boundaries
-        boundary->apply_boundary(out_u.data, type_u, false);
-        boundary->apply_boundary(out_v.data, type_v, false);
-        boundary->apply_boundary(out_w.data, type_w, false);
+        // boundaries
+        boundary->apply_boundary(out_u, false);
+        boundary->apply_boundary(out_v, false);
+        boundary->apply_boundary(out_w, false);
 
         if (sync) {
 #pragma acc wait

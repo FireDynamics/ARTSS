@@ -7,8 +7,6 @@
 #ifndef ARTSS_SOURCE_EXPLICITEULERSOURCE_H_
 #define ARTSS_SOURCE_EXPLICITEULERSOURCE_H_
 
-#include <memory>
-#include <string>
 #include "../interfaces/ISource.h"
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
@@ -18,10 +16,10 @@ class ExplicitEulerSource : public ISource {
  public:
     ExplicitEulerSource();
 
-    void add_source(
-            Field &out_x, Field &out_y, Field &out_z,
-            Field const &s_x, Field const &s_y, Field const &s_z, bool sync) override;
-    void add_source(Field &out, Field const &s, bool sync) override;
+    void add_source(Field &out_x, Field &out_y, Field &out_z,
+                    const Field &S_x, const Field &S_y, const Field &S_z,
+                    bool sync) override;
+    void add_source(Field &out, const Field &S, bool sync) override;
 
  private:
 #ifndef BENCHMARKING

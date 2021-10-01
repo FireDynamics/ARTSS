@@ -6,7 +6,6 @@
 
 #include <vector>
 #include <cmath>
-#include <algorithm>
 #include <fstream>
 
 #include "Analysis.h"
@@ -15,20 +14,19 @@
 #include "../Domain.h"
 #include "../utility/Utility.h"
 
-Analysis::Analysis(Solution *solution) {
+Analysis::Analysis(Solution &solution, bool has_analytical_solution) :
+        m_has_analytic_solution(has_analytical_solution),
+        m_solution(solution) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    auto params = Parameters::getInstance();
-    has_analytic_solution = params->get("solver/solution/available") == "Yes";
-    if (has_analytic_solution) {
-        m_tol = params->get_real("solver/solution/tol");
+    if (m_has_analytic_solution) {
+        m_tol = Parameters::getInstance()->get_real("solver/solution/tol");
     } else {
 #ifndef BENCHMARKING
         m_logger->info("No analytical solution available!");
 #endif
     }
-    m_solution = solution;
 }
 
 // ================================ Start analysis =============================
@@ -38,8 +36,8 @@ Analysis::Analysis(Solution *solution) {
 /// \param  t     current time
 // ***************************************************************************************
 void Analysis::analyse(FieldController *field_controller, real t) {
-    if (has_analytic_solution) {
-        m_solution->calc_analytical_solution(t);
+    if (m_has_analytic_solution) {
+        m_solution.calc_analytical_solution(t);
 
         auto params = Parameters::getInstance();
 
@@ -49,30 +47,43 @@ void Analysis::analyse(FieldController *field_controller, real t) {
 #ifndef BENCHMARKING
         m_logger->info("Compare to analytical solution:");
 #endif
-
         while (curElem) {
             std::string nodeName(curElem->Value());
-
             if (nodeName == "boundary") {
                 std::string field = curElem->Attribute("field");
                 if (field.find(BoundaryData::get_field_type_name(FieldType::U)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_u_data(), m_solution->get_data_u(), FieldType::U, t);
+                    compare_solutions(field_controller->get_field_u_data(),
+                                      m_solution.get_return_ptr_data_u(),
+                                      FieldType::U,
+                                      t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::V)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_v_data(), m_solution->get_data_v(), FieldType::V, t);
+                    compare_solutions(field_controller->get_field_v_data(),
+                                      m_solution.get_return_ptr_data_v(),
+                                      FieldType::V,
+                                      t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::W)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_w_data(), m_solution->get_data_w(), FieldType::W, t);
+                    compare_solutions(field_controller->get_field_w_data(),
+                                      m_solution.get_return_ptr_data_w(),
+                                      FieldType::W,
+                                      t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::P)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_p_data(), m_solution->get_data_p(), FieldType::P, t);
+                    compare_solutions(field_controller->get_field_p_data(),
+                                      m_solution.get_return_ptr_data_p(),
+                                      FieldType::P,
+                                      t);
                 }
                 if (field.find(BoundaryData::get_field_type_name(FieldType::T)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_T_data(), m_solution->get_data_T(), FieldType::T, t);
+                    compare_solutions(field_controller->get_field_T_data(),
+                                      m_solution.get_return_ptr_data_T(),
+                                      FieldType::T,
+                                      t);
                 }
-            }  // end if
+            }
             curElem = curElem->NextSiblingElement();
-        }  // end while
+        }
     }
 }
 
@@ -118,24 +129,28 @@ real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
 
     auto boundary = BoundaryController::getInstance();
     size_t *inner_list = boundary->get_inner_list_level_joined();
-    size_t size_iList = boundary->get_size_inner_list();
+    size_t size_inner_list = boundary->get_size_inner_list();
 
     // weighted 2-norm
     // absolute error
-    for (size_t i = 0; i < size_iList; i++) {
+    for (size_t i = 0; i < size_inner_list; i++) {
         size_t idx = inner_list[i];
         r = fabs(num[idx] - ana[idx]);
         sum += r * r;
     }
 
     // weight
-    real nr = static_cast<real>(size_iList);
+    real nr = static_cast<real>(size_inner_list);
     real eps = sqrt(1. / nr * sum);
 
     // TODO(n16h7) add. output
 #ifndef BENCHMARKING
     m_logger->info("Absolute error ||e|| = {}", eps);
 #endif
+    //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
+    //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]    << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]    << std::endl;
     return eps;
 }
 
@@ -151,16 +166,16 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
 
     auto boundary = BoundaryController::getInstance();
     size_t *inner_list = boundary->get_inner_list_level_joined();
-    size_t size_iList = boundary->get_size_inner_list();
+    size_t size_inner_list = boundary->get_size_inner_list();
 
     // relative part with norm of analytical solution as denominator
-    for (size_t i = 0; i < size_iList; i++) {
+    for (size_t i = 0; i < size_inner_list; i++) {
         rr = ana[inner_list[i]];
         sumr += rr * rr;
     }
 
     // weight
-    real nr = static_cast<real>(size_iList);
+    real nr = static_cast<real>(size_inner_list);
     real adenom = sqrt(1. / nr * sumr);
 
     real eps;
@@ -176,7 +191,7 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
         sumr = 0.;
 
         // relative part with norm of numerical solution as quotient
-        for (size_t i = 0; i < size_iList; i++) {
+        for (size_t i = 0; i < size_inner_list; i++) {
             rr = num[inner_list[i]];
             sumr += rr * rr;
         }
@@ -193,6 +208,11 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
 #ifndef BENCHMARKING
     m_logger->info("Relative error ||e|| = {}", eps);
 #endif
+    //std::cout << "num =" << num[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]        << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2, (m_ny-2)/2, 1, m_nx, m_ny)]      << std::endl;
+    //std::cout << "num =" << num[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]  << std::endl;
+    //std::cout << "ana =" << ana[IX((m_nx-2)/2 + 1, (m_ny-2)/2, 1, m_nx, m_ny)]  << std::endl;
+
     return eps;
 }
 
@@ -205,20 +225,20 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
 // ***************************************************************************************
 void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t, real *sum) {
     auto boundary = BoundaryController::getInstance();
-    size_t *iList = boundary->get_inner_list_level_joined();
+    size_t *inner_list = boundary->get_inner_list_level_joined();
 
-    size_t ix = iList[boundary->get_size_inner_list() / 2];
-    //take median of indices in iList to get center point ix
-    //std::nth_element(iList.begin(), iList.begin() + iList.size()/2, iList.end());
-    //size_t ix = iList[iList.size()/2];
+    size_t ix = inner_list[boundary->get_size_inner_list() / 2];
+    //take median of indices in inner_list to get center point ix
+    //std::nth_element(inner_list.begin(), inner_list.begin() + inner_list.size()/2, inner_list.end());
+    //size_t ix = inner_list[inner_list.size()/2];
 
-    if (has_analytic_solution) {
-        m_solution->calc_analytical_solution(t);
+    if (m_has_analytic_solution) {
+        m_solution.calc_analytical_solution(t);
 
         // local variables and parameters
-        auto d_ua = m_solution->get_data_u();
-        auto d_pa = m_solution->get_data_p();
-        auto d_Ta = m_solution->get_data_T();
+        auto d_ua = m_solution.get_return_ptr_data_u();
+        auto d_pa = m_solution.get_return_ptr_data_p();
+        auto d_Ta = m_solution.get_return_ptr_data_T();
 
         auto d_u = field_controller->get_field_u_data();
         auto d_p = field_controller->get_field_p_data();
@@ -243,7 +263,7 @@ void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t,
 void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
     auto params = Parameters::getInstance();
 
-    if (has_analytic_solution) {
+    if (m_has_analytic_solution) {
         // local variables and parameters
         real dt = params->get_real("physical_parameters/dt");
         real t_end = params->get_real("physical_parameters/t_end");
@@ -267,7 +287,7 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
 /// \param  u     x-velocity field
 /// \param  dt      time step size
 // ***************************************************************************************
-bool Analysis::check_time_step_VN(real dt) {
+bool Analysis::check_time_step_VN(const real dt) {
     bool VN_check;
 
     auto params = Parameters::getInstance();
@@ -303,8 +323,7 @@ bool Analysis::check_time_step_VN(real dt) {
 /// \param  dt      time step size
 // *****************************************************************************
 real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt) const {
-    real cfl_max = 0;  // highest seen C. C is always positiv, so 0 is a lower
-    // bound
+    real cfl_max = 0;  // highest seen C. C is always positiv, so 0 is a lower bound
     real cfl_local;    // C in the local cell
 
     auto boundary = BoundaryController::getInstance();

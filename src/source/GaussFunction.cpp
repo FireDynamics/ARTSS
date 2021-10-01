@@ -106,7 +106,7 @@ void GaussFunction::create_spatial_values() {
         real expr = std::exp(-(r_sigma_x_2 * x_i * x_i + r_sigma_y_2 * y_j * y_j + r_sigma_z_2 * z_k * z_k));
         m_field_spatial_values[idx] = HRRrV * rcp * expr;
     }
-    m_field_spatial_values.copyin();
+    m_field_spatial_values.update_dev();
 }
 
 // ============================= Ramp up function for HRR source =========================
