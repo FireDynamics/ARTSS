@@ -13,13 +13,10 @@
 class IDiffusion {
  public:
     virtual ~IDiffusion() = default;
-    virtual void diffuse(
-            Field &out, Field &in,
-            Field const &b, const real D, bool sync) = 0;
-    virtual void diffuse(
-            Field &out, Field &in,
-            Field const &b, const real D, const Field &ev, bool sync) = 0;
+    virtual void diffuse(Field &out, const Field &in, const Field &b,
+                         real D, bool sync) = 0;
+    virtual void diffuse(Field &out, const Field &in, const Field &b,
+                         real D, const Field &ev, bool sync) = 0;
 };
 
 #endif /* ARTSS_INTERFACES_IDIFFUSION_H_ */
-

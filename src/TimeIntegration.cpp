@@ -29,14 +29,14 @@ TimeIntegration::TimeIntegration(SolverController *sc) {
     m_adaption = new Adaption(m_field_controller);
 #ifndef BENCHMARKING
     std::string initial_condition = params->get("initial_conditions/usr_fct");
-    m_solution = new Solution(initial_condition);
-    m_analysis = new Analysis(m_solution);
-    m_visual = new Visual(*m_solution);
+    bool has_analytical_solution = (params->get("solver/solution/available") == XML_TRUE);
+    m_solution = new Solution(initial_condition, has_analytical_solution);
+    m_analysis = new Analysis(*m_solution, has_analytical_solution);
+    m_visual = new Visual(*m_solution, has_analytical_solution);
 #endif
 }
 
 void TimeIntegration::run() {
-    // local variables and parameters for GPU
     Field &u = m_field_controller->get_field_u();
     Field &v = m_field_controller->get_field_v();
     Field &w = m_field_controller->get_field_w();
@@ -45,6 +45,7 @@ void TimeIntegration::run() {
     Field &T = m_field_controller->get_field_T();
     Field &C = m_field_controller->get_field_concentration();
     Field &S_T = m_field_controller->get_field_source_T();
+    Field &S_C = m_field_controller->get_field_source_T();
     Field &nu_t = m_field_controller->get_field_nu_t();
 
 #ifndef BENCHMARKING
@@ -57,6 +58,7 @@ void TimeIntegration::run() {
     C.update_host();
     nu_t.update_host();
     S_T.update_host();
+    S_C.update_host();
 #pragma acc wait
 
     m_analysis->analyse(m_field_controller, 0.);
@@ -102,6 +104,7 @@ void TimeIntegration::run() {
             C.update_host();
             nu_t.update_host();
             S_T.update_host();
+            S_C.update_host();
 #pragma acc wait
 
             m_solution->calc_analytical_solution(t_cur);
@@ -163,8 +166,9 @@ void TimeIntegration::run() {
     C.update_host();
     nu_t.update_host();
     S_T.update_host();
+    S_C.update_host();
 #pragma acc wait
-    }  // end RANGE
+    }
 
 #ifndef BENCHMARKING
     m_logger->info("Done calculating and timing ...");

@@ -7,12 +7,10 @@
 #ifndef ARTSS_PRESSURE_VCYCLEMG_H_
 #define ARTSS_PRESSURE_VCYCLEMG_H_
 
-#include <vector>
 #include "../interfaces/IPressure.h"
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
-
 
 
 class VCycleMG: public IPressure{
@@ -31,18 +29,58 @@ class VCycleMG: public IPressure{
     void Prolongate(Field &out, Field const &in, size_t level, bool sync = true);
     void Solve(Field &out, Field &tmp, Field const &b, size_t level, bool sync = true);
 
-    size_t m_levels;
-    size_t m_cycles;
-    size_t m_relaxs;
+    void call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
+    void call_smooth_jacobi(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
+    void call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
+    void call_solve_jacobi(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
 
-    real m_dsign;
-    real m_w;
+    const size_t m_levels;
+    const int m_n_cycle;
+    const int m_n_relax;
 
-    std::vector<Field*> residuum0;
-    std::vector<Field*> residuum1;
-    std::vector<Field*> err0;
-    std::vector<Field*> error1;
-    std::vector<Field*> mg_temporal_solution;
+    /**
+     * difference between smooth and solve function:
+     * - solve function repeats the chosen algorithm (m_solve_function) until the residuum is
+     *   smaller than the given residual number or the number of repetitions exceeds the set number
+     *   of iterations
+     * - smooth function repeats the chosen algorithm (m_smooth_function) for a set number of times
+     *   (m_n_cycles)
+     */
+    void (VCycleMG::*m_smooth_function)(Field &, Field &, Field const &, const size_t, bool);
+    void (VCycleMG::*m_solve_function)(Field &, Field &, Field const &, const size_t, bool);
+    size_t m_diffusion_max_iter;
+    real m_diffusion_tol_res;
+
+    const real m_dt;
+    const real m_dsign = -1;
+    const real m_w;
+
+    /**
+     * size: 0 .. m_levels
+     * level's going coarse: residuum: result of error1 + residuum1
+     */
+    Field **m_residuum0;
+    /**
+     * stores on level 0 rhs/b field
+     * size: 0 ... m_levels + 1
+     */
+    Field **m_residuum1;
+    /**
+     * size: 0 .. m_levels
+     * level's going coarse: restrict: result from residuum0
+     * level's going fine: prolongate: result from error1
+     */
+    Field **m_error0;
+    /**
+     * stores on level 0 out/p field
+     * size: 0 ... m_levels + 1
+     * level's going coarse: smooth: result of residuum1
+     * level's going fine: correction through error0
+     * level's going fine: solve/smooth: result from residuum1
+     */
+    Field **m_error1;
+    // storage only
+    Field **m_mg_temporal_solution;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

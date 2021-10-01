@@ -58,9 +58,9 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real a = params->get_real("initial_conditions/a"); //0.25 * M_PI;
-        real d = params->get_real("initial_conditions/d"); //0.5 * M_PI;
-        real nu = params->get_real("physical_parameters/nu"); //1;
+        real a = params->get_real("initial_conditions/a");  // 0.25 * M_PI;
+        real d = params->get_real("initial_conditions/d");  // 0.5 * M_PI;
+        real nu = params->get_real("physical_parameters/nu");  // 1;
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -81,10 +81,11 @@ namespace Functions {
                                exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
             out_z[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
                                exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
-            out_p[idx] = -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
- + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
- + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
- + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
+            out_p[idx] =
+                    - 0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
+                    + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
+                    + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
+                    + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
         }
 
         // boundary cells
@@ -99,10 +100,11 @@ namespace Functions {
                                exp(a * xi(coords_i, X1, dx)) * cos(a * yj(coords_j, Y1, dy) + dz)) * exp(-nu * d * d * t);
             out_z[idx] = -a * (exp(a * zk(coords_k, Z1, dz)) * sin(a * xi(coords_i, X1, dx) + dy) +
                                exp(a * yj(coords_j, Y1, dy)) * cos(a * zk(coords_k, Z1, dz) + dx)) * exp(-nu * d * d * t);
-            out_p[idx] = -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
- + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
- + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
- + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
+            out_p[idx] =
+                    - 0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
+                    + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
+                    + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
+                    + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
         }
 
     }
@@ -142,10 +144,11 @@ namespace Functions {
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out_x[idx] = -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
- + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
- + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
- + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
+            out_x[idx] =
+                    -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
+                    + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
+                    + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
+                    + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
         }
         // boundary cells
         for (size_t i = 0; i < size_boundary_list; i++) {
@@ -153,10 +156,11 @@ namespace Functions {
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out_x[idx] = -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
- + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
- + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
- + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
+            out_x[idx] =
+                    -0.5 * a * a * (exp(2 * a * xi(coords_i, X1, dx)) + exp(2 * a * yj(coords_j, Y1, dy)) + exp(2 * a * zk(coords_k, Z1, dz)) \
+                    + 2 * sin(a * xi(coords_i, X1, dx) + dy) * cos(a * zk(coords_k, Z1, dz) + dx) * exp(a * (yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz))) \
+                    + 2 * sin(a * yj(coords_j, Y1, dy) + dz) * cos(a * xi(coords_i, X1, dx) + dy) * exp(a * (zk(coords_k, Z1, dz) + xi(coords_i, X1, dx))) \
+                    + 2 * sin(a * zk(coords_k, Z1, dz) + dx) * cos(a * yj(coords_j, Y1, dy) + dz) * exp(a * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy))));
         }
     }
 
@@ -181,9 +185,9 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real a = params->get_real("initial_conditions/a"); //0.25 * M_PI;
-        real d = params->get_real("initial_conditions/d"); //0.5 * M_PI;
-        real nu = params->get_real("physical_parameters/nu"); //1.;
+        real a = params->get_real("initial_conditions/a");  // 0.25 * M_PI;
+        real d = params->get_real("initial_conditions/d");  // 0.5 * M_PI;
+        real nu = params->get_real("physical_parameters/nu");  // 1.;
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -233,8 +237,8 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real a = params->get_real("initial_conditions/a");     // 0.25 * M_PI;
-        real d = params->get_real("initial_conditions/d");     // 0.5 * M_PI;
+        real a = params->get_real("initial_conditions/a");  // 0.25 * M_PI;
+        real d = params->get_real("initial_conditions/d");  // 0.5 * M_PI;
         real nu = params->get_real("physical_parameters/nu");  // 1.;
 
         auto boundary = BoundaryController::getInstance();
@@ -285,8 +289,8 @@ namespace Functions {
 
         auto params = Parameters::getInstance();
 
-        real a = params->get_real("initial_conditions/a");//0.25 * M_PI;
-        real d = params->get_real("initial_conditions/d");//0.25 * M_PI;
+        real a = params->get_real("initial_conditions/a");  // 0.25 * M_PI;
+        real d = params->get_real("initial_conditions/d");  // 0.25 * M_PI;
         real nu = params->get_real("physical_parameters/nu");
 
         auto boundary = BoundaryController::getInstance();
@@ -325,7 +329,6 @@ namespace Functions {
 // ***************************************************************************************
     void BuoyancyForce(Field &out, Field &T, Field &T_ambient) {
         auto params = Parameters::getInstance();
-
         real beta = params->get_real("physical_parameters/beta");
         real g = params->get_real("physical_parameters/g");  // -9.81;
 
@@ -355,10 +358,10 @@ namespace Functions {
 /// \param  out_y  y-velocity
 /// \param  out_z  z-velocity
 /// \param  out_p  pressure
-/// \param  outT  temperature
+/// \param  out_T  temperature
 /// \param  t   time
 // ***************************************************************************************
-    void BuoyancyMMS(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &outT, real t) {
+    void BuoyancyMMS(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -392,11 +395,11 @@ namespace Functions {
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out_x.data[idx] = exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            out_y.data[idx] = -exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            out_z.data[idx] = 0.;
-            out_p.data[idx] = rhoa * rpi * c * exp(-t) * cos(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            outT.data[idx] = rhoa * rbeta * rg * 2 * c * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_x[idx] = exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_y[idx] = -exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_z[idx] = 0.;
+            out_p[idx] = rhoa * rpi * c * exp(-t) * cos(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_T[idx] = rhoa * rbeta * rg * 2 * c * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
         }
 
         // boundary cells
@@ -405,11 +408,11 @@ namespace Functions {
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out_x.data[idx] = exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            out_y.data[idx] = -exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            out_z.data[idx] = 0.;
-            out_p.data[idx] = rhoa * rpi * c * exp(-t) * cos(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-            outT.data[idx] = rhoa * rbeta * rg * 2 * c * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_x[idx] =  exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_y[idx] = -exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_z[idx] = 0.;
+            out_p[idx] = rhoa * rpi * c * exp(-t) * cos(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out_T[idx] = rhoa * rbeta * rg * 2 * c * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
         }
     }
 
@@ -455,8 +458,8 @@ namespace Functions {
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out.data[idx] =
-                    rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t)
+                    * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
         }
 
         // boundary cells
@@ -465,8 +468,8 @@ namespace Functions {
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out.data[idx] =
-                    rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
+            out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t)
+                    * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
         }
     }
 
@@ -486,7 +489,6 @@ namespace Functions {
         real w_lin = params->get_real("initial_conditions/w_lin");
         real pa = params->get_real("initial_conditions/pa");
 
-
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
         size_t size_inner_list = boundary->get_size_inner_list();
@@ -496,19 +498,19 @@ namespace Functions {
         // inner cells
         for (size_t i = 0; i < size_inner_list; i++) {
             size_t idx = inner_list[i];
-            out_x.data[idx] = u_lin;
-            out_y.data[idx] = v_lin;
-            out_z.data[idx] = w_lin;
-            out_p.data[idx] = pa;
+            out_x[idx] = u_lin;
+            out_y[idx] = v_lin;
+            out_z[idx] = w_lin;
+            out_p[idx] = pa;
         }
 
         // boundary cells
         for (size_t i = 0; i < size_boundary_list; i++) {
             size_t idx = boundary_list[i];
-            out_x.data[idx] = u_lin;
-            out_y.data[idx] = v_lin;
-            out_z.data[idx] = w_lin;
-            out_p.data[idx] = pa;
+            out_x[idx] = u_lin;
+            out_y[idx] = v_lin;
+            out_z[idx] = w_lin;
+            out_p[idx] = pa;
         }
     }
 
@@ -553,8 +555,10 @@ namespace Functions {
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out.data[idx] = A * exp(-kpinu * t) * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
-                             sin(l * M_PI * zk(coords_k, Z1, dz));
+            out[idx] = A * exp(-kpinu * t)
+                    * sin(l * M_PI * xi(coords_i, X1, dx))
+                    * sin(l * M_PI * yj(coords_j, Y1, dy))
+                    * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
         //boundary
         for (size_t i = 0; i < size_boundary_list; i++) {
@@ -562,8 +566,10 @@ namespace Functions {
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out.data[idx] = A * exp(-kpinu * t) * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
-                             sin(l * M_PI * zk(coords_k, Z1, dz));
+            out[idx] = A * exp(-kpinu * t)
+                    * sin(l * M_PI * xi(coords_i, X1, dx))
+                    * sin(l * M_PI * yj(coords_j, Y1, dy))
+                    * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
     }
 
@@ -602,7 +608,6 @@ namespace Functions {
 
         if (Nz > 3) {
             real d = 3.;                // 3D
-
             // inner cells
             for (size_t i = 0; i < size_inner_list; i++) {
                 size_t idx = inner_list[i];
@@ -610,9 +615,12 @@ namespace Functions {
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-                out_x.data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
-                out_y.data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
-                out_z.data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_x[idx] = exp(-d * nu * t)
+                        * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_y[idx] = -0.5 * exp(-d * nu * t)
+                        * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_z[idx] = -0.5 * exp(-d * nu * t)
+                        * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
             }
             // boundary
             for (size_t i = 0; i < size_boundary_list; i++) {
@@ -621,11 +629,13 @@ namespace Functions {
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-                out_x.data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
-                out_y.data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
-                out_z.data[idx] = -0.5 * exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_x[idx] = exp(-d * nu * t)
+                        * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_y[idx] = -0.5 * exp(-d * nu * t)
+                        * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
+                out_z[idx] = -0.5 * exp(-d * nu * t)
+                        * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) + zk(coords_k, Z1, dz));
             }
-
         } else {
             real d = 2.;                // 2D
 
@@ -636,9 +646,9 @@ namespace Functions {
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-                out_x.data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
-                out_y.data[idx] = -exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
-                out_z.data[idx] = 0.;
+                out_x[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
+                out_y[idx] = -exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
+                out_z[idx] = 0.;
             }
             // boundary
             for (size_t i = 0; i < size_boundary_list; i++) {
@@ -647,9 +657,9 @@ namespace Functions {
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-                out_x.data[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
-                out_y.data[idx] = -exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
-                out_z.data[idx] = 0.;
+                out_x[idx] = exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
+                out_y[idx] = -exp(-d * nu * t) * sin(xi(coords_i, X1, dx) + yj(coords_j, Y1, dy));
+                out_z[idx] = 0.;
             }
         }
     }
@@ -673,8 +683,8 @@ namespace Functions {
         real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
-
         real l = params->get_real("initial_conditions/l"); //2;
+
         real dkpi = 3 * l * l * M_PI * M_PI;
         real rdkpi = 1. / dkpi;
 
@@ -691,8 +701,10 @@ namespace Functions {
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-            out.data[idx] = -rdkpi * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
-                             sin(l * M_PI * zk(coords_k, Z1, dz));
+            out[idx] = -rdkpi
+                    * sin(l * M_PI * xi(coords_i, X1, dx))
+                    * sin(l * M_PI * yj(coords_j, Y1, dy))
+                    * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
         // boundary cells
         for (size_t i = 0; i < size_boundary_list; i++) {
@@ -701,8 +713,10 @@ namespace Functions {
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out.data[idx] = -rdkpi * sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) *
-                             sin(l * M_PI * zk(coords_k, Z1, dz));
+            out[idx] = -rdkpi
+                    * sin(l * M_PI * xi(coords_i, X1, dx))
+                    * sin(l * M_PI * yj(coords_j, Y1, dy))
+                    * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
     }
 
@@ -726,7 +740,6 @@ namespace Functions {
         real dz = domain->get_dz();
 
         auto params = Parameters::getInstance();
-
         real u_lin = params->get_real("initial_conditions/u_lin");
         real v_lin = params->get_real("initial_conditions/v_lin");
         real w_lin = params->get_real("initial_conditions/w_lin");
@@ -754,7 +767,7 @@ namespace Functions {
             real z_shift2 = ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t) * ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t);
             real quot = 1. / (2. * l * l);
 
-            out.data[idx] = exp(-(x_shift2 + y_shift2 + z_shift2) * quot);
+            out[idx] = exp(-(x_shift2 + y_shift2 + z_shift2) * quot);
         }
         // boundary
         for (size_t i = 0; i < size_boundary_list; i++) {
@@ -768,7 +781,7 @@ namespace Functions {
             real z_shift2 = ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t) * ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t);
             real quot = 1. / (2. * l * l);
 
-            out.data[idx] = exp(-(x_shift2 + y_shift2 + z_shift2) * quot);
+            out[idx] = exp(-(x_shift2 + y_shift2 + z_shift2) * quot);
         }
     }
 
@@ -815,8 +828,8 @@ namespace Functions {
             auto m_logger = Utility::create_logger("Functions");
             m_logger->error("No distance for layers specified!");
 #endif
+            //TODO(issue 6) Error handling
         }
-        // TODO Error handling
 
         // get values in layers
         // layer values
@@ -847,13 +860,13 @@ namespace Functions {
         size_t size_inner_list = boundary->get_size_inner_list();
         size_t *boundary_list = boundary->get_boundary_list_level_joined();
         size_t size_boundary_list = boundary->get_size_boundary_list();
-        size_t *oList = boundary->get_obstacle_list();
-        size_t size_oList = boundary->get_size_obstacle_list();
+        size_t *obstacle_list = boundary->get_obstacle_list();
+        size_t size_obstacle_list = boundary->get_size_obstacle_list();
         size_t coords_i, coords_j, coords_k;
         real x, y, z;
 
         // set values into layers
-        for (size_t l = 0; l < n_layers; ++l) {
+        for (int l = 0; l < n_layers; ++l) {
             // inner cells
             for (size_t i = 0; i < size_inner_list; i++) {
                 size_t idx = inner_list[i];
@@ -864,27 +877,25 @@ namespace Functions {
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
                     if (bord[l] <= x && x <= bord[l + 1]) {
-                        out.data[idx] = val[l];
+                        out[idx] = val[l];
                     }
-
                 } else if (dir == "y") {
                     y = yj(coords_j, Y1, dy) - 0.5 * dy;
                     if (bord[l] <= y && y <= bord[l + 1]) {
-                        out.data[idx] = val[l];
+                        out[idx] = val[l];
                     }
-
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) {
-                        out.data[idx] = val[l];
+                        out[idx] = val[l];
                     }
                 } else {
 #ifndef BENCHMARKING
                     auto m_logger = Utility::create_logger("Functions");
                     m_logger->error("No distance for layers specified!");
 #endif
+                    //TODO(issue 6) Error handling
                 }
-                // TODO Error handling
             }
 
             // boundary
@@ -897,38 +908,38 @@ namespace Functions {
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
                     if (bord[l] <= x && x <= bord[l + 1]) {
-                        out.data[idx] = val[l];
+                        out[idx] = val[l];
                     }
                     if (x < bord[0]) {
-                        out.data[idx] = val[0];
+                        out[idx] = val[0];
                     }
                 } else if (dir == "y") {
                     y = yj(coords_j, Y1, dy) - 0.5 * dy;
                     if (bord[l] <= y && y <= bord[l + 1]) {
-                        out.data[idx] = val[l];
+                        out[idx] = val[l];
                     }
                     if (y < bord[0]) {
-                        out.data[idx] = val[0];
+                        out[idx] = val[0];
                     }
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) {
-                        out.data[idx] = val[l];
+                        out[idx] = val[l];
                     }
                     if (z < bord[0]) {
-                        out.data[idx] = val[0];
+                        out[idx] = val[0];
                     }
                 } else {
 #ifndef BENCHMARKING
                     auto m_logger = Utility::create_logger("Functions");
                     m_logger->error("No distance for layers specified!");
 #endif
+                    // TODO(issue 6) Error handling
                 }
-                // TODO Error handling
             }
             // obstacles
-            for (size_t i = 0; i < size_oList; i++) {
-                size_t idx = oList[i];
+            for (size_t i = 0; i < size_obstacle_list; i++) {
+                size_t idx = obstacle_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -936,36 +947,35 @@ namespace Functions {
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
                     if (bord[l] <= x && x <= bord[l + 1]) {
-                        out.data[idx] = val[l];
+                        out[idx] = val[l];
                     }
                     if (x < bord[0]) {
-                        out.data[idx] = val[0];
+                        out[idx] = val[0];
                     }
                 } else if (dir == "y") {
                     y = yj(coords_j, Y1, dy) - 0.5 * dy;
                     if (bord[l] <= y && y <= bord[l + 1]) {
-                        out.data[idx] = val[l];
+                        out[idx] = val[l];
                     }
                     if (y < bord[0]) {
-                        out.data[idx] = val[0];
+                        out[idx] = val[0];
                     }
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
                     if (bord[l] <= z && z <= bord[l + 1]) {
-                        out.data[idx] = val[l];
+                        out[idx] = val[l];
                     }
                     if (z < bord[0]) {
-                        out.data[idx] = val[0];
+                        out[idx] = val[0];
                     }
                 } else {
 #ifndef BENCHMARKING
                     auto m_logger = Utility::create_logger("Functions");
                     m_logger->error("No distance for layers specified!");
 #endif
+                    // TODO(issue 6) Error handling
                 }
-                // TODO Error handling
             }
-
         }
     }
 
@@ -1052,9 +1062,9 @@ namespace Functions {
 // *************************************************************************************************
     void Jet(
             Field &out,
-            size_t index_x1, size_t index_x2,
-            size_t index_y1, size_t index_y2,
-            size_t index_z1, size_t index_z2,
+            const size_t index_x1, const size_t index_x2,
+            const size_t index_y1, const size_t index_y2,
+            const size_t index_z1, const size_t index_z2,
             real value) {
         auto domain = Domain::getInstance();
 
@@ -1066,40 +1076,6 @@ namespace Functions {
                 for (size_t k = index_z1; k <= index_z2; k++) {
                     size_t index = IX(i, j, k, Nx, Ny);
                     out[index] = value;
-                }
-            }
-        }
-    }
-
-// ============================================== Jet ==============================================
-// *************************************************************************************************
-/// \brief Initial set up of a jet stream in a defined pipe
-/// \param out velocity field
-/// \param index_x1 starting index in x-direction
-/// \param index_x2 ending index in x-direction
-/// \param index_y1 starting index in y-direction
-/// \param index_y2 ending index in y-direction
-/// \param index_z1 starting index in z-direction
-/// \param index_z2 ending index in z-direction
-/// \param value velocity value to be set
-// *************************************************************************************************
-    void Jet(
-            Field *out,
-            size_t index_x1, size_t index_x2,
-            size_t index_y1, size_t index_y2,
-            size_t index_z1, size_t index_z2,
-            real value) {
-        auto domain = Domain::getInstance();
-        auto d_out = out->data;
-
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
-
-        for (size_t i = index_x1; i <= index_x2; i++) {
-            for (size_t j = index_y1; j <= index_y2; j++) {
-                for (size_t k = index_z1; k <= index_z2; k++) {
-                    size_t index = IX(i, j, k, Nx, Ny);
-                    d_out[index] = value;
                 }
             }
         }
@@ -1164,7 +1140,7 @@ namespace Functions {
         }
     }
 
-// === Random Function - Superposition of field values with random values ===
+// ======== Random Function - Superposition of field values with random values ===========
 // ***************************************************************************************
 /// \brief  Creates random absolute/relative noise on given field
 /// \param  out          field
@@ -1177,20 +1153,16 @@ namespace Functions {
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
         size_t size_inner_list = boundary->get_size_inner_list();
-        size_t *boundary_list = boundary->get_boundary_list_level_joined();
-        size_t size_boundary_list = boundary->get_size_boundary_list();
-        size_t *oList = boundary->get_obstacle_list();
-        size_t size_oList = boundary->get_size_obstacle_list();
 
         std::mt19937 mt;
         double steps = range / step_size;
         if (seed > 0) {
-          mt = std::mt19937(seed);
+            mt = std::mt19937(seed);
         } else {
-          std::random_device rd;
-          mt = std::mt19937(rd());
+            std::random_device rd;
+            mt = std::mt19937(rd());
         }
-        std::uniform_real_distribution<real> dist(-steps, steps);
+        std::uniform_int_distribution<int> dist(-steps, steps);
 
         // inner cells
         for (size_t i = 0; i < size_inner_list; i++) {
@@ -1240,7 +1212,9 @@ namespace Functions {
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out[idx] = sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) * sin(l * M_PI * zk(coords_k, Z1, dz));
+            out[idx] = sin(l * M_PI * xi(coords_i, X1, dx))
+                     * sin(l * M_PI * yj(coords_j, Y1, dy))
+                     * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
         // boundary cells
         for (size_t i = 0; i < size_boundary_list; i++) {
@@ -1249,7 +1223,9 @@ namespace Functions {
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out[idx] = sin(l * M_PI * xi(coords_i, X1, dx)) * sin(l * M_PI * yj(coords_j, Y1, dy)) * sin(l * M_PI * zk(coords_k, Z1, dz));
+            out[idx] = sin(l * M_PI * xi(coords_i, X1, dx))
+                     * sin(l * M_PI * yj(coords_j, Y1, dy))
+                     * sin(l * M_PI * zk(coords_k, Z1, dz));
         }
     }
 
@@ -1326,12 +1302,16 @@ namespace Functions {
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_z[idx] = 0.;
-            out_p[idx] = pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_p[idx] = pa - rhoGrR_c * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
         }
 
         // boundary cells
@@ -1341,12 +1321,16 @@ namespace Functions {
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_z[idx] = 0.;
-            out_p[idx] = pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_p[idx] = pa - rhoGrR_c * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
         }
     }
 
@@ -1390,12 +1374,16 @@ namespace Functions {
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_z[idx] = 0.;
-            out_p[idx] = pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_p[idx] = pa - rhoGrR_c * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
         }
 
         // boundary cells
@@ -1405,18 +1393,16 @@ namespace Functions {
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
 
-            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
-            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) *
-                                      exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_x[idx] = u_lin - GrR_c * yj(coords_j, Y1, dy) * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_y[idx] = v_lin + GrR_c * xi(coords_i, X1, dx) * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
             out_z[idx] = 0.;
-            out_p[idx] = pa - rhoGrR_c * exp(-rR_c * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx) + yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
+            out_p[idx] = pa - rhoGrR_c * exp(-rR_c
+                    * (xi(coords_i, X1, dx) * xi(coords_i, X1, dx)
+                    +  yj(coords_j, Y1, dy) * yj(coords_j, Y1, dy)));
         }
     }
-
-    void Zero(Field &field, size_t *arr_idx, size_t arr_idx_size) {
-        for (size_t idx = 0; idx < arr_idx_size; idx++) {
-            field[arr_idx[idx]] = 0;
-        }
-    }
-}
+}  // namespace Functions

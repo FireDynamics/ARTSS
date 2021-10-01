@@ -14,15 +14,14 @@ class ConstSmagorinsky : public ITurbulence {
     ConstSmagorinsky();
     ~ConstSmagorinsky() override = default;
 
-    void CalcTurbViscosity(
+    void calc_turbulent_viscosity(
             Field &ev,
-            Field const &in_u, Field const &in_v, Field const &in_w, bool sync) override;
+            const Field &in_u, const Field &in_v, const Field &in_w,
+            bool sync) override;
 
-    void ExplicitFiltering(Field &out, Field const &in, bool sync) override;
+    void explicit_filtering(Field &out, const Field &in, bool sync) override;
 
- private:
-    real m_nu;
-    real m_dt;
+private:
     real m_Cs;
 };
 

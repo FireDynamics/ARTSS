@@ -32,7 +32,8 @@ NSSolver::NSSolver(FieldController *field_controller) {
     //Pressure
     std::string pressureType = params->get("solver/pressure/type");
     SolverSelection::SetPressureSolver(&pres, pressureType,
-            m_field_controller->get_field_p(), m_field_controller->get_field_rhs());
+                                       m_field_controller->get_field_p(),
+                                       m_field_controller->get_field_rhs());
 
     //Source
     std::string sourceType = params->get("solver/source/type");
@@ -56,7 +57,6 @@ NSSolver::~NSSolver() {
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void NSSolver::do_step(real t, bool sync) {
-// local variables and parameters for GPU
     Field &u = m_field_controller->get_field_u();
     Field &v = m_field_controller->get_field_v();
     Field &w = m_field_controller->get_field_w();

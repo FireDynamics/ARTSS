@@ -55,5 +55,5 @@ void Cube::set_up(
             }
         }
     }
-    m_source_field.copyin();
+    m_source_field.update_dev();
 }

@@ -69,7 +69,7 @@ void BuoyancyMMS::set_up() {
         m_source_field[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
     }
 
-    m_source_field.copyin();
+    m_source_field.update_dev();
 }
 
 void BuoyancyMMS::update_source(Field &out, real t_cur) {
