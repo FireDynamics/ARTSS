@@ -16,7 +16,7 @@
 class FieldIO {
  public:
     explicit FieldIO(const SolverController &solver_controller);
-    void write(real t_cur, Field &data_u, Field &data_v, Field &data_w, Field &data_p, Field &data_T, Field &data_C);
+    void write(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
     void read(std::string &file_name, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
     void set_filename(std::string &filename) { m_filename = filename; }
     void read(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);

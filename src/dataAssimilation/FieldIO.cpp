@@ -74,11 +74,11 @@ FieldIO::FieldIO(const SolverController &solver_controller): m_solver_controller
 /// \param  T       data of field T to be written out
 /// \param  C       data of field C to be written out
 // *************************************************************************************************
-void FieldIO::write(real t_cur, real *data_u, real *data_v, real *data_w, real *data_p, real *data_T, real *data_C) {
+void FieldIO::write(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     std::string output = fmt::format(m_format + "\n", t_cur);
-    real *data_fields[] = {data_u, data_v, data_w, data_p, data_T, data_C};
-    auto size = Domain::getInstance()->get_size();
-    for (auto f: data_fields){
+    Field fields[] = {u, v, w, p, T, C};
+    size_t size = u.get_size();
+    for (Field &f: fields){
         for (size_t i = 0; i < size - 1; i++) {
             output.append(fmt::format(("{};"), f[i]));
         }
@@ -118,20 +118,20 @@ void FieldIO::write(real t_cur, real *data_u, real *data_v, real *data_w, real *
 /// \param  T       field T to store the read data
 /// \param  C       field C to store the read data
 // *************************************************************************************************
-void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
+void FieldIO::read(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     std::ifstream input_file(m_filename, std::ifstream::binary);
     size_t n = static_cast<size_t>(t_cur / m_dt) - 1;
     long pos = m_positions[n];
     std::string line;
     input_file.seekg(pos);
 
-    Field *fields[] = {u, v, w, p, T, C};
-    for (Field *f: fields) {
+    Field fields[] = {u, v, w, p, T, C};
+    for (Field &f: fields) {
         getline(input_file, line);
         std::vector<std::string> splitted_string = Utility::split(line, ';');
         size_t counter = 0;
         for (const std::string &part: splitted_string) {
-            f->data[counter] = std::stod(part);
+            f.data[counter] = std::stod(part);
             counter++;
         }
     }
@@ -148,7 +148,7 @@ void FieldIO::read(real t_cur, Field *u, Field *v, Field *w, Field *p, Field *T,
 /// \param  T           field T to store the read data
 /// \param  C           field C to store the read data
 // *************************************************************************************************
-void FieldIO::read(std::string &file_name, Field *u, Field *v, Field *w, Field *p, Field *T, Field *C) {
+void FieldIO::read(std::string &file_name, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     std::ifstream input_file(file_name, std::ifstream::binary);
     if (input_file.is_open()) {
         std::string string_time_step;
@@ -157,13 +157,13 @@ void FieldIO::read(std::string &file_name, Field *u, Field *v, Field *w, Field *
         getline(input_file, string_time_step);
         getline(input_file, string_time_step);
         std::string line;
-        Field *fields[] = {u, v, w, p, T, C};
-        for (Field *f: fields) {
+        Field fields[] = {u, v, w, p, T, C};
+        for (Field &f: fields) {
             getline(input_file, line);
             std::vector<std::string> splitted_string = Utility::split(line, ';');
             size_t counter = 0;
             for (const std::string &part: splitted_string) {
-                f->data[counter] = static_cast<real>(std::stold(part));
+                f.data[counter] = static_cast<real>(std::stold(part));
                 counter++;
             }
         }
