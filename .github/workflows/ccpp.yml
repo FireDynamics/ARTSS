@@ -7,17 +7,6 @@ on:
     branches: [ master ]
 
 jobs:
-  build-gcc-data-assimilation:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: compile
-      run: |
-        git submodule update --init
-        ./compile.sh --jobs 4 --gcc --mpi
-
   build-gcc-serial:
 
     runs-on: ubuntu-latest
