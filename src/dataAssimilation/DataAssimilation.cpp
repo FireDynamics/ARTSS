@@ -11,21 +11,21 @@
 #include "mpi.h"
 #include "HRRChanger.h"
 
-DataAssimilation::DataAssimilation(const SolverController &solver_controller, const FieldController &field_controller) : m_field_controller(field_controller), m_solver_controller(solver_controller) {
+DataAssimilation::DataAssimilation(const SolverController &solver_controller,
+                                   const FieldController &field_controller) :
+        m_field_controller(field_controller),
+        m_solver_controller(solver_controller),
+        m_new_field_u(Field(FieldType::U)),
+        m_new_field_v(Field(FieldType::V)),
+        m_new_field_w(Field(FieldType::W)),
+        m_new_field_p(Field(FieldType::P)),
+        m_new_field_T(Field(FieldType::T)),
+        m_new_field_C(Field(FieldType::RHO)){
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     Parameters *params = Parameters::getInstance();
     m_assimilated = (params->get("data_assimilation/enabled") == "Yes");
-    if (m_assimilated) {
-        m_reader = new FieldIO(solver_controller);
-        m_new_field_u = new Field(FieldType::U);
-        m_new_field_v = new Field(FieldType::V);
-        m_new_field_w = new Field(FieldType::W);
-        m_new_field_p = new Field(FieldType::P);
-        m_new_field_T = new Field(FieldType::T);
-        m_new_field_C = new Field(FieldType::RHO);
-    }
 }
 
 void DataAssimilation::initiate_rollback() {
@@ -39,12 +39,12 @@ void DataAssimilation::read_new_data(std::string &file_name) {
 }
 
 void DataAssimilation::save_data(real t_cur) {
-    real *u = m_field_controller.get_field_u_data();
-    real *v = m_field_controller.get_field_v_data();
-    real *w = m_field_controller.get_field_w_data();
-    real *p = m_field_controller.get_field_w_data();
-    real *T = m_field_controller.get_field_T_data();
-    real *C = m_field_controller.get_field_concentration_data();
+    Field &u = m_field_controller.get_field_u();
+    Field &v = m_field_controller.get_field_v();
+    Field &w = m_field_controller.get_field_w();
+    Field &p = m_field_controller.get_field_w();
+    Field &T = m_field_controller.get_field_T();
+    Field &C = m_field_controller.get_field_concentration();
 
     m_reader->write(t_cur, u, v, w, p, T, C);
 }

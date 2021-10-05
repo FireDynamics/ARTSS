@@ -188,6 +188,10 @@ target_compile_options(artss_gpu_benchmark PUBLIC -acc -Minfo=accel -DBENCHMARKI
 target_link_options(artss_gpu_benchmark PUBLIC -acc -ta=${GPU_CC_TA},lineinfo,${CUDA_VERSION_TA})
 target_link_libraries(artss_gpu_benchmark)
 
+enable_testing()
+add_subdirectory(tests)
+add_subdirectory(gtests)
+
 add_subdirectory(src/dataAssimilation)
 add_subdirectory(src/TCP)
 get_target_property(ARTSS_SOURCE_FILES artss SOURCES)
@@ -197,7 +201,3 @@ target_compile_options(artss_data_assimilation_serial PUBLIC -DASSIMILATION)
 target_link_libraries(artss_data_assimilation_serial PRIVATE spdlog::spdlog)
 target_link_libraries(artss_data_assimilation_serial PRIVATE fmt::fmt)
 target_link_libraries(artss_data_assimilation_serial PRIVATE MPI::MPI_CXX)
-
-enable_testing()
-add_subdirectory(tests)
-add_subdirectory(gtests)
