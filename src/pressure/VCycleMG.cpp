@@ -266,6 +266,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
             }
         }
     }
+    out.copy_data(*m_error1[0]);
     boundary->apply_boundary(out, sync);
 
     if (sync) {
