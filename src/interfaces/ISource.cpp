@@ -40,7 +40,7 @@ void ISource::buoyancy_force(
     auto bsize_i = boundary->get_size_inner_list();
     auto bsize_b = boundary->get_size_boundary_list();
 
-#pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], out, in, ina)
+#pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], out, in, in_a)
     {
         // inner cells
 #pragma acc kernels async
