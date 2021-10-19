@@ -122,8 +122,8 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
     size_t bsize = Domain::getInstance()->get_size(u.get_level());
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
-                         w0, w_tmp, p, p0, rhs, T, T0, T_tmp, \
-                         C, C0, C_tmp, fx, fy, fz, S_T, S_C, \
+                         w0, w_tmp, p, rhs, T, T0, T_tmp, \
+                         C, C0, C_tmp, f_x, f_y, f_z, S_T, S_C, \
                          nu_t, kappa_t, gamma_t)
     {
 // 1. Solve advection equation

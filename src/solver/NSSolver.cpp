@@ -74,7 +74,7 @@ void NSSolver::do_step(real t, bool sync) {
 
     auto nu = m_nu;
 
-#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, rhs, fx, fy, fz)
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, rhs, f_x, f_y, f_z)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING

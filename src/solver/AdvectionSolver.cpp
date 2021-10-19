@@ -57,7 +57,7 @@ void AdvectionSolver::do_step(real, bool sync) {
     Field &v0 = m_field_controller->get_field_v0();
     Field &w0 = m_field_controller->get_field_w0();
 
-#pragma acc data present(u_lin, v_lin, w_lin, u, u0, v, v0, w, w0)
+#pragma acc data present(m_u_lin, m_v_lin, m_w_lin, u, u0, v, v0, w, w0)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING

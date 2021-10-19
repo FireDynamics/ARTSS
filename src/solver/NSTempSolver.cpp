@@ -99,7 +99,7 @@ void NSTempSolver::do_step(real t, bool sync) {
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
                             w0, w_tmp, p, rhs, T, T0, T_tmp, \
-                            fx, fy, fz, S_T)
+                            f_x, f_y, f_z, S_T)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
