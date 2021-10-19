@@ -225,12 +225,12 @@ fi
 if [ $JURECA -eq 0 ]
 then
   module load CMake
-  module load PGI/19.10-GCC-8.3.0
-  module load CUDA/10.1.105
+  module load NVHPC/20.9-GCC-9.3.0
+  module load CUDA/11.0
   export CUDA_LIB=${CUDA_ROOT}/lib64/
   export CUDA_INC=${CUDA_ROOT}/include/
-  CUDA_VERSION=10.1
-  GPU_CC=cc35
+  CUDA_VERSION=11.0
+  GPU_CC=cc80
   GPU=0
 fi
 
