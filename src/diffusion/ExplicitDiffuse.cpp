@@ -98,7 +98,7 @@ void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Fi
     const size_t neighbour_i = 1;
     const size_t neighbour_j = Nx;
     const size_t neighbour_k = Nx * Ny;
-#pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i], ev) async
+#pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i], Ev) async
     for (size_t ii = 0; ii < bsize_i; ++ii) {
         const size_t idx = d_inner_list[ii];
         real nu_x1 = 0.5 * (EV[idx + neighbour_i] + EV[idx]) + D;
