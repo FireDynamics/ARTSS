@@ -54,7 +54,10 @@ class Field {
     void set_value(real val) const { std::fill(data, data + m_size, val); }
     void copy_data(const Field &other) const {
         // TODO parallelise copy data function for GPU
+#pragma acc data present (this->data[:m_size], other.data[:m_size])
+      {
         std::copy(other.data, other.data + other.m_size, data);
+      }
     }
     static void swap(Field &a, Field &b) { std::swap(a.data, b.data); }
 
