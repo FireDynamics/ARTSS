@@ -225,9 +225,10 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         Field *field_residuum1_level = *(m_residuum1 + level);
         Field *field_residuum1_level_plus_1 = *(m_residuum1 + level + 1);
 
-#pragma acc data present(residuum0_level, error1_level, error1_level_plus_1, \
-                         mg_temporal_level, residuum1_level, residuum1_level_plus_1, \
-                         out)
+#pragma acc data present(field_residuum0_level, \
+                         field_error1_level, field_error1_level_plus_1, \
+                         field_mg_temporal_level, \
+                         field_residuum1_level, field_residuum1_level_plus_1)
         {
             Smooth(*field_error1_level, *field_mg_temporal_level, *field_residuum1_level, level, sync);
 
@@ -248,8 +249,10 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         Field *field_mg_temporal_solution_level_minus_1 = *(m_mg_temporal_solution + level - 1);
         Field *field_residuum1_level_minus_1 = *(m_residuum1 + level - 1);
 
-#pragma acc data present(error0_level, error1_level, error1_level_minus_1, \
-                         mg_temporal_solution_level_minus_1, residuum1_level_minus_1, out)
+#pragma acc data present(field_error0_level, \
+                         field_error1_level, field_error1_level_minus_1, \
+                         field_mg_temporal_solution_level_minus_1, \
+                         field_residuum1_level_minus_1)
         {
             Prolongate(*field_error0_level, *field_error1_level, level, sync);
             boundary->apply_boundary(*field_error0_level, sync);
@@ -266,7 +269,8 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
             }
         }
     }
-    out.copy_data(*m_error1[0]);
+    out.copy_data(*m_error0[0]);
+    out.update_dev();
     boundary->apply_boundary(out, sync);
 
     if (sync) {
@@ -328,7 +332,7 @@ void VCycleMG::Residuum(Field &out, Field const &in, Field const &b, const size_
     const size_t neighbour_cell_i = 1;
     const size_t neighbour_cell_j = Nx;
     const size_t neighbour_cell_k = Nx * Ny;
-#pragma acc data present(b, in, out, inner_list)
+#pragma acc data present(b, in, out, data_inner_list[start_i:end_i])
     {
 #pragma acc kernels async
 #pragma acc loop independent
@@ -595,8 +599,7 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
     const real reciprocal_beta = 2. * (alpha_x + alpha_y + alpha_z);
     const real beta = 1. / reciprocal_beta;
 
-    tmp.copy_data(out);
-#pragma acc data present(out, tmp, b)
+#pragma acc data present(out, b)
     {
         for (int i = 0; i < m_n_relax; i++) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
@@ -640,8 +643,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
     const size_t max_it = m_diffusion_max_iter;
     const real tol_res = m_diffusion_tol_res;
 
-    tmp.copy_data(out);
-#pragma acc data present(out, tmp, b)
+#pragma acc data present(out, b)
     {
         size_t it = 0;
         real sum;
@@ -656,7 +658,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
             boundary->apply_boundary(out, sync);
 
             sum = 0.;
-#pragma acc parallel loop independent present(out, tmp, data_inner_list[:bsize_i]) async
+#pragma acc parallel loop independent present(out, data_inner_list[:bsize_i]) async
             for (size_t j = start_i; j < end_i; ++j) {
                 const size_t i = data_inner_list[j];
                 res = b[i] - (reciprocal_dx2 * (out.data[i - neighbour_i] - 2 * out.data[i] + out.data[i + neighbour_i])
@@ -696,9 +698,9 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
     const real reciprocal_beta = 2. * (alpha_x + alpha_y + alpha_z);
     const real beta = 1. / reciprocal_beta;
 
-    tmp.copy_data(out);
 #pragma acc data present(out, tmp, b)
     {
+        tmp.copy_data(out);
         size_t it = 0;
         for (int i = 0; i < m_n_relax; i++) {
             JacobiDiffuse::JacobiStep(level, out, tmp, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
@@ -746,9 +748,9 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
     const real reciprocal_beta = 2. * (alpha_x + alpha_y + alpha_z);
     const real beta = 1. / reciprocal_beta;
 
-    tmp.copy_data(out);
 #pragma acc data present(out, tmp, b)
     {
+        tmp.copy_data(out);
         size_t it = 0;
         real sum;
         real res = 10000.;
