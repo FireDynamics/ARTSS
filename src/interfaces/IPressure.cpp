@@ -35,7 +35,7 @@ void IPressure::divergence(
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    size_t *d_bList = boundary->get_boundary_list_level_joined();
+    size_t *d_boundary_list = boundary->get_boundary_list_level_joined();
 
     auto bsize_i = boundary->get_size_inner_list();
     auto bsize_b = boundary->get_size_boundary_list();
@@ -43,8 +43,8 @@ void IPressure::divergence(
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
     size_t neighbour_k = Nx * Ny;
-#pragma acc data present(d_inner_list[:bsize_i], d_bList[:bsize_b])
-#pragma acc data present(out, inx, iny, inz)
+#pragma acc data present(d_inner_list[:bsize_i], d_boundary_list[:bsize_b])
+#pragma acc data present(out, in_x, in_y, in_z)
     {
 #pragma acc kernels async
 #pragma acc loop independent
@@ -60,7 +60,7 @@ void IPressure::divergence(
 #pragma acc kernels async
 #pragma acc loop independent
         for (size_t j = 0; j < bsize_b; ++j) {
-            const size_t i = d_bList[j];
+            const size_t i = d_boundary_list[j];
             out[i] = 0.;
         }
 
@@ -110,7 +110,7 @@ void IPressure::projection(
     size_t neighbour_j = Nx;
     size_t neighbour_k = Nx * Ny;
 #pragma acc data present(d_inner_list[:bsize_i])
-#pragma acc data present(outu, outv, outw, inu, inv, inw, inp)
+#pragma acc data present(out_u, out_v, out_w, in_u, in_v, in_w, in_p)
     {
 #pragma acc kernels async
 #pragma acc loop independent
