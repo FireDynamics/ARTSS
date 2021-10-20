@@ -27,45 +27,48 @@ class Field {
     Field(FieldType type, real val, size_t level);
     Field(FieldType type, real val, size_t level, size_t size);
     Field(Field const &original);
-
     ~Field();
 
     // getter
     FieldType get_type() const { return m_type; }
     return_ptr get_data() const { return data; }
-
     size_t get_level() const { return m_level; }
     size_t get_size() const { return m_size; }
 
     // setter
-    inline real& operator[](size_t i) const { return data[i]; }
+    inline real &operator[](size_t i) const { return data[i]; }
 
     // acc functions
     void update_host() {
-        #pragma acc update host(data[:m_size])
+#pragma acc update host(data[:m_size])
     }
     void update_dev() {
-        #pragma acc update device(data[:m_size])
+#pragma acc update device(data[:m_size])
     }
     void copyin() {
-        #pragma acc enter data copyin(data[:m_size])
+#pragma acc enter data copyin(data[:m_size])
     }
 
     void set_value(real val) const { std::fill(data, data + m_size, val); }
+
     void copy_data(const Field &other) const {
         // TODO parallelise copy data function for GPU
-#pragma acc data present (this->data[:m_size], other.data[:m_size])
-      {
-        std::copy(other.data, other.data + other.m_size, data);
-      }
+        auto other_data = other.data;
+        //std::copy(other.data, other.data + other.m_size, data);
+#pragma acc parallel loop independent present(this->data[:m_size], other_data[:m_size]) async
+        for (size_t i = 0; i < m_size; ++i) {
+            this->data[i] = other_data[i];
+        }
+#pragma acc wait
     }
+
     static void swap(Field &a, Field &b) { std::swap(a.data, b.data); }
 
     Field &operator+=(const real x) {
 #pragma acc parallel loop independent present(this->data[:m_size]) async
-        for (size_t i=0; i < m_size; ++i)
+        for (size_t i = 0; i < m_size; ++i) {
             this->data[i] += x;
-
+        }
 #pragma acc wait
         return *this;
     }
@@ -73,18 +76,18 @@ class Field {
     Field &operator+=(const Field &rhs) {
         auto rhs_data = rhs.data;
 #pragma acc parallel loop independent present(this->data[:m_size], rhs_data[:m_size]) async
-        for (size_t i=0; i < m_size; ++i)
+        for (size_t i = 0; i < m_size; ++i) {
             this->data[i] += rhs_data[i];
-
+        }
 #pragma acc wait
         return *this;
     }
 
     Field &operator*=(const real x) {
 #pragma acc parallel loop independent present(this->data[:m_size]) async
-        for (size_t i=0; i < m_size; ++i)
+        for (size_t i = 0; i < m_size; ++i) {
             this->data[i] *= x;
-
+        }
 #pragma acc wait
         return *this;
     }
@@ -92,9 +95,9 @@ class Field {
     Field &operator*=(const Field &rhs) {
         auto rhs_data = rhs.data;
 #pragma acc parallel loop independent present(this->data[:m_size], rhs_data[:m_size]) async
-        for (size_t i=0; i < m_size; ++i)
+        for (size_t i = 0; i < m_size; ++i) {
             this->data[i] *= rhs_data[i];
-
+        }
 #pragma acc wait
         return *this;
     }
