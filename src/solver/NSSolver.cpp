@@ -156,7 +156,7 @@ void NSSolver::control() {
         std::exit(1);
         // TODO Error Handling
     }
-    if (params->get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
+    if (params->get("solver/pressure/field") != Field::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif

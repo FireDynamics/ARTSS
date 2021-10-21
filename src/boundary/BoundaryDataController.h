@@ -11,6 +11,7 @@
 #include "../utility/tinyxml2.h"
 #include "../utility/Utility.h"
 #include "BoundaryData.h"
+#include "../field/Field.h"
 
 class BoundaryDataController {
  public:

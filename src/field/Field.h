@@ -11,6 +11,11 @@
 #include <utility>
 #include <iostream>
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
+#ifndef BENCHMARKING
+#ifdef _OPENACC
+#endif
+#endif
 
 #ifndef ENUM_TYPES
 #define ENUM_TYPES
@@ -48,6 +53,11 @@ class Field {
     }
     void copyin() {
 #pragma acc enter data copyin(data[:m_size])
+#ifndef BENCHMARKING
+  #ifdef _OPENACC
+    m_gpu_logger->debug("{}{} copyin with data pointer: {}", get_field_type_name(m_type), m_level, static_cast<void *>(data));
+  #endif
+#endif
     }
 
     void set_value(real val) const { std::fill(data, data + m_size, val); }
@@ -102,11 +112,20 @@ class Field {
     }
 
     real *data;
+    static std::string get_field_type_name(FieldType f);
+    static FieldType match_field(const std::string& string);
 
  private:
     size_t const m_level;
     size_t const m_size;
     FieldType const m_type;
+
+    std::shared_ptr<spdlog::logger> m_gpu_logger;
+#ifndef BENCHMARKING
+#ifdef _OPENACC
+
+#endif
+#endif
 };
 
 #endif /* ARTSS_FIELD_FIELD_H_ */

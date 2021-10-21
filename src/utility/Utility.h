@@ -31,6 +31,9 @@ namespace Utility {
 
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
+#ifdef  _OPENACC
+    std::shared_ptr<spdlog::logger> create_gpu_logger(std::string loggerName);
+#endif
 #endif
 }  // namespace Utility
 

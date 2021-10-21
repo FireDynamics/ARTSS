@@ -51,31 +51,31 @@ void Analysis::analyse(FieldController *field_controller, real t) {
             std::string nodeName(curElem->Value());
             if (nodeName == "boundary") {
                 std::string field = curElem->Attribute("field");
-                if (field.find(BoundaryData::get_field_type_name(FieldType::U)) != std::string::npos) {
+                if (field.find(Field::get_field_type_name(FieldType::U)) != std::string::npos) {
                     compare_solutions(field_controller->get_field_u_data(),
                                       m_solution.get_return_ptr_data_u(),
                                       FieldType::U,
                                       t);
                 }
-                if (field.find(BoundaryData::get_field_type_name(FieldType::V)) != std::string::npos) {
+                if (field.find(Field::get_field_type_name(FieldType::V)) != std::string::npos) {
                     compare_solutions(field_controller->get_field_v_data(),
                                       m_solution.get_return_ptr_data_v(),
                                       FieldType::V,
                                       t);
                 }
-                if (field.find(BoundaryData::get_field_type_name(FieldType::W)) != std::string::npos) {
+                if (field.find(Field::get_field_type_name(FieldType::W)) != std::string::npos) {
                     compare_solutions(field_controller->get_field_w_data(),
                                       m_solution.get_return_ptr_data_w(),
                                       FieldType::W,
                                       t);
                 }
-                if (field.find(BoundaryData::get_field_type_name(FieldType::P)) != std::string::npos) {
+                if (field.find(Field::get_field_type_name(FieldType::P)) != std::string::npos) {
                     compare_solutions(field_controller->get_field_p_data(),
                                       m_solution.get_return_ptr_data_p(),
                                       FieldType::P,
                                       t);
                 }
-                if (field.find(BoundaryData::get_field_type_name(FieldType::T)) != std::string::npos) {
+                if (field.find(Field::get_field_type_name(FieldType::T)) != std::string::npos) {
                     compare_solutions(field_controller->get_field_T_data(),
                                       m_solution.get_return_ptr_data_T(),
                                       FieldType::T,
@@ -105,13 +105,13 @@ bool Analysis::compare_solutions(read_ptr num, read_ptr ana, FieldType type, rea
     if (res <= m_tol) {
 #ifndef BENCHMARKING
         m_logger->info("{} PASSED Test at time {} with error e = {}",
-                       BoundaryData::get_field_type_name(type), t, res);
+                       Field::get_field_type_name(type), t, res);
 #endif
         verification = true;
     } else {
 #ifndef BENCHMARKING
         m_logger->warn("{} FAILED Test at time {} with error e = {}",
-                       BoundaryData::get_field_type_name(type), t, res);
+                       Field::get_field_type_name(type), t, res);
 #endif
     }
     return verification;
@@ -383,7 +383,7 @@ void Analysis::save_variables_in_file(FieldController *field_controller) {
     for (auto &v_field: v_fields) {
         write_file(
                 dataField[v_field],
-                BoundaryData::get_field_type_name(v_field),
+                Field::get_field_type_name(v_field),
                 inner_list, size_inner_list,
                 boundary_list, size_boundary_list,
                 obstacle_list, size_obstacle_list);

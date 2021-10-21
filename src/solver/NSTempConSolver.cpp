@@ -275,35 +275,35 @@ void NSTempConSolver::control() {
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/temperature/advection/field") != BoundaryData::get_field_type_name(FieldType::T)) {
+    if (params->get("solver/temperature/advection/field") != Field::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/temperature/diffusion/field") != BoundaryData::get_field_type_name(FieldType::T)) {
+    if (params->get("solver/temperature/diffusion/field") != Field::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/concentration/advection/field") != BoundaryData::get_field_type_name(FieldType::RHO)) {
+    if (params->get("solver/concentration/advection/field") != Field::get_field_type_name(FieldType::RHO)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/concentration/diffusion/field") != BoundaryData::get_field_type_name(FieldType::RHO)) {
+    if (params->get("solver/concentration/diffusion/field") != Field::get_field_type_name(FieldType::RHO)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
+    if (params->get("solver/pressure/field") != Field::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         logger->error("Fields not specified correctly!");
 #endif

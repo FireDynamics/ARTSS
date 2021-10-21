@@ -46,7 +46,7 @@ void BoundaryDataController::add_boundary_data(tinyxml2::XMLElement *xml_element
     auto value = xml_element->DoubleAttribute("value");
 
     for (const std::string &f : fieldStrings) {
-        FieldType fieldType = BoundaryData::match_field(f);
+        FieldType fieldType = Field::match_field(f);
         m_boundary_data[fieldType]->add_boundary_condition(patches, value, boundaryCondition);
     }
 }
@@ -61,7 +61,7 @@ void BoundaryDataController::print() {
         auto boundary = *(m_boundary_data + i);
         if (!boundary->is_empty()) {
             m_logger->info("--- found boundary conditions for field {} ({}): ",
-                           BoundaryData::get_field_type_name(static_cast<FieldType>(i)), i);
+                           Field::get_field_type_name(static_cast<FieldType>(i)), i);
             boundary->print();
         }
     }
@@ -115,7 +115,7 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
     if (!(static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty()) {
 #ifndef BENCHMARKING
         m_logger->debug("apply obstacle boundary conditions of {}",
-                        BoundaryData::get_field_type_name(field_type));
+                        Field::get_field_type_name(field_type));
 #endif
         ObstacleBoundary::apply_boundary_condition(
                 field,

@@ -5,8 +5,9 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cmath>
-#include <openacc.h>
+#ifdef _OPENACC
 #include "accel.h"
+#endif
 
 #include "VCycleMG.h"
 #include "../Domain.h"
@@ -259,10 +260,11 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
                          field_mg_temporal_solution_level_minus_1, \
                          field_residuum1_level_minus_1)
         {
-            acc_present_dump();
             Prolongate(*field_error0_level, *field_error1_level, level, sync);
             std::cout << "nach prolongate" << std::endl;
+#ifdef _OPENACC
             acc_present_dump();
+#endif
             boundary->apply_boundary(*field_error0_level, sync);
 
             // correct

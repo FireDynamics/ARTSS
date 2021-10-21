@@ -9,6 +9,7 @@
 
 #include "../utility/GlobalMacrosTypes.h"
 #include "../boundary/BoundaryData.h"
+#include "../field/Field.h"
 #include "../utility/Utility.h"
 
 namespace DomainBoundary {

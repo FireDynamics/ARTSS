@@ -11,7 +11,6 @@
 #include <vector>
 #include "../utility/Utility.h"
 #include "../utility/tinyxml2.h"
-#include "../field/Field.h"
 
 const size_t number_of_patches = 6;
 enum Patch : int {
@@ -38,11 +37,9 @@ class BoundaryData {
     ~BoundaryData();
     void print();
 
-    static std::string get_field_type_name(FieldType f);
     static std::string get_boundary_condition_name(BoundaryCondition bc);
     static std::string get_patch_name(Patch p);
 
-    static FieldType match_field(const std::string& string);
     static Patch match_patch(const std::string &string);
     static BoundaryCondition match_boundary_condition(const std::string &string);
 
