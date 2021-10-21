@@ -129,6 +129,15 @@ Multigrid::Multigrid(
         m_data_obstacles_patches_joined[Patch::TOP] = m_data_MG_obstacle_top_level_joined;
         m_data_obstacles_patches_joined[Patch::LEFT] = m_data_MG_obstacle_left_level_joined;
         m_data_obstacles_patches_joined[Patch::RIGHT] = m_data_MG_obstacle_right_level_joined;
+
+#ifndef BENCHMARKING
+        m_logger->debug("pointer front:\n {}\n {}",
+                        static_cast<void *> (m_data_MG_obstacle_front_level_joined), static_cast<void *>(m_data_obstacles_patches_joined[0]));
+        m_logger->debug("pointer left:\n {}\n {}",
+                        static_cast<void *> (m_data_MG_obstacle_left_level_joined), static_cast<void *>(m_data_obstacles_patches_joined[4]));
+        m_logger->debug("pointer right:\n {}\n {}",
+                        static_cast<void *> (m_data_MG_obstacle_right_level_joined), static_cast<void *>(m_data_obstacles_patches_joined[5]));
+#endif
     }
 }
 
@@ -867,12 +876,17 @@ void Multigrid::send_boundary_lists_to_GPU() {
             counter_boundary_slice_x++;
         }
     }
+    std::cout << "copyin multigrid inner list: " << size_inner_list <<std::endl;
 #pragma acc enter data copyin(m_data_MG_inner_list_level_joined[:size_inner_list])
+    std::cout << "copyin multigrid boundary list: " << size_boundary_list <<std::endl;
 #pragma acc enter data copyin(m_data_MG_boundary_list_level_joined[:size_boundary_list])
+    std::cout << "copyin multigrid boundary slice z: " << size_boundary_slice_z <<std::endl;
 #pragma acc enter data copyin(m_data_MG_boundary_front_level_joined[:size_boundary_slice_z])
 #pragma acc enter data copyin(m_data_MG_boundary_back_level_joined[:size_boundary_slice_z])
+    std::cout << "copyin multigrid boundary slice y: " << size_boundary_slice_y <<std::endl;
 #pragma acc enter data copyin(m_data_MG_boundary_top_level_joined[:size_boundary_slice_y])
 #pragma acc enter data copyin(m_data_MG_boundary_bottom_level_joined[:size_boundary_slice_y])
+    std::cout << "copyin multigrid boundary slice x: " << size_boundary_slice_x <<std::endl;
 #pragma acc enter data copyin(m_data_MG_boundary_left_level_joined[:size_boundary_slice_x])
 #pragma acc enter data copyin(m_data_MG_boundary_right_level_joined[:size_boundary_slice_x])
 }
@@ -905,6 +919,7 @@ void Multigrid::send_surface_lists_to_GPU() {
         m_logger->debug("control sendMGListsToGPU surface {} | {}",
                         counter_surface_list, size_surface_list);
 #endif
+        std::cout << "copyin multigrid: " << size_surface_list <<std::endl;
 #pragma acc enter data copyin(m_data_MG_surface_list_level_joined[:size_surface_list])
     }
 }
@@ -968,13 +983,40 @@ void Multigrid::send_obstacle_lists_to_GPU() {
         }
 
         m_data_MG_obstacle_list_zero_joined = m_MG_obstacle_index_list[0];  // TODO(issue 33) wrong because only one obstacle is used?
-        size_t size_obstacle_list = get_size_obstacle_list();
+#ifndef BENCHMARKING
+        m_logger->debug("copyin multigrid oFront {} {}", size_oFront, static_cast<void *>(m_data_MG_obstacle_front_level_joined));
+#endif
 #pragma acc enter data copyin(m_data_MG_obstacle_front_level_joined[:size_oFront])
+
+#ifndef BENCHMARKING
+        m_logger->debug("copyin multigrid oBack {} {}", size_oBack, static_cast<void *>(m_data_MG_obstacle_back_level_joined));
+#endif
 #pragma acc enter data copyin(m_data_MG_obstacle_back_level_joined[:size_oBack])
+
+#ifndef BENCHMARKING
+        m_logger->debug("copyin multigrid oTop {} {}", size_oTop, static_cast<void *>(m_data_MG_obstacle_top_level_joined));
+#endif
 #pragma acc enter data copyin(m_data_MG_obstacle_top_level_joined[:size_oTop])
+
+#ifndef BENCHMARKING
+        m_logger->debug("copyin multigrid oBottom {} {}", size_oBottom, static_cast<void *>(m_data_MG_obstacle_bottom_level_joined));
+#endif
 #pragma acc enter data copyin(m_data_MG_obstacle_bottom_level_joined[:size_oBottom])
+
+#ifndef BENCHMARKING
+        m_logger->debug("copyin multigrid oLeft {} {}", size_oLeft, static_cast<void *>(m_data_MG_obstacle_left_level_joined));
+#endif
 #pragma acc enter data copyin(m_data_MG_obstacle_left_level_joined[:size_oLeft])
+
+#ifndef BENCHMARKING
+        m_logger->debug("copyin multigrid oRight {} {}", size_oRight, static_cast<void *>(m_data_MG_obstacle_right_level_joined));
+#endif
 #pragma acc enter data copyin(m_data_MG_obstacle_right_level_joined[:size_oRight])
+
+        size_t size_obstacle_list = get_size_obstacle_list();
+#ifndef BENCHMARKING
+        m_logger->debug("copyin multigrid obstacle_list {} {}", size_obstacle_list, static_cast<void *>(m_data_MG_obstacle_list_zero_joined));
+#endif
 #pragma acc enter data copyin(m_data_MG_obstacle_list_zero_joined[:size_obstacle_list])
     }
 }
@@ -1009,7 +1051,11 @@ void Multigrid::apply_boundary_condition(Field &field, bool sync) {
                                    get_first_index_of_obstacle_top(level, id + 1),
                                    get_first_index_of_obstacle_left(level, id + 1),
                                    get_first_index_of_obstacle_right(level, id + 1)};
-            (static_cast<BoundaryDataController *> (*(m_bdc_obstacle + id)))->apply_boundary_condition_obstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, id, sync);
+#ifndef BENCHMARKING
+            m_logger->debug("pointer right:\n {}\n {}",
+                            static_cast<void *> (m_data_MG_obstacle_right_level_joined), static_cast<void *>(m_data_obstacles_patches_joined[5]));
+#endif
+            (static_cast<BoundaryDataController *> (*(m_bdc_obstacle + id)))->apply_boundary_condition_obstacle(field, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, id, sync);
         }
         size_t opatch_start[] = {get_first_index_of_obstacle_front(level, m_number_of_obstacle_objects - 1),
                                  get_first_index_of_obstacle_back(level, m_number_of_obstacle_objects - 1),
@@ -1023,7 +1069,7 @@ void Multigrid::apply_boundary_condition(Field &field, bool sync) {
                                get_first_index_of_obstacle_top(level + 1, 0),
                                get_first_index_of_obstacle_left(level + 1, 0),
                                get_first_index_of_obstacle_right(level + 1, 0)};
-        (static_cast<BoundaryDataController *>(*(m_bdc_obstacle + m_number_of_obstacle_objects - 1)))->apply_boundary_condition_obstacle(d, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, level, m_number_of_obstacle_objects - 1, sync);
+        (static_cast<BoundaryDataController *>(*(m_bdc_obstacle + m_number_of_obstacle_objects - 1)))->apply_boundary_condition_obstacle(field, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, m_number_of_obstacle_objects - 1, sync);
     }
 
     size_t patch_start[] = {get_first_index_of_boundary_slice_z(level), get_first_index_of_boundary_slice_z(level),

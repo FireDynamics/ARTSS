@@ -15,38 +15,63 @@
 NSTempTurbSolver::NSTempTurbSolver(FieldController *field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
+    m_logger->debug("construct NSTempTurbSolver");
 #endif
     m_field_controller = field_controller;
 
     auto params = Parameters::getInstance();
 
+#ifndef BENCHMARKING
+    m_logger->debug("set advection solver");
+#endif
     // Advection of velocity
     SolverSelection::SetAdvectionSolver(&adv_vel, params->get("solver/advection/type"));
 
+#ifndef BENCHMARKING
+    m_logger->debug("set advection solver");
+#endif
     // Advection of temperature
     SolverSelection::SetAdvectionSolver(&adv_temp, params->get("solver/temperature/advection/type"));
 
+#ifndef BENCHMARKING
+    m_logger->debug("set diffusion solver");
+#endif
     // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(&dif_vel, params->get("solver/diffusion/type"));
 
     m_nu = params->get_real("physical_parameters/nu");
 
+#ifndef BENCHMARKING
+    m_logger->debug("set turbulence solver");
+#endif
     // Turbulent viscosity for velocity diffusion
     SolverSelection::SetTurbulenceSolver(&mu_tub, params->get("solver/turbulence/type"));
 
+#ifndef BENCHMARKING
+    m_logger->debug("set diffusion solver");
+#endif
     // Diffusion of temperature
     SolverSelection::SetDiffusionSolver(&dif_temp, params->get("solver/temperature/diffusion/type"));
 
     m_kappa = params->get_real("physical_parameters/kappa");
 
+#ifndef BENCHMARKING
+    m_logger->debug("set pressure solver");
+#endif
     // Pressure
     SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
                                        m_field_controller->get_field_p(),
                                        m_field_controller->get_field_rhs());
 
+#ifndef BENCHMARKING
+    m_logger->debug("set source solver vel");
+#endif
     // Source of velocity
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
 
+#ifndef BENCHMARKING
+    m_logger->debug("set source solver temp");
+#endif
     // Source of temperature
     SolverSelection::SetSourceSolver(&sou_temp, params->get("solver/temperature/source/type"));
 

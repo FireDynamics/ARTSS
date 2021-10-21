@@ -106,11 +106,10 @@ void BoundaryDataController::apply_boundary_condition(
 /// \param  sync          synchronous kernel launching (true, default: false)
 // *************************************************************************************************
 void BoundaryDataController::apply_boundary_condition_obstacle(
-        real *data,
+        Field &field,
         size_t **index_fields,
         size_t *patch_start, size_t *patch_end,
         FieldType field_type,
-        size_t level,
         size_t id,
         bool sync) {
     if (!(static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty()) {
@@ -119,10 +118,9 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
                         BoundaryData::get_field_type_name(field_type));
 #endif
         ObstacleBoundary::apply_boundary_condition(
-                data,
+                field,
                 index_fields,
                 patch_start, patch_end,
-                level,
                 m_boundary_data[field_type],
                 id,
                 sync);

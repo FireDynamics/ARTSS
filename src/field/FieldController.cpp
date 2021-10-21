@@ -119,6 +119,7 @@ void FieldController::set_up_boundary() {
 // ***************************************************************************************
 void FieldController::update_data(bool sync) {
     // TODO parallelisable ?
+    std::cout << "copy data" << std::endl;
     field_u0.copy_data(field_u);
     field_v0.copy_data(field_v);
     field_w0.copy_data(field_w);

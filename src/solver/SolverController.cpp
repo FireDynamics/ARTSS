@@ -41,7 +41,6 @@ SolverController::SolverController() {
 #endif
     set_up_sources();
     set_up_fields(string_solver);
-    // TODO unclean, first updating device to apply boundary and then updating host to create temporary fields.
     m_field_controller->update_device();
 #ifndef BENCHMARKING
     m_logger->debug("set up boundary");
@@ -184,6 +183,9 @@ void SolverController::set_up_sources() {
 }
 
 void SolverController::init_solver(const std::string &string_solver) {
+#ifndef BENCHMARKING
+    m_logger->debug("initialise solver {}", string_solver);
+#endif
     if (string_solver == SolverTypes::AdvectionSolver) {
         m_solver = new AdvectionSolver(m_field_controller);
     } else if (string_solver == SolverTypes::AdvectionDiffusionSolver) {

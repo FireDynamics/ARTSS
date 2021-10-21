@@ -5,6 +5,8 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cmath>
+#include <openacc.h>
+#include "accel.h"
 
 #include "VCycleMG.h"
 #include "../Domain.h"
@@ -23,6 +25,7 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
         m_w(Parameters::getInstance()->get_real("solver/pressure/diffusion/w")) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
+    m_logger->debug("construct VCycleMG");
 #endif
     Parameters *params = Parameters::getInstance();
 
@@ -216,6 +219,8 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         return;
     }
 
+    std::cout << "hier" << std::endl;
+    out.update_dev();
     m_error1[0]->copy_data(out);
     for (size_t level = 0; level < m_levels; ++level) {
         Field *field_residuum0_level = *(m_residuum0 + level);
@@ -254,7 +259,10 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
                          field_mg_temporal_solution_level_minus_1, \
                          field_residuum1_level_minus_1)
         {
+            acc_present_dump();
             Prolongate(*field_error0_level, *field_error1_level, level, sync);
+            std::cout << "nach prolongate" << std::endl;
+            acc_present_dump();
             boundary->apply_boundary(*field_error0_level, sync);
 
             // correct
@@ -270,7 +278,6 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         }
     }
     out.copy_data(*m_error0[0]);
-    out.update_dev();
     boundary->apply_boundary(out, sync);
 
     if (sync) {
@@ -332,7 +339,7 @@ void VCycleMG::Residuum(Field &out, Field const &in, Field const &b, const size_
     const size_t neighbour_cell_i = 1;
     const size_t neighbour_cell_j = Nx;
     const size_t neighbour_cell_k = Nx * Ny;
-#pragma acc data present(b, in, out, data_inner_list[start_i:end_i])
+#pragma acc data present(b, in, out, data_inner_list[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
 #pragma acc loop independent
@@ -426,6 +433,9 @@ void VCycleMG::Restrict(Field &out, Field const &in, const size_t level, bool sy
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool sync) {
+#ifndef  BENCHMARKING
+    m_logger->debug("Prolongate");
+#endif
     Domain *domain = Domain::getInstance();
 
     // local variables and parameters for GPU
@@ -447,7 +457,6 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
     const size_t neighbour_cell_i = 1;
     const size_t neighbour_cell_j = Nx_coarse;
     const size_t neighbour_cell_k = Nx_coarse * Ny_coarse;
-
     // prolongate
 #pragma acc data present(in, out, data_inner_list[start_i:(end_i-start_i)])
     {

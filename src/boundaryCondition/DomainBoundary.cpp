@@ -185,7 +185,6 @@ namespace {
 /// \param  index_fields List of indices for each patch
 /// \param  patch_start List of start indices
 /// \param  patch_end List of end indices
-/// \param  level Multigrid level
 /// \param  boundary_data Boundary data_field object of Domain
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************

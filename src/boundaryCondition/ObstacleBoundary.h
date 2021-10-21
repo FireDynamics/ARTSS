@@ -12,8 +12,8 @@
 #include "../boundary/BoundaryData.h"
 
 namespace ObstacleBoundary {
-    void apply_boundary_condition(real* data, size_t** index_fields, const size_t* patch_starts,
-                                  const size_t* patch_ends, size_t level,
+    void apply_boundary_condition(Field &field, size_t** index_fields,
+                                  const size_t* patch_starts, const size_t* patch_ends,
                                   BoundaryData* boundary_data, size_t id, bool sync = true);
 }  // namespace ObstacleBoundary
 
