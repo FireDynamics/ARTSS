@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <utility>
+#include <iostream>
 #include "../utility/GlobalMacrosTypes.h"
 
 #ifndef ENUM_TYPES
@@ -52,9 +53,7 @@ class Field {
     void set_value(real val) const { std::fill(data, data + m_size, val); }
 
     void copy_data(const Field &other) const {
-        // TODO parallelise copy data function for GPU
         auto other_data = other.data;
-        //std::copy(other.data, other.data + other.m_size, data);
 #pragma acc parallel loop independent present(this->data[:m_size], other_data[:m_size]) async
         for (size_t i = 0; i < m_size; ++i) {
             this->data[i] = other_data[i];

@@ -40,11 +40,11 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
 #pragma acc enter data create(data[:m_size])
 }
 
-Field::Field(Field const &original):
+Field::Field(const Field &original):
         data(new real[original.m_size]), m_level(original.m_level),
         m_size(original.m_size), m_type(original.m_type) {
-    this->copy_data(original);
 #pragma acc enter data copyin(this[:1]) create(data[:m_size])
+    this->copy_data(original);
 }
 
 Field::~Field() {
