@@ -85,6 +85,7 @@ void Boundary::init(size_t size_obstacles) {
 void Boundary::print(size_t size_obstacles) {
 #ifndef BENCHMARKING
     m_logger->debug("################ BOUNDARY ################");
+    m_logger->debug("level: {}", m_level);
     m_logger->debug("list size of bList: {}", m_size_boundary_list);
     m_logger->debug("Boundary starts with {} and ends with {}",
                     *(m_boundary_list + 0), *(m_boundary_list + m_size_boundary_list - 1));
