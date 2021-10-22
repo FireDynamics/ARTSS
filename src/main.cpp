@@ -14,6 +14,7 @@
     #include <openacc.h>
 #endif
 
+int Field::counter = 0;
 int main(int argc, char **argv) {
     // Initialisation
     // Parameters
@@ -27,13 +28,13 @@ int main(int argc, char **argv) {
         std::exit(1);
     }
 
-    SolverController *sc = new SolverController();
-
 #ifdef _OPENACC
     // Initialise GPU
     acc_device_t dev_type = acc_get_device_type();
     acc_init( dev_type );
 #endif
+
+    SolverController *sc = new SolverController();
 
     // Integrate over time and solve numerically
     // Time integration
