@@ -12,10 +12,6 @@
 #include <iostream>
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
-#ifndef BENCHMARKING
-#ifdef _OPENACC
-#endif
-#endif
 
 #ifndef ENUM_TYPES
 #define ENUM_TYPES
@@ -25,7 +21,33 @@ enum FieldType : int {
 };
 #endif
 
-class Field {
+template <typename T>
+struct counter
+{
+    counter()
+    {
+        objects_created++;
+        objects_alive++;
+    }
+
+    counter(const counter&)
+    {
+        objects_created++;
+        objects_alive++;
+    }
+
+protected:
+    virtual ~counter()
+    {
+        --objects_alive;
+    }
+    static int objects_created;
+    static int objects_alive;
+};
+template <typename T> int counter<T>::objects_created( 0 );
+template <typename T> int counter<T>::objects_alive( 0 );
+
+class Field : counter<Field> {
  public:
     explicit Field(size_t size);
     explicit Field(FieldType type);
@@ -116,14 +138,14 @@ class Field {
     static FieldType match_field(const std::string& string);
 
  private:
+    static int counter;
     size_t const m_level;
     size_t const m_size;
     FieldType const m_type;
 
-    std::shared_ptr<spdlog::logger> m_gpu_logger;
 #ifndef BENCHMARKING
 #ifdef _OPENACC
-
+    std::shared_ptr<spdlog::logger> m_gpu_logger;
 #endif
 #endif
 };

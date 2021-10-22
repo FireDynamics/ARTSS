@@ -14,7 +14,7 @@ Field::Field(FieldType type) :
     data = new real[m_size];
 #ifndef BENCHMARKING
   #ifdef _OPENACC
-    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
+    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name() + std::to_string(counter<Field>::objects_created));
     m_gpu_logger->debug("{}{} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
@@ -45,7 +45,7 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
     set_value(val);
 #ifndef BENCHMARKING
   #ifdef _OPENACC
-    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
+    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name() + std::to_string(counter<Field>::objects_created));
     m_gpu_logger->debug("{}{} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
@@ -63,7 +63,7 @@ Field::Field(const Field &original):
         m_size(original.m_size), m_type(original.m_type) {
 #ifndef BENCHMARKING
   #ifdef _OPENACC
-    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
+    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name() + std::to_string(counter<Field>::objects_created));
     m_gpu_logger->debug("{}{} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
