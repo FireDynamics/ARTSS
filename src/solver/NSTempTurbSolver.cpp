@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "NSTempTurbSolver.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryData.h"
 #include "../boundary/BoundaryController.h"
 #include "../pressure/VCycleMG.h"

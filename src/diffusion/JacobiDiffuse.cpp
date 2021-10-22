@@ -10,7 +10,7 @@
 #include "JacobiDiffuse.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../utility/Utility.h"
 
 JacobiDiffuse::JacobiDiffuse() {
@@ -39,7 +39,7 @@ JacobiDiffuse::JacobiDiffuse() {
 // ***************************************************************************************
 void JacobiDiffuse::diffuse(Field &out, const Field &in, const Field &b,
                             const real D, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     auto boundary = BoundaryController::getInstance();
     auto bsize_i = boundary->get_size_inner_list();
     auto bsize_b = boundary->get_size_boundary_list();
@@ -144,7 +144,7 @@ void JacobiDiffuse::diffuse(Field &out, const Field &in, const Field &b,
 void JacobiDiffuse::diffuse(
         Field &out, const Field &in, const Field &b,
         const real D, const Field &EV, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     auto boundary = BoundaryController::getInstance();
 
@@ -258,7 +258,7 @@ void JacobiDiffuse::JacobiStep(
         Field &out, Field const &in, Field const &b,
         real const alpha_x, real const alpha_y, real const alpha_z,
         real const reciprocal_beta, real const dsign, real const w, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny(out.get_level());
@@ -308,7 +308,7 @@ void JacobiDiffuse::JacobiStep(
         size_t level, Field &out, Field const &in, Field const &b,
         real const alpha_x, real const alpha_y, real const alpha_z,
         real const beta, real const dsign, real const w, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(level); //due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny(level);
@@ -354,7 +354,7 @@ void JacobiDiffuse::JacobiStep(
         Field &out, Field const &in, Field const &b,
         real const dsign, real const w, real const D,
         Field const &EV, real const dt, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx();
     const size_t Ny = domain->get_Ny();

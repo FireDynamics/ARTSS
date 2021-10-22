@@ -8,7 +8,7 @@
 #include "NSTempConSolver.h"
 #include "../pressure/VCycleMG.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryData.h"
 #include "SolverSelection.h"
 

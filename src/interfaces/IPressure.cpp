@@ -6,7 +6,7 @@
 
 #include "IPressure.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
 //======================================== Divergence ====================================
@@ -21,7 +21,7 @@
 void IPressure::divergence(
         Field &out,
         const Field &in_x, const Field &in_y, const Field &in_z, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     auto Nx = domain->get_Nx();
     auto Ny = domain->get_Ny();
@@ -87,7 +87,7 @@ void IPressure::projection(
         Field &out_u, Field &out_v, Field &out_w,
         const Field &in_u, const Field &in_v, const Field &in_w,
         const Field &in_p, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     auto Nx = domain->get_Nx();
     auto Ny = domain->get_Ny();

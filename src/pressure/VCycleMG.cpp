@@ -10,7 +10,7 @@
 #endif
 
 #include "VCycleMG.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 #include "../diffusion/ColoredGaussSeidelDiffuse.h"
 #include "../diffusion/JacobiDiffuse.h"
@@ -19,7 +19,7 @@
 
 
 VCycleMG::VCycleMG(Field const &out, Field const &b) :
-        m_levels(Domain::getInstance()->get_levels()),
+        m_levels(DomainData::getInstance()->get_levels()),
         m_n_cycle(Parameters::getInstance()->get_int("solver/pressure/n_cycle")),
         m_n_relax(Parameters::getInstance()->get_int("solver/pressure/diffusion/n_relax")),
         m_dt(Parameters::getInstance()->get_real("physical_parameters/dt")),
@@ -138,7 +138,7 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
     UpdateInput(out, b, sync);  // Update first
 
     Parameters *params = Parameters::getInstance();
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     const auto Nt = static_cast<size_t>(std::round(t / m_dt));
     size_t act_cycles = 0;
 
@@ -317,7 +317,7 @@ void VCycleMG::Smooth(Field &out, Field &tmp, Field const &b, const size_t level
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // ************************************************************************
 void VCycleMG::Residuum(Field &out, Field const &in, Field const &b, const size_t level, bool sync) {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
 
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(level);
@@ -368,7 +368,7 @@ void VCycleMG::Residuum(Field &out, Field const &in, Field const &b, const size_
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::Restrict(Field &out, Field const &in, const size_t level, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     // local variables and parameters for GPU
     // coarse grid
@@ -438,7 +438,7 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
 #ifndef  BENCHMARKING
     m_logger->debug("Prolongate");
 #endif
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
 
     // local variables and parameters for GPU
     // fine grid
@@ -559,7 +559,7 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::Solve(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
 #ifndef BENCHMARKING
     if (level < m_levels - 1) {
@@ -589,7 +589,7 @@ void VCycleMG::Solve(Field &out, Field &tmp, Field const &b, const size_t level,
 }
 
 void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     // local variables and parameters for GPU
     const real dx = domain->get_dx(level);
@@ -621,7 +621,7 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
 }
 
 void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(level);
@@ -687,7 +687,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
 }
 
 void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     // local variables and parameters for GPU
     const real dx = domain->get_dx(level);
@@ -727,7 +727,7 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
 }
 
 void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx(level);

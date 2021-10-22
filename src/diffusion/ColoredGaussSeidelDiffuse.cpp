@@ -11,7 +11,7 @@
 #include "ColoredGaussSeidelDiffuse.h"
 #include "../boundary/BoundaryController.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../utility/Utility.h"
 
 
@@ -48,7 +48,7 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
 void ColoredGaussSeidelDiffuse::diffuse(
         Field &out, const Field &, Field const &b,
         const real D, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
@@ -137,7 +137,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
 void ColoredGaussSeidelDiffuse::diffuse(
         Field &out, const Field &, const Field &b,
         const real D, const Field &EV, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
@@ -233,7 +233,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
         const real alpha_x, const real alpha_y, const real alpha_z,
         const real beta, const real dsign, const real w, bool) {
 
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local parameters for GPU
     const size_t nx = domain->get_Nx();
     const size_t ny = domain->get_Ny();
@@ -340,7 +340,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
         const Field &EV,
         const real dt, bool) {
 
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local parameters for GPU
     const size_t Nx = domain->get_Nx(out.get_level());
     const size_t Ny = domain->get_Ny(out.get_level());

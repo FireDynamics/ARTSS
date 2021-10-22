@@ -6,7 +6,7 @@
 //
 #include "FieldController.h"
 #include <string>
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
 FieldController::FieldController():

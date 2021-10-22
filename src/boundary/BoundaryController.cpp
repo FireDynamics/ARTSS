@@ -1,5 +1,5 @@
 /// \file       BoundaryController.cpp
-/// \brief      Controll class for boundary
+/// \brief      Controller class for boundary
 /// \date       Oct 01, 2020
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
@@ -16,12 +16,14 @@ BoundaryController::BoundaryController() {
 #endif
     m_bdc_boundary = new BoundaryDataController();
     read_XML();
+    size_t multigrid_level = DomainData::getInstance()->get_levels();
     if (m_number_of_obstacles + m_number_of_surfaces > 0) {
         m_multigrid = new Multigrid(m_number_of_surfaces, m_surface_list,
                                     m_number_of_obstacles, m_obstacle_list,
-                                    m_bdc_boundary, m_bdc_obstacles);
+                                    m_bdc_boundary, m_bdc_obstacles,
+                                    multigrid_level);
     } else {
-        m_multigrid = new Multigrid(m_bdc_boundary);
+        m_multigrid = new Multigrid(m_bdc_boundary, multigrid_level);
     }
 #ifndef BENCHMARKING
     print_boundaries();
@@ -182,7 +184,7 @@ BoundaryController *BoundaryController::getInstance() {
 void BoundaryController::print_boundaries() {
 #ifndef BENCHMARKING
     m_logger->info("-- Info summary");
-    Domain::getInstance()->print();
+    DomainData::getInstance()->print();
     m_bdc_boundary->print();
     for (size_t i = 0; i < m_number_of_obstacles; i++) {
         m_obstacle_list[i]->print();

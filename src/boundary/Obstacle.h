@@ -12,7 +12,7 @@
 
 #include "BoundaryData.h"
 #include "BoundaryDataController.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../utility/tinyxml2.h"
 #include "../utility/Utility.h"
 

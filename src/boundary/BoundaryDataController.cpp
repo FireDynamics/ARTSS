@@ -79,15 +79,13 @@ void BoundaryDataController::print() {
 // *************************************************************************************************
 void BoundaryDataController::apply_boundary_condition(
         Field &field,
-        size_t **index_fields,
-        const size_t *patch_start, const size_t *patch_end,
+        JoinedList **index_fields,
         bool sync) {
     FieldType field_type = field.get_type();
     if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {
         DomainBoundary::apply_boundary_condition(
                 field,
                 index_fields,
-                patch_start, patch_end,
                 m_boundary_data[field_type],
                 sync);
     }

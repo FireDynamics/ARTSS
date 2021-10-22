@@ -6,7 +6,7 @@
 
 #include "TimeIntegration.h"
 #include "utility/Parameters.h"
-#include "Domain.h"
+#include "DomainData.h"
 
 // ==================================== Constructor ====================================
 // ***************************************************************************************

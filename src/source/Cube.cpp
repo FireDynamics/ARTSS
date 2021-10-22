@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
 #include "Cube.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
 void Cube::update_source(Field &out, real) {
@@ -28,7 +28,7 @@ void Cube::set_up(
         real value,
         real x_start, real y_start, real z_start,
         real x_end, real y_end, real z_end) {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 

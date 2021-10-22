@@ -4,7 +4,7 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 #include "BoundaryData.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../utility/Utility.h"
 
 inline static const std::vector<std::string> patch_names = {"front", "back", "bottom", "top", "left", "right"};

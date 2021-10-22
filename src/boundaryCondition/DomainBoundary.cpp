@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "DomainBoundary.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 
 namespace DomainBoundary {
 namespace {
@@ -48,7 +48,7 @@ namespace {
     // *********************************************************************************************
     void apply_dirichlet(Field &field, size_t *d_patch, Patch patch,
                          const size_t patch_start, const size_t patch_end, real value) {
-        Domain *domain = Domain::getInstance();
+        DomainData *domain = DomainData::getInstance();
         size_t level = field.get_level();
         size_t reference_index = 0;
         int8_t sign_reference_index = POSITIVE_SIGN;
@@ -94,7 +94,7 @@ namespace {
     void apply_neumann(Field &field, size_t *d_patch, Patch patch,
                        size_t patch_start, size_t patch_end, real value) {
         size_t level = field.get_level();
-        Domain *domain = Domain::getInstance();
+        DomainData *domain = DomainData::getInstance();
         size_t reference_index = 0;
         int8_t sign_reference_index = POSITIVE_SIGN;
         switch (patch) {
@@ -141,7 +141,7 @@ namespace {
     void apply_periodic(Field &field, size_t *d_patch, Patch patch,
                         const size_t patch_start, const size_t patch_end) {
         size_t level = field.get_level();
-        Domain *domain = Domain::getInstance();
+        DomainData *domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx(level);
         size_t Ny = domain->get_Ny(level);
 
@@ -151,15 +151,15 @@ namespace {
         switch (patch) {
             case FRONT:
             case BACK:
-                reference_index = Nx * Ny * Domain::getInstance()->get_nz(level);
+                reference_index = Nx * Ny * DomainData::getInstance()->get_nz(level);
                 break;
             case BOTTOM:
             case TOP:
-                reference_index = Nx * Domain::getInstance()->get_ny(level);
+                reference_index = Nx * DomainData::getInstance()->get_ny(level);
                 break;
             case LEFT:
             case RIGHT:
-                reference_index = Domain::getInstance()->get_nx(level);
+                reference_index = DomainData::getInstance()->get_nx(level);
                 break;
             default:
 #ifndef BENCHMARKING
@@ -183,17 +183,16 @@ namespace {
 /// \brief  Applies boundary condition for domain boundary
 /// \param  data_field   Field
 /// \param  index_fields List of indices for each patch
-/// \param  patch_start List of start indices
-/// \param  patch_end List of end indices
 /// \param  boundary_data Boundary data_field object of Domain
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void apply_boundary_condition(Field &field, size_t **index_fields, const size_t *patch_starts,
-                              const size_t *patch_ends, BoundaryData *boundary_data, bool sync) {
+void apply_boundary_condition(Field &field, JoinedList **index_fields, BoundaryData *boundary_data, bool sync) {
     for (size_t i = 0; i < number_of_patches; i++) {
-        size_t *d_patch = *(index_fields + i);
-        size_t patch_start = *(patch_starts + i);
-        size_t patch_end = *(patch_ends + i);
+        size_t level = field.get_level();
+        JoinedList *jl = index_fields[i];
+        size_t *d_patch = jl->get_data();
+        size_t patch_start = jl->get_first_index(level);
+        size_t patch_end = jl->get_last_index(level);
         auto p = static_cast<Patch>(i);
         BoundaryCondition bc = boundary_data->get_boundary_condition(p);
         real value = 0;

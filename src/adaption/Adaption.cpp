@@ -16,13 +16,13 @@
 #include "Layers.h"
 #include "Vortex.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
 Adaption::Adaption(FieldController *field_controller) {
     m_field_controller = field_controller;
     auto params = Parameters::getInstance();
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     m_dynamic = (params->get("adaption/dynamic") == "Yes");
     std::string tmp = params->get("adaption/dynamic");
     m_filename = params->get_filename();
@@ -94,7 +94,7 @@ void Adaption::run(real) {
 /// \param  time timestep
 // ***************************************************************************************
 void Adaption::extractData(const std::string &filename, real height, real time) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     size_t x_start = 0;
     size_t x_end = domain->get_Nx();
     auto y = static_cast<size_t>(std::round((height - domain->get_Y1()) / domain->get_dy()));
@@ -129,7 +129,7 @@ void Adaption::extractData(const std::string &filename, real height, real time) 
 /// \param  filename  filename
 // ***************************************************************************************
 void Adaption::extractData(const std::string &filename) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
     size_t x_end = Nx;
@@ -169,7 +169,7 @@ void Adaption::applyChanges() {
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
 #endif
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     if (domain->resize(m_shift_x1, m_shift_x2, m_shift_y1, m_shift_y2, m_shift_z1, m_shift_z2)) {
         if (domain->get_X1() == domain->get_x1() &&
             domain->get_X2() == domain->get_x2() &&
@@ -230,7 +230,7 @@ bool Adaption::isUpdateNecessary() {
 /// \param len_e  size of arr_idx_expansion
 // ***************************************************************************************
 void Adaption::expand_x_direction(long shift, bool start, size_t *arr_idx_expansion, size_t len_e) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 #pragma acc data present(arr_idx_expansion[:len_e])
     {
         size_t j_start = domain->get_index_y1();
@@ -280,7 +280,7 @@ void Adaption::expand_x_direction(long shift, bool start, size_t *arr_idx_expans
 /// \param len_e  size of arr_idx_expansion
 // ***************************************************************************************
 void Adaption::expand_y_direction(long shift, bool start, size_t *arr_idx_expansion, size_t len_e) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
 #pragma acc data present(arr_idx_expansion[:len_e])
     {
@@ -329,7 +329,7 @@ void Adaption::expand_y_direction(long shift, bool start, size_t *arr_idx_expans
 /// \param len_e  size of arr_idx_reduction
 // ***************************************************************************************
 void Adaption::reduce_x_direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 #pragma acc data present(arr_idx_reduction[:len_r])
     {
         size_t j_start = domain->get_index_y1();
@@ -377,7 +377,7 @@ void Adaption::reduce_x_direction(long shift, bool start, size_t *arr_idx_reduct
 /// \param len_e  size of arr_idx_reduction
 // ***************************************************************************************
 void Adaption::reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 #pragma acc data present(arr_idx_reduction[:len_r])
     {
         size_t i_start = domain->get_index_x1();
@@ -426,7 +426,7 @@ void Adaption::reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduct
 /// \param  threshold precision of comparison
 // ***************************************************************************************
 bool Adaption::adapt_x_direction_serial(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
@@ -535,7 +535,7 @@ bool Adaption::adapt_x_direction_serial(const real *f, real check_value, size_t 
 /// \param  threshold precision of comparison
 // ***************************************************************************************
 bool Adaption::adapt_x_direction(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;
     size_t reduction_counter_start = 0;
@@ -631,7 +631,7 @@ bool Adaption::adapt_x_direction(const real *f, real check_value, size_t no_buff
 /// \param  threshold precision of comparison
 // ***************************************************************************************
 bool Adaption::adapt_y_direction_serial(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
@@ -741,7 +741,7 @@ bool Adaption::adapt_y_direction_serial(const real *f, real check_value, size_t 
 /// \param  threshold precision of comparison
 // ***************************************************************************************
 bool Adaption::adapt_y_direction(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;

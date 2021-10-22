@@ -4,36 +4,36 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include "Boundary.h"
+#include "Domain.h"
 #include <cmath>
 #include <string>
 #include "../field/Field.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-Boundary::Boundary(size_t level) {
-    m_level = level;
+Domain::Domain(size_t multigrid_level) :
+        m_multigrid_level(multigrid_level), m_size_boundary() {
     init(0);
     inner_cells();
 
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(Boundary).name());
+    m_logger = Utility::create_logger(typeid(Domain).name());
     print(0);
     control(0);
 #endif
 }
 
-Boundary::Boundary(
+Domain::Domain(
         Obstacle **obstacle_list,
         size_t number_of_obstacles,
         size_t size_obstacles,
-        size_t level) {
-    m_level = level;
+        size_t multigrid_level)  :
+        m_multigrid_level(multigrid_level), m_size_boundary() {
     init(size_obstacles);
     inner_cells(obstacle_list, number_of_obstacles);
 
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(Boundary).name());
+    m_logger = Utility::create_logger(typeid(Domain).name());
     print(size_obstacles);
     control(size_obstacles);
 #endif
@@ -45,32 +45,32 @@ Boundary::Boundary(
 /// \brief  Initialize member variables (arrays)
 /// \param  size_obstacles Amount of obstacle cells
 // *************************************************************************************************
-void Boundary::init(size_t size_obstacles) {
-    auto domain = Domain::getInstance();
+void Domain::init(size_t size_obstacles) {
+    auto domain = DomainData::getInstance();
 
-    const size_t Nx = domain->get_Nx(m_level);
-    const size_t Ny = domain->get_Ny(m_level);
-    const size_t Nz = domain->get_Nz(m_level);
+    const size_t Nx = domain->get_Nx(m_multigrid_level);
+    const size_t Ny = domain->get_Ny(m_multigrid_level);
+    const size_t Nz = domain->get_Nz(m_multigrid_level);
 
-    m_size_boundary_list = 2 * Nx * Ny + 2 * (Nz - 2) * (Ny - 2) + 2 * (Nz - 2) * Nx;
-    m_boundary_list = new size_t[m_size_boundary_list];
+    m_size_domain_list = 2 * Nx * Ny + 2 * (Nz - 2) * (Ny - 2) + 2 * (Nz - 2) * Nx;
+    m_domain_list = new size_t[m_size_domain_list];
 
-    m_size_boundary_front = Ny * Nx;
-    m_size_boundary_back = Ny * Nx;
-    m_boundary_front = new size_t[m_size_boundary_front];
-    m_boundary_back = new size_t[m_size_boundary_back];
+    m_size_boundary[FRONT] = Ny * Nx;
+    m_size_boundary[BACK] = Ny * Nx;
+    m_boundary[FRONT] = new size_t[m_size_boundary[FRONT]];
+    m_boundary[BACK] = new size_t[m_size_boundary[BACK]];
 
-    m_size_boundary_top = Nz * Nx;
-    m_size_boundary_bottom = Nz * Nx;
-    m_boundary_bottom = new size_t[m_size_boundary_bottom];
-    m_boundary_top = new size_t[m_size_boundary_top];
+    m_size_boundary[TOP] = Nz * Nx;
+    m_size_boundary[BOTTOM] = Nz * Nx;
+    m_boundary[BOTTOM] = new size_t[m_size_boundary[BOTTOM]];
+    m_boundary[TOP] = new size_t[m_size_boundary[TOP]];
 
-    m_size_boundary_left = Nz * Ny;
-    m_size_boundary_right = Nz * Ny;
-    m_boundary_left = new size_t[m_size_boundary_left];
-    m_boundary_right = new size_t[m_size_boundary_right];
+    m_size_boundary[LEFT] = Nz * Ny;
+    m_size_boundary[RIGHT] = Nz * Ny;
+    m_boundary[LEFT] = new size_t[m_size_boundary[LEFT]];
+    m_boundary[RIGHT] = new size_t[m_size_boundary[RIGHT]];
 
-    m_size_inner_list = domain->get_nx(m_level) * domain->get_ny(m_level) * domain->get_nz(m_level) - size_obstacles;
+    m_size_inner_list = domain->get_nx(m_multigrid_level) * domain->get_ny(m_multigrid_level) * domain->get_nz(m_multigrid_level) - size_obstacles;
     m_inner_list = new size_t[m_size_inner_list];
 
     boundary_cells();
@@ -82,32 +82,32 @@ void Boundary::init(size_t size_obstacles) {
 /// \brief  Prints boundary infos
 /// \param  size_obstacles Amount of obstacle cells
 // *************************************************************************************************
-void Boundary::print(size_t size_obstacles) {
+void Domain::print(size_t size_obstacles) {
 #ifndef BENCHMARKING
-    m_logger->debug("################ BOUNDARY ################");
-    m_logger->debug("level: {}", m_level);
-    m_logger->debug("list size of bList: {}", m_size_boundary_list);
-    m_logger->debug("Boundary starts with {} and ends with {}",
-                    *(m_boundary_list + 0), *(m_boundary_list + m_size_boundary_list - 1));
-    m_logger->debug("list size of size_z: {}", m_size_boundary_front);
+    m_logger->debug("################ DOMAIN ################");
+    m_logger->debug("level: {}", m_multigrid_level);
+    m_logger->debug("list size of bList: {}", m_size_domain_list);
+    m_logger->debug("Domain starts with {} and ends with {}",
+                    *(m_domain_list + 0), *(m_domain_list + m_size_domain_list - 1));
+    m_logger->debug("list size of size_z: {}", m_size_boundary[FRONT]);
     m_logger->debug("Front starts with {} and ends with {}",
-                    *(m_boundary_front + 0), *(m_boundary_list + m_size_boundary_list - 1));
+                    *(m_boundary[FRONT] + 0), *(m_domain_list + m_size_domain_list - 1));
     m_logger->debug("Back starts with {} and ends with {}",
-                    *(m_boundary_back + 0), *(m_boundary_list + m_size_boundary_list - 1));
-    m_logger->debug("list size of size_y: ", m_size_boundary_bottom);
+                    *(m_boundary[BACK] + 0), *(m_domain_list + m_size_domain_list - 1));
+    m_logger->debug("list size of size_y: ", m_size_boundary[BOTTOM]);
     m_logger->debug("Bottom starts with {} and ends with {}",
-                    *(m_boundary_bottom + 0), *(m_boundary_bottom + m_size_boundary_bottom - 1));
+                    *(m_boundary[BOTTOM] + 0), *(m_boundary[BOTTOM] + m_size_boundary[BOTTOM] - 1));
     m_logger->debug("Top starts with {} and ends with {}",
-                    *(m_boundary_top + 0), *(m_boundary_top + m_size_boundary_top - 1));
-    m_logger->debug("list size of size_x: ", m_size_boundary_left);
+                    *(m_boundary[TOP] + 0), *(m_boundary[TOP] + m_size_boundary[TOP] - 1));
+    m_logger->debug("list size of size_x: ", m_size_boundary[LEFT]);
     m_logger->debug("Left starts with {} and ends with {}",
-                    *(m_boundary_left + 0), *(m_boundary_left + m_size_boundary_left - 1));
+                    *(m_boundary[LEFT] + 0), *(m_boundary[LEFT] + m_size_boundary[LEFT] - 1));
     m_logger->debug("Right starts with {} and ends with {}",
-                    *(m_boundary_right + 0), *(m_boundary_right + m_size_boundary_right - 1));
+                    *(m_boundary[RIGHT] + 0), *(m_boundary[RIGHT] + m_size_boundary[RIGHT] - 1));
     m_logger->debug("list size of innerList: {} obstacle size: {}", m_size_inner_list, size_obstacles);
     m_logger->debug("Inner starts with {} and ends with {}",
                     *(m_inner_list + 0), *(m_inner_list + m_size_inner_list - 1));
-    m_logger->debug("--------------- END BOUNDARY ---------------");
+    m_logger->debug("--------------- END DOMAIN ---------------");
 #endif
 }
 
@@ -116,37 +116,37 @@ void Boundary::print(size_t size_obstacles) {
 /// \brief  Units test emergency solution
 /// \param  size_obstacles Amount of obstacle cells
 // *************************************************************************************************
-void Boundary::control(size_t size_obstacles) {
+void Domain::control(size_t size_obstacles) {
     // TODO(n16h7): clean up
     std::string message;
-    Domain *domain = Domain::getInstance();
-    size_t size = domain->get_size(m_level);
+    DomainData *domain = DomainData::getInstance();
+    size_t size = domain->get_size(m_multigrid_level);
 
-    size_t nx = domain->get_nx(m_level);
-    size_t ny = domain->get_ny(m_level);
-    size_t nz = domain->get_nz(m_level);
-    size_t Nx = domain->get_Nx(m_level);
-    size_t Ny = domain->get_Ny(m_level);
-    size_t all_cells = m_size_boundary_front + m_size_boundary_back
-                       + m_size_boundary_bottom + m_size_boundary_top
-                       + m_size_boundary_left + m_size_boundary_right;
+    size_t nx = domain->get_nx(m_multigrid_level);
+    size_t ny = domain->get_ny(m_multigrid_level);
+    size_t nz = domain->get_nz(m_multigrid_level);
+    size_t Nx = domain->get_Nx(m_multigrid_level);
+    size_t Ny = domain->get_Ny(m_multigrid_level);
+    size_t all_cells = m_size_boundary[FRONT] + m_size_boundary[BACK]
+                       + m_size_boundary[BOTTOM] + m_size_boundary[TOP]
+                       + m_size_boundary[LEFT] + m_size_boundary[RIGHT];
     size_t duplicates = 4 * Nx + 4 * Ny + 4 * nz;
-    if (m_size_boundary_list != all_cells - duplicates) {
-        message = message + "list size of all boundary cells does not fit with sum of it parts. Boundary List: "
-                  + std::to_string(m_size_boundary_list) + " sum: " + std::to_string(all_cells)
+    if (m_size_domain_list != all_cells - duplicates) {
+        message = message + "list size of all domain cells does not fit with sum of it parts. Domain List: "
+                  + std::to_string(m_size_domain_list) + " sum: " + std::to_string(all_cells)
                   + " duplicates: " + std::to_string(duplicates) + "\n";
-        message = message + "Front: " + std::to_string(m_size_boundary_front)
-                          + " Back: " + std::to_string(m_size_boundary_back)
-                          + " Bottom: " + std::to_string(m_size_boundary_bottom)
-                          + " Top: " + std::to_string(m_size_boundary_top)
-                          + " Left: " + std::to_string(m_size_boundary_left)
-                          + " Right: " + std::to_string(m_size_boundary_right) + "\n";
+        message = message + "Front: " + std::to_string(m_size_boundary[FRONT])
+                          + " Back: " + std::to_string(m_size_boundary[BACK])
+                          + " Bottom: " + std::to_string(m_size_boundary[BOTTOM])
+                          + " Top: " + std::to_string(m_size_boundary[TOP])
+                          + " Left: " + std::to_string(m_size_boundary[LEFT])
+                          + " Right: " + std::to_string(m_size_boundary[RIGHT]) + "\n";
     }
-    if (m_size_boundary_list + m_size_inner_list + size_obstacles != size) {
+    if (m_size_domain_list + m_size_inner_list + size_obstacles != size) {
         message = message + "list size of all domain cells is not equal with domain size."
-                            "Boundary List: " + std::to_string(m_size_boundary_list)
+                            "Domain List: " + std::to_string(m_size_domain_list)
                             + " Inner List: " + std::to_string(m_size_inner_list)
-                            + " Domain Size: " + std::to_string(domain->get_size(m_level))
+                            + " Domain Size: " + std::to_string(domain->get_size(m_multigrid_level))
                             + " Obstacle size: " + std::to_string(size_obstacles) + "\n";
     }
     size_t innerCells = nz * ny * nx;
@@ -157,135 +157,135 @@ void Boundary::control(size_t size_obstacles) {
                             + " Obstacle size: " + std::to_string(size_obstacles) + "\n";
     }
     size_t startIndex = IX(
-            (domain->get_index_x1(m_level) - 1),
-            (domain->get_index_y1(m_level) - 1),
-            (domain->get_index_z1(m_level) - 1),
+            (domain->get_index_x1(m_multigrid_level) - 1),
+            (domain->get_index_y1(m_multigrid_level) - 1),
+            (domain->get_index_z1(m_multigrid_level) - 1),
             Nx, Ny);
     size_t endIndex = IX(
-            (domain->get_index_x2(m_level) + 1),
-            (domain->get_index_y2(m_level) + 1),
-            (domain->get_index_z2(m_level) + 1),
+            (domain->get_index_x2(m_multigrid_level) + 1),
+            (domain->get_index_y2(m_multigrid_level) + 1),
+            (domain->get_index_z2(m_multigrid_level) + 1),
             Nx, Ny);
-    if (*(m_boundary_list) != startIndex || *(m_boundary_list + m_size_boundary_list - 1) != endIndex) {
-        message = message + "first or last index of boundary list not correct ("
+    if (*(m_domain_list) != startIndex || *(m_domain_list + m_size_domain_list - 1) != endIndex) {
+        message = message + "first or last index of domain list not correct ("
                   + std::to_string(startIndex) + "|"
-                  + std::to_string(*(m_boundary_list)) + ")("
+                  + std::to_string(*(m_domain_list)) + ")("
                   + std::to_string(endIndex) + "|"
-                  + std::to_string(*(m_boundary_list + m_size_boundary_list - 1)) + ")\n";
+                  + std::to_string(*(m_domain_list + m_size_domain_list - 1)) + ")\n";
     }
     size_t front2 = IX(
-            domain->get_index_x2(m_level) + 1,
-            domain->get_index_y2(m_level) + 1,
-            domain->get_index_z1(m_level) - 1,
+            domain->get_index_x2(m_multigrid_level) + 1,
+            domain->get_index_y2(m_multigrid_level) + 1,
+            domain->get_index_z1(m_multigrid_level) - 1,
             Nx, Ny);
-    if (*(m_boundary_front) != startIndex || *(m_boundary_front + m_size_boundary_front - 1) != front2) {
+    if (*(m_boundary[FRONT]) != startIndex || *(m_boundary[FRONT] + m_size_boundary[FRONT] - 1) != front2) {
         message = message + "first or last index of boundary Front not correct ("
                   + std::to_string(startIndex) + "|"
-                  + std::to_string(*(m_boundary_front)) + ")("
+                  + std::to_string(*(m_boundary[FRONT])) + ")("
                   + std::to_string(front2) + "|"
-                  + std::to_string(*(m_boundary_front + m_size_boundary_front - 1)) + ")\n";
+                  + std::to_string(*(m_boundary[FRONT] + m_size_boundary[FRONT] - 1)) + ")\n";
     }
     size_t back1 = IX(
-            domain->get_index_x1(m_level) - 1,
-            domain->get_index_y1(m_level) - 1,
-            domain->get_index_z2(m_level) + 1,
+            domain->get_index_x1(m_multigrid_level) - 1,
+            domain->get_index_y1(m_multigrid_level) - 1,
+            domain->get_index_z2(m_multigrid_level) + 1,
             Nx, Ny);
-    if (*(m_boundary_back) != back1 || *(m_boundary_back + m_size_boundary_back - 1) != endIndex) {
+    if (*(m_boundary[BACK]) != back1 || *(m_boundary[BACK] + m_size_boundary[BACK] - 1) != endIndex) {
         message = message + "first or last index of boundary Back not correct ("
                   + std::to_string(back1) + "|"
-                  + std::to_string(*(m_boundary_back)) + ")("
+                  + std::to_string(*(m_boundary[BACK])) + ")("
                   + std::to_string(endIndex) + "|"
-                  + std::to_string(*(m_boundary_back + m_size_boundary_back - 1)) + ")\n";
+                  + std::to_string(*(m_boundary[BACK] + m_size_boundary[BACK] - 1)) + ")\n";
     }
     size_t bottom2 = IX(
-            domain->get_index_x2(m_level) + 1,
-            domain->get_index_y1(m_level) - 1,
-            domain->get_index_z2(m_level) + 1,
+            domain->get_index_x2(m_multigrid_level) + 1,
+            domain->get_index_y1(m_multigrid_level) - 1,
+            domain->get_index_z2(m_multigrid_level) + 1,
             Nx, Ny);
-    if (*(m_boundary_bottom) != startIndex || *(m_boundary_bottom + m_size_boundary_bottom - 1) != bottom2) {
+    if (*(m_boundary[BOTTOM]) != startIndex || *(m_boundary[BOTTOM] + m_size_boundary[BOTTOM] - 1) != bottom2) {
         message = message + "first or last index of boundary Bottom not correct ("
                   + std::to_string(startIndex) + "|"
-                  + std::to_string(*(m_boundary_bottom)) + ")("
+                  + std::to_string(*(m_boundary[BOTTOM])) + ")("
                   + std::to_string(bottom2) + "|"
-                  + std::to_string(*(m_boundary_bottom + m_size_boundary_bottom - 1)) + ")\n";
+                  + std::to_string(*(m_boundary[BOTTOM] + m_size_boundary[BOTTOM] - 1)) + ")\n";
     }
     size_t top1 = IX(
-            domain->get_index_x1(m_level) - 1,
-            domain->get_index_y2(m_level) + 1,
-            domain->get_index_z1(m_level) - 1,
+            domain->get_index_x1(m_multigrid_level) - 1,
+            domain->get_index_y2(m_multigrid_level) + 1,
+            domain->get_index_z1(m_multigrid_level) - 1,
             Nx, Ny);
-    if (*(m_boundary_top) != top1 || *(m_boundary_top + m_size_boundary_top - 1) != endIndex) {
+    if (*(m_boundary[TOP]) != top1 || *(m_boundary[TOP] + m_size_boundary[TOP] - 1) != endIndex) {
         message = message + "first or last index of boundary Top not correct ("
                   + std::to_string(top1) + "|"
-                  + std::to_string(*(m_boundary_top)) + ")("
+                  + std::to_string(*(m_boundary[TOP])) + ")("
                   + std::to_string(endIndex) + "|"
-                  + std::to_string(*(m_boundary_top + m_size_boundary_top - 1)) + ")\n";
+                  + std::to_string(*(m_boundary[TOP] + m_size_boundary[TOP] - 1)) + ")\n";
     }
     size_t left2 = IX(
-            domain->get_index_x1(m_level) - 1,
-            domain->get_index_y2(m_level) + 1,
-            domain->get_index_z2(m_level) + 1,
+            domain->get_index_x1(m_multigrid_level) - 1,
+            domain->get_index_y2(m_multigrid_level) + 1,
+            domain->get_index_z2(m_multigrid_level) + 1,
             Nx, Ny);
-    if (*(m_boundary_left) != startIndex || *(m_boundary_left + m_size_boundary_left - 1) != left2) {
+    if (*(m_boundary[LEFT]) != startIndex || *(m_boundary[LEFT] + m_size_boundary[LEFT] - 1) != left2) {
         message = message + "first or last index of boundary Left not correct ("
                   + std::to_string(startIndex) + "|"
-                  + std::to_string(*(m_boundary_left)) + ")("
+                  + std::to_string(*(m_boundary[LEFT])) + ")("
                   + std::to_string(left2) + "|"
-                  + std::to_string(*(m_boundary_left + m_size_boundary_left - 1)) + ")\n";
+                  + std::to_string(*(m_boundary[LEFT] + m_size_boundary[LEFT] - 1)) + ")\n";
     }
     size_t right1 = IX(
-            domain->get_index_x2(m_level) + 1,
-            domain->get_index_y1(m_level) - 1,
-            domain->get_index_z1(m_level) - 1,
+            domain->get_index_x2(m_multigrid_level) + 1,
+            domain->get_index_y1(m_multigrid_level) - 1,
+            domain->get_index_z1(m_multigrid_level) - 1,
             Nx, Ny);
-    if (*(m_boundary_right) != right1 || *(m_boundary_right + m_size_boundary_right - 1) != endIndex) {
+    if (*(m_boundary[RIGHT]) != right1 || *(m_boundary[RIGHT] + m_size_boundary[RIGHT] - 1) != endIndex) {
         message = message + "first or last index of boundary Right not correct ("
                   + std::to_string(right1) + "|"
-                  + std::to_string(*(m_boundary_right)) + ")("
+                  + std::to_string(*(m_boundary[RIGHT])) + ")("
                   + std::to_string(endIndex) + "|"
-                  + std::to_string(*(m_boundary_right + m_size_boundary_right - 1)) + ")\n";
+                  + std::to_string(*(m_boundary[RIGHT] + m_size_boundary[RIGHT] - 1)) + ")\n";
     }
 
-    for (size_t i = 1; i < m_size_boundary_list; i++) {
-        int diff = static_cast<int>(m_boundary_list[i] - m_boundary_list[i - 1]);
+    for (size_t i = 1; i < m_size_domain_list; i++) {
+        int diff = static_cast<int>(m_domain_list[i] - m_domain_list[i - 1]);
         if (diff < 0) {
             message = message + "sorting error at index "
-                    + std::to_string(i - 1) + "|"
-                    + std::to_string(i) + " with values "
-                    + std::to_string(m_boundary_list[i - 1]) + "|"
-                    + std::to_string(m_boundary_list[i]) + "\n";
+                      + std::to_string(i - 1) + "|"
+                      + std::to_string(i) + " with values "
+                      + std::to_string(m_domain_list[i - 1]) + "|"
+                      + std::to_string(m_domain_list[i]) + "\n";
         }
     }
     if (!message.empty()) {
-        message = "############### BOUNDARY CONTROL ###############\n-- level "
-                  + std::to_string(m_level) + "\n" + message
-                  + "--------------- END BOUNDARY CONTROL ---------------";
+        message = "############### DOMAIN CONTROL ###############\n-- level "
+                  + std::to_string(m_multigrid_level) + "\n" + message
+                  + "--------------- END DOMAIN CONTROL ---------------";
 #ifndef BENCHMARKING
         m_logger->warn(message);
 #endif
     }
 }
 
-Boundary::~Boundary() {
+Domain::~Domain() {
     delete[] m_inner_list;
-    delete[] m_boundary_list;
-    delete[] m_boundary_front;
-    delete[] m_boundary_back;
-    delete[] m_boundary_top;
-    delete[] m_boundary_bottom;
-    delete[] m_boundary_left;
-    delete[] m_boundary_right;
+    delete[] m_domain_list;
+    delete[] m_boundary[FRONT];
+    delete[] m_boundary[BACK];
+    delete[] m_boundary[TOP];
+    delete[] m_boundary[BOTTOM];
+    delete[] m_boundary[LEFT];
+    delete[] m_boundary[RIGHT];
 }
 
 //======================================== Boundary cells ==========================================
 // *************************************************************************************************
 /// \brief  Creates lists of indices of boundary cells
 // *************************************************************************************************
-void Boundary::boundary_cells() {
-    auto domain = Domain::getInstance();
+void Domain::boundary_cells() {
+    auto domain = DomainData::getInstance();
 
-    const size_t Nx = domain->get_Nx(m_level);
-    const size_t Ny = domain->get_Ny(m_level);
+    const size_t Nx = domain->get_Nx(m_multigrid_level);
+    const size_t Ny = domain->get_Ny(m_multigrid_level);
 
     // DETAILED and CONCATENATED LISTS
     // BOUNDARY
@@ -294,14 +294,14 @@ void Boundary::boundary_cells() {
     // TODO(issue 86): New method for computational domain -> redefine XML usage of boundaries
 
     // start indices for computational domain minus 1 for ghost cells
-    size_t x1 = domain->get_index_x1(m_level) - 1;
-    size_t y1 = domain->get_index_y1(m_level) - 1;
-    size_t z1 = domain->get_index_z1(m_level) - 1;
+    size_t x1 = domain->get_index_x1(m_multigrid_level) - 1;
+    size_t y1 = domain->get_index_y1(m_multigrid_level) - 1;
+    size_t z1 = domain->get_index_z1(m_multigrid_level) - 1;
 
     // end indices for computational domain plus 1 for ghost cells
-    size_t x2 = domain->get_index_x2(m_level) + 1;
-    size_t y2 = domain->get_index_y2(m_level) + 1;
-    size_t z2 = domain->get_index_z2(m_level) + 1;
+    size_t x2 = domain->get_index_x2(m_multigrid_level) + 1;
+    size_t y2 = domain->get_index_y2(m_multigrid_level) + 1;
+    size_t z2 = domain->get_index_z2(m_multigrid_level) + 1;
 
     // fill boundaryList with boundary indices of computational domain (sorted)
     size_t counter = 0;
@@ -310,7 +310,7 @@ void Boundary::boundary_cells() {
     for (size_t j = y1; j <= y2; ++j) {
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, j, z1, Nx, Ny);
-            *(m_boundary_list + counter) = idx;
+            *(m_domain_list + counter) = idx;
             counter++;
         }
     }
@@ -319,23 +319,23 @@ void Boundary::boundary_cells() {
         // bottom stride
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, y1, k, Nx, Ny);
-            *(m_boundary_list + counter) = idx;
+            *(m_domain_list + counter) = idx;
             counter++;
         }
         // cell on the left and on the right
         for (size_t j = y1 + 1; j < y2; ++j) {
             size_t idx = IX(x1, j, k, Nx, Ny);
-            *(m_boundary_list + counter) = idx;
+            *(m_domain_list + counter) = idx;
             counter++;
 
             idx = IX(x2, j, k, Nx, Ny);
-            *(m_boundary_list + counter) = idx;
+            *(m_domain_list + counter) = idx;
             counter++;
         }
         // top stride
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, y2, k, Nx, Ny);
-            *(m_boundary_list + counter) = idx;
+            *(m_domain_list + counter) = idx;
             counter++;
         }
     }
@@ -343,7 +343,7 @@ void Boundary::boundary_cells() {
     for (size_t j = y1; j <= y2; ++j) {
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, j, z2, Nx, Ny);
-            *(m_boundary_list + counter) = idx;
+            *(m_domain_list + counter) = idx;
             counter++;
         }
     }
@@ -353,10 +353,10 @@ void Boundary::boundary_cells() {
     for (size_t j = y1; j <= y2; ++j) {
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, j, z1, Nx, Ny);
-            *(m_boundary_front + counter) = idx;
+            *(m_boundary[FRONT] + counter) = idx;
 
             idx = IX(i, j, z2, Nx, Ny);
-            *(m_boundary_back + counter) = idx;
+            *(m_boundary[BACK] + counter) = idx;
             counter++;
         }
     }
@@ -366,10 +366,10 @@ void Boundary::boundary_cells() {
     for (size_t k = z1; k <= z2; ++k) {
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, y1, k, Nx, Ny);
-            *(m_boundary_bottom + counter) = idx;
+            *(m_boundary[BOTTOM] + counter) = idx;
 
             idx = IX(i, y2, k, Nx, Ny);
-            *(m_boundary_top + counter) = idx;
+            *(m_boundary[TOP] + counter) = idx;
             counter++;
         }
     }
@@ -379,10 +379,10 @@ void Boundary::boundary_cells() {
     for (size_t k = z1; k <= z2; ++k) {
         for (size_t j = y1; j <= y2; ++j) {
             size_t idx = IX(x1, j, k, Nx, Ny);
-            *(m_boundary_left + counter) = idx;
+            *(m_boundary[LEFT] + counter) = idx;
 
             idx = IX(x2, j, k, Nx, Ny);
-            *(m_boundary_right + counter) = idx;
+            *(m_boundary[RIGHT] + counter) = idx;
             counter++;
         }
     }
@@ -394,17 +394,17 @@ void Boundary::boundary_cells() {
 /// \param  obstacle_list List of all obstacles of each multigrid level
 /// \param  number_of_obstacles Amount of obstacles
 // *************************************************************************************************
-void Boundary::inner_cells(Obstacle **obstacle_list, size_t number_of_obstacles) {
-    Domain *domain = Domain::getInstance();
-    size_t k1 = domain->get_index_z1(m_level);
-    size_t j1 = domain->get_index_y1(m_level);
-    size_t i1 = domain->get_index_x1(m_level);
-    size_t k2 = domain->get_index_z2(m_level);
-    size_t j2 = domain->get_index_y2(m_level);
-    size_t i2 = domain->get_index_x2(m_level);
+void Domain::inner_cells(Obstacle **obstacle_list, size_t number_of_obstacles) {
+    DomainData *domain = DomainData::getInstance();
+    size_t k1 = domain->get_index_z1(m_multigrid_level);
+    size_t j1 = domain->get_index_y1(m_multigrid_level);
+    size_t i1 = domain->get_index_x1(m_multigrid_level);
+    size_t k2 = domain->get_index_z2(m_multigrid_level);
+    size_t j2 = domain->get_index_y2(m_multigrid_level);
+    size_t i2 = domain->get_index_x2(m_multigrid_level);
 
-    size_t Nx = domain->get_Nx(m_level);
-    size_t Ny = domain->get_Ny(m_level);
+    size_t Nx = domain->get_Nx(m_multigrid_level);
+    size_t Ny = domain->get_Ny(m_multigrid_level);
 
     size_t counter = 0;
     size_t counter_obstacle = 0;
@@ -433,17 +433,17 @@ void Boundary::inner_cells(Obstacle **obstacle_list, size_t number_of_obstacles)
 // *************************************************************************************************
 /// \brief  Creates lists of indices of inner cells without obstacles
 // *************************************************************************************************
-void Boundary::inner_cells() {
-    Domain *domain = Domain::getInstance();
-    size_t k1 = domain->get_index_z1(m_level);
-    size_t j1 = domain->get_index_y1(m_level);
-    size_t i1 = domain->get_index_x1(m_level);
-    size_t k2 = domain->get_index_z2(m_level);
-    size_t j2 = domain->get_index_y2(m_level);
-    size_t i2 = domain->get_index_x2(m_level);
+void Domain::inner_cells() {
+    DomainData *domain = DomainData::getInstance();
+    size_t k1 = domain->get_index_z1(m_multigrid_level);
+    size_t j1 = domain->get_index_y1(m_multigrid_level);
+    size_t i1 = domain->get_index_x1(m_multigrid_level);
+    size_t k2 = domain->get_index_z2(m_multigrid_level);
+    size_t j2 = domain->get_index_y2(m_multigrid_level);
+    size_t i2 = domain->get_index_x2(m_multigrid_level);
 
-    size_t Nx = domain->get_Nx(m_level);
-    size_t Ny = domain->get_Ny(m_level);
+    size_t Nx = domain->get_Nx(m_multigrid_level);
+    size_t Ny = domain->get_Ny(m_multigrid_level);
 
     size_t counter = 0;
     for (size_t k = k1; k <= k2; ++k) {
@@ -463,7 +463,7 @@ void Boundary::inner_cells() {
 /// \param  obstacle_list List of all obstacles of each multigrid level
 /// \param  number_of_obstacles Number of obstacles
 // *************************************************************************************************
-void Boundary::update_lists(Obstacle **obstacle_list, size_t number_of_obstacles, size_t size_obstacles) {
+void Domain::update_lists(Obstacle **obstacle_list, size_t number_of_obstacles, size_t size_obstacles) {
     clear_lists();
     init(size_obstacles);
     inner_cells(obstacle_list, number_of_obstacles);
@@ -473,7 +473,7 @@ void Boundary::update_lists(Obstacle **obstacle_list, size_t number_of_obstacles
 // *************************************************************************************************
 /// \brief  Updates lists of indices
 // *************************************************************************************************
-void Boundary::update_lists() {
+void Domain::update_lists() {
     clear_lists();
     init(0);
     inner_cells();
@@ -483,13 +483,13 @@ void Boundary::update_lists() {
 // *************************************************************************************************
 /// \brief  removes all allocated arrays
 // *************************************************************************************************
-void Boundary::clear_lists() {
+void Domain::clear_lists() {
     delete[] m_inner_list;
-    delete[] m_boundary_list;
-    delete[] m_boundary_front;
-    delete[] m_boundary_back;
-    delete[] m_boundary_top;
-    delete[] m_boundary_bottom;
-    delete[] m_boundary_left;
-    delete[] m_boundary_right;
+    delete[] m_domain_list;
+    delete[] m_boundary[FRONT];
+    delete[] m_boundary[BACK];
+    delete[] m_boundary[BOTTOM];
+    delete[] m_boundary[TOP];
+    delete[] m_boundary[LEFT];
+    delete[] m_boundary[RIGHT];
 }

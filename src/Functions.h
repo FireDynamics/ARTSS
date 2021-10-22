@@ -8,7 +8,7 @@
 #define ARTSS_FUNCTIONS_H_
 
 #include "field/Field.h"
-#include "Domain.h"
+#include "DomainData.h"
 #include <string>
 
 struct FunctionNames{

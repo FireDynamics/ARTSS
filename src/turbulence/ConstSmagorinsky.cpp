@@ -12,7 +12,7 @@
 
 #include "ConstSmagorinsky.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
 ConstSmagorinsky::ConstSmagorinsky() {
@@ -35,7 +35,7 @@ void ConstSmagorinsky::calc_turbulent_viscosity(
             Field &ev,
             Field const &in_u, Field const &in_v, Field const &in_w,
             bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 #pragma acc data present(ev, in_u, in_v, in_w)
     {
         const size_t Nx = domain->get_Nx();

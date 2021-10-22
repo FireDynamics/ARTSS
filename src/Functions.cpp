@@ -10,7 +10,7 @@
 
 #include "Functions.h"
 #include "utility/Parameters.h"
-#include "Domain.h"
+#include "DomainData.h"
 #include "utility/Utility.h"
 #include "boundary/BoundaryController.h"
 
@@ -44,7 +44,7 @@ namespace Functions {
 /// \param  t time
 // ***************************************************************************************
     void Beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -115,7 +115,7 @@ namespace Functions {
 /// \param  out_x  pressure
 // ***************************************************************************************
     void BeltramiBC_p(Field &out_x) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -171,7 +171,7 @@ namespace Functions {
 /// \param  t time
 // ***************************************************************************************
     void BeltramiBC_u(Field &out_x, real t) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -223,7 +223,7 @@ namespace Functions {
 /// \param  t time
 // ***************************************************************************************
     void BeltramiBC_v(Field &out_x, real t) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -275,7 +275,7 @@ namespace Functions {
 /// \param  t time
 // ***************************************************************************************
     void BeltramiBC_w(Field &out_x, real t) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -362,7 +362,7 @@ namespace Functions {
 /// \param  t   time
 // ***************************************************************************************
     void BuoyancyMMS(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -423,7 +423,7 @@ namespace Functions {
 /// \param  t time
 // ***************************************************************************************
     void BuoyancyST_MMS(Field &out, real t) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -522,7 +522,7 @@ namespace Functions {
 /// \param  t   time
 // ***************************************************************************************
     void ExpSinusProd(Field &out, real t) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -582,7 +582,7 @@ namespace Functions {
 /// \param  t   time
 // ***************************************************************************************
     void ExpSinusSum(Field &out_x, Field &out_y, Field &out_z, real t) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
         size_t Nz = domain->get_Nz();
@@ -670,7 +670,7 @@ namespace Functions {
 /// \param  out velocity
 // ***************************************************************************************
     void FacSinSinSin(Field &out) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -727,7 +727,7 @@ namespace Functions {
 /// \param  t time
 // ***************************************************************************************
     void GaussBubble(Field &out, real t) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -791,7 +791,7 @@ namespace Functions {
 /// \param  out temperature
 // ***************************************************************************************
     void Layers(Field &out) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         auto params = Parameters::getInstance();
         int n_layers = params->get_int("initial_conditions/n_layers");
 
@@ -986,7 +986,7 @@ namespace Functions {
 /// \param  out velocity
 // ***************************************************************************************
     void Hat(Field &out) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -1066,7 +1066,7 @@ namespace Functions {
             const size_t index_y1, const size_t index_y2,
             const size_t index_z1, const size_t index_z2,
             real value) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
 
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -1091,7 +1091,7 @@ namespace Functions {
 /// \param  t   time
 // ***************************************************************************************
     void McDermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -1183,7 +1183,7 @@ namespace Functions {
 /// \param  out   pressure
 // ***************************************************************************************
     void SinSinSin(Field &out) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -1263,7 +1263,7 @@ namespace Functions {
 /// \param  out_p    pressure
 // ***************************************************************************************
     void Vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 
@@ -1335,7 +1335,7 @@ namespace Functions {
     }
 
     void VortexY(Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
 

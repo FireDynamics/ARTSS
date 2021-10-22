@@ -19,7 +19,7 @@
 #include "SLAdvect.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 
 SLAdvect::SLAdvect() {
     m_dt = Parameters::getInstance()->get_real("physical_parameters/dt");
@@ -38,7 +38,7 @@ SLAdvect::SLAdvect() {
 void SLAdvect::advect(Field &out, const Field &in,
                       const Field &u_vel, const Field &v_vel, const Field &w_vel,
                       bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();

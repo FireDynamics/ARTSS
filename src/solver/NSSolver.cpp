@@ -7,7 +7,7 @@
 #include "NSSolver.h"
 #include "../pressure/VCycleMG.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 

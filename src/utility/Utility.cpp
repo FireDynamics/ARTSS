@@ -9,7 +9,7 @@
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
 #include "Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 #include "../field/Field.h"
 

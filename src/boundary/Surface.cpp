@@ -14,7 +14,7 @@ Surface::Surface(tinyxml2::XMLElement* element) {
     m_logger = Utility::create_logger(typeid(this).name());
     m_logger->info("################ SURFACE ################");
 #endif
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     real dx = domain->get_dx();
     real dy = domain->get_dy();
@@ -72,7 +72,7 @@ Surface::Surface(size_t surfaceID, size_t startIndex, size_t strideX, size_t str
     m_strideY = strideY;
     m_strideZ = strideZ;
 
-    Domain* domain = Domain::getInstance();
+    DomainData* domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
     m_k1 = getCoordinateK(startIndex, Nx, Ny);

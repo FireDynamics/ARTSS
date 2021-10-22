@@ -12,7 +12,7 @@
 
 #include "DynamicSmagorinsky.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
 DynamicSmagorinsky::DynamicSmagorinsky() :
@@ -175,7 +175,7 @@ DynamicSmagorinsky::DynamicSmagorinsky() :
 void DynamicSmagorinsky::calc_turbulent_viscosity(
         Field &ev,
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx();
     const size_t Ny = domain->get_Ny();
@@ -392,7 +392,7 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void DynamicSmagorinsky::explicit_filtering(Field &out, Field const &in, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     const size_t Nx = domain->get_Nx(out.get_level());
     const size_t Ny = domain->get_Ny(out.get_level());

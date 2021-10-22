@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "VTKWriter.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "visit_writer.h"  //( https://wci.llnl.gov/codes/visit/ )
 
 static std::string ending = ".vtk";
@@ -115,7 +115,7 @@ void VTKWriter::vtk_prepare_and_write(const char *filename,
                                       read_ptr sight,
                                       read_ptr nu_t,
                                       read_ptr source_T) {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
     real Z1 = domain->get_Z1();
@@ -270,7 +270,7 @@ void VTKWriter::vtk_prepare_and_write(const char *filename,
                                       read_ptr u, read_ptr v, read_ptr w,
                                       read_ptr p,
                                       read_ptr T) {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
     real Z1 = domain->get_Z1();
@@ -392,7 +392,7 @@ void VTKWriter::vtk_prepare_and_write(const char *filename,
 void VTKWriter::vtk_prepare_and_write_debug(const char *filename, read_ptr *data,
                                             int size_vars, const char * const *var_names,
                                             int *centering, int *var_dims) {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
     real Z1 = domain->get_Z1();

@@ -11,7 +11,7 @@
 
 #include "Visual.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
@@ -114,7 +114,7 @@ void Visual::write_vtk_debug(FieldController &field_controller, const std::strin
 
 void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords,
                              int Nx, int Ny, int Nz, real dx, real dy, real dz) {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
     real Z1 = domain->get_Z1();

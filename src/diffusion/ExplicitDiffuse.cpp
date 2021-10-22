@@ -13,7 +13,7 @@
 #include "ExplicitDiffuse.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 
 ExplicitDiffuse::ExplicitDiffuse() {
     m_dt = Parameters::getInstance()->get_real("physical_parameters/dt");
@@ -51,7 +51,7 @@ void ExplicitDiffuse::diffuse(
 
 
 void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx();  // due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny();
@@ -85,7 +85,7 @@ void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bo
 
 // Turbulent Diffuse
 void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Field const &EV, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx();  // due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny();

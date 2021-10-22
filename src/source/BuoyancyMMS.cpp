@@ -7,7 +7,7 @@
 #include "BuoyancyMMS.h"
 #include "../boundary/BoundaryController.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 
 BuoyancyMMS::BuoyancyMMS() : m_source_field(FieldType::RHO) {
     set_up();
@@ -20,7 +20,7 @@ BuoyancyMMS::BuoyancyMMS() : m_source_field(FieldType::RHO) {
 /// \param  t   time
 // ***************************************************************************************
 void BuoyancyMMS::set_up() {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();

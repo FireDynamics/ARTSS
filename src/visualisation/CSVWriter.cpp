@@ -77,7 +77,7 @@ void CSVWriter::csv_prepare_and_write(const std::string &filename, read_ptr u, r
 
 void CSVWriter::csv_write(const std::string &filename, return_ptr *vars, int size_vars, const std::vector<std::string> &var_names) {
 #ifndef BENCHMARKING
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
 
     int Nx = static_cast<int>(domain->get_Nx());
     int Ny = static_cast<int>(domain->get_Ny());

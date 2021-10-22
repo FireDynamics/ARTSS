@@ -11,7 +11,7 @@
 #include <accelmath.h>
 #endif
 
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 #include "../utility/Parameters.h"
 
@@ -77,7 +77,7 @@ void ISource::dissipate(
         Field &out,
         const Field &in_u, const Field &in_v, const Field &in_w,
         bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 

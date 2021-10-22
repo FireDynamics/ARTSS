@@ -8,7 +8,7 @@
 #include <vector>
 #include "BoundaryData.h"
 
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../utility/Utility.h"
 #include "../utility/tinyxml2.h"
 

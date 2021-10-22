@@ -6,7 +6,7 @@
 //
 #include "GaussFunction.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
 GaussFunction::GaussFunction(
@@ -47,7 +47,7 @@ void GaussFunction::update_source(Field &out, real t_cur) {
 /// \param  sigma Radius of Gaussian
 // ***************************************************************************************
 void GaussFunction::create_spatial_values() {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     size_t level = m_field_spatial_values.get_level();
 

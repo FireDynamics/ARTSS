@@ -6,7 +6,7 @@
 
 #include "AdvectionDiffusionSolver.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "SolverSelection.h"
 #include "../utility/Utility.h"
 

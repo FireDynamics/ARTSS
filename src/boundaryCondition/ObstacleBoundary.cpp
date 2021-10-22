@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "ObstacleBoundary.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
 
@@ -69,7 +69,7 @@ namespace {
         if (level > 0) {
             value = 0;
         }
-        Domain *domain = Domain::getInstance();
+        DomainData *domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx(level);
         size_t Ny = domain->get_Ny(level);
         size_t reference_index = 0;
@@ -122,7 +122,7 @@ namespace {
         if (level > 0) {
             value = 0;
         }
-        Domain *domain = Domain::getInstance();
+        DomainData *domain = DomainData::getInstance();
         size_t Nx = domain->get_Nx(level);
         size_t Ny = domain->get_Ny(level);
         size_t reference_index = 0;
@@ -171,7 +171,7 @@ namespace {
     // *********************************************************************************************
     void apply_periodic(Field &field, size_t *d_patch, Patch p, size_t patch_start,
                         size_t patch_end, size_t id) {
-        Domain *domain = Domain::getInstance();
+        DomainData *domain = DomainData::getInstance();
         size_t level = field.get_level();
         size_t Nx = domain->get_Nx(level);
         size_t Ny = domain->get_Ny(level);

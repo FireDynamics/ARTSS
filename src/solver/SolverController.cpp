@@ -18,7 +18,7 @@
 #include "SolverController.h"
 #include "SolverSelection.h"
 #include "../boundary/BoundaryController.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../Functions.h"
 #include "../source/GaussFunction.h"
 #include "../source/BuoyancyMMS.h"
@@ -446,7 +446,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
     } else if (string_init_usr_fct == FunctionNames::Jet) {
         std::string dir = params->get("initial_conditions/dir");
         real value = params->get_real("initial_conditions/value");
-        auto domain = Domain::getInstance();
+        auto domain = DomainData::getInstance();
         if (dir == "x") {
             real y1 = params->get_real("initial_conditions/y1");
             real y2 = params->get_real("initial_conditions/y2");

@@ -15,7 +15,7 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const s
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_name = name;
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
 
     real dx = domain->get_dx();
     real dy = domain->get_dy();
@@ -66,7 +66,7 @@ Obstacle::Obstacle(
 /// \param  level Multigrid level
 // *************************************************************************************************
 void Obstacle::init(size_t level) {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
 
@@ -225,7 +225,7 @@ void Obstacle::print() {
 // *************************************************************************************************
 void Obstacle::print_details() {
 #ifndef BENCHMARKING
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx(m_level);
     size_t Ny = domain->get_Ny(m_level);
     size_t strideX = get_stride_x();
@@ -356,7 +356,7 @@ void Obstacle::print_details() {
 /// \brief  Units test emergency solution
 // *************************************************************************************************
 void Obstacle::control() {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx(m_level);
     size_t Ny = domain->get_Ny(m_level);
 
@@ -464,7 +464,7 @@ bool Obstacle::is_obstacle_cell(size_t i, size_t j, size_t k) const {
 /// \return  bool true if yes false if no
 // *************************************************************************************************
 bool Obstacle::is_obstacle_cell(const size_t idx) const {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     const size_t Nx = domain->get_Nx(m_level);
     const size_t Ny = domain->get_Ny(m_level);
     const size_t k = getCoordinateK(idx, Nx, Ny);
@@ -496,7 +496,7 @@ int Obstacle::get_matching_index(real obstacle_coordinate, real spacing, real st
 /// \param  level Multigrid level
 // *************************************************************************************************
 void Obstacle::remove_cells_at_boundary(size_t level) {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     if (m_k1 <= domain->get_index_z1(level)) {
         m_size_obstacle_front = 0;
     }
@@ -701,7 +701,7 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
 #endif
     bool overlap = false;
 
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     auto Nx = domain->get_Nx();
     auto Ny = domain->get_Ny();
 
@@ -902,7 +902,7 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2) {
 #endif
     bool overlap = false;
 
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     auto Nx = domain->get_Nx();
     auto Ny = domain->get_Ny();
 
@@ -1105,7 +1105,7 @@ bool Obstacle::circular_constraints_z_direction(Obstacle *o1, Obstacle *o2) {
 #endif
     bool overlap = false;
 
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     auto Nx = domain->get_Nx();
     auto Ny = domain->get_Ny();
 
@@ -1305,8 +1305,8 @@ bool Obstacle::circular_constraints_z_direction(Obstacle *o1, Obstacle *o2) {
 /// \param value value to which the cells should be set
 // *************************************************************************************************
 void Obstacle::set_inner_cells(Field *f, real value) {
-    auto Nx = Domain::getInstance()->get_Nx();
-    auto Ny = Domain::getInstance()->get_Ny();
+    auto Nx = DomainData::getInstance()->get_Nx();
+    auto Ny = DomainData::getInstance()->get_Ny();
 
     auto data = f->data;
     for (size_t i = m_i1 + 1; i < m_i2; i++) {

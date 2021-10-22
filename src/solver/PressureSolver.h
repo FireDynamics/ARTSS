@@ -12,7 +12,7 @@
 #include "../utility/Parameters.h"
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryData.h"
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IPressure.h"

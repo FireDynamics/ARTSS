@@ -6,13 +6,13 @@
 
 #include "Vortex.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 
 Vortex::Vortex(FieldController *field_controller) :
         m_u(field_controller->get_field_u()),
         m_v(field_controller->get_field_v()),
         m_w(field_controller->get_field_w()) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     auto params = Parameters::getInstance();
     m_u_lin = params->get_real("initial_conditions/u_lin");
     m_v_lin = params->get_real("initial_conditions/v_lin");
@@ -77,7 +77,7 @@ bool Vortex::update(
 /// \brief  Set values for new domain
 // ********************************************************************************
 void Vortex::apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     size_t i_start = domain->get_index_x1();//(x1 - X1) / dx;
     size_t i_end = domain->get_index_x2() + 2;//(x2 - X1) / dx + 2;

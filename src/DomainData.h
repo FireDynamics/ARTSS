@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_DOMAIN_H_
-#define ARTSS_DOMAIN_H_
+#ifndef ARTSS_DOMAINDATA_H_
+#define ARTSS_DOMAINDATA_H_
 
 #include <cmath>
 #ifdef _OPENACC
@@ -21,11 +21,11 @@ enum CoordinateAxis : int {
     UNKNOWN_DIRECTION = -1, X = 0, Y = 1, Z = 2
 };
 
-class Domain {
+class DomainData {
  public:
-    Domain();
+    DomainData();
 
-    static Domain *getInstance();
+    static DomainData *getInstance();
 
     // getter
     size_t inline get_nx(size_t level = 0) const { return this->m_nx[level]; }
@@ -82,7 +82,7 @@ class Domain {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    static Domain *single; // Singleton
+    static DomainData *single; // Singleton
     void calc_MG_values();
 
     static real calc_new_coord(real oldCoord, long shift, real cell_width);
@@ -97,4 +97,4 @@ class Domain {
     void control();
 };
 
-#endif /* ARTSS_DOMAIN_H_ */
+#endif /* ARTSS_DOMAINDATA_H_ */

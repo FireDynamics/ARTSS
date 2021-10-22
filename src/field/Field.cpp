@@ -5,12 +5,12 @@
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Field.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 
 inline static const std::vector<std::string> field_type_names = {"rho", "u", "v", "w", "p", "T", "nu"};
 
 Field::Field(FieldType type) :
-        m_level(0), m_size(Domain::getInstance()->get_size()), m_type(type) {
+        m_level(0), m_size(DomainData::getInstance()->get_size()), m_type(type) {
     data = new real[m_size];
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
@@ -30,11 +30,11 @@ Field::Field(size_t size) :
 }
 
 Field::Field(FieldType type, real val) :
-        Field::Field(type, val, 0, Domain::getInstance()->get_size()) {
+        Field::Field(type, val, 0, DomainData::getInstance()->get_size()) {
 }
 
 Field::Field(FieldType type, real val, size_t level) :
-        Field::Field(type, val, level, Domain::getInstance()->get_size(level)) {
+        Field::Field(type, val, level, DomainData::getInstance()->get_size(level)) {
 }
 
 Field::Field(FieldType type, real val, size_t level, size_t size):

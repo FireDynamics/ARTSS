@@ -11,7 +11,7 @@
 #include "Analysis.h"
 #include "../boundary/BoundaryController.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../utility/Utility.h"
 
 Analysis::Analysis(Solution &solution, bool has_analytical_solution) :
@@ -291,7 +291,7 @@ bool Analysis::check_time_step_VN(const real dt) {
     bool VN_check;
 
     auto params = Parameters::getInstance();
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     // local variables and parameters
     real nu = params->get_real("physical_parameters/nu");
@@ -327,7 +327,7 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
     real cfl_local;    // C in the local cell
 
     auto boundary = BoundaryController::getInstance();
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     // local variables and parameters
     size_t *inner_list = boundary->get_inner_list_level_joined();

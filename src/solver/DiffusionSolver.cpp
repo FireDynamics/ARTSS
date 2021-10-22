@@ -7,7 +7,7 @@
 #include "DiffusionSolver.h"
 #include "../interfaces/IDiffusion.h"
 #include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "SolverSelection.h"
 
 DiffusionSolver::DiffusionSolver(FieldController *field_controller) {

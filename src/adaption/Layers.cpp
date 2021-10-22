@@ -6,7 +6,7 @@
 
 #include "Layers.h"
 #include <chrono>
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../utility/Parameters.h"
 #include "Adaption.h"
 
@@ -17,7 +17,7 @@ Layers::Layers(FieldController *field_controller) :
         m_kappa(field_controller->get_field_kappa()),
         m_gamma(field_controller->get_field_gamma()) {
     auto params = Parameters::getInstance();
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     m_minimal = static_cast<size_t> (std::pow(2, domain->get_levels()));
     m_timecounter = 0;
 
@@ -43,7 +43,7 @@ bool Layers::update(
     } else {
         m_timecounter = 0;
     }
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     *p_shift_x1 = 0;
     *p_shift_x2 = 0;
@@ -112,7 +112,7 @@ size_t Layers::getExpansionSize() {
 /// \params start x-values at x1 (start = true) or x-values at x2 (start=false)
 // ********************************************************************************
 void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2, bool start) {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
 
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
@@ -189,7 +189,7 @@ void Layers::apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1,
 /// \param  no_buffer_cell Buffersize
 // ***************************************************************************************
 void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shift_x1, long *p_shift_x2) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     auto data = m_T.data;
     size_t size = domain->get_size();
@@ -249,7 +249,7 @@ void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shi
 /// \param  no_buffer_cell Buffersize
 // ***************************************************************************************
 void Layers::adaptXDirection_serial(real checkValue, size_t no_buffer_cell, long *p_shift_x1, long *p_shift_x2) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
