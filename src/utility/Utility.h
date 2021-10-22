@@ -12,6 +12,9 @@
 #include "GlobalMacrosTypes.h"
 
 #ifndef BENCHMARKING
+#ifdef _OPENACC
+#define GPU_DEBUG
+#endif
 #define FMT_USE_UDL_TEMPLATE 0
 
 #include "spdlog/logger.h"
@@ -31,9 +34,9 @@ namespace Utility {
 
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
-#ifdef  _OPENACC
-    std::shared_ptr<spdlog::logger> create_gpu_logger(std::string loggerName);
 #endif
+#ifdef GPU_DEBUG
+    std::shared_ptr<spdlog::logger> create_gpu_logger(std::string loggerName);
 #endif
 }  // namespace Utility
 

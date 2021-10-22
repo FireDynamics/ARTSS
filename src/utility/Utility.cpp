@@ -58,8 +58,7 @@ std::vector<std::string> split(const char *text, char delimiter) {
     return tokens;
 }
 
-#ifndef BENCHMARKING
-#ifdef _OPENACC
+#ifdef GPU_DEBUG
 // =====================creates a new logger for the GPU =======================
 // *****************************************************************************
 /// \brief  creates a new named logger this function is only available
@@ -67,11 +66,12 @@ std::vector<std::string> split(const char *text, char delimiter) {
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
     std::shared_ptr<spdlog::logger> create_gpu_logger(std::string logger_name) {
+    /*
         static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
-
+        std::cout << "print name: " << logger_name << std::endl;
         auto params = Parameters::getInstance();
         std::string log_level = "debug";
-        std::string log_file = params->get("logging/file");
+        std::string log_file = params->get("logging/file") + "_gpu";
 
         if (!file_sink) {
             file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
@@ -81,10 +81,28 @@ std::vector<std::string> split(const char *text, char delimiter) {
         std::shared_ptr<spdlog::logger> logger = spdlog::basic_logger_mt(logger_name, log_file);
         logger->flush_on(spdlog::level::err);
         logger->set_level(spdlog::level::trace);
-
         return logger;
+    */
+
+    static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
+
+    auto params = Parameters::getInstance();
+    std::string log_level = params->get("logging/level");
+    std::string log_file = params->get("logging/file") + "_gpu";
+
+    if (!file_sink) {
+        file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
+        file_sink->set_level(spdlog::level::trace);
     }
-#endif
+
+    std::vector<spdlog::sink_ptr> sinks;
+    sinks.reserve(1);
+    sinks.push_back(file_sink);
+    auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
+    logger->flush_on(spdlog::level::err);
+    logger->set_level(spdlog::level::trace);
+    return logger;
+    }
 #endif
 
 #ifndef BENCHMARKING
