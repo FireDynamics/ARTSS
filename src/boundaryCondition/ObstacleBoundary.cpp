@@ -27,12 +27,12 @@ namespace {
     void apply_boundary_condition(Field &field, size_t *d_patch, size_t patch_start,
                                   size_t patch_end, int8_t sign_reference_index,
                                   size_t reference_index, real value, int8_t sign) {
-#ifndef BENCHMARKING
-        auto logger = Utility::create_logger("ObstacleBoundary");
-        logger->debug("applying for [{};{}) with length {} at level {}, pointer {}, field pointer {}",
+#ifdef GPU_DEBUG
+        auto gpu_logger = Utility::create_gpu_logger("ObstacleBoundary_GPU");
+        gpu_logger->debug("applying for [{};{}) with length {} at level {}, pointer {}, field pointer {}",
                       patch_start, patch_end,patch_end-patch_start, field.get_level(),
                       static_cast<void *>(field.data), static_cast<void *>(&field));
-        logger->debug("patch pointer: {}", static_cast<void *>(d_patch));
+        gpu_logger->debug("patch pointer: {}", static_cast<void *>(d_patch));
 #endif
 #pragma acc data present(field)
         {
@@ -234,13 +234,14 @@ void apply_boundary_condition(Field &field, size_t **index_fields, const size_t 
 #ifndef BENCHMARKING
                 logger->debug("skipping apply boundary condition for: {}",
                               BoundaryData::get_patch_name(p));
-                logger->debug("obstacle info: {}", BoundaryController::getInstance()->get_obstacle_info(id));
+                //logger->debug("obstacle info: {}", BoundaryController::getInstance()->get_obstacle_info(id));
 #endif
                 continue;
             }
-#ifndef BENCHMARKING
+#ifdef GPU_DEBUG
             else {
-                logger->debug("pointer {}:\n {}\n {}", BoundaryData::get_patch_name(p),
+                auto gpu_logger = Utility::create_gpu_logger("ObstacleBoundary_GPU");
+                gpu_logger->debug("pointer {}:\n {}\n {}", BoundaryData::get_patch_name(p),
                               static_cast<void *> (d_patch), static_cast<void *> (index_fields[i]));
             }
 #endif
