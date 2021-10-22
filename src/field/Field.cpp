@@ -12,13 +12,11 @@ inline static const std::vector<std::string> field_type_names = {"rho", "u", "v"
 Field::Field(FieldType type) :
         m_level(0), m_size(Domain::getInstance()->get_size()), m_type(type) {
     data = new real[m_size];
-#ifndef BENCHMARKING
-  #ifdef _OPENACC
-    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name() + std::to_string(counter<Field>::objects_created));
-    m_gpu_logger->debug("{}{} create with field pointer: {} data pointer: {}",
+#ifdef GPU_DEBUG
+    m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
+    m_gpu_logger->info("{}{} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
-  #endif
 #endif
 #pragma acc enter data create(this)
 #pragma acc update device(this)
@@ -43,13 +41,11 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
         m_level(level), m_size(size), m_type(type) {
     data = new real[m_size];
     set_value(val);
-#ifndef BENCHMARKING
-  #ifdef _OPENACC
-    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name() + std::to_string(counter<Field>::objects_created));
-    m_gpu_logger->debug("{}{} create with field pointer: {} data pointer: {}",
+#ifdef GPU_DEBUG
+    m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
+    m_gpu_logger->info("{}{} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
-  #endif
 #endif
 #pragma acc enter data create(this)
 #pragma acc update device(this)
@@ -61,13 +57,11 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
 Field::Field(const Field &original):
         data(new real[original.m_size]), m_level(original.m_level),
         m_size(original.m_size), m_type(original.m_type) {
-#ifndef BENCHMARKING
-  #ifdef _OPENACC
-    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name() + std::to_string(counter<Field>::objects_created));
-    m_gpu_logger->debug("{}{} create with field pointer: {} data pointer: {}",
+#ifdef GPU_DEBUG
+    m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
+    m_gpu_logger->info("{}{} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
-  #endif
 #endif
 #pragma acc enter data copyin(this[:1]) create(data[:m_size])
     this->copy_data(original);

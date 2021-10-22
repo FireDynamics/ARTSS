@@ -21,33 +21,7 @@ enum FieldType : int {
 };
 #endif
 
-template <typename T>
-struct counter
-{
-    counter()
-    {
-        objects_created++;
-        objects_alive++;
-    }
-
-    counter(const counter&)
-    {
-        objects_created++;
-        objects_alive++;
-    }
-
-protected:
-    virtual ~counter()
-    {
-        --objects_alive;
-    }
-    static int objects_created;
-    static int objects_alive;
-};
-template <typename T> int counter<T>::objects_created( 0 );
-template <typename T> int counter<T>::objects_alive( 0 );
-
-class Field : counter<Field> {
+class Field {
  public:
     explicit Field(size_t size);
     explicit Field(FieldType type);
@@ -75,10 +49,8 @@ class Field : counter<Field> {
     }
     void copyin() {
 #pragma acc enter data copyin(data[:m_size])
-#ifndef BENCHMARKING
-  #ifdef _OPENACC
+#ifdef GPU_DEBUG
     m_gpu_logger->debug("{}{} copyin with data pointer: {}", get_field_type_name(m_type), m_level, static_cast<void *>(data));
-  #endif
 #endif
     }
 
@@ -143,10 +115,8 @@ class Field : counter<Field> {
     size_t const m_size;
     FieldType const m_type;
 
-#ifndef BENCHMARKING
-#ifdef _OPENACC
+#ifdef GPU_DEBUG
     std::shared_ptr<spdlog::logger> m_gpu_logger;
-#endif
 #endif
 };
 
