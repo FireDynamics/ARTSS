@@ -59,8 +59,6 @@ class BoundaryController {
         return m_multigrid->is_obstacle_cell(level, i, j, k);
     }
 
-    std::string get_obstacle_info(size_t id);
-
 private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;

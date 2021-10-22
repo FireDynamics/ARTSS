@@ -72,8 +72,6 @@ class Obstacle {
     bool is_edge_cell(size_t i, size_t j, size_t k) const;
     bool has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1, size_t k2) const;
 
-    std::string get_obstacle_info();
-
 private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;

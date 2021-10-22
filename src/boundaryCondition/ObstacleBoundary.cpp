@@ -234,7 +234,6 @@ void apply_boundary_condition(Field &field, size_t **index_fields, const size_t 
 #ifndef BENCHMARKING
                 logger->debug("skipping apply boundary condition for: {}",
                               BoundaryData::get_patch_name(p));
-                //logger->debug("obstacle info: {}", BoundaryController::getInstance()->get_obstacle_info(id));
 #endif
                 continue;
             }

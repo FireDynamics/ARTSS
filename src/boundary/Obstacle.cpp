@@ -1389,15 +1389,3 @@ bool Obstacle::is_edge_cell(size_t i, size_t j, size_t k) const {
 bool Obstacle::has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1, size_t k2) const {
     return has_overlap(m_i1, m_i2, i1, i2) && has_overlap(m_j1, m_j2, j1, j2) && has_overlap(m_k1, m_k2, k1, k2);
 }
-
-std::string Obstacle::get_obstacle_info() {
-    return fmt::format("Obstacle name: {}\n size front: {}\n size back: {}\n size bottom: {}\n size top: {}\n size left: {}\n size right: {}\n coords (x y z): ({}|{}) ({}|{}) ({}|{})",
-                       m_name,
-                       m_size_obstacle_front,
-                       m_size_obstacle_back,
-                       m_size_obstacle_bottom,
-                       m_size_obstacle_top,
-                       m_size_obstacle_left,
-                       m_size_obstacle_right,
-                       m_i1, m_i2, m_j1, m_j2, m_k1, m_k2);
-}

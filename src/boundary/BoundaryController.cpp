@@ -298,7 +298,3 @@ size_t BoundaryController::get_obstacle_stride_z(size_t id, size_t level) const 
 std::vector<FieldType> BoundaryController::get_used_fields() const {
     return m_bdc_boundary->get_used_fields();
 }
-
-std::string BoundaryController::get_obstacle_info(size_t id) {
-    return m_obstacle_list[id]->get_obstacle_info();
-}
