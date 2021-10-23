@@ -239,10 +239,6 @@ size_t BoundaryController::get_size_inner_list_level_joined() const {
     return m_multigrid->get_size_domain_inner_cells_level_joined();
 }
 
-size_t BoundaryController::get_size_boundary_list_level_joined() const {
-    return m_multigrid->get_size_domain_boundary_cells_level_joined();
-}
-
 size_t *BoundaryController::get_obstacle_boundary_list() const {
     return m_multigrid->get_obstacle_list();
 }

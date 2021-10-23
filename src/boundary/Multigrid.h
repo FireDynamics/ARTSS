@@ -39,6 +39,7 @@ class Multigrid {
     size_t get_end_index_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_last_index(level); }
 
     // getter -- domain boundary cell
+    size_t get_size_domain_boundary_cells() const { return m_jl_domain_boundary_list.get_size(); }
     size_t* get_domain_boundary_cells_level_joined() const { return m_jl_domain_boundary_list.get_data(); }
     size_t get_size_domain_boundary_cells_level_joined() const { return m_jl_domain_boundary_list.get_size(); }
     size_t get_start_index_domain_boundary_cells_level_joined(size_t level) const { return m_jl_domain_boundary_list.get_first_index(level); }
@@ -50,6 +51,7 @@ class Multigrid {
 
     bool is_obstacle_cell(size_t level, size_t index);
     bool is_obstacle_cell(size_t level, size_t i, size_t j, size_t k);
+
 
 private:
 #ifndef BENCHMARKING
@@ -82,7 +84,6 @@ private:
     SimpleJoinedList m_jl_obstacle_list;
     ObstacleJoinedList **m_jl_obstacle_boundary_list_patch_divided;  // [Patch]
 
-    size_t* m_data_MG_boundary_list_level_joined;
     size_t* m_data_MG_surface_list_level_joined;
 
     size_t get_length_of_surface_index_list_joined() const;
@@ -99,10 +100,10 @@ private:
     void send_lists_to_GPU();
     void create_domain_lists_for_GPU();
     void send_surface_lists_to_GPU();
-    void send_obstacle_lists_to_GPU(const size_t *size_MG_obstacle_index_list_level, size_t **MG_obstacle_index_list);
+    void send_obstacle_lists_to_GPU();
 
     void surface_dominant_restriction(size_t level);
-    size_t obstacle_dominant_restriction(size_t level, PatchObject *sum_patches);
+    size_t obstacle_dominant_restriction(size_t level, PatchObject *sum_patches, size_t **tmp_store_obstacle);
 
     void control();
     void print();
