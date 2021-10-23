@@ -248,11 +248,11 @@ size_t *BoundaryController::get_obstacle_boundary_list() const {
 }
 
 size_t BoundaryController::get_size_boundary_list() const {
-    return m_multigrid->get_size_boundary_list();
+    return m_multigrid->get_size_domain_boundary_cells();
 }
 
 size_t BoundaryController::get_size_inner_list() const {
-    return m_multigrid->get_size_inner_list();
+    return m_multigrid->get_size_domain_inner_cells();
 }
 
 size_t BoundaryController::get_size_obstacle_list() const {

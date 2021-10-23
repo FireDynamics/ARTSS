@@ -28,8 +28,8 @@ class Multigrid {
     explicit Multigrid(BoundaryDataController *bdc_boundary, size_t multigrid_level);
     ~Multigrid();
 
-    size_t get_size_inner_list(size_t level = 0) const;
-    size_t get_size_boundary_list(size_t level = 0) const;
+    size_t get_size_domain_inner_cells(size_t level = 0) const;
+    size_t get_size_domain_boundary_cells(size_t level = 0) const;
     size_t get_size_obstacle_list() const;
     size_t *get_obstacle_boundary_list() const;
 
@@ -106,7 +106,6 @@ private:
     size_t* m_data_MG_boundary_list_level_joined;
     size_t* m_data_MG_surface_list_level_joined;
 
-    size_t get_size_obstacle_index_list(size_t level) const;
     size_t get_last_index_of_obstacle_front(size_t level, size_t id) const;
     size_t get_last_index_of_obstacle_back(size_t level, size_t id) const;
     size_t get_last_index_of_obstacle_bottom(size_t level, size_t id) const;
@@ -126,14 +125,6 @@ private:
     size_t get_length_of_obstacle_left(size_t level) const;
     size_t get_length_of_obstacle_right(size_t level) const;
 
-    // get length of from/for joined array
-    size_t get_length_of_obstacle_front_joined() const;
-    size_t get_length_of_obstacle_back_joined() const;
-    size_t get_length_of_obstacle_bottom_joined() const;
-    size_t get_length_of_obstacle_top_joined() const;
-    size_t get_length_of_obstacle_left_joined() const;
-    size_t get_length_of_obstacle_right_joined() const;
-
     // get length of bSlice from/for joined array
     size_t get_length_of_boundary_slice_z_joined() const;
     size_t get_length_of_boundary_slice_y_joined() const;
@@ -146,10 +137,8 @@ private:
     size_t get_last_index_of_boundary_slice_x(size_t level) const;
     size_t get_last_index_of_boundary_slice_y(size_t level) const;
 
-    size_t get_length_of_inner_index_list_joined() const;
     size_t get_length_of_boundary_index_list_joined() const;
     size_t get_length_of_surface_index_list_joined() const;
-    size_t get_first_index_of_inner_index_list(size_t level) const;
     size_t get_first_index_of_boundary_index_list(size_t level) const;
     size_t get_first_index_of_surface_index_list(size_t level) const;
     size_t get_last_index_of_inner_index_list(size_t level) const;
@@ -178,11 +167,6 @@ private:
 
     void remove_boundary_lists_from_GPU();
 
-    static bool control_obstacle_overlap(
-            Obstacle* o,
-            size_t *i1, size_t *i2,
-            size_t *j1, size_t *j2,
-            size_t *k1, size_t *k2);
 };
 
 #endif /* ARTSS_BOUNDARY_MULTIGRID_H_*/

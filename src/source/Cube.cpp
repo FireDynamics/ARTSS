@@ -9,7 +9,6 @@
 #include "../boundary/BoundaryController.h"
 
 void Cube::update_source(Field &out, real) {
-    auto boundary = BoundaryController::getInstance();
     out.copy_data(m_source_field);
     if (m_has_noise) {
         out *= m_noise_maker->random_field(out.get_size());
