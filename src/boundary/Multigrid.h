@@ -28,20 +28,20 @@ class Multigrid {
     explicit Multigrid(BoundaryDataController *bdc_boundary, size_t multigrid_level);
     ~Multigrid();
 
-    size_t get_size_domain_inner_cells(size_t level = 0) const;
     size_t get_size_domain_boundary_cells(size_t level = 0) const;
     size_t get_size_obstacle_list() const;
     size_t *get_obstacle_boundary_list() const;
 
-    size_t* get_inner_list_level_joined() const { return m_jl_domain_inner_list.get_data(); }
-    size_t get_size_inner_list_level_joined() const { return *(m_size_MG_inner_index_list_level + m_multigrid_levels + 1); }
-    size_t get_inner_list_level_joined_start(size_t level) const;
-    size_t get_inner_list_level_joined_end(size_t level) const;
+    size_t* get_domain_inner_cells_level_joined() const { return m_jl_domain_inner_list.get_data(); }
+    size_t get_slice_size_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_slice_size(level); };
+    size_t get_size_domain_inner_cells_level_joined() const { return m_jl_domain_inner_list.get_size(); }
+    size_t get_start_index_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_first_index(level); }
+    size_t get_end_index_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_last_index(level); }
 
-    size_t* get_boundary_list_level_joined() const { return m_data_MG_boundary_list_level_joined; }
-    size_t get_size_boundary_list_level_joined() const { return *(m_size_MG_boundary_index_list_level + m_multigrid_levels + 1); }
-    size_t get_boundary_list_level_joined_start(size_t level) const;
-    size_t get_boundary_list_level_joined_end(size_t level) const;
+    size_t* get_domain_boundary_cells_level_joined() const { return m_data_MG_boundary_list_level_joined; }
+    size_t get_size_domain_boundary_cells_level_joined() const { return *(m_size_MG_boundary_index_list_level + m_multigrid_levels + 1); }
+    size_t get_start_index_domain_boundary_cells_level_joined(size_t level) const;
+    size_t get_end_index_domain_boundary_cells_level_joined(size_t level) const;
 
     void update_lists();
 

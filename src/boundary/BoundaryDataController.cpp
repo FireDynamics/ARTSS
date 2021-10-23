@@ -105,8 +105,7 @@ void BoundaryDataController::apply_boundary_condition(
 // *************************************************************************************************
 void BoundaryDataController::apply_boundary_condition_obstacle(
         Field &field,
-        size_t **index_fields,
-        size_t *patch_start, size_t *patch_end,
+        ObstacleJoinedList **index_fields,
         FieldType field_type,
         size_t id,
         bool sync) {
@@ -118,7 +117,6 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
         ObstacleBoundary::apply_boundary_condition(
                 field,
                 index_fields,
-                patch_start, patch_end,
                 m_boundary_data[field_type],
                 id,
                 sync);

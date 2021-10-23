@@ -237,13 +237,13 @@ void Multigrid::control() {
 
         size_t csize_inner = domain->get_nx(level) * domain->get_ny(level) * domain->get_nz(level)
                              - m_jl_obstacle_list.get_slice_size(level);
-        size_t bsize_inner = get_size_domain_inner_cells(level);
+        size_t bsize_inner = get_slice_size_domain_inner_cells_level_joined(level);
         if (csize_inner != bsize_inner) {
             message += "get_size_domain_inner_cells(level) does not equal (nx-2)*(ny-2)*(nz-2) "
                        + std::to_string(bsize_inner) + "|" + std::to_string(csize_inner) + "\n";
         }
-        size_t cindex_inner_start = get_inner_list_level_joined_start(level);
-        size_t cindex_inner_end = get_inner_list_level_joined_end(level);
+        size_t cindex_inner_start = get_start_index_domain_inner_cells_level_joined(level);
+        size_t cindex_inner_end = get_end_index_domain_inner_cells_level_joined(level);
         if (cindex_inner_end - cindex_inner_start + 1 != bsize_inner) {
             message += "get_size_domain_inner_cells(level) does not equal the difference between start and end "
                        + std::to_string(cindex_inner_start) + "|" + std::to_string(cindex_inner_end) + "\n";
@@ -266,11 +266,11 @@ void Multigrid::control() {
     {
         size_t bsize_inner = 0;
         for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-            bsize_inner += get_size_domain_inner_cells(level);
+            bsize_inner += get_slice_size_domain_inner_cells_level_joined(level);
         }
-        size_t csize_inner = get_size_inner_list_level_joined();
+        size_t csize_inner = get_size_domain_inner_cells_level_joined();
         if (bsize_inner != csize_inner) {
-            message += "get_size_inner_list_level_joined does not equal the sum of each inner list "
+            message += "get_size_domain_inner_cells_level_joined does not equal the sum of each inner list "
                        + std::to_string(bsize_inner) + "|" + std::to_string(csize_inner) + "\n";
         }
     }
@@ -831,38 +831,13 @@ void Multigrid::apply_boundary_condition(Field &field, bool sync) {
         }
     }
     if (m_number_of_obstacle_objects > 0) {
-        for (size_t id = 0; id < m_number_of_obstacle_objects - 1; ++id) {
-            size_t opatch_start[] = {get_first_index_of_obstacle_front(level, id),
-                                     get_first_index_of_obstacle_back(level, id),
-                                     get_first_index_of_obstacle_bottom(level, id),
-                                     get_first_index_of_obstacle_top(level, id),
-                                     get_first_index_of_obstacle_left(level, id),
-                                     get_first_index_of_obstacle_right(level, id)};
-            size_t opatch_end[] = {get_first_index_of_obstacle_front(level, id + 1),
-                                   get_first_index_of_obstacle_back(level, id + 1),
-                                   get_first_index_of_obstacle_bottom(level, id + 1),
-                                   get_first_index_of_obstacle_top(level, id + 1),
-                                   get_first_index_of_obstacle_left(level, id + 1),
-                                   get_first_index_of_obstacle_right(level, id + 1)};
+        for (size_t id = 0; id < m_number_of_obstacle_objects; ++id) {
 #ifdef GPU_DEBUG
             m_gpu_logger->debug("pointer left:\n {}\n {}",
                             static_cast<void *> (m_data_MG_obstacle_left_level_joined), static_cast<void *>(m_data_obstacles_patches_joined[Patch::LEFT]));
 #endif
-            (static_cast<BoundaryDataController *> (*(m_bdc_obstacle + id)))->apply_boundary_condition_obstacle(field, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, id, sync);
+            (static_cast<BoundaryDataController *> (m_bdc_obstacle[id]))->apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list, f, id, sync);
         }
-        size_t opatch_start[] = {get_first_index_of_obstacle_front(level, m_number_of_obstacle_objects - 1),
-                                 get_first_index_of_obstacle_back(level, m_number_of_obstacle_objects - 1),
-                                 get_first_index_of_obstacle_bottom(level, m_number_of_obstacle_objects - 1),
-                                 get_first_index_of_obstacle_top(level, m_number_of_obstacle_objects - 1),
-                                 get_first_index_of_obstacle_left(level, m_number_of_obstacle_objects - 1),
-                                 get_first_index_of_obstacle_right(level, m_number_of_obstacle_objects - 1)};
-        size_t opatch_end[] = {get_first_index_of_obstacle_front(level + 1, 0),
-                               get_first_index_of_obstacle_back(level + 1, 0),
-                               get_first_index_of_obstacle_bottom(level + 1, 0),
-                               get_first_index_of_obstacle_top(level + 1, 0),
-                               get_first_index_of_obstacle_left(level + 1, 0),
-                               get_first_index_of_obstacle_right(level + 1, 0)};
-        (static_cast<BoundaryDataController *>(*(m_bdc_obstacle + m_number_of_obstacle_objects - 1)))->apply_boundary_condition_obstacle(field, m_data_obstacles_patches_joined, opatch_start, opatch_end, f, m_number_of_obstacle_objects - 1, sync);
     }
     m_bdc_boundary->apply_boundary_condition(field, m_jl_domain_boundary_list, sync);
 }
@@ -1337,10 +1312,6 @@ size_t Multigrid::get_last_index_of_obstacle_right(size_t level, size_t id) cons
 }
 
 // ---------------- public getter
-size_t Multigrid::get_size_domain_inner_cells(size_t level) const {
-    return m_jl_domain_inner_list.get_slice_size(level);
-}
-
 size_t Multigrid::get_size_domain_boundary_cells(size_t level) const {
     return get_last_index_boundary_index_list(level) - get_first_index_of_boundary_index_list(level) + 1;
 }
@@ -1349,20 +1320,12 @@ size_t Multigrid::get_size_obstacle_list() const {
     return m_jl_obstacle_list.get_slice_size(0);
 }
 
-size_t Multigrid::get_inner_list_level_joined_start(size_t level) const {
-    return m_jl_domain_inner_list.get_first_index(level);
-}
-
-size_t Multigrid::get_inner_list_level_joined_end(size_t level) const {
-    return m_jl_domain_inner_list.get_last_index(level);
-}
-
-size_t Multigrid::get_boundary_list_level_joined_start(size_t level) const {
+size_t Multigrid::get_start_index_domain_boundary_cells_level_joined(size_t level) const {
     return *(m_size_MG_boundary_index_list_level + level);
 }
 
-size_t Multigrid::get_boundary_list_level_joined_end(size_t level) const {
-    return get_boundary_list_level_joined_start(level + 1) - 1;
+size_t Multigrid::get_end_index_domain_boundary_cells_level_joined(size_t level) const {
+    return get_start_index_domain_boundary_cells_level_joined(level + 1) - 1;
 }
 
 size_t Multigrid::get_obstacle_stride_x(size_t id, size_t level) const {

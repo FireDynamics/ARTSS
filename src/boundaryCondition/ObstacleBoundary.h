@@ -10,10 +10,10 @@
 #include <cstdlib>
 #include "../utility/GlobalMacrosTypes.h"
 #include "../boundary/BoundaryData.h"
+#include "../joinedLists/ObstacleJoinedList.h"
 
 namespace ObstacleBoundary {
-    void apply_boundary_condition(Field &field, size_t** index_fields,
-                                  const size_t* patch_starts, const size_t* patch_ends,
+    void apply_boundary_condition(Field &field, ObstacleJoinedList **index_fields,
                                   BoundaryData* boundary_data, size_t id, bool sync = true);
 }  // namespace ObstacleBoundary
 

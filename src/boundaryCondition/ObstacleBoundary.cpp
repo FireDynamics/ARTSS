@@ -18,7 +18,6 @@ namespace {
     /// \param  d_patch List of indices for given patch
     /// \param  patch_start Start Index of Patch
     /// \param  patch_end End index of patch
-    /// \param  level Multigrid level
     /// \param  sign_reference_index Sign of reference index (POSITIVE_SIGN or NEGATIVE_SIGN)
     /// \param  reference_index Index of reference
     /// \param  value Value of boundary condition
@@ -158,54 +157,6 @@ namespace {
         apply_boundary_condition(field, d_patch, patch_start, patch_end,
                                  sign_reference_index, reference_index, -value, POSITIVE_SIGN);
     }
-
-    //======================================== Apply periodic ======================================
-    // *********************************************************************************************
-    /// \brief  Apply periodic boundary condition
-    /// \param  data_field   Field
-    /// \param  d_patch List of indices for given patch
-    /// \param  p Patch
-    /// \param  patch_start Start Index of Patch
-    /// \param  patch_end End index of patch
-    /// \param  level Multigrid level
-    // *********************************************************************************************
-    void apply_periodic(Field &field, size_t *d_patch, Patch p, size_t patch_start,
-                        size_t patch_end, size_t id) {
-        DomainData *domain = DomainData::getInstance();
-        size_t level = field.get_level();
-        size_t Nx = domain->get_Nx(level);
-        size_t Ny = domain->get_Ny(level);
-        BoundaryController *bdc = BoundaryController::getInstance();
-
-        size_t reference_index = 0;
-        int8_t sign_reference_index = POSITIVE_SIGN;
-        switch (p) {
-            case FRONT:
-            case BACK:
-                reference_index = Nx * Ny * (bdc->get_obstacle_stride_z(id, level) - 2);
-                break;
-            case BOTTOM:
-            case TOP:
-                reference_index = Nx * (bdc->get_obstacle_stride_y(id, level) - 2);
-                break;
-            case LEFT:
-            case RIGHT:
-                reference_index = (bdc->get_obstacle_stride_x(id, level) - 2);
-                break;
-            default:
-#ifndef BENCHMARKING
-                auto logger = Utility::create_logger("ObstacleBoundary");
-                logger->error("Unknown Patch for periodic boundary condition: {}", p);
-#endif
-                break;
-        }
-
-        if (p == BACK || p == TOP || p == RIGHT) {
-            sign_reference_index = NEGATIVE_SIGN;
-        }
-        apply_boundary_condition(field, d_patch, patch_start, patch_end,
-                                 sign_reference_index, reference_index, 0, POSITIVE_SIGN);
-    }
 }  // namespace
 
 //======================================== Apply boundary condition ================================
@@ -219,24 +170,26 @@ namespace {
 /// \param  id ID of obstacle
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void apply_boundary_condition(Field &field, size_t **index_fields, const size_t *patch_starts,
-                              const size_t *patch_ends, BoundaryData *boundary_data,
-                              size_t id, bool sync) {
+void apply_boundary_condition(Field &field, ObstacleJoinedList **index_fields,
+                              BoundaryData *boundary_data, size_t id, bool sync) {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger("ObstacleBoundary");
 #endif
-        for (size_t i = 0; i < number_of_patches; i++) {
-            size_t *d_patch = index_fields[i];
-            size_t patch_start = patch_starts[i];
-            size_t patch_end = patch_ends[i];
-            auto p = static_cast<Patch>(i);
-            if (patch_start == patch_end) {
+        size_t level = field.get_level();
+        for (size_t patch = 0; patch < number_of_patches; patch++) {
+            size_t *d_patch = index_fields[patch]->get_data();
+            size_t size_patch = index_fields[patch]->get_slice_size(level, id);
+            auto p = static_cast<Patch>(patch);
+            if (size_patch == 0) {
 #ifndef BENCHMARKING
                 logger->debug("skipping apply boundary condition for: {}",
                               BoundaryData::get_patch_name(p));
 #endif
                 continue;
             }
+
+            size_t patch_start = index_fields[patch]->get_first_index(level, id);
+            size_t patch_end = index_fields[patch]->get_last_index(level, id);
 #ifdef GPU_DEBUG
             else {
                 auto gpu_logger = Utility::create_gpu_logger("ObstacleBoundary_GPU");
@@ -255,7 +208,9 @@ void apply_boundary_condition(Field &field, size_t **index_fields, const size_t 
                                   boundary_data->get_value(p));
                     break;
                 case BoundaryCondition::PERIODIC:
-                    apply_periodic(field, d_patch, p, patch_start, patch_end, id);
+#ifndef BENCHMARKING
+                    logger->error("periodic boundary conditions are not implemented for obstacles");
+#endif
                     break;
                 default:
 #ifndef BENCHMARKING

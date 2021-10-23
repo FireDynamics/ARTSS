@@ -13,6 +13,7 @@
 #include "BoundaryData.h"
 #include "../field/Field.h"
 #include "../joinedLists/SimpleJoinedList.h"
+#include "../joinedLists/ObstacleJoinedList.h"
 
 class BoundaryDataController {
  public:
@@ -25,8 +26,7 @@ class BoundaryDataController {
             bool sync = false);
     void apply_boundary_condition_obstacle(
             Field &field,
-            size_t **index_fields,
-            size_t *patch_start, size_t *patch_end,
+            ObstacleJoinedList **index_fields,
             FieldType field_type,
             size_t id,
             bool sync = false);

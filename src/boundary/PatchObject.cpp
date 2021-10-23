@@ -12,3 +12,7 @@ PatchObject::PatchObject() {
         m_patches[patch] = 0;
     }
 }
+
+PatchObject::~PatchObject() {
+    delete[] m_patches;
+}

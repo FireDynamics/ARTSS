@@ -14,6 +14,7 @@
 class PatchObject {
   public:
     PatchObject();
+    ~PatchObject();
     size_t *m_patches;
 
     inline size_t &operator[](size_t i) const { return m_patches[i]; }

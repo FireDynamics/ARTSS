@@ -236,11 +236,11 @@ void BoundaryController::detect_neighbouring_obstacles() {
 }
 
 size_t BoundaryController::get_size_inner_list_level_joined() const {
-    return m_multigrid->get_size_inner_list_level_joined();
+    return m_multigrid->get_size_domain_inner_cells_level_joined();
 }
 
 size_t BoundaryController::get_size_boundary_list_level_joined() const {
-    return m_multigrid->get_size_boundary_list_level_joined();
+    return m_multigrid->get_size_domain_boundary_cells_level_joined();
 }
 
 size_t *BoundaryController::get_obstacle_boundary_list() const {
@@ -252,7 +252,7 @@ size_t BoundaryController::get_size_boundary_list() const {
 }
 
 size_t BoundaryController::get_size_inner_list() const {
-    return m_multigrid->get_size_domain_inner_cells();
+    return m_multigrid->get_slice_size_domain_inner_cells_level_joined(0);
 }
 
 size_t BoundaryController::get_size_obstacle_list() const {
@@ -260,39 +260,19 @@ size_t BoundaryController::get_size_obstacle_list() const {
 }
 
 size_t *BoundaryController::get_inner_list_level_joined() const {
-    return m_multigrid->get_inner_list_level_joined();
+    return m_multigrid->get_domain_inner_cells_level_joined();
 }
 
 size_t BoundaryController::get_inner_list_level_joined_start(size_t level) const {
-    return m_multigrid->get_inner_list_level_joined_start(level);
+    return m_multigrid->get_start_index_domain_inner_cells_level_joined(level);
 }
 
 size_t BoundaryController::get_inner_list_level_joined_end(size_t level) const {
-    return m_multigrid->get_inner_list_level_joined_end(level);
+    return m_multigrid->get_end_index_domain_inner_cells_level_joined(level);
 }
 
 size_t *BoundaryController::get_boundary_list_level_joined() const {
-    return m_multigrid->get_boundary_list_level_joined();
-}
-
-size_t BoundaryController::get_boundary_list_level_joined_start(size_t level) const {
-    return m_multigrid->get_boundary_list_level_joined_start(level);
-}
-
-size_t BoundaryController::get_boundary_list_level_joined_end(size_t level) const {
-    return m_multigrid->get_boundary_list_level_joined_end(level);
-}
-
-size_t BoundaryController::get_obstacle_stride_x(size_t id, size_t level) const {
-    return m_multigrid->get_obstacle_stride_x(id, level);
-}
-
-size_t BoundaryController::get_obstacle_stride_y(size_t id, size_t level) const {
-    return m_multigrid->get_obstacle_stride_y(id, level);
-}
-
-size_t BoundaryController::get_obstacle_stride_z(size_t id, size_t level) const {
-    return m_multigrid->get_obstacle_stride_z(id, level);
+    return m_multigrid->get_domain_boundary_cells_level_joined();
 }
 
 std::vector<FieldType> BoundaryController::get_used_fields() const {
