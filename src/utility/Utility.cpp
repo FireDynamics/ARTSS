@@ -247,7 +247,7 @@ void log_field_info(Field &field, const std::string &text, const std::string &lo
     logger->info("average boundary {}: {}", text, average_boundary);
 #endif
 
-    size_t *obstacle_list = boundary->get_obstacle_list();
+    size_t *obstacle_list = boundary->get_obstacle_boundary_list();
     size_t size_obstacle_list = boundary->get_size_obstacle_list();
 
     if (size_obstacle_list > 0) {

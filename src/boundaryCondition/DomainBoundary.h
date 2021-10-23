@@ -11,10 +11,10 @@
 #include "../boundary/BoundaryData.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
-#include "../boundary/JoinedList.h"
+#include "../joinedLists/SimpleJoinedList.h"
 
 namespace DomainBoundary {
-    void apply_boundary_condition(Field &field, JoinedList** index_fields,
+    void apply_boundary_condition(Field &field, SimpleJoinedList** index_fields,
                                   BoundaryData* boundary_data, bool sync = true);
 }  // namespace DomainBoundary
 #endif /* ARTSS_BOUNDARYCONDITION_DOMAINBOUNDARY_H */

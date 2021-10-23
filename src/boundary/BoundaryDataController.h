@@ -12,7 +12,7 @@
 #include "../utility/Utility.h"
 #include "BoundaryData.h"
 #include "../field/Field.h"
-#include "JoinedList.h"
+#include "../joinedLists/SimpleJoinedList.h"
 
 class BoundaryDataController {
  public:
@@ -21,7 +21,7 @@ class BoundaryDataController {
     void add_boundary_data(tinyxml2::XMLElement *xml_element);
     void apply_boundary_condition(
             Field &field,
-            JoinedList **index_fields,
+            SimpleJoinedList **index_fields,
             bool sync = false);
     void apply_boundary_condition_obstacle(
             Field &field,

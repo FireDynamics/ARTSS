@@ -8,8 +8,6 @@ target_sources(artss
         ${CMAKE_CURRENT_LIST_DIR}/BoundaryData.h
         ${CMAKE_CURRENT_LIST_DIR}/BoundaryDataController.cpp
         ${CMAKE_CURRENT_LIST_DIR}/BoundaryDataController.h
-        ${CMAKE_CURRENT_LIST_DIR}/JoinedList.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/JoinedList.h
         ${CMAKE_CURRENT_LIST_DIR}/Multigrid.cpp
         ${CMAKE_CURRENT_LIST_DIR}/Multigrid.h
         ${CMAKE_CURRENT_LIST_DIR}/Obstacle.cpp

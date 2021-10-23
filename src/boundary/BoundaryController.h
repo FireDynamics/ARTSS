@@ -29,7 +29,7 @@ class BoundaryController {
 
     size_t get_size_inner_list() const;
     size_t get_size_boundary_list() const;
-    size_t* get_obstacle_list() const;
+    size_t* get_obstacle_boundary_list() const;
     size_t get_size_obstacle_list() const;
 
     size_t* get_inner_list_level_joined() const;

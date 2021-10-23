@@ -186,10 +186,10 @@ namespace {
 /// \param  boundary_data Boundary data_field object of Domain
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void apply_boundary_condition(Field &field, JoinedList **index_fields, BoundaryData *boundary_data, bool sync) {
+void apply_boundary_condition(Field &field, SimpleJoinedList **index_fields, BoundaryData *boundary_data, bool sync) {
     for (size_t i = 0; i < number_of_patches; i++) {
         size_t level = field.get_level();
-        JoinedList *jl = index_fields[i];
+        SimpleJoinedList *jl = index_fields[i];
         size_t *d_patch = jl->get_data();
         size_t patch_start = jl->get_first_index(level);
         size_t patch_end = jl->get_last_index(level);

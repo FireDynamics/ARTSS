@@ -79,7 +79,7 @@ void BoundaryDataController::print() {
 // *************************************************************************************************
 void BoundaryDataController::apply_boundary_condition(
         Field &field,
-        JoinedList **index_fields,
+        SimpleJoinedList **index_fields,
         bool sync) {
     FieldType field_type = field.get_type();
     if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {

@@ -367,7 +367,7 @@ void Analysis::save_variables_in_file(FieldController *field_controller) {
     size_t size_inner_list = boundary->get_size_inner_list();
     size_t *boundary_list = boundary->get_boundary_list_level_joined();
     size_t size_boundary_list = boundary->get_size_boundary_list();
-    size_t *obstacle_list = boundary->get_obstacle_list();
+    size_t *obstacle_list = boundary->get_obstacle_boundary_list();
     size_t size_obstacle_list = boundary->get_size_obstacle_list();
 
     std::vector<FieldType> v_fields = boundary->get_used_fields();

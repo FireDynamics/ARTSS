@@ -14,7 +14,8 @@
 #include "../DomainData.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
-#include "JoinedList.h"
+#include "../joinedLists/SimpleJoinedList.h"
+#include "../joinedLists/ObstacleJoinedList.h"
 
 class Multigrid {
  public:
@@ -30,7 +31,7 @@ class Multigrid {
     size_t get_size_inner_list(size_t level = 0) const;
     size_t get_size_boundary_list(size_t level = 0) const;
     size_t get_size_obstacle_list() const;
-    size_t *get_obstacle_list() const;
+    size_t *get_obstacle_boundary_list() const;
 
     size_t* get_inner_list_level_joined() const { return m_jl_domain_inner_list.get_data(); }
     size_t get_size_inner_list_level_joined() const { return *(m_size_MG_inner_index_list_level + m_multigrid_levels + 1); }
@@ -96,19 +97,14 @@ private:
     size_t* m_size_MG_obstacle_right_level;
 
     //---- all level joined / arrays for GPU -----
-    JoinedList m_jl_domain_inner_list;
-    JoinedList **m_jl_domain_boundary_list;
+    SimpleJoinedList m_jl_domain_inner_list;
+    SimpleJoinedList **m_jl_domain_boundary_list;
+
+    SimpleJoinedList m_jl_obstacle_list;
+    ObstacleJoinedList **m_jl_obstacle_boundary_list;
 
     size_t* m_data_MG_boundary_list_level_joined;
     size_t* m_data_MG_surface_list_level_joined;
-
-    size_t* m_data_MG_obstacle_front_level_joined;
-    size_t* m_data_MG_obstacle_back_level_joined;
-    size_t* m_data_MG_obstacle_bottom_level_joined;
-    size_t* m_data_MG_obstacle_top_level_joined;
-    size_t* m_data_MG_obstacle_left_level_joined;
-    size_t* m_data_MG_obstacle_right_level_joined;
-    size_t* m_data_MG_obstacle_list_level_joined;
 
     size_t get_size_obstacle_index_list(size_t level) const;
     size_t get_last_index_of_obstacle_front(size_t level, size_t id) const;
@@ -162,7 +158,7 @@ private:
 
     void init();
     void add_MG_lists();
-    void calc_obstacles(Obstacle** obstacle_object_list);
+    size_t calc_obstacles(Obstacle** obstacle_object_list, PatchObject *patch_sum);
     void calc_surfaces(Surface** surface_list);
     void send_lists_to_GPU();
     void send_domain_lists_to_GPU();
@@ -170,7 +166,7 @@ private:
     void send_obstacle_lists_to_GPU();
 
     void surface_dominant_restriction(size_t level);
-    Obstacle **obstacle_dominant_restriction(size_t level);
+    size_t obstacle_dominant_restriction(size_t level, PatchObject *sum_patches);
 
     void control();
     void print();
