@@ -38,7 +38,7 @@ class BoundaryData {
     void print();
 
     static std::string get_boundary_condition_name(BoundaryCondition bc);
-    static std::string get_patch_name(Patch p);
+    static std::string get_patch_name(size_t p);
 
     static Patch match_patch(const std::string &string);
     static BoundaryCondition match_boundary_condition(const std::string &string);

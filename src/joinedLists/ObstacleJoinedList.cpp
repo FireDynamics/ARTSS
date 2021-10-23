@@ -11,6 +11,7 @@ ObstacleJoinedList::ObstacleJoinedList(size_t multigrid_level, size_t number_of_
     for (size_t id = 0; id < number_of_obstacles; id++) {
         m_index_list[id] = 0;
     }
+    m_size_list = new size_t[multigrid_level  * number_of_obstacles];
 }
 
 void ObstacleJoinedList::set_size(const size_t size) {
@@ -54,4 +55,11 @@ void ObstacleJoinedList::add_data(size_t level, size_t obstacle_id, size_t size,
 
 void ObstacleJoinedList::control() {
 
+}
+
+ObstacleJoinedList::~ObstacleJoinedList() {
+#pragma acc exit data delete(m_data[:m_size])
+    delete[] m_index_list;
+    delete[] m_data;
+    delete[] m_size_list;
 }

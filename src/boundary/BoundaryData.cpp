@@ -64,7 +64,7 @@ std::string BoundaryData::get_boundary_condition_name(BoundaryCondition bc) {
     return boundary_condition_names[bc];
 }
 
-std::string BoundaryData::get_patch_name(Patch p) {
+std::string BoundaryData::get_patch_name(size_t p) {
     return patch_names[p];
 }
 

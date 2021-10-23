@@ -28,28 +28,25 @@ class Multigrid {
     explicit Multigrid(BoundaryDataController *bdc_boundary, size_t multigrid_level);
     ~Multigrid();
 
-    size_t get_size_domain_boundary_cells(size_t level = 0) const;
-    size_t get_size_obstacle_list() const;
-    size_t *get_obstacle_boundary_list() const;
+    size_t get_size_obstacle_list() const { return m_jl_obstacle_list.get_size(); }
+    size_t *get_obstacle_list() const { return m_jl_obstacle_list.get_data(); }
 
+    // getter -- domain inner cell
     size_t* get_domain_inner_cells_level_joined() const { return m_jl_domain_inner_list.get_data(); }
     size_t get_slice_size_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_slice_size(level); };
     size_t get_size_domain_inner_cells_level_joined() const { return m_jl_domain_inner_list.get_size(); }
     size_t get_start_index_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_first_index(level); }
     size_t get_end_index_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_last_index(level); }
 
-    size_t* get_domain_boundary_cells_level_joined() const { return m_data_MG_boundary_list_level_joined; }
-    size_t get_size_domain_boundary_cells_level_joined() const { return *(m_size_MG_boundary_index_list_level + m_multigrid_levels + 1); }
-    size_t get_start_index_domain_boundary_cells_level_joined(size_t level) const;
-    size_t get_end_index_domain_boundary_cells_level_joined(size_t level) const;
+    // getter -- domain boundary cell
+    size_t* get_domain_boundary_cells_level_joined() const { return m_jl_domain_boundary_list.get_data(); }
+    size_t get_size_domain_boundary_cells_level_joined() const { return m_jl_domain_boundary_list.get_size(); }
+    size_t get_start_index_domain_boundary_cells_level_joined(size_t level) const { return m_jl_domain_boundary_list.get_first_index(level); }
+    size_t get_end_index_domain_boundary_cells_level_joined(size_t level) const { return m_jl_domain_boundary_list.get_last_index(level); }
 
     void update_lists();
 
     void apply_boundary_condition(Field &field, bool sync = false);
-
-    size_t get_obstacle_stride_x(size_t id, size_t level) const;
-    size_t get_obstacle_stride_y(size_t id, size_t level) const;
-    size_t get_obstacle_stride_z(size_t id, size_t level) const;
 
     bool is_obstacle_cell(size_t level, size_t index);
     bool is_obstacle_cell(size_t level, size_t i, size_t j, size_t k);
@@ -71,88 +68,38 @@ private:
     // boundary for each level
     Domain** m_MG_domain_object_list;  // m_MG_boundary_object_list[level]
 
-    // obstacle indices divided by level
-    size_t** m_MG_obstacle_index_list;
     // surface indices divided by level
     size_t** m_MG_surface_index_list;
 
     // start index of each level in level joined list
-    size_t* m_size_MG_inner_index_list_level;
-    size_t* m_size_MG_boundary_index_list_level;
-    size_t* m_size_MG_obstacle_index_list_level;
     size_t* m_size_MG_surface_index_list_level;
-
-    // start index of each boundary object in level joined list
-    // (slice z = Front/Back, slice y = Bottom/Top, slice x = Left/Right)
-    size_t* m_size_MG_boundary_slice_z_level;
-    size_t* m_size_MG_boundary_slice_y_level;
-    size_t* m_size_MG_boundary_slice_x_level;
-
-    // start index of each obstacle object in level joined list
-    size_t* m_size_MG_obstacle_front_level;
-    size_t* m_size_MG_obstacle_back_level;
-    size_t* m_size_MG_obstacle_bottom_level;
-    size_t* m_size_MG_obstacle_top_level;
-    size_t* m_size_MG_obstacle_left_level;
-    size_t* m_size_MG_obstacle_right_level;
 
     //---- all level joined / arrays for GPU -----
     SimpleJoinedList m_jl_domain_inner_list;
-    SimpleJoinedList **m_jl_domain_boundary_list;
+    SimpleJoinedList m_jl_domain_boundary_list;
+    SimpleJoinedList **m_jl_domain_boundary_list_patch_divided;  // [Patch]
 
     SimpleJoinedList m_jl_obstacle_list;
-    ObstacleJoinedList **m_jl_obstacle_boundary_list;
+    ObstacleJoinedList **m_jl_obstacle_boundary_list_patch_divided;  // [Patch]
 
     size_t* m_data_MG_boundary_list_level_joined;
     size_t* m_data_MG_surface_list_level_joined;
 
-    size_t get_last_index_of_obstacle_front(size_t level, size_t id) const;
-    size_t get_last_index_of_obstacle_back(size_t level, size_t id) const;
-    size_t get_last_index_of_obstacle_bottom(size_t level, size_t id) const;
-    size_t get_last_index_of_obstacle_top(size_t level, size_t id) const;
-    size_t get_last_index_of_obstacle_left(size_t level, size_t id) const;
-    size_t get_last_index_of_obstacle_right(size_t level, size_t id) const;
-    size_t get_first_index_of_obstacle_front(size_t level, size_t id) const;
-    size_t get_first_index_of_obstacle_back(size_t level, size_t id) const;
-    size_t get_first_index_of_obstacle_bottom(size_t level, size_t id) const;
-    size_t get_first_index_of_obstacle_top(size_t level, size_t id) const;
-    size_t get_first_index_of_obstacle_left(size_t level, size_t id) const;
-    size_t get_first_index_of_obstacle_right(size_t level, size_t id) const;
-    size_t get_length_of_obstacle_front(size_t level) const;
-    size_t get_length_of_obstacle_back(size_t level) const;
-    size_t get_length_of_obstacle_bottom(size_t level) const;
-    size_t get_length_of_obstacle_top(size_t level) const;
-    size_t get_length_of_obstacle_left(size_t level) const;
-    size_t get_length_of_obstacle_right(size_t level) const;
-
-    // get length of bSlice from/for joined array
-    size_t get_length_of_boundary_slice_z_joined() const;
-    size_t get_length_of_boundary_slice_y_joined() const;
-    size_t get_length_of_boundary_slice_x_joined() const;
-
-    size_t get_first_index_of_boundary_slice_z(size_t level) const;
-    size_t get_first_index_of_boundary_slice_x(size_t level) const;
-    size_t get_first_index_of_boundary_slice_y(size_t level) const;
-    size_t get_last_index_of_boundary_slice_z(size_t level) const;
-    size_t get_last_index_of_boundary_slice_x(size_t level) const;
-    size_t get_last_index_of_boundary_slice_y(size_t level) const;
-
-    size_t get_length_of_boundary_index_list_joined() const;
     size_t get_length_of_surface_index_list_joined() const;
-    size_t get_first_index_of_boundary_index_list(size_t level) const;
     size_t get_first_index_of_surface_index_list(size_t level) const;
-    size_t get_last_index_of_inner_index_list(size_t level) const;
-    size_t get_last_index_boundary_index_list(size_t level) const;
     size_t get_last_index_of_surface_index_list(size_t level) const;
 
-    void init();
+    void init_domain();
+    void init_obstacles(Obstacle **obstacle_list);
+    void init_surfaces(Surface **surface_list);
+
     void add_MG_lists();
-    size_t calc_obstacles(Obstacle** obstacle_object_list, PatchObject *patch_sum);
+    size_t calc_obstacles(Obstacle** obstacle_object_list, PatchObject *patch_sum) const;
     void calc_surfaces(Surface** surface_list);
     void send_lists_to_GPU();
-    void send_domain_lists_to_GPU();
+    void create_domain_lists_for_GPU();
     void send_surface_lists_to_GPU();
-    void send_obstacle_lists_to_GPU();
+    void send_obstacle_lists_to_GPU(const size_t *size_MG_obstacle_index_list_level, size_t **MG_obstacle_index_list);
 
     void surface_dominant_restriction(size_t level);
     size_t obstacle_dominant_restriction(size_t level, PatchObject *sum_patches);
@@ -161,12 +108,10 @@ private:
     void print();
 
     // size_t **m_data_surfaces_patches_joined;
-    size_t **m_data_obstacles_patches_joined;
     BoundaryDataController *m_bdc_boundary;
     BoundaryDataController **m_bdc_obstacle;
 
     void remove_boundary_lists_from_GPU();
-
 };
 
 #endif /* ARTSS_BOUNDARY_MULTIGRID_H_*/

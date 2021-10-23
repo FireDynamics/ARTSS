@@ -6,7 +6,6 @@
 
 #include "Multigrid.h"
 #include "PatchObject.h"
-#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -15,6 +14,7 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary, size_t multigrid_leve
         m_number_of_surface_objects(0),
         m_number_of_obstacle_objects(0),
         m_jl_domain_inner_list(multigrid_levels),
+        m_jl_domain_boundary_list(multigrid_levels),
         m_jl_obstacle_list(multigrid_levels),
         m_bdc_boundary(bdc_boundary) {
 #ifndef BENCHMARKING
@@ -23,7 +23,7 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary, size_t multigrid_leve
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
 #endif
-    init();
+    init_domain();
     add_MG_lists();
     send_lists_to_GPU();
 #ifndef BENCHMARKING
@@ -42,41 +42,24 @@ Multigrid::Multigrid(
         m_number_of_surface_objects(number_of_surfaces),
         m_number_of_obstacle_objects(number_of_obstacles),
         m_jl_domain_inner_list(multigrid_levels),
+        m_jl_domain_boundary_list(multigrid_levels),
         m_jl_obstacle_list(multigrid_levels),
-        m_bdc_boundary(bdc_boundary) {
+        m_bdc_boundary(bdc_boundary),
+        m_bdc_obstacle(bdc_obstacles) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
 #endif
-    init();
+    init_domain();
 
     if (m_number_of_surface_objects > 0) {
-        // list of surfaces for each level
-        m_MG_surface_object_list = new Surface **[m_multigrid_levels + 1];
-        *(m_MG_surface_object_list) = surface_list;  // level 0
-
-        // surface indices divided by level
-        m_MG_surface_index_list = new size_t *[m_multigrid_levels + 1];
-
-        // start index of each surface in level joined list
-        m_size_MG_surface_index_list_level = new size_t[m_multigrid_levels * m_number_of_surface_objects + 1];
-        // start index of first level in joined list = 0
-        *(m_size_MG_surface_index_list_level) = 0;
+        init_surfaces(surface_list);
     }
 
     if (m_number_of_obstacle_objects > 0) {
-        // list of obstacles for each level
-        m_MG_obstacle_object_list = new Obstacle **[m_multigrid_levels + 1];
-        m_MG_obstacle_object_list[0] = obstacle_list;  // level 0
-        m_size_MG_obstacle_index_list_level = new size_t[m_multigrid_levels + 1];
-
-        // obstacle indices divided by level
-        m_MG_obstacle_index_list = new size_t *[m_multigrid_levels + 1];
-
-        m_jl_obstacle_boundary_list = new ObstacleJoinedList*[number_of_patches];
-        m_bdc_obstacle = bdc_obstacles;
+        init_obstacles(obstacle_list);
     }
 
     add_MG_lists();
@@ -89,16 +72,41 @@ Multigrid::Multigrid(
 
 //======================================== Init ====================================================
 // *************************************************************************************************
-/// \brief  Initialize member variables (arrays)
+/// \brief  Initialize member variables for domain
 // *************************************************************************************************
-void Multigrid::init() {
-    m_jl_domain_boundary_list = new SimpleJoinedList*[number_of_patches];
-    for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_jl_domain_boundary_list[patch]  = new SimpleJoinedList(m_multigrid_levels);
-    }
-
+void Multigrid::init_domain() {
     // list of domain boundary for each level
     m_MG_domain_object_list = new Domain *[m_multigrid_levels + 1];
+
+    m_jl_domain_boundary_list_patch_divided = new SimpleJoinedList*[number_of_patches];
+    for (size_t patch = 0; patch < number_of_patches; patch++) {
+        m_jl_domain_boundary_list_patch_divided[patch]  = new SimpleJoinedList(m_multigrid_levels);
+    }
+}
+
+void Multigrid::init_obstacles(Obstacle **obstacle_list){
+    // list of obstacles for each level
+    m_MG_obstacle_object_list = new Obstacle **[m_multigrid_levels + 1];
+    m_MG_obstacle_object_list[0] = obstacle_list;  // level 0
+
+    m_jl_obstacle_boundary_list_patch_divided = new ObstacleJoinedList*[number_of_patches];
+    for (size_t patch = 0; patch < number_of_patches; patch++) {
+        m_jl_obstacle_boundary_list_patch_divided[patch]  = new ObstacleJoinedList(m_multigrid_levels, m_number_of_obstacle_objects);
+    }
+}
+
+void Multigrid::init_surfaces(Surface **surface_list) {
+    // list of surfaces for each level
+    m_MG_surface_object_list = new Surface **[m_multigrid_levels + 1];
+    m_MG_surface_object_list[0] = surface_list;  // level 0
+
+    // surface indices divided by level
+    m_MG_surface_index_list = new size_t *[m_multigrid_levels + 1];
+
+    // start index of each surface in level joined list
+    m_size_MG_surface_index_list_level = new size_t[m_multigrid_levels * m_number_of_surface_objects + 1];
+    // start index of first level in joined list = 0
+    *(m_size_MG_surface_index_list_level) = 0;
 }
 
 Multigrid::~Multigrid() {
@@ -128,17 +136,6 @@ Multigrid::~Multigrid() {
 #pragma acc exit data delete(m_data_MG_boundary_list_level_joined[:size_boundary_list])
     delete[] m_data_MG_boundary_list_level_joined;
 
-    size_t size_boundary_slice_z = get_length_of_boundary_slice_z_joined();
-    size_t size_boundary_slice_y = get_length_of_boundary_slice_y_joined();
-    size_t size_boundary_slice_x = get_length_of_boundary_slice_x_joined();
-
-    delete[] m_size_MG_inner_index_list_level;
-    delete[] m_size_MG_boundary_index_list_level;
-
-    delete[] m_size_MG_boundary_slice_z_level;
-    delete[] m_size_MG_boundary_slice_y_level;
-    delete[] m_size_MG_boundary_slice_x_level;
-
     if (m_number_of_surface_objects > 0) {
         size_t size_surface_list = get_length_of_surface_index_list_joined();
 #pragma acc exit data delete(m_data_MG_surface_list_level_joined[:size_surface_list])
@@ -149,14 +146,6 @@ Multigrid::~Multigrid() {
     }
     if (m_number_of_obstacle_objects > 0) {
         delete[] m_MG_obstacle_object_list;
-        delete[] m_MG_obstacle_index_list;
-
-        delete[] m_size_MG_obstacle_front_level;
-        delete[] m_size_MG_obstacle_back_level;
-        delete[] m_size_MG_obstacle_top_level;
-        delete[] m_size_MG_obstacle_bottom_level;
-        delete[] m_size_MG_obstacle_left_level;
-        delete[] m_size_MG_obstacle_right_level;
     }
 }
 
@@ -176,63 +165,39 @@ void Multigrid::control() {
             message += "For Level " + std::to_string(level) + "\n";
             message += "size control\n";
         }
-        size_t bLen = (static_cast<Domain *>(*(m_MG_domain_object_list + level)))->get_size_inner_list();
-        size_t cLen = get_last_index_of_inner_index_list(level) - m_jl_domain_inner_list.get_first_index(level) + 1;
-        if (cLen != bLen) {
+        size_t original_len = (static_cast<Domain *>(*(m_MG_domain_object_list + level)))->get_size_inner_list();
+        size_t calculated_len = m_jl_domain_inner_list.get_last_index(level) - m_jl_domain_inner_list.get_first_index(level) + 1;
+        size_t saved_len = m_jl_domain_inner_list.get_slice_size(level);
+        if (calculated_len != original_len) {
             size_t control = domain->get_nx(level) * domain->get_ny(level) * domain->get_nz(level);
             message += "length calculated by first and last index of inner_list does not equals size of innerList of Boundary object "
-                       + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
+                       + std::to_string(calculated_len) + "|" + std::to_string(original_len) + " control: " + std::to_string(control) + "\n";
         }
-        bLen = (static_cast<Domain *>(*(m_MG_domain_object_list + level)))->get_size_domain_list();
-        cLen = get_last_index_boundary_index_list(level) - get_first_index_of_boundary_index_list(level) + 1;
-        if (cLen != bLen) {
+        if (saved_len != original_len) {
+            size_t control = domain->get_nx(level) * domain->get_ny(level) * domain->get_nz(level);
+            message += "length calculated by first and last index of inner_list does not equals size of innerList of Boundary object "
+                       + std::to_string(calculated_len) + "|" + std::to_string(original_len) + " control: " + std::to_string(control) + "\n";
+        }
+        original_len = (static_cast<Domain *>(*(m_MG_domain_object_list + level)))->get_size_domain_list();
+        calculated_len = get_last_index_boundary_index_list(level) - m_jl_domain_boundary_list.get_first_index(level) + 1;
+        if (calculated_len != original_len) {
             size_t control = (domain->get_Nx(level) * domain->get_Ny(level) * 2)
                              + (domain->get_Nx(level) * (domain->get_Nz(level) - 2)) * 2
                              + ((domain->get_Ny(level) - 2) * (domain->get_Nz(level) - 2)) * 2;
             message += "length calculated by first and last index of boundary_list does not equals size of boundaryList of Boundary object "
-                       + std::to_string(cLen) + "|" + std::to_string(bLen) + " control: " + std::to_string(control) + "\n";
+                       + std::to_string(calculated_len) + "|" + std::to_string(original_len) + " control: " + std::to_string(control) + "\n";
         }
-        bLen = (static_cast<Domain *>(*(m_MG_domain_object_list + level)))->get_size_boundary_list()[LEFT];
-        cLen = get_last_index_of_boundary_slice_x(level) - get_first_index_of_boundary_slice_x(level) + 1;
-        if (cLen != bLen) {
-            size_t control = domain->get_ny(level) * domain->get_nz(level);
-            message += "length calculated by first and last index of boundary_slice_x does not equals size of boundary_slice_x of bLeft "
-                       + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
-        }
-        bLen = (static_cast<Domain *>(*(m_MG_domain_object_list + level)))->get_size_boundary_list()[RIGHT];
-        cLen = get_last_index_of_boundary_slice_x(level) - get_first_index_of_boundary_slice_x(level) + 1;
-        if (cLen != bLen) {
-            size_t control = domain->get_ny(level) * domain->get_nz(level);
-            message += "length calculated by first and last index of boundary_slice_x does not equals size of boundary_slice_x of bRight "
-                       + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
-        }
-        bLen = (static_cast<Domain *>(*(m_MG_domain_object_list + level)))->get_size_boundary_list()[BOTTOM];
-        cLen = get_last_index_of_boundary_slice_y(level) - get_first_index_of_boundary_slice_y(level) + 1;
-        if (cLen != bLen) {
-            size_t control = domain->get_nx(level) * domain->get_nz(level);
-            message += "length calculated by first and last index of boundary_slice_y does not equals size of boundary_slice_y of bBottom "
-                       + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
-        }
-        bLen = (static_cast<Domain *>(*(m_MG_domain_object_list + level)))->get_size_boundary_list()[TOP];
-        cLen = get_last_index_of_boundary_slice_y(level) - get_first_index_of_boundary_slice_y(level) + 1;
-        if (cLen != bLen) {
-            size_t control = domain->get_nx(level) * domain->get_nz(level);
-            message += "length calculated by first and last index of boundary_slice_y does not equals size of boundary_slice_y of bTop "
-                       + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
-        }
-        bLen = (static_cast<Domain *>(*(m_MG_domain_object_list + level)))->get_size_boundary_list()[FRONT];
-        cLen = get_last_index_of_boundary_slice_z(level) - get_first_index_of_boundary_slice_z(level) + 1;
-        if (cLen != bLen) {
-            size_t control = domain->get_nx(level) * domain->get_ny(level);
-            message += "length calculated by first and last index of boundary_slice_z does not equals size of boundary_slice_z of bFront "
-                       + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
-        }
-        bLen = (static_cast<Domain *>(*(m_MG_domain_object_list + level)))->get_size_boundary_list()[BACK];
-        cLen = get_last_index_of_boundary_slice_z(level) - get_first_index_of_boundary_slice_z(level) + 1;
-        if (cLen != bLen) {
-            size_t control = domain->get_nx(level) * domain->get_ny(level);
-            message += "length calculated by first and last index of boundary_slice_z does not equals size of boundary_slice_z of bBack "
-                       + std::to_string(cLen) + "|" + std::to_string(bLen) + " control " + std::to_string(control) + "\n";
+        for (size_t patch = 0; patch < number_of_patches; patch++) {
+            original_len = (static_cast<Domain *>(m_MG_domain_object_list[level]))->get_size_boundary_list()[patch];
+            saved_len = m_jl_domain_boundary_list_patch_divided[patch]->get_slice_size(level);
+            calculated_len = m_jl_domain_boundary_list_patch_divided[patch]->get_first_index(level) - m_jl_domain_boundary_list_patch_divided[patch]->get_slice_size(level + 1);
+            if (calculated_len != original_len || saved_len != original_len) {
+                size_t control = domain->get_ny(level) * domain->get_nz(level);
+                message += fmt::format("length calculated/stored of domain boundary '{}' does not equals its original size size:"
+                                       "original: {} saved: {} calculated: {} control: {}\n",
+                                       BoundaryData::get_patch_name(static_cast<Patch>(patch)),
+                                       original_len, saved_len, calculated_len, control);
+            }
         }
 
         size_t csize_inner = domain->get_nx(level) * domain->get_ny(level) * domain->get_nz(level)
@@ -293,120 +258,62 @@ void Multigrid::print() {
     m_logger->debug("################ MULTIGRID ################");
     m_logger->debug("Number of Obstacles: {}, Number of Surfaces: {}",
                     m_number_of_obstacle_objects, m_number_of_surface_objects);
-    m_logger->debug("Levels: {}", m_multigrid_levels);
+    m_logger->debug("Multigrid levels: {}", m_multigrid_levels);
 
     for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        m_logger->debug("For Level {} inner_list starts at index {} and ends with index {}", level,
-                        m_jl_domain_inner_list.get_first_index(level), get_last_index_of_inner_index_list(level));
+        m_logger->debug("For Level {} domain inner list starts at index {} and ends with index {}", level,
+                        m_jl_domain_inner_list.get_first_index(level),
+                        m_jl_domain_inner_list.get_last_index(level));
         m_logger->debug("and the corresponding indices at this position: {}|{}",
                         m_jl_domain_inner_list[m_jl_domain_inner_list.get_first_index(level)],
-                        m_jl_domain_inner_list[get_last_index_of_inner_index_list(level)]);
+                        m_jl_domain_inner_list[m_jl_domain_inner_list.get_last_index(level)]);
     }
-    m_logger->debug("Total length of inner_list: {}", m_jl_domain_inner_list.get_size());
+    m_logger->debug("Total number of domain inner cells: {}", m_jl_domain_inner_list.get_size());
 
     for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        m_logger->debug("For Level {} boundary_list starts at index {} and ends with index {}", level,
-                        get_first_index_of_boundary_index_list(level), get_last_index_boundary_index_list(level));
+        m_logger->debug("For Level {} domain boundary list starts at index {} and ends with index {}", level,
+                        m_jl_domain_boundary_list.get_first_index(level),
+                        get_last_index_boundary_index_list(level));
         m_logger->debug("and the corresponding indices at this position: {} | {}",
-                        *(m_data_MG_boundary_list_level_joined + get_first_index_of_boundary_index_list(level)),
+                        *(m_data_MG_boundary_list_level_joined + m_jl_domain_boundary_list.get_first_index(level)),
                         *(m_data_MG_boundary_list_level_joined + get_last_index_boundary_index_list(level)));
     }
     m_logger->debug("Total length of boundary_list: {}", get_length_of_boundary_index_list_joined());
 
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        m_logger->debug("For Level {} boundary_slice_z starts at index {} and ends with index {}", level,
-                        get_first_index_of_boundary_slice_z(level), get_last_index_of_boundary_slice_z(level));
-        m_logger->debug(" and the corresponding indices at this position for FRONT: {} | {}",
-                        m_jl_domain_boundary_list[FRONT]->get_data()[get_first_index_of_boundary_slice_z(level)],
-                        m_jl_domain_boundary_list[FRONT]->get_data()[get_last_index_of_boundary_slice_z(level)]);
-        m_logger->debug(" and the corresponding indices at this position for BACK : {} | {}",
-                        m_jl_domain_boundary_list[BACK]->get_data()[get_first_index_of_boundary_slice_z(level)],
-                        m_jl_domain_boundary_list[BACK]->get_data()[get_last_index_of_boundary_slice_z(level)]);
+    for (size_t patch = 0; patch < number_of_patches; patch++) {
+        for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
+            size_t start_index = m_jl_domain_boundary_list_patch_divided[patch]->get_first_index(level);
+            size_t end_index = m_jl_domain_boundary_list_patch_divided[patch]->get_last_index(level);
+            m_logger->debug("For Level {} domain boundary '{}' starts at index {} and ends with index {}",
+                            level, BoundaryData::get_patch_name(patch),
+                            start_index, end_index);
+            m_logger->debug(" and the corresponding indices at this position {} | {}",
+                            m_jl_domain_boundary_list_patch_divided[patch]->get_data()[start_index],
+                            m_jl_domain_boundary_list_patch_divided[patch]->get_data()[end_index]);
+        }
+        m_logger->debug("Total number of '{}' boundary cells: {}",
+                        BoundaryData::get_patch_name(patch),
+                        m_jl_domain_boundary_list_patch_divided[patch]->get_size());
     }
-    m_logger->debug("Total length of boundary_slice_z: {}", get_length_of_boundary_slice_z_joined());
-
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        m_logger->debug("For Level {} boundary_slice_y starts at index {} and ends with index {}", level,
-                        get_first_index_of_boundary_slice_y(level), get_last_index_of_boundary_slice_y(level));
-        m_logger->debug(" and the corresponding indices at this position for BOTTOM: {} | {}",
-                        m_jl_domain_boundary_list[BOTTOM]->get_data()[get_first_index_of_boundary_slice_y(level)],
-                        m_jl_domain_boundary_list[BOTTOM]->get_data()[get_last_index_of_boundary_slice_y(level)]);
-        m_logger->debug(" and the corresponding indices at this position for TOP   : {} | {}",
-                        m_jl_domain_boundary_list[TOP]->get_data()[get_first_index_of_boundary_slice_y(level)],
-                        m_jl_domain_boundary_list[TOP]->get_data()[get_last_index_of_boundary_slice_y(level)]);
-    }
-    m_logger->debug("Total length of boundary_slice_y: {}", get_length_of_boundary_slice_y_joined());
-
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        m_logger->debug("For Level {} boundary_slice_x starts at index {} and ends with index {}", level,
-                        get_first_index_of_boundary_slice_x(level), get_last_index_of_boundary_slice_x(level));
-        m_logger->debug(" and the corresponding indices at this position for LEFT : {} | {}",
-                        m_jl_domain_boundary_list[LEFT]->get_data()[get_first_index_of_boundary_slice_x(level)],
-                        m_jl_domain_boundary_list[LEFT]->get_data()[get_last_index_of_boundary_slice_x(level)]);
-        m_logger->debug(" and the corresponding indices at this position for RIGHT: {} | {}",
-                        m_jl_domain_boundary_list[RIGHT]->get_data()[get_first_index_of_boundary_slice_x(level)],
-                        m_jl_domain_boundary_list[RIGHT]->get_data()[get_last_index_of_boundary_slice_x(level)]);
-    }
-    m_logger->debug("Total length of boundary_slice_x: {}", get_length_of_boundary_slice_x_joined());
 
     for (size_t level = 0; level < m_multigrid_levels; level++) {
         m_logger->debug("For Level {} obstacle_list has {} elements",
                         level, m_jl_obstacle_list.get_slice_size(level));
     }
 
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        m_logger->debug("For Level {} oFront starts at index {} and ends with index {} with length {}",
-                        level,
-                        get_first_index_of_obstacle_front(level, 0),
-                        get_last_index_of_obstacle_front(level, m_number_of_obstacle_objects - 1),
-                        get_length_of_obstacle_front(level));
+    for (size_t patch = 0; patch < number_of_patches; patch++) {
+        for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
+            m_logger->debug("For Level {} obstacle '{}' starts at index {} and ends with index {} with length {}",
+                            level,
+                            BoundaryData::get_patch_name(patch),
+                            m_jl_obstacle_boundary_list_patch_divided[patch]->get_first_index(level, 0),
+                            m_jl_obstacle_boundary_list_patch_divided[patch]->get_last_index(level, m_number_of_obstacle_objects - 1),
+                            m_jl_obstacle_boundary_list_patch_divided[patch]->get_slice_size(level));
+        }
+        m_logger->debug("Total number of '{}' obstacle cells: {}",
+                        BoundaryData::get_patch_name(patch),
+                        m_jl_obstacle_boundary_list_patch_divided[patch]->get_size());
     }
-    m_logger->debug("Total length of oFront: ", m_jl_obstacle_boundary_list[Patch::FRONT]->get_size());
-
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        m_logger->debug("For Level {} oBack starts at index {} and ends with index {} with length {}",
-                        level,
-                        get_first_index_of_obstacle_back(level, 0),
-                        get_last_index_of_obstacle_back(level, m_number_of_obstacle_objects - 1),
-                        get_length_of_obstacle_back(level));
-    }
-    m_logger->debug("Total length of oBack: {}", m_jl_obstacle_boundary_list[Patch::BACK]->get_size());
-
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        m_logger->debug("For Level {} oBottom starts at index {} and ends with index {} with length {}",
-                        level,
-                        get_first_index_of_obstacle_bottom(level, 0),
-                        get_last_index_of_obstacle_bottom(level, m_number_of_obstacle_objects - 1),
-                        get_length_of_obstacle_bottom(level));
-    }
-    m_logger->debug("Total length of oBottom: {}", m_jl_obstacle_boundary_list[Patch::BOTTOM]->get_size());
-
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        m_logger->debug("For Level {} oTop starts at index {} and ends with index {} with length {}",
-                        level,
-                        get_first_index_of_obstacle_top(level, 0),
-                        get_last_index_of_obstacle_top(level, m_number_of_obstacle_objects - 1),
-                        get_length_of_obstacle_top(level));
-    }
-    m_logger->debug("Total length of oTop: {}", m_jl_obstacle_boundary_list[Patch::TOP]->get_size());
-
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        m_logger->debug("For Level {} oLeft starts at index {} and ends with index {} with length {}",
-                        level,
-                        get_first_index_of_obstacle_left(level, 0),
-                        get_last_index_of_obstacle_left(level, m_number_of_obstacle_objects - 1),
-                        get_length_of_obstacle_left(level));
-    }
-    m_logger->debug("Total length of oLeft: {}", m_jl_obstacle_boundary_list[Patch::LEFT]->get_size());
-
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        m_logger->debug("For Level {} oRight starts at index {} and ends with index {} with length {}",
-                        level,
-                        get_first_index_of_obstacle_right(level, 0),
-                        get_last_index_of_obstacle_right(level, m_number_of_obstacle_objects - 1),
-                        get_length_of_obstacle_right(level));
-    }
-    m_logger->debug("Total length of oRight: {}", m_jl_obstacle_boundary_list[Patch::RIGHT]->get_size());
 
     for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
         m_logger->debug("For Level {} surface_list starts at index {} and ends with index {}",
@@ -425,7 +332,7 @@ void Multigrid::print() {
 // *************************************************************************************************
 void Multigrid::add_MG_lists() {
     size_t sum_domain_inner_cells = 0;
-    PatchObject * sum_domain_boundary = new PatchObject();
+    auto * sum_domain_boundary = new PatchObject();
     size_t sum_obstacle_cells = 0;
     auto sum_obstacle_boundary = new PatchObject();
 
@@ -472,8 +379,8 @@ void Multigrid::add_MG_lists() {
     m_jl_obstacle_list.set_size(sum_obstacle_cells);
 
     for (size_t patch = 0 ; patch < number_of_patches; patch++) {
-        m_jl_domain_boundary_list[patch]->set_size((*sum_domain_boundary)[patch]);
-        m_jl_obstacle_boundary_list[patch]->set_size((*sum_obstacle_boundary)[patch]);
+        m_jl_domain_boundary_list_patch_divided[patch]->set_size((*sum_domain_boundary)[patch]);
+        m_jl_obstacle_boundary_list_patch_divided[patch]->set_size((*sum_obstacle_boundary)[patch]);
     }
 }
 
@@ -482,25 +389,11 @@ void Multigrid::add_MG_lists() {
 /// \brief  create obstacles of level 0, no check if obstacles are overlapping
 /// \param obstacle_object_list List of obstacle objects
 // *************************************************************************************************
-size_t Multigrid::calc_obstacles(Obstacle **obstacle_object_list, PatchObject *patch_sum) {
+size_t Multigrid::calc_obstacles(Obstacle **obstacle_object_list, PatchObject *patch_sum) const {
     size_t sum_obstacle_list = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        size_t level = 0;
-        size_t o_size = m_jl_obstacle_list.get_slice_size(level);
-        auto *obstacle_index_list = new size_t[o_size];
-        size_t counter = 0;
-        for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
-            *patch_sum += obstacle_object_list[id]->get_size_boundary_list();
-            sum_obstacle_list += obstacle_object_list[id]->get_size_obstacle_list();
-
-            Obstacle *obstacle_tmp = obstacle_object_list[id];
-            size_t len_all = obstacle_tmp->get_size_obstacle_list();
-            for (size_t i = 0; i < len_all; i++) {
-                *(obstacle_index_list + counter) = obstacle_tmp->get_obstacle_list()[i];
-                counter++;
-            }
-        }
-        m_MG_obstacle_index_list[0] = obstacle_index_list;
+    for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
+        *patch_sum += obstacle_object_list[id]->get_size_boundary_list();
+        sum_obstacle_list += obstacle_object_list[id]->get_size_obstacle_list();
     }
     return sum_obstacle_list;
 }
@@ -689,10 +582,10 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
         size = data.size();
     }
 
+    //TODO(issue 130) result has to be stored/returned
     auto obstacle_list_tmp = new size_t[size];
     std::copy(&data[0], &data[size], obstacle_list_tmp);
-    m_size_MG_obstacle_index_list_level[level] = size;
-    m_MG_obstacle_index_list[level] = obstacle_list_tmp;
+    m_MG_obstacle_index_list[level] = obstacle_list_tmp; //TODO(issue 130) remove
     return size;
 }
 
@@ -702,15 +595,15 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
 // *************************************************************************************************
 void Multigrid::send_lists_to_GPU() {
     send_surface_lists_to_GPU();
-    send_domain_lists_to_GPU();
-    send_obstacle_lists_to_GPU();
+    create_domain_lists_for_GPU();
+    send_obstacle_lists_to_GPU(nullptr, nullptr);
 }
 
 // ================================= Send boundary lists to GPU ====================================
 // *************************************************************************************************
 /// \brief  create boundary joined list and send them to GPU
 // *************************************************************************************************
-void Multigrid::send_domain_lists_to_GPU() {
+void Multigrid::create_domain_lists_for_GPU() {
     for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
         Domain *domain = m_MG_domain_object_list[level];
         m_jl_domain_inner_list.add_data(level, domain->get_size_inner_list(), domain->get_inner_list());
@@ -718,27 +611,13 @@ void Multigrid::send_domain_lists_to_GPU() {
         size_t **all_boundaries = domain->get_boundary_list();
         PatchObject all_boundary_sizes = domain->get_size_boundary_list();
         for (size_t patch = 0; patch < number_of_patches; patch++) {
-            m_jl_domain_boundary_list[patch]->add_data(level, all_boundary_sizes[patch], all_boundaries[patch]);
+            m_jl_domain_boundary_list_patch_divided[patch]->add_data(level, all_boundary_sizes[patch], all_boundaries[patch]);
         }
     }
 
-    size_t *domain_inner_list_joined = m_jl_domain_inner_list.get_data();
-    size_t size_inner_list = m_jl_domain_inner_list.get_size();
-#ifdef GPU_DEBUG
-    m_gpu_logger->info("copyin inner list joined (domain_inner_list_joined) with pointer {} and size {}", static_cast<void *>(domain_inner_list_joined), size_inner_list);
-#endif
-#pragma acc enter data copyin(domain_inner_list_joined[:size_inner_list])
-
+    m_jl_domain_inner_list.copyin();
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        size_t *boundary_list_joined = m_jl_domain_boundary_list[patch]->get_data();
-        size_t size_boundary = m_jl_domain_boundary_list[patch]->get_size();
-#ifdef GPU_DEBUG
-    m_gpu_logger->info("copyin domain boundary {} with pointer {} and size {}",
-                       BoundaryData::get_patch_name(static_cast<Patch>(patch)),
-                       static_cast<void *>(boundary_list_joined),
-                       size_boundary);
-#endif
-#pragma acc enter data copyin(boundary_list_joined[:size_boundary])
+        m_jl_domain_boundary_list_patch_divided[patch]->copyin();
     }
 }
 
@@ -781,36 +660,24 @@ void Multigrid::send_surface_lists_to_GPU() {
 // *************************************************************************************************
 /// \brief  create obstacle joined list and send them to GPU
 // *************************************************************************************************
-void Multigrid::send_obstacle_lists_to_GPU() {
+void Multigrid::send_obstacle_lists_to_GPU(const size_t *size_MG_obstacle_index_list_level, size_t **MG_obstacle_index_list) {
     if (m_number_of_obstacle_objects > 0) {
         for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-            m_jl_obstacle_list.add_data(level, m_size_MG_obstacle_index_list_level[level], m_MG_obstacle_index_list[level]);
+            m_jl_obstacle_list.add_data(level, size_MG_obstacle_index_list_level[level], MG_obstacle_index_list[level]);
             Obstacle **obstacle_list = m_MG_obstacle_object_list[level];
             for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
                 Obstacle *obstacle = obstacle_list[id];
                 size_t **all_obstacle_boundary_cells = obstacle->get_boundary_list();
                 PatchObject all_obstacle_size = obstacle->get_size_boundary_list();
                 for (size_t patch = 0; patch < number_of_patches; patch++) {
-                    m_jl_obstacle_boundary_list[patch]->add_data(level, id, all_obstacle_size[patch], all_obstacle_boundary_cells[patch]);
+                    m_jl_obstacle_boundary_list_patch_divided[patch]->add_data(level, id, all_obstacle_size[patch], all_obstacle_boundary_cells[patch]);
                 }
             }
         }
-#ifdef GPU_DEBUG
-    m_gpu_logger->info("copyin obstacle list joined (m_data_MG_obstacle_list_zero_joined) with pointer {} and size {}", static_cast<void *>(m_data_MG_obstacle_list_zero_joined), size_obstacle_list);
-    m_gpu_logger->info("copyin obstacle front joined (m_data_MG_obstacle_front_level_joined) with pointer {} and size {}", static_cast<void *>(m_data_MG_obstacle_front_level_joined), size_obstacle_front);
-    m_gpu_logger->info("copyin obstacle back joined (m_data_MG_obstacle_back_level_joined) with pointer {} and size {}", static_cast<void *>(m_data_MG_obstacle_back_level_joined), size_obstacle_back);
-    m_gpu_logger->info("copyin obstacle top joined (m_data_MG_obstacle_top_level_joined) with pointer {} and size {}", static_cast<void *>(m_data_MG_obstacle_top_level_joined), size_obstacle_bottom);
-    m_gpu_logger->info("copyin obstacle bottom joined (m_data_MG_obstacle_bottom_level_joined) with pointer {} and size {}", static_cast<void *>(m_data_MG_obstacle_bottom_level_joined), size_obstacle_top);
-    m_gpu_logger->info("copyin obstacle left joined (m_data_MG_obstacle_left_level_joined) with pointer {} and size {}", static_cast<void *>(m_data_MG_obstacle_left_level_joined), size_obstacle_left);
-    m_gpu_logger->info("copyin obstacle right joined (m_data_MG_obstacle_right_level_joined) with pointer {} and size {}", static_cast<void *>(m_data_MG_obstacle_right_level_joined), size_obstacle_right);
-#endif
-#pragma acc enter data copyin(m_data_MG_obstacle_front_level_joined[:size_obstacle_front])
-#pragma acc enter data copyin(m_data_MG_obstacle_back_level_joined[:size_obstacle_back])
-#pragma acc enter data copyin(m_data_MG_obstacle_bottom_level_joined[:size_obstacle_bottom])
-#pragma acc enter data copyin(m_data_MG_obstacle_top_level_joined[:size_obstacle_top])
-#pragma acc enter data copyin(m_data_MG_obstacle_left_level_joined[:size_obstacle_left])
-#pragma acc enter data copyin(m_data_MG_obstacle_right_level_joined[:size_obstacle_right])
-#pragma acc enter data copyin(m_data_MG_obstacle_list_zero_joined[:size_obstacle_list])
+        m_jl_obstacle_list.copyin();
+        for (size_t patch = 0; patch < number_of_patches; patch++) {
+            m_jl_obstacle_boundary_list_patch_divided[patch]->copyin();
+        }
     }
 }
 
@@ -836,10 +703,10 @@ void Multigrid::apply_boundary_condition(Field &field, bool sync) {
             m_gpu_logger->debug("pointer left:\n {}\n {}",
                             static_cast<void *> (m_data_MG_obstacle_left_level_joined), static_cast<void *>(m_data_obstacles_patches_joined[Patch::LEFT]));
 #endif
-            (static_cast<BoundaryDataController *> (m_bdc_obstacle[id]))->apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list, f, id, sync);
+            (static_cast<BoundaryDataController *> (m_bdc_obstacle[id]))->apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list_patch_divided, f, id, sync);
         }
     }
-    m_bdc_boundary->apply_boundary_condition(field, m_jl_domain_boundary_list, sync);
+    m_bdc_boundary->apply_boundary_condition(field, m_jl_domain_boundary_list_patch_divided, sync);
 }
 
 //======================================== Update lists ====================================
@@ -847,49 +714,45 @@ void Multigrid::apply_boundary_condition(Field &field, bool sync) {
 /// \brief  Updates lists of indices
 // ***************************************************************************************
 void Multigrid::update_lists() {
+    //TODO(issue 178) rework update function especially with obstacles
     remove_boundary_lists_from_GPU();
-
-    *(m_size_MG_inner_index_list_level) = 0;
     *(m_size_MG_boundary_index_list_level) = 0;
-
-    *(m_size_MG_boundary_slice_z_level) = 0;
-    *(m_size_MG_boundary_slice_y_level) = 0;
-    *(m_size_MG_boundary_slice_x_level) = 0;
 
     if (m_number_of_obstacle_objects > 0) {
         for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-            Domain *boundary = *(m_MG_domain_object_list + level);
-            boundary->update_lists(*(m_MG_obstacle_object_list + level),
-                                   m_number_of_obstacle_objects,
-                                   m_jl_obstacle_list.get_slice_size(level));
-            m_size_MG_inner_index_list_level[level + 1] = m_size_MG_inner_index_list_level[level]
-                                                          + boundary->get_size_inner_list();
-            m_size_MG_boundary_index_list_level[level + 1] = m_size_MG_boundary_index_list_level[level]
-                                                             + boundary->get_size_domain_list();
-            m_size_MG_boundary_slice_z_level[level + 1] = m_size_MG_boundary_slice_z_level[level]
-                                                          + boundary->get_size_boundary_list()[FRONT];
-            m_size_MG_boundary_slice_y_level[level + 1] = m_size_MG_boundary_slice_y_level[level]
-                                                          + boundary->get_size_boundary_list()[TOP];
-            m_size_MG_boundary_slice_x_level[level + 1] = m_size_MG_boundary_slice_x_level[level]
-                                                          + boundary->get_size_boundary_list()[LEFT];
+            Domain *domain = *(m_MG_domain_object_list + level);
+            domain->update_lists(*(m_MG_obstacle_object_list + level),
+                                 m_number_of_obstacle_objects,
+                                 m_jl_obstacle_list.get_slice_size(level));
+
+            //m_size_MG_inner_index_list_level[level + 1] = m_size_MG_inner_index_list_level[level]
+            //                                              + domain->get_size_inner_list();
+            //m_size_MG_boundary_index_list_level[level + 1] = m_size_MG_boundary_index_list_level[level]
+            //                                                 + domain->get_size_domain_list();
+            //m_size_MG_boundary_slice_z_level[level + 1] = m_size_MG_boundary_slice_z_level[level]
+            //                                              + domain->get_size_boundary_list()[FRONT];
+            //m_size_MG_boundary_slice_y_level[level + 1] = m_size_MG_boundary_slice_y_level[level]
+            //                                              + domain->get_size_boundary_list()[TOP];
+            //m_size_MG_boundary_slice_x_level[level + 1] = m_size_MG_boundary_slice_x_level[level]
+            //                                              + domain->get_size_boundary_list()[LEFT];
         }
     } else {
         for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-            Domain *boundary = *(m_MG_domain_object_list + level);
-            boundary->update_lists();
-            m_size_MG_inner_index_list_level[level + 1] = m_size_MG_inner_index_list_level[level]
-                                                          + boundary->get_size_inner_list();
-            m_size_MG_boundary_index_list_level[level + 1] = m_size_MG_boundary_index_list_level[level]
-                                                             + boundary->get_size_domain_list();
-            m_size_MG_boundary_slice_z_level[level + 1] = m_size_MG_boundary_slice_z_level[level]
-                                                          + boundary->get_size_boundary_list()[FRONT];
-            m_size_MG_boundary_slice_y_level[level + 1] = m_size_MG_boundary_slice_y_level[level]
-                                                          + boundary->get_size_boundary_list()[TOP];
-            m_size_MG_boundary_slice_x_level[level + 1] = m_size_MG_boundary_slice_x_level[level]
-                                                          + boundary->get_size_boundary_list()[LEFT];
+            Domain *domain = m_MG_domain_object_list[level];
+            domain->update_lists();
+            //m_size_MG_inner_index_list_level[level + 1] = m_size_MG_inner_index_list_level[level]
+            //                                              + domain->get_size_inner_list();
+            //m_size_MG_boundary_index_list_level[level + 1] = m_size_MG_boundary_index_list_level[level]
+            //                                                 + domain->get_size_domain_list();
+            //m_size_MG_boundary_slice_z_level[level + 1] = m_size_MG_boundary_slice_z_level[level]
+            //                                              + domain->get_size_boundary_list()[FRONT];
+            //m_size_MG_boundary_slice_y_level[level + 1] = m_size_MG_boundary_slice_y_level[level]
+            //                                              + domain->get_size_boundary_list()[TOP];
+            //m_size_MG_boundary_slice_x_level[level + 1] = m_size_MG_boundary_slice_x_level[level]
+            //                                              + domain->get_size_boundary_list()[LEFT];
         }
     }
-    send_domain_lists_to_GPU();
+    create_domain_lists_for_GPU();
 }
 
 void Multigrid::remove_boundary_lists_from_GPU() {
@@ -902,22 +765,11 @@ void Multigrid::remove_boundary_lists_from_GPU() {
 
 //======================================== Private getter ==========================================
 // *************************************************************************************************
-/// \brief  get the index of joined inner cell list, where the last cell of level l is
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_last_index_of_inner_index_list(size_t level) const {
-    return m_jl_domain_inner_list.get_last_index(level);
-}
-
-// boundary_list
-
-// *************************************************************************************************
 /// \brief  get the index of joined inner cell list, where the first cell of level l is
 /// \return size_t
 // *************************************************************************************************
 size_t Multigrid::get_length_of_boundary_index_list_joined() const {
-    return get_first_index_of_boundary_index_list(m_multigrid_levels + 1) + 1;
+    return m_jl_domain_boundary_list.get_first_index(m_multigrid_levels + 1) + 1;
 }
 
 // *************************************************************************************************
@@ -925,8 +777,8 @@ size_t Multigrid::get_length_of_boundary_index_list_joined() const {
 /// \param level Multigrid level
 /// \return size_t
 // *************************************************************************************************
-size_t Multigrid::get_first_index_of_boundary_index_list(size_t level) const {
-    return *(m_size_MG_boundary_index_list_level + level);
+size_t Multigrid::m_jl_domain_boundary_list.get_first_index(size_t level) const {
+    return m_jl_domain_boundary_list.get_first_index(level);
 }
 
 // *************************************************************************************************
@@ -963,358 +815,7 @@ size_t Multigrid::get_last_index_of_surface_index_list(size_t level) const {
     return index;
 }
 
-// bSlices
-
-// *************************************************************************************************
-/// \brief  get length of left/right joined boundary list
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_length_of_boundary_slice_x_joined() const {
-    return get_first_index_of_boundary_slice_x(m_multigrid_levels + 1) + 1;
-}
-
-// *************************************************************************************************
-/// \brief  get length of top/bottom joined boundary list
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_length_of_boundary_slice_y_joined() const {
-    return get_first_index_of_boundary_slice_y(m_multigrid_levels + 1) + 1;
-}
-
-// *************************************************************************************************
-/// \brief  get length of front/back joined boundary list
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_length_of_boundary_slice_z_joined() const {
-    return get_first_index_of_boundary_slice_z(m_multigrid_levels + 1) + 1;
-}
-
-// *************************************************************************************************
-/// \brief  get the index of joined boundary cell list of left/right patch of the first cell
-/// of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_first_index_of_boundary_slice_x(size_t level) const {
-    return *(m_size_MG_boundary_slice_x_level + level);
-}
-
-// *************************************************************************************************
-/// \brief  get the index of joined boundary cell list of top/bottom patch of the first cell
-/// of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_first_index_of_boundary_slice_y(size_t level) const {
-    return *(m_size_MG_boundary_slice_y_level + level);
-}
-
-// *************************************************************************************************
-/// \brief  get the index of joined boundary cell list of front/back patch of the first cell
-/// of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_first_index_of_boundary_slice_z(size_t level) const {
-    return *(m_size_MG_boundary_slice_z_level + level);
-}
-
-// *************************************************************************************************
-/// \brief  get the index of joined boundary cell list of left/right patch of the last cell
-/// of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_last_index_of_boundary_slice_x(size_t level) const {
-    return *(m_size_MG_boundary_slice_x_level + level + 1) - 1;
-}
-
-// *************************************************************************************************
-/// \brief  get the index of joined boundary cell list of top/bottom patch of the last cell
-/// of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_last_index_of_boundary_slice_y(size_t level) const {
-    return *(m_size_MG_boundary_slice_y_level + level + 1) - 1;
-}
-
-// *************************************************************************************************
-/// \brief  get the index of joined boundary cell list of front/back patch of the last cell
-/// of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_last_index_of_boundary_slice_z(size_t level) const {
-    return *(m_size_MG_boundary_slice_z_level + level + 1) - 1;
-}
-
-// *************************************************************************************************
-/// \brief  get amount of Front obstacle cells of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_front(size_t level) const {
-    size_t len = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        size_t last = get_last_index_of_obstacle_front(level, m_number_of_obstacle_objects - 1);
-        if (last > 0) {
-            len = last - get_first_index_of_obstacle_front(level, 0) + 1;
-        }
-    }
-    return len;
-}
-
-// *************************************************************************************************
-/// \brief get amount of Back obstacle cells of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_back(size_t level) const {
-    size_t len = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        size_t last = get_last_index_of_obstacle_back(level, m_number_of_obstacle_objects - 1);
-        if (last > 0) {
-            len = last - get_first_index_of_obstacle_back(level, 0) + 1;
-        }
-    }
-    return len;
-}
-
-// *************************************************************************************************
-/// \brief  get amount of Bottom obstacle cells of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_bottom(size_t level) const {
-    size_t len = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        size_t last = get_last_index_of_obstacle_bottom(level, m_number_of_obstacle_objects - 1);
-        if (last > 0) {
-            len = last - get_first_index_of_obstacle_bottom(level, 0) + 1;
-        }
-    }
-    return len;
-}
-
-// *************************************************************************************************
-/// \brief  get amount of Top obstacle cells of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_top(size_t level) const {
-    size_t len = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        size_t last = get_last_index_of_obstacle_top(level, m_number_of_obstacle_objects - 1);
-        if (last > 0) {
-            len = last - get_first_index_of_obstacle_top(level, 0) + 1;
-        }
-    }
-    return len;
-}
-
-// *************************************************************************************************
-/// \brief  get amount of Left obstacle cells of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_left(size_t level) const {
-    size_t len = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        size_t last = get_last_index_of_obstacle_left(level, m_number_of_obstacle_objects - 1);
-        if (last > 0) {
-            len = last - get_first_index_of_obstacle_left(level, 0) + 1;
-        }
-    }
-    return len;
-}
-
-// *************************************************************************************************
-/// \brief  get amount of Front obstacle cells of level l
-/// \param level Multigrid level
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_length_of_obstacle_right(size_t level) const {
-    size_t len = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        len = get_first_index_of_obstacle_right(level + 1, 0)
-              - get_first_index_of_obstacle_right(level, 0);
-    }
-    return len;
-}
-
-// *************************************************************************************************
-/// \brief  get the index of joined obstacle cell list of Front patch of the first cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_front(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = *(m_size_MG_obstacle_front_level + level * m_number_of_obstacle_objects + id);
-    }
-    return index;
-}
-
-// *************************************************************************************************
-/// \brief  get the index of joined obstacle cell list of Back patch of the first cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_back(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = *(m_size_MG_obstacle_back_level + level * m_number_of_obstacle_objects + id);
-    }
-    return index;
-}
-
-// *************************************************************************************************
-/// \brief  get the index of joined obstacle cell list of Bottom patch of the first cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_bottom(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = *(m_size_MG_obstacle_bottom_level + level * m_number_of_obstacle_objects + id);
-    }
-    return index;
-}
-
-// *************************************************************************************************
-/// \brief  get the index of joined obstacle cell list of Top patch of the first cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_top(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = *(m_size_MG_obstacle_top_level + level * m_number_of_obstacle_objects + id);
-    }
-    return index;
-}
-
-// *************************************************************************************************
-/// \brief  get the index of joined obstacle cell list of Left patch of the first cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_left(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = *(m_size_MG_obstacle_left_level + level * m_number_of_obstacle_objects + id);
-    }
-    return index;
-}
-
-// *************************************************************************************************
-/// \brief get the index of joined obstacle cell list of right patch of the first cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_first_index_of_obstacle_right(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = *(m_size_MG_obstacle_right_level + level * m_number_of_obstacle_objects + id);
-    }
-    return index;
-}
-
-// *************************************************************************************************
-/// \brief get the index of joined obstacle cell list of front patch of the last cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_front(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = m_size_MG_obstacle_front_level[level * m_number_of_obstacle_objects + id + 1];
-    }
-    return index;
-}
-
-// *************************************************************************************************
-/// \brief get the index of joined obstacle cell list of back patch of the last cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_back(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = m_size_MG_obstacle_back_level[level * m_number_of_obstacle_objects + id + 1];
-    }
-    return index;
-}
-
-// *************************************************************************************************
-/// \brief get the index of joined obstacle cell list of bottom patch of the last cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return size_t
-// *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_bottom(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = m_size_MG_obstacle_bottom_level[level * m_number_of_obstacle_objects + id + 1] - 1;
-    }
-    return index;
-}
-
-// *************************************************************************************************
-/// \brief get the index of joined obstacle cell list of top patch of the last cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return int
-// *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_top(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = m_size_MG_obstacle_top_level[level * m_number_of_obstacle_objects + id + 1] - 1;
-    }
-    return index;
-}
-
-// *************************************************************************************************
-/// \brief get the index of joined obstacle cell list of left patch of the last cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return int
-// *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_left(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = m_size_MG_obstacle_left_level[level * m_number_of_obstacle_objects + id + 1];
-    }
-    return index;
-}
-
-// *************************************************************************************************
-/// \brief get the index of joined obstacle cell list of right patch of the last cell of level l
-/// \param level Multigrid level
-/// \param id ID of obstacle
-/// \return int
-// *************************************************************************************************
-size_t Multigrid::get_last_index_of_obstacle_right(size_t level, size_t id) const {
-    size_t index = 0;
-    if (m_number_of_obstacle_objects > 0) {
-        index = m_size_MG_obstacle_right_level[level * m_number_of_obstacle_objects + id + 1];
-    }
-    return index;
-}
-
 // ---------------- public getter
-size_t Multigrid::get_size_domain_boundary_cells(size_t level) const {
-    return get_last_index_boundary_index_list(level) - get_first_index_of_boundary_index_list(level) + 1;
-}
 
 size_t Multigrid::get_size_obstacle_list() const {
     return m_jl_obstacle_list.get_slice_size(0);
@@ -1326,18 +827,6 @@ size_t Multigrid::get_start_index_domain_boundary_cells_level_joined(size_t leve
 
 size_t Multigrid::get_end_index_domain_boundary_cells_level_joined(size_t level) const {
     return get_start_index_domain_boundary_cells_level_joined(level + 1) - 1;
-}
-
-size_t Multigrid::get_obstacle_stride_x(size_t id, size_t level) const {
-    return (static_cast<Obstacle *>(m_MG_obstacle_object_list[level][id]))->get_stride_x();
-}
-
-size_t Multigrid::get_obstacle_stride_y(size_t id, size_t level) const {
-    return (static_cast<Obstacle *>(m_MG_obstacle_object_list[level][id]))->get_stride_y();
-}
-
-size_t Multigrid::get_obstacle_stride_z(size_t id, size_t level) const {
-    return (static_cast<Obstacle *>(m_MG_obstacle_object_list[level][id]))->get_stride_z();
 }
 
 bool Multigrid::is_obstacle_cell(const size_t level, const size_t index) {
@@ -1358,6 +847,6 @@ bool Multigrid::is_obstacle_cell(const size_t level,
     return is_obstacle_cell(level, IX(i, j, k, Nx, Ny));
 }
 
-size_t *Multigrid::get_obstacle_boundary_list() const {
+size_t *Multigrid::get_obstacle_list() const {
     return m_jl_obstacle_list.get_data();
 }

@@ -244,7 +244,7 @@ size_t BoundaryController::get_size_boundary_list_level_joined() const {
 }
 
 size_t *BoundaryController::get_obstacle_boundary_list() const {
-    return m_multigrid->get_obstacle_boundary_list();
+    return m_multigrid->get_obstacle_list();
 }
 
 size_t BoundaryController::get_size_boundary_list() const {

@@ -9,6 +9,8 @@
 SimpleJoinedList::SimpleJoinedList(size_t multigrid_level) {
     m_index_list = new size_t[multigrid_level + 2];
     m_index_list[0] = 0;
+
+    m_size_list = new size_t[multigrid_level + 1];
 }
 
 void SimpleJoinedList::set_size(const size_t size) {
@@ -46,6 +48,9 @@ void SimpleJoinedList::add_data(size_t level, size_t size, const size_t *data) {
     }
 }
 
-void SimpleJoinedList::control() {
-
+SimpleJoinedList::~SimpleJoinedList() {
+#pragma acc exit data delete(m_data[:m_size])
+    delete[] m_index_list;
+    delete[] m_data;
+    delete[] m_size_list;
 }
