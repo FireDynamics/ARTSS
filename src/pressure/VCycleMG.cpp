@@ -220,7 +220,6 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         return;
     }
 
-    std::cout << "hier" << std::endl;
     out.update_dev();
     m_error1[0]->copy_data(out);
     for (size_t level = 0; level < m_levels; ++level) {
@@ -261,7 +260,6 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
                          field_residuum1_level_minus_1)
         {
             Prolongate(*field_error0_level, *field_error1_level, level, sync);
-            std::cout << "nach prolongate" << std::endl;
 #ifdef _OPENACC
             acc_present_dump();
 #endif
