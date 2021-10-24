@@ -30,12 +30,10 @@ Multigrid::Multigrid(
     m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
 #endif
     init_domain();
-
+    init_obstacles(obstacle_list);
     if (m_number_of_surface_objects > 0) {
         init_surfaces(surface_list);
     }
-
-    init_obstacles(obstacle_list);
 
     add_MG_lists();
     send_lists_to_GPU();
@@ -50,7 +48,7 @@ Multigrid::Multigrid(
 /// \brief  Initialize member variables for domain
 // *************************************************************************************************
 void Multigrid::init_domain() {
-    // list of domain boundary for each level
+    // list of domain objects for each level
     m_MG_domain_object_list = new Domain *[m_multigrid_levels + 1];
 
     m_jl_domain_boundary_list_patch_divided = new SimpleJoinedList*[number_of_patches];
@@ -60,7 +58,7 @@ void Multigrid::init_domain() {
 }
 
 void Multigrid::init_obstacles(Obstacle **obstacle_list){
-    // list of obstacles for each level
+    // list of obstacle objects for each level
     m_MG_obstacle_object_list = new Obstacle **[m_multigrid_levels + 1];
     m_MG_obstacle_object_list[0] = obstacle_list;  // level 0
 
@@ -85,7 +83,6 @@ void Multigrid::init_surfaces(Surface **surface_list) {
 }
 
 Multigrid::~Multigrid() {
-    //TODO(issue 130)
     for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
         if (m_number_of_surface_objects > 0) {
             Surface **surface_level = *(m_MG_surface_object_list + level);
@@ -115,9 +112,6 @@ Multigrid::~Multigrid() {
         delete[] m_MG_surface_index_list;
         delete[] m_size_MG_surface_index_list_level;
         delete[] m_data_MG_surface_list_level_joined;
-    }
-    if (m_number_of_obstacle_objects > 0) {
-        delete[] m_MG_obstacle_object_list;
     }
 
     for (size_t patch = 0; patch < number_of_patches; patch++) {
@@ -714,39 +708,18 @@ void Multigrid::update_lists() {
             domain->update_lists(*(m_MG_obstacle_object_list + level),
                                  m_number_of_obstacle_objects,
                                  m_jl_obstacle_list.get_slice_size(level));
-
-            //m_size_MG_inner_index_list_level[level + 1] = m_size_MG_inner_index_list_level[level]
-            //                                              + domain->get_size_domain_inner_list();
-            //m_size_MG_boundary_index_list_level[level + 1] = m_size_MG_boundary_index_list_level[level]
-            //                                                 + domain->get_size_domain_list();
-            //m_size_MG_boundary_slice_z_level[level + 1] = m_size_MG_boundary_slice_z_level[level]
-            //                                              + domain->get_size_boundary_list()[FRONT];
-            //m_size_MG_boundary_slice_y_level[level + 1] = m_size_MG_boundary_slice_y_level[level]
-            //                                              + domain->get_size_boundary_list()[TOP];
-            //m_size_MG_boundary_slice_x_level[level + 1] = m_size_MG_boundary_slice_x_level[level]
-            //                                              + domain->get_size_boundary_list()[LEFT];
         }
     } else {
         for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
             Domain *domain = m_MG_domain_object_list[level];
             domain->update_lists();
-            //m_size_MG_inner_index_list_level[level + 1] = m_size_MG_inner_index_list_level[level]
-            //                                              + domain->get_size_domain_inner_list();
-            //m_size_MG_boundary_index_list_level[level + 1] = m_size_MG_boundary_index_list_level[level]
-            //                                                 + domain->get_size_domain_list();
-            //m_size_MG_boundary_slice_z_level[level + 1] = m_size_MG_boundary_slice_z_level[level]
-            //                                              + domain->get_size_boundary_list()[FRONT];
-            //m_size_MG_boundary_slice_y_level[level + 1] = m_size_MG_boundary_slice_y_level[level]
-            //                                              + domain->get_size_boundary_list()[TOP];
-            //m_size_MG_boundary_slice_x_level[level + 1] = m_size_MG_boundary_slice_x_level[level]
-            //                                              + domain->get_size_boundary_list()[LEFT];
         }
     }
     create_domain_lists_for_GPU();
 }
 
 void Multigrid::remove_boundary_lists_from_GPU() {
-    //TODO(issue 130)
+    //TODO(issue 178) remove domain lists which are going to be replaced
 }
 
 // surface_list
