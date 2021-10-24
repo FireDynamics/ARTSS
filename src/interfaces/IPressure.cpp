@@ -53,7 +53,7 @@ void IPressure::divergence(
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
     size_t neighbour_k = Nx * Ny;
-#pragma acc data present(d_inner_list[:bsize_i], d_boundary_list[:bsize_b])
+#pragma acc data present(d_inner_list[:bsize_i])
 #pragma acc data present(out, in_x, in_y, in_z)
     {
 #pragma acc kernels async
