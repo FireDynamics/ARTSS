@@ -28,22 +28,26 @@ class Multigrid {
     explicit Multigrid(BoundaryDataController *bdc_boundary, size_t multigrid_level);
     ~Multigrid();
 
-    size_t get_size_obstacle_list() const { return m_jl_obstacle_list.get_size(); }
-    size_t *get_obstacle_list() const { return m_jl_obstacle_list.get_data(); }
-
-    // getter -- domain inner cell
+    // getter -- domain inner cells
     size_t* get_domain_inner_cells_level_joined() const { return m_jl_domain_inner_list.get_data(); }
     size_t get_slice_size_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_slice_size(level); };
     size_t get_size_domain_inner_cells_level_joined() const { return m_jl_domain_inner_list.get_size(); }
     size_t get_start_index_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_first_index(level); }
     size_t get_end_index_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_last_index(level); }
 
-    // getter -- domain boundary cell
-    size_t get_size_domain_boundary_cells() const { return m_jl_domain_boundary_list.get_size(); }
-    size_t* get_domain_boundary_cells_level_joined() const { return m_jl_domain_boundary_list.get_data(); }
-    size_t get_size_domain_boundary_cells_level_joined() const { return m_jl_domain_boundary_list.get_size(); }
-    size_t get_start_index_domain_boundary_cells_level_joined(size_t level) const { return m_jl_domain_boundary_list.get_first_index(level); }
-    size_t get_end_index_domain_boundary_cells_level_joined(size_t level) const { return m_jl_domain_boundary_list.get_last_index(level); }
+    // getter -- domain cells (boundary + inner)
+    size_t* get_domain_cells_level_joined() const { return m_jl_domain_list.get_data(); }
+    size_t get_slice_size_domain_cells(size_t level) const { return m_jl_domain_list.get_slice_size(level); }
+    size_t get_size_domain_cells() const { return m_jl_domain_list.get_size(); }
+    size_t get_start_index_domain_cells_level_joined(size_t level) const { return m_jl_domain_list.get_first_index(level); }
+    size_t get_end_index_domain_cells_level_joined(size_t level) const { return m_jl_domain_list.get_last_index(level); }
+
+    // getter -- obstacle cells (boundary + inner)
+    size_t* get_obstacle_cells_level_joined() const { return m_jl_obstacle_list.get_data(); }
+    size_t get_slice_size_obstacle_cells(size_t level) const { return m_jl_obstacle_list.get_slice_size(level); }
+    size_t get_size_obstacle_cells() const { return m_jl_obstacle_list.get_size(); }
+    size_t get_start_index_obstacle_cells_level_joined(size_t level) const { return m_jl_obstacle_list.get_first_index(level); }
+    size_t get_end_index_obstacle_cells_level_joined(size_t level) const { return m_jl_obstacle_list.get_last_index(level); }
 
     void update_lists();
 
@@ -77,8 +81,8 @@ private:
     size_t* m_size_MG_surface_index_list_level;
 
     //---- all level joined / arrays for GPU -----
+    SimpleJoinedList m_jl_domain_list;
     SimpleJoinedList m_jl_domain_inner_list;
-    SimpleJoinedList m_jl_domain_boundary_list;
     SimpleJoinedList **m_jl_domain_boundary_list_patch_divided;  // [Patch]
 
     SimpleJoinedList m_jl_obstacle_list;

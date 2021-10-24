@@ -162,8 +162,8 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
         const real reciprocal_dz2 = 1. / (dz * dz);
 
         BoundaryController *boundary = BoundaryController::getInstance();
-        const size_t bsize_i = boundary->get_size_inner_list();
-        size_t *data_inner_list = boundary->get_inner_list_level_joined();
+        const size_t bsize_i = boundary->get_size_domain_inner_list();
+        size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
 
         const size_t neighbour_i = 1;
         const size_t neighbour_j = Nx;
@@ -332,10 +332,10 @@ void VCycleMG::Residuum(Field &out, Field const &in, Field const &b, const size_
     const real reciprocal_dz2 = 1. / (dz * dz);
 
     BoundaryController *boundary = BoundaryController::getInstance();
-    size_t *data_inner_list = boundary->get_inner_list_level_joined();
+    size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
 
-    const size_t start_i = boundary->get_inner_list_level_joined_start(level);
-    const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
+    const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level) + 1;
 
     // neighbour cells, i/j/k represent the directions
     const size_t neighbour_cell_i = 1;
@@ -380,10 +380,10 @@ void VCycleMG::Restrict(Field &out, Field const &in, const size_t level, bool sy
     const size_t Ny_fine = domain->get_Ny(in.get_level());
 
     auto boundary = BoundaryController::getInstance();
-    size_t *data_inner_list = boundary->get_inner_list_level_joined();
+    size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
 
-    const size_t start_i = boundary->get_inner_list_level_joined_start(level + 1);
-    const size_t end_i = boundary->get_inner_list_level_joined_end(level + 1) + 1;
+    const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level + 1);
+    const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level + 1) + 1;
 
 #ifndef BENCHMARKING
     if (end_i == start_i) {
@@ -450,10 +450,10 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
     const size_t Ny_coarse = domain->get_Ny(in.get_level());
 
     BoundaryController *boundary = BoundaryController::getInstance();
-    size_t *data_inner_list = boundary->get_inner_list_level_joined();
+    size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
 
-    const size_t start_i = boundary->get_inner_list_level_joined_start(level);
-    const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
+    const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level) + 1;
 
     // neighbour cells, i/j/k represent the directions
     const size_t neighbour_cell_i = 1;
@@ -632,11 +632,11 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
     const real dz = domain->get_dz(level);
 
     BoundaryController *boundary = BoundaryController::getInstance();
-    size_t *data_inner_list = boundary->get_inner_list_level_joined();
-    const size_t bsize_i = boundary->get_size_inner_list_level_joined();
+    size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
+    const size_t bsize_i = boundary->get_size_domain_inner_list();
 
-    const size_t start_i = boundary->get_inner_list_level_joined_start(level);
-    const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
+    const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level) + 1;
 
     boundary->apply_boundary(out, sync);
 
@@ -739,11 +739,11 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
 
     BoundaryController *boundary = BoundaryController::getInstance();
 
-    size_t *data_inner_list = boundary->get_inner_list_level_joined();
-    const size_t bsize_i = boundary->get_size_inner_list_level_joined();
+    size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
+    const size_t bsize_i = boundary->get_size_domain_inner_list();
 
-    const size_t start_i = boundary->get_inner_list_level_joined_start(level);
-    const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
+    const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level) + 1;
 
     boundary->apply_boundary(out, sync);
 

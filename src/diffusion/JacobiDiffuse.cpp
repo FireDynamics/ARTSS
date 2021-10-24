@@ -10,8 +10,6 @@
 #include "JacobiDiffuse.h"
 #include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
-#include "../DomainData.h"
-#include "../utility/Utility.h"
 
 JacobiDiffuse::JacobiDiffuse() {
 #ifndef BENCHMARKING
@@ -41,11 +39,12 @@ void JacobiDiffuse::diffuse(Field &out, const Field &in, const Field &b,
                             const real D, bool sync) {
     auto domain = DomainData::getInstance();
     auto boundary = BoundaryController::getInstance();
-    auto bsize_i = boundary->get_size_inner_list();
-    auto bsize_b = boundary->get_size_boundary_list();
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    size_t *d_bList = boundary->get_boundary_list_level_joined();
+    size_t bsize_i = boundary->get_size_domain_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+
+    size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
+    size_t *domain_list = boundary->get_domain_list_level_joined();
 
 #pragma acc data present(out, in, b)
     {
@@ -91,31 +90,19 @@ void JacobiDiffuse::diffuse(Field &out, const Field &in, const Field &b,
             it++;
 
             // swap (no pointer swap due to uncontrolled behavior in TimeIntegration Update)
-#pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i]) async
-            for (size_t j = 0; j < bsize_i; ++j) {
-                const size_t i = d_inner_list[j];
-                in[i] = out[i];
-            }
-
-#pragma acc parallel loop independent present(out, in, d_bList[:bsize_b]) async
-            for (size_t j = 0; j < bsize_b; ++j) {
-                const size_t i = d_bList[j];
+#pragma acc parallel loop independent present(out, in, domain_list[:size_domain_list]) async
+            for (size_t j = 0; j < size_domain_list; ++j) {
+                const size_t i = domain_list[j];
                 in[i] = out[i];
             }
         }
 
         if (it % 2 != 0)  // swap necessary when odd number of iterations
         {
-#pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i]) async
-            for (size_t j = 0; j < bsize_i; ++j) {
-                const size_t i = d_inner_list[j];
-                out[i] = in[i];
-            }
-
-#pragma acc parallel loop independent present(out, in, d_bList[:bsize_b]) async
-            for (size_t j = 0; j < bsize_b; ++j) {
-                const size_t i = d_bList[j];
-                out[i] = in[i];
+#pragma acc parallel loop independent present(out, in, domain_list[:size_domain_list]) async
+            for (size_t j = 0; j < size_domain_list; ++j) {
+                const size_t i = domain_list[j];
+                in[i] = out[i];
             }
         }
 
@@ -148,11 +135,11 @@ void JacobiDiffuse::diffuse(
     // local variables and parameters for GPU
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    size_t *d_bList = boundary->get_boundary_list_level_joined();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list();
 
-    auto bsize_i = boundary->get_size_inner_list();
-    auto bsize_b = boundary->get_size_boundary_list();
+    size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
+    size_t *domain_list = boundary->get_domain_list_level_joined();
 
 #pragma acc data present(out, in, b, EV)
     {
@@ -200,30 +187,19 @@ void JacobiDiffuse::diffuse(
             it++;
 
 // swap (no pointer swap due to uncontrolled behavior in TimeIntegration Update)
-#pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i]) async
-            for (size_t j = 0; j < bsize_i; ++j) {
-                const size_t i = d_inner_list[j];
+#pragma acc parallel loop independent present(out, in, domain_list[:size_domain_list]) async
+            for (size_t j = 0; j < size_domain_list; ++j) {
+                const size_t i = domain_list[j];
                 in[i] = out[i];
             }
-#pragma acc parallel loop independent present(out, in, d_bList[:bsize_b]) async
-            for (size_t j = 0; j < bsize_b; ++j) {
-                const size_t i = d_bList[j];
-                in[i] = out[i];
-            }
-
-        } //end while
+        }
 
         if (it % 2 != 0)// swap necessary when odd number of iterations
         {
-#pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i]) async
-            for (size_t j = 0; j < bsize_i; ++j) {
-                const size_t i = d_inner_list[j];
-                out[i] = in[i];
-            }
-#pragma acc parallel loop independent present(out, in, d_bList[:bsize_b]) async
-            for (size_t j = 0; j < bsize_b; ++j) {
-                const size_t i = d_bList[j];
-                out[i] = in[i];
+#pragma acc parallel loop independent present(out, in, domain_list[:size_domain_list]) async
+            for (size_t j = 0; j < size_domain_list; ++j) {
+                const size_t i = domain_list[j];
+                in[i] = out[i];
             }
         }
 
@@ -265,8 +241,8 @@ void JacobiDiffuse::JacobiStep(
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list();
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
@@ -315,9 +291,9 @@ void JacobiDiffuse::JacobiStep(
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    size_t start_i = boundary->get_inner_list_level_joined_start(level);
-    size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
+    size_t end_i = boundary->get_domain_inner_list_level_joined_end(level) + 1;
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
@@ -369,8 +345,8 @@ void JacobiDiffuse::JacobiStep(
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list();
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;

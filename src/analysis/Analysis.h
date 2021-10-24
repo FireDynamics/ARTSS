@@ -34,11 +34,8 @@ class Analysis {
     real calc_absolute_spatial_error(read_ptr num, read_ptr ana);
     real calc_relative_spatial_error(read_ptr num, read_ptr ana);
 
-    static void write_file(
-            const real *field, const std::string& filename,
-            size_t *inner_list, size_t size_inner_list,
-            size_t *boundary_list, size_t size_boundary_list,
-            size_t *obstacle_list, size_t size_obstacle_list);
+    static void write_file(const Field &field, const std::string& filename);
+    static void write_obstacles(const Field &field, const std::string &filename);
 
     bool m_has_analytic_solution = false;
     Solution &m_solution;

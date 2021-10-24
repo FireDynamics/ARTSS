@@ -41,8 +41,8 @@ void SLAdvect::advect(Field &out, const Field &in,
     auto domain = DomainData::getInstance();
     auto boundary = BoundaryController::getInstance();
 
-    auto bsize_i = boundary->get_size_inner_list();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
 
 #pragma acc data present(out, in, u_vel, v_vel, w_vel, d_inner_list[:bsize_i])
     {

@@ -55,8 +55,8 @@ void ConstSmagorinsky::calc_turbulent_viscosity(
         real Cs = m_Cs;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *d_inner_list = boundary->get_inner_list_level_joined();
-        auto bsize_i = boundary->get_size_inner_list();
+        size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+        auto bsize_i = boundary->get_size_domain_inner_list();
 
         size_t neighbour_i = 1;
         size_t neighbour_j = Nx;

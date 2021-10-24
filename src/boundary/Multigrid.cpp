@@ -26,8 +26,8 @@ Multigrid::Multigrid(
         m_multigrid_levels(multigrid_levels),
         m_number_of_surface_objects(number_of_surfaces),
         m_number_of_obstacle_objects(number_of_obstacles),
+        m_jl_domain_list(multigrid_levels),
         m_jl_domain_inner_list(multigrid_levels),
-        m_jl_domain_boundary_list(multigrid_levels),
         m_jl_obstacle_list(multigrid_levels),
         m_bdc_boundary(bdc_boundary),
         m_bdc_obstacle(bdc_obstacles) {
@@ -161,8 +161,8 @@ void Multigrid::control() {
                                    original_len, saved_len, calculated_len, control);
         }
         original_len = (static_cast<Domain *>(m_MG_domain_object_list[level]))->get_size_domain_list();
-        calculated_len = m_jl_domain_boundary_list.get_last_index(level) - m_jl_domain_boundary_list.get_first_index(level) + 1;
-        saved_len = m_jl_domain_boundary_list.get_slice_size(level);
+        calculated_len = m_jl_domain_list.get_last_index(level) - m_jl_domain_list.get_first_index(level) + 1;
+        saved_len = m_jl_domain_list.get_slice_size(level);
         if (calculated_len != original_len) {
             size_t control = (domain->get_Nx(level) * domain->get_Ny(level) * 2)
                              + (domain->get_Nx(level) * (domain->get_Nz(level) - 2)) * 2
@@ -171,8 +171,9 @@ void Multigrid::control() {
                                    "original: {} saved: {} calculated: {} control: {}\n",
                                    original_len, saved_len, calculated_len, control);
         }
+        PatchObject &boundary_size = (static_cast<Domain *>(m_MG_domain_object_list[level]))->get_size_boundary_list();
         for (size_t patch = 0; patch < number_of_patches; patch++) {
-            original_len = (static_cast<Domain *>(m_MG_domain_object_list[level]))->get_size_boundary_list()[patch];
+            original_len = boundary_size[patch];
             saved_len = m_jl_domain_boundary_list_patch_divided[patch]->get_slice_size(level);
             calculated_len = m_jl_domain_boundary_list_patch_divided[patch]->get_first_index(level) - m_jl_domain_boundary_list_patch_divided[patch]->get_slice_size(level + 1);
             if (calculated_len != original_len || saved_len != original_len) {
@@ -196,12 +197,6 @@ void Multigrid::control() {
         if (cindex_inner_end - cindex_inner_start + 1 != bsize_inner) {
             message += "get_size_domain_inner_cells(level) does not equal the difference between start and end "
                        + std::to_string(cindex_inner_start) + "|" + std::to_string(cindex_inner_end) + "\n";
-        }
-        size_t bsize_boundary = domain->get_size(level) - nx * ny * nz;
-        size_t csize_boundary = m_jl_domain_boundary_list.get_slice_size(level);
-        if (csize_boundary != bsize_boundary) {
-            message += "get_size_domain_list(level) does not equal size-(nx-2)*(ny-2)*(nz-2) "
-                       + std::to_string(bsize_boundary) + "|" + std::to_string(csize_boundary) + "\n";
         }
 
         if (!message.empty()) {
@@ -254,14 +249,14 @@ void Multigrid::print() {
     m_logger->debug("Total number of domain inner cells: {}", m_jl_domain_inner_list.get_size());
 
     for (size_t level = 0; level < m_multigrid_levels; level++) {
-        m_logger->debug("For Level {} domain boundary list starts at index {} and ends with index {}", level,
-                        m_jl_domain_boundary_list.get_first_index(level),
-                        m_jl_domain_boundary_list.get_last_index(level));
+        m_logger->debug("For Level {} domain list starts at index {} and ends with index {}", level,
+                        m_jl_domain_list.get_first_index(level),
+                        m_jl_domain_list.get_last_index(level));
         m_logger->debug("and the corresponding indices at this position: {} | {}",
-                        m_jl_domain_boundary_list.get_data()[m_jl_domain_boundary_list.get_first_index(level)],
-                        m_jl_domain_boundary_list.get_data()[m_jl_domain_boundary_list.get_last_index(level)]);
+                        m_jl_domain_list.get_data()[m_jl_domain_list.get_first_index(level)],
+                        m_jl_domain_list.get_data()[m_jl_domain_list.get_last_index(level)]);
     }
-    m_logger->debug("Total number of domain boundary cells: {}", m_jl_domain_boundary_list.get_size());
+    m_logger->debug("Total number of domain cells: {}", m_jl_domain_list.get_size());
 
     for (size_t patch = 0; patch < number_of_patches; patch++) {
         for (size_t level = 0; level < m_multigrid_levels; level++) {
@@ -315,6 +310,7 @@ void Multigrid::print() {
 // *************************************************************************************************
 void Multigrid::add_MG_lists() {
     size_t sum_domain_inner_cells = 0;
+    size_t sum_domain_cells = 0;
     auto sum_domain_boundary = new PatchObject();
     size_t sum_obstacle_cells = 0;
     auto obstacle_cells = new size_t[m_multigrid_levels];
@@ -331,7 +327,8 @@ void Multigrid::add_MG_lists() {
             domain = new Domain();
         }
         sum_domain_inner_cells += domain->get_size_inner_list();
-        //m_jl_inner_list.add_data(0, domain->get_size_inner_list(), domain->get_inner_list());
+        sum_domain_cells += domain->get_size_domain_list();
+
         PatchObject &boundary_size = domain->get_size_boundary_list();
         *sum_domain_boundary += boundary_size;
 
@@ -344,7 +341,7 @@ void Multigrid::add_MG_lists() {
     }
 
     // create boundary object, surfaces and obstacles for each multigrid level
-    size_t **tmp_store_obstacle = new size_t*[m_multigrid_levels];
+    auto **tmp_store_obstacle = new size_t*[m_multigrid_levels];
     for (size_t level = 1; level < m_multigrid_levels + 1; level++) {
         surface_dominant_restriction(level);
         size_t sum = obstacle_dominant_restriction(level, sum_domain_boundary, tmp_store_obstacle);
@@ -364,6 +361,7 @@ void Multigrid::add_MG_lists() {
         m_MG_domain_object_list[level] = domain;
     }
     m_jl_domain_inner_list.set_size(sum_domain_inner_cells);
+    m_jl_domain_list.set_size(sum_domain_cells);
     m_jl_obstacle_list.set_size(sum_obstacle_cells);
 
     for (size_t patch = 0 ; patch < number_of_patches; patch++) {
@@ -611,6 +609,8 @@ void Multigrid::create_domain_lists_for_GPU() {
         Domain *domain = m_MG_domain_object_list[level];
         m_jl_domain_inner_list.add_data(level, domain->get_size_inner_list(), domain->get_inner_list());
 
+        m_jl_domain_list.add_data(level, domain->get_size_domain_list(), domain->get_domain_list());
+
         size_t **all_boundaries = domain->get_boundary_list();
         PatchObject &all_boundary_sizes = domain->get_size_boundary_list();
         for (size_t patch = 0; patch < number_of_patches; patch++) {
@@ -619,6 +619,7 @@ void Multigrid::create_domain_lists_for_GPU() {
     }
 
     m_jl_domain_inner_list.copyin();
+    m_jl_domain_list.copyin();
     for (size_t patch = 0; patch < number_of_patches; patch++) {
         m_jl_domain_boundary_list_patch_divided[patch]->copyin();
     }
@@ -723,7 +724,7 @@ void Multigrid::update_lists() {
                                  m_jl_obstacle_list.get_slice_size(level));
 
             //m_size_MG_inner_index_list_level[level + 1] = m_size_MG_inner_index_list_level[level]
-            //                                              + domain->get_size_inner_list();
+            //                                              + domain->get_size_domain_inner_list();
             //m_size_MG_boundary_index_list_level[level + 1] = m_size_MG_boundary_index_list_level[level]
             //                                                 + domain->get_size_domain_list();
             //m_size_MG_boundary_slice_z_level[level + 1] = m_size_MG_boundary_slice_z_level[level]
@@ -738,7 +739,7 @@ void Multigrid::update_lists() {
             Domain *domain = m_MG_domain_object_list[level];
             domain->update_lists();
             //m_size_MG_inner_index_list_level[level + 1] = m_size_MG_inner_index_list_level[level]
-            //                                              + domain->get_size_inner_list();
+            //                                              + domain->get_size_domain_inner_list();
             //m_size_MG_boundary_index_list_level[level + 1] = m_size_MG_boundary_index_list_level[level]
             //                                                 + domain->get_size_domain_list();
             //m_size_MG_boundary_slice_z_level[level + 1] = m_size_MG_boundary_slice_z_level[level]

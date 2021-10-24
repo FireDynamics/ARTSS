@@ -194,8 +194,8 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
 
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list();
 
     // Velocity filter
     explicit_filtering(u_f, in_u, sync);
@@ -403,8 +403,8 @@ void DynamicSmagorinsky::explicit_filtering(Field &out, Field const &in, bool sy
 
     // Construction by product combination for trapezoidal
     auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list();
 
     real sum;
 #pragma acc parallel loop independent present(out, in, a[:3], d_inner_list[:bsize_i]) async

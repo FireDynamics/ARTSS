@@ -128,8 +128,8 @@ real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
     real r;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *inner_list = boundary->get_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_inner_list();
+    size_t *inner_list = boundary->get_domain_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_domain_inner_list();
 
     // weighted 2-norm
     // absolute error
@@ -165,8 +165,8 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
     real rr;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *inner_list = boundary->get_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_inner_list();
+    size_t *inner_list = boundary->get_domain_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_domain_inner_list();
 
     // relative part with norm of analytical solution as denominator
     for (size_t i = 0; i < size_inner_list; i++) {
@@ -225,9 +225,9 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
 // ***************************************************************************************
 void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t, real *sum) {
     auto boundary = BoundaryController::getInstance();
-    size_t *inner_list = boundary->get_inner_list_level_joined();
+    size_t *inner_list = boundary->get_domain_inner_list_level_joined();
 
-    size_t ix = inner_list[boundary->get_size_inner_list() / 2];
+    size_t ix = inner_list[boundary->get_size_domain_inner_list() / 2];
     //take median of indices in inner_list to get center point ix
     //std::nth_element(inner_list.begin(), inner_list.begin() + inner_list.size()/2, inner_list.end());
     //size_t ix = inner_list[inner_list.size()/2];
@@ -330,8 +330,8 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
     auto domain = DomainData::getInstance();
 
     // local variables and parameters
-    size_t *inner_list = boundary->get_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_inner_list();
+    size_t *inner_list = boundary->get_domain_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_domain_inner_list();
 
     real dx = domain->get_dx();
     real dy = domain->get_dy();
@@ -358,69 +358,48 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
 // =============================== Save variables ==============================
 // *****************************************************************************
 /// \brief  saves variables in .dat files
-/// \param  field_controller    pointer to solver
+/// \param  field_controller    pointer to field controller
 // ***************************************************************************************
 void Analysis::save_variables_in_file(FieldController *field_controller) {
-    //TODO do not write field out if not used
     auto boundary = BoundaryController::getInstance();
-    size_t *inner_list = boundary->get_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_inner_list();
-    size_t *boundary_list = boundary->get_boundary_list_level_joined();
-    size_t size_boundary_list = boundary->get_size_boundary_list();
-    size_t *obstacle_list = boundary->get_obstacle_boundary_list();
-    size_t size_obstacle_list = boundary->get_size_obstacle_list();
-
     std::vector<FieldType> v_fields = boundary->get_used_fields();
 
-    const real *dataField[numberOfFieldTypes];
-    dataField[FieldType::RHO] = field_controller->get_field_concentration_data();
-    dataField[FieldType::U] = field_controller->get_field_u_data();
-    dataField[FieldType::V] = field_controller->get_field_v_data();
-    dataField[FieldType::W] = field_controller->get_field_w_data();
-    dataField[FieldType::P] = field_controller->get_field_p_data();
-    dataField[FieldType::T] = field_controller->get_field_T_data();
+    Field *fields[numberOfFieldTypes];
+    fields[FieldType::RHO] = &field_controller->get_field_concentration();
+    fields[FieldType::U] = &field_controller->get_field_u();
+    fields[FieldType::V] = &field_controller->get_field_v();
+    fields[FieldType::W] = &field_controller->get_field_w();
+    fields[FieldType::P] = &field_controller->get_field_p();
+    fields[FieldType::T] = &field_controller->get_field_T();
 
     for (auto &v_field: v_fields) {
-        write_file(
-                dataField[v_field],
-                Field::get_field_type_name(v_field),
-                inner_list, size_inner_list,
-                boundary_list, size_boundary_list,
-                obstacle_list, size_obstacle_list);
+        write_file(*fields[v_field], Field::get_field_type_name(v_field));
+        write_obstacles(*fields[v_field], Field::get_field_type_name(v_field));
     }
 }
 
-void Analysis::write_file(
-        const real *field, const std::string &filename,
-        size_t *inner_list, size_t size_inner_list,
-        size_t *boundary_list, size_t size_boundary_list,
-        size_t *obstacle_list, size_t size_obstacle_list) {
+void Analysis::write_file(const Field &field, const std::string &filename) {
     std::ofstream out;
     out.open(filename + ".dat", std::ofstream::out);
 
-    std::ofstream out_inner;
-    out_inner.open(filename + "_inner.dat", std::ofstream::out);
-    for (size_t idx = 0; idx < size_inner_list; idx++) {
-        out_inner << inner_list[idx] << ";" << field[inner_list[idx]] << std::endl;
-        out << field[inner_list[idx]] << std::endl;
+    for (size_t index = 0; index < field.get_size(); index++) {
+        out << field[index] << std::endl;
     }
-    out_inner.close();
-
-    std::ofstream out_obstacle;
-    out_obstacle.open(filename + "_obstacle.dat", std::ofstream::out);
-    for (size_t idx = 0; idx < size_obstacle_list; idx++) {
-        out_obstacle << obstacle_list[idx] << ";" << field[obstacle_list[idx]] << std::endl;
-        out << field[obstacle_list[idx]] << std::endl;
-    }
-    out_obstacle.close();
-
-    std::ofstream out_boundary;
-    out_boundary.open(filename + "_boundary.dat", std::ofstream::out);
-    for (size_t idx = 0; idx < size_boundary_list; idx++) {
-        out_boundary << boundary_list[idx] << ";" << field[boundary_list[idx]] << std::endl;
-        out << field[boundary_list[idx]] << std::endl;
-    }
-    out_boundary.close();
-
     out.close();
+}
+
+void Analysis::write_obstacles(const Field &field, const std::string &filename) {
+    BoundaryController *boundary = BoundaryController::getInstance();
+    size_t *obstacle_list = boundary->get_obstacle_list_level_joined();
+    size_t start = boundary->get_obstacle_list_level_joined_start(0);
+    size_t end = boundary->get_obstacle_list_level_joined_end(0);
+
+    if (start != end) {  // do not create (empty) file if there are no obstacles
+        std::ofstream out_obstacle;
+        out_obstacle.open(filename + "_obstacle.dat", std::ofstream::out);
+        for (size_t idx = start; idx <= end; idx++) {
+            out_obstacle << obstacle_list[idx] << ";" << field[obstacle_list[idx]] << std::endl;
+        }
+        out_obstacle.close();
+    }
 }

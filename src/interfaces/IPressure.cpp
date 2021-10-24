@@ -25,6 +25,7 @@ void IPressure::divergence(
 
     auto Nx = domain->get_Nx();
     auto Ny = domain->get_Ny();
+
     auto dx = domain->get_dx();
     auto dy = domain->get_dy();
     auto dz = domain->get_dz();
@@ -34,11 +35,20 @@ void IPressure::divergence(
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    size_t *d_boundary_list = boundary->get_boundary_list_level_joined();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
 
-    auto bsize_i = boundary->get_size_inner_list();
-    auto bsize_b = boundary->get_size_boundary_list();
+    auto bsize_i = boundary->get_size_domain_inner_list();
+
+    // start indices for computational domain minus 1 for ghost cells
+    size_t x1 = domain->get_index_x1() - 1;
+    size_t y1 = domain->get_index_y1() - 1;
+    size_t z1 = domain->get_index_z1() - 1;
+
+    // end indices for computational domain plus 1 for ghost cells
+    size_t x2 = domain->get_index_x2() + 1;
+    size_t y2 = domain->get_index_y2() + 1;
+    size_t z2 = domain->get_index_z2() + 1;
+
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
@@ -59,9 +69,39 @@ void IPressure::divergence(
 // boundaries
 #pragma acc kernels async
 #pragma acc loop independent
-        for (size_t j = 0; j < bsize_b; ++j) {
-            const size_t i = d_boundary_list[j];
-            out[i] = 0.;
+        for (size_t j = y1; j <= y2; ++j) {
+            for (size_t i = x1; i <= x2; ++i) {
+                size_t idx = IX(i, j, z1, Nx, Ny);
+                out[idx] = 0;
+            }
+        }
+        // left, right, bottom, top
+        for (size_t k = z1 + 1; k < z2; ++k) {
+            // bottom stride
+            for (size_t i = x1; i <= x2; ++i) {
+                size_t idx = IX(i, y1, k, Nx, Ny);
+                out[idx] = 0;
+            }
+            // cell on the left and on the right
+            for (size_t j = y1 + 1; j < y2; ++j) {
+                size_t idx = IX(x1, j, k, Nx, Ny);
+                out[idx] = 0;
+
+                idx = IX(x2, j, k, Nx, Ny);
+                out[idx] = 0;
+            }
+            // top stride
+            for (size_t i = x1; i <= x2; ++i) {
+                size_t idx = IX(i, y2, k, Nx, Ny);
+                out[idx] = 0;
+            }
+        }
+        // back
+        for (size_t j = y1; j <= y2; ++j) {
+            for (size_t i = x1; i <= x2; ++i) {
+                size_t idx = IX(i, j, z2, Nx, Ny);
+                out[idx] = 0;
+            }
         }
 
         if (sync) {
@@ -102,9 +142,9 @@ void IPressure::projection(
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
 
-    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_i = boundary->get_size_domain_inner_list();
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;

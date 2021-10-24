@@ -71,9 +71,9 @@ void GaussFunction::create_spatial_values() {
 
     // set Gaussian to cells
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *d_iList = boundary->get_domain_inner_list_level_joined();
 
-    auto bsize_i = boundary->get_size_inner_list();
+    auto bsize_i = boundary->get_size_domain_inner_list();
 
     real HRRrV;
 

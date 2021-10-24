@@ -142,7 +142,7 @@ void Obstacle::create_obstacle(size_t Nx, size_t Ny) {
     }
 
     // TOP and BOTTOM of OBSTACLE
-    // fill m_boundary[TOP] list with top indices of obstacle and oBottom list with bottom indices
+    // fill m_boundary_patch_divided[TOP] list with top indices of obstacle and oBottom list with bottom indices
     // of obstacle
     if (m_size_boundary[BOTTOM] > 0) {
         for (size_t k = 0; k < strideZ; ++k) {

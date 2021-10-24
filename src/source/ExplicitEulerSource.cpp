@@ -45,8 +45,8 @@ void ExplicitEulerSource::add_source(
     auto dir = m_dir_vel;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list();
 
 #pragma acc data present(out_x, out_y, out_z, s_x, s_y, s_z)
     {
@@ -98,8 +98,8 @@ void ExplicitEulerSource::add_source(
 // ***************************************************************************************
 void ExplicitEulerSource::add_source(Field &out, Field const &s, bool sync) {
     auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list();
 
 #pragma acc data present(out, s)
     {

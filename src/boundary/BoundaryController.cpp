@@ -235,42 +235,6 @@ void BoundaryController::detect_neighbouring_obstacles() {
 #endif
 }
 
-size_t BoundaryController::get_size_inner_list_level_joined() const {
-    return m_multigrid->get_size_domain_inner_cells_level_joined();
-}
-
-size_t *BoundaryController::get_obstacle_boundary_list() const {
-    return m_multigrid->get_obstacle_list();
-}
-
-size_t BoundaryController::get_size_boundary_list() const {
-    return m_multigrid->get_size_domain_boundary_cells();
-}
-
-size_t BoundaryController::get_size_inner_list() const {
-    return m_multigrid->get_slice_size_domain_inner_cells_level_joined(0);
-}
-
-size_t BoundaryController::get_size_obstacle_list() const {
-    return m_multigrid->get_size_obstacle_list();
-}
-
-size_t *BoundaryController::get_inner_list_level_joined() const {
-    return m_multigrid->get_domain_inner_cells_level_joined();
-}
-
-size_t BoundaryController::get_inner_list_level_joined_start(size_t level) const {
-    return m_multigrid->get_start_index_domain_inner_cells_level_joined(level);
-}
-
-size_t BoundaryController::get_inner_list_level_joined_end(size_t level) const {
-    return m_multigrid->get_end_index_domain_inner_cells_level_joined(level);
-}
-
-size_t *BoundaryController::get_boundary_list_level_joined() const {
-    return m_multigrid->get_domain_boundary_cells_level_joined();
-}
-
 std::vector<FieldType> BoundaryController::get_used_fields() const {
     return m_bdc_boundary->get_used_fields();
 }

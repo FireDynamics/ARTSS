@@ -27,26 +27,25 @@ class BoundaryController {
     void print_boundaries();
     void update_lists();
 
-    size_t get_size_inner_list() const;
-    size_t get_size_boundary_list() const;
-    size_t* get_obstacle_boundary_list() const;
-    size_t get_size_obstacle_list() const;
+    size_t* get_domain_inner_list_level_joined() const { return m_multigrid->get_domain_inner_cells_level_joined(); }
+    size_t get_size_domain_inner_list() const { return get_slice_size_domain_inner_list_level_joined(0); }
+    //size_t get_size_domain_inner_list_level_joined() const { return m_multigrid->get_size_domain_inner_cells_level_joined(); }  // get size of joined domain inner list
+    size_t get_domain_inner_list_level_joined_start(size_t level) const { return m_multigrid->get_start_index_domain_inner_cells_level_joined(level); }
+    size_t get_domain_inner_list_level_joined_end(size_t level) const { return m_multigrid->get_end_index_domain_inner_cells_level_joined(level); }
 
-    size_t* get_inner_list_level_joined() const;
-    size_t get_size_inner_list_level_joined() const;
-    size_t get_inner_list_level_joined_start(size_t level) const;
-    size_t get_inner_list_level_joined_end(size_t level) const;
+    size_t* get_domain_list_level_joined() const { return m_multigrid->get_domain_cells_level_joined(); }
+    size_t get_slice_size_domain_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_domain_cells(level); }
+    //size_t get_size_domain_list_level_joined() const { return m_multigrid->get_size_domain_cells(); }
+    size_t get_domain_list_level_joined_start(size_t level) const { return m_multigrid->get_start_index_domain_cells_level_joined(level); }
+    size_t get_domain_list_level_joined_end(size_t level) const { return m_multigrid->get_end_index_domain_cells_level_joined(level); }
 
-    size_t* get_boundary_list_level_joined() const;
-    size_t get_size_boundary_list_level_joined() const;
-    size_t get_boundary_list_level_joined_start(size_t level) const;
-    size_t get_boundary_list_level_joined_end(size_t level) const;
+    size_t* get_obstacle_list_level_joined() const { return m_multigrid->get_obstacle_cells_level_joined(); }
+    size_t get_slice_size_obstacle_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_obstacle_cells(level); }
+    //size_t get_size_obstacle_list_level_joined() const { return m_multigrid->get_size_obstacle_cells(); }
+    size_t get_obstacle_list_level_joined_start(size_t level) const { return m_multigrid->get_start_index_obstacle_cells_level_joined(level); }
+    size_t get_obstacle_list_level_joined_end(size_t level) const { return m_multigrid->get_end_index_obstacle_cells_level_joined(level); }
 
     size_t get_size_surfaceList() const {return m_size_surface_list;}
-
-    size_t get_obstacle_stride_x(size_t id, size_t level) const;
-    size_t get_obstacle_stride_y(size_t id, size_t level) const;
-    size_t get_obstacle_stride_z(size_t id, size_t level) const;
 
     std::vector<FieldType> get_used_fields() const;
 
@@ -60,6 +59,7 @@ class BoundaryController {
     }
 
 private:
+    size_t get_slice_size_domain_inner_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_domain_inner_cells_level_joined(level); }  // get size of domain inner list
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

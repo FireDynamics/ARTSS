@@ -514,8 +514,8 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 
     // Sight of boundaries
     auto boundary = BoundaryController::getInstance();
-    size_t *inner_list = boundary->get_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_inner_list();
+    size_t *inner_list = boundary->get_domain_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_domain_inner_list();
 
     Field sight = m_field_controller->get_field_sight();
     for (size_t i = 0; i < size_inner_list; i++) {

@@ -52,29 +52,34 @@ void Domain::init(size_t size_obstacles) {
     const size_t Ny = domain->get_Ny(m_multigrid_level);
     const size_t Nz = domain->get_Nz(m_multigrid_level);
 
-    m_size_domain_list = 2 * Nx * Ny + 2 * (Nz - 2) * (Ny - 2) + 2 * (Nz - 2) * Nx;
-    m_domain_list = new size_t[m_size_domain_list];
-
-    m_boundary = new size_t*[number_of_patches];
+    m_boundary_patch_divided = new size_t*[number_of_patches];
     m_size_boundary.m_patches[FRONT] = Ny * Nx;
     m_size_boundary[BACK] = Ny * Nx;
-    m_boundary[FRONT] = new size_t[m_size_boundary[FRONT]];
-    m_boundary[BACK] = new size_t[m_size_boundary[BACK]];
+    m_boundary_patch_divided[FRONT] = new size_t[m_size_boundary[FRONT]];
+    m_boundary_patch_divided[BACK] = new size_t[m_size_boundary[BACK]];
 
     m_size_boundary[TOP] = Nz * Nx;
     m_size_boundary[BOTTOM] = Nz * Nx;
-    m_boundary[BOTTOM] = new size_t[m_size_boundary[BOTTOM]];
-    m_boundary[TOP] = new size_t[m_size_boundary[TOP]];
+    m_boundary_patch_divided[BOTTOM] = new size_t[m_size_boundary[BOTTOM]];
+    m_boundary_patch_divided[TOP] = new size_t[m_size_boundary[TOP]];
 
     m_size_boundary[LEFT] = Nz * Ny;
     m_size_boundary[RIGHT] = Nz * Ny;
-    m_boundary[LEFT] = new size_t[m_size_boundary[LEFT]];
-    m_boundary[RIGHT] = new size_t[m_size_boundary[RIGHT]];
+    m_boundary_patch_divided[LEFT] = new size_t[m_size_boundary[LEFT]];
+    m_boundary_patch_divided[RIGHT] = new size_t[m_size_boundary[RIGHT]];
 
     m_size_inner_list = domain->get_nx(m_multigrid_level) * domain->get_ny(m_multigrid_level) * domain->get_nz(m_multigrid_level) - size_obstacles;
     m_inner_list = new size_t[m_size_inner_list];
 
+    m_size_boundary_list = 2 * Nx * Ny + 2 * (Nz - 2) * (Ny - 2) + 2 * (Nz - 2) * Nx;
+    m_boundary_list = new size_t[m_size_boundary_list];
+
+    m_size_domain_list = m_size_inner_list + m_size_boundary_list;
+    m_domain_list = new size_t[m_size_domain_list];
+
     boundary_cells();
+
+    Utility::merge_sort(m_inner_list, m_boundary_list, m_size_inner_list, m_size_boundary_list, m_domain_list);
 }
 
 
@@ -92,19 +97,19 @@ void Domain::print(size_t size_obstacles) {
                     *(m_domain_list + 0), *(m_domain_list + m_size_domain_list - 1));
     m_logger->debug("list size of size_z: {}", m_size_boundary[FRONT]);
     m_logger->debug("Front starts with {} and ends with {}",
-                    *(m_boundary[FRONT] + 0), *(m_domain_list + m_size_domain_list - 1));
+                    *(m_boundary_patch_divided[FRONT] + 0), *(m_domain_list + m_size_domain_list - 1));
     m_logger->debug("Back starts with {} and ends with {}",
-                    *(m_boundary[BACK] + 0), *(m_domain_list + m_size_domain_list - 1));
+                    *(m_boundary_patch_divided[BACK] + 0), *(m_domain_list + m_size_domain_list - 1));
     m_logger->debug("list size of size_y: ", m_size_boundary[BOTTOM]);
     m_logger->debug("Bottom starts with {} and ends with {}",
-                    *(m_boundary[BOTTOM] + 0), *(m_boundary[BOTTOM] + m_size_boundary[BOTTOM] - 1));
+                    *(m_boundary_patch_divided[BOTTOM] + 0), *(m_boundary_patch_divided[BOTTOM] + m_size_boundary[BOTTOM] - 1));
     m_logger->debug("Top starts with {} and ends with {}",
-                    *(m_boundary[TOP] + 0), *(m_boundary[TOP] + m_size_boundary[TOP] - 1));
+                    *(m_boundary_patch_divided[TOP] + 0), *(m_boundary_patch_divided[TOP] + m_size_boundary[TOP] - 1));
     m_logger->debug("list size of size_x: ", m_size_boundary[LEFT]);
     m_logger->debug("Left starts with {} and ends with {}",
-                    *(m_boundary[LEFT] + 0), *(m_boundary[LEFT] + m_size_boundary[LEFT] - 1));
+                    *(m_boundary_patch_divided[LEFT] + 0), *(m_boundary_patch_divided[LEFT] + m_size_boundary[LEFT] - 1));
     m_logger->debug("Right starts with {} and ends with {}",
-                    *(m_boundary[RIGHT] + 0), *(m_boundary[RIGHT] + m_size_boundary[RIGHT] - 1));
+                    *(m_boundary_patch_divided[RIGHT] + 0), *(m_boundary_patch_divided[RIGHT] + m_size_boundary[RIGHT] - 1));
     m_logger->debug("list size of innerList: {} obstacle size: {}", m_size_inner_list, size_obstacles);
     m_logger->debug("Inner starts with {} and ends with {}",
                     *(m_inner_list + 0), *(m_inner_list + m_size_inner_list - 1));
@@ -179,72 +184,72 @@ void Domain::control(size_t size_obstacles) {
             domain->get_index_y2(m_multigrid_level) + 1,
             domain->get_index_z1(m_multigrid_level) - 1,
             Nx, Ny);
-    if (m_boundary[FRONT][0] != startIndex || m_boundary[FRONT][m_size_boundary[FRONT] - 1] != front2) {
+    if (m_boundary_patch_divided[FRONT][0] != startIndex || m_boundary_patch_divided[FRONT][m_size_boundary[FRONT] - 1] != front2) {
         message = message + "first or last index of boundary Front not correct ("
                   + std::to_string(startIndex) + "|"
-                  + std::to_string(*(m_boundary[FRONT])) + ")("
+                  + std::to_string(*(m_boundary_patch_divided[FRONT])) + ")("
                   + std::to_string(front2) + "|"
-                  + std::to_string(*(m_boundary[FRONT] + m_size_boundary[FRONT] - 1)) + ")\n";
+                  + std::to_string(*(m_boundary_patch_divided[FRONT] + m_size_boundary[FRONT] - 1)) + ")\n";
     }
     size_t back1 = IX(
             domain->get_index_x1(m_multigrid_level) - 1,
             domain->get_index_y1(m_multigrid_level) - 1,
             domain->get_index_z2(m_multigrid_level) + 1,
             Nx, Ny);
-    if (*(m_boundary[BACK]) != back1 || *(m_boundary[BACK] + m_size_boundary[BACK] - 1) != endIndex) {
+    if (*(m_boundary_patch_divided[BACK]) != back1 || *(m_boundary_patch_divided[BACK] + m_size_boundary[BACK] - 1) != endIndex) {
         message = message + "first or last index of boundary Back not correct ("
                   + std::to_string(back1) + "|"
-                  + std::to_string(*(m_boundary[BACK])) + ")("
+                  + std::to_string(*(m_boundary_patch_divided[BACK])) + ")("
                   + std::to_string(endIndex) + "|"
-                  + std::to_string(*(m_boundary[BACK] + m_size_boundary[BACK] - 1)) + ")\n";
+                  + std::to_string(*(m_boundary_patch_divided[BACK] + m_size_boundary[BACK] - 1)) + ")\n";
     }
     size_t bottom2 = IX(
             domain->get_index_x2(m_multigrid_level) + 1,
             domain->get_index_y1(m_multigrid_level) - 1,
             domain->get_index_z2(m_multigrid_level) + 1,
             Nx, Ny);
-    if (*(m_boundary[BOTTOM]) != startIndex || *(m_boundary[BOTTOM] + m_size_boundary[BOTTOM] - 1) != bottom2) {
+    if (*(m_boundary_patch_divided[BOTTOM]) != startIndex || *(m_boundary_patch_divided[BOTTOM] + m_size_boundary[BOTTOM] - 1) != bottom2) {
         message = message + "first or last index of boundary Bottom not correct ("
                   + std::to_string(startIndex) + "|"
-                  + std::to_string(*(m_boundary[BOTTOM])) + ")("
+                  + std::to_string(*(m_boundary_patch_divided[BOTTOM])) + ")("
                   + std::to_string(bottom2) + "|"
-                  + std::to_string(*(m_boundary[BOTTOM] + m_size_boundary[BOTTOM] - 1)) + ")\n";
+                  + std::to_string(*(m_boundary_patch_divided[BOTTOM] + m_size_boundary[BOTTOM] - 1)) + ")\n";
     }
     size_t top1 = IX(
             domain->get_index_x1(m_multigrid_level) - 1,
             domain->get_index_y2(m_multigrid_level) + 1,
             domain->get_index_z1(m_multigrid_level) - 1,
             Nx, Ny);
-    if (*(m_boundary[TOP]) != top1 || *(m_boundary[TOP] + m_size_boundary[TOP] - 1) != endIndex) {
+    if (*(m_boundary_patch_divided[TOP]) != top1 || *(m_boundary_patch_divided[TOP] + m_size_boundary[TOP] - 1) != endIndex) {
         message = message + "first or last index of boundary Top not correct ("
                   + std::to_string(top1) + "|"
-                  + std::to_string(*(m_boundary[TOP])) + ")("
+                  + std::to_string(*(m_boundary_patch_divided[TOP])) + ")("
                   + std::to_string(endIndex) + "|"
-                  + std::to_string(*(m_boundary[TOP] + m_size_boundary[TOP] - 1)) + ")\n";
+                  + std::to_string(*(m_boundary_patch_divided[TOP] + m_size_boundary[TOP] - 1)) + ")\n";
     }
     size_t left2 = IX(
             domain->get_index_x1(m_multigrid_level) - 1,
             domain->get_index_y2(m_multigrid_level) + 1,
             domain->get_index_z2(m_multigrid_level) + 1,
             Nx, Ny);
-    if (*(m_boundary[LEFT]) != startIndex || *(m_boundary[LEFT] + m_size_boundary[LEFT] - 1) != left2) {
+    if (*(m_boundary_patch_divided[LEFT]) != startIndex || *(m_boundary_patch_divided[LEFT] + m_size_boundary[LEFT] - 1) != left2) {
         message = message + "first or last index of boundary Left not correct ("
                   + std::to_string(startIndex) + "|"
-                  + std::to_string(*(m_boundary[LEFT])) + ")("
+                  + std::to_string(*(m_boundary_patch_divided[LEFT])) + ")("
                   + std::to_string(left2) + "|"
-                  + std::to_string(*(m_boundary[LEFT] + m_size_boundary[LEFT] - 1)) + ")\n";
+                  + std::to_string(*(m_boundary_patch_divided[LEFT] + m_size_boundary[LEFT] - 1)) + ")\n";
     }
     size_t right1 = IX(
             domain->get_index_x2(m_multigrid_level) + 1,
             domain->get_index_y1(m_multigrid_level) - 1,
             domain->get_index_z1(m_multigrid_level) - 1,
             Nx, Ny);
-    if (*(m_boundary[RIGHT]) != right1 || *(m_boundary[RIGHT] + m_size_boundary[RIGHT] - 1) != endIndex) {
+    if (*(m_boundary_patch_divided[RIGHT]) != right1 || *(m_boundary_patch_divided[RIGHT] + m_size_boundary[RIGHT] - 1) != endIndex) {
         message = message + "first or last index of boundary Right not correct ("
                   + std::to_string(right1) + "|"
-                  + std::to_string(*(m_boundary[RIGHT])) + ")("
+                  + std::to_string(*(m_boundary_patch_divided[RIGHT])) + ")("
                   + std::to_string(endIndex) + "|"
-                  + std::to_string(*(m_boundary[RIGHT] + m_size_boundary[RIGHT] - 1)) + ")\n";
+                  + std::to_string(*(m_boundary_patch_divided[RIGHT] + m_size_boundary[RIGHT] - 1)) + ")\n";
     }
 
     for (size_t i = 1; i < m_size_domain_list; i++) {
@@ -270,12 +275,12 @@ void Domain::control(size_t size_obstacles) {
 Domain::~Domain() {
     delete[] m_inner_list;
     delete[] m_domain_list;
-    delete[] m_boundary[FRONT];
-    delete[] m_boundary[BACK];
-    delete[] m_boundary[TOP];
-    delete[] m_boundary[BOTTOM];
-    delete[] m_boundary[LEFT];
-    delete[] m_boundary[RIGHT];
+    delete[] m_boundary_patch_divided[FRONT];
+    delete[] m_boundary_patch_divided[BACK];
+    delete[] m_boundary_patch_divided[TOP];
+    delete[] m_boundary_patch_divided[BOTTOM];
+    delete[] m_boundary_patch_divided[LEFT];
+    delete[] m_boundary_patch_divided[RIGHT];
 }
 
 //======================================== Boundary cells ==========================================
@@ -311,7 +316,7 @@ void Domain::boundary_cells() {
     for (size_t j = y1; j <= y2; ++j) {
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, j, z1, Nx, Ny);
-            *(m_domain_list + counter) = idx;
+            *(m_boundary_list + counter) = idx;
             counter++;
         }
     }
@@ -320,23 +325,23 @@ void Domain::boundary_cells() {
         // bottom stride
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, y1, k, Nx, Ny);
-            *(m_domain_list + counter) = idx;
+            *(m_boundary_list + counter) = idx;
             counter++;
         }
         // cell on the left and on the right
         for (size_t j = y1 + 1; j < y2; ++j) {
             size_t idx = IX(x1, j, k, Nx, Ny);
-            *(m_domain_list + counter) = idx;
+            *(m_boundary_list + counter) = idx;
             counter++;
 
             idx = IX(x2, j, k, Nx, Ny);
-            *(m_domain_list + counter) = idx;
+            *(m_boundary_list + counter) = idx;
             counter++;
         }
         // top stride
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, y2, k, Nx, Ny);
-            *(m_domain_list + counter) = idx;
+            *(m_boundary_list + counter) = idx;
             counter++;
         }
     }
@@ -344,7 +349,7 @@ void Domain::boundary_cells() {
     for (size_t j = y1; j <= y2; ++j) {
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, j, z2, Nx, Ny);
-            *(m_domain_list + counter) = idx;
+            *(m_boundary_list + counter) = idx;
             counter++;
         }
     }
@@ -354,10 +359,10 @@ void Domain::boundary_cells() {
     for (size_t j = y1; j <= y2; ++j) {
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, j, z1, Nx, Ny);
-            *(m_boundary[FRONT] + counter) = idx;
+            *(m_boundary_patch_divided[FRONT] + counter) = idx;
 
             idx = IX(i, j, z2, Nx, Ny);
-            *(m_boundary[BACK] + counter) = idx;
+            *(m_boundary_patch_divided[BACK] + counter) = idx;
             counter++;
         }
     }
@@ -367,10 +372,10 @@ void Domain::boundary_cells() {
     for (size_t k = z1; k <= z2; ++k) {
         for (size_t i = x1; i <= x2; ++i) {
             size_t idx = IX(i, y1, k, Nx, Ny);
-            *(m_boundary[BOTTOM] + counter) = idx;
+            *(m_boundary_patch_divided[BOTTOM] + counter) = idx;
 
             idx = IX(i, y2, k, Nx, Ny);
-            *(m_boundary[TOP] + counter) = idx;
+            *(m_boundary_patch_divided[TOP] + counter) = idx;
             counter++;
         }
     }
@@ -380,10 +385,10 @@ void Domain::boundary_cells() {
     for (size_t k = z1; k <= z2; ++k) {
         for (size_t j = y1; j <= y2; ++j) {
             size_t idx = IX(x1, j, k, Nx, Ny);
-            *(m_boundary[LEFT] + counter) = idx;
+            *(m_boundary_patch_divided[LEFT] + counter) = idx;
 
             idx = IX(x2, j, k, Nx, Ny);
-            *(m_boundary[RIGHT] + counter) = idx;
+            *(m_boundary_patch_divided[RIGHT] + counter) = idx;
             counter++;
         }
     }
@@ -487,10 +492,10 @@ void Domain::update_lists() {
 void Domain::clear_lists() {
     delete[] m_inner_list;
     delete[] m_domain_list;
-    delete[] m_boundary[FRONT];
-    delete[] m_boundary[BACK];
-    delete[] m_boundary[BOTTOM];
-    delete[] m_boundary[TOP];
-    delete[] m_boundary[LEFT];
-    delete[] m_boundary[RIGHT];
+    delete[] m_boundary_patch_divided[FRONT];
+    delete[] m_boundary_patch_divided[BACK];
+    delete[] m_boundary_patch_divided[BOTTOM];
+    delete[] m_boundary_patch_divided[TOP];
+    delete[] m_boundary_patch_divided[LEFT];
+    delete[] m_boundary_patch_divided[RIGHT];
 }
