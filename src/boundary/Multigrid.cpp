@@ -9,14 +9,6 @@
 #include <string>
 #include <vector>
 
-Multigrid::Multigrid(BoundaryDataController *bdc_boundary, size_t multigrid_levels) :
-        Multigrid(0, new Surface*[0],
-                  0, new Obstacle*[0],
-                  bdc_boundary,
-                  new BoundaryDataController*[0],
-                  multigrid_levels)
-        { }
-
 Multigrid::Multigrid(
         size_t number_of_surfaces, Surface **surface_list,
         size_t number_of_obstacles, Obstacle **obstacle_list,

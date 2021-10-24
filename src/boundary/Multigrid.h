@@ -25,7 +25,6 @@ class Multigrid {
             BoundaryDataController* bdc_boundary,
             BoundaryDataController **bdc_obstacles,
             size_t multigrid_level);
-    explicit Multigrid(BoundaryDataController *bdc_boundary, size_t multigrid_level);
     ~Multigrid();
 
     // getter -- domain inner cells

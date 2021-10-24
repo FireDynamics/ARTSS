@@ -17,14 +17,10 @@ BoundaryController::BoundaryController() {
     m_bdc_boundary = new BoundaryDataController();
     read_XML();
     size_t multigrid_level = DomainData::getInstance()->get_levels();
-    if (m_number_of_obstacles + m_number_of_surfaces > 0) {
-        m_multigrid = new Multigrid(m_number_of_surfaces, m_surface_list,
-                                    m_number_of_obstacles, m_obstacle_list,
-                                    m_bdc_boundary, m_bdc_obstacles,
-                                    multigrid_level);
-    } else {
-        m_multigrid = new Multigrid(m_bdc_boundary, multigrid_level);
-    }
+    m_multigrid = new Multigrid(m_number_of_surfaces, m_surface_list,
+                                m_number_of_obstacles, m_obstacle_list,
+                                m_bdc_boundary, m_bdc_obstacles,
+                                multigrid_level);
 #ifndef BENCHMARKING
     print_boundaries();
 #endif
@@ -91,6 +87,8 @@ void BoundaryController::parse_surface_parameter(tinyxml2::XMLElement *xmlParame
         }
         m_number_of_surfaces = surfaces.size();
         m_surface_list = surfaces.data();
+    } else {
+        m_surface_list = new Surface *[m_number_of_surfaces];
     }
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing surface parameter");
@@ -155,6 +153,9 @@ void BoundaryController::parse_obstacle_parameter(tinyxml2::XMLElement *xmlParam
             *(m_obstacle_list + i) = obstacles[i];
             *(m_bdc_obstacles + i) = bdc_obstacles[i];
         }
+    } else {
+        m_obstacle_list = new Obstacle *[m_number_of_obstacles];
+        m_bdc_obstacles = new BoundaryDataController *[m_number_of_obstacles];
     }
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing obstacle parameter");
