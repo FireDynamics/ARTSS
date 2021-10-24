@@ -187,9 +187,6 @@ void apply_boundary_condition(Field &field, ObstacleJoinedList **index_fields,
 #endif
                 continue;
             }
-
-            size_t patch_start = index_fields[patch]->get_first_index(level, id);
-            size_t patch_end = index_fields[patch]->get_last_index(level, id);
 #ifdef GPU_DEBUG
             else {
                 auto gpu_logger = Utility::create_gpu_logger("ObstacleBoundary_GPU");
@@ -197,6 +194,9 @@ void apply_boundary_condition(Field &field, ObstacleJoinedList **index_fields,
                               static_cast<void *> (d_patch), static_cast<void *> (index_fields[i]));
             }
 #endif
+            size_t patch_start = index_fields[patch]->get_first_index(level, id);
+            size_t patch_end = index_fields[patch]->get_last_index(level, id);
+
             BoundaryCondition bc = boundary_data->get_boundary_condition(p);
             switch (bc) {
                 case BoundaryCondition::DIRICHLET:
