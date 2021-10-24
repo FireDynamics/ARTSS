@@ -191,7 +191,7 @@ void apply_boundary_condition(Field &field, ObstacleJoinedList **index_fields,
             else {
                 auto gpu_logger = Utility::create_gpu_logger("ObstacleBoundary_GPU");
                 gpu_logger->debug("pointer {}:\n {}\n {}", BoundaryData::get_patch_name(p),
-                              static_cast<void *> (d_patch), static_cast<void *> (index_fields[i]));
+                              static_cast<void *> (d_patch), static_cast<void *> (index_fields[patch]));
             }
 #endif
             size_t patch_start = index_fields[patch]->get_first_index(level, id);
