@@ -159,17 +159,20 @@ namespace Utility {
     void merge_sort(size_t *list1, size_t *list2, size_t size_list1, size_t size_list2, size_t *merged_list) {
         size_t counter_list1 = 0, counter_list2 = 0, counter_merged_list = 0;
         while (counter_list1 < size_list1 && counter_list2 < size_list2) {
-            if (list1[counter_list1] < list2[counter_list2])
+            if (list1[counter_list1] < list2[counter_list2]) {
                 merged_list[counter_merged_list++] = list1[counter_list1++];
-            else
+            } else {
                 merged_list[counter_merged_list++] = list2[counter_list2++];
+            }
         }
 
-        while (counter_list1 < size_list1)
+        while (counter_list1 < size_list1) {
             merged_list[counter_merged_list++] = list1[counter_list1++];
+        }
 
-        while (counter_list2 < size_list2)
+        while (counter_list2 < size_list2) {
             merged_list[counter_merged_list++] = list2[counter_list2++];
+        }
     }
 
     std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list1,

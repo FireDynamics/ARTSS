@@ -16,6 +16,7 @@ Domain::Domain(size_t multigrid_level) :
     init(0);
     inner_cells();
 
+    Utility::merge_sort(m_inner_list, m_boundary_list, m_size_inner_list, m_size_boundary_list, m_domain_list);
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(Domain).name());
     print(0);
@@ -32,6 +33,7 @@ Domain::Domain(
     init(size_obstacles);
     inner_cells(obstacle_list, number_of_obstacles);
 
+    Utility::merge_sort(m_inner_list, m_boundary_list, m_size_inner_list, m_size_boundary_list, m_domain_list);
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(Domain).name());
     print(size_obstacles);
@@ -78,8 +80,6 @@ void Domain::init(size_t size_obstacles) {
     m_domain_list = new size_t[m_size_domain_list];
 
     boundary_cells();
-
-    Utility::merge_sort(m_inner_list, m_boundary_list, m_size_inner_list, m_size_boundary_list, m_domain_list);
 }
 
 
