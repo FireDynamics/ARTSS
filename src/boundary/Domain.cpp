@@ -133,9 +133,10 @@ void Domain::control(size_t size_obstacles) {
     size_t nz = domain->get_nz(m_multigrid_level);
     size_t Nx = domain->get_Nx(m_multigrid_level);
     size_t Ny = domain->get_Ny(m_multigrid_level);
-    size_t all_cells = m_size_boundary[FRONT] + m_size_boundary[BACK]
-                       + m_size_boundary[BOTTOM] + m_size_boundary[TOP]
-                       + m_size_boundary[LEFT] + m_size_boundary[RIGHT];
+    size_t all_cells = m_size_inner_list
+                     + m_size_boundary[FRONT] + m_size_boundary[BACK]
+                     + m_size_boundary[BOTTOM] + m_size_boundary[TOP]
+                     + m_size_boundary[LEFT] + m_size_boundary[RIGHT];
     size_t duplicates = 4 * Nx + 4 * Ny + 4 * nz;
     if (m_size_domain_list != all_cells - duplicates) {
         message = message + "list size of all domain cells does not fit with sum of it parts. Domain List: "
@@ -148,10 +149,9 @@ void Domain::control(size_t size_obstacles) {
                           + " Left: " + std::to_string(m_size_boundary[LEFT])
                           + " Right: " + std::to_string(m_size_boundary[RIGHT]) + "\n";
     }
-    if (m_size_domain_list + m_size_inner_list + size_obstacles != size) {
+    if (m_size_domain_list + size_obstacles != size) {
         message = message + "list size of all domain cells is not equal with domain size."
-                            "Domain List: " + std::to_string(m_size_domain_list)
-                            + " Inner List: " + std::to_string(m_size_inner_list)
+                            " Domain List: " + std::to_string(m_size_domain_list)
                             + " Domain Size: " + std::to_string(domain->get_size(m_multigrid_level))
                             + " Obstacle size: " + std::to_string(size_obstacles) + "\n";
     }
