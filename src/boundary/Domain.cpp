@@ -55,7 +55,8 @@ void Domain::init(size_t size_obstacles) {
     m_size_domain_list = 2 * Nx * Ny + 2 * (Nz - 2) * (Ny - 2) + 2 * (Nz - 2) * Nx;
     m_domain_list = new size_t[m_size_domain_list];
 
-    m_size_boundary[FRONT] = Ny * Nx;
+    m_boundary = new size_t*[number_of_patches];
+    m_size_boundary.m_patches[FRONT] = Ny * Nx;
     m_size_boundary[BACK] = Ny * Nx;
     m_boundary[FRONT] = new size_t[m_size_boundary[FRONT]];
     m_boundary[BACK] = new size_t[m_size_boundary[BACK]];

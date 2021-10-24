@@ -10,25 +10,12 @@
 #include <vector>
 
 Multigrid::Multigrid(BoundaryDataController *bdc_boundary, size_t multigrid_levels) :
-        m_multigrid_levels(multigrid_levels),
-        m_jl_domain_inner_list(multigrid_levels),
-        m_jl_domain_boundary_list(multigrid_levels),
-        m_jl_obstacle_list(multigrid_levels),
-        m_bdc_boundary(bdc_boundary) {
-#ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
-#endif
-#ifdef GPU_DEBUG
-    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
-#endif
-    init_domain();
-    add_MG_lists();
-    send_lists_to_GPU();
-#ifndef BENCHMARKING
-    print();
-    control();
-#endif
-}
+        Multigrid(0, new Surface*[0],
+                  0, new Obstacle*[0],
+                  bdc_boundary,
+                  new BoundaryDataController*[0],
+                  multigrid_levels)
+        { }
 
 Multigrid::Multigrid(
         size_t number_of_surfaces, Surface **surface_list,
@@ -56,9 +43,7 @@ Multigrid::Multigrid(
         init_surfaces(surface_list);
     }
 
-    if (m_number_of_obstacle_objects > 0) {
-        init_obstacles(obstacle_list);
-    }
+    init_obstacles(obstacle_list);
 
     add_MG_lists();
     send_lists_to_GPU();
@@ -258,7 +243,7 @@ void Multigrid::print() {
                     m_number_of_obstacle_objects, m_number_of_surface_objects);
     m_logger->debug("Multigrid levels: {}", m_multigrid_levels);
 
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
+    for (size_t level = 0; level < m_multigrid_levels; level++) {
         m_logger->debug("For Level {} domain inner list starts at index {} and ends with index {}", level,
                         m_jl_domain_inner_list.get_first_index(level),
                         m_jl_domain_inner_list.get_last_index(level));
@@ -268,7 +253,7 @@ void Multigrid::print() {
     }
     m_logger->debug("Total number of domain inner cells: {}", m_jl_domain_inner_list.get_size());
 
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
+    for (size_t level = 0; level < m_multigrid_levels; level++) {
         m_logger->debug("For Level {} domain boundary list starts at index {} and ends with index {}", level,
                         m_jl_domain_boundary_list.get_first_index(level),
                         m_jl_domain_boundary_list.get_last_index(level));
@@ -279,7 +264,7 @@ void Multigrid::print() {
     m_logger->debug("Total number of domain boundary cells: {}", m_jl_domain_boundary_list.get_size());
 
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
+        for (size_t level = 0; level < m_multigrid_levels; level++) {
             size_t start_index = m_jl_domain_boundary_list_patch_divided[patch]->get_first_index(level);
             size_t end_index = m_jl_domain_boundary_list_patch_divided[patch]->get_last_index(level);
             m_logger->debug("For Level {} domain boundary '{}' starts at index {} and ends with index {}",
@@ -300,7 +285,7 @@ void Multigrid::print() {
     }
 
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
+        for (size_t level = 0; level < m_multigrid_levels; level++) {
             m_logger->debug("For Level {} obstacle '{}' starts at index {} and ends with index {} with length {}",
                             level,
                             BoundaryData::get_patch_name(patch),
@@ -313,7 +298,7 @@ void Multigrid::print() {
                         m_jl_obstacle_boundary_list_patch_divided[patch]->get_size());
     }
 
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
+    for (size_t level = 0; level < m_multigrid_levels; level++) {
         m_logger->debug("For Level {} surface_list starts at index {} and ends with index {}",
                         level,
                         get_first_index_of_surface_index_list(level),
@@ -330,9 +315,9 @@ void Multigrid::print() {
 // *************************************************************************************************
 void Multigrid::add_MG_lists() {
     size_t sum_domain_inner_cells = 0;
-    auto * sum_domain_boundary = new PatchObject();
+    auto sum_domain_boundary = new PatchObject();
     size_t sum_obstacle_cells = 0;
-    auto *obstacle_cells = new size_t[m_multigrid_levels];
+    auto obstacle_cells = new size_t[m_multigrid_levels];
     auto sum_obstacle_boundary = new PatchObject();
 
     {  // create domain object of level 0
@@ -386,10 +371,20 @@ void Multigrid::add_MG_lists() {
         m_jl_obstacle_boundary_list_patch_divided[patch]->set_size((*sum_obstacle_boundary)[patch]);
     }
 
-    m_jl_obstacle_list.set_size(sum_obstacle_cells);
-    for (size_t level = 0; level < m_multigrid_levels; level++) {
-        m_jl_obstacle_list.add_data(level, obstacle_cells[level], tmp_store_obstacle[level]);
+    if (m_number_of_obstacle_objects > 0) {
+        m_jl_obstacle_list.set_size(sum_obstacle_cells);
+        for (size_t level = 0; level < m_multigrid_levels; level++) {
+            m_jl_obstacle_list.add_data(level, obstacle_cells[level], tmp_store_obstacle[level]);
+        }
     }
+
+    delete sum_domain_boundary;
+    delete[] obstacle_cells;
+    delete sum_obstacle_boundary;
+    for (size_t level = 0; level < m_number_of_obstacle_objects; level++) {
+        delete[] tmp_store_obstacle[level];
+    }
+    delete[] tmp_store_obstacle;
 }
 
 // ================================= Calc obstacles ================================================
@@ -506,6 +501,7 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
     // add index to m_obstacle_lists if any of l-1 indices building the l index was an obstacle
     // (dominant restriction)
     if (m_number_of_obstacle_objects == 0) {
+        tmp_store_obstacle[level] = new size_t[0];
         return 0;
     }
     DomainData *domain_data = DomainData::getInstance();
