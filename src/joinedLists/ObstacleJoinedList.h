@@ -33,7 +33,6 @@ class ObstacleJoinedList {
     void set_size(size_t size);
     void add_data(size_t level, size_t obstacle_id, size_t size, const size_t *data);
   private:
-    void control();
     size_t *m_data;
     size_t m_size;
     size_t *m_size_list;  // size of each level
