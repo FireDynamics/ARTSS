@@ -11,6 +11,7 @@ SimpleJoinedList::SimpleJoinedList(size_t multigrid_level) {
     m_index_list[0] = 0;
 
     m_size_list = new size_t[multigrid_level + 1];
+    std::fill(m_size_list, m_size_list + multigrid_level + 1, 0);
 }
 
 void SimpleJoinedList::set_size(const size_t size) {

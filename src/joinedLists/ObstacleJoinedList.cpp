@@ -12,6 +12,7 @@ ObstacleJoinedList::ObstacleJoinedList(size_t multigrid_level, size_t number_of_
         m_index_list[id] = 0;
     }
     m_size_list = new size_t[multigrid_level  * number_of_obstacles];
+    std::fill(m_size_list, m_size_list + multigrid_level * number_of_obstacles, 0);
 }
 
 void ObstacleJoinedList::set_size(const size_t size) {
@@ -24,7 +25,7 @@ size_t ObstacleJoinedList::get_slice_size(size_t level) const {
 }
 
 size_t ObstacleJoinedList::get_slice_size(size_t level, size_t obstacle_id) const {
-    return get_last_index(level, obstacle_id) - get_first_index(level, obstacle_id) + 1;
+    return m_size_list[level * m_number_of_obstacles + obstacle_id];
 }
 
 size_t ObstacleJoinedList::get_first_index(size_t level, size_t obstacle_id) const {
