@@ -127,7 +127,9 @@ Multigrid::~Multigrid() {
         }
         delete (*(m_MG_domain_object_list + level));
     }
+    delete[] m_MG_surface_object_list;
     delete[] m_MG_domain_object_list;
+    delete[] m_MG_obstacle_object_list;
 
     if (m_number_of_surface_objects > 0) {
         size_t size_surface_list = get_length_of_surface_index_list_joined();
@@ -140,6 +142,11 @@ Multigrid::~Multigrid() {
     if (m_number_of_obstacle_objects > 0) {
         delete[] m_MG_obstacle_object_list;
     }
+
+    for (size_t patch = 0; patch < number_of_patches; patch++) {
+        delete m_jl_obstacle_boundary_list_patch_divided[patch];
+        delete m_jl_domain_boundary_list_patch_divided[patch];
+    }
 }
 
 //======================================== Control =================================================
@@ -147,6 +154,7 @@ Multigrid::~Multigrid() {
 /// \brief  Units test emergency solution
 // *************************************************************************************************
 void Multigrid::control() {
+#ifndef BENCHMARKING
     std::string message;
     auto domain = DomainData::getInstance();
     for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
@@ -234,10 +242,9 @@ void Multigrid::control() {
     if (!message.empty()) {
         message = "################ MULTIGRID CONTROL ################\n" + message
                   + "---------------- MULTIGRID CONTROL END ----------------";
-#ifndef BENCHMARKING
         m_logger->warn(message);
-#endif
     }
+#endif
 }
 
 //======================================== Print ===================================================
@@ -698,10 +705,6 @@ void Multigrid::apply_boundary_condition(Field &field, bool sync) {
     }
     if (m_number_of_obstacle_objects > 0) {
         for (size_t id = 0; id < m_number_of_obstacle_objects; ++id) {
-#ifdef GPU_DEBUG
-            m_gpu_logger->debug("pointer left:\n {}\n {}",
-                            static_cast<void *> (m_data_MG_obstacle_left_level_joined), static_cast<void *>(m_data_obstacles_patches_joined[Patch::LEFT]));
-#endif
             (static_cast<BoundaryDataController *> (m_bdc_obstacle[id]))->apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list_patch_divided, f, id, sync);
         }
     }
