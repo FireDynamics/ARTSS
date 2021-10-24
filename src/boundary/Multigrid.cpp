@@ -142,7 +142,7 @@ void Multigrid::control() {
 #ifndef BENCHMARKING
     std::string message;
     auto domain = DomainData::getInstance();
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
+    for (size_t level = 0; level < m_multigrid_levels; level++) {
         size_t nx = domain->get_nx(level);
         size_t ny = domain->get_ny(level);
         size_t nz = domain->get_nz(level);
@@ -612,7 +612,7 @@ void Multigrid::create_domain_lists_for_GPU() {
         m_jl_domain_inner_list.add_data(level, domain->get_size_inner_list(), domain->get_inner_list());
 
         size_t **all_boundaries = domain->get_boundary_list();
-        PatchObject all_boundary_sizes = domain->get_size_boundary_list();
+        PatchObject &all_boundary_sizes = domain->get_size_boundary_list();
         for (size_t patch = 0; patch < number_of_patches; patch++) {
             m_jl_domain_boundary_list_patch_divided[patch]->add_data(level, all_boundary_sizes[patch], all_boundaries[patch]);
         }

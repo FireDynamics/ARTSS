@@ -179,7 +179,7 @@ void Domain::control(size_t size_obstacles) {
             domain->get_index_y2(m_multigrid_level) + 1,
             domain->get_index_z1(m_multigrid_level) - 1,
             Nx, Ny);
-    if (*(m_boundary[FRONT]) != startIndex || *(m_boundary[FRONT] + m_size_boundary[FRONT] - 1) != front2) {
+    if (m_boundary[FRONT][0] != startIndex || m_boundary[FRONT][m_size_boundary[FRONT] - 1] != front2) {
         message = message + "first or last index of boundary Front not correct ("
                   + std::to_string(startIndex) + "|"
                   + std::to_string(*(m_boundary[FRONT])) + ")("
