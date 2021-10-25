@@ -7,9 +7,19 @@
 #ifndef ARTSS_PATCHOBJECT_H_
 #define ARTSS_PATCHOBJECT_H_
 
-
 #include <cstdlib>
-#include "BoundaryData.h"
+#include <string>
+
+const size_t number_of_patches = 6;
+enum Patch : int {
+    UNKNOWN_PATCH = -1,
+    FRONT = 0,
+    BACK = 1,
+    BOTTOM = 2,
+    TOP = 3,
+    LEFT = 4,
+    RIGHT = 5
+};
 
 class PatchObject {
   public:
@@ -26,6 +36,9 @@ class PatchObject {
         }
         return *this;
     }
+
+    static std::string get_patch_name(size_t p);
+    static Patch match_patch(const std::string &string);
 };
 
 

@@ -13,8 +13,8 @@ SimpleJoinedList::SimpleJoinedList(size_t multigrid_level) {
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
 #endif
-    m_index_list = new size_t[multigrid_level + 2];
-    m_index_list[0] = 0;
+    m_index_list = new size_t[multigrid_level + 1];
+    std::fill(m_index_list, m_index_list + multigrid_level + 1, 0);
 
     m_size_list = new size_t[multigrid_level + 1];
     std::fill(m_size_list, m_size_list + multigrid_level + 1, 0);

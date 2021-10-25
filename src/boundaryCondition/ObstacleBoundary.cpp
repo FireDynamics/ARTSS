@@ -62,7 +62,7 @@ namespace {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger("ObstacleBoundary");
         logger->debug("applying dirichlet to patch {}",
-                      BoundaryData::get_patch_name(static_cast<Patch>(p)));
+                      PatchObject::get_patch_name(static_cast<Patch>(p)));
 #endif
         size_t level = field.get_level();
         if (level > 0) {
@@ -183,14 +183,14 @@ void apply_boundary_condition(Field &field, ObstacleJoinedList **index_fields,
             if (size_patch == 0) {
 #ifndef BENCHMARKING
                 logger->debug("skipping apply boundary condition for: {}",
-                              BoundaryData::get_patch_name(p));
+                              PatchObject::get_patch_name(p));
 #endif
                 continue;
             }
 #ifdef GPU_DEBUG
             else {
                 auto gpu_logger = Utility::create_gpu_logger("ObstacleBoundary_GPU");
-                gpu_logger->debug("pointer {}:\n {}\n {}", BoundaryData::get_patch_name(p),
+                gpu_logger->debug("pointer {}:\n {}\n {}", PatchObject::get_patch_name(p),
                               static_cast<void *> (d_patch), static_cast<void *> (index_fields[patch]));
             }
 #endif

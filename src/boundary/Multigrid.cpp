@@ -166,7 +166,7 @@ void Multigrid::control() {
                 size_t control = domain->get_ny(level) * domain->get_nz(level);
                 message += fmt::format("length calculated/stored of domain boundary '{}' does not equals its original size size:"
                                        "original: {} saved: {} calculated: {} control: {}\n",
-                                       BoundaryData::get_patch_name(static_cast<Patch>(patch)),
+                                       PatchObject::get_patch_name(static_cast<Patch>(patch)),
                                        original_len, saved_len, calculated_len, control);
             }
         }
@@ -249,14 +249,14 @@ void Multigrid::print() {
             size_t start_index = m_jl_domain_boundary_list_patch_divided[patch]->get_first_index(level);
             size_t end_index = m_jl_domain_boundary_list_patch_divided[patch]->get_last_index(level);
             m_logger->debug("For Level {} domain boundary '{}' starts at index {} and ends with index {}",
-                            level, BoundaryData::get_patch_name(patch),
+                            level, PatchObject::get_patch_name(patch),
                             start_index, end_index);
             m_logger->debug(" and the corresponding indices at this position {} | {}",
                             m_jl_domain_boundary_list_patch_divided[patch]->get_data()[start_index],
                             m_jl_domain_boundary_list_patch_divided[patch]->get_data()[end_index]);
         }
         m_logger->debug("Total number of '{}' boundary cells: {}",
-                        BoundaryData::get_patch_name(patch),
+                        PatchObject::get_patch_name(patch),
                         m_jl_domain_boundary_list_patch_divided[patch]->get_size());
     }
 
@@ -269,13 +269,13 @@ void Multigrid::print() {
         for (size_t level = 0; level < m_multigrid_levels; level++) {
             m_logger->debug("For Level {} obstacle '{}' starts at index {} and ends with index {} with length {}",
                             level,
-                            BoundaryData::get_patch_name(patch),
+                            PatchObject::get_patch_name(patch),
                             m_jl_obstacle_boundary_list_patch_divided[patch]->get_first_index(level, 0),
                             m_jl_obstacle_boundary_list_patch_divided[patch]->get_last_index(level, m_number_of_obstacle_objects - 1),
                             m_jl_obstacle_boundary_list_patch_divided[patch]->get_slice_size(level));
         }
         m_logger->debug("Total number of '{}' obstacle cells: {}",
-                        BoundaryData::get_patch_name(patch),
+                        PatchObject::get_patch_name(patch),
                         m_jl_obstacle_boundary_list_patch_divided[patch]->get_size());
     }
 

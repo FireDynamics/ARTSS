@@ -7,7 +7,6 @@
 #include "../DomainData.h"
 #include "../utility/Utility.h"
 
-inline static const std::vector<std::string> patch_names = {"front", "back", "bottom", "top", "left", "right"};
 inline static const std::vector<std::string> boundary_condition_names = {"neumann", "dirichlet", "periodic"};
 
 BoundaryData::BoundaryData() {
@@ -30,23 +29,12 @@ BoundaryData::~BoundaryData() {
 void BoundaryData::print() {
 #ifndef BENCHMARKING
     for (size_t i = 0; i < number_of_patches; i++) {
-        std::string p = get_patch_name(static_cast<Patch>(i));
+        std::string p = PatchObject::get_patch_name(static_cast<Patch>(i));
         std::string bc = get_boundary_condition_name(m_boundary_conditions[i]);
         real val = m_values[i];
         m_logger->info("\t Patch {} with {} {}", p, bc, val);
     }
 #endif
-}
-
-// *************************************************************************************************
-/// \brief  matches string to patch_names
-/// \param  string           string to be matched
-// *************************************************************************************************
-Patch BoundaryData::match_patch(const std::string &string) {
-    for (size_t pn = 0; pn < patch_names.size(); pn++) {
-        if (patch_names[pn] == string) return (Patch) pn;
-    }
-    return UNKNOWN_PATCH;
 }
 
 // *************************************************************************************************
@@ -62,10 +50,6 @@ BoundaryCondition BoundaryData::match_boundary_condition(const std::string &stri
 
 std::string BoundaryData::get_boundary_condition_name(BoundaryCondition bc) {
     return boundary_condition_names[bc];
-}
-
-std::string BoundaryData::get_patch_name(size_t p) {
-    return patch_names[p];
 }
 
 //=============================== Add boundary condition============================================

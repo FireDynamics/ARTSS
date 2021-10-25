@@ -39,7 +39,7 @@ void BoundaryDataController::add_boundary_data(tinyxml2::XMLElement *xml_element
     patches.reserve(patchStrings.size());
 
     for (const std::string &p : patchStrings) {
-        patches.push_back(BoundaryData::match_patch(p));
+        patches.push_back(PatchObject::match_patch(p));
     }
 
     BoundaryCondition boundaryCondition = BoundaryData::match_boundary_condition(xml_element->Attribute("type"));

@@ -13,12 +13,11 @@ ObstacleJoinedList::ObstacleJoinedList(size_t multigrid_level, size_t number_of_
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
 #endif
-    m_index_list = new size_t[(multigrid_level + 1) * number_of_obstacles + 1];
-    for (size_t id = 0; id < number_of_obstacles; id++) {
-        m_index_list[id] = 0;
-    }
-    m_size_list = new size_t[multigrid_level  * number_of_obstacles];
-    std::fill(m_size_list, m_size_list + multigrid_level * number_of_obstacles, 0);
+    m_index_list = new size_t[(multigrid_level + 1) * number_of_obstacles];
+    std::fill(m_index_list, m_index_list + (multigrid_level + 1) * number_of_obstacles, 0);
+
+    m_size_list = new size_t[(multigrid_level + 1) * number_of_obstacles];
+    std::fill(m_size_list, m_size_list + (multigrid_level + 1) * number_of_obstacles, 0);
 }
 
 void ObstacleJoinedList::set_size(const size_t size) {
