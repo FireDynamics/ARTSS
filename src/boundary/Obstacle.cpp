@@ -11,7 +11,7 @@
 
 
 Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const std::string &name) :
-        m_name(name), m_size_boundary() {
+        m_name(name), m_level(0), m_size_boundary() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -33,7 +33,7 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const s
     m_j2 = get_matching_index(y2, dy, Y1);
     m_k2 = get_matching_index(z2, dz, Z1);
 
-    init(0);
+    init();
 }
 
 
@@ -50,7 +50,7 @@ Obstacle::Obstacle(
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
 
-    init(level);
+    init();
 }
 
 
@@ -59,10 +59,10 @@ Obstacle::Obstacle(
 /// \brief  Initialize member variables (arrays)
 /// \param  level Multigrid level
 // *************************************************************************************************
-void Obstacle::init(size_t level) {
+void Obstacle::init() {
     DomainData *domain = DomainData::getInstance();
-    size_t Nx = domain->get_Nx(level);
-    size_t Ny = domain->get_Ny(level);
+    size_t Nx = domain->get_Nx(m_level);
+    size_t Ny = domain->get_Ny(m_level);
 
     size_t strideX = get_stride_x();
     size_t strideY = get_stride_y();
@@ -77,16 +77,12 @@ void Obstacle::init(size_t level) {
     m_size_boundary[TOP] = strideZ * strideX;
     m_size_boundary[LEFT] = strideZ * strideY;
     m_size_boundary[RIGHT] = strideZ * strideY;
-    remove_cells_at_boundary(level);
+    remove_cells_at_boundary();
 
-    m_boundary[FRONT] = new size_t[m_size_boundary[FRONT]];
-    m_boundary[BACK] = new size_t[m_size_boundary[BACK]];
-
-    m_boundary[TOP] = new size_t[m_size_boundary[TOP]];
-    m_boundary[BOTTOM] = new size_t[m_size_boundary[BOTTOM]];
-
-    m_boundary[LEFT] = new size_t[m_size_boundary[LEFT]];
-    m_boundary[RIGHT] = new size_t[m_size_boundary[RIGHT]];
+    m_boundary = new size_t*[number_of_patches];
+    for (size_t patch = 0; patch < number_of_patches; patch++) {
+        m_boundary[patch] = new size_t[m_size_boundary[patch]];
+    }
 
     create_obstacle(Nx, Ny);
 
@@ -95,7 +91,12 @@ void Obstacle::init(size_t level) {
 }
 
 Obstacle::~Obstacle() {
-    delete (m_obstacle_list);
+    delete[] m_obstacle_list;
+
+    for (size_t patch = 0; patch < number_of_patches; patch++) {
+        delete[] m_boundary[patch];
+    }
+    delete[] m_boundary;
 }
 
 //===================================== Create obstacle ============================================
@@ -119,69 +120,91 @@ void Obstacle::create_obstacle(size_t Nx, size_t Ny) {
         }
     }
 
+#ifndef BENCHMARKING
+    m_logger->debug("added {} cells to obstacle, array size: {}", counter, m_size_obstacle_list);
+#endif
+
     // DETAILED OBSTACLE LISTS
     // FRONT and BACK of OBSTACLE
     // fill oFront list with front indices of obstacle and oBack list with back indices of obstacle
     if (m_size_boundary[FRONT] > 0) {
+        counter = 0;
         for (size_t j = 0; j < strideY; ++j) {
             for (size_t i = 0; i < strideX; ++i) {
-                size_t index = i + strideX * j;
                 size_t idx_front = IX(i, j, 0, strideX, strideY);
-                *(m_boundary[FRONT] + index) = m_obstacle_list[idx_front];
+                m_boundary[FRONT][counter++] = m_obstacle_list[idx_front];
             }
         }
+#ifndef BENCHMARKING
+        m_logger->debug("added {} front patch cells to obstacle, array size: {}", counter, m_size_boundary[Patch::FRONT]);
+#endif
     }
     if (m_size_boundary[BACK] > 0) {
+        counter = 0;
         for (size_t j = 0; j < strideY; ++j) {
             for (size_t i = 0; i < strideX; ++i) {
-                size_t index = i + strideX * j;
                 size_t idx_back = IX(i, j, strideZ - 1, strideX, strideY);
-                *(m_boundary[BACK] + index) = m_obstacle_list[idx_back];
+                m_boundary[BACK][counter++] = m_obstacle_list[idx_back];
             }
         }
+#ifndef BENCHMARKING
+        m_logger->debug("added {} back patch cells to obstacle, array size: {}", counter, m_size_boundary[Patch::BACK]);
+#endif
     }
 
     // TOP and BOTTOM of OBSTACLE
     // fill m_boundary_patch_divided[TOP] list with top indices of obstacle and oBottom list with bottom indices
     // of obstacle
     if (m_size_boundary[BOTTOM] > 0) {
+        counter = 0;
         for (size_t k = 0; k < strideZ; ++k) {
             for (size_t i = 0; i < strideX; ++i) {
-                size_t index = i + strideX * k;
                 size_t idx_bottom = IX(i, 0, k, strideX, strideY);
-                *(m_boundary[BOTTOM] + index) = m_obstacle_list[idx_bottom];
+                m_boundary[BOTTOM][counter++] = m_obstacle_list[idx_bottom];
             }
         }
+#ifndef BENCHMARKING
+        m_logger->debug("added {} bottom patch cells to obstacle, array size: {}", counter, m_size_boundary[Patch::BOTTOM]);
+#endif
     }
     if (m_size_boundary[TOP] > 0) {
+        counter = 0;
         for (size_t k = 0; k < strideZ; ++k) {
             for (size_t i = 0; i < strideX; ++i) {
-                size_t index = i + strideX * k;
                 size_t idx_top = IX(i, strideY - 1, k, strideX, strideY);
-                *(m_boundary[TOP] + index) = m_obstacle_list[idx_top];
+                m_boundary[TOP][counter++] = m_obstacle_list[idx_top];
             }
         }
+#ifndef BENCHMARKING
+        m_logger->debug("added {} top patch cells to obstacle, array size: {}", counter, m_size_boundary[Patch::TOP]);
+#endif
     }
 
     // LEFT and RIGHT of OBSTACLE
     // fill oLeft list with left indices of obstacle and oRight list with right indices of obstacle
     if (m_size_boundary[LEFT] > 0) {
+        counter = 0;
         for (size_t k = 0; k < strideZ; ++k) {
             for (size_t j = 0; j < strideY; ++j) {
-                size_t index = j + strideY * k;
                 size_t idx_left = IX(0, j, k, strideX, strideY);
-                *(m_boundary[LEFT] + index) = m_obstacle_list[idx_left];
+                m_boundary[LEFT][counter++] = m_obstacle_list[idx_left];
             }
         }
+#ifndef BENCHMARKING
+        m_logger->debug("added {} left patch cells to obstacle, array size: {}", counter, m_size_boundary[Patch::LEFT]);
+#endif
     }
     if (m_size_boundary[RIGHT] > 0) {
+        counter = 0;
         for (size_t k = 0; k < strideZ; ++k) {
             for (size_t j = 0; j < strideY; ++j) {
-                size_t index = j + strideY * k;
                 size_t idx_right = IX(strideX - 1, j, k, strideX, strideY);
-                *(m_boundary[RIGHT] + index) = m_obstacle_list[idx_right];
+                m_boundary[RIGHT][counter++] = m_obstacle_list[idx_right];
             }
         }
+#ifndef BENCHMARKING
+        m_logger->debug("added {} right patch cells to obstacle, array size: {}", counter, m_size_boundary[Patch::RIGHT]);
+#endif
     }
 }
 
@@ -483,24 +506,24 @@ int Obstacle::get_matching_index(real obstacle_coordinate, real spacing, real st
 /// \brief  Remove obstacle patch facing the boundary
 /// \param  level Multigrid level
 // *************************************************************************************************
-void Obstacle::remove_cells_at_boundary(size_t level) {
+void Obstacle::remove_cells_at_boundary() {
     DomainData *domain = DomainData::getInstance();
-    if (m_k1 <= domain->get_index_z1(level)) {
+    if (m_k1 <= domain->get_index_z1(m_level)) {
         m_size_boundary[FRONT] = 0;
     }
-    if (m_k2 >= domain->get_index_z2(level)) {
+    if (m_k2 >= domain->get_index_z2(m_level)) {
         m_size_boundary[BACK] = 0;
     }
-    if (m_j1 <= domain->get_index_y1(level)) {
+    if (m_j1 <= domain->get_index_y1(m_level)) {
         m_size_boundary[BOTTOM] = 0;
     }
-    if (m_j2 >= domain->get_index_y2(level)) {
+    if (m_j2 >= domain->get_index_y2(m_level)) {
         m_size_boundary[TOP] = 0;
     }
-    if (m_i1 <= domain->get_index_x1(level)) {
+    if (m_i1 <= domain->get_index_x1(m_level)) {
         m_size_boundary[LEFT] = 0;
     }
-    if (m_i2 >= domain->get_index_x2(level)) {
+    if (m_i2 >= domain->get_index_x2(m_level)) {
         m_size_boundary[RIGHT] = 0;
     }
 }
@@ -519,43 +542,9 @@ bool Obstacle::has_overlap(size_t o1_coord1, size_t o1_coord2, size_t o2_coord1,
 }
 
 void Obstacle::replace_patch(size_t *indices, size_t size, Patch p) {
-    switch (p) {
-        case FRONT:
-            delete[] m_boundary[FRONT];
-            m_boundary[FRONT] = indices;
-            m_size_boundary[FRONT] = size;
-            break;
-        case BACK:
-            delete[] m_boundary[BACK];
-            m_boundary[BACK] = indices;
-            m_size_boundary[BACK] = size;
-            break;
-        case BOTTOM:
-            delete[] m_boundary[BOTTOM];
-            m_boundary[BOTTOM] = indices;
-            m_size_boundary[BOTTOM] = size;
-            break;
-        case TOP:
-            delete[] m_boundary[TOP];
-            m_boundary[TOP] = indices;
-            m_size_boundary[TOP] = size;
-            break;
-        case LEFT:
-            delete[] m_boundary[LEFT];
-            m_boundary[LEFT] = indices;
-            m_size_boundary[LEFT] = size;
-            break;
-        case RIGHT:
-            delete[] m_boundary[RIGHT];
-            m_boundary[RIGHT] = indices;
-            m_size_boundary[RIGHT] = size;
-            break;
-        default:
-#ifndef BENCHMARKING
-            m_logger->warn("wrong patch: {}", p);
-#endif
-            break;
-    }
+    delete[] m_boundary[p];
+    m_boundary[p] = indices;
+    m_size_boundary[p] = size;
 }
 
 //======================================== has overlap =============================================
@@ -1313,37 +1302,8 @@ void Obstacle::set_inner_cells(Field *f, real value) {
 /// \param patch Patch to be removed
 // *************************************************************************************************
 void Obstacle::remove_patch(Patch patch) {
-    switch (patch) {
-        case FRONT:
-            delete[] m_boundary[FRONT];
-            m_size_boundary[FRONT] = 0;
-            break;
-        case BACK:
-            delete[] m_boundary[BACK];
-            m_size_boundary[BACK] = 0;
-            break;
-        case BOTTOM:
-            delete[] m_boundary[BOTTOM];
-            m_size_boundary[BOTTOM] = 0;
-            break;
-        case TOP:
-            delete[] m_boundary[TOP];
-            m_size_boundary[TOP] = 0;
-            break;
-        case LEFT:
-            delete[] m_boundary[LEFT];
-            m_size_boundary[LEFT] = 0;
-            break;
-        case RIGHT:
-            delete[] m_boundary[RIGHT];
-            m_size_boundary[RIGHT] = 0;
-            break;
-        default:
-#ifndef BENCHMARKING
-            m_logger->warn("wrong patch: {}", patch);
-#endif
-            break;
-    }
+    delete[] m_boundary[patch];
+    m_size_boundary[patch] = 0;
 }
 
 //======================================== is corner cell ==========================================

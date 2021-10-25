@@ -8,6 +8,7 @@
 // TODO(issue 15): surface implementing
 //  - underscores instead of camel case
 //  - create file description
+//  - remove surface cells from domain domain boundary cells
 Surface::Surface(tinyxml2::XMLElement* element) {
     m_boundaryDataController = new BoundaryDataController();
 #ifndef BENCHMARKING

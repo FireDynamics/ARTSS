@@ -84,7 +84,7 @@ private:
     SimpleJoinedList m_jl_domain_inner_list;
     SimpleJoinedList **m_jl_domain_boundary_list_patch_divided;  // [Patch]
 
-    SimpleJoinedList m_jl_obstacle_list;
+    SimpleJoinedList m_jl_obstacle_list;  // all obstacle boundary cells
     ObstacleJoinedList **m_jl_obstacle_boundary_list_patch_divided;  // [Patch]
 
     size_t* m_data_MG_surface_list_level_joined;

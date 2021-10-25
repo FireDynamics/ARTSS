@@ -12,9 +12,7 @@ inline static const std::vector<std::string> patch_names = {"front", "back", "bo
 
 PatchObject::PatchObject() {
     m_patches = new size_t[number_of_patches];
-    for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_patches[patch] = 0;
-    }
+    std::fill(m_patches, m_patches + number_of_patches, 0);
 }
 
 PatchObject::~PatchObject() {

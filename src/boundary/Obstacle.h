@@ -29,23 +29,10 @@ class Obstacle {
     ~Obstacle();
 
     size_t * get_obstacle_list() const { return m_obstacle_list; }
-    size_t ** get_boundary_list() const { return m_boundary; }
-    //size_t* get_obstacle_front() const { return m_obstacle_front; }
-    //size_t* get_obstacle_back() const { return m_obstacle_back; }
-    //size_t* get_obstacle_top() const { return m_obstacle_top; }
-    //size_t* get_obstacle_bottom() const { return m_obstacle_bottom; }
-    //size_t* get_obstacle_left() const { return m_obstacle_left; }
-    //size_t* get_obstacle_right() const { return m_obstacle_right; }
-
     size_t get_size_obstacle_list() const { return m_size_obstacle_list; }
 
+    size_t ** get_boundary_list() const { return m_boundary; }
     PatchObject & get_size_boundary_list() { return m_size_boundary; }
-    //size_t get_size_obstacle_front() const { return m_size_obstacle_front; }
-    //size_t get_size_obstacle_back() const { return m_size_obstacle_back; }
-    //size_t get_size_obstacle_bottom() const { return m_size_obstacle_bottom; }
-    //size_t get_size_obstacle_top() const { return m_size_obstacle_top; }
-    //size_t get_size_obstacle_left() const { return m_size_obstacle_left; }
-    //size_t get_size_obstacle_right() const { return m_size_obstacle_right; }
 
     bool is_obstacle_cell(size_t i, size_t j, size_t k) const;
     bool is_obstacle_cell(size_t index) const;
@@ -87,25 +74,11 @@ private:
 
     size_t* m_obstacle_list;
     size_t ** m_boundary;
-    //size_t* m_obstacle_front;
-    //size_t* m_obstacle_back;
-    //size_t* m_obstacle_top;
-    //size_t* m_obstacle_bottom;
-    //size_t* m_obstacle_left;
-    //size_t* m_obstacle_right;
 
     size_t m_size_obstacle_list;
     PatchObject m_size_boundary;
 
-    // actual size
-    //size_t m_size_obstacle_front;
-    //size_t m_size_obstacle_back;
-    //size_t m_size_obstacle_top;
-    //size_t m_size_obstacle_bottom;
-    //size_t m_size_obstacle_left;
-    //size_t m_size_obstacle_right;
-
-    void init(size_t level);
+    void init();
     void create_obstacle(size_t Nx, size_t Ny);
 
     static real match_grid(real obstacle_coordinate, real spacing, real start_coordinate);
@@ -118,7 +91,7 @@ private:
     size_t get_size() const { return get_stride_z() * get_stride_y() * get_stride_x(); }
 
     void remove_patch(Patch patch);
-    void remove_cells_at_boundary(size_t level);
+    void remove_cells_at_boundary();
 
     static void calculate_area_index(
             Obstacle *o1, Obstacle *o2,
