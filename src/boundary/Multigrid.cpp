@@ -459,6 +459,7 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
         (*end_coarse) += 1;
         (*end_coarse) *= 0.5;
 
+#ifndef BENCHMARKING
         if (end_fine[X] - start_fine[X] + 1 < domain_data->get_nx(level - 1)
             && (*end_coarse)[X] - (*start_coarse)[X] + 1 >= domain_data->get_nx(level)) {
             m_logger->warn("Be cautious! Surface '{}' fills up boundary patch '{}' at level {}", surface_fine->get_name(), level);
@@ -471,7 +472,6 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
             && (*end_coarse)[Z] - (*start_coarse)[Z] + 1 >= domain_data->get_nz(level)) {
             m_logger->warn("Be cautious! Surface '{}' fills up boundary patch '{}' at level {}", surface_fine->get_name(), level);
         }
-#ifndef BENCHMARKING
         m_logger->debug("multigrid surface start fine {}|{}|{}", start_fine[X], start_fine[Y], start_fine[Z]);
         m_logger->debug("multigrid surface end fine {}|{}|{}", end_fine[X], end_fine[Y], end_fine[Z]);
         m_logger->debug("multigrid surface start coarse {}|{}|{}", (*start_coarse)[X], (*start_coarse)[Y], (*start_coarse)[Z]);
