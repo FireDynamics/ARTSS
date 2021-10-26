@@ -364,7 +364,7 @@ void Analysis::save_variables_in_file(FieldController *field_controller) {
     auto boundary = BoundaryController::getInstance();
     std::vector<FieldType> v_fields = boundary->get_used_fields();
 
-    Field *fields[numberOfFieldTypes];
+    Field *fields[number_of_field_types];
     fields[FieldType::RHO] = &field_controller->get_field_concentration();
     fields[FieldType::U] = &field_controller->get_field_u();
     fields[FieldType::V] = &field_controller->get_field_v();

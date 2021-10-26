@@ -8,21 +8,17 @@
 #define ARTSS_BOUNDARY_DOMAIN_H_
 
 
-#include "BoundaryData.h"
 #include "Obstacle.h"
 #include "../utility/Utility.h"
 #include "PatchObject.h"
 
 class Domain {
  public:
+    Domain(size_t *obstacle_list, size_t size_obstacle_list,
+           size_t **surface_list, PatchObject &size_surface_list,
+           size_t multigrid_level);
+
     ~Domain();
-    Domain(
-            Obstacle** obstacle_list,
-            size_t number_of_obstacles,
-            size_t size_obstacles,
-            size_t multigrid_level = 0);
-    explicit Domain(size_t multigrid_level = 0);
-    void init(size_t size_obstacles);
 
     size_t * get_domain_list() const { return m_domain_list; }
     size_t get_size_domain_list() const { return m_size_domain_list; }
@@ -33,9 +29,8 @@ class Domain {
     size_t ** get_boundary_list() const { return m_boundary_patch_divided; }
     PatchObject & get_size_boundary_list() { return m_size_boundary; }
 
-    void update_lists(Obstacle **obstacle_list, size_t number_of_obstacles, size_t size_obstacles);
-    void update_lists();
-    void control(size_t size_obstacles);
+    void update_lists(size_t *obstacle_list, size_t size_obstacle_list, size_t **surface_list, PatchObject &size_surface_list);
+    void control(size_t size_obstacle_list, PatchObject &size_surface_list);
 
  private:
 #ifndef BENCHMARKING
@@ -56,10 +51,10 @@ class Domain {
     size_t *m_inner_list;
     size_t m_size_inner_list;
 
-    void boundary_cells();
-    void inner_cells(Obstacle **obstacle_list, size_t number_of_obstacles);
-    void inner_cells();
-    void print(size_t size_obstacles);
+    void init(size_t size_obstacle_list, PatchObject &size_surface_list);
+    void inner_cells(const size_t *obstacle_list, size_t size_obstacle_list);
+    void boundary_cells(size_t **surface_list, PatchObject &size_surface_list);
+    void print(size_t size_obstacle_list, PatchObject &size_surface_list);
     void clear_lists();
 };
 

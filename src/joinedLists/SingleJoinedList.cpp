@@ -4,9 +4,9 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 //
-#include "SimpleJoinedList.h"
+#include "SingleJoinedList.h"
 
-SimpleJoinedList::SimpleJoinedList(size_t multigrid_level) {
+SingleJoinedList::SingleJoinedList(size_t multigrid_level) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -20,16 +20,16 @@ SimpleJoinedList::SimpleJoinedList(size_t multigrid_level) {
     std::fill(m_size_list, m_size_list + multigrid_level + 1, 0);
 }
 
-void SimpleJoinedList::set_size(const size_t size) {
+void SingleJoinedList::set_size(const size_t size) {
     m_size = size;
     m_data = new size_t[m_size];
 }
 
-size_t SimpleJoinedList::get_slice_size(size_t level) const {
+size_t SingleJoinedList::get_slice_size(size_t level) const {
     return m_size_list[level];
 }
 
-size_t SimpleJoinedList::get_first_index(size_t level) const {
+size_t SingleJoinedList::get_first_index(size_t level) const {
     return m_index_list[level];
 }
 
@@ -38,7 +38,7 @@ size_t SimpleJoinedList::get_first_index(size_t level) const {
  * @param level  level of slice
  * @return
  */
-size_t SimpleJoinedList::get_last_index(size_t level) const {
+size_t SingleJoinedList::get_last_index(size_t level) const {
     size_t size = get_slice_size(level);
     if (size == 0) {
         return get_first_index(level);
@@ -46,7 +46,7 @@ size_t SimpleJoinedList::get_last_index(size_t level) const {
     return get_first_index(level) + size - 1;
 }
 
-void SimpleJoinedList::add_data(size_t level, size_t size, const size_t *data) {
+void SingleJoinedList::add_data(size_t level, size_t size, const size_t *data) {
 #ifndef BENCHMARKING
     m_logger->debug("add data for level {} with size {}", level, size);
 #endif
@@ -58,9 +58,16 @@ void SimpleJoinedList::add_data(size_t level, size_t size, const size_t *data) {
     }
 }
 
-SimpleJoinedList::~SimpleJoinedList() {
+SingleJoinedList::~SingleJoinedList() {
 #pragma acc exit data delete(m_data[:m_size])
     delete[] m_index_list;
     delete[] m_data;
     delete[] m_size_list;
+}
+
+size_t *SingleJoinedList::get_slice(size_t level) {
+    size_t *slice = new size_t[get_slice_size(level)];
+    //TODO(cvm) legit? want to return a copy of a part of 'data'
+    std::copy(m_data + get_first_index(level), m_data + get_last_index(level), slice);
+    return slice;
 }

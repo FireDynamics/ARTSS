@@ -33,3 +33,11 @@ Patch PatchObject::match_patch(const std::string &string) {
     }
     return UNKNOWN_PATCH;
 }
+
+size_t PatchObject::get_sum() {
+    size_t sum = 0;
+    for (size_t patch = 0; patch < number_of_patches; patch++) {
+        sum += m_patches[patch];
+    }
+    return sum;
+}

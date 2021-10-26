@@ -22,6 +22,8 @@
 
 
 namespace Utility {
+    static std::string class_name = "Utility";
+
 //======================================== get index ===============================================
 // *************************************************************************************************
 /// \brief  Snaps value to grid discretisation
@@ -148,80 +150,6 @@ namespace Utility {
 
 #endif
 
-/**
- * merge two sorted lists. merge sort algorithm
- * @param list1
- * @param list2
- * @param size_list1
- * @param size_list2
- * @param merged_list
- */
-    void merge_sort(size_t *list1, size_t *list2, size_t size_list1, size_t size_list2, size_t *merged_list) {
-        size_t counter_list1 = 0, counter_list2 = 0, counter_merged_list = 0;
-        while (counter_list1 < size_list1 && counter_list2 < size_list2) {
-            if (list1[counter_list1] < list2[counter_list2]) {
-                merged_list[counter_merged_list++] = list1[counter_list1++];
-            } else {
-                merged_list[counter_merged_list++] = list2[counter_list2++];
-            }
-        }
-
-        while (counter_list1 < size_list1) {
-            merged_list[counter_merged_list++] = list1[counter_list1++];
-        }
-
-        while (counter_list2 < size_list2) {
-            merged_list[counter_merged_list++] = list2[counter_list2++];
-        }
-    }
-
-    std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list1,
-                                                     size_t *list2, size_t size_list2) {
-        std::vector<size_t> result;
-        size_t counter1 = 0;
-        size_t counter2 = 0;
-
-        if (list1[counter1] < list2[counter2]) {
-            result.push_back(list1[counter1]);
-            counter1++;
-        } else {
-            result.push_back(list2[counter2]);
-            counter2++;
-        }
-        while (counter1 < size_list1 && counter2 < size_list2) {
-            if (list1[counter1] == result[result.size() - 1]) {
-                counter1++;
-                continue;
-            }
-            if (list2[counter2] == result[result.size() - 1]) {
-                counter2++;
-                continue;
-            }
-            if (list1[counter1] < list2[counter2]) {
-                result.push_back(list1[counter1]);
-                counter1++;
-            } else {
-                result.push_back(list2[counter2]);
-                counter2++;
-            }
-        }
-        if (counter1 < size_list1) {
-            if (list1[counter1] == result[result.size() - 1]) {
-                counter1++;
-            }
-            for (size_t c = counter1; c < size_list1; c++) {
-                result.push_back(list1[c]);
-            }
-        } else {
-            if (list2[counter2] == result[result.size() - 1]) {
-                counter2++;
-            }
-            for (size_t c = counter2; c < size_list2; c++) {
-                result.push_back(list2[c]);
-            }
-        }
-        return result;
-    }
 
     void log_field_info(Field &field, const std::string &text, const std::string &logger_name) {
 #ifndef BENCHMARKING

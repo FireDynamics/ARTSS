@@ -9,10 +9,10 @@
 
 #include "../utility/Utility.h"
 
-class ObstacleJoinedList {
+class MultipleJoinedList {
   public:
-    ObstacleJoinedList(size_t multigrid_level, size_t m_number_of_obstacles);
-    ~ObstacleJoinedList();
+    MultipleJoinedList(size_t multigrid_level, size_t m_number_of_obstacles);
+    ~MultipleJoinedList();
 
     void copyin() {
 #pragma acc enter data copyin(m_data[:m_size])
@@ -29,6 +29,7 @@ class ObstacleJoinedList {
     size_t get_slice_size(size_t level, size_t obstacle_id) const;
     size_t get_size() const { return m_size; }
     size_t * get_data() const { return m_data; }
+    size_t * get_slice(size_t level);
 
     void set_size(size_t size);
     void add_data(size_t level, size_t obstacle_id, size_t size, const size_t *data);

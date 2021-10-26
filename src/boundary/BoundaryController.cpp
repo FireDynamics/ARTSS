@@ -79,14 +79,15 @@ void BoundaryController::parse_surface_parameter(tinyxml2::XMLElement *xmlParame
     m_has_surfaces = (Parameters::getInstance()->get("surfaces/enabled") == "Yes");
     if (m_has_surfaces) {
         std::vector<Surface *> surfaces;
-        auto cur_elem = xmlParameter->FirstChildElement();
-        while (cur_elem) {
-            Surface *o = new Surface(cur_elem);
-            surfaces.push_back(o);
-            cur_elem = cur_elem->NextSiblingElement();
+        auto cur_elem_surface = xmlParameter->FirstChildElement();
+        while (cur_elem_surface) {
+            Surface *surface = new Surface(cur_elem_surface);
+            surfaces.push_back(surface);
+            cur_elem_surface = cur_elem_surface->NextSiblingElement();
         }
         m_number_of_surfaces = surfaces.size();
-        m_surface_list = surfaces.data();
+        //TODO(cvm) vector surfaces will be destroyed after this method therefore I need to preserve the data
+        std::memcpy(m_surface_list, surfaces.data(), surfaces.size());
     } else {
         m_surface_list = new Surface *[m_number_of_surfaces];
     }

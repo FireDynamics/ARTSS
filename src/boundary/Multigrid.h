@@ -14,8 +14,8 @@
 #include "../DomainData.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
-#include "../joinedLists/SimpleJoinedList.h"
-#include "../joinedLists/ObstacleJoinedList.h"
+#include "../joinedLists/SingleJoinedList.h"
+#include "../joinedLists/MultipleJoinedList.h"
 
 class Multigrid {
  public:
@@ -73,49 +73,35 @@ private:
     // boundary for each level
     Domain** m_MG_domain_object_list;  // m_MG_boundary_object_list[level]
 
-    // surface indices divided by level
-    size_t** m_MG_surface_index_list;
-
-    // start index of each level in level joined list
-    size_t* m_size_MG_surface_index_list_level;
-
     //---- all level joined / arrays for GPU -----
-    SimpleJoinedList m_jl_domain_list;
-    SimpleJoinedList m_jl_domain_inner_list;
-    SimpleJoinedList **m_jl_domain_boundary_list_patch_divided;  // [Patch]
+    SingleJoinedList m_jl_domain_list;
+    SingleJoinedList m_jl_domain_inner_list;
+    SingleJoinedList **m_jl_domain_boundary_list_patch_divided;  // [Patch]
 
-    SimpleJoinedList m_jl_obstacle_list;  // all obstacle boundary cells
-    ObstacleJoinedList **m_jl_obstacle_boundary_list_patch_divided;  // [Patch]
+    SingleJoinedList m_jl_obstacle_list;  // all obstacle boundary cells
+    MultipleJoinedList **m_jl_obstacle_boundary_list_patch_divided;  // [Patch]
 
-    size_t* m_data_MG_surface_list_level_joined;
+    MultipleJoinedList **m_jl_surface_list_patch_divided;  //
 
-    size_t get_length_of_surface_index_list_joined() const;
-    size_t get_first_index_of_surface_index_list(size_t level) const;
-    size_t get_last_index_of_surface_index_list(size_t level) const;
+    void create_multigrid_obstacle_lists();
+    void create_multigrid_surface_lists();
+    void create_multigrid_domain_lists();
 
-    void init_domain();
-    void init_obstacles(Obstacle **obstacle_list);
-    void init_surfaces(Surface **surface_list);
-
-    void add_MG_lists();
-    size_t calc_obstacles(Obstacle** obstacle_object_list, PatchObject *patch_sum) const;
-    void calc_surfaces(Surface** surface_list);
-    void send_lists_to_GPU();
-    void create_domain_lists_for_GPU();
     void send_surface_lists_to_GPU();
     void send_obstacle_lists_to_GPU();
+    void send_domain_lists_to_GPU();
 
-    void surface_dominant_restriction(size_t level);
+    size_t surface_dominant_restriction(size_t level, PatchObject *sum_patches);
     size_t obstacle_dominant_restriction(size_t level, PatchObject *sum_patches, size_t **tmp_store_obstacle);
 
     void control();
     void print();
 
-    // size_t **m_data_surfaces_patches_joined;
     BoundaryDataController *m_bdc_boundary;
     BoundaryDataController **m_bdc_obstacle;
 
-    void remove_boundary_lists_from_GPU();
+    void remove_domain_lists_from_GPU();
+
 };
 
 #endif /* ARTSS_BOUNDARY_MULTIGRID_H_*/

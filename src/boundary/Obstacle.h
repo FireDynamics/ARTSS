@@ -16,6 +16,7 @@
 #include "../utility/tinyxml2.h"
 #include "../utility/Utility.h"
 #include "PatchObject.h"
+#include "Coordinate.h"
 
 
 class Obstacle {

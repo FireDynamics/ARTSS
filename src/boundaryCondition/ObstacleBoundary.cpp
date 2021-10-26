@@ -170,7 +170,7 @@ namespace {
 /// \param  id ID of obstacle
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void apply_boundary_condition(Field &field, ObstacleJoinedList **index_fields,
+void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
                               BoundaryData *boundary_data, size_t id, bool sync) {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger("ObstacleBoundary");

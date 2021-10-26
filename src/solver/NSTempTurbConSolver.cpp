@@ -119,8 +119,6 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
     Field &kappa_t = m_field_controller->get_field_kappa();  // kappa_t - Eddy thermal diffusivity
     Field &gamma_t = m_field_controller->get_field_gamma();  // gamma_t - Eddy mass diffsusivity
 
-    size_t bsize = DomainData::getInstance()->get_size(u.get_level());
-
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
                          w0, w_tmp, p, rhs, T, T0, T_tmp, \
                          C, C0, C_tmp, f_x, f_y, f_z, S_T, S_C, \

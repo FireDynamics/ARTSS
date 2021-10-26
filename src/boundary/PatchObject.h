@@ -25,7 +25,6 @@ class PatchObject {
   public:
     PatchObject();
     ~PatchObject();
-    size_t *m_patches;
 
     inline size_t &operator[](size_t i) const { return m_patches[i]; }
 
@@ -37,8 +36,13 @@ class PatchObject {
         return *this;
     }
 
+    size_t get_sum();
+    void add_value(size_t patch, size_t value) { m_patches[patch] += value; }
+
     static std::string get_patch_name(size_t p);
     static Patch match_patch(const std::string &string);
+  private:
+    size_t *m_patches;
 };
 
 

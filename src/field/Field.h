@@ -15,7 +15,7 @@
 
 #ifndef ENUM_TYPES
 #define ENUM_TYPES
-const size_t numberOfFieldTypes = 7;
+const size_t number_of_field_types = 7;
 enum FieldType : int {
     UNKNOWN_FIELD = -1, RHO = 0, U = 1, V = 2, W = 3, P = 4, T = 5, NU = 6
 };

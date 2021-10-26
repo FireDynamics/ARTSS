@@ -14,14 +14,14 @@ BoundaryDataController::BoundaryDataController() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_boundary_data = new BoundaryData *[numberOfFieldTypes];
-    for (size_t i = 0; i < numberOfFieldTypes; i++) {
+    m_boundary_data = new BoundaryData *[number_of_field_types];
+    for (size_t i = 0; i < number_of_field_types; i++) {
         *(m_boundary_data + i) = new BoundaryData();
     }
 }
 
 BoundaryDataController::~BoundaryDataController() {
-    for (size_t i = 0; i < numberOfFieldTypes; i++) {
+    for (size_t i = 0; i < number_of_field_types; i++) {
         delete m_boundary_data[i];
     }
     delete[] m_boundary_data;
@@ -57,7 +57,7 @@ void BoundaryDataController::add_boundary_data(tinyxml2::XMLElement *xml_element
 // *************************************************************************************************
 void BoundaryDataController::print() {
 #ifndef BENCHMARKING
-    for (size_t i = 0; i < numberOfFieldTypes; i++) {
+    for (size_t i = 0; i < number_of_field_types; i++) {
         auto boundary = *(m_boundary_data + i);
         if (!boundary->is_empty()) {
             m_logger->info("--- found boundary conditions for field {} ({}): ",
@@ -79,7 +79,7 @@ void BoundaryDataController::print() {
 // *************************************************************************************************
 void BoundaryDataController::apply_boundary_condition(
         Field &field,
-        SimpleJoinedList **index_fields,
+        SingleJoinedList **index_fields,
         bool sync) {
     FieldType field_type = field.get_type();
     if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {
@@ -105,7 +105,7 @@ void BoundaryDataController::apply_boundary_condition(
 // *************************************************************************************************
 void BoundaryDataController::apply_boundary_condition_obstacle(
         Field &field,
-        ObstacleJoinedList **index_fields,
+        MultipleJoinedList **index_fields,
         FieldType field_type,
         size_t id,
         bool sync) {
@@ -131,8 +131,8 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
 // *************************************************************************************************
 std::vector<FieldType> BoundaryDataController::get_used_fields() {
     std::vector<FieldType> v_fields;
-    v_fields.reserve(numberOfFieldTypes);
-    for (size_t fieldType = 0; fieldType < numberOfFieldTypes; fieldType++) {
+    v_fields.reserve(number_of_field_types);
+    for (size_t fieldType = 0; fieldType < number_of_field_types; fieldType++) {
         if (!(static_cast<BoundaryData *> (*(m_boundary_data + fieldType)))->is_empty()) {
             v_fields.push_back(static_cast<FieldType>(fieldType));
         }

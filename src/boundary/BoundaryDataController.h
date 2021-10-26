@@ -12,8 +12,8 @@
 #include "../utility/Utility.h"
 #include "BoundaryData.h"
 #include "../field/Field.h"
-#include "../joinedLists/SimpleJoinedList.h"
-#include "../joinedLists/ObstacleJoinedList.h"
+#include "../joinedLists/SingleJoinedList.h"
+#include "../joinedLists/MultipleJoinedList.h"
 
 class BoundaryDataController {
  public:
@@ -22,11 +22,11 @@ class BoundaryDataController {
     void add_boundary_data(tinyxml2::XMLElement *xml_element);
     void apply_boundary_condition(
             Field &field,
-            SimpleJoinedList **index_fields,
+            SingleJoinedList **index_fields,
             bool sync = false);
     void apply_boundary_condition_obstacle(
             Field &field,
-            ObstacleJoinedList **index_fields,
+            MultipleJoinedList **index_fields,
             FieldType field_type,
             size_t id,
             bool sync = false);
