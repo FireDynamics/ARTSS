@@ -269,15 +269,26 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
         real t_end = params->get_real("physical_parameters/t_end");
         auto Nt = static_cast<size_t>(std::round(t_end / dt));
         real rNt = 1. / static_cast<real>(Nt);
+
         real epsu = sqrt(rNt * sum_u);
-        real epsp = sqrt(rNt * sum_p);
-        real epsT = sqrt(rNt * sum_T);
 
 #ifndef BENCHMARKING
         m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
-        m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
-        m_logger->info("RMS error of T at domain center is e_RMS = {}", epsT);
 #endif
+
+        std::vector<FieldType> v_fields = BoundaryController::getInstance()->get_used_fields();
+        if (std::count(v_fields.begin(), v_fields.end(), FieldType::P)) {
+            real epsp = sqrt(rNt * sum_p);
+#ifndef BENCHMARKING
+            m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
+#endif
+        }
+        if(std::count(v_fields.begin(), v_fields.end(), FieldType::T)) {
+            real epsT = sqrt(rNt * sum_T);
+#ifndef BENCHMARKING
+            m_logger->info("RMS error of T at domain center is e_RMS = {}", epsT);
+#endif
+        }
     }
 }
 
@@ -381,9 +392,9 @@ void Analysis::save_variables_in_file(FieldController *field_controller) {
 void Analysis::write_file(const Field &field, const std::string &filename) {
     std::ofstream out;
     out.open(filename + ".dat", std::ofstream::out);
-
-    for (size_t index = 0; index < field.get_size(); index++) {
-        out << field[index] << std::endl;
+    size_t size = field.get_size();
+    for (size_t index = 0; index < size; index++) {
+        out << &field[index] << std::endl;
     }
     out.close();
 }

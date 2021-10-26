@@ -13,8 +13,8 @@ SingleJoinedList::SingleJoinedList(size_t multigrid_level) {
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
 #endif
-    m_index_list = new size_t[multigrid_level + 1];
-    std::fill(m_index_list, m_index_list + multigrid_level + 1, 0);
+    m_index_list = new size_t[multigrid_level + 2];
+    std::fill(m_index_list, m_index_list + multigrid_level + 2, 0);
 
     m_size_list = new size_t[multigrid_level + 1];
     std::fill(m_size_list, m_size_list + multigrid_level + 1, 0);
@@ -48,7 +48,7 @@ size_t SingleJoinedList::get_last_index(size_t level) const {
 
 void SingleJoinedList::add_data(size_t level, size_t size, const size_t *data) {
 #ifndef BENCHMARKING
-    m_logger->debug("add data for level {} with size {}", level, size);
+    m_logger->debug("SJL: add data for level {} with size {}", level, size);
 #endif
     size_t index = m_index_list[level];
     m_index_list[level + 1] = index + size;

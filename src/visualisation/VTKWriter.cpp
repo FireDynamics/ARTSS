@@ -59,16 +59,16 @@ void VTKWriter::write_numerical_debug(const FieldController &field_controller, c
 }
 
 void VTKWriter::write_numerical(const FieldController &field_controller, const std::string &filename) {
-    auto u = field_controller.get_field_u_data();
-    auto v = field_controller.get_field_v_data();
-    auto w = field_controller.get_field_w_data();
-    auto p = field_controller.get_field_p_data();
-    auto div = field_controller.get_field_rhs_data();
-    auto T = field_controller.get_field_T_data();
-    auto C = field_controller.get_field_concentration_data();
-    auto sight = field_controller.get_field_sight_data();
-    auto nu_t = field_controller.get_field_nu_t_data();
-    auto source_T = field_controller.get_field_source_T_data();
+    return_ptr u = field_controller.get_field_u_data();
+    return_ptr v = field_controller.get_field_v_data();
+    return_ptr w = field_controller.get_field_w_data();
+    return_ptr p = field_controller.get_field_p_data();
+    return_ptr div = field_controller.get_field_rhs_data();
+    return_ptr T = field_controller.get_field_T_data();
+    return_ptr C = field_controller.get_field_concentration_data();
+    return_ptr sight = field_controller.get_field_sight_data();
+    return_ptr nu_t = field_controller.get_field_nu_t_data();
+    return_ptr source_T = field_controller.get_field_source_T_data();
     VTKWriter::vtk_prepare_and_write((filename + ending).c_str(),
                                      u, v, w,
                                      p,

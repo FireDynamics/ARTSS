@@ -22,6 +22,7 @@ Multigrid::Multigrid(
         m_jl_domain_list(multigrid_levels),
         m_jl_domain_inner_list(multigrid_levels),
         m_jl_obstacle_list(multigrid_levels),
+        m_jl_surface_list(multigrid_levels),
         m_bdc_boundary(bdc_boundary),
         m_bdc_obstacle(bdc_obstacles) {
 #ifndef BENCHMARKING
@@ -178,6 +179,7 @@ void Multigrid::control() {
             sum_surfaces->add_value(patch, m_jl_surface_list_patch_divided[patch]->get_slice_size(level));
         }
         domain->control(m_jl_obstacle_list.get_slice_size(level), *sum_surfaces);
+        delete sum_surfaces;
     }
     {
         size_t bsize_inner = 0;
@@ -331,6 +333,10 @@ void Multigrid::create_multigrid_obstacle_lists() {
 
     m_jl_obstacle_list.set_size(sum_obstacle_cells);
     for (size_t level = 0; level < m_multigrid_levels; level++) {
+#ifndef BENCHMARKING
+        m_logger->debug("add obstacle data to SJL {} {}", level,
+                        obstacle_cells[level]);
+#endif
         m_jl_obstacle_list.add_data(level, obstacle_cells[level], tmp_store_obstacle[level]);
     }
 
@@ -344,6 +350,7 @@ void Multigrid::create_multigrid_surface_lists() {
 #ifndef BENCHMARKING
     m_logger->debug("create_multigrid_surface_list");
 #endif
+    size_t sum_surface_cells = 0;
     auto sum_surface_patch_divided = new PatchObject();  // total sum of surfaces for allocation m_jl_surface_list_patch_divided
     {  // count surface cells level 0
         size_t level = 0;
@@ -351,13 +358,15 @@ void Multigrid::create_multigrid_surface_lists() {
             Patch patch = m_MG_surface_object_list[level][id]->get_patch();
             sum_surface_patch_divided->add_value(patch, m_MG_surface_object_list[level][id]->get_size_surface_list());
         }
+        sum_surface_cells = sum_surface_patch_divided->get_sum();
     }
 
     // create surfaces for each multigrid level
     for (size_t level = 1; level < m_multigrid_levels + 1; level++) {
-        surface_dominant_restriction(level, sum_surface_patch_divided);
+        sum_surface_cells += surface_dominant_restriction(level, sum_surface_patch_divided);
     }
 
+    m_jl_surface_list.set_size(sum_surface_cells);
     for (size_t patch = 0; patch < number_of_patches; patch++) {
         m_jl_surface_list_patch_divided[patch]->set_size((*sum_surface_patch_divided)[patch]);
     }
@@ -365,12 +374,22 @@ void Multigrid::create_multigrid_surface_lists() {
         for (size_t id = 0; id < m_number_of_surface_objects; level++) {
             Patch patch = m_MG_surface_object_list[level][id]->get_patch();
             m_MG_surface_object_list[level][id]->set_id(id);
+#ifndef BENCHMARKING
+            m_logger->debug("add surface data to SJL {} {} {}", level,
+                            m_MG_surface_object_list[level][id]->get_size_surface_list());
+#endif
+            m_jl_surface_list.add_data(level,
+                                       m_MG_surface_object_list[level][id]->get_size_surface_list(),
+                                       m_MG_surface_object_list[level][id]->get_surface_list());
             m_jl_surface_list_patch_divided[patch]->add_data(
                     level, id,
                     m_MG_surface_object_list[level][id]->get_size_surface_list(),
                     m_MG_surface_object_list[level][id]->get_surface_list());
         }
     }
+#ifndef BENCHMARKING
+    m_logger->debug("surface sums: {}|{}", sum_surface_cells, sum_surface_patch_divided->get_sum());
+#endif
     delete sum_surface_patch_divided;
 }
 
@@ -384,26 +403,31 @@ void Multigrid::create_multigrid_domain_lists() {
 
     // create domain for each multigrid level
     for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        auto slice_surface_list = new size_t*[m_multigrid_levels];
+        auto slice_surface_list = new size_t*[number_of_patches];
         auto size_surface_list = new PatchObject();
-        if (m_number_of_surface_objects > 0) {
-            for (size_t patch = 0; patch < number_of_patches; patch++) {
-                slice_surface_list[patch] = m_jl_surface_list_patch_divided[patch]->get_slice(level);
-                size_surface_list->add_value(patch, m_jl_surface_list_patch_divided[patch]->get_slice_size(level));
-            }
+        for (size_t patch = 0; patch < number_of_patches; patch++) {
+            slice_surface_list[patch] = m_jl_surface_list_patch_divided[patch]->get_slice(level);
+            size_surface_list->add_value(patch, m_jl_surface_list_patch_divided[patch]->get_slice_size(level));
         }
-        auto domain = new Domain(m_jl_obstacle_list.get_slice(level),
+        size_t *slice_obstacle_list = m_jl_obstacle_list.get_slice(level);
+        auto domain = new Domain(slice_obstacle_list,
                                  m_jl_obstacle_list.get_slice_size(level),
                                  slice_surface_list,
                                  *size_surface_list,
                                  level);
+        // save domain object
         m_MG_domain_object_list[level] = domain;
         // count domain cells
         sum_domain_inner_cells += m_MG_domain_object_list[level]->get_size_inner_list();
         sum_domain_cells += m_MG_domain_object_list[level]->get_size_domain_list();
         PatchObject &domain_boundary_size = m_MG_domain_object_list[level]->get_size_boundary_list();
         *sum_domain_boundary += domain_boundary_size;
-        // save domain object
+        for (size_t patch = 0; patch < number_of_patches; patch++) {
+            delete[] slice_surface_list[patch];
+        }
+        delete[] slice_surface_list;
+        delete[] slice_obstacle_list;
+        delete size_surface_list;
     }
 
     m_jl_domain_inner_list.set_size(sum_domain_inner_cells);
@@ -422,9 +446,14 @@ void Multigrid::create_multigrid_domain_lists() {
         size_t **all_boundaries = domain->get_boundary_list();
         PatchObject &all_boundary_sizes = domain->get_size_boundary_list();
         for (size_t patch = 0; patch < number_of_patches; patch++) {
+#ifndef BENCHMARKING
+            m_logger->debug("add domain boundary data to SJL {} {}", level,
+                            all_boundary_sizes[level]);
+#endif
             m_jl_domain_boundary_list_patch_divided[patch]->add_data(level, all_boundary_sizes[patch], all_boundaries[patch]);
         }
     }
+    delete sum_domain_boundary;
 }
 
 // ================================= Surface dominant restriction ==================================

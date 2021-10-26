@@ -15,8 +15,8 @@ MultipleJoinedList::MultipleJoinedList(size_t multigrid_level, size_t number_of_
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
 #endif
-    m_index_list = new size_t[(multigrid_level + 1) * number_of_obstacles];
-    std::fill(m_index_list, m_index_list + (multigrid_level + 1) * number_of_obstacles, 0);
+    m_index_list = new size_t[(multigrid_level + 1) * number_of_obstacles + 1];
+    std::fill(m_index_list, m_index_list + (multigrid_level + 1) * number_of_obstacles + 1, 0);
 
     m_size_list = new size_t[(multigrid_level + 1) * number_of_obstacles];
     std::fill(m_size_list, m_size_list + (multigrid_level + 1) * number_of_obstacles, 0);
@@ -28,7 +28,10 @@ void MultipleJoinedList::set_size(const size_t size) {
 }
 
 size_t MultipleJoinedList::get_slice_size(size_t level) const {
-    return get_last_index(level, m_number_of_obstacles - 1) - get_first_index(level, 0) + 1;
+    if (m_number_of_obstacles > 0) {
+        return get_last_index(level, m_number_of_obstacles - 1) - get_first_index(level, 0) + 1;
+    }
+    return 0;
 }
 
 size_t MultipleJoinedList::get_slice_size(size_t level, size_t obstacle_id) const {
@@ -74,6 +77,6 @@ MultipleJoinedList::~MultipleJoinedList() {
 size_t *MultipleJoinedList::get_slice(size_t level) {
     size_t *slice = new size_t[get_slice_size(level)];
     //TODO(cvm) legit? want to return a copy of a part of 'data'
-    std::copy(m_data + get_first_index(level, 0), m_data + get_last_index(level, m_number_of_obstacles - 1), slice);
+    std::copy(m_data + get_first_index(level, 0), m_data + get_slice_size(level), slice);
     return slice;
 }
