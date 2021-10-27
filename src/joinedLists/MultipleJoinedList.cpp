@@ -75,8 +75,12 @@ MultipleJoinedList::~MultipleJoinedList() {
 }
 
 size_t *MultipleJoinedList::get_slice(size_t level) {
-    size_t *slice = new size_t[get_slice_size(level)];
-    //TODO(cvm) legit? want to return a copy of a part of 'data'
-    std::copy(m_data + get_first_index(level, 0), m_data + get_slice_size(level), slice);
+    size_t slice_size = get_slice_size(level);
+    size_t *slice = new size_t[slice_size];
+    if (slice_size > 0) {
+        size_t first_index = get_first_index(level, 0);
+        //TODO(cvm) legit? want to return a copy of a part of 'data'
+        std::copy(m_data + first_index, m_data + first_index + slice_size, slice);
+    }
     return slice;
 }
