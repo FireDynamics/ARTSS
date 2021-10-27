@@ -106,6 +106,7 @@ namespace Algorithm {
                 result.push_back(list2[c]);
             }
         }
+        result.shrink_to_fit();
         return result;
     }
 }

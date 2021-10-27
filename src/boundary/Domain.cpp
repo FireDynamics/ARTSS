@@ -355,7 +355,6 @@ void Domain::boundary_cells(size_t **surface_list, PatchObject &size_surface_lis
             }
         }
     }
-
     // create boundary list via merging the six boundary patches
     std::vector<size_t> boundary_cells;
     boundary_cells.assign(m_boundary_patch_divided[0], m_boundary_patch_divided[0] + m_size_boundary[0]);
@@ -363,7 +362,7 @@ void Domain::boundary_cells(size_t **surface_list, PatchObject &size_surface_lis
         //TODO(cvm): is that even legal?
         boundary_cells = Algorithm::merge_sort_with_duplicates(boundary_cells.data(), boundary_cells.size(), m_boundary_patch_divided[patch], m_size_boundary[patch]);
     }
-    std::copy(std::begin(boundary_cells), std::end(boundary_cells), m_boundary_list);
+    std::copy(boundary_cells.begin(), boundary_cells.end(), m_boundary_list);
 }
 
 //======================================== Inner cells =============================================
