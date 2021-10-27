@@ -333,7 +333,7 @@ bool Analysis::check_time_step_VN(const real dt) {
 /// \param  dt      time step size
 // *****************************************************************************
 real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt) const {
-    real cfl_max = 0;  // highest seen C. C is always positiv, so 0 is a lower bound
+    real cfl_max = 0;  // highest seen C. C is always positive, so 0 is a lower bound
     real cfl_local;    // C in the local cell
 
     auto boundary = BoundaryController::getInstance();

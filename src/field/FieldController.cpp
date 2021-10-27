@@ -12,9 +12,9 @@
 FieldController::FieldController():
         // Variables
         // Velocities
-        field_u(FieldType::U),
-        field_v(FieldType::V),
-        field_w(FieldType::W),
+        field_u(FieldType::U, 0),  // initialise with 0 in case they won't be used (e.g. pressure test) to prevent uninitialised warnings in valgrind
+        field_v(FieldType::V, 0),
+        field_w(FieldType::W, 0),
 
         field_u0(FieldType::U),
         field_v0(FieldType::V),
@@ -30,12 +30,12 @@ FieldController::FieldController():
         field_gamma_t(FieldType::RHO),
 
         // Pressure
-        field_p(FieldType::P),
+        field_p(FieldType::P, 0),
         field_p0(FieldType::P),
         field_rhs(FieldType::P),
 
         // Temperature
-        field_T(FieldType::T),
+        field_T(FieldType::T, 0),
         field_T0(FieldType::T),
         field_T_tmp(FieldType::T),
         field_T_ambient(FieldType::T),
