@@ -39,11 +39,11 @@ Domain::Domain(
 /// \param  size_obstacles Amount of obstacle cells
 // *************************************************************************************************
 void Domain::init(size_t size_obstacle_list, PatchObject &size_surface_list) {
-    auto domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 
-    const size_t Nx = domain->get_Nx(m_multigrid_level);
-    const size_t Ny = domain->get_Ny(m_multigrid_level);
-    const size_t Nz = domain->get_Nz(m_multigrid_level);
+    const size_t Nx = domain_data->get_Nx(m_multigrid_level);
+    const size_t Ny = domain_data->get_Ny(m_multigrid_level);
+    const size_t Nz = domain_data->get_Nz(m_multigrid_level);
 
     m_boundary_patch_divided = new size_t *[number_of_patches];
     m_size_boundary[FRONT] = Ny * Nx - size_surface_list[FRONT];
@@ -57,7 +57,7 @@ void Domain::init(size_t size_obstacle_list, PatchObject &size_surface_list) {
         m_boundary_patch_divided[patch] = new size_t[m_size_boundary[patch]];
     }
 
-    m_size_inner_list = domain->get_nx(m_multigrid_level) * domain->get_ny(m_multigrid_level) * domain->get_nz(m_multigrid_level) - size_obstacle_list;
+    m_size_inner_list = domain_data->get_nx(m_multigrid_level) * domain_data->get_ny(m_multigrid_level) * domain_data->get_nz(m_multigrid_level) - size_obstacle_list;
     m_inner_list = new size_t[m_size_inner_list];
 
     // surfaces cannot be at the edge/corner cells
