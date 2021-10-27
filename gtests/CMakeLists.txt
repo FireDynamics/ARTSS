@@ -1,5 +1,6 @@
 add_executable(artss_gtest ${ARTSS_SOURCE_FILES})
 
+add_subdirectory(boundary)
 add_subdirectory(field)
 add_subdirectory(randomField)
 
