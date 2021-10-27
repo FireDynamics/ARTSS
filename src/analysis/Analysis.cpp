@@ -125,23 +125,22 @@ bool Analysis::compare_solutions(read_ptr num, read_ptr ana, FieldType type, rea
 // ***************************************************************************************
 real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
     real sum = 0.;
-    real r;
 
     auto boundary = BoundaryController::getInstance();
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
     size_t size_inner_list = boundary->get_size_domain_inner_list();
 
-    // weighted 2-norm
+    //// weighted 2-norm
     // absolute error
     for (size_t i = 0; i < size_inner_list; i++) {
         size_t idx = inner_list[i];
-        r = fabs(num[idx] - ana[idx]);
+        real r = std::fabs(num[idx] - ana[idx]);
         sum += r * r;
     }
 
     // weight
     real nr = static_cast<real>(size_inner_list);
-    real eps = sqrt(1. / nr * sum);
+    real eps = std::sqrt(1. / nr * sum);
 
     // TODO(n16h7) add. output
 #ifndef BENCHMARKING

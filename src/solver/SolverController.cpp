@@ -292,6 +292,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
     } else if (string_init_usr_fct == FunctionNames::SinSinSin) {
         if (string_solver == SolverTypes::PressureSolver) {
             // Pressure test case
+            m_field_controller->get_field_p().set_value(0.);
             Functions::SinSinSin(m_field_controller->get_field_rhs());
         }
     } else if (string_init_usr_fct == FunctionNames::McDermott) {
