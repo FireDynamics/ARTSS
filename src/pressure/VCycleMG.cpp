@@ -258,6 +258,14 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         Field *field_error1_level_minus_1 = *(m_error1 + level - 1);
         Field *field_mg_temporal_solution_level_minus_1 = *(m_mg_temporal_solution + level - 1);
         Field *field_residuum1_level_minus_1 = *(m_residuum1 + level - 1);
+#ifndef BENCHMARKING
+        m_logger->debug("level: {}", level);
+        m_logger->debug("field_error0_level {}, size {}", static_cast<void *>(field_error0_level), field_error0_level->get_size());
+        m_logger->debug("field_error1_level {}, size {}", static_cast<void *>(field_error1_level), field_error1_level->get_size());
+        m_logger->debug("field_error1_level_minus_1 {}, size {}", static_cast<void *>(field_error1_level_minus_1), field_error1_level_minus_1->get_size());
+        m_logger->debug("field_residuum1_level_minus_1 {}, size {}", static_cast<void *>(field_residuum1_level_minus_1), field_residuum1_level_minus_1->get_size());
+        m_logger->debug("field_mg_temporal_level_minus_1 {}, size {}", static_cast<void *>(field_mg_temporal_solution_level_minus_1), field_mg_temporal_solution_level_minus_1->get_size());
+#endif
 
 #pragma acc data present(field_error0_level, \
                          field_error1_level, field_error1_level_minus_1, \
@@ -265,10 +273,17 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
                          field_residuum1_level_minus_1)
         {
             Prolongate(*field_error0_level, *field_error1_level, level, sync);
+#ifndef BENCHMARKING
+            m_logger->debug("field_error0_level {}", static_cast<void *>(field_error0_level));
+#endif
 #ifdef _OPENACC
             acc_present_dump();
 #endif
             boundary->apply_boundary(*field_error0_level, sync);
+
+#ifndef BENCHMARKING
+            m_logger->debug("field_error1_level_minus_1 {}", static_cast<void *>(field_error1_level_minus_1));
+#endif
 
             // correct
             *field_error1_level_minus_1 += *field_error0_level;
