@@ -104,7 +104,7 @@ void CSVWriter::csv_write(const std::string &filename, return_ptr *vars, int siz
     std::ofstream output_file(filename, std::ofstream::binary);
 
     // var_names as column titles
-    output_file << fmt::format("{}", fmt::join(coord_names, delimiter));
+    output_file << fmt::format("{},", fmt::join(coord_names, delimiter));
     output_file << fmt::format("{}\n", fmt::join(var_names, delimiter));
 
     // write variables to csv

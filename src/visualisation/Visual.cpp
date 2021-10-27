@@ -42,21 +42,22 @@ void Visual::visualise(const FieldController &field_controller, real t) {
     m_logger->info("Visualise ...");
 #endif
     int n = static_cast<int> (std::round(t / m_dt));
-    std::string filename = create_filename(m_filename, n, false);
+    std::string filename_numerical = create_filename(m_filename, n, false);
+    std::string filename_analytical = create_filename(m_filename, n, true);
     if (m_save_vtk) {
         if (fmod(n, m_vtk_plots) == 0 || t >= m_t_end) {
-            VTKWriter::write_numerical(field_controller, filename);
+            VTKWriter::write_numerical(field_controller, filename_numerical);
             if (m_has_analytical_solution) {
-                VTKWriter::write_analytical(m_solution, filename);
+                VTKWriter::write_analytical(m_solution, filename_analytical);
             }
         }
     }
 
     if (m_save_csv) {
         if (fmod(n, m_csv_plots) == 0 || t >= m_t_end) {
-            CSVWriter::write_numerical(field_controller, filename);
+            CSVWriter::write_numerical(field_controller, filename_numerical);
             if (m_has_analytical_solution) {
-                CSVWriter::write_analytical(m_solution, filename);
+                CSVWriter::write_analytical(m_solution, filename_analytical);
             }
         }
     }
