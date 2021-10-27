@@ -35,7 +35,7 @@ class MultipleJoinedList {
     void add_data(size_t level, size_t obstacle_id, size_t size, const size_t *data);
   private:
     size_t *m_data;
-    size_t m_size;
+    size_t m_size = 0;
     size_t *m_size_list;  // size of each level
     size_t *m_index_list;  // starting index of each level
     size_t m_number_of_obstacles;

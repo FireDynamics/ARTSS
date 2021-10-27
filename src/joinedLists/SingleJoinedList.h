@@ -34,7 +34,7 @@ class SingleJoinedList {
     void add_data(size_t level, size_t size, const size_t *data);
   private:
     size_t *m_data;  // array for GPU
-    size_t m_size;
+    size_t m_size = 0;
     size_t *m_size_list;  // size of each level
     size_t *m_index_list;  // starting index of each level
 #ifndef BENCHMARKING
