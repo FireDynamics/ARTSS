@@ -344,6 +344,9 @@ void Multigrid::create_multigrid_obstacle_lists() {
 
     delete sum_obstacle_boundary;
     delete[] obstacle_cells;
+    for (size_t level = 1; level < m_multigrid_levels + 1; level++) {
+        delete[] tmp_store_obstacle[level];
+    }
     delete[] tmp_store_obstacle;
 }
 

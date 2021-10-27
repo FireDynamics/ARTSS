@@ -49,7 +49,7 @@ size_t MultipleJoinedList::get_first_index(size_t level, size_t obstacle_id) con
  */
 size_t MultipleJoinedList::get_last_index(size_t level, size_t obstacle_id) const {
     size_t size = get_slice_size(level, obstacle_id);
-    if (size == 0) {
+    if (size == 0 || obstacle_id > m_number_of_obstacles) {
         return get_first_index(level, obstacle_id);
     }
     return get_first_index(level, obstacle_id) + size - 1;

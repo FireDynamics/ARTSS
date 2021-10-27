@@ -108,6 +108,11 @@ VCycleMG::~VCycleMG() {
         delete m_error1[i];
         delete m_mg_temporal_solution[i];
     }
+    delete[] m_residuum1;
+    delete[] m_residuum0;
+    delete[] m_error1;
+    delete[] m_error0;
+    delete[] m_mg_temporal_solution;
 }
 
 // =============================== Update ===============================
