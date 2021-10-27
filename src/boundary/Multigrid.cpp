@@ -250,36 +250,40 @@ void Multigrid::print() {
                         m_jl_domain_boundary_list_patch_divided[patch]->get_size());
     }
 
-    for (size_t level = 0; level < m_multigrid_levels; level++) {
-        m_logger->debug("For Level {} obstacle_list has {} elements",
-                        level, m_jl_obstacle_list.get_slice_size(level));
-    }
-
-    for (size_t patch = 0; patch < number_of_patches; patch++) {
+    if (m_number_of_obstacle_objects > 0) {
         for (size_t level = 0; level < m_multigrid_levels; level++) {
-            m_logger->debug("For Level {} obstacle '{}' starts at index {} and ends with index {} with length {}",
-                            level,
+            m_logger->debug("For Level {} obstacle_list has {} elements",
+                            level, m_jl_obstacle_list.get_slice_size(level));
+        }
+
+        for (size_t patch = 0; patch < number_of_patches; patch++) {
+            for (size_t level = 0; level < m_multigrid_levels; level++) {
+                m_logger->debug("For Level {} obstacle '{}' starts at index {} and ends with index {} with length {}",
+                                level,
+                                PatchObject::get_patch_name(patch),
+                                m_jl_obstacle_boundary_list_patch_divided[patch]->get_first_index(level, 0),
+                                m_jl_obstacle_boundary_list_patch_divided[patch]->get_last_index(level, m_number_of_obstacle_objects - 1),
+                                m_jl_obstacle_boundary_list_patch_divided[patch]->get_slice_size(level));
+            }
+            m_logger->debug("Total number of '{}' obstacle cells: {}",
                             PatchObject::get_patch_name(patch),
-                            m_jl_obstacle_boundary_list_patch_divided[patch]->get_first_index(level, 0),
-                            m_jl_obstacle_boundary_list_patch_divided[patch]->get_last_index(level, m_number_of_obstacle_objects - 1),
-                            m_jl_obstacle_boundary_list_patch_divided[patch]->get_slice_size(level));
+                            m_jl_obstacle_boundary_list_patch_divided[patch]->get_size());
         }
-        m_logger->debug("Total number of '{}' obstacle cells: {}",
-                        PatchObject::get_patch_name(patch),
-                        m_jl_obstacle_boundary_list_patch_divided[patch]->get_size());
     }
 
-    size_t sum_surface_cells = 0;
-    for (size_t patch = 0; patch < number_of_patches; patch++) {
-        for (size_t level = 0; level < m_multigrid_levels; level++) {
-            m_logger->debug("For Level {} surface_list starts at index {} and ends with index {}",
-                            level,
-                            m_jl_surface_list_patch_divided[patch]->get_first_index(level, 0),
-                            m_jl_surface_list_patch_divided[patch]->get_last_index(level, m_number_of_surface_objects - 1));
+    if (m_number_of_surface_objects > 0) {
+        size_t sum_surface_cells = 0;
+        for (size_t patch = 0; patch < number_of_patches; patch++) {
+            for (size_t level = 0; level < m_multigrid_levels; level++) {
+                m_logger->debug("For Level {} surface_list starts at index {} and ends with index {}",
+                                level,
+                                m_jl_surface_list_patch_divided[patch]->get_first_index(level, 0),
+                                m_jl_surface_list_patch_divided[patch]->get_last_index(level, m_number_of_surface_objects - 1));
+            }
+            sum_surface_cells += m_jl_surface_list_patch_divided[patch]->get_size();
         }
-        sum_surface_cells += m_jl_surface_list_patch_divided[patch]->get_size();
+        m_logger->debug("Total length of surface_list: {}", sum_surface_cells);
     }
-    m_logger->debug("Total length of surface_list: {}", sum_surface_cells);
     m_logger->debug("---------------- MULTIGRID END ----------------");
 #endif
 }
