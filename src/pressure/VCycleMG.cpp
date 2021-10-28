@@ -5,9 +5,6 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <cmath>
-#ifdef _OPENACC
-#include "accel.h"
-#endif
 
 #include "VCycleMG.h"
 #include "../DomainData.h"
@@ -258,14 +255,6 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         Field *field_error1_level_minus_1 = *(m_error1 + level - 1);
         Field *field_mg_temporal_solution_level_minus_1 = *(m_mg_temporal_solution + level - 1);
         Field *field_residuum1_level_minus_1 = *(m_residuum1 + level - 1);
-#ifndef BENCHMARKING
-        m_logger->debug("level: {}", level);
-        m_logger->debug("field_error0_level {}, size {}", static_cast<void *>(field_error0_level), field_error0_level->get_size());
-        m_logger->debug("field_error1_level {}, size {}", static_cast<void *>(field_error1_level), field_error1_level->get_size());
-        m_logger->debug("field_error1_level_minus_1 {}, size {}", static_cast<void *>(field_error1_level_minus_1), field_error1_level_minus_1->get_size());
-        m_logger->debug("field_residuum1_level_minus_1 {}, size {}", static_cast<void *>(field_residuum1_level_minus_1), field_residuum1_level_minus_1->get_size());
-        m_logger->debug("field_mg_temporal_level_minus_1 {}, size {}", static_cast<void *>(field_mg_temporal_solution_level_minus_1), field_mg_temporal_solution_level_minus_1->get_size());
-#endif
 
 #pragma acc data present(field_error0_level, \
                          field_error1_level, field_error1_level_minus_1, \
@@ -273,17 +262,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
                          field_residuum1_level_minus_1)
         {
             Prolongate(*field_error0_level, *field_error1_level, level, sync);
-#ifndef BENCHMARKING
-            m_logger->debug("field_error0_level {}", static_cast<void *>(field_error0_level));
-#endif
-#ifdef _OPENACC
-            acc_present_dump();
-#endif
             boundary->apply_boundary(*field_error0_level, sync);
-
-#ifndef BENCHMARKING
-            m_logger->debug("field_error1_level_minus_1 {}", static_cast<void *>(field_error1_level_minus_1));
-#endif
 
             // correct
             *field_error1_level_minus_1 += *field_error0_level;
@@ -477,6 +456,7 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
     const size_t neighbour_cell_i = 1;
     const size_t neighbour_cell_j = Nx_coarse;
     const size_t neighbour_cell_k = Nx_coarse * Ny_coarse;
+
     // prolongate
 #pragma acc data present(in, out, data_inner_list[start_i:(end_i-start_i)])
     {
@@ -739,12 +719,16 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
         }
 
         if (it % 2 != 0) {  // get data from tmp field when number of iterations is odd
-            out.copy_data(tmp);
+            Field::swap(tmp, out);
+            //out.copy_data(tmp);
         }
     }
 }
 
 void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
+#ifndef BENCHMARKING
+    m_logger->debug("solve_jacobi ! start");
+#endif
     auto domain = DomainData::getInstance();
 
     // local variables and parameters for GPU
@@ -811,7 +795,7 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
         }
 
         if (it % 2 != 0) {  // get data from tmp field when number of iterations is odd
-            out.copy_data(tmp);
+            Field::swap(tmp, out);
         }
     }
 }
