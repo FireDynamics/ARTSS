@@ -249,8 +249,10 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         }
     }
 
-    for (size_t level = m_levels; level > 0; --level) {
-        Field *field_error0_level = *(m_error0 + level - 1);
+    out.update_dev();
+    out.copy_data(*m_error0[0]);
+    for (size_t level = m_levels; level > 1; --level) {
+        Field *field_error0_level_minus_1 = *(m_error0 + level - 1);
         Field *field_error1_level = *(m_error1 + level);
         Field *field_error1_level_minus_1 = *(m_error1 + level - 1);
         Field *field_mg_temporal_solution_level_minus_1 = *(m_mg_temporal_solution + level - 1);
@@ -261,11 +263,11 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
                          field_mg_temporal_solution_level_minus_1, \
                          field_residuum1_level_minus_1)
         {
-            Prolongate(*field_error0_level, *field_error1_level, level, sync);
-            boundary->apply_boundary(*field_error0_level, sync);
+            Prolongate(*field_error0_level_minus_1, *field_error1_level, level, sync);
+            boundary->apply_boundary(*field_error0_level_minus_1, sync);
 
             // correct
-            *field_error1_level_minus_1 += *field_error0_level;
+            *field_error1_level_minus_1 += *field_error0_level_minus_1;
 
             if (level == m_levels) {
                 Solve(*field_error1_level_minus_1, *field_mg_temporal_solution_level_minus_1,
@@ -276,7 +278,10 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
             }
         }
     }
-    out.copy_data(*m_error0[0]);
+    size_t level = 1;
+    Prolongate(*m_error0[level - 1], *m_error1[level], level, sync);
+    boundary->apply_boundary(*m_error0[level - 1], sync);
+    out += *m_error0[level - 1];
     boundary->apply_boundary(out, sync);
 
     if (sync) {
@@ -558,15 +563,6 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
 // *****************************************************************************
 void VCycleMG::Solve(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
     auto domain = DomainData::getInstance();
-
-#ifndef BENCHMARKING
-    if (level < m_levels - 1) {
-        m_logger->warn("Trying to solve on level {}, but should be {}", level, m_levels - 1);
-        return;
-        // TODO(issue 6) Error handling
-    }
-#endif
-
     const size_t Nx = domain->get_Nx(out.get_level());
     const size_t Ny = domain->get_Ny(out.get_level());
 

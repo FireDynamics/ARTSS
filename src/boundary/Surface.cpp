@@ -10,6 +10,9 @@
 //  - create file description
 //  - remove surface cells from domain domain boundary cells
 //  - develop a concept for boundary conditions
+//  - make sure that surfaces does not extend to corner or edge cells
+//  - consider moving parsing to BoundaryController.cpp same as for obstacles,
+//    may be not possible/practical depending on the concept for BC
 Surface::Surface(tinyxml2::XMLElement *element) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());

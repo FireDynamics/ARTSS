@@ -11,7 +11,7 @@
 
 class MultipleJoinedList {
   public:
-    MultipleJoinedList(size_t multigrid_level, size_t m_number_of_obstacles);
+    MultipleJoinedList(size_t multigrid_level, size_t number_of_objects);
     ~MultipleJoinedList();
 
     void copyin() {
@@ -38,7 +38,7 @@ class MultipleJoinedList {
     size_t m_size = 0;
     size_t *m_size_list;  // size of each level
     size_t *m_index_list;  // starting index of each level
-    size_t m_number_of_obstacles;
+    size_t m_number_of_objects;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

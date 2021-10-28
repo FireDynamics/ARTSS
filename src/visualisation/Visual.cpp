@@ -64,7 +64,7 @@ void Visual::visualise(const FieldController &field_controller, real t) {
 }
 
 void Visual::write_csv(FieldController &field_controller, const std::string &filename){
-    //TODO method update host/device whatever
+    //TODO method update host can be called here?
     field_controller.get_field_u().update_host();
     field_controller.get_field_v().update_host();
     field_controller.get_field_w().update_host();
@@ -79,7 +79,7 @@ void Visual::write_csv(FieldController &field_controller, const std::string &fil
 }
 
 void Visual::write_vtk(FieldController &field_controller, const std::string &filename){
-    //TODO method update host/device whatever
+    //TODO method update host can be called here?
     field_controller.get_field_u().update_host();
     field_controller.get_field_v().update_host();
     field_controller.get_field_w().update_host();
@@ -94,7 +94,7 @@ void Visual::write_vtk(FieldController &field_controller, const std::string &fil
 }
 
 void Visual::write_vtk_debug(FieldController &field_controller, const std::string &filename){
-    //TODO method update host/device whatever
+    //TODO method update host can be called here?
     field_controller.get_field_u().update_host();
     field_controller.get_field_v().update_host();
     field_controller.get_field_w().update_host();

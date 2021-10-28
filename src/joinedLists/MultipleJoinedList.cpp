@@ -6,20 +6,18 @@
 //
 #include "MultipleJoinedList.h"
 
-size_t *get_slice(size_t level);
-
-MultipleJoinedList::MultipleJoinedList(size_t multigrid_level, size_t number_of_obstacles) : m_number_of_obstacles(number_of_obstacles) {
+MultipleJoinedList::MultipleJoinedList(size_t multigrid_level, size_t number_of_objects) : m_number_of_objects(number_of_objects) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
 #endif
-    m_index_list = new size_t[(multigrid_level + 1) * number_of_obstacles + 1];
-    std::fill(m_index_list, m_index_list + (multigrid_level + 1) * number_of_obstacles + 1, 0);
+    m_index_list = new size_t[(multigrid_level + 1) * number_of_objects + 1];
+    std::fill(m_index_list, m_index_list + (multigrid_level + 1) * number_of_objects + 1, 0);
 
-    m_size_list = new size_t[(multigrid_level + 1) * number_of_obstacles];
-    std::fill(m_size_list, m_size_list + (multigrid_level + 1) * number_of_obstacles, 0);
+    m_size_list = new size_t[(multigrid_level + 1) * number_of_objects];
+    std::fill(m_size_list, m_size_list + (multigrid_level + 1) * number_of_objects, 0);
 }
 
 void MultipleJoinedList::set_size(const size_t size) {
@@ -28,18 +26,18 @@ void MultipleJoinedList::set_size(const size_t size) {
 }
 
 size_t MultipleJoinedList::get_slice_size(size_t level) const {
-    if (m_number_of_obstacles > 0) {
-        return get_last_index(level, m_number_of_obstacles - 1) - get_first_index(level, 0) + 1;
+    if (m_number_of_objects > 0) {
+        return get_last_index(level, m_number_of_objects - 1) - get_first_index(level, 0) + 1;
     }
     return 0;
 }
 
 size_t MultipleJoinedList::get_slice_size(size_t level, size_t obstacle_id) const {
-    return m_size_list[level * m_number_of_obstacles + obstacle_id];
+    return m_size_list[level * m_number_of_objects + obstacle_id];
 }
 
 size_t MultipleJoinedList::get_first_index(size_t level, size_t obstacle_id) const {
-    return m_index_list[level * m_number_of_obstacles + obstacle_id];
+    return m_index_list[level * m_number_of_objects + obstacle_id];
 }
 
 /**
@@ -57,11 +55,11 @@ size_t MultipleJoinedList::get_last_index(size_t level, size_t obstacle_id) cons
 
 void MultipleJoinedList::add_data(size_t level, size_t obstacle_id, size_t size, const size_t *data) {
 #ifndef BENCHMARKING
-    m_logger->debug("add data for obstacle '{}' with level {} with size {}", obstacle_id, level, size);
+    m_logger->debug("MJL: add data for obstacle id={} with level {} and size {}", obstacle_id, level, size);
 #endif
-    size_t index = m_index_list[level * m_number_of_obstacles];
-    m_index_list[level * m_number_of_obstacles + 1] = index + size;
-    m_size_list[level * m_number_of_obstacles + obstacle_id] = size;
+    size_t index = m_index_list[level * m_number_of_objects];
+    m_index_list[level * m_number_of_objects + 1] = index + size;
+    m_size_list[level * m_number_of_objects + obstacle_id] = size;
     for (size_t i = 0; i < size; i++) {
         m_data[index + i] = data[i];
     }
