@@ -41,12 +41,17 @@ class Field {
     inline real &operator[](size_t i) const { return data[i]; }
 
     // acc functions
+    /// \brief update data array on CPU
     void update_host() {
 #pragma acc update host(data[:m_size])
     }
+
+    /// \brief update data array on GPU
     void update_dev() {
 #pragma acc update device(data[:m_size])
     }
+
+    /// \brief copy data array to GPU
     void copyin() {
 #pragma acc enter data copyin(data[:m_size])
 #ifdef GPU_DEBUG
@@ -54,8 +59,12 @@ class Field {
 #endif
     }
 
+    /// \brief fill data array with the specified number
+    /// \param val value to be set
     void set_value(real val) const { std::fill(data, data + m_size, val); }
 
+    /// \brief copy data of Field other. No changes in data pointer
+    /// \param Field &other
     void copy_data(const Field &other) const {
         auto other_data = other.data;
 #pragma acc parallel loop independent present(this->data[:m_size], other_data[:m_size]) async
@@ -65,6 +74,11 @@ class Field {
 #pragma acc wait
     }
 
+    /// \brief swap pointer of data array of a and b
+    /// \warning Use with care! data pointer have to be swapped back in the same
+    /// data region otherwise it leads to a `cuCtxSynchronize returned error 700`
+    /// \param Field a
+    /// \param Field b
     static void swap(Field &a, Field &b) { std::swap(a.data, b.data); }
 
     Field &operator+=(const real x) {
