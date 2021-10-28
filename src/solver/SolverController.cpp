@@ -518,7 +518,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
     size_t size_inner_list = boundary->get_size_domain_inner_list();
 
-    Field sight = m_field_controller->get_field_sight();
+    Field &sight = m_field_controller->get_field_sight();
     for (size_t i = 0; i < size_inner_list; i++) {
         size_t idx = inner_list[i];
         sight[idx] = 0.;

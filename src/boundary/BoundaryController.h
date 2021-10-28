@@ -27,7 +27,9 @@ class BoundaryController {
     void print_boundaries();
     void update_lists();
 
+    /// \brief get array of joined domain inner list
     size_t* get_domain_inner_list_level_joined() const { return m_multigrid->get_domain_inner_cells_level_joined(); }
+    /// \brief get size of domain inner list for level 0
     size_t get_size_domain_inner_list() const { return get_slice_size_domain_inner_list_level_joined(0); }
     //size_t get_size_domain_inner_list_level_joined() const { return m_multigrid->get_size_domain_inner_cells_level_joined(); }  // get size of joined domain inner list
     size_t get_domain_inner_list_level_joined_start(size_t level) const { return m_multigrid->get_start_index_domain_inner_cells_level_joined(level); }
