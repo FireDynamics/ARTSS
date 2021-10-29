@@ -229,6 +229,9 @@ void BoundaryController::detect_neighbouring_obstacles() {
         Obstacle *obstacle1 = m_obstacle_list[o1];
         for (size_t o2 = o1 + 1; o2 < m_number_of_obstacles; o2++) {
             Obstacle *obstacle2 = m_obstacle_list[o2];
+#ifndef BENCHMARKING
+            m_logger->debug("scan for neighbouring cells for '{}' and '{}'", obstacle1->get_name(), obstacle2->get_name());
+#endif
             Obstacle::remove_circular_constraints(obstacle1, obstacle2);
         }
     }

@@ -52,9 +52,7 @@ class Multigrid {
 
     void apply_boundary_condition(Field &field, bool sync = false);
 
-    bool is_obstacle_cell(size_t level, size_t index);
-    bool is_obstacle_cell(size_t level, size_t i, size_t j, size_t k);
-
+    bool is_obstacle_cell(size_t level, const Coordinate &coords);
 
 private:
 #ifndef BENCHMARKING

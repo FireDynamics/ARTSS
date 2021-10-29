@@ -324,12 +324,15 @@ void Multigrid::create_multigrid_obstacle_lists() {
             size_t *list = m_MG_obstacle_object_list[level][0]->get_obstacle_list();
             size_t size = m_MG_obstacle_object_list[level][0]->get_size_obstacle_list();
             for (size_t o = 1; o < m_number_of_obstacle_objects; o++) {
+                //TODO (cvm) better idea for merging all obstacles ?
                 Obstacle *obstacle = m_MG_obstacle_object_list[level][o];
                 size_t new_size = size + obstacle->get_size_obstacle_list();
                 auto obstacle_list_tmp = new size_t[new_size];
                 Algorithm::merge_sort(list, obstacle->get_obstacle_list(),
                                       size, obstacle->get_size_obstacle_list(),
                                       obstacle_list_tmp);
+                delete[] list;
+                list = new size_t[new_size];
                 std::copy(obstacle_list_tmp, obstacle_list_tmp + new_size, list);
                 size = new_size;
                 delete[] obstacle_list_tmp;
@@ -519,12 +522,12 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
         Coordinate &start_fine = surface_fine->get_start_coordinates();
         Coordinate &end_fine = surface_fine->get_end_coordinates();
 
-        auto *start_coarse = new Coordinate(start_fine);
-        (*start_coarse) += 1;
-        (*start_coarse) *= 0.5;
+        auto start_coarse = new Coordinate();
         auto *end_coarse = new Coordinate(end_fine);
-        (*end_coarse) += 1;
-        (*end_coarse) *= 0.5;
+        for (size_t axis = 0; axis < number_of_axis; axis++) {
+            (*start_coarse)[axis] = static_cast<size_t>((start_fine[axis] + 1) / 2);
+            (*end_coarse)[axis] = static_cast<size_t>((end_fine[axis] + 1) / 2);
+        }
 
 #ifndef BENCHMARKING
         if (end_fine[X] - start_fine[X] + 1 < domain_data->get_nx(level - 1)
@@ -577,59 +580,56 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
     m_MG_obstacle_object_list[level] = obstacle_list_coarse;
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
         Obstacle *obstacle_fine = obstacle_list_fine[id];
-        size_t i1_fine = obstacle_fine->get_coordinates_i1();
-        size_t j1_fine = obstacle_fine->get_coordinates_j1();
-        size_t k1_fine = obstacle_fine->get_coordinates_k1();
-        size_t i2_fine = obstacle_fine->get_coordinates_i2();
-        size_t j2_fine = obstacle_fine->get_coordinates_j2();
-        size_t k2_fine = obstacle_fine->get_coordinates_k2();
 
-        size_t i1_coarse = (i1_fine + 1) / 2;
-        size_t j1_coarse = (j1_fine + 1) / 2;
-        size_t k1_coarse = (k1_fine + 1) / 2;
-        size_t i2_coarse = (i2_fine + 1) / 2;
-        size_t j2_coarse = (j2_fine + 1) / 2;
-        size_t k2_coarse = (k2_fine + 1) / 2;
+        Coordinate &start_fine = obstacle_fine->get_start_coordinates();
+        Coordinate &end_fine = obstacle_fine->get_end_coordinates();
+
+        auto start_coarse = new Coordinate();
+        auto end_coarse = new Coordinate();
+        for (size_t axis = 0; axis < number_of_axis; axis++) {
+            (*start_coarse)[axis] = static_cast<size_t>((start_fine[axis] + 1) / 2);
+            (*end_coarse)[axis] = static_cast<size_t>((end_fine[axis] + 1) / 2);
+        }
 
 #ifndef BENCHMARKING
-        if (i2_fine - i1_fine + 1 < domain_data->get_nx(level - 1)
-            && i2_coarse - i1_coarse + 1 >= domain_data->get_nx(level)) {
+        if (end_fine[CoordinateAxis::X] - start_fine[CoordinateAxis::X] + 1 < domain_data->get_nx(level - 1)
+            && (*end_coarse)[CoordinateAxis::X] - (*start_coarse)[CoordinateAxis::X] + 1 >= domain_data->get_nx(level)) {
             m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in x-direction at level {}", obstacle_fine->get_name(), level);
         }
-        if (j2_fine - j1_fine + 1 < domain_data->get_ny(level - 1)
-            && j2_coarse - j1_coarse + 1 >= domain_data->get_ny(level)) {
+        if (end_fine[CoordinateAxis::Y] - start_fine[CoordinateAxis::Y] + 1 < domain_data->get_ny(level - 1)
+            && (*end_coarse)[CoordinateAxis::Y] - (*start_coarse)[CoordinateAxis::Y] + 1 >= domain_data->get_ny(level)) {
             m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in y-direction at level {}", obstacle_fine->get_name(), level);
         }
-        if (k2_fine - k1_fine + 1 < domain_data->get_nz(level - 1)
-            && k2_coarse - k1_coarse + 1 >= domain_data->get_nz(level)) {
+        if (end_fine[CoordinateAxis::Z] - start_fine[CoordinateAxis::Z] + 1 < domain_data->get_nz(level - 1)
+            && (*end_coarse)[CoordinateAxis::Z] - (*start_coarse)[CoordinateAxis::Z] + 1 >= domain_data->get_nz(level)) {
             m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in z-direction at level {}", obstacle_fine->get_name(), level);
         }
 
         for (size_t c = 0; c < id; c++) {
-            if (obstacle_list_coarse[c]->has_overlap(i1_coarse, i2_coarse, j1_coarse, j2_coarse, k1_coarse, k2_coarse)) {
+            if (obstacle_list_coarse[c]->has_overlap((*start_coarse)[CoordinateAxis::X], (*end_coarse)[CoordinateAxis::X], (*start_coarse)[CoordinateAxis::Y], (*end_coarse)[CoordinateAxis::Y], (*start_coarse)[CoordinateAxis::Z], (*end_coarse)[CoordinateAxis::Z])) {
                 m_logger->debug("overlapping of obstacle {} with obstacle {} on level {}",
                                 obstacle_list_coarse[c]->get_name(), obstacle_fine->get_name(), level);
             }
         }
 #endif
 
-        auto obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse,
-                                            i2_coarse, j2_coarse, k2_coarse,
+        auto obstacle_coarse = new Obstacle((*start_coarse), (*end_coarse),
                                             level, obstacle_fine->get_name());
 #ifndef BENCHMARKING
-        if (obstacle_coarse->get_stride_x() <= 1) {
+        Coordinate &strides = obstacle_coarse->get_strides();
+        if (strides[CoordinateAxis::X] <= 1) {
             m_logger->warn("Obstacle '{}' is too small with size 1 in x-direction at level {}. "
                            "Consider less multigrid level, a higher resolution at the finest grid "
                            "or expanding the obstacle. Otherwise only the right boundary condition "
                            "will be applied.", obstacle_fine->get_name(), level);
         }
-        if (obstacle_coarse->get_stride_y() <= 1) {
+        if (strides[CoordinateAxis::Y] <= 1) {
             m_logger->warn("Obstacle '{}' is too small with size 1 in y-direction at level {}. "
                            "Consider less multigrid level, a higher resolution at the finest grid "
                            "or expanding the obstacle. Otherwise only the top boundary condition "
                            "will be applied.", obstacle_fine->get_name(), level);
         }
-        if (obstacle_coarse->get_stride_z() <= 1) {
+        if (strides[CoordinateAxis::Z] <= 1) {
             m_logger->warn("Obstacle '{}' is too small with size 1 in z-direction at level {}. "
                            "Consider less multigrid level, a higher resolution at the finest grid "
                            "or expanding the obstacle. Otherwise only the back boundary condition "
@@ -654,6 +654,7 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
         size = data.size();
     }
 
+    //TODO(cvm) copy command
     auto obstacle_list_tmp = new size_t[size];
     std::copy(&data[0], &data[size], obstacle_list_tmp);
     tmp_store_obstacle[level] = obstacle_list_tmp;
@@ -735,20 +736,14 @@ void Multigrid::remove_domain_lists_from_GPU() {
     // the joined lists
 }
 
-bool Multigrid::is_obstacle_cell(const size_t level, const size_t index) {
+bool Multigrid::is_obstacle_cell(const size_t level,
+                                 const Coordinate &coords) {
     Obstacle **obstacle_list = m_MG_obstacle_object_list[level];
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
         Obstacle *obstacle = obstacle_list[id];
-        if (obstacle->is_obstacle_cell(index)) {
+        if (obstacle->is_obstacle_cell(coords)) {
             return true;
         }
     }
     return false;
-}
-
-bool Multigrid::is_obstacle_cell(const size_t level,
-                                 const size_t i, const size_t j, const size_t k) {
-    const size_t Nx = DomainData::getInstance()->get_Nx(level);
-    const size_t Ny = DomainData::getInstance()->get_Ny(level);
-    return is_obstacle_cell(level, IX(i, j, k, Nx, Ny));
 }

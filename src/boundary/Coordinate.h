@@ -20,6 +20,12 @@ enum CoordinateAxis : int {
 
 class Coordinate {
   public:
+    Coordinate(size_t i, size_t j, size_t k) {
+        m_coordinates = new size_t[number_of_axis];
+        m_coordinates[CoordinateAxis::X] = i;
+        m_coordinates[CoordinateAxis::Y] = j;
+        m_coordinates[CoordinateAxis::Z] = k;
+    };
     Coordinate() {
         m_coordinates = new size_t[number_of_axis];
     };
@@ -47,12 +53,6 @@ class Coordinate {
         }
         return *this;
     }
-    Coordinate &operator*=(const real x) {
-        for (size_t i = 0; i < number_of_axis; ++i) {
-            this->m_coordinates[i] = static_cast<size_t>(x * this->m_coordinates[i]);
-        }
-        return *this;
-    }
     Coordinate &operator*=(const size_t x) {
         for (size_t i = 0; i < number_of_axis; ++i) {
             this->m_coordinates[i] *= x;
@@ -67,7 +67,6 @@ class Coordinate {
         }
     }
 
-    size_t *get_coordinates() { return m_coordinates; }
     void set_coordinate(size_t i, size_t j, size_t k) { m_coordinates[X] = i; m_coordinates[Y] = j, m_coordinates[Z] = k; }
     size_t get_index(size_t Nx, size_t Ny) { return IX(m_coordinates[X], m_coordinates[Y], m_coordinates[Z], Nx, Ny); }
   private:
