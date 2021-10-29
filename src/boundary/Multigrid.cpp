@@ -358,8 +358,8 @@ void Multigrid::create_multigrid_obstacle_lists() {
                 PatchObject &obstacle_size = obstacle->get_size_boundary_list();
                 for (size_t patch = 0; patch < number_of_patches; patch++) {
 #ifndef BENCHMARKING
-                    m_logger->debug("add obstacle boundary data to MJL, patch '{}' level={}, number of obstacle boundary cells={}",
-                                    PatchObject::get_patch_name(patch), level,
+                    m_logger->debug("add obstacle boundary data to MJL for obstacle '{}' patch '{}' level={}, number of obstacle boundary cells={}",
+                                    obstacle->get_name(), PatchObject::get_patch_name(patch), level,
                                     sum_obstacle_cells_level_divided[level]);
 #endif
                     m_jl_obstacle_boundary_list_patch_divided[patch]->add_data(level, id, obstacle_size[patch], obstacle_boundary_cells[patch]);
@@ -581,26 +581,26 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
         Obstacle *obstacle_fine = obstacle_list_fine[id];
 
-        Coordinate &start_fine = obstacle_fine->get_start_coordinates();
-        Coordinate &end_fine = obstacle_fine->get_end_coordinates();
+        Coordinate *start_fine = obstacle_fine->get_start_coordinates();
+        Coordinate *end_fine = obstacle_fine->get_end_coordinates();
 
         auto start_coarse = new Coordinate();
         auto end_coarse = new Coordinate();
         for (size_t axis = 0; axis < number_of_axis; axis++) {
-            (*start_coarse)[axis] = static_cast<size_t>((start_fine[axis] + 1) / 2);
-            (*end_coarse)[axis] = static_cast<size_t>((end_fine[axis] + 1) / 2);
+            (*start_coarse)[axis] = static_cast<size_t>(((*start_fine)[axis] + 1) / 2);
+            (*end_coarse)[axis] = static_cast<size_t>(((*end_fine)[axis] + 1) / 2);
         }
 
 #ifndef BENCHMARKING
-        if (end_fine[CoordinateAxis::X] - start_fine[CoordinateAxis::X] + 1 < domain_data->get_nx(level - 1)
+        if ((*end_fine)[CoordinateAxis::X] - (*start_fine)[CoordinateAxis::X] + 1 < domain_data->get_nx(level - 1)
             && (*end_coarse)[CoordinateAxis::X] - (*start_coarse)[CoordinateAxis::X] + 1 >= domain_data->get_nx(level)) {
             m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in x-direction at level {}", obstacle_fine->get_name(), level);
         }
-        if (end_fine[CoordinateAxis::Y] - start_fine[CoordinateAxis::Y] + 1 < domain_data->get_ny(level - 1)
+        if ((*end_fine)[CoordinateAxis::Y] - (*start_fine)[CoordinateAxis::Y] + 1 < domain_data->get_ny(level - 1)
             && (*end_coarse)[CoordinateAxis::Y] - (*start_coarse)[CoordinateAxis::Y] + 1 >= domain_data->get_ny(level)) {
             m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in y-direction at level {}", obstacle_fine->get_name(), level);
         }
-        if (end_fine[CoordinateAxis::Z] - start_fine[CoordinateAxis::Z] + 1 < domain_data->get_nz(level - 1)
+        if ((*end_fine)[CoordinateAxis::Z] - (*start_fine)[CoordinateAxis::Z] + 1 < domain_data->get_nz(level - 1)
             && (*end_coarse)[CoordinateAxis::Z] - (*start_coarse)[CoordinateAxis::Z] + 1 >= domain_data->get_nz(level)) {
             m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in z-direction at level {}", obstacle_fine->get_name(), level);
         }
@@ -616,20 +616,20 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
         auto obstacle_coarse = new Obstacle((*start_coarse), (*end_coarse),
                                             level, obstacle_fine->get_name());
 #ifndef BENCHMARKING
-        Coordinate &strides = obstacle_coarse->get_strides();
-        if (strides[CoordinateAxis::X] <= 1) {
+        Coordinate *strides = obstacle_coarse->get_strides();
+        if ((*strides)[CoordinateAxis::X] <= 1) {
             m_logger->warn("Obstacle '{}' is too small with size 1 in x-direction at level {}. "
                            "Consider less multigrid level, a higher resolution at the finest grid "
                            "or expanding the obstacle. Otherwise only the right boundary condition "
                            "will be applied.", obstacle_fine->get_name(), level);
         }
-        if (strides[CoordinateAxis::Y] <= 1) {
+        if ((*strides)[CoordinateAxis::Y] <= 1) {
             m_logger->warn("Obstacle '{}' is too small with size 1 in y-direction at level {}. "
                            "Consider less multigrid level, a higher resolution at the finest grid "
                            "or expanding the obstacle. Otherwise only the top boundary condition "
                            "will be applied.", obstacle_fine->get_name(), level);
         }
-        if (strides[CoordinateAxis::Z] <= 1) {
+        if ((*strides)[CoordinateAxis::Z] <= 1) {
             m_logger->warn("Obstacle '{}' is too small with size 1 in z-direction at level {}. "
                            "Consider less multigrid level, a higher resolution at the finest grid "
                            "or expanding the obstacle. Otherwise only the back boundary condition "
@@ -702,16 +702,15 @@ void Multigrid::send_obstacle_lists_to_GPU() {
 // *************************************************************************************************
 void Multigrid::apply_boundary_condition(Field &field, bool sync) {
     size_t level = field.get_level();
-    FieldType f = field.get_type();
     if (m_number_of_surface_objects > 0) {
         Surface **surface_list = *(m_MG_surface_object_list + level);
         for (size_t id = 0; id < m_number_of_surface_objects; ++id) {
-            (static_cast<Surface *>(*(surface_list + id)))->apply_boundary_conditions(field, f, sync);
+            (static_cast<Surface *>(*(surface_list + id)))->apply_boundary_conditions(field, sync);
         }
     }
     if (m_number_of_obstacle_objects > 0) {
         for (size_t id = 0; id < m_number_of_obstacle_objects; ++id) {
-            (static_cast<BoundaryDataController *> (m_bdc_obstacle[id]))->apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list_patch_divided, f, id, sync);
+            (static_cast<BoundaryDataController *> (m_bdc_obstacle[id]))->apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list_patch_divided, id, sync);
         }
     }
     m_bdc_boundary->apply_boundary_condition(field, m_jl_domain_boundary_list_patch_divided, sync);

@@ -539,30 +539,30 @@ void Obstacle::calculate_area_index(
         size_t *o1_coordinate, size_t *o2_coordinate,
         CoordinateAxis coordinate_axis,
         bool start) {
-    Coordinate &coords_start_o1 = o1->get_start_coordinates();
-    Coordinate &coords_end_o1 = o1->get_end_coordinates();
-    Coordinate &coords_start_o2 = o2->get_start_coordinates();
-    Coordinate &coords_end_o2 = o2->get_end_coordinates();
+    Coordinate *coords_start_o1 = o1->get_start_coordinates();
+    Coordinate *coords_end_o1 = o1->get_end_coordinates();
+    Coordinate *coords_start_o2 = o2->get_start_coordinates();
+    Coordinate *coords_end_o2 = o2->get_end_coordinates();
 
     if (start) {
-        *o1_coordinate = coords_start_o1[coordinate_axis];
-        *o2_coordinate = coords_start_o2[coordinate_axis];
-        if (coords_start_o1[coordinate_axis] > coords_start_o2[coordinate_axis]) {
+        *o1_coordinate = (*coords_start_o1)[coordinate_axis];
+        *o2_coordinate = (*coords_start_o2)[coordinate_axis];
+        if ((*coords_start_o1)[coordinate_axis] > (*coords_start_o2)[coordinate_axis]) {
             // do not remove inner edge, can be accessed by SL Advection Solver
-            *o2_coordinate = coords_start_o1[coordinate_axis] + 1;
-        } else if (coords_start_o1[coordinate_axis] < coords_start_o2[coordinate_axis]) {
+            *o2_coordinate = (*coords_start_o1)[coordinate_axis] + 1;
+        } else if ((*coords_start_o1)[coordinate_axis] < (*coords_start_o2)[coordinate_axis]) {
             // do not remove inner edge, can be accessed by SL Advection Solver
-            *o1_coordinate = coords_start_o2[coordinate_axis] + 1;
+            *o1_coordinate = (*coords_start_o2)[coordinate_axis] + 1;
         }
     } else {
-        *o1_coordinate = coords_end_o1[coordinate_axis];
-        *o2_coordinate = coords_end_o2[coordinate_axis];
-        if (coords_end_o1[coordinate_axis] < coords_end_o2[coordinate_axis]) {
+        *o1_coordinate = (*coords_end_o1)[coordinate_axis];
+        *o2_coordinate = (*coords_end_o2)[coordinate_axis];
+        if ((*coords_end_o1)[coordinate_axis] < (*coords_end_o2)[coordinate_axis]) {
             // do not remove inner edge, can be accessed by SL Advection Solver
-            *o2_coordinate = coords_end_o1[coordinate_axis] - 1;
-        } else if (coords_end_o1[coordinate_axis] > coords_end_o2[coordinate_axis]) {
+            *o2_coordinate = (*coords_end_o1)[coordinate_axis] - 1;
+        } else if ((*coords_end_o1)[coordinate_axis] > (*coords_end_o2)[coordinate_axis]) {
             // do not remove inner edge, can be accessed by SL Advection Solver
-            *o1_coordinate = coords_end_o2[coordinate_axis] - 1;
+            *o1_coordinate = (*coords_end_o2)[coordinate_axis] - 1;
         }
     }
 }
@@ -615,17 +615,15 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
     auto Nx = domain->get_Nx();
     auto Ny = domain->get_Ny();
 
-    Coordinate &coords_start_o1 = o1->get_start_coordinates();
-    Coordinate &coords_end_o1 = o1->get_end_coordinates();
-    Coordinate &coords_start_o2 = o2->get_start_coordinates();
-    Coordinate &coords_end_o2 = o2->get_end_coordinates();
+    Coordinate *coords_start_o1 = o1->get_start_coordinates();
+    Coordinate *coords_end_o1 = o1->get_end_coordinates();
+    Coordinate *coords_start_o2 = o2->get_start_coordinates();
+    Coordinate *coords_end_o2 = o2->get_end_coordinates();
 
-    if (coords_end_o1[coordinate_axis] + 1 == coords_start_o2[coordinate_axis]) {
+    if ((*coords_end_o1)[coordinate_axis] + 1 == (*coords_start_o2)[coordinate_axis]) {
         std::swap(o1, o2);
-        std::swap(coords_start_o1, coords_start_o2);
-        std::swap(coords_end_o1, coords_end_o2);
     }
-    if (coords_start_o1[coordinate_axis] - 1 == coords_end_o2[coordinate_axis]) {
+    if ((*coords_start_o1)[coordinate_axis] - 1 == (*coords_end_o2)[coordinate_axis]) {
         auto other_axes = new CoordinateAxis[2];
         if (coordinate_axis == CoordinateAxis::X) {
             other_axes[0] = CoordinateAxis::Y;
@@ -639,12 +637,12 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
         }
         // for constraints in x-direction, check for overlapping in y-direction
         bool overlap1 = has_overlap(
-                coords_start_o1[other_axes[0]], coords_end_o1[other_axes[0]],
-                coords_start_o2[other_axes[0]], coords_end_o2[other_axes[0]]);
+                (*coords_start_o1)[other_axes[0]], (*coords_end_o1)[other_axes[0]],
+                (*coords_start_o2)[other_axes[0]], (*coords_end_o2)[other_axes[0]]);
         // for constraints in x-direction, check for overlapping in z-direction
         bool overlap2 = has_overlap(
-                coords_start_o1[other_axes[1]], coords_end_o1[other_axes[1]],
-                coords_start_o2[other_axes[1]], coords_end_o2[other_axes[1]]);
+                (*coords_start_o1)[other_axes[1]], (*coords_end_o1)[other_axes[1]],
+                (*coords_start_o2)[other_axes[1]], (*coords_end_o2)[other_axes[1]]);
         if (overlap1 && overlap2) {
             auto o1_patch = static_cast<Patch>(coordinate_axis * 2);
             auto o2_patch = static_cast<Patch>(coordinate_axis * 2 + 1);
@@ -664,8 +662,8 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             auto o2_remove_end = new Coordinate();
 
             if (coordinate_axis == CoordinateAxis::X) {
-                size_t o1_x1 = coords_start_o1[CoordinateAxis::X];
-                size_t o2_x2 = coords_end_o2[CoordinateAxis::X];
+                size_t o1_x1 = (*coords_start_o1)[CoordinateAxis::X];
+                size_t o2_x2 = (*coords_end_o2)[CoordinateAxis::X];
 
                 size_t o1_y1;
                 size_t o2_y1;
@@ -703,8 +701,8 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
                 size_t o2_x2;
                 Obstacle::calculate_area_index(o1, o2, &o1_x2, &o2_x2, CoordinateAxis::X, false);
 
-                size_t o1_y1 = coords_start_o1[CoordinateAxis::Y];
-                size_t o2_y2 = coords_end_o2[CoordinateAxis::Y];
+                size_t o1_y1 = (*coords_start_o1)[CoordinateAxis::Y];
+                size_t o2_y2 = (*coords_end_o2)[CoordinateAxis::Y];
 
                 size_t o1_z1;
                 size_t o2_z1;
@@ -742,8 +740,8 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
                 size_t o2_y2;
                 Obstacle::calculate_area_index(o1, o2, &o1_y2, &o2_y2, CoordinateAxis::Y, false);
 
-                size_t o1_z1 = coords_start_o1[CoordinateAxis::Z];
-                size_t o2_z2 = coords_end_o2[CoordinateAxis::Z];
+                size_t o1_z1 = (*coords_start_o1)[CoordinateAxis::Z];
+                size_t o2_z2 = (*coords_end_o2)[CoordinateAxis::Z];
 
                 o1_remove_start->set_coordinate(o1_x1, o1_y1, o1_z1);
                 o1_remove_end->set_coordinate(o1_x2, o1_y2, o1_z1);
@@ -785,13 +783,13 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             }
             size_t o2_new_size = o2_counter_old;
 
-            size_t o1_current_axis_0 = coords_start_o1[other_axes[0]];
-            size_t o1_current_axis_1 = coords_start_o2[other_axes[1]];
+            size_t o1_current_axis_0 = (*coords_start_o1)[other_axes[0]];
+            size_t o1_current_axis_1 = (*coords_start_o2)[other_axes[1]];
             size_t o1_removing_index = o1_smallest_removing_index;
             bool o1_end = false;
 
-            size_t o2_current_axis_0 = coords_start_o2[other_axes[0]];
-            size_t o2_current_axis_1 = coords_start_o2[other_axes[1]];
+            size_t o2_current_axis_0 = (*coords_start_o2)[other_axes[0]];
+            size_t o2_current_axis_1 = (*coords_start_o2)[other_axes[1]];
             size_t o2_removing_index = o2_smallest_removing_index;
             bool o2_end = false;
             for (; o1_counter_old < o1->get_size_boundary_list()[o1_patch]

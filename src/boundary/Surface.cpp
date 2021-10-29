@@ -120,7 +120,7 @@ void Surface::createSurface(size_t Nx, size_t Ny) {
 #endif
 }
 
-void Surface::apply_boundary_conditions(Field &field, FieldType field_type, bool sync) {
+void Surface::apply_boundary_conditions(Field &field, bool sync) {
     // m_bdc_boundary->apply_boundary_condition(dataField, indexFields, patch_starts, patch_ends, fieldType, level, sync);
     //TODO(issue 5)
 }

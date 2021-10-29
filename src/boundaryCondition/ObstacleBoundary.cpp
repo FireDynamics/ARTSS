@@ -23,9 +23,12 @@ namespace {
     /// \param  value Value of boundary condition
     /// \param  sign Sign of boundary condition (POSITIVE_SIGN or NEGATIVE_SIGN)
     // *********************************************************************************************
-    void apply_boundary_condition(Field &field, size_t *d_patch, size_t patch_start,
-                                  size_t patch_end, int8_t sign_reference_index,
-                                  size_t reference_index, real value, int8_t sign) {
+    void apply_boundary_condition(Field &field, MultipleJoinedList *mjl, size_t id,
+                                  int8_t sign_reference_index, size_t reference_index,
+                                  real value, int8_t sign) {
+        size_t *d_patch = mjl->get_data();
+        size_t patch_start = mjl->get_first_index(field.get_level(), id);
+        size_t patch_end = mjl->get_last_index(field.get_level(), id);
 #ifdef GPU_DEBUG
         auto gpu_logger = Utility::create_gpu_logger("ObstacleBoundary_GPU");
         gpu_logger->debug("applying for [{};{}) with length {} at level {}, pointer {}, field pointer {}",
@@ -57,8 +60,7 @@ namespace {
     /// \param  level Multigrid level
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_dirichlet(Field &field, size_t *d_patch, Patch p, size_t patch_start,
-                         size_t patch_end, real value) {
+    void apply_dirichlet(Field &field, MultipleJoinedList *mjl, size_t id, Patch p, real value) {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger("ObstacleBoundary");
         logger->debug("applying dirichlet to patch {}",
@@ -99,7 +101,7 @@ namespace {
         if (p == FRONT || p == BOTTOM || p == LEFT) {
             sign_reference_index = NEGATIVE_SIGN;
         }
-        apply_boundary_condition(field, d_patch, patch_start, patch_end,
+        apply_boundary_condition(field, mjl, id,
                                  sign_reference_index, reference_index, value * 2,
                                  NEGATIVE_SIGN);
     }
@@ -115,8 +117,7 @@ namespace {
     /// \param  level Multigrid level
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_neumann(Field &field, size_t *d_patch, Patch p, size_t patch_start,
-                       size_t patch_end, real value) {
+    void apply_neumann(Field &field, MultipleJoinedList *mjl, size_t id, Patch p, real value) {
         size_t level = field.get_level();
         if (level > 0) {
             value = 0;
@@ -154,7 +155,7 @@ namespace {
             sign_reference_index = NEGATIVE_SIGN;
         }
 
-        apply_boundary_condition(field, d_patch, patch_start, patch_end,
+        apply_boundary_condition(field, mjl, id,
                                  sign_reference_index, reference_index, -value, POSITIVE_SIGN);
     }
 }  // namespace
@@ -176,36 +177,25 @@ void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
         auto logger = Utility::create_logger("ObstacleBoundary");
 #endif
         size_t level = field.get_level();
-        for (size_t patch = 0; patch < number_of_patches; patch++) {
-            size_t *d_patch = index_fields[patch]->get_data();
+        for (size_t p = 0; p < number_of_patches; p++) {
+            auto patch = static_cast<Patch>(p);
             size_t size_patch = index_fields[patch]->get_slice_size(level, id);
-            auto p = static_cast<Patch>(patch);
             if (size_patch == 0) {
 #ifndef BENCHMARKING
-                logger->debug("skipping apply boundary condition for: {}",
-                              PatchObject::get_patch_name(p));
+                logger->debug("skipping apply boundary condition id={} for: {}",
+                              id,PatchObject::get_patch_name(patch));
 #endif
                 continue;
             }
-#ifdef GPU_DEBUG
-            else {
-                auto gpu_logger = Utility::create_gpu_logger("ObstacleBoundary_GPU");
-                gpu_logger->debug("pointer {}:\n {}\n {}", PatchObject::get_patch_name(p),
-                              static_cast<void *> (d_patch), static_cast<void *> (index_fields[patch]));
-            }
-#endif
-            size_t patch_start = index_fields[patch]->get_first_index(level, id);
-            size_t patch_end = index_fields[patch]->get_last_index(level, id);
-
-            BoundaryCondition bc = boundary_data->get_boundary_condition(p);
+            BoundaryCondition bc = boundary_data->get_boundary_condition(patch);
             switch (bc) {
                 case BoundaryCondition::DIRICHLET:
-                    apply_dirichlet(field, d_patch, p, patch_start, patch_end,
-                                    boundary_data->get_value(p));
+                    apply_dirichlet(field, index_fields[patch], id, patch,
+                                    boundary_data->get_value(patch));
                     break;
                 case BoundaryCondition::NEUMANN:
-                    apply_neumann(field, d_patch, p, patch_start, patch_end,
-                                  boundary_data->get_value(p));
+                    apply_neumann(field, index_fields[patch], id, patch,
+                                  boundary_data->get_value(patch));
                     break;
                 case BoundaryCondition::PERIODIC:
 #ifndef BENCHMARKING

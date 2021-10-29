@@ -27,7 +27,6 @@ class BoundaryDataController {
     void apply_boundary_condition_obstacle(
             Field &field,
             MultipleJoinedList **index_fields,
-            FieldType field_type,
             size_t id,
             bool sync = false);
     void print();

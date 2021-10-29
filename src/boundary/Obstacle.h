@@ -35,9 +35,9 @@ class Obstacle {
 
     void print();
 
-    Coordinate & get_start_coordinates() { return m_start; }
-    Coordinate & get_end_coordinates() { return m_end; }
-    Coordinate & get_strides() { return m_strides; }
+    Coordinate *get_start_coordinates() { return &m_start; }
+    Coordinate *get_end_coordinates() { return &m_end; }
+    Coordinate *get_strides() { return &m_strides; }
 
     std::string get_name() { return m_name; }
 

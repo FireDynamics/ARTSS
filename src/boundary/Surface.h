@@ -34,7 +34,7 @@ class Surface {
     size_t get_id() { return m_id; }
     void set_id(size_t id) { m_id = id; }
 
-    void apply_boundary_conditions(Field &field, FieldType field_type, bool sync);
+    void apply_boundary_conditions(Field &field, bool sync);
 
     void print();
 

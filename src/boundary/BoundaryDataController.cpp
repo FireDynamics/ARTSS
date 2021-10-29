@@ -106,9 +106,9 @@ void BoundaryDataController::apply_boundary_condition(
 void BoundaryDataController::apply_boundary_condition_obstacle(
         Field &field,
         MultipleJoinedList **index_fields,
-        FieldType field_type,
         size_t id,
         bool sync) {
+    FieldType field_type = field.get_type();
     if (!(static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty()) {
 #ifndef BENCHMARKING
         m_logger->debug("apply obstacle boundary conditions of {}",
