@@ -6,6 +6,7 @@
 //
 
 #include <gtest/gtest.h>
+#include <src/boundary/Coordinate.h>
 #include "src/boundary/PatchObject.h"
 
 class PatchObjectTest : public testing::Test {
@@ -89,4 +90,13 @@ TEST_F(PatchObjectTest, add) {
     ASSERT_EQ((*po2)[Patch::TOP], 0);
     ASSERT_EQ((*po2)[Patch::LEFT], 6);
     ASSERT_EQ((*po2)[Patch::RIGHT], 0);
+}
+
+TEST_F(PatchObjectTest, coordinate_axis) {
+    ASSERT_EQ(CoordinateAxis::X * 2, Patch::FRONT);
+    ASSERT_EQ(CoordinateAxis::X * 2 + 1, Patch::BACK);
+    ASSERT_EQ(CoordinateAxis::Y * 2, Patch::BOTTOM);
+    ASSERT_EQ(CoordinateAxis::Y * 2 + 1, Patch::TOP);
+    ASSERT_EQ(CoordinateAxis::Z * 2, Patch::LEFT);
+    ASSERT_EQ(CoordinateAxis::Z * 2 + 1, Patch::RIGHT);
 }
