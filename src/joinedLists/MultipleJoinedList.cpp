@@ -57,8 +57,8 @@ void MultipleJoinedList::add_data(size_t level, size_t obstacle_id, size_t size,
 #ifndef BENCHMARKING
     m_logger->debug("MJL: add data for obstacle id={} with level {} and size {}", obstacle_id, level, size);
 #endif
-    size_t index = m_index_list[level * m_number_of_objects];
-    m_index_list[level * m_number_of_objects + 1] = index + size;
+    size_t index = m_index_list[level * m_number_of_objects + obstacle_id];
+    m_index_list[level * m_number_of_objects + obstacle_id + 1] = index + size;
     m_size_list[level * m_number_of_objects + obstacle_id] = size;
     for (size_t i = 0; i < size; i++) {
         m_data[index + i] = data[i];
