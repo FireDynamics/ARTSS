@@ -140,9 +140,9 @@ void Multigrid::control() {
                                    "original: {} saved: {} calculated: {} control: {}\n",
                                    original_len, saved_len, calculated_len, control);
         }
-        PatchObject &boundary_size = (static_cast<Domain *>(m_MG_domain_object_list[level]))->get_size_boundary_list();
+        PatchObject *boundary_size = (static_cast<Domain *>(m_MG_domain_object_list[level]))->get_size_boundary_list();
         for (size_t patch = 0; patch < number_of_patches; patch++) {
-            original_len = boundary_size[patch];
+            original_len = (*boundary_size)[patch];
             saved_len = m_jl_domain_boundary_list_patch_divided[patch]->get_slice_size(level);
             calculated_len = m_jl_domain_boundary_list_patch_divided[patch]->get_last_index(level) - m_jl_domain_boundary_list_patch_divided[patch]->get_first_index(level) + 1;
             if (calculated_len != original_len || saved_len != original_len) {
@@ -315,8 +315,8 @@ void Multigrid::create_multigrid_obstacle_lists() {
             size_t level = 0;
             for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
                 sum_obstacle_cells_level_divided[level] += m_MG_obstacle_object_list[level][id]->get_size_obstacle_list();
-                PatchObject &obstacle_boundary = m_MG_obstacle_object_list[level][id]->get_size_boundary_list();
-                *sum_obstacle_boundary += obstacle_boundary;
+                PatchObject *obstacle_boundary = m_MG_obstacle_object_list[level][id]->get_size_boundary_list();
+                *sum_obstacle_boundary += *obstacle_boundary;
                 sum_obstacle_cells += sum_obstacle_cells_level_divided[level];
             }
 
@@ -355,14 +355,14 @@ void Multigrid::create_multigrid_obstacle_lists() {
             for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
                 Obstacle *obstacle = obstacle_list[id];
                 size_t **obstacle_boundary_cells = obstacle->get_boundary_list();
-                PatchObject &obstacle_size = obstacle->get_size_boundary_list();
+                PatchObject *obstacle_size = obstacle->get_size_boundary_list();
                 for (size_t patch = 0; patch < number_of_patches; patch++) {
 #ifndef BENCHMARKING
                     m_logger->debug("add obstacle boundary data to MJL for obstacle '{}' patch '{}' level={}, number of obstacle boundary cells={}",
                                     obstacle->get_name(), PatchObject::get_patch_name(patch), level,
                                     sum_obstacle_cells_level_divided[level]);
 #endif
-                    m_jl_obstacle_boundary_list_patch_divided[patch]->add_data(level, id, obstacle_size[patch], obstacle_boundary_cells[patch]);
+                    m_jl_obstacle_boundary_list_patch_divided[patch]->add_data(level, id, (*obstacle_size)[patch], obstacle_boundary_cells[patch]);
                 }
             }
         }
@@ -460,8 +460,8 @@ void Multigrid::create_multigrid_domain_lists() {
         // count domain cells
         sum_domain_inner_cells += m_MG_domain_object_list[level]->get_size_inner_list();
         sum_domain_cells += m_MG_domain_object_list[level]->get_size_domain_list();
-        PatchObject &domain_boundary_size = m_MG_domain_object_list[level]->get_size_boundary_list();
-        *sum_domain_boundary += domain_boundary_size;
+        PatchObject *domain_boundary_size = m_MG_domain_object_list[level]->get_size_boundary_list();
+        *sum_domain_boundary += *domain_boundary_size;
         for (size_t patch = 0; patch < number_of_patches; patch++) {
             delete[] slice_surface_list[patch];
         }
@@ -484,14 +484,14 @@ void Multigrid::create_multigrid_domain_lists() {
         m_jl_domain_list.add_data(level, domain->get_size_domain_list(), domain->get_domain_list());
 
         size_t **all_boundaries = domain->get_boundary_list();
-        PatchObject &all_boundary_sizes = domain->get_size_boundary_list();
+        PatchObject *all_boundary_sizes = domain->get_size_boundary_list();
         for (size_t patch = 0; patch < number_of_patches; patch++) {
 #ifndef BENCHMARKING
             m_logger->debug("add domain boundary data to SJL for patch '{}' level {} size {}",
                             PatchObject::get_patch_name(patch), level,
-                            all_boundary_sizes[level]);
+                            (*all_boundary_sizes)[level]);
 #endif
-            m_jl_domain_boundary_list_patch_divided[patch]->add_data(level, all_boundary_sizes[patch], all_boundaries[patch]);
+            m_jl_domain_boundary_list_patch_divided[patch]->add_data(level, (*all_boundary_sizes)[patch], all_boundaries[patch]);
         }
     }
     delete sum_domain_boundary;
@@ -637,7 +637,7 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
         }
 #endif
         obstacle_list_coarse[id] = obstacle_coarse;
-        *sum_patches += obstacle_coarse->get_size_boundary_list();
+        *sum_patches += *obstacle_coarse->get_size_boundary_list();
     }
 
     // merge obstacles

@@ -248,7 +248,7 @@ void Obstacle::print_details() {
                     m_start[CoordinateAxis::Z], m_end[CoordinateAxis::Z]);
 
     std::vector<size_t> coords;
-    size_t size_front = get_size_boundary_list()[FRONT];
+    size_t size_front = (*get_size_boundary_list())[FRONT];
     if (size_front > 0) {
         m_logger->debug("Front: {} | {}", m_boundary[FRONT][0],
                         m_boundary[FRONT][size_front - 1]);
@@ -266,7 +266,7 @@ void Obstacle::print_details() {
         m_logger->debug("Front size = 0");
     }
 
-    size_t size_back = get_size_boundary_list()[BACK];
+    size_t size_back = (*get_size_boundary_list())[BACK];
     if (size_back > 0) {
         m_logger->debug("Back: {} | {}", m_boundary[BACK][0], m_boundary[BACK][size_back - 1]);
 
@@ -283,7 +283,7 @@ void Obstacle::print_details() {
         m_logger->debug("Back size = 0");
     }
 
-    size_t size_top = get_size_boundary_list()[TOP];
+    size_t size_top = (*get_size_boundary_list())[TOP];
     if (size_top > 0) {
         m_logger->debug("Top: {} | {}", m_boundary[TOP][0], m_boundary[TOP][size_top - 1]);
 
@@ -300,7 +300,7 @@ void Obstacle::print_details() {
         m_logger->debug("Top size = 0");
     }
 
-    size_t size_bottom = get_size_boundary_list()[BOTTOM];
+    size_t size_bottom = (*get_size_boundary_list())[BOTTOM];
     if (size_bottom > 0) {
         m_logger->debug("Bottom: {} | {}", m_boundary[BOTTOM][0], m_boundary[BOTTOM][size_bottom - 1]);
 
@@ -317,7 +317,7 @@ void Obstacle::print_details() {
         m_logger->debug("Bottom size = 0");
     }
 
-    size_t size_left = get_size_boundary_list()[LEFT];
+    size_t size_left = (*get_size_boundary_list())[LEFT];
     if (size_left > 0) {
         m_logger->debug("Left: {} | {}", m_boundary[LEFT][0], m_boundary[LEFT][size_left - 1]);
 
@@ -334,7 +334,7 @@ void Obstacle::print_details() {
         m_logger->debug("Left size = 0");
     }
 
-    size_t size_right = get_size_boundary_list()[RIGHT];
+    size_t size_right = (*get_size_boundary_list())[RIGHT];
     if (size_right > 0) {
         m_logger->debug("Right: {} | {}", m_boundary[RIGHT][0], m_boundary[RIGHT][size_right - 1]);
 
@@ -757,9 +757,9 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             }
 
             std::vector<size_t> o1_new;
-            o1_new.reserve(o1->get_size_boundary_list()[o1_patch]);
+            o1_new.reserve((*o1->get_size_boundary_list())[o1_patch]);
             std::vector<size_t> o2_new;
-            o2_new.reserve(o2->get_size_boundary_list()[o2_patch]);
+            o2_new.reserve((*o2->get_size_boundary_list())[o2_patch]);
 
             // add all cells which are smaller than the smallest removing index of o1
             size_t o1_counter_old = 0;
@@ -792,8 +792,8 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             size_t o2_current_axis_1 = (*coords_start_o2)[other_axes[1]];
             size_t o2_removing_index = o2_smallest_removing_index;
             bool o2_end = false;
-            for (; o1_counter_old < o1->get_size_boundary_list()[o1_patch]
-                   && o2_counter_old < o2->get_size_boundary_list()[o2_patch]
+            for (; o1_counter_old < (*o1->get_size_boundary_list())[o1_patch]
+                   && o2_counter_old < (*o2->get_size_boundary_list())[o2_patch]
                    && !o1_end && !o2_end;
                    o1_counter_old++, o2_counter_old++) {
                 o1_current_index = o1->get_boundary_list()[o1_patch][o1_counter_old];
@@ -839,7 +839,7 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             }
 
             if (!o1_end) {
-                for (; o1_counter_old < o1->get_size_boundary_list()[o1_patch] && o1_current_axis_1 <= (*o1_remove_end)[other_axes[1]]; o1_counter_old++) {
+                for (; o1_counter_old < (*o1->get_size_boundary_list())[o1_patch] && o1_current_axis_1 <= (*o1_remove_end)[other_axes[1]]; o1_counter_old++) {
                     o1_current_index = o1->get_boundary_list()[o1_patch][o1_counter_old];
                     if (o1_current_index != o1_removing_index) {
                         o1_new.push_back(o1_current_index);
@@ -861,7 +861,7 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             }
 
             if (!o2_end) {
-                for (; o2_counter_old < o2->get_size_boundary_list()[o2_patch] && o2_current_axis_1 <= (*o2_remove_end)[other_axes[1]]; o2_counter_old++) {
+                for (; o2_counter_old < (*o2->get_size_boundary_list())[o2_patch] && o2_current_axis_1 <= (*o2_remove_end)[other_axes[1]]; o2_counter_old++) {
                     o2_current_index = o2->get_boundary_list()[o2_patch][o2_counter_old];
                     if (o2_current_index != o2_removing_index) {
                         o2_new.push_back(o2_current_index);
@@ -882,34 +882,34 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
                 }
             }
 
-            for (; o1_counter_old < o1->get_size_boundary_list()[o1_patch]; o1_counter_old++) {
+            for (; o1_counter_old < (*o1->get_size_boundary_list())[o1_patch]; o1_counter_old++) {
                 o1_new.push_back(o1->get_boundary_list()[o1_patch][o1_counter_old]);
                 o1_new_size++;
             }
             o1_new.resize(o1_new_size);
 
             size_t o1_diff_target = ((*o1_remove_end)[other_axes[0]] - (*o1_remove_start)[other_axes[0]] + 1) * ((*o1_remove_end)[other_axes[1]] - (*o1_remove_start)[other_axes[1]] + 1);
-            size_t o1_diff_actual = o1->get_size_boundary_list()[o1_patch] - o1_new_size;
+            size_t o1_diff_actual = (*o1->get_size_boundary_list())[o1_patch] - o1_new_size;
 #ifndef BENCHMARKING
             logger->debug("neighbouring obstacles ! new size of obstacle '{}' {} patch: {} -> {} ({}|{})",
-                          o1->get_name(), o1_patch, o1->get_size_boundary_list()[o1_patch], o1_new_size,
+                          o1->get_name(), o1_patch, (*o1->get_size_boundary_list())[o1_patch], o1_new_size,
                           o1_diff_target, o1_diff_actual);
 #endif
             auto o1_new_data = new size_t[o1_new_size];
             std::copy(o1_new.begin(), o1_new.end(), o1_new_data);
             o1->replace_patch(o1_new_data, o1_new_size, o1_patch);
 
-            for (; o2_counter_old < o2->get_size_boundary_list()[o2_patch]; o2_counter_old++) {
+            for (; o2_counter_old < (*o2->get_size_boundary_list())[o2_patch]; o2_counter_old++) {
                 o2_new.push_back(o2->get_boundary_list()[o2_patch][o2_counter_old]);
                 o2_new_size++;
             }
             o2_new.resize(o2_new_size);
 
             size_t o2_diff_target = ((*o2_remove_end)[other_axes[0]] - (*o2_remove_start)[other_axes[0]] + 1) * ((*o2_remove_end)[other_axes[1]] - (*o2_remove_start)[other_axes[1]] + 1);
-            size_t o2_diff_actual = o2->get_size_boundary_list()[o2_patch] - o2_new_size;
+            size_t o2_diff_actual = (*o2->get_size_boundary_list())[o2_patch] - o2_new_size;
 #ifndef BENCHMARKING
             logger->debug("neighbouring obstacles ! new size of obstacle '{}' {} patch: {} -> {} ({}|{})",
-                          o2->get_name(), o2_patch, o2->get_size_boundary_list()[o2_patch], o2_new_size,
+                          o2->get_name(), o2_patch, (*o2->get_size_boundary_list())[o2_patch], o2_new_size,
                           o2_diff_target, o2_diff_actual);
 #endif
             auto o2_new_data = new size_t[o2_new_size];

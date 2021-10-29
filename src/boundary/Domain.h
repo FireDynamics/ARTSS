@@ -27,7 +27,7 @@ class Domain {
     size_t get_size_inner_list() const { return m_size_inner_list; }
 
     size_t ** get_boundary_list() const { return m_boundary_patch_divided; }
-    PatchObject & get_size_boundary_list() { return m_size_boundary; }
+    PatchObject * get_size_boundary_list() { return &m_size_boundary; }
 
     void update_lists(size_t *obstacle_list, size_t size_obstacle_list, size_t **surface_list, PatchObject &size_surface_list);
     void control(size_t size_obstacle_list, PatchObject &size_surface_list);

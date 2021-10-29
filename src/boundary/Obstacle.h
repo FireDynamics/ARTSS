@@ -29,7 +29,7 @@ class Obstacle {
     size_t get_size_obstacle_list() const { return m_size_obstacle_list; }
 
     size_t ** get_boundary_list() const { return m_boundary; }
-    PatchObject & get_size_boundary_list() { return m_size_boundary; }
+    PatchObject *get_size_boundary_list() { return &m_size_boundary; }
 
     bool is_obstacle_cell(const Coordinate &coords) const;
 
