@@ -54,8 +54,6 @@ void VTKWriter::write_numerical_debug(const FieldController &field_controller, c
     VTKWriter::vtk_prepare_and_write_debug((filename + ending).c_str(), data,
                                            size_vars, var_names, centering, var_dims);
 
-    delete[] (*var_names);
-    delete[] (*data);
 }
 
 void VTKWriter::write_numerical(const FieldController &field_controller, const std::string &filename) {
