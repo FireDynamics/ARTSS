@@ -72,24 +72,24 @@ TEST_F(PatchObjectTest, add) {
     for (size_t patch = 0; patch < number_of_patches; patch++) {
         po1->add_value(patch, patch);
     }
-    po2->add_value(Patch::LEFT, 6);
+    po2->add_value(Patch::FRONT, 6);
     po2->add_value(Patch::BOTTOM, 3);
 
     *po1 += *po2;
 
-    EXPECT_EQ((*po1)[Patch::FRONT], 0);
-    EXPECT_EQ((*po1)[Patch::BACK], 1);
+    EXPECT_EQ((*po1)[Patch::LEFT], 0);
+    EXPECT_EQ((*po1)[Patch::RIGHT], 1);
     EXPECT_EQ((*po1)[Patch::BOTTOM], 5);
     EXPECT_EQ((*po1)[Patch::TOP], 3);
-    EXPECT_EQ((*po1)[Patch::LEFT], 10);
-    EXPECT_EQ((*po1)[Patch::RIGHT], 5);
+    EXPECT_EQ((*po1)[Patch::FRONT], 10);
+    EXPECT_EQ((*po1)[Patch::BACK], 5);
 
-    EXPECT_EQ((*po2)[Patch::FRONT], 0);
-    EXPECT_EQ((*po2)[Patch::BACK], 0);
+    EXPECT_EQ((*po2)[Patch::LEFT], 0);
+    EXPECT_EQ((*po2)[Patch::RIGHT], 0);
     EXPECT_EQ((*po2)[Patch::BOTTOM], 3);
     EXPECT_EQ((*po2)[Patch::TOP], 0);
-    EXPECT_EQ((*po2)[Patch::LEFT], 6);
-    EXPECT_EQ((*po2)[Patch::RIGHT], 0);
+    EXPECT_EQ((*po2)[Patch::FRONT], 6);
+    EXPECT_EQ((*po2)[Patch::BACK], 0);
 }
 
 TEST_F(PatchObjectTest, coordinate_axis) {
@@ -98,5 +98,5 @@ TEST_F(PatchObjectTest, coordinate_axis) {
     EXPECT_EQ(CoordinateAxis::Y * 2, Patch::BOTTOM);
     EXPECT_EQ(CoordinateAxis::Y * 2 + 1, Patch::TOP);
     EXPECT_EQ(CoordinateAxis::Z * 2, Patch::FRONT);
-    EXPECT_EQ(CoordinateAxis::Z * 2 + 1, Patch::BOTTOM);
+    EXPECT_EQ(CoordinateAxis::Z * 2 + 1, Patch::BACK);
 }
