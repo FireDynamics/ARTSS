@@ -54,7 +54,8 @@ void SingleJoinedList::add_data(size_t level, size_t size, const size_t *data) {
         m_data[index + i] = data[i];
     }
 #ifndef BENCHMARKING
-    m_logger->debug("SJL: add data for level {} with size {}|{}", level, size, m_size_list[level]);
+    m_logger->debug("SJL: add data for level {} with size {}|{} first index: {} last index: {}",
+                    level, size, m_size_list[level], m_data[index], m_data[index + size - 1]);
 #endif
 }
 
@@ -70,7 +71,7 @@ size_t *SingleJoinedList::get_slice(size_t level) {
     size_t *slice = new size_t[slice_size];
     if (slice_size > 0) {
         //TODO(cvm) legit? want to return a copy of a part of 'data'
-        std::copy(m_data + get_first_index(level), m_data + get_last_index(level), slice);
+        std::copy(m_data + get_first_index(level), m_data + get_last_index(level) + 1, slice);
     }
     return slice;
 }
