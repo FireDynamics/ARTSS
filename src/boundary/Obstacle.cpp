@@ -915,7 +915,13 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             auto o2_new_data = new size_t[o2_new_size];
             std::copy(o2_new.begin(), o2_new.end(), o2_new_data);
             o2->replace_patch(o2_new_data, o2_new_size, o2_patch);
+
+            delete o1_remove_start;
+            delete o1_remove_end;
+            delete o2_remove_start;
+            delete o2_remove_end;
         }
+        delete[] other_axes;
     }
     return overlap;
 }

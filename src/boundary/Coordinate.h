@@ -29,6 +29,8 @@ class Coordinate {
     Coordinate() {
         m_coordinates = new size_t[number_of_axis];
     };
+
+    ~Coordinate() { delete[] m_coordinates; }
     inline size_t &operator[](size_t i) const { return m_coordinates[i]; }
 
     Coordinate &operator+=(const Coordinate &rhs) {

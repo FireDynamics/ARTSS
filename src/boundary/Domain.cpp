@@ -389,17 +389,19 @@ void Domain::inner_cells(const size_t *obstacle_list, size_t size_obstacle_list)
         for (size_t j = j1; j <= j2; ++j) {
             for (size_t i = i1; i <= i2; ++i) {
                 size_t idx = IX(i, j, k, Nx, Ny);
-                if (counter_obstacle_list >= size_obstacle_list || obstacle_list[counter_obstacle_list] != idx) {
+                if (counter_obstacle_list >= size_obstacle_list) {
                     m_inner_list[counter_inner_cells++] = idx;
-                } else {
+                } else if (obstacle_list[counter_obstacle_list] == idx){
                     counter_obstacle_list++;
+                } else {
+                    m_inner_list[counter_inner_cells++] = idx;
                 }
             }
         }
     }
 #ifndef BENCHMARKING
-    m_logger->debug("inner list size: {} counter: {} obstacle counter: {}",
-                    m_size_inner_list, counter_inner_cells, counter_obstacle_list);
+    m_logger->debug("inner list size: {} counter: {} obstacle list size: {} obstacle counter: {}",
+                    m_size_inner_list, counter_inner_cells, size_obstacle_list, counter_obstacle_list);
 #endif
 }
 

@@ -378,7 +378,7 @@ void Multigrid::create_multigrid_obstacle_lists() {
 
         delete sum_obstacle_boundary;
         delete[] sum_obstacle_cells_level_divided;
-        for (size_t level = 1; level < m_multigrid_levels + 1; level++) {
+        for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
             delete[] tmp_store_obstacle[level];
         }
         delete[] tmp_store_obstacle;
@@ -468,6 +468,7 @@ void Multigrid::create_multigrid_domain_lists() {
         delete[] slice_surface_list;
         delete[] slice_obstacle_list;
         delete size_surface_list;
+        std::exit(1);
     }
 
     m_jl_domain_inner_list.set_size(sum_domain_inner_cells);
@@ -615,6 +616,8 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
 
         auto obstacle_coarse = new Obstacle((*start_coarse), (*end_coarse),
                                             level, obstacle_fine->get_name());
+        delete start_coarse;
+        delete end_coarse;
 #ifndef BENCHMARKING
         Coordinate *strides = obstacle_coarse->get_strides();
         if ((*strides)[CoordinateAxis::X] <= 1) {
