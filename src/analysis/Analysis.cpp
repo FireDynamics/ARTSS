@@ -392,8 +392,9 @@ void Analysis::write_file(const Field &field, const std::string &filename) {
     std::ofstream out;
     out.open(filename + ".dat", std::ofstream::out);
     size_t size = field.get_size();
+    real *data = field.data;
     for (size_t index = 0; index < size; index++) {
-        out << &field[index] << std::endl;
+        out << data[index] << std::endl;
     }
     out.close();
 }
@@ -402,6 +403,7 @@ void Analysis::write_obstacles(const Field &field, const std::string &filename) 
     BoundaryController *boundary = BoundaryController::getInstance();
     size_t *obstacle_list = boundary->get_obstacle_list_level_joined();
     size_t size = boundary->get_slice_size_obstacle_list_level_joined(0);
+    real *data = field.data;
     if (size > 0) {  // do not create (empty) file if there are no obstacles
         size_t start = boundary->get_obstacle_list_level_joined_start(0);
         size_t end = boundary->get_obstacle_list_level_joined_end(0);
@@ -409,7 +411,7 @@ void Analysis::write_obstacles(const Field &field, const std::string &filename) 
         std::ofstream out_obstacle;
         out_obstacle.open(filename + "_obstacle.dat", std::ofstream::out);
         for (size_t idx = start; idx <= end; idx++) {
-            out_obstacle << obstacle_list[idx] << ";" << field[obstacle_list[idx]] << std::endl;
+            out_obstacle << obstacle_list[idx] << ";" << data[obstacle_list[idx]] << std::endl;
         }
         out_obstacle.close();
     }
