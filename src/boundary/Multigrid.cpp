@@ -468,7 +468,6 @@ void Multigrid::create_multigrid_domain_lists() {
         delete[] slice_surface_list;
         delete[] slice_obstacle_list;
         delete size_surface_list;
-        std::exit(1);
     }
 
     m_jl_domain_inner_list.set_size(sum_domain_inner_cells);
