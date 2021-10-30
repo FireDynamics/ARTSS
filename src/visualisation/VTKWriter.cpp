@@ -457,6 +457,10 @@ void VTKWriter::vtk_prepare_and_write_debug(const char *filename, read_ptr *data
     // Use visit_writer to write data on mesh
     write_rectilinear_mesh(filename, 1, dims, x_coords, y_coords, z_coords, size_vars + 6, var_dims, centering, var_names, vars);
 
+
+    for (int i = 0; i < size_vars + 6; i++) {
+        delete[] write_out[i];
+    }
     // Clean up
     delete[] (x_coords);
     delete[] (y_coords);

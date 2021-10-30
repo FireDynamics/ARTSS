@@ -21,7 +21,7 @@ class GaussFunction: public ISourceFunction {
             real tau);
 
     GaussFunction(real HRR, real cp);
-    ~GaussFunction();
+    ~GaussFunction() = default;
 
     void update_source(Field &out, real t_cur) override;
 

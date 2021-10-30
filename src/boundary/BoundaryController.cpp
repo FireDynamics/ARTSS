@@ -164,10 +164,10 @@ void BoundaryController::parse_obstacle_parameter(tinyxml2::XMLElement *xmlParam
 }
 
 BoundaryController::~BoundaryController() {
-    delete (m_multigrid);
-    delete (m_bdc_boundary);
+    delete m_multigrid;
+    delete m_bdc_boundary;
     for (size_t i = 0; i < m_number_of_obstacles; i++) {
-        delete (m_bdc_obstacles[i]);
+        delete m_bdc_obstacles[i];
     }
 }
 

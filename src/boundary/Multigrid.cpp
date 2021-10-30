@@ -78,21 +78,17 @@ Multigrid::Multigrid(
 
 Multigrid::~Multigrid() {
     for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        if (m_number_of_surface_objects > 0) {
-            Surface **surface_level = *(m_MG_surface_object_list + level);
-            for (size_t surface = 0; surface < m_number_of_surface_objects; surface++) {
-                delete (*(surface_level + surface));
-            }
-            delete[] surface_level;
+        Surface **surface_level = m_MG_surface_object_list[level];
+        for (size_t surface = 0; surface < m_number_of_surface_objects; surface++) {
+            delete surface_level[surface];
         }
-        if (m_number_of_obstacle_objects > 0) {
-            Obstacle **obstacle_level = *(m_MG_obstacle_object_list);
-            for (size_t obstacle = 0; obstacle < m_number_of_obstacle_objects; obstacle++) {
-                delete (*(obstacle_level + obstacle));
-            }
-            delete[] obstacle_level;
+        delete[] surface_level;
+        Obstacle **obstacle_level = m_MG_obstacle_object_list[level];
+        for (size_t obstacle = 0; obstacle < m_number_of_obstacle_objects; obstacle++) {
+            delete obstacle_level[obstacle];
         }
-        delete (*(m_MG_domain_object_list + level));
+        delete[] obstacle_level;
+        delete m_MG_domain_object_list[level];
     }
     delete[] m_MG_surface_object_list;
     delete[] m_MG_domain_object_list;
