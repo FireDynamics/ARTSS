@@ -93,10 +93,10 @@ TEST_F(PatchObjectTest, add) {
 }
 
 TEST_F(PatchObjectTest, coordinate_axis) {
-    EXPECT_EQ(CoordinateAxis::X * 2, Patch::FRONT);
-    EXPECT_EQ(CoordinateAxis::X * 2 + 1, Patch::BACK);
+    EXPECT_EQ(CoordinateAxis::X * 2, Patch::LEFT);
+    EXPECT_EQ(CoordinateAxis::X * 2 + 1, Patch::RIGHT);
     EXPECT_EQ(CoordinateAxis::Y * 2, Patch::BOTTOM);
     EXPECT_EQ(CoordinateAxis::Y * 2 + 1, Patch::TOP);
-    EXPECT_EQ(CoordinateAxis::Z * 2, Patch::LEFT);
-    EXPECT_EQ(CoordinateAxis::Z * 2 + 1, Patch::RIGHT);
+    EXPECT_EQ(CoordinateAxis::Z * 2, Patch::FRONT);
+    EXPECT_EQ(CoordinateAxis::Z * 2 + 1, Patch::BOTTOM);
 }

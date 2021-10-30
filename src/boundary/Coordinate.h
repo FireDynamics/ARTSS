@@ -10,6 +10,8 @@
 #include <cstdlib>
 #include "../utility/GlobalMacrosTypes.h"
 
+inline static const std::vector<std::string> axis_names = {"X", "Y", "Z"};
+
 const size_t number_of_axis = 3;
 enum CoordinateAxis : int {
     UNKNOWN_AXIS = -1,
@@ -29,6 +31,10 @@ class Coordinate {
     Coordinate() {
         m_coordinates = new size_t[number_of_axis];
     };
+
+    static std::string get_axis_name(size_t axis) {
+        return axis_names[axis];
+    }
 
     ~Coordinate() { delete[] m_coordinates; }
     inline size_t &operator[](size_t i) const { return m_coordinates[i]; }

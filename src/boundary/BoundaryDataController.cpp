@@ -111,7 +111,7 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
     FieldType field_type = field.get_type();
     if (!(static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty()) {
 #ifndef BENCHMARKING
-        m_logger->debug("apply obstacle boundary conditions of {}",
+        m_logger->debug("apply obstacle boundary conditions of id={} {}", id,
                         Field::get_field_type_name(field_type));
 #endif
         ObstacleBoundary::apply_boundary_condition(

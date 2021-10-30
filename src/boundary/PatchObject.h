@@ -13,12 +13,12 @@
 const size_t number_of_patches = 6;
 enum Patch : int {
     UNKNOWN_PATCH = -1,
-    FRONT = 0,
-    BACK = 1,
+    LEFT = 0,
+    RIGHT = 1,
     BOTTOM = 2,
     TOP = 3,
-    LEFT = 4,
-    RIGHT = 5
+    FRONT = 4,
+    BACK = 5
 };
 
 class PatchObject {

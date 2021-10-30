@@ -620,9 +620,23 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
     Coordinate *coords_start_o2 = o2->get_start_coordinates();
     Coordinate *coords_end_o2 = o2->get_end_coordinates();
 
+#ifndef BENCHMARKING
+    logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
+                  o1->get_name(), (*coords_end_o1)[coordinate_axis],
+                  o2->get_name(), (*coords_start_o2)[coordinate_axis],
+                  Coordinate::get_axis_name(coordinate_axis));
+#endif
     if ((*coords_end_o1)[coordinate_axis] + 1 == (*coords_start_o2)[coordinate_axis]) {
         std::swap(o1, o2);
+        std::swap(coords_start_o1, coords_start_o2);
+        std::swap(coords_end_o1, coords_end_o2);
     }
+#ifndef BENCHMARKING
+    logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
+                  o1->get_name(), (*coords_start_o1)[coordinate_axis],
+                  o2->get_name(), (*coords_end_o2)[coordinate_axis],
+                  Coordinate::get_axis_name(coordinate_axis));
+#endif
     if ((*coords_start_o1)[coordinate_axis] - 1 == (*coords_end_o2)[coordinate_axis]) {
         auto other_axes = new CoordinateAxis[2];
         if (coordinate_axis == CoordinateAxis::X) {
@@ -783,13 +797,13 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             }
             size_t o2_new_size = o2_counter_old;
 
-            size_t o1_current_axis_0 = (*coords_start_o1)[other_axes[0]];
-            size_t o1_current_axis_1 = (*coords_start_o2)[other_axes[1]];
+            size_t o1_current_axis_0 = (*o1_remove_start)[other_axes[0]];
+            size_t o1_current_axis_1 = (*o1_remove_start)[other_axes[1]];
             size_t o1_removing_index = o1_smallest_removing_index;
             bool o1_end = false;
 
-            size_t o2_current_axis_0 = (*coords_start_o2)[other_axes[0]];
-            size_t o2_current_axis_1 = (*coords_start_o2)[other_axes[1]];
+            size_t o2_current_axis_0 = (*o2_remove_start)[other_axes[0]];
+            size_t o2_current_axis_1 = (*o2_remove_start)[other_axes[1]];
             size_t o2_removing_index = o2_smallest_removing_index;
             bool o2_end = false;
             for (; o1_counter_old < (*o1->get_size_boundary_list())[o1_patch]
@@ -892,7 +906,8 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             size_t o1_diff_actual = (*o1->get_size_boundary_list())[o1_patch] - o1_new_size;
 #ifndef BENCHMARKING
             logger->debug("neighbouring obstacles ! new size of obstacle '{}' {} patch: {} -> {} ({}|{})",
-                          o1->get_name(), o1_patch, (*o1->get_size_boundary_list())[o1_patch], o1_new_size,
+                          o1->get_name(), PatchObject::get_patch_name(o1_patch),
+                          (*o1->get_size_boundary_list())[o1_patch], o1_new_size,
                           o1_diff_target, o1_diff_actual);
 #endif
             auto o1_new_data = new size_t[o1_new_size];
@@ -909,7 +924,8 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             size_t o2_diff_actual = (*o2->get_size_boundary_list())[o2_patch] - o2_new_size;
 #ifndef BENCHMARKING
             logger->debug("neighbouring obstacles ! new size of obstacle '{}' {} patch: {} -> {} ({}|{})",
-                          o2->get_name(), o2_patch, (*o2->get_size_boundary_list())[o2_patch], o2_new_size,
+                          o2->get_name(), PatchObject::get_patch_name(o2_patch),
+                          (*o2->get_size_boundary_list())[o2_patch], o2_new_size,
                           o2_diff_target, o2_diff_actual);
 #endif
             auto o2_new_data = new size_t[o2_new_size];

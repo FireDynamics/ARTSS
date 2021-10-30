@@ -31,19 +31,16 @@ class BoundaryController {
     size_t* get_domain_inner_list_level_joined() const { return m_multigrid->get_domain_inner_cells_level_joined(); }
     /// \brief get size of domain inner list for level 0
     size_t get_size_domain_inner_list() const { return get_slice_size_domain_inner_list_level_joined(0); }
-    //size_t get_size_domain_inner_list_level_joined() const { return m_multigrid->get_size_domain_inner_cells_level_joined(); }  // get size of joined domain inner list
     size_t get_domain_inner_list_level_joined_start(size_t level) const { return m_multigrid->get_start_index_domain_inner_cells_level_joined(level); }
     size_t get_domain_inner_list_level_joined_end(size_t level) const { return m_multigrid->get_end_index_domain_inner_cells_level_joined(level); }
 
     size_t* get_domain_list_level_joined() const { return m_multigrid->get_domain_cells_level_joined(); }
     size_t get_slice_size_domain_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_domain_cells(level); }
-    //size_t get_size_domain_list_level_joined() const { return m_multigrid->get_size_domain_cells(); }
     size_t get_domain_list_level_joined_start(size_t level) const { return m_multigrid->get_start_index_domain_cells_level_joined(level); }
     size_t get_domain_list_level_joined_end(size_t level) const { return m_multigrid->get_end_index_domain_cells_level_joined(level); }
 
     size_t* get_obstacle_list_level_joined() const { return m_multigrid->get_obstacle_cells_level_joined(); }
     size_t get_slice_size_obstacle_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_obstacle_cells(level); }
-    //size_t get_size_obstacle_list_level_joined() const { return m_multigrid->get_size_obstacle_cells(); }
     size_t get_obstacle_list_level_joined_start(size_t level) const { return m_multigrid->get_start_index_obstacle_cells_level_joined(level); }
     size_t get_obstacle_list_level_joined_end(size_t level) const { return m_multigrid->get_end_index_obstacle_cells_level_joined(level); }
 

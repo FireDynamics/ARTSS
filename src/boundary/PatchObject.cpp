@@ -8,7 +8,7 @@
 #include "PatchObject.h"
 #include <vector>
 
-inline static const std::vector<std::string> patch_names = {"front", "back", "bottom", "top", "left", "right"};
+inline static const std::vector<std::string> patch_names = {"left", "right", "bottom", "top", "front", "back"};
 
 PatchObject::PatchObject() {
     m_patches = new size_t[number_of_patches];

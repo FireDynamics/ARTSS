@@ -108,6 +108,12 @@ Multigrid::~Multigrid() {
     delete m_jl_domain_boundary_list_patch_divided;
     delete m_jl_obstacle_boundary_list_patch_divided;
     delete m_jl_surface_list_patch_divided;
+
+    for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
+        delete m_bdc_obstacle[id];
+    }
+    delete m_bdc_boundary;
+    delete m_bdc_obstacle;
 }
 
 //======================================== Control =================================================
@@ -306,7 +312,7 @@ void Multigrid::create_multigrid_obstacle_lists() {
     size_t sum_obstacle_cells = 0;  // total sum of obstacle cells for allocation m_jl_obstacle_list
     auto sum_obstacle_boundary = new PatchObject();  // total sum of obstacle patches for allocation m_jl_obstacle_boundary_list_patch_divided
     auto sum_obstacle_cells_level_divided = new size_t[m_multigrid_levels + 1];  // sum for obstacle cells for each level (total sum equals sum_obstacle_cells)
-    std::fill(sum_obstacle_cells_level_divided, sum_obstacle_cells_level_divided + m_multigrid_levels, 0);
+    std::fill(sum_obstacle_cells_level_divided, sum_obstacle_cells_level_divided + m_multigrid_levels +1, 0);
 
     if (m_number_of_obstacle_objects > 0) {
         auto **tmp_store_obstacle = new size_t *[m_multigrid_levels + 1];
@@ -338,6 +344,9 @@ void Multigrid::create_multigrid_obstacle_lists() {
                 delete[] obstacle_list_tmp;
             }
             tmp_store_obstacle[level] = list;
+#ifndef BENCHMARKING
+            m_logger->debug("create_multigrid_obstacle_list ! calculated size {} original size {}", size, sum_obstacle_cells_level_divided[level]);
+#endif
         }
 
         // create obstacles for each multigrid level
@@ -360,7 +369,7 @@ void Multigrid::create_multigrid_obstacle_lists() {
 #ifndef BENCHMARKING
                     m_logger->debug("add obstacle boundary data to MJL for obstacle '{}' patch '{}' level={}, number of obstacle boundary cells={}",
                                     obstacle->get_name(), PatchObject::get_patch_name(patch), level,
-                                    sum_obstacle_cells_level_divided[level]);
+                                    (*obstacle_size)[patch]);
 #endif
                     m_jl_obstacle_boundary_list_patch_divided[patch]->add_data(level, id, (*obstacle_size)[patch], obstacle_boundary_cells[patch]);
                 }
