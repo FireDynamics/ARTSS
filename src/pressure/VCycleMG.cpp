@@ -260,7 +260,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         Field *field_mg_temporal_solution_level_minus_1 = *(m_mg_temporal_solution + level - 1);
         Field *field_residuum1_level_minus_1 = *(m_residuum1 + level - 1);
 
-#pragma acc data present(field_error0_level, \
+#pragma acc data present(field_error0_level_minus_1, \
                          field_error1_level, field_error1_level_minus_1, \
                          field_mg_temporal_solution_level_minus_1, \
                          field_residuum1_level_minus_1)
