@@ -40,7 +40,6 @@ Field::Field(FieldType type, real val, size_t level) :
 Field::Field(FieldType type, real val, size_t level, size_t size):
         m_level(level), m_size(size), m_type(type) {
     data = new real[m_size];
-    set_value(val);
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
     m_gpu_logger->info("{}{} create with field pointer: {} data pointer: {}",
@@ -52,6 +51,7 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
     // note that the pointer is to host memory, so we overwrite with a
     // pointer to memory allocated on the device.
 #pragma acc enter data create(data[:m_size])
+    set_value(val);
 }
 
 Field::Field(const Field &original):

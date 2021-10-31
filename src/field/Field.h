@@ -61,7 +61,13 @@ class Field {
 
     /// \brief fill data array with the specified number
     /// \param val value to be set
-    void set_value(real val) const { std::fill(data, data + m_size, val); }
+    void set_value(real val) const {
+#pragma acc parallel loop independent present(this->data[:m_size]) async
+        for (size_t i = 0; i < m_size; i++) {
+            this->data[i] = val;
+        }
+#pragma acc wait
+    }
 
     /// \brief copy data of Field other. No changes in data pointer
     /// \param Field &other
