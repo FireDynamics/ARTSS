@@ -253,7 +253,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
 
     out.update_dev();
     out.copy_data(*(m_error0[0]));
-    for (size_t level = m_levels - 1; level > 1; --level) {
+    for (size_t level = m_levels; level > 0; --level) {
         Field *field_error0_level_minus_1 = *(m_error0 + level - 1);
         Field *field_error1_level = *(m_error1 + level);
         Field *field_error1_level_minus_1 = *(m_error1 + level - 1);
@@ -280,10 +280,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
             }
         }
     }
-    size_t level = 1;
-    Prolongate(*m_error0[level - 1], *m_error1[level], level, sync);
-    boundary->apply_boundary(*m_error0[level - 1], sync);
-    out += *m_error0[level - 1];
+    out.copy_data(*m_error1[0]);
     boundary->apply_boundary(out, sync);
 
     if (sync) {
@@ -718,7 +715,6 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
 
         if (it % 2 != 0) {  // get data from tmp field when number of iterations is odd
             Field::swap(tmp, out);
-            //out.copy_data(tmp);
         }
     }
 }
