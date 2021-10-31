@@ -9,12 +9,14 @@
 #include "utility/tinyxml2.h"
 #include "utility/Parameters.h"
 #include "solver/SolverController.h"
+#include "visualisation/VTKWriter.h"
 
 #ifdef _OPENACC
     #include <openacc.h>
 #endif
 
 int Field::counter = 0;
+int VTKWriter::vtk_counter = 0;
 int main(int argc, char **argv) {
     // Initialisation
     // Parameters

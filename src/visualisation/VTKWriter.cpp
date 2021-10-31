@@ -466,3 +466,84 @@ void VTKWriter::vtk_prepare_and_write_debug(const char *filename, read_ptr *data
     delete[] (y_coords);
     delete[] (z_coords);
 }
+
+void VTKWriter::write_field(const Field &field, const std::string &filename, const std::string &var_name) {
+    std::string fname = std::to_string(vtk_counter++) + "_" + filename;
+    int size_vars = 1;
+    const char *var_names[] = {"x-coords", "y-coords", "z-coords",
+                               "index_i", "index_j", "index_k",
+                               var_name.c_str()};
+    DomainData *domain = DomainData::getInstance();
+    real X1 = domain->get_X1();
+    real Y1 = domain->get_Y1();
+    real Z1 = domain->get_Z1();
+
+    int Nx = static_cast<int>(domain->get_Nx());
+    int Ny = static_cast<int>(domain->get_Ny());
+    int Nz = static_cast<int>(domain->get_Nz());
+
+    real dx = domain->get_dx();
+    real dy = domain->get_dy();
+    real dz = domain->get_dz();
+
+    int size = static_cast<int>(domain->get_size());
+
+    // Dimensions of the rectilinear array (+1 for zonal values)
+    int dims[] = {Nx + 1, Ny + 1, Nz + 1};
+
+    auto x_coords = new float[(Nx + 1)];
+    auto y_coords = new float[(Ny + 1)];
+    auto z_coords = new float[(Nz + 1)];
+
+    // Initialise grid
+    // faces of the grid cells
+    for (int i = 0; i < Nx + 1; i++) {
+        x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
+    }
+
+    for (int j = 0; j < Ny + 1; j++) {
+        y_coords[j] = static_cast<float> (Y1 + (j - 1) * dy);
+    }
+
+    for (int k = 0; k < Nz + 1; k++) {
+        z_coords[k] = static_cast<float> (Z1 + (k - 1) * dz);
+    }
+
+    float *write_out[size_vars + 6];
+    for (int i = 0; i < size_vars + 6; i++){
+        write_out[i] = new float[size];
+    }
+
+    // Cast variables to floats
+    for (int k = 0; k < Nz; k++) {
+        for (int j = 0; j < Ny; j++) {
+            for (int i = 0; i < Nx; i++) {
+                size_t index = IX(i, j, k, Nx, Ny);
+                write_out[0][index] = x_coords[i] + static_cast<float> (0.5 * dx);
+                write_out[1][index] = y_coords[j] + static_cast<float> (0.5 * dy);
+                write_out[2][index] = z_coords[k] + static_cast<float> (0.5 * dz);
+                write_out[3][index] = static_cast<float> (i);
+                write_out[4][index] = static_cast<float> (j);
+                write_out[5][index] = static_cast<float> (k);
+                write_out[6][index] = static_cast<float>(field.data[index]);
+            }
+        }
+    }
+    // Summarise pointers to variables in an array
+    float *vars[size_vars + 6];
+    for (int i = 0; i < size_vars + 6; i++){
+        vars[i] = static_cast<float *> (write_out[i]);
+    }
+    int var_dims[] = {1, 1, 1, 1, 1, 1, 1};
+    int centering[] = {0, 0, 0, 0, 0, 0, 0};
+    write_rectilinear_mesh(fname.c_str(), 1, dims, x_coords, y_coords, z_coords, size_vars + 6, var_dims, centering, var_names, vars);
+
+
+    for (int i = 0; i < size_vars + 6; i++) {
+        delete[] write_out[i];
+    }
+    // Clean up
+    delete[] (x_coords);
+    delete[] (y_coords);
+    delete[] (z_coords);
+}
