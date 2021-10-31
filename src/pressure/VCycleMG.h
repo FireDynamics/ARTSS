@@ -15,7 +15,7 @@
 
 class VCycleMG: public IPressure{
  public:
-    VCycleMG(Field const &out, Field const &b);
+    VCycleMG();
     ~VCycleMG() override;
 
     void pressure(Field &out, Field const &b, real t, bool sync) override;

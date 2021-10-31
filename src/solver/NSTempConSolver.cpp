@@ -45,9 +45,7 @@ NSTempConSolver::NSTempConSolver(FieldController *field_controller) {
     m_gamma = params->get_real("solver/concentration/diffusion/gamma");
 
     // Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
-                                       m_field_controller->get_field_p(),
-                                       m_field_controller->get_field_rhs());
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"));
 
     // Source of velocity
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));

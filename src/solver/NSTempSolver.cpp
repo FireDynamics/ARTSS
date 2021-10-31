@@ -36,9 +36,7 @@ NSTempSolver::NSTempSolver(FieldController *field_controller) {
     m_kappa = params->get_real("physical_parameters/kappa");
 
     // Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
-                                       m_field_controller->get_field_p(),
-                                       m_field_controller->get_field_rhs());
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"));
 
     // Source of velocity
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));

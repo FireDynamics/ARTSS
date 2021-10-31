@@ -31,9 +31,7 @@ NSTurbSolver::NSTurbSolver(FieldController *field_controller) {
     SolverSelection::SetTurbulenceSolver(&mu_tub, params->get("solver/turbulence/type"));
 
     //Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
-                                       m_field_controller->get_field_p(),
-                                       m_field_controller->get_field_rhs());
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"));
 
     // Source
     SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));

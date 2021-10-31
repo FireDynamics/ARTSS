@@ -59,9 +59,7 @@ NSTempTurbSolver::NSTempTurbSolver(FieldController *field_controller) {
     m_logger->debug("set pressure solver");
 #endif
     // Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
-                                       m_field_controller->get_field_p(),
-                                       m_field_controller->get_field_rhs());
+    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"));
 
 #ifndef BENCHMARKING
     m_logger->debug("set source solver vel");

@@ -17,7 +17,7 @@
 #include "../visualisation/VTKWriter.h"
 
 
-VCycleMG::VCycleMG(Field const &out, Field const &b) :
+VCycleMG::VCycleMG() :
         m_levels(DomainData::getInstance()->get_levels()),
         m_n_cycle(Parameters::getInstance()->get_int("solver/pressure/n_cycle")),
         m_n_relax(Parameters::getInstance()->get_int("solver/pressure/diffusion/n_relax")),
@@ -54,17 +54,17 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
 
     // copies of out and b to prevent aliasing
     // residuum
-    auto *b_res1 = new Field(b);
+    auto *b_res1 = new Field(FieldType::P);
     b_res1->copyin();
     m_residuum1[0] = b_res1;
 
     // error
-    auto *out_err1 = new Field(out);
+    auto *out_err1 = new Field(FieldType::P);
     out_err1->copyin();
     m_error1[0] = out_err1;
 
     // temporal solution
-    auto *out_tmp = new Field(out);
+    auto *out_tmp = new Field(FieldType::P);
     out_tmp->copyin();
     m_mg_temporal_solution[0] = out_tmp;
 

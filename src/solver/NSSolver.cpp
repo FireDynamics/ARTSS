@@ -31,9 +31,7 @@ NSSolver::NSSolver(FieldController *field_controller) {
 
     //Pressure
     std::string pressureType = params->get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(&pres, pressureType,
-                                       m_field_controller->get_field_p(),
-                                       m_field_controller->get_field_rhs());
+    SolverSelection::SetPressureSolver(&pres, pressureType);
 
     //Source
     std::string sourceType = params->get("solver/source/type");
