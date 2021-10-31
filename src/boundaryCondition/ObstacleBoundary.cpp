@@ -63,7 +63,7 @@ namespace {
     void apply_dirichlet(Field &field, MultipleJoinedList *mjl, size_t id, Patch p, real value) {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger("ObstacleBoundary");
-        logger->debug("applying dirichlet to patch {}",
+        logger->debug("applying dirichlet to id={} patch {}", id,
                       PatchObject::get_patch_name(static_cast<Patch>(p)));
 #endif
         size_t level = field.get_level();

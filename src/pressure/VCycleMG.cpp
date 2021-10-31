@@ -13,6 +13,8 @@
 #include "../diffusion/JacobiDiffuse.h"
 #include "../solver/SolverSelection.h"
 #include "../utility/Parameters.h"
+#include "../visualisation/Visual.h"
+#include "../visualisation/VTKWriter.h"
 
 
 VCycleMG::VCycleMG(Field const &out, Field const &b) :
@@ -214,7 +216,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
     //===================== No refinement, when max_level = 0 =========//
     if (m_levels == 0) {
         Field *field_mg_temporal_level = m_mg_temporal_solution[0];
-        Field *field_residuum1_level = m_residuum1[0];
+        Field *field_residuum1_level = m_residuum1[0];  // b
 #pragma acc data present(out, field_mg_temporal_level, field_residuum1_level)
         {
             Solve(out, *field_mg_temporal_level, *field_residuum1_level, m_levels, sync);
@@ -250,8 +252,8 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
     }
 
     out.update_dev();
-    out.copy_data(*m_error0[0]);
-    for (size_t level = m_levels; level > 1; --level) {
+    out.copy_data(*(m_error0[0]));
+    for (size_t level = m_levels - 1; level > 1; --level) {
         Field *field_error0_level_minus_1 = *(m_error0 + level - 1);
         Field *field_error1_level = *(m_error1 + level);
         Field *field_error1_level_minus_1 = *(m_error1 + level - 1);
