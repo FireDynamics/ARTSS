@@ -40,7 +40,7 @@ void JacobiDiffuse::diffuse(Field &out, const Field &in, const Field &b,
     auto domain = DomainData::getInstance();
     auto boundary = BoundaryController::getInstance();
 
-    size_t bsize_i = boundary->get_size_domain_inner_list();
+    size_t bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
 
     size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
@@ -136,7 +136,7 @@ void JacobiDiffuse::diffuse(
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_domain_inner_list();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
     size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
     size_t *domain_list = boundary->get_domain_list_level_joined();
@@ -242,13 +242,15 @@ void JacobiDiffuse::JacobiStep(
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_domain_inner_list();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(out.get_level());
+    size_t start_index = boundary->get_domain_inner_list_level_joined_start(out.get_level());
+    size_t end_index = boundary->get_domain_inner_list_level_joined_end(out.get_level()) + 1;
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
     size_t neighbour_k = Nx * Ny;
 #pragma acc parallel loop independent present(out, in, b, d_inner_list[:bsize_i]) async
-    for (size_t j = 0; j < bsize_i; ++j) {
+    for (size_t j = start_index; j < end_index; ++j) {
         const size_t i = d_inner_list[j];
         real out_h = (dsign * b[i]
                 + alpha_x * (in[i + neighbour_i] + in[i - neighbour_i])
@@ -346,7 +348,7 @@ void JacobiDiffuse::JacobiStep(
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_domain_inner_list();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;

@@ -164,7 +164,7 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
         const real reciprocal_dz2 = 1. / (dz * dz);
 
         BoundaryController *boundary = BoundaryController::getInstance();
-        const size_t bsize_i = boundary->get_size_domain_inner_list();
+        const size_t bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
         size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
 
         const size_t neighbour_i = 1;
@@ -627,7 +627,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
 
     BoundaryController *boundary = BoundaryController::getInstance();
     size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
-    const size_t bsize_i = boundary->get_size_domain_inner_list();
+    const size_t bsize_i = boundary->get_size_domain_inner_list_level_joined(level);
 
     const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
     const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level) + 1;
@@ -738,7 +738,7 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
     BoundaryController *boundary = BoundaryController::getInstance();
 
     size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
-    const size_t bsize_i = boundary->get_size_domain_inner_list();
+    const size_t bsize_i = boundary->get_size_domain_inner_list_level_joined(level);
 
     const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
     const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level) + 1;

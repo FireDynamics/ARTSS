@@ -64,7 +64,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -111,7 +111,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -154,13 +154,13 @@ namespace Functions {
         real nu = params->get_real("physical_parameters/nu");  // 1.;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t *domain_list = boundary->get_domain_list_level_joined();
+        size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-        for (size_t i = 0; i < size_inner_list; i++) {
-            size_t idx = inner_list[i];
+        for (size_t i = 0; i < size_domain_list; i++) {
+            size_t idx = domain_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -195,13 +195,13 @@ namespace Functions {
         real nu = params->get_real("physical_parameters/nu");  // 1.;
 
         auto boundary = BoundaryController::getInstance();
-        size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t *domain_list = boundary->get_domain_list_level_joined();
+        size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-        for (size_t i = 0; i < size_inner_list; i++) {
-            size_t idx = inner_list[i];
+        for (size_t i = 0; i < size_domain_list; i++) {
+            size_t idx = domain_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -236,13 +236,13 @@ namespace Functions {
         real nu = params->get_real("physical_parameters/nu");
 
         auto boundary = BoundaryController::getInstance();
-        size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t *domain_list = boundary->get_domain_list_level_joined();
+        size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-        for (size_t i = 0; i < size_inner_list; i++) {
-            size_t idx = inner_list[i];
+        for (size_t i = 0; i < size_domain_list; i++) {
+            size_t idx = domain_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -265,7 +265,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
         // inner cells
         for (size_t i = 0; i < size_inner_list; i++) {
@@ -307,7 +307,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
@@ -354,7 +354,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
         size_t coords_k, coords_i, coords_j;
 
@@ -387,7 +387,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
         // inner cells
         for (size_t i = 0; i < size_inner_list; i++) {
@@ -429,7 +429,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         //inner cells
@@ -473,7 +473,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         if (Nz > 3) {
@@ -535,7 +535,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -581,7 +581,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -672,7 +672,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
         real x, y, z;
 
@@ -742,7 +742,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -822,7 +822,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
@@ -851,7 +851,7 @@ namespace Functions {
     void Random(Field &out, real range, bool is_absolute, int seed, real step_size) {
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
         std::mt19937 mt;
         double steps = range / step_size;
@@ -899,7 +899,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
@@ -923,12 +923,12 @@ namespace Functions {
 // ***************************************************************************************
     void Uniform(Field &out, real val) {
         auto boundary = BoundaryController::getInstance();
-        size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t *domain_list = boundary->get_domain_list_level_joined();
+        size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
 
         // inner cells
-        for (size_t i = 0; i < size_inner_list; i++) {
-            size_t idx = inner_list[i];
+        for (size_t i = 0; i < size_domain_list; i++) {
+            size_t idx = domain_list[i];
             out[idx] = val;
         }
     }
@@ -969,7 +969,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
@@ -1020,7 +1020,7 @@ namespace Functions {
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;
 
         // inner cells

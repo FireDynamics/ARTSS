@@ -128,7 +128,7 @@ real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
 
     auto boundary = BoundaryController::getInstance();
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_domain_inner_list();
+    size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
     //// weighted 2-norm
     // absolute error
@@ -165,7 +165,7 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
 
     auto boundary = BoundaryController::getInstance();
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_domain_inner_list();
+    size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
     // relative part with norm of analytical solution as denominator
     for (size_t i = 0; i < size_inner_list; i++) {
@@ -226,7 +226,7 @@ void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t,
     auto boundary = BoundaryController::getInstance();
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
 
-    size_t ix = inner_list[boundary->get_size_domain_inner_list() / 2];
+    size_t ix = inner_list[boundary->get_size_domain_inner_list_level_joined(0) / 2];
     //take median of indices in inner_list to get center point ix
     //std::nth_element(inner_list.begin(), inner_list.begin() + inner_list.size()/2, inner_list.end());
     //size_t ix = inner_list[inner_list.size()/2];
@@ -341,7 +341,7 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
 
     // local variables and parameters
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_domain_inner_list();
+    size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
     real dx = domain->get_dx();
     real dy = domain->get_dy();

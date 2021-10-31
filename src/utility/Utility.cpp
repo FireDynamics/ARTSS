@@ -157,7 +157,7 @@ namespace Utility {
 #endif
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list();
+        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
         size_t idx = inner_list[0];
         real minimum_inner = field[idx];

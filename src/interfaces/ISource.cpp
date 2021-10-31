@@ -82,7 +82,7 @@ void ISource::dissipate(
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_domain_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_domain_inner_list();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;

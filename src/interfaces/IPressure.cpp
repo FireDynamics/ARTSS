@@ -37,7 +37,7 @@ void IPressure::divergence(
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
 
-    auto bsize_i = boundary->get_size_domain_inner_list();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
     // start indices for computational domain minus 1 for ghost cells
     size_t x1 = domain->get_index_x1() - 1;
@@ -144,7 +144,7 @@ void IPressure::projection(
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
 
-    auto bsize_i = boundary->get_size_domain_inner_list();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
