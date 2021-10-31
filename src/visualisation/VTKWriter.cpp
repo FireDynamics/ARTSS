@@ -468,7 +468,8 @@ void VTKWriter::vtk_prepare_and_write_debug(const char *filename, read_ptr *data
 }
 
 void VTKWriter::write_field(const Field &field, const std::string &filename, const std::string &var_name) {
-    std::string fname = std::to_string(vtk_counter++) + "_" + filename;
+    /*
+    std::string fname = std::to_string(VTKWriter::vtk_counter++) + "_" + filename;
     int size_vars = 1;
     const char *var_names[] = {"x-coords", "y-coords", "z-coords",
                                "index_i", "index_j", "index_k",
@@ -546,4 +547,5 @@ void VTKWriter::write_field(const Field &field, const std::string &filename, con
     delete[] (x_coords);
     delete[] (y_coords);
     delete[] (z_coords);
+     */
 }

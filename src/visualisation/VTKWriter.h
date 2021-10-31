@@ -12,7 +12,6 @@
 
 class VTKWriter {
 public:
-    static int vtk_counter;
     static void write_numerical(const FieldController &field_controller, const std::string &filename);
     static void write_analytical(const Solution &solution, const std::string &filename);
     static void write_field(const Field &field, const std::string &filename, const std::string &var_name);
@@ -35,6 +34,7 @@ private:
                                       read_ptr u, read_ptr v, read_ptr w,
                                       read_ptr p,
                                       read_ptr T);
+    static int vtk_counter;
 };
 
 #endif /* ARTSS_VISUALISATION_VTKWRITER_H */
