@@ -22,13 +22,24 @@ namespace DomainBoundary {
         /// \param  sign Sign of boundary condition ( POSITIVE_SIGN or NEGATIVE_SIGN )
         // *********************************************************************************************
         void apply_boundary_condition(
-                Field &field, const size_t *d_patch, const size_t patch_start, const size_t patch_end,
+                Field &field, SingleJoinedList *jl,
                 int8_t sign_reference_index, size_t reference_index, real value, int8_t sign) {
+            size_t level = field.get_level();
             real *data = field.data;
+            size_t patch_start = jl->get_first_index(level);
+            size_t patch_end = jl->get_last_index(level);
+            size_t patch_size = jl->get_slice_size(level);
+            size_t *d_patch = jl->get_data();
+#ifndef BENCHMARKING
+            auto logger = Utility::create_logger("DomainBoundary");
+            logger->debug("apply_boundary_condition ! apply domain boundary pointer patch: {} size: {}", static_cast<void *>(d_patch), jl->get_size());
+            logger->debug("apply_boundary_condition ! apply domain boundary pointer field: {} size: {}", static_cast<void *>(field.data), field.get_size());
+            logger->debug("apply_boundary_condition ! start {} end {} size {} level {}", patch_start, patch_end, jl->get_slice_size(level), level);
+#endif
 #pragma acc data present(field)
             {
-#pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
-                for (size_t j = patch_start; j < patch_end; ++j) {
+#pragma acc parallel loop independent present(d_patch[patch_start:patch_size]) async
+                for (size_t j = patch_start; j <= patch_end; ++j) {
                     const size_t index = d_patch[j];
                     *(data + index) = sign * *(data + index + sign_reference_index * reference_index) + value;
                 }
@@ -40,14 +51,11 @@ namespace DomainBoundary {
         // *********************************************************************************************
         /// \brief  Apply dirichlet boundary condition
         /// \param  field   Field
-        /// \param  d_patch List of indices for given patch
+        /// \param  jl single joined list which contains the patch data
         /// \param  patch Patch
-        /// \param  patch_start Start Index of Patch
-        /// \param  patch_end End index of patch
         /// \param  value Value of boundary condition
         // *********************************************************************************************
-        void apply_dirichlet(Field &field, size_t *d_patch, Patch patch,
-                             const size_t patch_start, const size_t patch_end, real value) {
+        void apply_dirichlet(Field &field, SingleJoinedList *jl, Patch patch, real value) {
             DomainData *domain = DomainData::getInstance();
             size_t level = field.get_level();
             size_t reference_index = 0;
@@ -77,8 +85,7 @@ namespace DomainBoundary {
                 sign_reference_index = NEGATIVE_SIGN;
             }
 
-            apply_boundary_condition(field, d_patch, patch_start, patch_end,
-                                     sign_reference_index, reference_index, value * 2, NEGATIVE_SIGN);
+            apply_boundary_condition(field, jl, sign_reference_index, reference_index, value * 2, NEGATIVE_SIGN);
         }
 
         //======================================== Apply neumann =======================================
@@ -91,8 +98,7 @@ namespace DomainBoundary {
         /// \param  patch_end End index of patch
         /// \param  value Value of boundary condition
         // *********************************************************************************************
-        void apply_neumann(Field &field, size_t *d_patch, Patch patch,
-                           size_t patch_start, size_t patch_end, real value) {
+        void apply_neumann(Field &field, SingleJoinedList *jl, Patch patch, real value) {
             size_t level = field.get_level();
             DomainData *domain = DomainData::getInstance();
             size_t reference_index = 0;
@@ -124,8 +130,7 @@ namespace DomainBoundary {
             if (patch == BACK || patch == TOP || patch == RIGHT) {
                 sign_reference_index = NEGATIVE_SIGN;
             }
-            apply_boundary_condition(field, d_patch, patch_start, patch_end,
-                                     sign_reference_index, reference_index, value, POSITIVE_SIGN);
+            apply_boundary_condition(field, jl, sign_reference_index, reference_index, value, POSITIVE_SIGN);
         }
 
         //======================================== Apply periodic ======================================
@@ -138,8 +143,7 @@ namespace DomainBoundary {
         /// \param  patch_end End index of patch
         /// \param  level Multigrid level
         // *********************************************************************************************
-        void apply_periodic(Field &field, size_t *d_patch, Patch patch,
-                            const size_t patch_start, const size_t patch_end) {
+        void apply_periodic(Field &field, SingleJoinedList *jl, Patch patch) {
             size_t level = field.get_level();
             DomainData *domain = DomainData::getInstance();
             size_t Nx = domain->get_Nx(level);
@@ -173,8 +177,7 @@ namespace DomainBoundary {
                 sign_reference_index = NEGATIVE_SIGN;
             }
 
-            apply_boundary_condition(field, d_patch, patch_start, patch_end,
-                                     sign_reference_index, reference_index, 0, POSITIVE_SIGN);
+            apply_boundary_condition(field, jl, sign_reference_index, reference_index, 0, POSITIVE_SIGN);
         }
     }
 
@@ -193,32 +196,31 @@ namespace DomainBoundary {
         for (size_t i = 0; i < number_of_patches; i++) {
             size_t level = field.get_level();
             SingleJoinedList *jl = index_fields[i];
-            size_t *d_patch = jl->get_data();
-            size_t patch_start = jl->get_first_index(level);
-            size_t patch_end = jl->get_last_index(level);
+            size_t patch_size = jl->get_slice_size(level);
+            if (patch_size == 0) {
+                continue;
+            }
             auto p = static_cast<Patch>(i);
+#ifndef BENCHMARKING
+            logger->debug("apply_boundary_condition ! level {} for {}", jl->get_slice_size(level), level, PatchObject::get_patch_name(p));
+#endif
             BoundaryCondition bc = boundary_data->get_boundary_condition(p);
             real value = 0;
-#ifndef BENCHMARKING
-            logger->debug("apply_boundary_condition ! apply domain boundary pointer patch: {} size: {}", static_cast<void *>(d_patch), jl->get_size());
-            logger->debug("apply_boundary_condition ! apply domain boundary pointer field: {} size: {}", static_cast<void *>(field.data), field.get_size());
-            logger->debug("apply_boundary_condition ! start {} end {} size {} level {} patch {}", patch_start, patch_end, jl->get_slice_size(level), level, PatchObject::get_patch_name(p));
-#endif
             switch (bc) {
                 case BoundaryCondition::DIRICHLET:
                     if (field.get_level() == 0) {
                         value = boundary_data->get_value(p);
                     }
-                    apply_dirichlet(field, d_patch, p, patch_start, patch_end, value);
+                    apply_dirichlet(field, jl, p, value);
                     break;
                 case BoundaryCondition::NEUMANN:
                     if (field.get_level() == 0) {
                         value = boundary_data->get_value(p);
                     }
-                    apply_neumann(field, d_patch, p, patch_start, patch_end, value);
+                    apply_neumann(field, jl, p, value);
                     break;
                 case BoundaryCondition::PERIODIC:
-                    apply_periodic(field, d_patch, p, patch_start, patch_end);
+                    apply_periodic(field, jl, p);
                     break;
                 default:
 #ifndef BENCHMARKING

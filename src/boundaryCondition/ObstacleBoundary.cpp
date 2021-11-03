@@ -28,18 +28,19 @@ namespace {
                                   real value, int8_t sign) {
         size_t *d_patch = mjl->get_data();
         size_t patch_start = mjl->get_first_index(field.get_level(), id);
-        size_t patch_end = mjl->get_last_index(field.get_level(), id);
+        size_t patch_end = mjl->get_last_index(field.get_level(), id) ;
+        size_t patch_size = mjl->get_slice_size(field.get_level(), id);
 #ifdef GPU_DEBUG
         auto gpu_logger = Utility::create_gpu_logger("ObstacleBoundary_GPU");
-        gpu_logger->debug("applying for [{};{}) with length {} at level {}, pointer {}, field pointer {}",
-                      patch_start, patch_end,patch_end-patch_start, field.get_level(),
+        gpu_logger->debug("applying for [{};{}] with length {} at level {}, pointer {}, field pointer {}",
+                      patch_start, patch_end, patch_size, field.get_level(),
                       static_cast<void *>(field.data), static_cast<void *>(&field));
         gpu_logger->debug("patch pointer: {}", static_cast<void *>(d_patch));
 #endif
 #pragma acc data present(field)
         {
-#pragma acc parallel loop independent present(d_patch[patch_start:(patch_end-patch_start)]) async
-            for (size_t j = patch_start; j < patch_end; ++j) {
+#pragma acc parallel loop independent present(d_patch[patch_start:patch_size]) async
+            for (size_t j = patch_start; j <= patch_end; ++j) {
                 const size_t index = d_patch[j];
                 field[index] = sign
                         * field[index + sign_reference_index * static_cast<int>(reference_index)]
