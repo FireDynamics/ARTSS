@@ -62,6 +62,9 @@ class Field {
     /// \brief fill data array with the specified number
     /// \param val value to be set
     void set_value(real val) const {
+#ifdef GPU_DEBUG
+        m_gpu_logger->debug("set value to {} for {}", val, static_cast<void *>(data));
+#endif
 #pragma acc parallel loop independent present(this->data[:m_size]) async
         for (size_t i = 0; i < m_size; i++) {
             this->data[i] = val;
@@ -73,6 +76,12 @@ class Field {
     /// \param Field &other
     void copy_data(const Field &other) const {
         auto other_data = other.data;
+#ifdef GPU_DEBUG
+        m_gpu_logger->debug("copy data of {} ({}) to {} ({}) for level {}",
+                            get_field_type_name(other.get_type()), static_cast<void *>(other_data),
+                            get_field_type_name(m_type), static_cast<void *>(data),
+                            m_level);
+#endif
 #pragma acc parallel loop independent present(this->data[:m_size], other_data[:m_size]) async
         for (size_t i = 0; i < m_size; ++i) {
             this->data[i] = other_data[i];

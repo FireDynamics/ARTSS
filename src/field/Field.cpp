@@ -14,7 +14,7 @@ Field::Field(FieldType type) :
     data = new real[m_size];
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
-    m_gpu_logger->info("{}{} create with field pointer: {} data pointer: {}",
+    m_gpu_logger->info("{} level {} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
 #endif
@@ -42,7 +42,7 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
     data = new real[m_size];
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
-    m_gpu_logger->info("{}{} create with field pointer: {} data pointer: {}",
+    m_gpu_logger->info("{} level {} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
 #endif
@@ -59,7 +59,7 @@ Field::Field(const Field &original):
         m_size(original.m_size), m_type(original.m_type) {
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
-    m_gpu_logger->info("{}{} create with field pointer: {} data pointer: {}",
+    m_gpu_logger->info("{} level {} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
 #endif

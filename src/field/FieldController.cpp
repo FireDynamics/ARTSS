@@ -55,7 +55,7 @@ FieldController::FieldController():
         field_source_concentration(FieldType::RHO),
 
         // Fields for sight of boundaries
-        sight(FieldType::RHO, 1.0) {
+        sight(FieldType::UNKNOWN_FIELD, 1.0) {
 
     field_u.copyin();
     field_v.copyin();
@@ -69,30 +69,29 @@ FieldController::FieldController():
     field_v_tmp.copyin();
     field_w_tmp.copyin();
 
+    field_nu_t.copyin();
+    field_kappa_t.copyin();
+    field_gamma_t.copyin();
+
     field_p.copyin();
     field_p0.copyin();
     field_rhs.copyin();
 
     field_T.copyin();
+    field_T0.copyin();
+    field_T_tmp.copyin();
     field_T_ambient.copyin();
 
     field_concentration.copyin();
+    field_concentration0.copyin();
+    field_concentration_tmp.copyin();
 
     field_force_x.copyin();
     field_force_y.copyin();
     field_force_z.copyin();
 
     field_source_T.copyin();
-    field_T0.copyin();
-    field_T_tmp.copyin();
-
     field_source_concentration.copyin();
-    field_concentration0.copyin();
-    field_concentration_tmp.copyin();
-
-    field_nu_t.copyin();
-    field_kappa_t.copyin();
-    field_gamma_t.copyin();
 }
 
 // ========================================== Set up boundary =======================================
