@@ -75,8 +75,8 @@ NSTempTurbSolver::NSTempTurbSolver(FieldController *field_controller) {
 
     // Constants
     m_dir_vel = params->get("solver/source/dir");
-    m_hasTurbulence = (params->get("solver/temperature/turbulence/include") == "Yes");
-    m_hasDissipation = (params->get("solver/temperature/source/dissipation") == "Yes");
+    m_hasTurbulence = (params->get("solver/temperature/turbulence/include") == XML_TRUE);
+    m_hasDissipation = (params->get("solver/temperature/source/dissipation") == XML_TRUE);
     m_forceFct = params->get("solver/source/force_fct");
     m_tempFct = params->get("solver/temperature/source/temp_fct");
     control();
