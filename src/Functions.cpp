@@ -17,6 +17,7 @@
 #include "DomainData.h"
 #include "utility/Utility.h"
 #include "boundary/BoundaryController.h"
+#include "interfaces/IRandomField.h"
 
 const std::string FunctionNames::Beltrami = "Beltrami";
 const std::string FunctionNames::BuoyancyMMS = "BuoyancyMMS";
@@ -906,6 +907,7 @@ namespace Functions {
         }
         std::uniform_int_distribution<int> dist(-steps, steps);
 
+        out.update_host();
         // inner cells
         for (size_t i = 0; i < size_domain_list; i++) {
             size_t idx = domain_list[i];
