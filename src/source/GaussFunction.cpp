@@ -71,7 +71,7 @@ void GaussFunction::create_spatial_values() {
 
     // set Gaussian to cells
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_domain_inner_list_level_joined();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
 
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
@@ -79,7 +79,7 @@ void GaussFunction::create_spatial_values() {
 
     real V = 0.;
     for (size_t l = 0; l < bsize_i; ++l) {
-        const size_t idx = d_iList[l];
+        const size_t idx = d_inner_list[l];
         size_t k = getCoordinateK(idx, Nx, Ny);
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
@@ -94,8 +94,10 @@ void GaussFunction::create_spatial_values() {
     HRRrV = m_HRR / V;       // in case of concentration Ys*HRR
     real rcp = 1. / m_cp;    // to get [K/s] for energy equation (d_t T), rho:=1, otherwise *1/rho; in case of concentration 1/Hc to get kg/m^3s
 
+
+#pragma acc parallel loop independent present(m_field_spatial_values, d_inner_list[:bsize_i]) async
     for (size_t l = 0; l < bsize_i; ++l) {
-        const size_t idx = d_iList[l];
+        const size_t idx = d_inner_list[l];
         size_t k = getCoordinateK(idx, Nx, Ny);
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
@@ -106,7 +108,6 @@ void GaussFunction::create_spatial_values() {
         real expr = std::exp(-(r_sigma_x_2 * x_i * x_i + r_sigma_y_2 * y_j * y_j + r_sigma_z_2 * z_k * z_k));
         m_field_spatial_values[idx] = HRRrV * rcp * expr;
     }
-    m_field_spatial_values.update_dev();
 }
 
 // ============================= Ramp up function for HRR source =========================

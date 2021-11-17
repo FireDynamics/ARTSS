@@ -49,6 +49,7 @@ void BuoyancyMMS::set_up() {
     auto size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
 
     // inner cells
+#pragma acc parallel loop independent present(m_source_field, domain_list[:size_domain_list]) async
     for (size_t l = 0; l < size_domain_list; ++l) {
         const size_t idx = domain_list[l];
         size_t k = getCoordinateK(idx, Nx, Ny);
@@ -56,8 +57,6 @@ void BuoyancyMMS::set_up() {
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
         m_source_field[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
     }
-
-    m_source_field.update_dev();
 }
 
 void BuoyancyMMS::update_source(Field &out, real t_cur) {

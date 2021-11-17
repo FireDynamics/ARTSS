@@ -224,7 +224,6 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         return;
     }
 
-    out.update_dev();
     m_error1[0]->copy_data(out);
     for (size_t level = 0; level < m_levels; ++level) {
         Field *field_residuum0_level = *(m_residuum0 + level);
@@ -251,7 +250,6 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         }
     }
 
-    out.update_dev();
     out.copy_data(*(m_error0[0]));
     for (size_t level = m_levels; level > 0; --level) {
         Field *field_error0_level_minus_1 = *(m_error0 + level - 1);
