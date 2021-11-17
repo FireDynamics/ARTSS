@@ -41,12 +41,10 @@ SolverController::SolverController() {
 #endif
     set_up_sources();
     set_up_fields(string_solver);
-    m_field_controller->update_device();
 #ifndef BENCHMARKING
     m_logger->debug("set up boundary");
 #endif
     m_field_controller->set_up_boundary();
-    m_field_controller->update_host();
     m_field_controller->update_data();
 
     source_velocity = nullptr;
@@ -638,12 +636,6 @@ void SolverController::update_sources(real t_cur, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Update f(T) ...");
 #endif
-            if (params->get("solver/source/use_init_values") == XML_FALSE) {
-                int ambient_temperature_value = params->get_int("solver/source/ambient_temperature_value");
-                m_field_controller->get_field_T_ambient().set_value(ambient_temperature_value);
-            } else {
-                m_field_controller->get_field_T_ambient().copy_data(m_field_controller->get_field_T());
-            }
             momentum_source();
         } else {
 #ifndef BENCHMARKING
@@ -657,7 +649,6 @@ void SolverController::update_sources(real t_cur, bool sync) {
     // Temperature source
     if (m_has_temperature) {
         m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
-        std::string tempFct = params->get("solver/temperature/source/temp_fct");
     }
 
     // Concentration source
