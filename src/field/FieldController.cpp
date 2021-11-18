@@ -205,7 +205,21 @@ void FieldController::update_device() {
 #pragma acc wait
 }
 
-void FieldController::update_host(){
+void FieldController::update_host() {
+    field_u.update_host();
+    field_v.update_host();
+    field_w.update_host();
+    field_p.update_host();
+    field_rhs.update_host();
+    field_T.update_host();
+    field_concentration.update_host();
+    field_nu_t.update_host();
+    field_source_T.update_host();
+    field_source_concentration.update_host();
+#pragma acc wait
+}
+
+void FieldController::update_host_debug() {
     field_u.update_host();
     field_v.update_host();
     field_w.update_host();

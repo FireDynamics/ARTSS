@@ -105,6 +105,7 @@ class FieldController {
     static void couple_scalar(const Field &a, Field &a0, Field &a_tmp, bool sync);
 
     void update_device();
+    void update_host_debug();
     void update_host();
  private:
     Field field_u, field_v, field_w;          // velocities

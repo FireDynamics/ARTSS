@@ -61,11 +61,17 @@ SolverController::~SolverController() {
 }
 
 void SolverController::set_up_sources() {
+#ifndef BENCHMARKING
+    m_logger->debug("set up sources");
+#endif
     auto params = Parameters::getInstance();
     // source of temperature
     if (m_has_temperature) {
         // source
         std::string temp_type = params->get("solver/temperature/source/type");
+#ifndef BENCHMARKING
+        m_logger->debug("create temperature type function {}", temp_type);
+#endif
         if (temp_type == SourceMethods::ExplicitEuler) {
             source_temperature = new ExplicitEulerSource();
         } else {
@@ -77,6 +83,9 @@ void SolverController::set_up_sources() {
         }
         // temperature function
         std::string temp_fct = params->get("solver/temperature/source/temp_fct");
+#ifndef BENCHMARKING
+        m_logger->debug("create temperature source function {}", temp_fct);
+#endif
         if (temp_fct == SourceMethods::GaussST) {
             real HRR = params->get_real("solver/temperature/source/HRR");    // heat release rate in [kW]
             real cp = params->get_real("solver/temperature/source/cp");        // specific heat capacity in [kJ/ kg K]
@@ -513,12 +522,13 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 
     // Sight of boundaries
     auto boundary = BoundaryController::getInstance();
-    size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
+    size_t *domain_list = boundary->get_domain_inner_list_level_joined();
+    size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
 
     Field &sight = m_field_controller->get_field_sight();
-    for (size_t i = 0; i < size_inner_list; i++) {
-        size_t idx = inner_list[i];
+    sight.update_host();
+    for (size_t i = 0; i < size_domain_list; i++) {
+        size_t idx = domain_list[i];
         sight[idx] = 0.;
     }
 }
@@ -561,7 +571,7 @@ void SolverController::temperature_source() {
 
 //======================================= Update data ==================================
 // ***************************************************************************************
-/// \brief  Updates time dependent parameters force source functions
+/// \brief  Updates time dependent parameters force source functions, once at initialisation
 // ***************************************************************************************
 void SolverController::force_source() {
     auto params = Parameters::getInstance();

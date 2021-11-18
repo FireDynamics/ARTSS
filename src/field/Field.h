@@ -36,6 +36,13 @@ class Field {
     return_ptr get_data() const { return data; }
     size_t get_level() const { return m_level; }
     size_t get_size() const { return m_size; }
+    real get_sum() const {
+        real sum = 0;
+        for (size_t i = 0; i < m_size; i++) {
+            sum += data[i];
+        }
+        return sum;
+    }
 
     // setter
     inline real &operator[](size_t i) const { return data[i]; }
@@ -55,7 +62,7 @@ class Field {
     void copyin() {
 #pragma acc enter data copyin(data[:m_size])
 #ifdef GPU_DEBUG
-    m_gpu_logger->debug("{}{} copyin with data pointer: {}", get_field_type_name(m_type), m_level, static_cast<void *>(data));
+    m_gpu_logger->debug("{} level {} copyin with data pointer: {}", get_field_type_name(m_type), m_level, static_cast<void *>(data));
 #endif
     }
 

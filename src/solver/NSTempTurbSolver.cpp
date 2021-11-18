@@ -101,6 +101,8 @@ NSTempTurbSolver::~NSTempTurbSolver() {
 // ***************************************************************************************
 void NSTempTurbSolver::do_step(real t, bool sync) {
     auto params = Parameters::getInstance();
+    size_t counter = 0;
+    std::string filename = "tunnel_debug_" + std::to_string(t) + "_";
 
     // local variables and parameters for GPU
     Field &u = m_field_controller->get_field_u();

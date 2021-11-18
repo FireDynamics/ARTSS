@@ -64,52 +64,17 @@ void Visual::visualise(const FieldController &field_controller, real t) {
 }
 
 void Visual::write_csv(FieldController &field_controller, const std::string &filename){
-    //TODO method update host can be called here?
-    field_controller.get_field_u().update_host();
-    field_controller.get_field_v().update_host();
-    field_controller.get_field_w().update_host();
-    field_controller.get_field_p().update_host();
-    field_controller.get_field_rhs().update_host();
-    field_controller.get_field_T().update_host();
-    field_controller.get_field_concentration().update_host();
-    field_controller.get_field_source_T().update_host();
-    field_controller.get_field_source_concentration().update_host();
-    field_controller.get_field_nu_t().update_host();
+    field_controller.update_host();
     CSVWriter::write_numerical(field_controller, filename);
 }
 
 void Visual::write_vtk(FieldController &field_controller, const std::string &filename){
-    //TODO method update host can be called here?
-    field_controller.get_field_u().update_host();
-    field_controller.get_field_v().update_host();
-    field_controller.get_field_w().update_host();
-    field_controller.get_field_p().update_host();
-    field_controller.get_field_rhs().update_host();
-    field_controller.get_field_T().update_host();
-    field_controller.get_field_concentration().update_host();
-    field_controller.get_field_source_T().update_host();
-    field_controller.get_field_source_concentration().update_host();
-    field_controller.get_field_nu_t().update_host();
+    field_controller.update_host();
     VTKWriter::write_numerical(field_controller, filename);
 }
 
 void Visual::write_vtk_debug(FieldController &field_controller, const std::string &filename){
-    //TODO method update host can be called here?
-    field_controller.get_field_u().update_host();
-    field_controller.get_field_v().update_host();
-    field_controller.get_field_w().update_host();
-    field_controller.get_field_p().update_host();
-    field_controller.get_field_rhs().update_host();
-    field_controller.get_field_T().update_host();
-    field_controller.get_field_concentration().update_host();
-    field_controller.get_field_source_T().update_host();
-    field_controller.get_field_source_concentration().update_host();
-    field_controller.get_field_nu_t().update_host();
-    field_controller.get_field_force_x().update_host();
-    field_controller.get_field_force_y().update_host();
-    field_controller.get_field_force_z().update_host();
-    field_controller.get_field_kappa().update_host();
-    field_controller.get_field_gamma().update_host();
+    field_controller.update_host_debug();
     VTKWriter::write_numerical_debug(field_controller, filename);
 }
 

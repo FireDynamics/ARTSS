@@ -24,6 +24,18 @@
 namespace Utility {
     static std::string class_name = "Utility";
 
+
+    std::vector<size_t> get_coordinates(size_t index, size_t Nx, size_t Ny) {
+        std::vector<size_t> coordinates;
+        coordinates.reserve(3);
+        size_t k = getCoordinateK(index, Nx, Ny);
+        size_t j = getCoordinateJ(index, Nx, Ny, k);
+        size_t i = getCoordinateI(index, Nx, Ny, j, k);
+        coordinates.push_back(i);
+        coordinates.push_back(j);
+        coordinates.push_back(k);
+        return coordinates;
+    }
 //======================================== get index ===============================================
 // *************************************************************************************************
 /// \brief  Snaps value to grid discretisation
