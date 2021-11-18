@@ -8,11 +8,13 @@
 #ifndef ARTSS_UTILITY_PARAMETERS_H
 #define ARTSS_UTILITY_PARAMETERS_H
 
+#include <memory>
 #include <string>
 #include <iostream>
 #include <fstream>
 
 #include "tinyxml2.h"
+#include "spdlog/logger.h"
 #include "GlobalMacrosTypes.h"
 #include "Utility.h"
 

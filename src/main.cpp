@@ -8,6 +8,7 @@
 #include "TimeIntegration.h"
 #include "utility/tinyxml2.h"
 #include "utility/Parameters.h"
+#include "utility/Settings.h"
 #include "solver/SolverController.h"
 
 #ifdef _OPENACC
@@ -26,6 +27,14 @@ int main(int argc, char **argv) {
         std::cerr << "XML file missing" << std::endl;
         std::exit(1);
     }
+
+    Settings sets(argv[1]);
+    sets.print_config();
+    std::cout << sets.get("physical_parameters/t_end") << "\n";
+    std::cout << sets.get_real("physical_parameters/t_end") << "\n";
+    sets.set("physical_parameters/t_end", "101.314");
+    std::cout << sets.get_real("physical_parameters/t_end") << "\n";
+    sets.print_config();
 
     SolverController *sc = new SolverController();
 

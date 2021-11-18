@@ -8,15 +8,17 @@
 #ifndef ARTSS_UTILITY_SETTINGS_H
 #define ARTSS_UTILITY_SETTINGS_H
 
+#include <map>
 #include <string>
+#include <iostream>
 #include <unordered_map>
 
-#include "Parameters.h"
+#include "tinyxml2.h"
 #include "GlobalMacrosTypes.h"
 
 #ifndef BENCHMARKING
 #include <memory>
-#include "Utility.h"
+#include "spdlog/logger.h"
 #endif
 
 union settings_obj {
@@ -28,34 +30,36 @@ union settings_obj {
 
 class Settings {
  public:
-     Settings() : m_params(Parameters::getInstance())
-#ifndef BENCHMARKING
-    , m_logger(Utility::create_logger(typeid(this).name()))
-#endif
-    {}
+     explicit Settings(std::string path);
+     void print_config() const;
 
-     std::string get(std::string path);
+     std::string get(std::string path) const;
+     std::string sget(std::string path) const;
      void set(std::string path, std::string val) {
-         m_proxy.insert({path, val});
+         sset(path, val);
 #ifndef BENCHMARKING
          m_logger->debug("set: \"{}\" to value: \"{}\"", path, val);
 #endif
      }
+     void sset(std::string path, std::string val) {
+         m_proxy.insert({path, val});
+     }
 
-     bool get_bool(std::string path) {
+     bool get_bool(std::string path) const {
          return get(path) == "Yes";
      }
 
-     int get_int(std::string path) {
+     int get_int(std::string path) const {
          return real(std::stoi(get(path)));
      }
 
-     real get_real(std::string path) {
+     real get_real(std::string path) const {
          return real(std::stod(get(path)));
      }
 
  private:
-     Parameters *m_params;
+     void read_config(std::string prefix, tinyxml2::XMLElement *elem);
+
      std::unordered_multimap<std::string, std::string> m_proxy;
 
 #ifndef BENCHMARKING

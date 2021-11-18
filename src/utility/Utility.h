@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include "Settings.h"
 #include "GlobalMacrosTypes.h"
 
 #ifndef BENCHMARKING
@@ -19,7 +20,9 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #endif
 
+
 class Field;
+
 
 namespace Utility {
     size_t get_index(real physical_coordinate, real spacing, real start_coordinate);
@@ -31,6 +34,7 @@ namespace Utility {
 
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
+    std::shared_ptr<spdlog::logger> create_logger(std::string loggerName, Settings &sets);
 #endif
 }  // namespace Utility
 
