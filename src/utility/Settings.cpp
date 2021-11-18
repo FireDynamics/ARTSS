@@ -36,7 +36,6 @@ void Settings::print_config() const {
 #ifndef BENCHMARKING
     std::map<std::string, std::string> ordered(m_proxy.begin(), m_proxy.end());
     for(auto i = ordered.begin(); i != ordered.end(); ++i) {
-        // std::cout << i->first << " " << i->second << "\n";
         m_logger->debug("{} = \"{}\"", i->first, i->second);
     }
 #endif

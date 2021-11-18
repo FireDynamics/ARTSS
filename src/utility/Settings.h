@@ -21,12 +21,6 @@
 #include "spdlog/logger.h"
 #endif
 
-union settings_obj {
-    bool bool_val;
-    int int_val;
-    real real_val;
-    std::string *str_val;
-};
 
 class Settings {
  public:
