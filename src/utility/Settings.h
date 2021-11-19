@@ -51,10 +51,15 @@ class Settings {
          return real(std::stod(get(path)));
      }
 
+     std::string get_filename() const {
+         return filename;
+     }
+
  private:
      void read_config(std::string prefix, tinyxml2::XMLElement *elem);
 
      std::unordered_multimap<std::string, std::string> m_proxy;
+     std::string filename;
 
 #ifndef BENCHMARKING
      std::shared_ptr<spdlog::logger> m_logger;

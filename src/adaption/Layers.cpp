@@ -7,24 +7,22 @@
 #include "Layers.h"
 #include <chrono>
 #include "../Domain.h"
-#include "../utility/Parameters.h"
 #include "Adaption.h"
 
-Layers::Layers(FieldController *field_controller) :
+Layers::Layers(Settings const &sets, FieldController *field_controller) :
         m_T(field_controller->get_field_T()),
         m_Ta(field_controller->get_field_T_ambient()),
         m_Nu(field_controller->get_field_nu_t()),
         m_kappa(field_controller->get_field_kappa()),
         m_gamma(field_controller->get_field_gamma()) {
-    auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
     m_minimal = static_cast<size_t> (std::pow(2, domain->get_levels()));
     m_timecounter = 0;
 
-    m_no_buffer_cells = static_cast<size_t> (params->get_int("adaption/class/buffer"));
-    m_check_value = params->get_real("adaption/class/check_value");
-    m_timestep = static_cast<size_t> (params->get_int("adaption/class/timestep"));
-    m_expansion_size = static_cast<size_t> (params->get_int("adaption/class/expansion_size"));
+    m_no_buffer_cells = static_cast<size_t> (sets.get_int("adaption/class/buffer"));
+    m_check_value = sets.get_real("adaption/class/check_value");
+    m_timestep = static_cast<size_t> (sets.get_int("adaption/class/timestep"));
+    m_expansion_size = static_cast<size_t> (sets.get_int("adaption/class/expansion_size"));
 }
 
 
@@ -111,7 +109,7 @@ size_t Layers::getExpansionSize() {
 /// \brief  Set values for new domain in x-direction
 /// \params start x-values at x1 (start = true) or x-values at x2 (start=false)
 // ********************************************************************************
-void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2, bool start) {
+void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *, long *, long *, long *, bool start) {
     Domain *domain = Domain::getInstance();
 
     size_t Nx = domain->get_Nx();
@@ -192,7 +190,7 @@ void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shi
     auto domain = Domain::getInstance();
 
     auto data = m_T.data;
-    size_t size = domain->get_size();
+    size_t size __attribute__((unused)) = domain->get_size();
 
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;

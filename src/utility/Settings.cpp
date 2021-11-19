@@ -2,7 +2,8 @@
 #include "Settings.h"
 #include "Utility.h"
 
-Settings::Settings(std::string path) {
+Settings::Settings(std::string path) :
+        filename(path) {
     tinyxml2::XMLDocument doc;
     doc.LoadFile(path.c_str());
 

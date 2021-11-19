@@ -11,6 +11,7 @@
 
 #include "interfaces/ISolver.h"
 #include "interfaces/ISource.h"
+#include "utility/Settings.h"
 #include "utility/GlobalMacrosTypes.h"
 #include "solver/SolverController.h"
 #include "adaption/Adaption.h"
@@ -26,7 +27,7 @@
 
 class TimeIntegration {
  public:
-    explicit TimeIntegration(SolverController *sc);
+    TimeIntegration(Settings const &sets, SolverController *sc);
     void run();
 
  private:

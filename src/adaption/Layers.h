@@ -7,6 +7,7 @@
 #ifndef ARTSS_ADAPTION_LAYERS_H_
 #define ARTSS_ADAPTION_LAYERS_H_
 
+#include "../utility/Settings.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../field/Field.h"
 #include "../interfaces/IAdaptionFunction.h"
@@ -14,7 +15,7 @@
 
 class Layers : public IAdaptionFunction {
 public:
-    explicit Layers(FieldController *field_controller);
+    Layers(Settings const &sets, FieldController *field_controller);
 
     bool update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
     void apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
