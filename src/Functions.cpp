@@ -9,7 +9,6 @@
 #include <random>
 
 #include "Functions.h"
-#include "utility/Parameters.h"
 #include "Domain.h"
 #include "utility/Utility.h"
 #include "boundary/BoundaryController.h"
@@ -43,7 +42,7 @@ namespace Functions {
 /// \param  out_p  pressure
 /// \param  t time
 // ***************************************************************************************
-    void Beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t) {
+    void Beltrami(Settings const &sets, Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -56,11 +55,9 @@ namespace Functions {
         real dy = domain->get_dy();
         real dz = domain->get_dz();
 
-        auto params = Parameters::getInstance();
-
-        real a = params->get_real("initial_conditions/a");  // 0.25 * M_PI;
-        real d = params->get_real("initial_conditions/d");  // 0.5 * M_PI;
-        real nu = params->get_real("physical_parameters/nu");  // 1;
+        real a = sets.get_real("initial_conditions/a");  // 0.25 * M_PI;
+        real d = sets.get_real("initial_conditions/d");  // 0.5 * M_PI;
+        real nu = sets.get_real("physical_parameters/nu");  // 1;
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -114,7 +111,7 @@ namespace Functions {
 /// \brief  Initial pressure set up for NS Test - Beltrami
 /// \param  out_x  pressure
 // ***************************************************************************************
-    void BeltramiBC_p(Field &out_x) {
+    void BeltramiBC_p(Settings const &sets, Field &out_x) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -127,9 +124,8 @@ namespace Functions {
         real dy = domain->get_dy();
         real dz = domain->get_dz();
 
-        auto params = Parameters::getInstance();
 
-        real a = params->get_real("initial_conditions/a");  // 0.25 * M_PI;
+        real a = sets.get_real("initial_conditions/a");  // 0.25 * M_PI;
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -170,7 +166,7 @@ namespace Functions {
 /// \param  out_x  x-velocity
 /// \param  t time
 // ***************************************************************************************
-    void BeltramiBC_u(Field &out_x, real t) {
+    void BeltramiBC_u(Settings const &sets, Field &out_x, real t) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -183,11 +179,10 @@ namespace Functions {
         real dy = domain->get_dy();
         real dz = domain->get_dz();
 
-        auto params = Parameters::getInstance();
 
-        real a = params->get_real("initial_conditions/a");  // 0.25 * M_PI;
-        real d = params->get_real("initial_conditions/d");  // 0.5 * M_PI;
-        real nu = params->get_real("physical_parameters/nu");  // 1.;
+        real a = sets.get_real("initial_conditions/a");  // 0.25 * M_PI;
+        real d = sets.get_real("initial_conditions/d");  // 0.5 * M_PI;
+        real nu = sets.get_real("physical_parameters/nu");  // 1.;
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -222,7 +217,7 @@ namespace Functions {
 /// \param  out_y  y-velocity
 /// \param  t time
 // ***************************************************************************************
-    void BeltramiBC_v(Field &out_x, real t) {
+    void BeltramiBC_v(Settings const &sets, Field &out_x, real t) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -235,11 +230,10 @@ namespace Functions {
         real dy = domain->get_dy();
         real dz = domain->get_dz();
 
-        auto params = Parameters::getInstance();
 
-        real a = params->get_real("initial_conditions/a");  // 0.25 * M_PI;
-        real d = params->get_real("initial_conditions/d");  // 0.5 * M_PI;
-        real nu = params->get_real("physical_parameters/nu");  // 1.;
+        real a = sets.get_real("initial_conditions/a");  // 0.25 * M_PI;
+        real d = sets.get_real("initial_conditions/d");  // 0.5 * M_PI;
+        real nu = sets.get_real("physical_parameters/nu");  // 1.;
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -274,7 +268,7 @@ namespace Functions {
 /// \param  out_z  z-velocity
 /// \param  t time
 // ***************************************************************************************
-    void BeltramiBC_w(Field &out_x, real t) {
+    void BeltramiBC_w(Settings const &sets, Field &out_x, real t) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -287,11 +281,10 @@ namespace Functions {
         real dy = domain->get_dy();
         real dz = domain->get_dz();
 
-        auto params = Parameters::getInstance();
 
-        real a = params->get_real("initial_conditions/a");  // 0.25 * M_PI;
-        real d = params->get_real("initial_conditions/d");  // 0.25 * M_PI;
-        real nu = params->get_real("physical_parameters/nu");
+        real a = sets.get_real("initial_conditions/a");  // 0.25 * M_PI;
+        real d = sets.get_real("initial_conditions/d");  // 0.25 * M_PI;
+        real nu = sets.get_real("physical_parameters/nu");
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -327,10 +320,9 @@ namespace Functions {
 /// \param  T   Temperature
 /// \param  T_ambient    Ambient temperature
 // ***************************************************************************************
-    void BuoyancyForce(Field &out, Field &T, Field &T_ambient) {
-        auto params = Parameters::getInstance();
-        real beta = params->get_real("physical_parameters/beta");
-        real g = params->get_real("physical_parameters/g");  // -9.81;
+    void BuoyancyForce(Settings const &sets, Field &out, Field &T, Field &T_ambient) {
+        real beta = sets.get_real("physical_parameters/beta");
+        real g = sets.get_real("physical_parameters/g");  // -9.81;
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -361,7 +353,7 @@ namespace Functions {
 /// \param  out_T  temperature
 /// \param  t   time
 // ***************************************************************************************
-    void BuoyancyMMS(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t) {
+    void BuoyancyMMS(Settings const &sets, Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -372,11 +364,10 @@ namespace Functions {
         real dx = domain->get_dx();
         real dy = domain->get_dy();
 
-        auto params = Parameters::getInstance();
-        real nu = params->get_real("physical_parameters/nu");
-        real beta = params->get_real("physical_parameters/beta");
-        real g = params->get_real("physical_parameters/g");
-        real rhoa = params->get_real("initial_conditions/rhoa");
+        real nu = sets.get_real("physical_parameters/nu");
+        real beta = sets.get_real("physical_parameters/beta");
+        real g = sets.get_real("physical_parameters/g");
+        real rhoa = sets.get_real("initial_conditions/rhoa");
         real rbeta = 1. / beta;
         real rg = 1. / g;
         real c = 2 * nu * M_PI * M_PI - 1;
@@ -422,7 +413,7 @@ namespace Functions {
 /// \param  out force
 /// \param  t time
 // ***************************************************************************************
-    void BuoyancyST_MMS(Field &out, real t) {
+    void BuoyancyST_MMS(Settings const &sets, Field &out, real t) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -433,12 +424,11 @@ namespace Functions {
         real dx = domain->get_dx();
         real dy = domain->get_dy();
 
-        auto params = Parameters::getInstance();
-        real nu = params->get_real("physical_parameters/nu");
-        real beta = params->get_real("physical_parameters/beta");
-        real kappa = params->get_real("physical_parameters/kappa");
-        real g = params->get_real("physical_parameters/g");
-        real rhoa = params->get_real("initial_conditions/rhoa");
+        real nu = sets.get_real("physical_parameters/nu");
+        real beta = sets.get_real("physical_parameters/beta");
+        real kappa = sets.get_real("physical_parameters/kappa");
+        real g = sets.get_real("physical_parameters/g");
+        real rhoa = sets.get_real("initial_conditions/rhoa");
         real rbeta = 1. / beta;
         real rg = 1. / g;
         real c_nu = 2 * nu * M_PI * M_PI - 1;
@@ -481,13 +471,12 @@ namespace Functions {
 /// \param  out_z  z-velocity
 /// \param  out_p  pressure
 // ***************************************************************************************
-    void Drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
-        auto params = Parameters::getInstance();
+    void Drift(Settings const &sets, Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
 
-        real u_lin = params->get_real("initial_conditions/u_lin");
-        real v_lin = params->get_real("initial_conditions/v_lin");
-        real w_lin = params->get_real("initial_conditions/w_lin");
-        real pa = params->get_real("initial_conditions/pa");
+        real u_lin = sets.get_real("initial_conditions/u_lin");
+        real v_lin = sets.get_real("initial_conditions/v_lin");
+        real w_lin = sets.get_real("initial_conditions/w_lin");
+        real pa = sets.get_real("initial_conditions/pa");
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -521,7 +510,7 @@ namespace Functions {
 /// \param  out velocity
 /// \param  t   time
 // ***************************************************************************************
-    void ExpSinusProd(Field &out, real t) {
+    void ExpSinusProd(Settings const &sets, Field &out, real t) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -534,10 +523,9 @@ namespace Functions {
         real dy = domain->get_dy();
         real dz = domain->get_dz();
 
-        auto params = Parameters::getInstance();
 
-        real nu = params->get_real("physical_parameters/nu");
-        real l = params->get_real("initial_conditions/l");
+        real nu = sets.get_real("physical_parameters/nu");
+        real l = sets.get_real("initial_conditions/l");
         real A = 1.0;
 
         real kpinu = 3 * l * l * M_PI * M_PI * nu;
@@ -581,7 +569,7 @@ namespace Functions {
 /// \param  out_z  z-velocity
 /// \param  t   time
 // ***************************************************************************************
-    void ExpSinusSum(Field &out_x, Field &out_y, Field &out_z, real t) {
+    void ExpSinusSum(Settings const &sets, Field &out_x, Field &out_y, Field &out_z, real t) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -595,9 +583,8 @@ namespace Functions {
         real dy = domain->get_dy();
         real dz = domain->get_dz();
 
-        auto params = Parameters::getInstance();
 
-        real nu = params->get_real("physical_parameters/nu");
+        real nu = sets.get_real("physical_parameters/nu");
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -669,7 +656,7 @@ namespace Functions {
 /// \brief  Initial set up for Diffusion Test (c*sin*sin*sin)
 /// \param  out velocity
 // ***************************************************************************************
-    void FacSinSinSin(Field &out) {
+    void FacSinSinSin(Settings const &sets, Field &out) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -682,8 +669,7 @@ namespace Functions {
         real dy = domain->get_dy();
         real dz = domain->get_dz();
 
-        auto params = Parameters::getInstance();
-        real l = params->get_real("initial_conditions/l"); //2;
+        real l = sets.get_real("initial_conditions/l"); //2;
 
         real dkpi = 3 * l * l * M_PI * M_PI;
         real rdkpi = 1. / dkpi;
@@ -726,7 +712,7 @@ namespace Functions {
 /// \param  out velocity
 /// \param  t time
 // ***************************************************************************************
-    void GaussBubble(Field &out, real t) {
+    void GaussBubble(Settings const &sets, Field &out, real t) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -739,14 +725,13 @@ namespace Functions {
         real dy = domain->get_dy();
         real dz = domain->get_dz();
 
-        auto params = Parameters::getInstance();
-        real u_lin = params->get_real("initial_conditions/u_lin");
-        real v_lin = params->get_real("initial_conditions/v_lin");
-        real w_lin = params->get_real("initial_conditions/w_lin");
-        real x_shift = params->get_real("initial_conditions/x_shift");
-        real y_shift = params->get_real("initial_conditions/y_shift");
-        real z_shift = params->get_real("initial_conditions/z_shift");
-        real l = params->get_real("initial_conditions/l");
+        real u_lin = sets.get_real("initial_conditions/u_lin");
+        real v_lin = sets.get_real("initial_conditions/v_lin");
+        real w_lin = sets.get_real("initial_conditions/w_lin");
+        real x_shift = sets.get_real("initial_conditions/x_shift");
+        real y_shift = sets.get_real("initial_conditions/y_shift");
+        real z_shift = sets.get_real("initial_conditions/z_shift");
+        real l = sets.get_real("initial_conditions/l");
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -790,10 +775,9 @@ namespace Functions {
 /// \brief  Initial set up as layers throughout the domain
 /// \param  out temperature
 // ***************************************************************************************
-    void Layers(Field &out) {
+    void Layers(Settings const &sets, Field &out) {
         auto domain = Domain::getInstance();
-        auto params = Parameters::getInstance();
-        int n_layers = params->get_int("initial_conditions/n_layers");
+        int n_layers = sets.get_int("initial_conditions/n_layers");
 
         // layer border
         real *bord = new real[n_layers + 1];
@@ -802,11 +786,11 @@ namespace Functions {
         for (int l = 1; l < n_layers; ++l) {
             std::string val_bord_l = "initial_conditions/border_";
             val_bord_l += std::to_string(l);
-            val_bord = params->get_real(val_bord_l);
+            val_bord = sets.get_real(val_bord_l);
             bord[l] = val_bord;
         }
 
-        std::string dir = params->get("initial_conditions/dir"); //x,y,z
+        std::string dir = sets.get("initial_conditions/dir"); //x,y,z
 
         if (dir == "x") {
             real x1 = domain->get_x1();
@@ -825,7 +809,7 @@ namespace Functions {
             bord[n_layers] = z2;
         } else {
 #ifndef BENCHMARKING
-            auto m_logger = Utility::create_logger("Functions");
+            auto m_logger = Utility::create_logger(sets, "Functions");
             m_logger->error("No distance for layers specified!");
 #endif
             //TODO(issue 6) Error handling
@@ -839,7 +823,7 @@ namespace Functions {
         for (int l = 0; l < n_layers; ++l) {
             std::string val_out_l = "initial_conditions/value_";
             val_out_l += std::to_string(l + 1);
-            val_out = params->get_real(val_out_l);
+            val_out = sets.get_real(val_out_l);
             val[l] = val_out;
         }
 
@@ -891,7 +875,7 @@ namespace Functions {
                     }
                 } else {
 #ifndef BENCHMARKING
-                    auto m_logger = Utility::create_logger("Functions");
+                    auto m_logger = Utility::create_logger(sets, "Functions");
                     m_logger->error("No distance for layers specified!");
 #endif
                     //TODO(issue 6) Error handling
@@ -931,7 +915,7 @@ namespace Functions {
                     }
                 } else {
 #ifndef BENCHMARKING
-                    auto m_logger = Utility::create_logger("Functions");
+                    auto m_logger = Utility::create_logger(sets, "Functions");
                     m_logger->error("No distance for layers specified!");
 #endif
                     // TODO(issue 6) Error handling
@@ -970,7 +954,7 @@ namespace Functions {
                     }
                 } else {
 #ifndef BENCHMARKING
-                    auto m_logger = Utility::create_logger("Functions");
+                    auto m_logger = Utility::create_logger(sets, "Functions");
                     m_logger->error("No distance for layers specified!");
 #endif
                     // TODO(issue 6) Error handling
@@ -985,7 +969,7 @@ namespace Functions {
 /// \brief  Initial set up for Diffusion Test
 /// \param  out velocity
 // ***************************************************************************************
-    void Hat(Field &out) {
+    void Hat(Settings const &sets, Field &out) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -998,15 +982,14 @@ namespace Functions {
         real dy = domain->get_dy();
         real dz = domain->get_dz();
 
-        auto params = Parameters::getInstance();
-        real start_x = params->get_real("initial_conditions/x1");
-        real end_x = params->get_real("initial_conditions/x2");
-        real start_y = params->get_real("initial_conditions/y1");
-        real end_y = params->get_real("initial_conditions/y2");
-        real start_z = params->get_real("initial_conditions/z1");
-        real end_z = params->get_real("initial_conditions/z2");
-        real val_in = params->get_real("initial_conditions/val_in");
-        real val_out = params->get_real("initial_conditions/val_out");
+        real start_x = sets.get_real("initial_conditions/x1");
+        real end_x = sets.get_real("initial_conditions/x2");
+        real start_y = sets.get_real("initial_conditions/y1");
+        real end_y = sets.get_real("initial_conditions/y2");
+        real start_z = sets.get_real("initial_conditions/z1");
+        real end_z = sets.get_real("initial_conditions/z2");
+        real val_in = sets.get_real("initial_conditions/val_in");
+        real val_out = sets.get_real("initial_conditions/val_out");
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -1090,7 +1073,7 @@ namespace Functions {
 /// \param  out_p  pressure
 /// \param  t   time
 // ***************************************************************************************
-    void McDermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t) {
+    void McDermott(Settings const &sets, Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -1101,10 +1084,9 @@ namespace Functions {
         real dx = domain->get_dx();
         real dy = domain->get_dy();
 
-        auto params = Parameters::getInstance();
-        real nu = params->get_real("physical_parameters/nu");
+        real nu = sets.get_real("physical_parameters/nu");
 
-        real A = params->get_real("initial_conditions/A"); //2;
+        real A = sets.get_real("initial_conditions/A"); //2;
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -1182,7 +1164,7 @@ namespace Functions {
 /// \brief  Initial set up for Pressure Test (sin*sin*sin)
 /// \param  out   pressure
 // ***************************************************************************************
-    void SinSinSin(Field &out) {
+    void SinSinSin(Settings const &sets, Field &out) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -1195,8 +1177,7 @@ namespace Functions {
         real dy = domain->get_dy();
         real dz = domain->get_dz();
 
-        auto params = Parameters::getInstance();
-        real l = params->get_real("initial_conditions/l"); //2;
+        real l = sets.get_real("initial_conditions/l"); //2;
 
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
@@ -1262,7 +1243,7 @@ namespace Functions {
 /// \param  out_z    z-velocity
 /// \param  out_p    pressure
 // ***************************************************************************************
-    void Vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
+    void Vortex(Settings const &sets, Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -1273,16 +1254,15 @@ namespace Functions {
         real dx = domain->get_dx();
         real dy = domain->get_dy();
 
-        auto params = Parameters::getInstance();
 
-        real u_lin = params->get_real("initial_conditions/u_lin");
-        real v_lin = params->get_real("initial_conditions/v_lin");
+        real u_lin = sets.get_real("initial_conditions/u_lin");
+        real v_lin = sets.get_real("initial_conditions/v_lin");
 
         real L = domain->get_lx();
         real R_c = L / 20.;
         real G = 0.04 * u_lin * R_c * sqrt(exp(1));
-        real pa = params->get_real("initial_conditions/pa");
-        real rhoa = params->get_real("initial_conditions/rhoa");
+        real pa = sets.get_real("initial_conditions/pa");
+        real rhoa = sets.get_real("initial_conditions/rhoa");
 
         real GrR_c = G / (R_c * R_c);
         real rR_c = 1. / (2. * R_c * R_c);
@@ -1334,7 +1314,7 @@ namespace Functions {
         }
     }
 
-    void VortexY(Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
+    void VortexY(Settings const &sets, Field &out_x, Field &out_y, Field &out_z, Field &out_p) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -1345,16 +1325,14 @@ namespace Functions {
         real dx = domain->get_dx();
         real dy = domain->get_dy();
 
-        auto params = Parameters::getInstance();
-
-        real u_lin = params->get_real("initial_conditions/u_lin");
-        real v_lin = params->get_real("initial_conditions/v_lin");
+        real u_lin = sets.get_real("initial_conditions/u_lin");
+        real v_lin = sets.get_real("initial_conditions/v_lin");
 
         real L = domain->get_ly();
         real R_c = L / 20.;
         real G = 0.04 * u_lin * R_c * sqrt(exp(1));
-        real pa = params->get_real("initial_conditions/pa");
-        real rhoa = params->get_real("initial_conditions/rhoa");
+        real pa = sets.get_real("initial_conditions/pa");
+        real rhoa = sets.get_real("initial_conditions/rhoa");
 
         real GrR_c = G / (R_c * R_c);
         real rR_c = 1. / (2. * R_c * R_c);
