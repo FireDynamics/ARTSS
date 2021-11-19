@@ -9,19 +9,19 @@
 #include <fstream>
 
 #include "Analysis.h"
-#include "../boundary/BoundaryController.h"
-#include "../utility/Parameters.h"
 #include "../Domain.h"
+#include "../boundary/BoundaryController.h"
 #include "../utility/Utility.h"
 
-Analysis::Analysis(Solution &solution, bool has_analytical_solution) :
+Analysis::Analysis(Settings const &sets, Solution &solution, bool has_analytical_solution) :
+        m_sets(sets),
         m_has_analytic_solution(has_analytical_solution),
         m_solution(solution) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_sets, typeid(this).name());
 #endif
     if (m_has_analytic_solution) {
-        m_tol = Parameters::getInstance()->get_real("solver/solution/tol");
+        m_tol = m_sets.get_real("solver/solution/tol");
     } else {
 #ifndef BENCHMARKING
         m_logger->info("No analytical solution available!");
@@ -36,53 +36,47 @@ Analysis::Analysis(Solution &solution, bool has_analytical_solution) :
 /// \param  t     current time
 // ***************************************************************************************
 void Analysis::analyse(FieldController *field_controller, real t) {
-    if (m_has_analytic_solution) {
-        m_solution.calc_analytical_solution(t);
-
-        auto params = Parameters::getInstance();
-
-        tinyxml2::XMLElement *xmlParameter = params->get_first_child("boundaries");
-        auto curElem = xmlParameter->FirstChildElement();
+    if (!m_has_analytic_solution) {
+        return;
+    }
+    m_solution.calc_analytical_solution(t);
 
 #ifndef BENCHMARKING
-        m_logger->info("Compare to analytical solution:");
+    m_logger->info("Compare to analytical solution:");
 #endif
-        while (curElem) {
-            std::string nodeName(curElem->Value());
-            if (nodeName == "boundary") {
-                std::string field = curElem->Attribute("field");
-                if (field.find(BoundaryData::get_field_type_name(FieldType::U)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_u_data(),
-                                      m_solution.get_return_ptr_data_u(),
-                                      FieldType::U,
-                                      t);
-                }
-                if (field.find(BoundaryData::get_field_type_name(FieldType::V)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_v_data(),
-                                      m_solution.get_return_ptr_data_v(),
-                                      FieldType::V,
-                                      t);
-                }
-                if (field.find(BoundaryData::get_field_type_name(FieldType::W)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_w_data(),
-                                      m_solution.get_return_ptr_data_w(),
-                                      FieldType::W,
-                                      t);
-                }
-                if (field.find(BoundaryData::get_field_type_name(FieldType::P)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_p_data(),
-                                      m_solution.get_return_ptr_data_p(),
-                                      FieldType::P,
-                                      t);
-                }
-                if (field.find(BoundaryData::get_field_type_name(FieldType::T)) != std::string::npos) {
-                    compare_solutions(field_controller->get_field_T_data(),
-                                      m_solution.get_return_ptr_data_T(),
-                                      FieldType::T,
-                                      t);
-                }
-            }
-            curElem = curElem->NextSiblingElement();
+
+    for (auto curElem : m_sets.get_boundaries()) {
+        std::string field = curElem["field"];
+
+        if (field.find(BoundaryData::get_field_type_name(FieldType::U)) != std::string::npos) {
+            compare_solutions(field_controller->get_field_u_data(),
+                              m_solution.get_return_ptr_data_u(),
+                              FieldType::U,
+                              t);
+        }
+        if (field.find(BoundaryData::get_field_type_name(FieldType::V)) != std::string::npos) {
+            compare_solutions(field_controller->get_field_v_data(),
+                              m_solution.get_return_ptr_data_v(),
+                              FieldType::V,
+                              t);
+        }
+        if (field.find(BoundaryData::get_field_type_name(FieldType::W)) != std::string::npos) {
+            compare_solutions(field_controller->get_field_w_data(),
+                              m_solution.get_return_ptr_data_w(),
+                              FieldType::W,
+                              t);
+        }
+        if (field.find(BoundaryData::get_field_type_name(FieldType::P)) != std::string::npos) {
+            compare_solutions(field_controller->get_field_p_data(),
+                              m_solution.get_return_ptr_data_p(),
+                              FieldType::P,
+                              t);
+        }
+        if (field.find(BoundaryData::get_field_type_name(FieldType::T)) != std::string::npos) {
+            compare_solutions(field_controller->get_field_T_data(),
+                              m_solution.get_return_ptr_data_T(),
+                              FieldType::T,
+                              t);
         }
     }
 }
@@ -261,24 +255,24 @@ void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t,
 /// \param  sum     pointer to sum for (u,p,T results)
 // ***************************************************************************************
 void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
-    auto params = Parameters::getInstance();
+    if (!m_has_analytic_solution) {
+        return;
+    }
 
-    if (m_has_analytic_solution) {
-        // local variables and parameters
-        real dt = params->get_real("physical_parameters/dt");
-        real t_end = params->get_real("physical_parameters/t_end");
-        auto Nt = static_cast<size_t>(std::round(t_end / dt));
-        real rNt = 1. / static_cast<real>(Nt);
-        real epsu = sqrt(rNt * sum_u);
-        real epsp = sqrt(rNt * sum_p);
-        real epsT = sqrt(rNt * sum_T);
+    // local variables and parameters
+    real dt = m_sets.get_real("physical_parameters/dt");
+    real t_end = m_sets.get_real("physical_parameters/t_end");
+    auto Nt = static_cast<size_t>(std::round(t_end / dt));
+    real rNt = 1. / static_cast<real>(Nt);
+    real epsu = sqrt(rNt * sum_u);
+    real epsp = sqrt(rNt * sum_p);
+    real epsT = sqrt(rNt * sum_T);
 
 #ifndef BENCHMARKING
-        m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
-        m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
-        m_logger->info("RMS error of T at domain center is e_RMS = {}", epsT);
+    m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
+    m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
+    m_logger->info("RMS error of T at domain center is e_RMS = {}", epsT);
 #endif
-    }
 }
 
 // ========================== Check Von Neumann condition ======================
@@ -289,12 +283,10 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
 // ***************************************************************************************
 bool Analysis::check_time_step_VN(const real dt) {
     bool VN_check;
-
-    auto params = Parameters::getInstance();
     auto domain = Domain::getInstance();
 
     // local variables and parameters
-    real nu = params->get_real("physical_parameters/nu");
+    real nu = m_sets.get_real("physical_parameters/nu");
 
     real dx = domain->get_dx();
     real dy = domain->get_dy();

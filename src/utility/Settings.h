@@ -55,6 +55,10 @@ class Settings {
          return filename;
      }
 
+     std::vector<std::unordered_map<std::string, std::string>> get_boundaries() const {
+         return {};
+     }
+
  private:
      void read_config(std::string prefix, tinyxml2::XMLElement *elem);
 

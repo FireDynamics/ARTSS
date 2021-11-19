@@ -28,8 +28,8 @@ TimeIntegration::TimeIntegration(Settings const &sets, SolverController *sc) {
 #ifndef BENCHMARKING
     std::string initial_condition = sets.get("initial_conditions/usr_fct");
     bool has_analytical_solution = (sets.get("solver/solution/available") == XML_TRUE);
-    m_solution = new Solution(initial_condition, has_analytical_solution);
-    m_analysis = new Analysis(*m_solution, has_analytical_solution);
+    m_solution = new Solution(sets, initial_condition, has_analytical_solution);
+    m_analysis = new Analysis(sets, *m_solution, has_analytical_solution);
     m_visual = new Visual(*m_solution, has_analytical_solution);
 #endif
 }
