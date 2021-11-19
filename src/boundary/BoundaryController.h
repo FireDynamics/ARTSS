@@ -19,7 +19,9 @@
 
 class BoundaryController {
  public:
-    static BoundaryController* getInstance();
+    static BoundaryController* getInstance() { return singleton; }
+    static BoundaryController* getInstance(Settings const &sets);
+
     ~BoundaryController();
 
     void apply_boundary(Field &field, bool sync = true);
@@ -60,7 +62,10 @@ class BoundaryController {
     }
 
  private:
+    explicit BoundaryController(Settings const &sets);
+
 #ifndef BENCHMARKING
+    Settings const &sets;
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     static BoundaryController* singleton;
@@ -79,7 +84,6 @@ class BoundaryController {
     bool m_has_obstacles;
     bool m_has_surfaces;
 
-    BoundaryController();
     void read_XML();
     void parse_boundary_parameter(tinyxml2::XMLElement *xml_parameter);
     void parse_obstacle_parameter(tinyxml2::XMLElement *xml_parameter);

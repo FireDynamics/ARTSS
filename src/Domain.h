@@ -14,7 +14,6 @@
 #include <cstddef>
 
 #include "utility/GlobalMacrosTypes.h"
-#include "utility/Parameters.h"
 #include "utility/Utility.h"
 
 enum CoordinateAxis : int {
@@ -23,9 +22,10 @@ enum CoordinateAxis : int {
 
 class Domain {
  public:
-    Domain();
+    explicit Domain(Settings const &sets);
 
-    static Domain *getInstance();
+    static Domain *getInstance() { return single; }
+    static Domain *getInstance(Settings const &sets);
 
     // getter
     size_t inline get_nx(size_t level = 0) const { return this->m_nx[level]; }

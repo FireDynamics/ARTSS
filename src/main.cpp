@@ -6,6 +6,8 @@
 
 #include <iostream>
 #include "TimeIntegration.h"
+#include "Domain.h"
+#include "boundary/BoundaryController.h"
 #include "utility/tinyxml2.h"
 #include "utility/Parameters.h"
 #include "utility/Settings.h"
@@ -20,21 +22,22 @@ int main(int argc, char **argv) {
     // Parameters
     std::string XML_filename;
     auto params = Parameters::getInstance();
-    if (argc > 1) {
-        XML_filename.assign(argv[1]);
-        params->parse(XML_filename);
-    } else {
+    if (argc <= 1) {
         std::cerr << "XML file missing" << std::endl;
         std::exit(1);
     }
 
     Settings sets(argv[1]);
+    Domain::getInstance(sets);
+    BoundaryController::getInstance(sets);
+
     sets.print_config();
     std::cout << sets.get("physical_parameters/t_end") << "\n";
     std::cout << sets.get_real("physical_parameters/t_end") << "\n";
     sets.set("physical_parameters/t_end", "101.314");
     std::cout << sets.get_real("physical_parameters/t_end") << "\n";
     sets.print_config();
+    return 0;
 
     SolverController *sc = new SolverController();
 

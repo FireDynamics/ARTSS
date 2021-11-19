@@ -10,9 +10,10 @@
 BoundaryController *BoundaryController::singleton = nullptr;  // Singleton
 
 
-BoundaryController::BoundaryController() {
+BoundaryController::BoundaryController(Settings const &sets) :
+        m_sets(sets) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_sets, typeid(this).name());
 #endif
     m_bdc_boundary = new BoundaryDataController();
     read_XML();
@@ -37,7 +38,6 @@ void BoundaryController::read_XML() {
     m_logger->debug("start parsing XML");
 #endif
 
-    auto params = Parameters::getInstance();
     parse_boundary_parameter(params->get_first_child("boundaries"));
     parse_obstacle_parameter(params->get_first_child("obstacles"));
     detect_neighbouring_obstacles();
@@ -168,9 +168,9 @@ BoundaryController::~BoundaryController() {
 }
 
 
-BoundaryController *BoundaryController::getInstance() {
+BoundaryController *BoundaryController::getInstance(Settings const &sets) {
     if (singleton == nullptr) {
-        singleton = new BoundaryController();
+        singleton = new BoundaryController(sets);
     }
     return singleton;
 }
