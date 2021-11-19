@@ -45,8 +45,8 @@ void Analysis::analyse(FieldController *field_controller, real t) {
     m_logger->info("Compare to analytical solution:");
 #endif
 
-    for (auto curElem : m_sets.get_boundaries()) {
-        std::string field = curElem["field"];
+    for (auto boundary : m_sets.get_boundaries()) {
+        std::string field = boundary["field"];
 
         if (field.find(BoundaryData::get_field_type_name(FieldType::U)) != std::string::npos) {
             compare_solutions(field_controller->get_field_u_data(),
