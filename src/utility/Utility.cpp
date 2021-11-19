@@ -63,43 +63,8 @@ std::vector<std::string> split(const char *text, char delimiter) {
 // *****************************************************************************
 /// \brief  creates a new named logger this function is only available
 ///         if BENCHMARKING is not enabled
-/// \param  loggerName name of logger, written to log file
-// *****************************************************************************
-std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
-    static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
-    static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
-
-    auto params = Parameters::getInstance();
-    std::string log_level = params->get("logging/level");
-    std::string log_file = params->get("logging/file");
-
-    if (!stdout_sink) {
-        stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        auto level = spdlog::level::from_str(log_level);
-        stdout_sink->set_level(level);
-        stdout_sink->set_pattern("%^%-8l: %v%$");
-    }
-
-    if (!file_sink) {
-        file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
-        file_sink->set_level(spdlog::level::trace);
-    }
-
-    std::vector<spdlog::sink_ptr> sinks;
-    sinks.reserve(2);
-    sinks.push_back(stdout_sink);
-    sinks.push_back(file_sink);
-    auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
-    logger->flush_on(spdlog::level::err);
-    logger->set_level(spdlog::level::trace);
-
-    return logger;
-}
-
-// ======================= creates a new logger ================================
-// *****************************************************************************
-/// \brief  creates a new named logger this function is only available
-///         if BENCHMARKING is not enabled
+/// \param  sets the settings to create the logger
+//          ("logging/level", "logging/file")
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
 std::shared_ptr<spdlog::logger> create_logger(std::string logger_name, Settings &sets) {
