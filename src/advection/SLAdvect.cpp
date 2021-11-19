@@ -17,12 +17,11 @@
 #endif
 
 #include "SLAdvect.h"
-#include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 
-SLAdvect::SLAdvect() {
-    m_dt = Parameters::getInstance()->get_real("physical_parameters/dt");
+SLAdvect::SLAdvect(Settings const &sets) {
+    m_dt = sets.get_real("physical_parameters/dt");
 }
 
 // ***************************************************************************************
