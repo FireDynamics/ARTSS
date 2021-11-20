@@ -27,16 +27,16 @@ int main(int argc, char **argv) {
         std::exit(1);
     }
 
-    Settings sets(argv[1]);
-    Domain::getInstance(sets);
-    BoundaryController::getInstance(sets);
+    Settings settings(argv[1]);
+    Domain::getInstance(settings);
+    BoundaryController::getInstance(settings);
 
-    sets.print_config();
-    std::cout << sets.get("physical_parameters/t_end") << "\n";
-    std::cout << sets.get_real("physical_parameters/t_end") << "\n";
-    sets.set("physical_parameters/t_end", "101.314");
-    std::cout << sets.get_real("physical_parameters/t_end") << "\n";
-    sets.print_config();
+    settings.print_config();
+    std::cout << settings.get("physical_parameters/t_end") << "\n";
+    std::cout << settings.get_real("physical_parameters/t_end") << "\n";
+    settings.set("physical_parameters/t_end", "101.314");
+    std::cout << settings.get_real("physical_parameters/t_end") << "\n";
+    settings.print_config();
     return 0;
 
     SolverController *sc = new SolverController();

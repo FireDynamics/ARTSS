@@ -12,24 +12,24 @@
 /// \brief  Constructor
 /// \param  solver_controller class representative for solver
 // ***************************************************************************************
-TimeIntegration::TimeIntegration(Settings const &sets, SolverController *sc) {
+TimeIntegration::TimeIntegration(Settings const &settings, SolverController *sc) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(sets, typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
 
-    m_dt = sets.get_real("physical_parameters/dt");
-    m_t_end = sets.get_real("physical_parameters/t_end");
+    m_dt = settings.get_real("physical_parameters/dt");
+    m_t_end = settings.get_real("physical_parameters/t_end");
     m_t_cur = m_dt;        // since t=0 already handled in setup
 
     m_solver_controller = sc;
     m_field_controller = m_solver_controller->get_field_controller();
 
-    m_adaption = new Adaption(sets, m_field_controller);
+    m_adaption = new Adaption(settings, m_field_controller);
 #ifndef BENCHMARKING
-    std::string initial_condition = sets.get("initial_conditions/usr_fct");
-    bool has_analytical_solution = (sets.get("solver/solution/available") == XML_TRUE);
-    m_solution = new Solution(sets, initial_condition, has_analytical_solution);
-    m_analysis = new Analysis(sets, *m_solution, has_analytical_solution);
+    std::string initial_condition = settings.get("initial_conditions/usr_fct");
+    bool has_analytical_solution = (settings.get("solver/solution/available") == XML_TRUE);
+    m_solution = new Solution(settings, initial_condition, has_analytical_solution);
+    m_analysis = new Analysis(settings, *m_solution, has_analytical_solution);
     m_visual = new Visual(*m_solution, has_analytical_solution);
 #endif
 }

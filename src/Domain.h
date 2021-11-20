@@ -22,10 +22,10 @@ enum CoordinateAxis : int {
 
 class Domain {
  public:
-    explicit Domain(Settings const &sets);
+    explicit Domain(Settings const &settings);
 
     static Domain *getInstance() { return single; }
-    static Domain *getInstance(Settings const &sets);
+    static Domain *getInstance(Settings const &settings);
 
     // getter
     size_t inline get_nx(size_t level = 0) const { return this->m_nx[level]; }

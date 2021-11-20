@@ -13,15 +13,15 @@
 #include "../boundary/BoundaryController.h"
 #include "../utility/Utility.h"
 
-Analysis::Analysis(Settings const &sets, Solution &solution, bool has_analytical_solution) :
-        m_sets(sets),
+Analysis::Analysis(Settings const &settings, Solution &solution, bool has_analytical_solution) :
+        m_settings(settings),
         m_has_analytic_solution(has_analytical_solution),
         m_solution(solution) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_sets, typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     if (m_has_analytic_solution) {
-        m_tol = m_sets.get_real("solver/solution/tol");
+        m_tol = m_settings.get_real("solver/solution/tol");
     } else {
 #ifndef BENCHMARKING
         m_logger->info("No analytical solution available!");
@@ -45,7 +45,7 @@ void Analysis::analyse(FieldController *field_controller, real t) {
     m_logger->info("Compare to analytical solution:");
 #endif
 
-    for (auto boundary : m_sets.get_boundaries()) {
+    for (auto boundary : m_settings.get_boundaries()) {
         std::string field = boundary["field"];
 
         if (field.find(BoundaryData::get_field_type_name(FieldType::U)) != std::string::npos) {
@@ -260,8 +260,8 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
     }
 
     // local variables and parameters
-    real dt = m_sets.get_real("physical_parameters/dt");
-    real t_end = m_sets.get_real("physical_parameters/t_end");
+    real dt = m_settings.get_real("physical_parameters/dt");
+    real t_end = m_settings.get_real("physical_parameters/t_end");
     auto Nt = static_cast<size_t>(std::round(t_end / dt));
     real rNt = 1. / static_cast<real>(Nt);
     real epsu = sqrt(rNt * sum_u);
@@ -286,7 +286,7 @@ bool Analysis::check_time_step_VN(const real dt) {
     auto domain = Domain::getInstance();
 
     // local variables and parameters
-    real nu = m_sets.get_real("physical_parameters/nu");
+    real nu = m_settings.get_real("physical_parameters/nu");
 
     real dx = domain->get_dx();
     real dy = domain->get_dy();

@@ -10,10 +10,10 @@
 BoundaryController *BoundaryController::singleton = nullptr;  // Singleton
 
 
-BoundaryController::BoundaryController(Settings const &sets) :
-        m_sets(sets) {
+BoundaryController::BoundaryController(Settings const &settings) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_sets, typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     m_bdc_boundary = new BoundaryDataController();
     read_XML();
@@ -168,9 +168,9 @@ BoundaryController::~BoundaryController() {
 }
 
 
-BoundaryController *BoundaryController::getInstance(Settings const &sets) {
+BoundaryController *BoundaryController::getInstance(Settings const &settings) {
     if (singleton == nullptr) {
-        singleton = new BoundaryController(sets);
+        singleton = new BoundaryController(settings);
     }
     return singleton;
 }

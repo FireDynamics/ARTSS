@@ -9,8 +9,8 @@
 #include "../Functions.h"
 
 
-Solution::Solution(Settings const &sets, const std::string &initial_condition, bool has_analytical_solution) :
-        m_sets(sets),
+Solution::Solution(Settings const &settings, const std::string &initial_condition, bool has_analytical_solution) :
+        m_settings(settings),
         m_u_analytical_solution(Field(FieldType::U)),
         m_v_analytical_solution(Field(FieldType::V)),
         m_w_analytical_solution(Field(FieldType::W)),
@@ -18,7 +18,7 @@ Solution::Solution(Settings const &sets, const std::string &initial_condition, b
         m_T_analytical_solution(Field(FieldType::T)),
         m_has_analytical_solution(has_analytical_solution) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_sets, typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
 
     // set function pointer to chosen initial condition
@@ -58,21 +58,21 @@ Solution::Solution(Settings const &sets, const std::string &initial_condition, b
 
 void Solution::gauss_bubble(const real t) {
     // Advection test case
-    Functions::GaussBubble(m_sets, m_u_analytical_solution, t);
-    Functions::GaussBubble(m_sets, m_v_analytical_solution, t);
-    Functions::GaussBubble(m_sets, m_w_analytical_solution, t);
+    Functions::GaussBubble(m_settings, m_u_analytical_solution, t);
+    Functions::GaussBubble(m_settings, m_v_analytical_solution, t);
+    Functions::GaussBubble(m_settings, m_w_analytical_solution, t);
 }
 
 void Solution::exp_sinus_prod(const real t) {
     // Diffusion test case
-    Functions::ExpSinusProd(m_sets, m_u_analytical_solution, t);
-    Functions::ExpSinusProd(m_sets, m_v_analytical_solution, t);
-    Functions::ExpSinusProd(m_sets, m_w_analytical_solution, t);
+    Functions::ExpSinusProd(m_settings, m_u_analytical_solution, t);
+    Functions::ExpSinusProd(m_settings, m_v_analytical_solution, t);
+    Functions::ExpSinusProd(m_settings, m_w_analytical_solution, t);
 }
 
 void Solution::exp_sinus_sum(const real t) {
     // Diffusion test case
-    Functions::ExpSinusSum(m_sets,
+    Functions::ExpSinusSum(m_settings,
                            m_u_analytical_solution,
                            m_v_analytical_solution,
                            m_w_analytical_solution, t);
@@ -80,19 +80,19 @@ void Solution::exp_sinus_sum(const real t) {
 
 void Solution::hat(const real) {
     // Diffusion test case
-    Functions::Hat(m_sets, m_u_analytical_solution);  // TODO time dependency?
-    Functions::Hat(m_sets, m_v_analytical_solution);
-    Functions::Hat(m_sets, m_w_analytical_solution);
+    Functions::Hat(m_settings, m_u_analytical_solution);  // TODO time dependency?
+    Functions::Hat(m_settings, m_v_analytical_solution);
+    Functions::Hat(m_settings, m_w_analytical_solution);
 }
 
 void Solution::sin_sin_sin(const real) {
 // Pressure test case
-    Functions::FacSinSinSin(m_sets, m_p_analytical_solution);  // TODO time dependency?
+    Functions::FacSinSinSin(m_settings, m_p_analytical_solution);  // TODO time dependency?
 }
 
 void Solution::mcDermott(const real t) {
 // NavierStokes test case
-    Functions::McDermott(m_sets,
+    Functions::McDermott(m_settings,
                          m_u_analytical_solution,
                          m_v_analytical_solution,
                          m_w_analytical_solution,
@@ -100,7 +100,7 @@ void Solution::mcDermott(const real t) {
 }
 
 void Solution::vortex(const real) {
-    Functions::Vortex(m_sets,
+    Functions::Vortex(m_settings,
                       m_u_analytical_solution,
                       m_v_analytical_solution,
                       m_w_analytical_solution,
@@ -108,7 +108,7 @@ void Solution::vortex(const real) {
 }
 
 void Solution::vortex_y(const real) {
-    Functions::VortexY(m_sets,
+    Functions::VortexY(m_settings,
                        m_u_analytical_solution,
                        m_v_analytical_solution,
                        m_w_analytical_solution,
@@ -116,7 +116,7 @@ void Solution::vortex_y(const real) {
 }
 
 void Solution::beltrami(const real t) {
-    Functions::Beltrami(m_sets,
+    Functions::Beltrami(m_settings,
                         m_u_analytical_solution,
                         m_v_analytical_solution,
                         m_w_analytical_solution,
@@ -129,7 +129,7 @@ void Solution::zero(const real) {
 }
 
 void Solution::buoyancy_mms(const real t) {
-    Functions::BuoyancyMMS(m_sets,
+    Functions::BuoyancyMMS(m_settings,
                            m_u_analytical_solution,
                            m_v_analytical_solution,
                            m_w_analytical_solution,

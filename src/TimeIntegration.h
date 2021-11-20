@@ -27,7 +27,7 @@
 
 class TimeIntegration {
  public:
-    TimeIntegration(Settings const &sets, SolverController *sc);
+    TimeIntegration(Settings const &settings, SolverController *sc);
     void run();
 
  private:

@@ -63,16 +63,16 @@ std::vector<std::string> split(const char *text, char delimiter) {
 // *****************************************************************************
 /// \brief  creates a new named logger this function is only available
 ///         if BENCHMARKING is not enabled
-/// \param  sets the settings to create the logger
+/// \param  settings the settings to create the logger
 //          ("logging/level", "logging/file")
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
-std::shared_ptr<spdlog::logger> create_logger(std::string logger_name, Settings &sets) {
+std::shared_ptr<spdlog::logger> create_logger(std::string logger_name, Settings &settings) {
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
 
-    std::string log_level = sets.sget("logging/level");
-    std::string log_file = sets.sget("logging/file");
+    std::string log_level = settings.sget("logging/level");
+    std::string log_file = settings.sget("logging/file");
 
     if (!stdout_sink) {
         stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();

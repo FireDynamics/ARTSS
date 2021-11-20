@@ -20,8 +20,8 @@
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 
-SLAdvect::SLAdvect(Settings const &sets) {
-    m_dt = sets.get_real("physical_parameters/dt");
+SLAdvect::SLAdvect(Settings const &settings) {
+    m_dt = settings.get_real("physical_parameters/dt");
 }
 
 // ***************************************************************************************

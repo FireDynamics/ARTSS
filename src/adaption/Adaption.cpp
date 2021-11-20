@@ -18,28 +18,28 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-Adaption::Adaption(Settings const &sets, FieldController *field_controller) {
+Adaption::Adaption(Settings const &settings, FieldController *field_controller) {
     m_field_controller = field_controller;
-    m_logger = Utility::create_logger(sets, typeid(Adaption).name());
+    m_logger = Utility::create_logger(settings, typeid(Adaption).name());
     auto domain = Domain::getInstance();
-    m_dynamic = (sets.get("adaption/dynamic") == "Yes");
-    std::string tmp = sets.get("adaption/dynamic");
-    m_filename = sets.get_filename();
+    m_dynamic = (settings.get("adaption/dynamic") == "Yes");
+    std::string tmp = settings.get("adaption/dynamic");
+    m_filename = settings.get_filename();
     m_filename.resize(m_filename.size() - 4);//remove .xml from filename
-    m_has_data_extraction = sets.get_bool("adaption/data_extraction");
+    m_has_data_extraction = settings.get_bool("adaption/data_extraction");
     if (m_has_data_extraction) {
-        m_has_data_extraction_before = sets.get_bool("adaption/data_extraction/before/enabled");
-        m_has_data_extraction_after = sets.get_bool("adaption/data_extraction/after/enabled");
-        m_has_data_extraction_endresult = sets.get_bool("adaption/data_extraction/endresult/enabled");
-        m_has_time_measuring = sets.get_bool("adaption/data_extraction/time_measuring/enabled");
-        //m_has_write_runtime = (sets.get("adaption/data_extraction/runtime/enabled") == "Yes");
+        m_has_data_extraction_before = settings.get_bool("adaption/data_extraction/before/enabled");
+        m_has_data_extraction_after = settings.get_bool("adaption/data_extraction/after/enabled");
+        m_has_data_extraction_endresult = settings.get_bool("adaption/data_extraction/endresult/enabled");
+        m_has_time_measuring = settings.get_bool("adaption/data_extraction/time_measuring/enabled");
+        //m_has_write_runtime = (settings.get("adaption/data_extraction/runtime/enabled") == "Yes");
     }
     if (m_dynamic) {
-        std::string init = sets.get("adaption/class/name");
+        std::string init = settings.get("adaption/class/name");
         if (init == "Layers") {
-            func = new Layers(sets, m_field_controller);
+            func = new Layers(settings, m_field_controller);
         } else if (init == "Vortex" || init == "VortexY") {
-            func = new Vortex(sets, m_field_controller);
+            func = new Vortex(settings, m_field_controller);
         } else {
 #ifndef BENCHMARKING
             m_logger->critical("Type {} is not defined", init);
@@ -424,7 +424,7 @@ void Adaption::reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduct
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_x_direction_serial(Settings const &sets, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_x_direction_serial(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
@@ -503,7 +503,7 @@ bool Adaption::adapt_x_direction_serial(Settings const &sets, const real *f, rea
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(sets, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
         m_logger->error("Exception in x-Adaption: {} {} {} {}",
                         size_t(expansion_start),
                         size_t(reduction_start),
@@ -533,7 +533,7 @@ bool Adaption::adapt_x_direction_serial(Settings const &sets, const real *f, rea
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_x_direction(Settings const &sets, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_x_direction(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;
@@ -593,7 +593,7 @@ bool Adaption::adapt_x_direction(Settings const &sets, const real *f, real check
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(sets, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
         m_logger->error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
                 expansion_counter_start,
                 reduction_counter_start,
@@ -629,7 +629,7 @@ bool Adaption::adapt_x_direction(Settings const &sets, const real *f, real check
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_y_direction_serial(Settings const &sets, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_y_direction_serial(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
@@ -708,7 +708,7 @@ bool Adaption::adapt_y_direction_serial(Settings const &sets, const real *f, rea
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(sets, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
         m_logger->error("Exception in y-Adaption: {} {} {} {}",
                         size_t(expansion_start),
                         size_t(reduction_start),
@@ -739,7 +739,7 @@ bool Adaption::adapt_y_direction_serial(Settings const &sets, const real *f, rea
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_y_direction(Settings const &sets, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_y_direction(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
 
     size_t expansion_counter_start = 0;
@@ -799,7 +799,7 @@ bool Adaption::adapt_y_direction(Settings const &sets, const real *f, real check
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(sets, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
         m_logger->error(
             "Trying to reduce and expand at the same time (y): {}, {} | {}, {}",
             expansion_counter_start,

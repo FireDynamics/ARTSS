@@ -9,7 +9,7 @@
 #include "../Domain.h"
 #include "Adaption.h"
 
-Layers::Layers(Settings const &sets, FieldController *field_controller) :
+Layers::Layers(Settings const &settings, FieldController *field_controller) :
         m_T(field_controller->get_field_T()),
         m_Ta(field_controller->get_field_T_ambient()),
         m_Nu(field_controller->get_field_nu_t()),
@@ -19,10 +19,10 @@ Layers::Layers(Settings const &sets, FieldController *field_controller) :
     m_minimal = static_cast<size_t> (std::pow(2, domain->get_levels()));
     m_timecounter = 0;
 
-    m_no_buffer_cells = static_cast<size_t> (sets.get_int("adaption/class/buffer"));
-    m_check_value = sets.get_real("adaption/class/check_value");
-    m_timestep = static_cast<size_t> (sets.get_int("adaption/class/timestep"));
-    m_expansion_size = static_cast<size_t> (sets.get_int("adaption/class/expansion_size"));
+    m_no_buffer_cells = static_cast<size_t> (settings.get_int("adaption/class/buffer"));
+    m_check_value = settings.get_real("adaption/class/check_value");
+    m_timestep = static_cast<size_t> (settings.get_int("adaption/class/timestep"));
+    m_expansion_size = static_cast<size_t> (settings.get_int("adaption/class/expansion_size"));
 }
 
 

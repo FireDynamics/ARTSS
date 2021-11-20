@@ -14,7 +14,7 @@
 
 class SLAdvect : public IAdvection {
  public:
-    explicit SLAdvect(Settings const &sets);
+    explicit SLAdvect(Settings const &settings);
     ~SLAdvect() override = default;
 
     void advect(Field &out, const Field &in, const Field &u_vel, const Field &v_vel, const Field &w_vel, bool sync) override;

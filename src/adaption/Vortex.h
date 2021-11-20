@@ -13,7 +13,7 @@
 
 class Vortex : public IAdaptionFunction {
 public:
-    Vortex(Settings const &sets, FieldController *field_controller);
+    Vortex(Settings const &settings, FieldController *field_controller);
 
     bool update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
     void apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
@@ -23,7 +23,7 @@ private:
     void Drift_dynamic(const size_t *arr_idx, size_t arr_idx_size);
     void Zero(size_t *arr_idx, size_t arr_idx_size);
 
-    Settings const &m_sets;
+    Settings const &m_settings;
 
     real m_u_lin;
     real m_v_lin;

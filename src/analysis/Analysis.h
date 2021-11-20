@@ -15,7 +15,7 @@
 
 class Analysis {
  public:
-    Analysis(Settings const &sets, Solution &solution, bool has_analytical_solution);
+    Analysis(Settings const &settings, Solution &solution, bool has_analytical_solution);
 
     void analyse(FieldController *solver, real t);
 
@@ -28,7 +28,7 @@ class Analysis {
     void save_variables_in_file(FieldController *field_controller);
 
  private:
-    Settings const &m_sets;
+    Settings const &m_settings;
     real m_tol = 1e-7;
 
     bool compare_solutions(read_ptr num, read_ptr ana, FieldType type, real t);

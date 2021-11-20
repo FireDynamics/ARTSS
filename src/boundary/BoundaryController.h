@@ -20,7 +20,7 @@
 class BoundaryController {
  public:
     static BoundaryController* getInstance() { return singleton; }
-    static BoundaryController* getInstance(Settings const &sets);
+    static BoundaryController* getInstance(Settings const &settings);
 
     ~BoundaryController();
 
@@ -62,10 +62,10 @@ class BoundaryController {
     }
 
  private:
-    explicit BoundaryController(Settings const &sets);
+    explicit BoundaryController(Settings const &settings);
 
 #ifndef BENCHMARKING
-    Settings const &sets;
+    Settings const &settings;
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     static BoundaryController* singleton;

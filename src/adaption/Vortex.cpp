@@ -7,25 +7,25 @@
 #include "Vortex.h"
 #include "../Domain.h"
 
-Vortex::Vortex(Settings const &sets, FieldController *field_controller) :
-        m_sets(sets),
+Vortex::Vortex(Settings const &settings, FieldController *field_controller) :
+        m_settings(settings),
         m_u(field_controller->get_field_u()),
         m_v(field_controller->get_field_v()),
         m_w(field_controller->get_field_w()) {
     auto domain = Domain::getInstance();
-    m_u_lin = m_sets.get_real("initial_conditions/u_lin");
-    m_v_lin = m_sets.get_real("initial_conditions/v_lin");
-    m_w_lin = m_sets.get_real("initial_conditions/w_lin");
+    m_u_lin = m_settings.get_real("initial_conditions/u_lin");
+    m_v_lin = m_settings.get_real("initial_conditions/v_lin");
+    m_w_lin = m_settings.get_real("initial_conditions/w_lin");
     m_minimal = static_cast<size_t> (std::pow(2, domain->get_levels()));
-    m_reduction = m_sets.get_bool("adaption/class/reduction/enabled");
+    m_reduction = m_settings.get_bool("adaption/class/reduction/enabled");
     if (m_reduction) {
-        std::string dir = (m_sets.get("adaption/class/reduction/dir"));
+        std::string dir = (m_settings.get("adaption/class/reduction/dir"));
         if (dir.find('x') != std::string::npos) m_x_side = true;
         if (dir.find('y') != std::string::npos) m_y_side = true;
         if (dir.find('z') != std::string::npos) m_z_side = true;
     }
-    m_buffer = m_sets.get_int("adaption/class/buffer");
-    m_threshold = m_u_lin * m_sets.get_real("adaption/class/threshold");
+    m_buffer = m_settings.get_int("adaption/class/buffer");
+    m_threshold = m_u_lin * m_settings.get_real("adaption/class/threshold");
 }
 
 // ==================================== Has reduction ===============================
@@ -57,9 +57,9 @@ bool Vortex::update(
     *p_shift_z1 = 0;
     *p_shift_z2 = 0;
 
-    adaption = Adaption::adapt_x_direction(m_sets, d_u, m_u_lin, m_buffer, m_threshold, p_shift_x1, p_shift_x2, m_minimal, m_reduction) || adaption;
+    adaption = Adaption::adapt_x_direction(m_settings, d_u, m_u_lin, m_buffer, m_threshold, p_shift_x1, p_shift_x2, m_minimal, m_reduction) || adaption;
     if (m_y_side)
-        adaption = Adaption::adapt_y_direction(m_sets, d_v, m_v_lin, m_buffer, m_threshold, p_shift_y1, p_shift_y2, m_minimal, m_reduction) || adaption;
+        adaption = Adaption::adapt_y_direction(m_settings, d_v, m_v_lin, m_buffer, m_threshold, p_shift_y1, p_shift_y2, m_minimal, m_reduction) || adaption;
 
     *p_shift_x1 *= m_minimal;
     *p_shift_x2 *= m_minimal;
