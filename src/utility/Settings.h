@@ -22,6 +22,64 @@
 #endif
 
 
+class BoundarySetting {
+ public:
+    explicit BoundarySetting(tinyxml2::XMLElement *xml_element);
+
+    std::string get_field();
+    std::string get_patch();
+    std::string get_type();
+    real get_value();
+
+ private:
+    std::string field;
+    std::string patch;
+    std::string type;
+    real value;
+};
+
+class ObstacleSetting {
+ public:
+    explicit ObstacleSetting(tinyxml2::XMLElement *xml_element);
+
+    std::string get_name();
+    real get_ox1();
+    real get_ox2();
+    real get_oy1();
+    real get_oy2();
+    real get_oz1();
+    real get_oz2();
+
+    std::vector<BoundarySetting> get_boundaries();
+
+ private:
+    std::string name;
+    real ox1, ox2;
+    real oy1, oy2;
+    real oz1, oz2;
+    std::vector<BoundarySetting> m_boundaries;
+};
+
+class SurfaceSetting {
+ public:
+    explicit SurfaceSetting(tinyxml2::XMLElement *xml_element);
+
+    real get_id() const { return id; }
+    real get_sx1() const { return sx1; }
+    real get_sx2() const { return sx2; }
+    real get_sy1() const { return sy1; }
+    real get_sy2() const { return sy2; }
+    real get_sz1() const { return sz1; }
+    real get_sz2() const { return sz2; }
+
+ private:
+    int id;
+    real sx1, sx2;
+    real sy1, sy2;
+    real sz1, sz2;
+};
+
+
 class Settings {
  public:
      explicit Settings(std::string path);
@@ -55,9 +113,9 @@ class Settings {
          return filename;
      }
 
-     std::vector<std::unordered_map<std::string, std::string>> get_boundaries() const {
-         return {};
-     }
+     std::vector<BoundarySetting> get_boundaries() const;
+     std::vector<ObstacleSetting> get_obstacles() const;
+     std::vector<SurfaceSetting> get_surfaces() const;
 
  private:
      void read_config(std::string prefix, tinyxml2::XMLElement *elem);

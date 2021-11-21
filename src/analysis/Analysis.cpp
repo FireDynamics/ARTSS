@@ -46,7 +46,7 @@ void Analysis::analyse(FieldController *field_controller, real t) {
 #endif
 
     for (auto boundary : m_settings.get_boundaries()) {
-        std::string field = boundary["field"];
+        std::string field = boundary.get_field();
 
         if (field.find(BoundaryData::get_field_type_name(FieldType::U)) != std::string::npos) {
             compare_solutions(field_controller->get_field_u_data(),

@@ -14,9 +14,9 @@
 
 class BoundaryDataController {
  public:
-    BoundaryDataController();
+    explicit BoundaryDataController(Settings const &settings);
     ~BoundaryDataController();
-    void add_boundary_data(tinyxml2::XMLElement *xml_element);
+    void add_boundary_data(BoundarySetting boundary);
     void apply_boundary_condition(
             Field &data,
             size_t **index_fields,

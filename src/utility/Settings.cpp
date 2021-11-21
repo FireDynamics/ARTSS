@@ -63,3 +63,15 @@ std::string Settings::get(std::string path) const {
 
     return iter->second;
 }
+
+std::vector<BoundaryData> get_boundaries() const {
+    return {};
+}
+
+std::vector<Obstacle> get_obstacle() const {
+    return {};
+}
+
+std::vector<Surface> get_surface() const {
+    return {};
+}

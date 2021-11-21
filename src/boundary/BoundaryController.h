@@ -65,7 +65,7 @@ class BoundaryController {
     explicit BoundaryController(Settings const &settings);
 
 #ifndef BENCHMARKING
-    Settings const &settings;
+    Settings const &m_settings;
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     static BoundaryController* singleton;
@@ -85,9 +85,9 @@ class BoundaryController {
     bool m_has_surfaces;
 
     void read_XML();
-    void parse_boundary_parameter(tinyxml2::XMLElement *xml_parameter);
-    void parse_obstacle_parameter(tinyxml2::XMLElement *xml_parameter);
-    void parse_surface_parameter(tinyxml2::XMLElement *xml_parameter);
+    void parse_boundary_parameter(std::vector<BoundarySetting> boundaries);
+    void parse_obstacle_parameter(std::vector<ObstacleSetting> obstacles);
+    void parse_surface_parameter(std::vector<SurfaceSetting> surfaces);
 
     void detect_neighbouring_obstacles();
 };

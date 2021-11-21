@@ -16,8 +16,8 @@
 
 class Surface {
  public:
-    Surface(tinyxml2::XMLElement *element);
-    Surface(size_t surfaceID, size_t startIndex, size_t strideX, size_t strideY, size_t strideZ, size_t level);
+    Surface(Settings const &settings, SurfaceSetting const &surfsettings);
+    Surface(Settings const &settings, size_t surfaceID, size_t startIndex, size_t strideX, size_t strideY, size_t strideZ, size_t level);
     ~Surface();
     size_t* getSurfaceList() {return m_surfaceList;}
     size_t getSize_surfaceList() {return m_size_surfaceList;}
@@ -28,7 +28,7 @@ class Surface {
 
     size_t getSurfaceID() { return m_surfaceID;}
 
-    void setBoundaryConditions(tinyxml2::XMLElement *xmlElement);
+    void setBoundaryConditions(BoundarySetting const &boundary);
 
     void applyBoundaryConditions(real *dataField, FieldType FieldType, size_t level, bool sync);
 
