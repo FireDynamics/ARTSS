@@ -12,27 +12,25 @@
 #include "../diffusion/ColoredGaussSeidelDiffuse.h"
 #include "../diffusion/JacobiDiffuse.h"
 #include "../solver/SolverSelection.h"
-#include "../utility/Parameters.h"
 
 
-VCycleMG::VCycleMG(Field const &out, Field const &b) :
+VCycleMG::VCycleMG(Settings const &settings, Field const &out, Field const &b) :
+        m_settings(settings),
         m_levels(Domain::getInstance()->get_levels()),
-        m_n_cycle(Parameters::getInstance()->get_int("solver/pressure/n_cycle")),
-        m_n_relax(Parameters::getInstance()->get_int("solver/pressure/diffusion/n_relax")),
-        m_dt(Parameters::getInstance()->get_real("physical_parameters/dt")),
-        m_w(Parameters::getInstance()->get_real("solver/pressure/diffusion/w")) {
+        m_n_cycle(settings.get_int("solver/pressure/n_cycle")),
+        m_n_relax(settings.get_int("solver/pressure/diffusion/n_relax")),
+        m_dt(settings.get_real("physical_parameters/dt")),
+        m_w(settings.get_real("solver/pressure/diffusion/w")) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
-    Parameters *params = Parameters::getInstance();
-
-    std::string diffusion_type = params->get("solver/pressure/diffusion/type");
+    std::string diffusion_type = m_settings.get("solver/pressure/diffusion/type");
     if (diffusion_type == DiffusionMethods::Jacobi) {
-        m_diffusion_max_iter = static_cast<size_t>(params->get_int("solver/pressure/diffusion/max_solve"));
+        m_diffusion_max_iter = static_cast<size_t>(m_settings.get_int("solver/pressure/diffusion/max_solve"));
         m_smooth_function = &VCycleMG::call_smooth_jacobi;
         m_solve_function = &VCycleMG::call_solve_jacobi;
     } else if (diffusion_type == DiffusionMethods::ColoredGaussSeidel) {
-        m_diffusion_max_iter = static_cast<size_t>(params->get_int("solver/pressure/diffusion/max_iter"));
+        m_diffusion_max_iter = static_cast<size_t>(m_settings.get_int("solver/pressure/diffusion/max_iter"));
         m_smooth_function = &VCycleMG::call_smooth_colored_gauss_seidel;
         m_solve_function = &VCycleMG::call_solve_colored_gauss_seidel;
     } else {
@@ -41,7 +39,7 @@ VCycleMG::VCycleMG(Field const &out, Field const &b) :
 #endif
         // TODO(issue 6) Error handling
     }
-    m_diffusion_tol_res = params->get_real("solver/pressure/diffusion/tol_res");
+    m_diffusion_tol_res = m_settings.get_real("solver/pressure/diffusion/tol_res");
 
     m_residuum0 = new Field *[m_levels];
     m_residuum1 = new Field *[m_levels + 1];
@@ -133,18 +131,17 @@ void VCycleMG::UpdateInput(Field &out, const Field &b, bool sync) {
 void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
     UpdateInput(out, b, sync);  // Update first
 
-    Parameters *params = Parameters::getInstance();
     Domain *domain = Domain::getInstance();
     const auto Nt = static_cast<size_t>(std::round(t / m_dt));
     size_t act_cycles = 0;
 
     if (Nt == 1) {  // solve more accurately, in first time step
-        const size_t max_cycles = params->get_int("solver/pressure/max_cycle");
-        const size_t max_relaxs = params->get_int("solver/pressure/diffusion/max_solve");
+        const size_t max_cycles = m_settings.get_int("solver/pressure/max_cycle");
+        const size_t max_relaxs = m_settings.get_int("solver/pressure/diffusion/max_solve");
         size_t set_relax = m_n_relax;
         real r = 10000.;
         real sum;
-        const real tol_res = params->get_real("solver/pressure/tol_res");
+        const real tol_res = m_settings.get_real("solver/pressure/tol_res");
 
         const size_t Nx = domain->get_Nx();
         const size_t Ny = domain->get_Ny();
@@ -619,7 +616,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
 
     BoundaryController *boundary = BoundaryController::getInstance();
     size_t *data_inner_list = boundary->get_inner_list_level_joined();
-    const size_t bsize_i = boundary->get_size_inner_list_level_joined();
+    const size_t bsize_i __attribute__((unused)) = boundary->get_size_inner_list_level_joined();
 
     const size_t start_i = boundary->get_inner_list_level_joined_start(level);
     const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
@@ -727,7 +724,7 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
     BoundaryController *boundary = BoundaryController::getInstance();
 
     size_t *data_inner_list = boundary->get_inner_list_level_joined();
-    const size_t bsize_i = boundary->get_size_inner_list_level_joined();
+    const size_t bsize_i __attribute__((unused)) = boundary->get_size_inner_list_level_joined();
 
     const size_t start_i = boundary->get_inner_list_level_joined_start(level);
     const size_t end_i = boundary->get_inner_list_level_joined_end(level) + 1;
