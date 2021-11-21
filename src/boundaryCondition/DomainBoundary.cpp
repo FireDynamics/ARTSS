@@ -46,7 +46,7 @@ namespace {
     /// \param  patch_end End index of patch
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_dirichlet(Field &field, size_t *d_patch, Patch patch,
+    void apply_dirichlet(Settings const &settings, Field &field, size_t *d_patch, Patch patch,
                          const size_t patch_start, const size_t patch_end, real value) {
         Domain *domain = Domain::getInstance();
         size_t level = field.get_level();
@@ -67,7 +67,7 @@ namespace {
                 break;
             default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("DomainBoundary");
+                auto logger = Utility::create_logger(settings, "DomainBoundary");
                 logger->error("Unknown Patch for dirichlet boundary condition: {}", patch);
 #endif
                 break;
@@ -91,7 +91,7 @@ namespace {
     /// \param  patch_end End index of patch
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_neumann(Field &field, size_t *d_patch, Patch patch,
+    void apply_neumann(Settings const &settings, Field &field, size_t *d_patch, Patch patch,
                        size_t patch_start, size_t patch_end, real value) {
         size_t level = field.get_level();
         Domain *domain = Domain::getInstance();
@@ -115,7 +115,7 @@ namespace {
                 break;
             default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("DomainBoundary");
+                auto logger = Utility::create_logger(settings, "DomainBoundary");
                 logger->error("Unknown Patch for neumann boundary condition: {}", patch);
 #endif
                 break;
@@ -138,7 +138,7 @@ namespace {
     /// \param  patch_end End index of patch
     /// \param  level Multigrid level
     // *********************************************************************************************
-    void apply_periodic(Field &field, size_t *d_patch, Patch patch,
+    void apply_periodic(Settings const &settings, Field &field, size_t *d_patch, Patch patch,
                         const size_t patch_start, const size_t patch_end) {
         size_t level = field.get_level();
         Domain *domain = Domain::getInstance();
@@ -163,7 +163,7 @@ namespace {
                 break;
             default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("DomainBoundary");
+                auto logger = Utility::create_logger(settings, "DomainBoundary");
                 logger->error("Unknown Patch for periodic boundary condition: {}", patch);
 #endif
                 break;
@@ -189,7 +189,7 @@ namespace {
 /// \param  boundary_data Boundary data_field object of Domain
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void apply_boundary_condition(Field &field, size_t **index_fields, const size_t *patch_starts,
+void apply_boundary_condition(Settings const &settings, Field &field, size_t **index_fields, const size_t *patch_starts,
                               const size_t *patch_ends, BoundaryData *boundary_data, bool sync) {
     for (size_t i = 0; i < number_of_patches; i++) {
         size_t *d_patch = *(index_fields + i);
@@ -203,20 +203,20 @@ void apply_boundary_condition(Field &field, size_t **index_fields, const size_t 
                 if (field.get_level() == 0) {
                     value = boundary_data->get_value(p);
                 }
-                apply_dirichlet(field, d_patch, p, patch_start, patch_end, value);
+                apply_dirichlet(settings, field, d_patch, p, patch_start, patch_end, value);
                 break;
             case BoundaryCondition::NEUMANN:
                 if (field.get_level() == 0) {
                     value = boundary_data->get_value(p);
                 }
-                apply_neumann(field, d_patch, p, patch_start, patch_end, value);
+                apply_neumann(settings, field, d_patch, p, patch_start, patch_end, value);
                 break;
             case BoundaryCondition::PERIODIC:
-                apply_periodic(field, d_patch, p, patch_start, patch_end);
+                apply_periodic(settings, field, d_patch, p, patch_start, patch_end);
                 break;
             default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("DomainBoundary");
+                auto logger = Utility::create_logger(settings, "DomainBoundary");
                 logger->error("Unknown boundary condition: {}", bc);
 #endif
                 break;

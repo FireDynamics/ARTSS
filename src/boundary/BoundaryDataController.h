@@ -34,6 +34,7 @@ class BoundaryDataController {
     std::vector<FieldType> get_used_fields();
 
  private:
+    Settings const &m_settings;
     BoundaryData** m_boundary_data;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;

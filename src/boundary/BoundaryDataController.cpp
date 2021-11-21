@@ -10,9 +10,10 @@
 #include "../boundaryCondition/DomainBoundary.h"
 #include "../boundaryCondition/ObstacleBoundary.h"
 
-BoundaryDataController::BoundaryDataController(Settings const &settings) {
+BoundaryDataController::BoundaryDataController(Settings const &settings) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     m_boundary_data = new BoundaryData *[numberOfFieldTypes];
     for (size_t i = 0; i < numberOfFieldTypes; i++) {
@@ -75,6 +76,7 @@ void BoundaryDataController::apply_boundary_condition(
     FieldType field_type = field.get_type();
     if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {
         DomainBoundary::apply_boundary_condition(
+                m_settings,
                 field,
                 index_fields,
                 patch_start, patch_end,
@@ -109,6 +111,7 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
                         BoundaryData::get_field_type_name(field_type));
 #endif
         ObstacleBoundary::apply_boundary_condition(
+                m_settings,
                 data,
                 index_fields,
                 patch_start, patch_end,

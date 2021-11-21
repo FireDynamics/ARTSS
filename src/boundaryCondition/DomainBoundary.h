@@ -12,7 +12,8 @@
 #include "../utility/Utility.h"
 
 namespace DomainBoundary {
-    void apply_boundary_condition(Field &field, size_t** index_fields,
+    void apply_boundary_condition(Settings const &settings,
+                                  Field &field, size_t** index_fields,
                                   const size_t* patch_starts, const size_t* patch_ends,
                                   BoundaryData* boundary_data, bool sync = true);
 }  // namespace DomainBoundary
