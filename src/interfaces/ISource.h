@@ -8,6 +8,7 @@
 #define ARTSS_INTERFACES_ISOURCE_H_
 
 #include "../field/Field.h"
+#include "../utility/Settings.h"
 #include "../utility/GlobalMacrosTypes.h"
 
 class ISource {
@@ -20,10 +21,11 @@ class ISource {
             bool sync) = 0;
     virtual void add_source(Field &out, Field const &S, bool sync) = 0;
 
-    void buoyancy_force(Field &out,
+    void buoyancy_force(Settings const &settings,
+                        Field &out,
                         const Field &in, const Field &in_a,
                         bool sync = true);
-    void dissipate(Field &out,
+    void dissipate(Settings const &settings, Field &out,
                    const Field &in_u, const Field &in_v, const Field &in_w,
                    bool sync = true);
 };

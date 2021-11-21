@@ -13,7 +13,6 @@
 
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
-#include "../utility/Parameters.h"
 
 //======================================== Sources ====================================
 //======================================== Force ======================================
@@ -25,12 +24,12 @@
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::buoyancy_force(
+        Settings const &settings,
         Field &out,
         const Field &in, const Field &in_a,
         bool sync) {
-    auto params = Parameters::getInstance();
-    real beta = params->get_real("physical_parameters/beta");
-    real g = params->get_real("physical_parameters/g");
+    real beta = settings.get_real("physical_parameters/beta");
+    real g = settings.get_real("physical_parameters/g");
 
     auto boundary = BoundaryController::getInstance();
 
@@ -74,6 +73,7 @@ void ISource::buoyancy_force(
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::dissipate(
+        Settings const &settings,
         Field &out,
         const Field &in_u, const Field &in_v, const Field &in_w,
         bool sync) {
@@ -88,10 +88,8 @@ void ISource::dissipate(
     real reciprocal_dy = 1. / dy;
     real reciprocal_dz = 1. / dz;
 
-    auto params = Parameters::getInstance();
-
-    real dt = params->get_real("physical_parameters/dt");
-    real nu = params->get_real("physical_parameters/nu");
+    real dt = settings.get_real("physical_parameters/dt");
+    real nu = settings.get_real("physical_parameters/nu");
 
     auto boundary = BoundaryController::getInstance();
     size_t *d_iList = boundary->get_inner_list_level_joined();
