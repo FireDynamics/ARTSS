@@ -10,11 +10,12 @@
 
 #include "../interfaces/IDiffusion.h"
 #include "../field/Field.h"
+#include "../utility/Settings.h"
 #include "../utility/Utility.h"
 
 class JacobiDiffuse : public IDiffusion {
  public:
-    JacobiDiffuse();
+    explicit JacobiDiffuse(Settings const &settings);
 
     void diffuse(
             Field &out, const Field &in, const Field &b,

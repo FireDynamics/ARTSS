@@ -8,23 +8,20 @@
 #include <cmath>
 
 #include "JacobiDiffuse.h"
-#include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 #include "../utility/Utility.h"
 
-JacobiDiffuse::JacobiDiffuse() {
+JacobiDiffuse::JacobiDiffuse(Settings const &settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
-    auto params = Parameters::getInstance();
-
-    m_dt = params->get_real("physical_parameters/dt");
+    m_dt = settings.get_real("physical_parameters/dt");
     m_dsign = 1.;
-    m_w = params->get_real("solver/diffusion/w");
+    m_w = settings.get_real("solver/diffusion/w");
 
-    m_max_iter = static_cast<size_t>(params->get_int("solver/diffusion/max_iter"));
-    m_tol_res = params->get_real("solver/diffusion/tol_res");
+    m_max_iter = static_cast<size_t>(settings.get_int("solver/diffusion/max_iter"));
+    m_tol_res = settings.get_real("solver/diffusion/tol_res");
 }
 
 // ============================ Diffuse =====================================

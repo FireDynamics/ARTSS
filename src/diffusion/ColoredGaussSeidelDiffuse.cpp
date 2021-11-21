@@ -10,25 +10,23 @@
 
 #include "ColoredGaussSeidelDiffuse.h"
 #include "../boundary/BoundaryController.h"
-#include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../utility/Utility.h"
 
 
 // ========================== Constructor =================================
-ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
+ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse(Settings const &settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
-    auto params = Parameters::getInstance();
 
-    m_dt = params->get_real("physical_parameters/dt");
+    m_dt = settings.get_real("physical_parameters/dt");
     m_dsign = 1.;
-    m_w = params->get_real("solver/diffusion/w");
+    m_w = settings.get_real("solver/diffusion/w");
 
-    if (params->get("solver/diffusion/type") == "ColoredGaussSeidel") {
-        m_max_iter = static_cast<size_t>(params->get_int("solver/diffusion/max_iter"));
-        m_tol_res = params->get_real("solver/diffusion/tol_res");
+    if (settings.get("solver/diffusion/type") == "ColoredGaussSeidel") {
+        m_max_iter = static_cast<size_t>(settings.get_int("solver/diffusion/max_iter"));
+        m_tol_res = settings.get_real("solver/diffusion/tol_res");
     } else {
         m_max_iter = 10000;
         m_tol_res = 1e-16;
@@ -52,10 +50,10 @@ void ColoredGaussSeidelDiffuse::diffuse(
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
-    auto bsize_b = boundary->get_size_boundary_list();
+    auto bsize_b __attribute__((unused)) = boundary->get_size_boundary_list();
 
     size_t* d_inner_list = boundary->get_inner_list_level_joined();
-    size_t* d_boundary_list = boundary->get_boundary_list_level_joined();
+    // size_t* d_boundary_list = boundary->get_boundary_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize])
 {
@@ -141,10 +139,10 @@ void ColoredGaussSeidelDiffuse::diffuse(
     auto boundary = BoundaryController::getInstance();
 
     auto bsize_i = boundary->get_size_inner_list();
-    auto bsize_b = boundary->get_size_boundary_list();
+    auto bsize_b __attribute__((unused)) = boundary->get_size_boundary_list();
 
     size_t* d_inner_list = boundary->get_inner_list_level_joined();
-    size_t* d_boundary_list = boundary->get_boundary_list_level_joined();
+    // size_t* d_boundary_list = boundary->get_boundary_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize], d_EV[:bsize])
 {

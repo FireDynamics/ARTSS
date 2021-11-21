@@ -7,12 +7,13 @@
 #ifndef ARTSS_DIFFUSION_EXPLICITDIFFUSE_H_
 #define ARTSS_DIFFUSION_EXPLICITDIFFUSE_H_
 
+#include "../utility/Settings.h"
 #include "../interfaces/IDiffusion.h"
 #include "../field/Field.h"
 
 class ExplicitDiffuse : public IDiffusion {
 public:
-    ExplicitDiffuse();
+    explicit ExplicitDiffuse(Settings const &settings);
 
     void diffuse(
             Field &out, const Field &in, const Field &b,

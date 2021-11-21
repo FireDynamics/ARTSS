@@ -11,12 +11,11 @@
 #endif
 
 #include "ExplicitDiffuse.h"
-#include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 
-ExplicitDiffuse::ExplicitDiffuse() {
-    m_dt = Parameters::getInstance()->get_real("physical_parameters/dt");
+ExplicitDiffuse::ExplicitDiffuse(Settings const &settings) {
+    m_dt = settings.get_real("physical_parameters/dt");
 }
 
 //====================================== Diffuse ===============================================

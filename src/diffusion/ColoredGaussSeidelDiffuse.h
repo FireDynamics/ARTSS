@@ -14,7 +14,7 @@
 
 class ColoredGaussSeidelDiffuse: public IDiffusion {
  public:
-    ColoredGaussSeidelDiffuse();
+    explicit ColoredGaussSeidelDiffuse(Settings const &settings);
 
     void diffuse(
             Field &out, const Field &in, const Field &b,
