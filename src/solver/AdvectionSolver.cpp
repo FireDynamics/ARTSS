@@ -6,23 +6,23 @@
 
 #include "AdvectionSolver.h"
 #include "../interfaces/IAdvection.h"
-#include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
 
 AdvectionSolver::AdvectionSolver(
+        Settings const &settings,
         FieldController *field_controller,
         real u_lin, real v_lin, real w_lin) :
+    m_settings(settings),
     m_field_controller(field_controller),
     m_u_lin(FieldType::U, u_lin),
     m_v_lin(FieldType::V, v_lin),
     m_w_lin(FieldType::W, w_lin) {
 #ifndef BENCHMARKING
-     m_logger = Utility::create_logger(typeid(this).name());
+     m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
-    auto params = Parameters::getInstance();
-    std::string advectionType = params->get("solver/advection/type");
-    SolverSelection::SetAdvectionSolver(&adv, params->get("solver/advection/type"));
+    std::string advectionType = m_settings.get("solver/advection/type");
+    SolverSelection::SetAdvectionSolver(m_settings, &adv, m_settings.get("solver/advection/type"));
 
     m_u_lin.copyin();
     m_v_lin.copyin();
@@ -31,12 +31,13 @@ AdvectionSolver::AdvectionSolver(
     control();
 }
 
-AdvectionSolver::AdvectionSolver(FieldController *field_controller) :
+AdvectionSolver::AdvectionSolver(Settings const &settings, FieldController *field_controller) :
     AdvectionSolver(
+            settings,
             field_controller,
-            Parameters::getInstance()->get_real("initial_conditions/u_lin"),
-            Parameters::getInstance()->get_real("initial_conditions/v_lin"),
-            Parameters::getInstance()->get_real("initial_conditions/w_lin")) {
+            settings.get_real("initial_conditions/u_lin"),
+            settings.get_real("initial_conditions/v_lin"),
+            settings.get_real("initial_conditions/w_lin")) {
 }
 
 AdvectionSolver::~AdvectionSolver() {
@@ -74,11 +75,9 @@ void AdvectionSolver::do_step(real, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void AdvectionSolver::control() {
-    auto params = Parameters::getInstance();
-    if (params->get("solver/advection/field") != "u,v,w") {
+    if (m_settings.get("solver/advection/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(typeid(AdvectionSolver).name());
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling

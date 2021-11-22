@@ -9,23 +9,22 @@
 #include <string>
 
 
-DiffusionTurbSolver::DiffusionTurbSolver(FieldController *field_controller) {
+DiffusionTurbSolver::DiffusionTurbSolver(Settings const &settings, FieldController *field_controller) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     m_field_controller = field_controller;
 
-    auto params = Parameters::getInstance();
-
     //Diffusion
-    std::string diffusionType = params->get("solver/diffusion/type");
-    SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
+    std::string diffusionType = m_settings.get("solver/diffusion/type");
+    SolverSelection::SetDiffusionSolver(m_settings, &this->dif, diffusionType);
 
-    m_nu = params->get_real("physical_parameters/nu");
+    m_nu = m_settings.get_real("physical_parameters/nu");
 
     // Turbulent viscosity
-    std::string turbluenceType = params->get("solver/turbulence/type");
-    SolverSelection::SetTurbulenceSolver(&this->mu_tub, turbluenceType);
+    std::string turbluenceType = m_settings.get("solver/turbulence/type");
+    SolverSelection::SetTurbulenceSolver(m_settings, &this->mu_tub, turbluenceType);
     control();
 }
 
@@ -76,11 +75,9 @@ void DiffusionTurbSolver::do_step(real, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void DiffusionTurbSolver::control() {
-    auto params = Parameters::getInstance();
-    if (params->get("solver/diffusion/field") != "u,v,w") {
+    if (m_settings.get("solver/diffusion/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(typeid(DiffusionTurbSolver).name());
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO(issue 6) Error handling

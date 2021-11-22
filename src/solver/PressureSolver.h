@@ -9,7 +9,6 @@
 
 #include "SolverSelection.h"
 #include "../pressure/VCycleMG.h"
-#include "../utility/Parameters.h"
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../Domain.h"
@@ -20,17 +19,18 @@
 
 class PressureSolver : public ISolver {
 public:
-    PressureSolver(FieldController *field_controller);
+    PressureSolver(Settings const &settings, FieldController *field_controller);
     ~PressureSolver();
     void do_step(real t, bool sync) override;
 
 private:
+    Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     FieldController *m_field_controller;
     IPressure *pres;
-    static void control();
+    void control();
 };
 
 #endif /* ARTSS_SOLVER_PRESSURESOLVER_H_ */

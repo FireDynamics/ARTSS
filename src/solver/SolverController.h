@@ -16,7 +16,7 @@
 
 class SolverController {
  public:
-    SolverController();
+    explicit SolverController(Settings const &settings);
     ~SolverController();
 
     void solver_do_step(real t, bool sync);
@@ -33,6 +33,8 @@ class SolverController {
     void force_source();
     void temperature_source();
     void momentum_source();
+
+    Settings const &m_settings;
 
     FieldController *m_field_controller;
     ISolver *m_solver;

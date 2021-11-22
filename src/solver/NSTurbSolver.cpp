@@ -6,39 +6,37 @@
 
 #include "NSTurbSolver.h"
 #include "../pressure/VCycleMG.h"
-#include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 
-NSTurbSolver::NSTurbSolver(FieldController *field_controller) {
+NSTurbSolver::NSTurbSolver(Settings const &settings, FieldController *field_controller) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     m_field_controller = field_controller;
 
-    auto params = Parameters::getInstance();
-
     // Advection of velocity
-    SolverSelection::SetAdvectionSolver(&adv_vel, params->get("solver/advection/type"));
+    SolverSelection::SetAdvectionSolver(m_settings, &adv_vel, m_settings.get("solver/advection/type"));
 
     // Diffusion of velocity
-    SolverSelection::SetDiffusionSolver(&dif_vel, params->get("solver/diffusion/type"));
+    SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));
 
-    m_nu = params->get_real("physical_parameters/nu");
+    m_nu = m_settings.get_real("physical_parameters/nu");
 
     // Turbulent viscosity
-    SolverSelection::SetTurbulenceSolver(&mu_tub, params->get("solver/turbulence/type"));
+    SolverSelection::SetTurbulenceSolver(m_settings, &mu_tub, m_settings.get("solver/turbulence/type"));
 
     //Pressure
-    SolverSelection::SetPressureSolver(&pres, params->get("solver/pressure/type"),
+    SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"),
                                        m_field_controller->get_field_p(),
                                        m_field_controller->get_field_rhs());
 
     // Source
-    SolverSelection::SetSourceSolver(&sou_vel, params->get("solver/source/type"));
+    SolverSelection::SetSourceSolver(m_settings, &sou_vel, m_settings.get("solver/source/type"));
 
-    m_force_function = params->get("solver/source/force_fct");
+    m_force_function = m_settings.get("solver/source/force_fct");
     control();
 }
 
@@ -142,27 +140,23 @@ void NSTurbSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void NSTurbSolver::control() {
+    if (m_settings.get("solver/advection/field") != "u,v,w") {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger(typeid(NSTurbSolver).name());
-#endif
-    auto params = Parameters::getInstance();
-    if (params->get("solver/advection/field") != "u,v,w") {
-#ifndef BENCHMARKING
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/diffusion/field") != "u,v,w") {
+    if (m_settings.get("solver/diffusion/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
+    if (m_settings.get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling

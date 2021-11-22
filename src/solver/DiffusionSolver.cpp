@@ -6,20 +6,20 @@
 
 #include "DiffusionSolver.h"
 #include "../interfaces/IDiffusion.h"
-#include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
 
-DiffusionSolver::DiffusionSolver(FieldController *field_controller) {
+DiffusionSolver::DiffusionSolver(Settings const &settings, FieldController *field_controller) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     m_field_controller = field_controller;
-    auto params = Parameters::getInstance();
-    std::string diffusionType = params->get("solver/diffusion/type");
-    SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
 
-    m_nu = params->get_real("physical_parameters/nu");
+    std::string diffusionType = m_settings.get("solver/diffusion/type");
+    SolverSelection::SetDiffusionSolver(m_settings, &this->dif, diffusionType);
+
+    m_nu = m_settings.get_real("physical_parameters/nu");
     control();
 }
 
@@ -61,11 +61,9 @@ void DiffusionSolver::do_step(real, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void DiffusionSolver::control() {
-    auto params = Parameters::getInstance();
-    if (params->get("solver/diffusion/field") != "u,v,w") {
+    if (m_settings.get("solver/diffusion/field") != "u,v,w") {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(typeid(DiffusionSolver).name());
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling

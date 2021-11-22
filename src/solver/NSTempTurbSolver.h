@@ -20,12 +20,13 @@
 
 class NSTempTurbSolver : public ISolver {
  public:
-    explicit NSTempTurbSolver(FieldController *fieldController);
+    NSTempTurbSolver(Settings const &settings, FieldController *fieldController);
     ~NSTempTurbSolver();
 
     void do_step(real t, bool sync) override;
 
  private:
+    Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -45,7 +46,7 @@ class NSTempTurbSolver : public ISolver {
 
     std::string m_dir_vel;
 
-    static void control();
+    void control();
 
     bool m_hasTurbulence;
     bool m_hasDissipation;

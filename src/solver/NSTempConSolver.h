@@ -21,12 +21,13 @@
 
 class NSTempConSolver: public ISolver {
  public:
-    NSTempConSolver(FieldController *field_controller);
+    NSTempConSolver(Settings const &settings, FieldController *field_controller);
     ~NSTempConSolver() override;
 
     void do_step(real t, bool sync) override;
 
 private:
+    Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -48,7 +49,7 @@ private:
     real m_gamma;
     std::string m_dir_vel;
 
-    static void control();
+    void control();
 
     std::string m_forceFct;
     bool m_hasDissipation;

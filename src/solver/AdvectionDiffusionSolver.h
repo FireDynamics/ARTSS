@@ -16,12 +16,13 @@
 
 class AdvectionDiffusionSolver : public ISolver {
 public:
-    AdvectionDiffusionSolver(FieldController *field_controller);
+    AdvectionDiffusionSolver(Settings const &settings, FieldController *field_controller);
     ~AdvectionDiffusionSolver();
 
     void do_step(real t, bool sync) override;
 
 private:
+    Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -33,7 +34,7 @@ private:
 
     real m_nu;
 
-    static void control();
+    void control();
 };
 
 #endif /* ARTSS_SOLVER_ADVECTIONDIFFUSIONSOLVER_H_ */

@@ -18,12 +18,13 @@
 
 class NSTurbSolver : public ISolver {
  public:
-    NSTurbSolver(FieldController *field_controller);
+    NSTurbSolver(Settings const &setings, FieldController *field_controller);
     ~NSTurbSolver();
 
     void do_step(real t, bool sync) override;
 
  private:
+    Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -37,7 +38,7 @@ class NSTurbSolver : public ISolver {
     FieldController *m_field_controller;
     real m_nu;
 
-    static void control();
+    void control();
 
     std::string m_force_function;
 };
