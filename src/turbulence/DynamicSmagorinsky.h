@@ -9,10 +9,11 @@
 
 #include "../interfaces/ITurbulence.h"
 #include "../field/Field.h"
+#include "../utility/Settings.h"
 
 class DynamicSmagorinsky : public ITurbulence {
 public:
-    DynamicSmagorinsky();
+    explicit DynamicSmagorinsky(Settings const &settings);
     ~DynamicSmagorinsky() override = default;
 
     void calc_turbulent_viscosity(

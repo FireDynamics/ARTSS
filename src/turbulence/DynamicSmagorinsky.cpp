@@ -11,11 +11,10 @@
 #endif
 
 #include "DynamicSmagorinsky.h"
-#include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-DynamicSmagorinsky::DynamicSmagorinsky() :
+DynamicSmagorinsky::DynamicSmagorinsky(Settings const &settings) :
     u_f(FieldType::U),
     v_f(FieldType::U),
     w_f(FieldType::U),
@@ -86,8 +85,7 @@ DynamicSmagorinsky::DynamicSmagorinsky() :
     S_bar(FieldType::U),
     S_bar_f(FieldType::U),
     Cs(FieldType::U) {
-    auto params = Parameters::getInstance();
-    m_nu = params->get_real("physical_parameters/nu");
+    m_nu = settings.get_real("physical_parameters/nu");
 
     // Variables related to Dynamic Smagorinsky
     u_f.copyin();

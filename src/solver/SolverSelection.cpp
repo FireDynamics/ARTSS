@@ -108,9 +108,9 @@ void SetSourceSolver(Settings const &settings, ISource **sourceSolver, const std
 // ***************************************************************************************
 void SetTurbulenceSolver(Settings const &settings, ITurbulence **turbulenceSolver, const std::string& turbulenceType) {
     if (turbulenceType == TurbulenceMethods::ConstSmagorinsky) {
-        *turbulenceSolver = new ConstSmagorinsky();
+        *turbulenceSolver = new ConstSmagorinsky(settings);
     } else if (turbulenceType == TurbulenceMethods::DynamicSmagorinsky) {
-        *turbulenceSolver = new DynamicSmagorinsky();
+        *turbulenceSolver = new DynamicSmagorinsky(settings);
     } else {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(settings, solver_selection_name);
