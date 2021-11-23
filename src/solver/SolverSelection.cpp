@@ -89,7 +89,7 @@ void SetPressureSolver(Settings const &settings, IPressure **pressureSolver, con
 // ***************************************************************************************
 void SetSourceSolver(Settings const &settings, ISource **sourceSolver, const std::string& sourceType) {
     if (sourceType == SourceMethods::ExplicitEuler) {
-        *sourceSolver = new ExplicitEulerSource();
+        *sourceSolver = new ExplicitEulerSource(settings);
     } else {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(settings, solver_selection_name);

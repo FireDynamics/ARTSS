@@ -14,7 +14,7 @@
 
 class ExplicitEulerSource : public ISource {
  public:
-    ExplicitEulerSource();
+    explicit ExplicitEulerSource(Settings const &settings);
 
     void add_source(Field &out_x, Field &out_y, Field &out_z,
                     const Field &S_x, const Field &S_y, const Field &S_z,

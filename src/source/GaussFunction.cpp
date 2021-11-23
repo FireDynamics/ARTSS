@@ -5,7 +5,6 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
 #include "GaussFunction.h"
-#include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 

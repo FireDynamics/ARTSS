@@ -8,15 +8,18 @@
 #define ARTSS_SOURCE_BUOYANCYMMS_H_
 
 
+#include "../utility/Settings.h"
 #include "../interfaces/ISourceFunction.h"
 
 class BuoyancyMMS: public ISourceFunction {
  public:
-    BuoyancyMMS();
+    explicit BuoyancyMMS(Settings const &settings);
     ~BuoyancyMMS();
     void update_source(Field &out, real t_cur) override;
  private:
     void set_up();
+
+    Settings const &m_settings;
     Field m_source_field;
 };
 

@@ -68,7 +68,7 @@ void SolverController::set_up_sources() {
         // source
         std::string temp_type = m_settings.get("solver/temperature/source/type");
         if (temp_type == SourceMethods::ExplicitEuler) {
-            source_temperature = new ExplicitEulerSource();
+            source_temperature = new ExplicitEulerSource(m_settings);
         } else {
 #ifndef BENCHMARKING
             m_logger->critical("Source type {} not yet implemented! Simulation stopped!", temp_type);
@@ -90,7 +90,7 @@ void SolverController::set_up_sources() {
             real tau = m_settings.get_real("solver/temperature/source/tau");
             m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
         } else if (temp_fct == SourceMethods::BuoyancyST_MMS) {
-            m_source_function_temperature = new BuoyancyMMS();
+            m_source_function_temperature = new BuoyancyMMS(m_settings);
         } else if (temp_fct == SourceMethods::Cube) {
             real x_start = m_settings.get_real("solver/temperature/source/x_start");
             real y_start = m_settings.get_real("solver/temperature/source/y_start");
@@ -132,7 +132,7 @@ void SolverController::set_up_sources() {
         // Source of concentration
         std::string con_type = m_settings.get("solver/concentration/source/type");
         if (con_type == SourceMethods::ExplicitEuler) {
-            source_concentration = new ExplicitEulerSource();
+            source_concentration = new ExplicitEulerSource(m_settings);
         } else {
 #ifndef BENCHMARKING
             m_logger->critical("Source type {} not yet implemented! Simulation stopped!", con_type);
@@ -170,7 +170,7 @@ void SolverController::set_up_sources() {
     if (m_has_momentum_source) {
         std::string source_type = m_settings.get("solver/source/type");
         if (source_type == SourceMethods::ExplicitEuler) {
-            source_velocity = new ExplicitEulerSource();
+            source_velocity = new ExplicitEulerSource(m_settings);
         } else {
 #ifndef BENCHMARKING
             m_logger->critical("Source function {} not yet implemented! Simulation stopped!", source_type);
