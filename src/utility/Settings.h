@@ -26,10 +26,10 @@ class BoundarySetting {
  public:
     explicit BoundarySetting(tinyxml2::XMLElement *xml_element);
 
-    std::string get_field();
-    std::string get_patch();
-    std::string get_type();
-    real get_value();
+    std::string get_field() const { return field; }
+    std::string get_patch() const {return patch; }
+    std::string get_type() const {return type; }
+    real get_value() const { return value; }
 
  private:
     std::string field;
@@ -42,15 +42,15 @@ class ObstacleSetting {
  public:
     explicit ObstacleSetting(tinyxml2::XMLElement *xml_element);
 
-    std::string get_name();
-    real get_ox1();
-    real get_ox2();
-    real get_oy1();
-    real get_oy2();
-    real get_oz1();
-    real get_oz2();
+    std::string get_name() const { return name; }
+    real get_ox1() const { return ox1; }
+    real get_ox2() const { return ox2; }
+    real get_oy1() const { return oy1; }
+    real get_oy2() const { return oy2; }
+    real get_oz1() const { return oz1; }
+    real get_oz2() const { return oz2; }
 
-    std::vector<BoundarySetting> get_boundaries();
+    std::vector<BoundarySetting> get_boundaries() const { return m_boundaries; }
 
  private:
     std::string name;

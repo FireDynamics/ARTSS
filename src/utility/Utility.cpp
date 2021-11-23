@@ -66,7 +66,7 @@ std::vector<std::string> split(const char *text, char delimiter) {
 //          ("logging/level", "logging/file")
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
-std::shared_ptr<spdlog::logger> create_logger(std::string logger_name, Settings &settings) {
+std::shared_ptr<spdlog::logger> create_logger(Settings const &settings, std::string logger_name) {
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
 
