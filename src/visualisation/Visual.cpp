@@ -10,30 +10,28 @@
 #include <utility>
 
 #include "Visual.h"
-#include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
-Visual::Visual(const Solution &solution, bool has_analytical_solution) :
+Visual::Visual(Settings const &settings, Solution const &solution, bool has_analytical_solution) :
         m_solution(solution),
         m_has_analytical_solution(has_analytical_solution) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
-    auto params = Parameters::getInstance();
-    m_filename = Utility::remove_extension(params->get_filename());
+    m_filename = Utility::remove_extension(settings.get_filename());
 
-    m_save_csv = (params->get("visualisation/save_csv") == XML_TRUE);
-    m_save_vtk = (params->get("visualisation/save_vtk") == XML_TRUE);
+    m_save_csv = settings.get_bool("visualisation/save_csv");
+    m_save_vtk = settings.get_bool("visualisation/save_vtk");
 
-    m_dt = params->get_real("physical_parameters/dt");
-    m_t_end = params->get_real("physical_parameters/t_end");
+    m_dt = settings.get_real("physical_parameters/dt");
+    m_t_end = settings.get_real("physical_parameters/t_end");
     if (m_save_csv) {
-        m_csv_plots = params->get_int("visualisation/csv_nth_plot");
+        m_csv_plots = settings.get_int("visualisation/csv_nth_plot");
     }
     if (m_save_vtk) {
-        m_vtk_plots = params->get_int("visualisation/vtk_nth_plot");
+        m_vtk_plots = settings.get_int("visualisation/vtk_nth_plot");
     }
 }
 

@@ -11,7 +11,7 @@ Settings::Settings(std::string path) :
         read_config("", i);
     }
 
-    m_logger = Utility::create_logger("XMLFile", *this);
+    m_logger = Utility::create_logger(*this, "XMLFile");
     m_logger->debug("start the simulation of \"{}\"", path);
     print_config();
 }
@@ -64,14 +64,14 @@ std::string Settings::get(std::string path) const {
     return iter->second;
 }
 
-std::vector<BoundaryData> get_boundaries() const {
+std::vector<BoundarySetting> Settings::get_boundaries() const {
     return {};
 }
 
-std::vector<Obstacle> get_obstacle() const {
+std::vector<ObstacleSetting> Settings::get_obstacles() const {
     return {};
 }
 
-std::vector<Surface> get_surface() const {
+std::vector<SurfaceSetting> Settings::get_surfaces() const {
     return {};
 }

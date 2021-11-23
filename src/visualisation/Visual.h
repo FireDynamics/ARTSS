@@ -14,7 +14,7 @@
 
 class Visual {
 public:
-    Visual(const Solution &solution, bool has_analytical_solution);
+    Visual(Settings const &settings, Solution const &solution, bool has_analytical_solution);
 
     void visualise(const FieldController &field_controller, real t);
 

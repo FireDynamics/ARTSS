@@ -30,7 +30,7 @@ TimeIntegration::TimeIntegration(Settings const &settings, SolverController *sc)
     bool has_analytical_solution = (settings.get("solver/solution/available") == XML_TRUE);
     m_solution = new Solution(settings, initial_condition, has_analytical_solution);
     m_analysis = new Analysis(settings, *m_solution, has_analytical_solution);
-    m_visual = new Visual(*m_solution, has_analytical_solution);
+    m_visual = new Visual(settings, *m_solution, has_analytical_solution);
 #endif
 }
 

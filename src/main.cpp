@@ -9,7 +9,6 @@
 #include "Domain.h"
 #include "boundary/BoundaryController.h"
 #include "utility/tinyxml2.h"
-#include "utility/Parameters.h"
 #include "utility/Settings.h"
 #include "solver/SolverController.h"
 
@@ -21,7 +20,6 @@ int main(int argc, char **argv) {
     // Initialisation
     // Parameters
     std::string XML_filename;
-    auto params = Parameters::getInstance();
     if (argc <= 1) {
         std::cerr << "XML file missing" << std::endl;
         std::exit(1);
@@ -39,17 +37,17 @@ int main(int argc, char **argv) {
     settings.print_config();
     return 0;
 
-    SolverController *sc = new SolverController();
+    SolverController *sc = new SolverController(settings);
 
 #ifdef _OPENACC
     // Initialise GPU
     acc_device_t dev_type = acc_get_device_type();
-    acc_init( dev_type );
+    acc_init(dev_type);
 #endif
 
     // Integrate over time and solve numerically
     // Time integration
-    TimeIntegration ti(sc);
+    TimeIntegration ti(settings, sc);
     ti.run();
 
     // Clean up

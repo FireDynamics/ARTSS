@@ -8,7 +8,6 @@
 #include <sstream>
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
-#include "Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 #include "../field/Field.h"
@@ -146,9 +145,9 @@ std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list
     return result;
 }
 
-void log_field_info(Field &field, const std::string &text, const std::string &logger_name) {
+void log_field_info(Settings const &settings, Field &field, const std::string &text, const std::string &logger_name) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger(logger_name);
+    auto logger = Utility::create_logger(settings, logger_name);
 #endif
     auto boundary = BoundaryController::getInstance();
     size_t *inner_list = boundary->get_inner_list_level_joined();
