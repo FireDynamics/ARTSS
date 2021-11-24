@@ -10,6 +10,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include <iostream>
 #include <unordered_map>
 
@@ -27,9 +28,11 @@ class BoundarySetting {
     explicit BoundarySetting(tinyxml2::XMLElement *xml_element);
 
     std::string get_field() const { return field; }
-    std::string get_patch() const {return patch; }
-    std::string get_type() const {return type; }
+    std::string get_patch() const { return patch; }
+    std::string get_type() const { return type; }
     real get_value() const { return value; }
+
+    void print(spdlog::logger logger) const;
 
  private:
     std::string field;
@@ -50,14 +53,16 @@ class ObstacleSetting {
     real get_oz1() const { return oz1; }
     real get_oz2() const { return oz2; }
 
-    std::vector<BoundarySetting> get_boundaries() const { return m_boundaries; }
+    void print(spdlog::logger logger) const;
+
+    std::vector<BoundarySetting> get_boundaries() const { return boundaries; }
 
  private:
     std::string name;
     real ox1, ox2;
     real oy1, oy2;
     real oz1, oz2;
-    std::vector<BoundarySetting> m_boundaries;
+    std::vector<BoundarySetting> boundaries;
 };
 
 class SurfaceSetting {
@@ -71,6 +76,8 @@ class SurfaceSetting {
     real get_sy2() const { return sy2; }
     real get_sz1() const { return sz1; }
     real get_sz2() const { return sz2; }
+
+    void print(spdlog::logger logger) const;
 
  private:
     int id;
@@ -93,32 +100,27 @@ class Settings {
          m_logger->debug("set: \"{}\" to value: \"{}\"", path, val);
 #endif
      }
-     void sset(std::string path, std::string val) {
-         m_proxy.insert({path, val});
-     }
+     void sset(std::string path, std::string val) { m_proxy.insert({path, val}); }
 
-     bool get_bool(std::string path) const {
-         return get(path) == "Yes";
-     }
+     bool get_bool(std::string path) const { return get(path) == "Yes"; }
+     int get_int(std::string path) const { return real(std::stoi(get(path))); }
+     real get_real(std::string path) const { return real(std::stod(get(path))); }
 
-     int get_int(std::string path) const {
-         return real(std::stoi(get(path)));
-     }
+     std::string get_filename() const { return filename; }
 
-     real get_real(std::string path) const {
-         return real(std::stod(get(path)));
-     }
-
-     std::string get_filename() const {
-         return filename;
-     }
-
-     std::vector<BoundarySetting> get_boundaries() const;
-     std::vector<ObstacleSetting> get_obstacles() const;
-     std::vector<SurfaceSetting> get_surfaces() const;
+     std::vector<BoundarySetting> get_boundaries() const { return m_boundaries; }
+     std::vector<ObstacleSetting> get_obstacles() const { return m_obstacles; }
+     std::vector<SurfaceSetting> get_surfaces() const { return m_surfaces; }
 
  private:
      void read_config(std::string prefix, tinyxml2::XMLElement *elem);
+     void read_boundaries(tinyxml2::XMLElement *elem);
+     void read_obstacles(tinyxml2::XMLElement *elem);
+     void read_surfaces(tinyxml2::XMLElement *elem);
+
+     std::vector<BoundarySetting> m_boundaries;
+     std::vector<ObstacleSetting> m_obstacles;
+     std::vector<SurfaceSetting> m_surfaces;
 
      std::unordered_multimap<std::string, std::string> m_proxy;
      std::string filename;
