@@ -21,8 +21,10 @@ Settings::Settings(std::string path) :
         }
     }
 
+#ifndef BENCHMARKING
     m_logger = Utility::create_logger(*this, "XMLFile");
     m_logger->debug("start the simulation of \"{}\"", path);
+#endif
 }
 
 
