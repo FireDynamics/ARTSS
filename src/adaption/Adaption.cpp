@@ -20,10 +20,11 @@
 
 Adaption::Adaption(Settings const &settings, FieldController *field_controller) {
     m_field_controller = field_controller;
+#ifndef BENCHMARKING
     m_logger = Utility::create_logger(settings, typeid(Adaption).name());
+#endif
     auto domain = Domain::getInstance();
-    m_dynamic = (settings.get("adaption/dynamic") == "Yes");
-    std::string tmp = settings.get("adaption/dynamic");
+    m_dynamic = settings.get_bool("adaption/dynamic");
     m_filename = settings.get_filename();
     m_filename.resize(m_filename.size() - 4);//remove .xml from filename
     m_has_data_extraction = settings.get_bool("adaption/data_extraction");
