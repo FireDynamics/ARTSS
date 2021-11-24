@@ -81,7 +81,4 @@ using real = double;  // data type for solver (float, double, ...)
 #define NEGATIVE_SIGN (-1)
 #define POSITIVE_SIGN (1)
 
-#define XML_TRUE ("Yes")
-#define XML_FALSE ("No")
-
 #endif /* ARTSS_UTILITY_GLOBALMACROSTYPES_H_ */

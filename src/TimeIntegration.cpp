@@ -27,7 +27,7 @@ TimeIntegration::TimeIntegration(Settings const &settings, SolverController *sc)
     m_adaption = new Adaption(settings, m_field_controller);
 #ifndef BENCHMARKING
     std::string initial_condition = settings.get("initial_conditions/usr_fct");
-    bool has_analytical_solution = (settings.get("solver/solution/available") == XML_TRUE);
+    bool has_analytical_solution = settings.get_bool("solver/solution/available");
     m_solution = new Solution(settings, initial_condition, has_analytical_solution);
     m_analysis = new Analysis(settings, *m_solution, has_analytical_solution);
     m_visual = new Visual(settings, *m_solution, has_analytical_solution);

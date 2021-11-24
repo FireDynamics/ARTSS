@@ -31,7 +31,7 @@ Domain::Domain(Settings const &settings) {
     m_Z1 = settings.get_real("domain_parameters/Z1");
     m_Z2 = settings.get_real("domain_parameters/Z2");
 
-    bool has_computational_domain = (settings.get("domain_parameters/enable_computational_domain") == XML_TRUE);
+    bool has_computational_domain = settings.get_bool("domain_parameters/enable_computational_domain");
     if (has_computational_domain){
         m_x1 = settings.get_real("domain_parameters/x1");
         m_x2 = settings.get_real("domain_parameters/x2");
