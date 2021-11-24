@@ -64,8 +64,8 @@ class BoundaryController {
  private:
     explicit BoundaryController(Settings const &settings);
 
-#ifndef BENCHMARKING
     Settings const &m_settings;
+#ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     static BoundaryController* singleton;
