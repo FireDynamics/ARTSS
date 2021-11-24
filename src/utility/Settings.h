@@ -32,7 +32,9 @@ class BoundarySetting {
     std::string get_type() const { return type; }
     real get_value() const { return value; }
 
+#ifndef BENCHMARKING
     void print(spdlog::logger logger) const;
+#endif
 
  private:
     std::string field;
@@ -53,7 +55,9 @@ class ObstacleSetting {
     real get_oz1() const { return oz1; }
     real get_oz2() const { return oz2; }
 
+#ifndef BENCHMARKING
     void print(spdlog::logger logger) const;
+#endif
 
     std::vector<BoundarySetting> get_boundaries() const { return boundaries; }
 
@@ -77,7 +81,9 @@ class SurfaceSetting {
     real get_sz1() const { return sz1; }
     real get_sz2() const { return sz2; }
 
+#ifndef BENCHMARKING
     void print(spdlog::logger logger) const;
+#endif
 
  private:
     int id;
