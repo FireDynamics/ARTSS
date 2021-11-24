@@ -26,11 +26,8 @@ int main(int argc, char **argv) {
     }
 
     Settings settings(argv[1]);
-    // Domain::getInstance(settings);
-    // BoundaryController::getInstance(settings);
-
-    settings.print_config();
-    return 0;
+    Domain::getInstance(settings);
+    BoundaryController::getInstance(settings);
 
     SolverController *sc = new SolverController(settings);
 
