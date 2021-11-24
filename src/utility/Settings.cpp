@@ -109,7 +109,6 @@ BoundarySetting::BoundarySetting(tinyxml2::XMLElement *xml_element) :
     patch(xml_element->Attribute("patch")),
     type(xml_element->Attribute("type")),
     value(std::atof(xml_element->Attribute("value"))) {
-        assert(xml_element->Name() == std::string("boundary"));
 }
 
 void BoundarySetting::print(spdlog::logger logger) const {
@@ -128,8 +127,6 @@ ObstacleSetting::ObstacleSetting(tinyxml2::XMLElement *xml_element) :
             oz2 = std::atof(i->Attribute("oz2"));
         } else if (i->Name() == std::string("boundary")) {
             boundaries.push_back(BoundarySetting(i));
-        } else {
-            assert(1 == 0);
         }
     }
 }
@@ -146,7 +143,6 @@ SurfaceSetting::SurfaceSetting(tinyxml2::XMLElement *xml_element) :
     sx1(std::atof(xml_element->Attribute("sx1"))), sx2(std::atof(xml_element->Attribute("sx2"))),
     sy1(std::atof(xml_element->Attribute("sy1"))), sy2(std::atof(xml_element->Attribute("sy2"))),
     sz1(std::atof(xml_element->Attribute("sz1"))), sz2(std::atof(xml_element->Attribute("sz2"))) {
-        assert(xml_element->Name() == std::string("surface"));
 }
 
 void SurfaceSetting::print(spdlog::logger logger) const {
