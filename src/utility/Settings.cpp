@@ -111,9 +111,11 @@ BoundarySetting::BoundarySetting(tinyxml2::XMLElement *xml_element) :
     value(std::atof(xml_element->Attribute("value"))) {
 }
 
+#ifndef BENCHMARKING
 void BoundarySetting::print(spdlog::logger logger) const {
     logger.debug("field={} patch={} type={} value={}", field, patch, type, value);
 }
+#endif
 
 ObstacleSetting::ObstacleSetting(tinyxml2::XMLElement *xml_element) :
     name(xml_element->Attribute("name")) {
@@ -131,12 +133,14 @@ ObstacleSetting::ObstacleSetting(tinyxml2::XMLElement *xml_element) :
     }
 }
 
+#ifndef BENCHMARKING
 void ObstacleSetting::print(spdlog::logger logger) const {
     logger.debug("ox=({}, {}) oy=({}, {}) oz=({}, {})", ox1, ox2, oy1, oy2, oz1, oz2);
     for(auto i : boundaries) {
         i.print(logger);
     }
 }
+#endif
 
 SurfaceSetting::SurfaceSetting(tinyxml2::XMLElement *xml_element) :
     id(std::atoi(xml_element->Attribute("ID"))),
@@ -145,6 +149,7 @@ SurfaceSetting::SurfaceSetting(tinyxml2::XMLElement *xml_element) :
     sz1(std::atof(xml_element->Attribute("sz1"))), sz2(std::atof(xml_element->Attribute("sz2"))) {
 }
 
+#ifndef BENCHMARKING
 void SurfaceSetting::print(spdlog::logger logger) const {
     logger.debug("id={} sx=({}, {}) sy=({}, {}) oz=({}, {})",
             id,
@@ -152,3 +157,4 @@ void SurfaceSetting::print(spdlog::logger logger) const {
             sy1, sy2,
             sz1, sz2);
 }
+#endif
