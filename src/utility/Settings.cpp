@@ -16,9 +16,9 @@ Settings::Settings(std::string path) :
             read_obstacles(i);
         } else if (i->Name() == std::string("surfaces")) {
             read_surfaces(i);
-        } else {
-            read_config("", i);
         }
+
+        read_config("", i);
     }
 
 #ifndef BENCHMARKING
