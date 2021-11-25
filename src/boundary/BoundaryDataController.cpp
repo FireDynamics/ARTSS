@@ -35,11 +35,16 @@ BoundaryDataController::~BoundaryDataController() {
 // *************************************************************************************************
 void BoundaryDataController::add_boundary_data(BoundarySetting boundary) {
     BoundaryCondition bc = BoundaryData::match_boundary_condition(boundary.get_type());
-    FieldType fieldType = BoundaryData::match_field(boundary.get_field());
-    Patch patch = BoundaryData::match_patch(boundary.get_patch());
     real value = boundary.get_value();
 
-    m_boundary_data[fieldType]->add_boundary_condition(patch, value, bc);
+    for (auto f : Utility::split(boundary.get_field(), ',')) {
+        FieldType ft = BoundaryData::match_field(f);
+
+        for (auto p : Utility::split(boundary.get_patch(), ',')) {
+            Patch pt = BoundaryData::match_patch(p);
+            m_boundary_data[ft]->add_boundary_condition(pt, value, bc);
+        }
+    }
 }
 
 // ============================================== Print ============================================
