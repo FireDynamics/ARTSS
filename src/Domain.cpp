@@ -61,9 +61,9 @@ Domain::Domain(Settings const &settings) {
 // ***************************************************************************************
 void Domain::calc_MG_values() {
     for (size_t l = 1; l < m_levels + 1; ++l) {
-        m_nx[l] = (m_nx[l - 1] == 3) ? 3 : static_cast<size_t> (std::round(m_nx[l - 1] / 2));
-        m_ny[l] = (m_ny[l - 1] == 3) ? 3 : static_cast<size_t> (std::round(m_ny[l - 1] / 2));
-        m_nz[l] = (m_nz[l - 1] == 3) ? 3 : static_cast<size_t> (std::round(m_nz[l - 1] / 2));
+        m_nx[l] = (m_nx[l - 1] == 1) ? 1 : static_cast<size_t> (std::round(m_nx[l - 1] / 2));
+        m_ny[l] = (m_ny[l - 1] == 1) ? 1 : static_cast<size_t> (std::round(m_ny[l - 1] / 2));
+        m_nz[l] = (m_nz[l - 1] == 1) ? 1 : static_cast<size_t> (std::round(m_nz[l - 1] / 2));
     }
 }
 
