@@ -96,6 +96,7 @@ void BoundaryData::add_boundary_condition(
         Patch const &patch,
         real value,
         BoundaryCondition const &boundary_condition) {
+    m_has_values = true;
     m_values[patch] = value;
     m_boundary_conditions[patch] = boundary_condition;
 }
