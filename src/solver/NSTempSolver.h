@@ -38,8 +38,6 @@ public:
     ISource *sou_vel;
     ISource *sou_temp;
 
-    real m_nu;
-    real m_kappa;
     std::string m_dir_vel;
 
     void control();

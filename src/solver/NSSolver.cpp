@@ -29,8 +29,6 @@ NSSolver::NSSolver(Settings const &settings, FieldController *field_controller) 
     std::string diffusionType = m_settings.get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, diffusionType);
 
-    m_nu = m_settings.get_real("physical_parameters/nu");
-
     //Pressure
     std::string pressureType = m_settings.get("solver/pressure/type");
     SolverSelection::SetPressureSolver(m_settings, &pres, pressureType,
@@ -74,7 +72,7 @@ void NSSolver::do_step(real t, bool sync) {
     Field &f_y = m_field_controller->get_field_force_y();
     Field &f_z = m_field_controller->get_field_force_z();
 
-    auto nu = m_nu;
+    real nu = m_settings.get_real("physical_parameters/nu");
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, rhs, fx, fy, fz)
     {

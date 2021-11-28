@@ -23,7 +23,6 @@ DiffusionSolver::DiffusionSolver(Settings const &settings, FieldController *fiel
     std::string diffusionType = m_settings.get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(m_settings, &this->dif, diffusionType);
 
-    m_nu = m_settings.get_real("physical_parameters/nu");
     control();
 }
 
@@ -54,9 +53,10 @@ void DiffusionSolver::do_step(real, bool sync) {
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp)
     {
-        dif->diffuse(u, u0, u_tmp, m_nu, sync);
-        dif->diffuse(v, v0, v_tmp, m_nu, sync);
-        dif->diffuse(w, w0, w_tmp, m_nu, sync);
+        real nu = m_settings.get_real("physical_parameters/nu");
+        dif->diffuse(u, u0, u_tmp, nu, sync);
+        dif->diffuse(v, v0, v_tmp, nu, sync);
+        dif->diffuse(w, w0, w_tmp, nu, sync);
     }
 }
 

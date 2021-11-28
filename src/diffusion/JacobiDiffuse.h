@@ -38,10 +38,10 @@ class JacobiDiffuse : public IDiffusion {
             const Field &EV, real dt, bool sync = true);  // turbulent version
 
  private:
+    Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    real m_dt;
     real m_dsign;
     real m_w;
     size_t m_max_iter;

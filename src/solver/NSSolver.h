@@ -38,8 +38,6 @@ class NSSolver : public ISolver {
     IPressure *pres;
     ISource *sou;
 
-    real m_nu;
-
     void control();
 
     std::string m_sourceFct;

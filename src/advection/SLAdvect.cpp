@@ -20,10 +20,6 @@
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 
-SLAdvect::SLAdvect(Settings const &settings) {
-    m_dt = settings.get_real("physical_parameters/dt");
-}
-
 // ***************************************************************************************
 /// \brief  solves advection \f$ \partial_t \phi_1 = - (u \cdot \nabla) \phi_0 \f$ via
 ///         unconditionally stable semi-Lagrangian approach (backtrace and linear interpolation)
@@ -52,7 +48,7 @@ void SLAdvect::advect(Field &out, const Field &in,
         const real dy = domain->get_dy();
         const real dz = domain->get_dz();
 
-        const real dt = m_dt;
+        const real dt = m_settings.get_real("physical_parameters/dt");
 
         const real dtx = dt / dx;
         const real dty = dt / dy;

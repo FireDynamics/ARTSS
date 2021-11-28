@@ -44,9 +44,6 @@ private:
 
     FieldController *m_field_controller;
 
-    real m_nu;
-    real m_kappa;
-    real m_gamma;
     std::string m_dir_vel;
 
     void control();

@@ -36,7 +36,6 @@ class NSTurbSolver : public ISolver {
     ITurbulence *mu_tub;
 
     FieldController *m_field_controller;
-    real m_nu;
 
     void control();
 

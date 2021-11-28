@@ -27,8 +27,6 @@ AdvectionDiffusionSolver::AdvectionDiffusionSolver(Settings const &settings, Fie
     std::string diffusionType = m_settings.get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(m_settings, &this->dif, diffusionType);
 
-    m_nu = m_settings.get_real("physical_parameters/nu");
-
     control();
 }
 
@@ -56,7 +54,7 @@ void AdvectionDiffusionSolver::do_step(real, bool sync) {
     Field &v_tmp = m_field_controller->get_field_v_tmp();
     Field &w_tmp = m_field_controller->get_field_w_tmp();
 
-    auto nu = m_nu;
+    auto nu = m_settings.get_real("physical_parameters/nu");
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp)
     {

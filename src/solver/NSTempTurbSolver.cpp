@@ -31,15 +31,11 @@ m_settings(settings) {
     // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));
 
-    m_nu = m_settings.get_real("physical_parameters/nu");
-
     // Turbulent viscosity for velocity diffusion
     SolverSelection::SetTurbulenceSolver(m_settings, &mu_tub, m_settings.get("solver/turbulence/type"));
 
     // Diffusion of temperature
     SolverSelection::SetDiffusionSolver(m_settings, &dif_temp, m_settings.get("solver/temperature/diffusion/type"));
-
-    m_kappa = m_settings.get_real("physical_parameters/kappa");
 
     // Pressure
     SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"),
@@ -126,9 +122,11 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        dif_vel->diffuse(u, u0, u_tmp, m_nu, nu_t, sync);
-        dif_vel->diffuse(v, v0, v_tmp, m_nu, nu_t, sync);
-        dif_vel->diffuse(w, w0, w_tmp, m_nu, nu_t, sync);
+        real nu = m_settings.get_real("physical_parameters/nu");
+
+        dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
 
         // Couple data to prepare for adding source
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
@@ -170,6 +168,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
         // Solve diffusion equation
         // turbulence
         if (m_hasTurbulence) {
+            real kappa = m_settings.get_real("physical_parameters/kappa");
             real Pr_T = m_settings.get_real("solver/temperature/turbulence/Pr_T");
             real rPr_T = 1. / Pr_T;
 
@@ -182,17 +181,18 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Temperature ...");
 #endif
-            dif_temp->diffuse(T, T0, T_tmp, m_kappa, kappa_t, sync);
+            dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
 
             // Couple temperature to prepare for adding source
             FieldController::couple_scalar(T, T0, T_tmp, sync);
         } else {
             // no turbulence
-            if (m_kappa != 0.) {
+            real kappa = m_settings.get_real("physical_parameters/kappa");
+            if (kappa != 0.) {
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Temperature ...");
 #endif
-                dif_temp->diffuse(T, T0, T_tmp, m_kappa, sync);
+                dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
 
                 // Couple temperature to prepare for adding source
                 FieldController::couple_scalar(T, T0, T_tmp, sync);

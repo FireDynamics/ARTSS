@@ -12,11 +12,11 @@
 #include "../Domain.h"
 #include "../utility/Utility.h"
 
-JacobiDiffuse::JacobiDiffuse(Settings const &settings) {
+JacobiDiffuse::JacobiDiffuse(Settings const &settings) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
-    m_dt = settings.get_real("physical_parameters/dt");
     m_dsign = 1.;
     m_w = settings.get_real("solver/diffusion/w");
 
@@ -50,13 +50,15 @@ void JacobiDiffuse::diffuse(Field &out, const Field &in, const Field &b,
         const real dy = domain->get_dy();
         const real dz = domain->get_dz();
 
+        const real dt = m_settings.get_real("physical_parameters/dt");
+
         const real reciprocal_dx = 1. / dx;  // due to unnecessary parameter passing of *this
         const real reciprocal_dy = 1. / dy;
         const real reciprocal_dz = 1. / dz;
 
-        const real alpha_x = D * m_dt * reciprocal_dx * reciprocal_dx;  // due to better pgi handling of scalars (instead of arrays)
-        const real alpha_y = D * m_dt * reciprocal_dy * reciprocal_dy;
-        const real alpha_z = D * m_dt * reciprocal_dz * reciprocal_dz;
+        const real alpha_x = D * dt * reciprocal_dx * reciprocal_dx;  // due to better pgi handling of scalars (instead of arrays)
+        const real alpha_y = D * dt * reciprocal_dy * reciprocal_dy;
+        const real alpha_z = D * dt * reciprocal_dz * reciprocal_dz;
 
         const real reciprocal_beta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
 
@@ -161,7 +163,7 @@ void JacobiDiffuse::diffuse(
         const real reciprocal_dy = 1. / dy;
         const real reciprocal_dz = 1. / dz;
 
-        real dt = m_dt;
+        const real dt = m_settings.get_real("physical_parameters/dt");
 
         real alpha_x, alpha_y, alpha_z, reciprocal_beta;  // calculated in JacobiStep!
 

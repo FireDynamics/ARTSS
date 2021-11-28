@@ -15,18 +15,17 @@
 #include "VTKWriter.h"
 
 Visual::Visual(Settings const &settings, Solution const &solution, bool has_analytical_solution) :
+        m_settings(settings),
         m_solution(solution),
         m_has_analytical_solution(has_analytical_solution) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     m_filename = Utility::remove_extension(settings.get_filename());
 
-    m_save_csv = settings.get_bool("visualisation/save_csv");
-    m_save_vtk = settings.get_bool("visualisation/save_vtk");
+    m_save_csv = m_settings.get_bool("visualisation/save_csv");
+    m_save_vtk = m_settings.get_bool("visualisation/save_vtk");
 
-    m_dt = settings.get_real("physical_parameters/dt");
-    m_t_end = settings.get_real("physical_parameters/t_end");
     if (m_save_csv) {
         m_csv_plots = settings.get_int("visualisation/csv_nth_plot");
     }
@@ -39,10 +38,14 @@ void Visual::visualise(const FieldController &field_controller, real t) {
 #ifndef BENCHMARKING
     m_logger->info("Visualise ...");
 #endif
-    int n = static_cast<int> (std::round(t / m_dt));
+    real dt = m_settings.get_real("physical_parameters/dt");
+    real t_end = m_settings.get_real("physical_parameters/t_end");
+
+    int n = static_cast<int> (std::round(t / dt));
+
     std::string filename = create_filename(m_filename, n, false);
     if (m_save_vtk) {
-        if (fmod(n, m_vtk_plots) == 0 || t >= m_t_end) {
+        if (fmod(n, m_vtk_plots) == 0 || t >= t_end) {
             VTKWriter::write_numerical(field_controller, filename);
             if (m_has_analytical_solution) {
                 VTKWriter::write_analytical(m_solution, filename);
@@ -51,7 +54,7 @@ void Visual::visualise(const FieldController &field_controller, real t) {
     }
 
     if (m_save_csv) {
-        if (fmod(n, m_csv_plots) == 0 || t >= m_t_end) {
+        if (fmod(n, m_csv_plots) == 0 || t >= t_end) {
             CSVWriter::write_numerical(field_controller, filename);
             if (m_has_analytical_solution) {
                 CSVWriter::write_analytical(m_solution, filename);

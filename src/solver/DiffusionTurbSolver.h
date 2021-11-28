@@ -33,8 +33,6 @@ class DiffusionTurbSolver: public ISolver {
     IDiffusion *dif;
     ITurbulence *mu_tub;
 
-    real m_nu;
-
     void control();
 };
 

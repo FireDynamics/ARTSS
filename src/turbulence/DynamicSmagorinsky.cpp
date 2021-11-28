@@ -15,6 +15,8 @@
 #include "../boundary/BoundaryController.h"
 
 DynamicSmagorinsky::DynamicSmagorinsky(Settings const &settings) :
+    m_settings(settings),
+
     u_f(FieldType::U),
     v_f(FieldType::U),
     w_f(FieldType::U),
@@ -85,7 +87,6 @@ DynamicSmagorinsky::DynamicSmagorinsky(Settings const &settings) :
     S_bar(FieldType::U),
     S_bar_f(FieldType::U),
     Cs(FieldType::U) {
-    m_nu = settings.get_real("physical_parameters/nu");
 
     // Variables related to Dynamic Smagorinsky
     u_f.copyin();
@@ -177,6 +178,8 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx();
     const size_t Ny = domain->get_Ny();
+
+    const real nu = m_settings.get_real("physical_parameters/nu");
 
     const real dx = domain->get_dx();
     const real dy = domain->get_dy();
@@ -376,7 +379,7 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
     // negative coefficients are allowed unless they don't make the effective viscosity zero. In our case d_ev is very small to do that
     for (size_t j = 0; j < bsize_i; ++j) {
         const size_t i = d_inner_list[j];
-        if ((ev[i] + m_nu) < 0) {
+        if ((ev[i] + nu) < 0) {
             ev[i] = 0;
         }
     }

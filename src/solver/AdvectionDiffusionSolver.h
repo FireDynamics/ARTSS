@@ -32,8 +32,6 @@ private:
 
     FieldController *m_field_controller;
 
-    real m_nu;
-
     void control();
 };
 

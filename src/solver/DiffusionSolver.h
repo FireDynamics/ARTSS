@@ -27,7 +27,6 @@ class DiffusionSolver: public ISolver {
 
     FieldController *m_field_controller;
     IDiffusion *dif;
-    real m_nu;
 
     void control();
 };

@@ -22,8 +22,6 @@ DiffusionTurbSolver::DiffusionTurbSolver(Settings const &settings, FieldControll
     std::string diffusionType = m_settings.get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(m_settings, &this->dif, diffusionType);
 
-    m_nu = m_settings.get_real("physical_parameters/nu");
-
     // Turbulent viscosity
     std::string turbluenceType = m_settings.get("solver/turbulence/type");
     SolverSelection::SetTurbulenceSolver(m_settings, &this->mu_tub, turbluenceType);
@@ -55,7 +53,7 @@ void DiffusionTurbSolver::do_step(real, bool sync) {
     Field &w_tmp = m_field_controller->get_field_w_tmp();
     Field &nu_t = m_field_controller->get_field_nu_t();  // Eddy Viscosity
 
-    auto nu = m_nu;
+    real nu = m_settings.get_real("physical_parameters/nu");
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, nu_t)
     {

@@ -22,11 +22,11 @@ class ExplicitEulerSource : public ISource {
     void add_source(Field &out, const Field &S, bool sync) override;
 
  private:
+    Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
 
-    real m_dt;
     std::string m_dir_vel;
 };
 

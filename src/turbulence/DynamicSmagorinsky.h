@@ -23,6 +23,7 @@ public:
     void explicit_filtering(Field &out, Field const &in, bool sync) override;
 
 private:
+    Settings const &m_settings;
     Field u_f, v_f, w_f;                 // filtered velocities
     Field uu, vv, ww, uv, uw, vw;           // velocity products
     Field uu_f, vv_f, ww_f, uv_f, uw_f, vw_f;     // filters of the velocity products
@@ -35,7 +36,6 @@ private:
     Field M11, M22, M33, M12, M13, M23;       // High frequency resolved terms
     Field S_bar, S_bar_f;                 // modulus of strain tensor
     Field Cs;                        // dynamic constant
-    real m_nu;                        // viscosity
 };
 
 #endif /* ARTSS_TURBULENCE_DYNAMICSMAGORINSKY_H_ */

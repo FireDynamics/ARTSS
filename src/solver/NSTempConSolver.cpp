@@ -16,7 +16,7 @@
 #include "SolverSelection.h"
 
 NSTempConSolver::NSTempConSolver(Settings const &settings, FieldController *field_controller) :
-m_settings(settings) {
+        m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
@@ -34,17 +34,11 @@ m_settings(settings) {
     // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, settings.get("solver/diffusion/type"));
 
-    m_nu = settings.get_real("physical_parameters/nu");
-
     // Diffusion of temperature
     SolverSelection::SetDiffusionSolver(m_settings, &dif_temp, settings.get("solver/temperature/diffusion/type"));
 
-    m_kappa = settings.get_real("physical_parameters/kappa");
-
     // Diffusion for concentration
     SolverSelection::SetDiffusionSolver(m_settings, &dif_con, settings.get("solver/concentration/diffusion/type"));
-
-    m_gamma = settings.get_real("solver/concentration/diffusion/gamma");
 
     // Pressure
     SolverSelection::SetPressureSolver(m_settings, &pres, settings.get("solver/pressure/type"),
@@ -113,9 +107,10 @@ void NSTempConSolver::do_step(real t, bool sync) {
     Field &S_T = m_field_controller->get_field_source_T();
     Field &S_C = m_field_controller->get_field_source_concentration();
 
-    auto nu = m_nu;
-    auto kappa = m_kappa;
-    auto gamma = m_gamma;
+    auto nu = m_settings.get_real("physical_parameters/nu");
+    auto kappa = m_settings.get_real("physical_parameters/kappa");
+    auto gamma = m_settings.get_real("solver/concentration/diffusion/gamma");
+
     auto dir_vel = m_dir_vel;
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, rhs, T, T0, T_tmp, C, C0, C_tmp, fx, fy, fz, S_T, S_C)

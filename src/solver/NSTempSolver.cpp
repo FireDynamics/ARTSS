@@ -30,12 +30,8 @@ NSTempSolver::NSTempSolver(Settings const &settings, FieldController *field_cont
     // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));
 
-    m_nu = m_settings.get_real("physical_parameters/nu");
-
     // Diffusion of temperature
     SolverSelection::SetDiffusionSolver(m_settings, &dif_temp, m_settings.get("solver/temperature/diffusion/type"));
-
-    m_kappa = m_settings.get_real("physical_parameters/kappa");
 
     // Pressure
     SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"),
@@ -95,8 +91,9 @@ void NSTempSolver::do_step(real t, bool sync) {
     Field &f_z = m_field_controller->get_field_force_z();
     Field &S_T = m_field_controller->get_field_source_T();
 
-    auto nu = m_nu;
-    auto kappa = m_kappa;
+    auto nu = m_settings.get_real("physical_parameters/nu");
+    auto kappa = m_settings.get_real("physical_parameters/kappa");
+
     auto dir_vel = m_dir_vel;
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \

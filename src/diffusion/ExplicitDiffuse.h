@@ -13,7 +13,7 @@
 
 class ExplicitDiffuse : public IDiffusion {
 public:
-    explicit ExplicitDiffuse(Settings const &settings);
+    explicit ExplicitDiffuse(Settings const &settings) : m_settings(settings) {}
 
     void diffuse(
             Field &out, const Field &in, const Field &b,
@@ -28,7 +28,7 @@ public:
                       real D, const Field &EV, bool sync = true);
 
 private:
-    real m_dt;
+    Settings const &m_settings;
 };
 
 #endif /* ARTSS_DIFFUSION_EXPLICITDIFFUSE_H_ */

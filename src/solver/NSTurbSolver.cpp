@@ -27,8 +27,6 @@ NSTurbSolver::NSTurbSolver(Settings const &settings, FieldController *field_cont
     // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));
 
-    m_nu = m_settings.get_real("physical_parameters/nu");
-
     // Turbulent viscosity
     SolverSelection::SetTurbulenceSolver(m_settings, &mu_tub, m_settings.get("solver/turbulence/type"));
 
@@ -75,7 +73,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
     Field &f_z = m_field_controller->get_field_force_z();
     Field &nu_t = m_field_controller->get_field_nu_t();  // nu_t - Eddy Viscosity
 
-    auto nu = m_nu;
+    auto nu = m_settings.get_real("physical_parameters/nu");
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, \
                          p, rhs, fx, fy, fz, nu_t)

@@ -25,14 +25,14 @@ public:
     static void write_vtk_debug(FieldController &field_controller, const std::string& filename);
 
 private:
+    Settings const &m_settings;
+
     std::string m_filename;
     const Solution &m_solution;
     bool m_save_csv = false;
     int m_csv_plots = 0;
     bool m_save_vtk = false;
     int m_vtk_plots = 0;
-    real m_dt;
-    real m_t_end;
 
     static std::string create_filename(const std::string &filename, int counter, bool analytical);
 
