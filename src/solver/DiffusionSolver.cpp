@@ -4,6 +4,10 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <string>
+#include <vector>
+#include <algorithm>
+
 #include "DiffusionSolver.h"
 #include "../interfaces/IDiffusion.h"
 #include "../Domain.h"
@@ -61,7 +65,9 @@ void DiffusionSolver::do_step(real, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void DiffusionSolver::control() {
-    if (m_settings.get("solver/diffusion/field") != "u,v,w") {
+    auto fields = Utility::split(m_settings.get("solver/diffusion/field"), ',');
+    std::sort(fields.begin(), fields.end());
+    if (fields != std::vector<std::string>({"u", "v", "w"})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

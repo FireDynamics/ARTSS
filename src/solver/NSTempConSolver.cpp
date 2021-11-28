@@ -5,6 +5,10 @@
 /// \author     Küsters
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <string>
+#include <vector>
+#include <algorithm>
+
 #include "NSTempConSolver.h"
 #include "../pressure/VCycleMG.h"
 #include "../Domain.h"
@@ -252,7 +256,9 @@ void NSTempConSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void NSTempConSolver::control() {
-    if (m_settings.get("solver/advection/field") != "u,v,w") {
+    auto fields = Utility::split(m_settings.get("solver/advection/field"), ',');
+    std::sort(fields.begin(), fields.end());
+    if (fields != std::vector<std::string>({"u", "v", "w"})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
@@ -260,13 +266,16 @@ void NSTempConSolver::control() {
         // TODO Error handling
     }
 
-    if (m_settings.get("solver/diffusion/field") != "u,v,w") {
+    auto diff_fields = Utility::split(m_settings.get("solver/diffusion/field"), ',');
+    std::sort(diff_fields.begin(), diff_fields.end());
+    if (diff_fields != std::vector<std::string>({"u", "v", "w"})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
+
     if (m_settings.get("solver/temperature/advection/field") != BoundaryData::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");

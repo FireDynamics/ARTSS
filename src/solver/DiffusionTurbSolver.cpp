@@ -4,9 +4,11 @@
 /// \author     Suryanarayana Maddu
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <string>
+#include <vector>
+#include <algorithm>
 
 #include "DiffusionTurbSolver.h"
-#include <string>
 
 
 DiffusionTurbSolver::DiffusionTurbSolver(Settings const &settings, FieldController *field_controller) :
@@ -75,7 +77,9 @@ void DiffusionTurbSolver::do_step(real, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void DiffusionTurbSolver::control() {
-    if (m_settings.get("solver/diffusion/field") != "u,v,w") {
+    auto fields = Utility::split(m_settings.get("solver/diffusion/field"), ',');
+    std::sort(fields.begin(), fields.end());
+    if (fields != std::vector<std::string>({"u", "v", "w"})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
