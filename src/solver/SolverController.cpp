@@ -625,7 +625,7 @@ void SolverController::temperature_source() {
 // ***************************************************************************************
 void SolverController::force_source() {
     // Force
-    if (m_settings.get("solver/source/force_fct") != SourceMethods::Buoyancy) {
+    if (m_settings.get("solver/source/force_fct") == SourceMethods::Buoyancy) {
         std::string dir = m_settings.get("solver/source/dir");
         if (!m_settings.get_bool("solver/source/use_init_values")) {
             real ambient_temperature_value = m_settings.get_real("solver/source/ambient_temperature_value");

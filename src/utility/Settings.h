@@ -103,7 +103,7 @@ class Settings {
      void set(std::string path, std::string val) {
          sset(path, val);
 #ifndef BENCHMARKING
-         m_logger->debug("set: \"{}\" to value: \"{}\"", path, val);
+         m_logger->debug(R"(set: "{}" to value: "{}")", path, val);
 #endif
      }
      void sset(std::string path, std::string val) { m_proxy.insert({path, val}); }
