@@ -19,7 +19,7 @@
 
 #ifndef BENCHMARKING
 #include <memory>
-#include "spdlog/logger.h"
+#include <spdlog/logger.h>
 #endif
 
 
