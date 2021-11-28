@@ -8,8 +8,8 @@
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
 
-BuoyancyMMS::BuoyancyMMS(Settings const &settings)
-        : m_settings(settings),
+BuoyancyMMS::BuoyancyMMS(Settings const &settings) :
+        m_settings(settings),
         m_source_field(FieldType::RHO) {
     set_up();
 }

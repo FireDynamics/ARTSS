@@ -38,11 +38,11 @@ void BoundaryDataController::add_boundary_data(BoundarySetting boundary) {
     real value = boundary.get_value();
 
     for (auto f : Utility::split(boundary.get_field(), ',')) {
-        FieldType ft = BoundaryData::match_field(f);
+        FieldType field_type = BoundaryData::match_field(f);
 
         for (auto p : Utility::split(boundary.get_patch(), ',')) {
-            Patch pt = BoundaryData::match_patch(p);
-            m_boundary_data[ft]->add_boundary_condition(pt, value, bc);
+            Patch path = BoundaryData::match_patch(p);
+            m_boundary_data[field_type]->add_boundary_condition(path, value, bc);
         }
     }
 }

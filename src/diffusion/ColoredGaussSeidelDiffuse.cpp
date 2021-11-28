@@ -53,7 +53,6 @@ void ColoredGaussSeidelDiffuse::diffuse(
     auto bsize_b __attribute__((unused)) = boundary->get_size_boundary_list();
 
     size_t* d_inner_list = boundary->get_inner_list_level_joined();
-    // size_t* d_boundary_list = boundary->get_boundary_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize])
 {
@@ -142,7 +141,6 @@ void ColoredGaussSeidelDiffuse::diffuse(
     auto bsize_b __attribute__((unused)) = boundary->get_size_boundary_list();
 
     size_t* d_inner_list = boundary->get_inner_list_level_joined();
-    // size_t* d_boundary_list = boundary->get_boundary_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize], d_EV[:bsize])
 {
