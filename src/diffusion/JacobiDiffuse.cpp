@@ -20,7 +20,7 @@ JacobiDiffuse::JacobiDiffuse(Settings const &settings) {
     m_dsign = 1.;
     m_w = settings.get_real("solver/diffusion/w");
 
-    m_max_iter = static_cast<size_t>(settings.get_int("solver/diffusion/max_iter"));
+    m_max_iter = settings.get_size_t("solver/diffusion/max_iter");
     m_tol_res = settings.get_real("solver/diffusion/tol_res");
 }
 

@@ -109,7 +109,8 @@ class Settings {
      void sset(std::string path, std::string val) { m_proxy.insert({path, val}); }
 
      bool get_bool(std::string path) const { return get(path) == "Yes"; }
-     int get_int(std::string path) const { return real(std::stoi(get(path))); }
+     int get_int(std::string path) const { return std::stoi(get(path)); }
+     int get_size_t(std::string path) const { return std::stol(get(path)); }
      real get_real(std::string path) const { return real(std::stod(get(path))); }
 
      std::string get_filename() const { return filename; }

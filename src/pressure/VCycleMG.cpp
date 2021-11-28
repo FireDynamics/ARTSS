@@ -26,11 +26,11 @@ VCycleMG::VCycleMG(Settings const &settings, Field const &out, Field const &b) :
 #endif
     std::string diffusion_type = m_settings.get("solver/pressure/diffusion/type");
     if (diffusion_type == DiffusionMethods::Jacobi) {
-        m_diffusion_max_iter = static_cast<size_t>(m_settings.get_int("solver/pressure/diffusion/max_solve"));
+        m_diffusion_max_iter = m_settings.get_int("solver/pressure/diffusion/max_solve");
         m_smooth_function = &VCycleMG::call_smooth_jacobi;
         m_solve_function = &VCycleMG::call_solve_jacobi;
     } else if (diffusion_type == DiffusionMethods::ColoredGaussSeidel) {
-        m_diffusion_max_iter = static_cast<size_t>(m_settings.get_int("solver/pressure/diffusion/max_iter"));
+        m_diffusion_max_iter = m_settings.get_int("solver/pressure/diffusion/max_iter");
         m_smooth_function = &VCycleMG::call_smooth_colored_gauss_seidel;
         m_solve_function = &VCycleMG::call_solve_colored_gauss_seidel;
     } else {

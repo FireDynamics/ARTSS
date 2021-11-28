@@ -4,6 +4,7 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <string>
 #include "Domain.h"
 
 Domain *Domain::single = nullptr; //Singleton
@@ -14,15 +15,15 @@ Domain::Domain(Settings const &settings) {
 #endif
     auto solver = settings.get("solver/description");
     if (solver.find("NS") != std::string::npos || solver.find("Pressure") != std::string::npos) {
-        m_levels = static_cast<size_t> (settings.get_int("solver/pressure/n_level"));
+        m_levels = settings.get_size_t("solver/pressure/n_level");
     }
     m_nx = new size_t[m_levels + 1];
     m_ny = new size_t[m_levels + 1];
     m_nz = new size_t[m_levels + 1];
 
-    m_nx[0] = static_cast<size_t> (settings.get_int("domain_parameters/nx"));
-    m_ny[0] = static_cast<size_t> (settings.get_int("domain_parameters/ny"));
-    m_nz[0] = static_cast<size_t> (settings.get_int("domain_parameters/nz"));
+    m_nx[0] = settings.get_size_t("domain_parameters/nx");
+    m_ny[0] = settings.get_size_t("domain_parameters/ny");
+    m_nz[0] = settings.get_size_t("domain_parameters/nz");
 
     m_X1 = settings.get_real("domain_parameters/X1");
     m_X2 = settings.get_real("domain_parameters/X2");
@@ -32,7 +33,7 @@ Domain::Domain(Settings const &settings) {
     m_Z2 = settings.get_real("domain_parameters/Z2");
 
     bool has_computational_domain = settings.get_bool("domain_parameters/enable_computational_domain");
-    if (has_computational_domain){
+    if (has_computational_domain) {
         m_x1 = settings.get_real("domain_parameters/x1");
         m_x2 = settings.get_real("domain_parameters/x2");
         m_y1 = settings.get_real("domain_parameters/y1");
