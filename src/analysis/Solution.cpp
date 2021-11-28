@@ -58,70 +58,113 @@ Solution::Solution(Settings const &settings, const std::string &initial_conditio
 
 void Solution::gauss_bubble(const real t) {
     // Advection test case
-    Functions::GaussBubble(m_settings, m_u_analytical_solution, t);
-    Functions::GaussBubble(m_settings, m_v_analytical_solution, t);
-    Functions::GaussBubble(m_settings, m_w_analytical_solution, t);
+    real u_lin = m_settings.get_real("initial_conditions/u_lin");
+    real v_lin = m_settings.get_real("initial_conditions/v_lin");
+    real w_lin = m_settings.get_real("initial_conditions/w_lin");
+    real x_shift = m_settings.get_real("initial_conditions/x_shift");
+    real y_shift = m_settings.get_real("initial_conditions/y_shift");
+    real z_shift = m_settings.get_real("initial_conditions/z_shift");
+    real l = m_settings.get_real("initial_conditions/l");
+
+    Functions::GaussBubble(m_u_analytical_solution, t,
+            u_lin, v_lin, w_lin, x_shift, y_shift, z_shift, l);
+    Functions::GaussBubble(m_v_analytical_solution, t,
+            u_lin, v_lin, w_lin, x_shift, y_shift, z_shift, l);
+    Functions::GaussBubble(m_w_analytical_solution, t,
+            u_lin, v_lin, w_lin, x_shift, y_shift, z_shift, l);
 }
 
 void Solution::exp_sinus_prod(const real t) {
     // Diffusion test case
-    Functions::ExpSinusProd(m_settings, m_u_analytical_solution, t);
-    Functions::ExpSinusProd(m_settings, m_v_analytical_solution, t);
-    Functions::ExpSinusProd(m_settings, m_w_analytical_solution, t);
+    real nu = m_settings.get_real("physical_parameters/nu");
+    real l = m_settings.get_real("initial_conditions/l");
+
+    Functions::ExpSinusProd(m_u_analytical_solution, t, nu, l);
+    Functions::ExpSinusProd(m_v_analytical_solution, t, nu, l);
+    Functions::ExpSinusProd(m_w_analytical_solution, t, nu, l);
 }
 
 void Solution::exp_sinus_sum(const real t) {
     // Diffusion test case
-    Functions::ExpSinusSum(m_settings,
-                           m_u_analytical_solution,
+    real nu = m_settings.get_real("physical_parameters/nu");
+
+    Functions::ExpSinusSum(m_u_analytical_solution,
                            m_v_analytical_solution,
-                           m_w_analytical_solution, t);
+                           m_w_analytical_solution, t, nu);
 }
 
 void Solution::hat(const real) {
     // Diffusion test case
-    Functions::Hat(m_settings, m_u_analytical_solution);  // TODO time dependency?
-    Functions::Hat(m_settings, m_v_analytical_solution);
-    Functions::Hat(m_settings, m_w_analytical_solution);
+    real start_x = m_settings.get_real("initial_conditions/x1");
+    real end_x = m_settings.get_real("initial_conditions/x2");
+    real start_y = m_settings.get_real("initial_conditions/y1");
+    real end_y = m_settings.get_real("initial_conditions/y2");
+    real start_z = m_settings.get_real("initial_conditions/z1");
+    real end_z = m_settings.get_real("initial_conditions/z2");
+    real val_in = m_settings.get_real("initial_conditions/val_in");
+    real val_out = m_settings.get_real("initial_conditions/val_out");
+
+    Functions::Hat(m_u_analytical_solution,
+            start_x, end_x, start_y, end_y, start_z, end_z, val_in, val_out);  // TODO time dependency?
+    Functions::Hat(m_v_analytical_solution,
+            start_x, end_x, start_y, end_y, start_z, end_z, val_in, val_out);
+    Functions::Hat(m_w_analytical_solution,
+            start_x, end_x, start_y, end_y, start_z, end_z, val_in, val_out);
 }
 
 void Solution::sin_sin_sin(const real) {
-// Pressure test case
-    Functions::FacSinSinSin(m_settings, m_p_analytical_solution);  // TODO time dependency?
+    // Pressure test case
+    real l = m_settings.get_real("initial_conditions/l");
+    Functions::FacSinSinSin(m_p_analytical_solution, l);  // TODO time dependency?
 }
 
 void Solution::mcDermott(const real t) {
-// NavierStokes test case
-    Functions::McDermott(m_settings,
-                         m_u_analytical_solution,
+    // NavierStokes test case
+    real nu = m_settings.get_real("physical_parameters/nu");
+    real A = m_settings.get_real("initial_conditions/A");
+
+    Functions::McDermott(m_u_analytical_solution,
                          m_v_analytical_solution,
                          m_w_analytical_solution,
-                         m_p_analytical_solution, t);
+                         m_p_analytical_solution,
+                         t, nu, A);
 }
 
 void Solution::vortex(const real) {
-    Functions::Vortex(m_settings,
-                      m_u_analytical_solution,
+    real u_lin = m_settings.get_real("initial_conditions/u_lin");
+    real v_lin = m_settings.get_real("initial_conditions/v_lin");
+    real pa = m_settings.get_real("initial_conditions/pa");
+    real rhoa = m_settings.get_real("initial_conditions/rhoa");
+
+    Functions::Vortex(m_u_analytical_solution,
                       m_v_analytical_solution,
                       m_w_analytical_solution,
-                      m_p_analytical_solution);  // TODO time dependency
+                      m_p_analytical_solution,
+                      u_lin, v_lin, pa, rhoa);  // TODO time dependency
 }
 
 void Solution::vortex_y(const real) {
-    Functions::VortexY(m_settings,
-                       m_u_analytical_solution,
+    real u_lin = m_settings.get_real("initial_conditions/u_lin");
+    real v_lin = m_settings.get_real("initial_conditions/v_lin");
+    real pa = m_settings.get_real("initial_conditions/pa");
+    real rhoa = m_settings.get_real("initial_conditions/rhoa");
+
+    Functions::VortexY(m_u_analytical_solution,
                        m_v_analytical_solution,
                        m_w_analytical_solution,
-                       m_p_analytical_solution);  // TODO time dependency
+                       m_p_analytical_solution,
+                       u_lin, v_lin, pa, rhoa);  // TODO time dependency
 }
 
 void Solution::beltrami(const real t) {
-    Functions::Beltrami(m_settings,
-                        m_u_analytical_solution,
+    real a = m_settings.get_real("initial_conditions/a");  // 0.25 * M_PI;
+    real d = m_settings.get_real("initial_conditions/d");  // 0.5 * M_PI;
+    real nu = m_settings.get_real("physical_parameters/nu");  // 1;
+    Functions::Beltrami(m_u_analytical_solution,
                         m_v_analytical_solution,
                         m_w_analytical_solution,
                         m_p_analytical_solution,
-                        t);
+                        t, a, d, nu);
 }
 
 void Solution::zero(const real) {
@@ -129,13 +172,17 @@ void Solution::zero(const real) {
 }
 
 void Solution::buoyancy_mms(const real t) {
-    Functions::BuoyancyMMS(m_settings,
-                           m_u_analytical_solution,
+    real g = m_settings.get_real("physical_parameters/g");  // 1;
+    real nu = m_settings.get_real("physical_parameters/nu");  // 1;
+    real beta = m_settings.get_real("physical_parameters/beta");
+    real rhoa = m_settings.get_real("initial_conditions/rhoa");
+
+    Functions::BuoyancyMMS(m_u_analytical_solution,
                            m_v_analytical_solution,
                            m_w_analytical_solution,
                            m_p_analytical_solution,
                            m_T_analytical_solution,
-                           t);
+                           t, nu, beta, g, rhoa);
 }
 
 // =================== Calculate analytical solution based on test case ==================

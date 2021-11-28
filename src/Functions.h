@@ -34,25 +34,35 @@ struct FunctionNames{
 
 namespace Functions {  // alphabetically ordered
 
-  void Beltrami(Settings const &settings, Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t);
-  void BeltramiBC_p(Settings const &settings, Field &out_x);
-  void BeltramiBC_u(Settings const &settings, Field &out_x, real t);
-  void BeltramiBC_v(Settings const &settings, Field &out_x, real t);
-  void BeltramiBC_w(Settings const &settings, Field &out_x, real t);
-  void BuoyancyForce(Settings const &settings, Field &out, Field &T, Field &T_ambient);
-  void BuoyancyMMS(Settings const &settings, Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t);
-  void BuoyancyST_MMS(Settings const &settings, Field &out, real t);
+  void Beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+          real t, real a, real d, real nu);
+  void BeltramiBC_p(Field &out_x, real a);
+  void BeltramiBC_u(Field &out_x, real t, real a, real d, real nu);
+  void BeltramiBC_v(Field &out_x, real t, real a, real d, real nu);
+  void BeltramiBC_w(Field &out_x, real t, real a, real d, real nu);
+  void BuoyancyForce(Field &out, Field &T, Field &T_ambient, real beta, real g);
+  void BuoyancyMMS(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T,
+          real t, real nu, real beta, real g, real rhoa);
+  void BuoyancyST_MMS(Field &out, real t, real nu, real beta, real kappa, real g, real rhoa);
 
-  void Drift(Settings const &settings, Field &out_x, Field &out_y, Field &out_z, Field &out_p);
+  void Drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+          real u_lin, real v_lin, real w_lin, real pa);
 
-  void ExpSinusProd(Settings const &settings, Field &out, real t);
-  void ExpSinusSum(Settings const &settings, Field &out_x, Field &out_y, Field &out_z, real t);
+  void ExpSinusProd(Field &out, real t, real nu, real l);
+  void ExpSinusSum(Field &out_x, Field &out_y, Field &out_z, real t, real nu);
 
-  void FacSinSinSin(Settings const &settings, Field &out);
+  void FacSinSinSin(Field &out, real l);
 
-  void GaussBubble(Settings const &settings, Field &out, real t);
+  void GaussBubble(Field &out, real t,
+          real u_lin, real v_lin, real w_lin,
+          real x_shift, real y_shift, real z_shift,
+          real l);
 
-  void Hat(Settings const &settings, Field &out);
+  void Hat(Field &out,
+          real start_x, real end_x,
+          real start_y, real end_y,
+          real start_z, real end_z,
+          real val_in, real val_out);
 
   void Jet(
           Field &out,
@@ -63,16 +73,20 @@ namespace Functions {  // alphabetically ordered
 
   void Layers(Settings const &settings, Field &out);
 
-  void McDermott(Settings const &settings, Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t);
+  void McDermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+          real t, real nu, real A);
 
-  void Random(Field &out, real range, bool is_absolute, int seed, real step_size);
+  void Random(Field &out,
+          real range, bool is_absolute, int seed, real step_size);
 
-  void SinSinSin(Settings const &settings, Field &out);
+  void SinSinSin(Field &out, real l);
 
   void Uniform(Field &out, real val);
 
-  void Vortex(Settings const &settings, Field &out_x, Field &out_y, Field &out_z, Field &out_p);
-  void VortexY(Settings const &settings, Field &out_x, Field &out_y, Field &out_z, Field &out_p);
+  void Vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+          real u_lin, real v_lin, real pa, real rhoa);
+  void VortexY(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+          real u_lin, real v_lin, real pa, real rhoa);
 };
 
 #endif /* ARTSS_FUNCTIONS_H_ */
