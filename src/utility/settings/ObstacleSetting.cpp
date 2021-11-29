@@ -25,5 +25,5 @@ void ObstacleSetting::print(spdlog::logger logger) const {
         i.print(logger);
     }
 }
-}
 #endif
+}
