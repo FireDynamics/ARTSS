@@ -13,22 +13,22 @@
 #include "utility/Utility.h"
 #include "boundary/BoundaryController.h"
 
-const std::string FunctionNames::Beltrami = "Beltrami";
-const std::string FunctionNames::BuoyancyMMS = "BuoyancyMMS";
-const std::string FunctionNames::BuoyancyST_MMS = "BuoyancyST_MMS";
-const std::string FunctionNames::Drift = "Drift";
-const std::string FunctionNames::ExpSinusProd = "ExpSinusProd";
-const std::string FunctionNames::ExpSinusSum = "ExpSinusSum";
-const std::string FunctionNames::GaussBubble = "GaussBubble";
-const std::string FunctionNames::Hat = "Hat";
-const std::string FunctionNames::Jet = "Jet";
-const std::string FunctionNames::McDermott = "McDermott";
-const std::string FunctionNames::RandomC = "RandomC";
-const std::string FunctionNames::SinSinSin = "SinSinSin";
-const std::string FunctionNames::Uniform = "Uniform";
-const std::string FunctionNames::Vortex = "Vortex";
-const std::string FunctionNames::VortexY = "VortexY";
-const std::string FunctionNames::Zero = "Zero";
+const std::string FunctionNames::beltrami = "Beltrami";
+const std::string FunctionNames::buoyancy_mms = "BuoyancyMMS";
+const std::string FunctionNames::buoyancy_st_mms = "BuoyancyST_MMS";
+const std::string FunctionNames::drift = "Drift";
+const std::string FunctionNames::exp_sinus_prod = "ExpSinusProd";
+const std::string FunctionNames::exp_sinus_sum = "ExpSinusSum";
+const std::string FunctionNames::gauss_bubble = "GaussBubble";
+const std::string FunctionNames::hat = "Hat";
+const std::string FunctionNames::jet = "Jet";
+const std::string FunctionNames::mcdermott = "McDermott";
+const std::string FunctionNames::random_c = "RandomC";
+const std::string FunctionNames::sin_sin_sin = "SinSinSin";
+const std::string FunctionNames::uniform = "Uniform";
+const std::string FunctionNames::vortex = "Vortex";
+const std::string FunctionNames::vortex_y = "VortexY";
+const std::string FunctionNames::zero = "Zero";
 
 const std::string class_name = "Functions";
 namespace Functions {
@@ -42,7 +42,7 @@ namespace Functions {
 /// \param  out_p  pressure
 /// \param  t time
 // ***************************************************************************************
-    void Beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, real a, real d, real nu) {
+    void beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, real a, real d, real nu) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -107,7 +107,7 @@ namespace Functions {
 /// \brief  Initial pressure set up for NS Test - Beltrami
 /// \param  out_x  pressure
 // ***************************************************************************************
-    void BeltramiBC_p(Field &out_x, real a) {
+    void beltrami_bc_p(Field &out_x, real a) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -159,7 +159,7 @@ namespace Functions {
 /// \param  out_x  x-velocity
 /// \param  t time
 // ***************************************************************************************
-    void BeltramiBC_u(Field &out_x, real t, real a, real d, real nu) {
+    void beltrami_bc_u(Field &out_x, real t, real a, real d, real nu) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -205,7 +205,7 @@ namespace Functions {
 /// \param  out_y  y-velocity
 /// \param  t time
 // ***************************************************************************************
-    void BeltramiBC_v(Field &out_x, real t, real a, real d, real nu) {
+    void beltrami_bc_v(Field &out_x, real t, real a, real d, real nu) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -251,7 +251,7 @@ namespace Functions {
 /// \param  out_z  z-velocity
 /// \param  t time
 // ***************************************************************************************
-    void BeltramiBC_w(Field &out_x, real t, real a, real d, real nu) {
+    void beltrami_bc_w(Field &out_x, real t, real a, real d, real nu) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -298,7 +298,7 @@ namespace Functions {
 /// \param  T   Temperature
 /// \param  T_ambient    Ambient temperature
 // ***************************************************************************************
-    void BuoyancyForce(Field &out, Field &T, Field &T_ambient, real beta, real g) {
+    void buoyancy_force(Field &out, Field &T, Field &T_ambient, real beta, real g) {
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
         size_t size_inner_list = boundary->get_size_inner_list();
@@ -328,7 +328,7 @@ namespace Functions {
 /// \param  out_T  temperature
 /// \param  t   time
 // ***************************************************************************************
-    void BuoyancyMMS(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t, real nu, real beta, real g, real rhoa) {
+    void buoyancy_mms(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t, real nu, real beta, real g, real rhoa) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -384,7 +384,7 @@ namespace Functions {
 /// \param  out force
 /// \param  t time
 // ***************************************************************************************
-    void BuoyancyST_MMS(Field &out, real t, real nu, real beta, real kappa, real g, real rhoa) {
+    void buoyancy_st_mms(Field &out, real t, real nu, real beta, real kappa, real g, real rhoa) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -437,7 +437,7 @@ namespace Functions {
 /// \param  out_z  z-velocity
 /// \param  out_p  pressure
 // ***************************************************************************************
-    void Drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real w_lin, real pa) {
+    void drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real w_lin, real pa) {
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
         size_t size_inner_list = boundary->get_size_inner_list();
@@ -470,7 +470,7 @@ namespace Functions {
 /// \param  out velocity
 /// \param  t   time
 // ***************************************************************************************
-    void ExpSinusProd(Field &out, real t, real nu, real l) {
+    void exp_sinus_prod(Field &out, real t, real nu, real l) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -526,7 +526,7 @@ namespace Functions {
 /// \param  out_z  z-velocity
 /// \param  t   time
 // ***************************************************************************************
-    void ExpSinusSum(Field &out_x, Field &out_y, Field &out_z, real t, real nu) {
+    void exp_sinus_sum(Field &out_x, Field &out_y, Field &out_z, real t, real nu) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -610,7 +610,7 @@ namespace Functions {
 /// \brief  Initial set up for Diffusion Test (c*sin*sin*sin)
 /// \param  out velocity
 // ***************************************************************************************
-    void FacSinSinSin(Field &out, real l) {
+    void fac_sin_sin_sin(Field &out, real l) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -664,7 +664,7 @@ namespace Functions {
 /// \param  out velocity
 /// \param  t time
 // ***************************************************************************************
-    void GaussBubble(Field &out, real t,
+    void gauss_bubble(Field &out, real t,
             real u_lin, real v_lin, real w_lin,
             real x_shift, real y_shift, real z_shift,
             real l) {
@@ -722,7 +722,7 @@ namespace Functions {
 /// \brief  Initial set up as layers throughout the domain
 /// \param  out temperature
 // ***************************************************************************************
-    void Layers(std::string const log_level, std::string const log_file, Field &out,
+    void layers(std::string const log_level, std::string const log_file, Field &out,
             int n_layers, std::string dir,
             real *borders, real *values) {
         auto domain = Domain::getInstance();
@@ -893,7 +893,7 @@ namespace Functions {
 /// \brief  Initial set up for Diffusion Test
 /// \param  out velocity
 // ***************************************************************************************
-    void Hat(Field &out,
+    void hat(Field &out,
             real start_x, real end_x,
             real start_y, real end_y,
             real start_z, real end_z,
@@ -962,7 +962,7 @@ namespace Functions {
 /// \param index_z2 ending index in z-direction
 /// \param value velocity value to be set
 // *************************************************************************************************
-    void Jet(
+    void jet(
             Field &out,
             const size_t index_x1, const size_t index_x2,
             const size_t index_y1, const size_t index_y2,
@@ -992,7 +992,7 @@ namespace Functions {
 /// \param  out_p  pressure
 /// \param  t   time
 // ***************************************************************************************
-    void McDermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, real nu, real A) {
+    void mcdermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, real nu, real A) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -1046,7 +1046,7 @@ namespace Functions {
 /// \param  seed         custom seed if given, else seed <= 0
 /// \param  step_size    interval steps of random numbers
 // ***************************************************************************************
-    void Random(Field &out, real range, bool is_absolute, int seed, real step_size) {
+    void random(Field &out, real range, bool is_absolute, int seed, real step_size) {
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
         size_t size_inner_list = boundary->get_size_inner_list();
@@ -1079,7 +1079,7 @@ namespace Functions {
 /// \brief  Initial set up for Pressure Test (sin*sin*sin)
 /// \param  out   pressure
 // ***************************************************************************************
-    void SinSinSin(Field &out, real l) {
+    void sin_sin_sin(Field &out, real l) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -1129,7 +1129,7 @@ namespace Functions {
 /// \param  out   force
 /// \param  val   value of uniform distribution
 // ***************************************************************************************
-    void Uniform(Field &out, real val) {
+    void uniform(Field &out, real val) {
         auto boundary = BoundaryController::getInstance();
         size_t *inner_list = boundary->get_inner_list_level_joined();
         size_t size_inner_list = boundary->get_size_inner_list();
@@ -1156,7 +1156,7 @@ namespace Functions {
 /// \param  out_z    z-velocity
 /// \param  out_p    pressure
 // ***************************************************************************************
-    void Vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real pa, real rhoa) {
+    void vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real pa, real rhoa) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
@@ -1222,7 +1222,7 @@ namespace Functions {
         }
     }
 
-    void VortexY(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real pa, real rhoa) {
+    void vortex_y(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real pa, real rhoa) {
         auto domain = Domain::getInstance();
         size_t Nx = domain->get_Nx();
         size_t Ny = domain->get_Ny();
