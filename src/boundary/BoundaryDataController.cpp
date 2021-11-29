@@ -41,8 +41,8 @@ void BoundaryDataController::add_boundary_data(BoundarySetting boundary) {
         FieldType field_type = BoundaryData::match_field(f);
 
         for (auto p : Utility::split(boundary.get_patch(), ',')) {
-            Patch path = BoundaryData::match_patch(p);
-            m_boundary_data[field_type]->add_boundary_condition(path, value, bc);
+            Patch patch = BoundaryData::match_patch(p);
+            m_boundary_data[field_type]->add_boundary_condition(patch, value, bc);
         }
     }
 }
