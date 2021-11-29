@@ -459,7 +459,31 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempConSolver || \
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver) {
-            Functions::Layers(m_settings, m_field_controller->get_field_T());
+            std::string const log_level;
+            std::string const log_file;
+
+            int n_layers = m_settings.get_int("initial_conditions/n_layers");
+            std::string const dir = m_settings.get("initial_conditions/dir");
+
+            real *borders = new real[n_layers + 1];
+            real *values = new real[n_layers];
+
+            for (int l = 1; l < n_layers; ++l) {
+                std::string val_bord_l = "initial_conditions/border_";
+                val_bord_l += std::to_string(l);
+                borders[l] = m_settings.get_real(val_bord_l);
+            }
+
+            for (int l = 0; l < n_layers; ++l) {
+                std::string val_out_l = "initial_conditions/value_";
+                val_out_l += std::to_string(l + 1);
+                values[l] = m_settings.get_real(val_out_l);
+            }
+
+            Functions::Layers(log_level, log_file,
+                    m_field_controller->get_field_T(),
+                    n_layers, dir, borders, values);
+
             if (random) {
                 call_random(m_field_controller->get_field_T());
             }

@@ -7,8 +7,6 @@
 #ifndef ARTSS_UTILITY_UTILITY_H_
 #define ARTSS_UTILITY_UTILITY_H_
 
-#include <string>
-#include <vector>
 #include "GlobalMacrosTypes.h"
 #include "settings/Settings.h"
 
@@ -18,7 +16,13 @@
 #include "spdlog/logger.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
+
+#include <memory>
 #endif
+
+#include <string>
+#include <vector>
+
 
 class Field;
 
@@ -31,7 +35,13 @@ namespace Utility {
     void log_field_info(Settings::Settings const &settings, Field &field, const std::string &text, const std::string &logger_name);
 
 #ifndef BENCHMARKING
-    std::shared_ptr<spdlog::logger> create_logger(Settings::Settings const &settings, std::string loggerName);
+    std::shared_ptr<spdlog::logger> create_logger(
+            std::string const level,
+            std::string const file,
+            std::string const loggerName);
+    std::shared_ptr<spdlog::logger> create_logger(
+            Settings::Settings const &settings,
+            std::string const loggerName);
 #endif
 }  // namespace Utility
 

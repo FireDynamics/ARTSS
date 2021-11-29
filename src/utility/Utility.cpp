@@ -66,12 +66,27 @@ std::vector<std::string> split(const char *text, char delimiter) {
 //          ("logging/level", "logging/file")
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
-std::shared_ptr<spdlog::logger> create_logger(Settings::Settings const &settings, std::string logger_name) {
+std::shared_ptr<spdlog::logger> create_logger(Settings::Settings const &settings, std::string const logger_name) {
+    return create_logger(
+            settings.get("logging/level"),
+            settings.get("logging/file"),
+            logger_name);
+}
+
+// ======================= creates a new logger ================================
+// *****************************************************************************
+/// \brief  creates a new named logger this function is only available
+///         if BENCHMARKING is not enabled
+/// \param  level the level of visable messages
+/// \param  file the file to write into
+/// \param  loggerName name of logger, written to log file
+// *****************************************************************************
+std::shared_ptr<spdlog::logger> create_logger(
+        std::string const log_level,
+        std::string const log_file,
+        std::string const logger_name) {
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
-
-    std::string log_level = settings.sget("logging/level");
-    std::string log_file = settings.sget("logging/file");
 
     if (!stdout_sink) {
         stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();

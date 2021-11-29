@@ -722,56 +722,33 @@ namespace Functions {
 /// \brief  Initial set up as layers throughout the domain
 /// \param  out temperature
 // ***************************************************************************************
-    void Layers(Settings::Settings const &settings, Field &out) {
+    void Layers(std::string const log_level, std::string const log_file, Field &out,
+            int n_layers, std::string dir,
+            real *borders, real *values) {
         auto domain = Domain::getInstance();
-        int n_layers = settings.get_int("initial_conditions/n_layers");
 
         // layer border
-        real *bord = new real[n_layers + 1];
-        real val_bord;
-
-        for (int l = 1; l < n_layers; ++l) {
-            std::string val_bord_l = "initial_conditions/border_";
-            val_bord_l += std::to_string(l);
-            val_bord = settings.get_real(val_bord_l);
-            bord[l] = val_bord;
-        }
-
-        std::string dir = settings.get("initial_conditions/dir"); //x,y,z
-
         if (dir == "x") {
             real x1 = domain->get_x1();
             real x2 = domain->get_x2();
-            bord[0] = x1;
-            bord[n_layers] = x2;
+            borders[0] = x1;
+            borders[n_layers] = x2;
         } else if (dir == "y") {
             real y1 = domain->get_y1();
             real y2 = domain->get_y2();
-            bord[0] = y1;
-            bord[n_layers] = y2;
+            borders[0] = y1;
+            borders[n_layers] = y2;
         } else if (dir == "z") {
             real z1 = domain->get_z1();
             real z2 = domain->get_z2();
-            bord[0] = z1;
-            bord[n_layers] = z2;
+            borders[0] = z1;
+            borders[n_layers] = z2;
         } else {
 #ifndef BENCHMARKING
-            auto m_logger = Utility::create_logger(settings, class_name);
+            auto m_logger = Utility::create_logger(log_level, log_file, class_name);
             m_logger->error("No distance for layers specified!");
 #endif
             //TODO(issue 6) Error handling
-        }
-
-        // get values in layers
-        // layer values
-        real *val = new real[n_layers];
-        real val_out;
-
-        for (int l = 0; l < n_layers; ++l) {
-            std::string val_out_l = "initial_conditions/value_";
-            val_out_l += std::to_string(l + 1);
-            val_out = settings.get_real(val_out_l);
-            val[l] = val_out;
         }
 
         // set values into layers
@@ -807,22 +784,22 @@ namespace Functions {
 
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
-                    if (bord[l] <= x && x <= bord[l + 1]) {
-                        out[idx] = val[l];
+                    if (borders[l] <= x && x <= borders[l + 1]) {
+                        out[idx] = values[l];
                     }
                 } else if (dir == "y") {
                     y = yj(coords_j, Y1, dy) - 0.5 * dy;
-                    if (bord[l] <= y && y <= bord[l + 1]) {
-                        out[idx] = val[l];
+                    if (borders[l] <= y && y <= borders[l + 1]) {
+                        out[idx] = values[l];
                     }
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
-                    if (bord[l] <= z && z <= bord[l + 1]) {
-                        out[idx] = val[l];
+                    if (borders[l] <= z && z <= borders[l + 1]) {
+                        out[idx] = values[l];
                     }
                 } else {
 #ifndef BENCHMARKING
-                    auto m_logger = Utility::create_logger(settings, class_name);
+                    auto m_logger = Utility::create_logger(log_level, log_file, class_name);
                     m_logger->error("No distance for layers specified!");
 #endif
                     //TODO(issue 6) Error handling
@@ -838,31 +815,31 @@ namespace Functions {
 
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
-                    if (bord[l] <= x && x <= bord[l + 1]) {
-                        out[idx] = val[l];
+                    if (borders[l] <= x && x <= borders[l + 1]) {
+                        out[idx] = values[l];
                     }
-                    if (x < bord[0]) {
-                        out[idx] = val[0];
+                    if (x < borders[0]) {
+                        out[idx] = values[0];
                     }
                 } else if (dir == "y") {
                     y = yj(coords_j, Y1, dy) - 0.5 * dy;
-                    if (bord[l] <= y && y <= bord[l + 1]) {
-                        out[idx] = val[l];
+                    if (borders[l] <= y && y <= borders[l + 1]) {
+                        out[idx] = values[l];
                     }
-                    if (y < bord[0]) {
-                        out[idx] = val[0];
+                    if (y < borders[0]) {
+                        out[idx] = values[0];
                     }
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
-                    if (bord[l] <= z && z <= bord[l + 1]) {
-                        out[idx] = val[l];
+                    if (borders[l] <= z && z <= borders[l + 1]) {
+                        out[idx] = values[l];
                     }
-                    if (z < bord[0]) {
-                        out[idx] = val[0];
+                    if (z < borders[0]) {
+                        out[idx] = values[0];
                     }
                 } else {
 #ifndef BENCHMARKING
-                    auto m_logger = Utility::create_logger(settings, class_name);
+                    auto m_logger = Utility::create_logger(log_level, log_file, class_name);
                     m_logger->error("No distance for layers specified!");
 #endif
                     // TODO(issue 6) Error handling
@@ -877,31 +854,31 @@ namespace Functions {
 
                 if (dir == "x") {
                     x = xi(coords_i, X1, dx) - 0.5 * dx;
-                    if (bord[l] <= x && x <= bord[l + 1]) {
-                        out[idx] = val[l];
+                    if (borders[l] <= x && x <= borders[l + 1]) {
+                        out[idx] = values[l];
                     }
-                    if (x < bord[0]) {
-                        out[idx] = val[0];
+                    if (x < borders[0]) {
+                        out[idx] = values[0];
                     }
                 } else if (dir == "y") {
                     y = yj(coords_j, Y1, dy) - 0.5 * dy;
-                    if (bord[l] <= y && y <= bord[l + 1]) {
-                        out[idx] = val[l];
+                    if (borders[l] <= y && y <= borders[l + 1]) {
+                        out[idx] = values[l];
                     }
-                    if (y < bord[0]) {
-                        out[idx] = val[0];
+                    if (y < borders[0]) {
+                        out[idx] = values[0];
                     }
                 } else if (dir == "z") {
                     z = zk(coords_k, Z1, dz) - 0.5 * dz;
-                    if (bord[l] <= z && z <= bord[l + 1]) {
-                        out[idx] = val[l];
+                    if (borders[l] <= z && z <= borders[l + 1]) {
+                        out[idx] = values[l];
                     }
-                    if (z < bord[0]) {
-                        out[idx] = val[0];
+                    if (z < borders[0]) {
+                        out[idx] = values[0];
                     }
                 } else {
 #ifndef BENCHMARKING
-                    auto m_logger = Utility::create_logger(settings, class_name);
+                    auto m_logger = Utility::create_logger(log_level, log_file, class_name);
                     m_logger->error("No distance for layers specified!");
 #endif
                     // TODO(issue 6) Error handling
