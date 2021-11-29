@@ -70,5 +70,4 @@ class Settings {
 #endif
 };
 }
-
 #endif
