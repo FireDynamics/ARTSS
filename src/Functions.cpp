@@ -756,7 +756,7 @@ namespace Functions {
             bord[n_layers] = z2;
         } else {
 #ifndef BENCHMARKING
-            auto m_logger = Utility::create_logger(settings, "Functions");
+            auto m_logger = Utility::create_logger(settings, class_name);
             m_logger->error("No distance for layers specified!");
 #endif
             //TODO(issue 6) Error handling
@@ -822,7 +822,7 @@ namespace Functions {
                     }
                 } else {
 #ifndef BENCHMARKING
-                    auto m_logger = Utility::create_logger(settings, "Functions");
+                    auto m_logger = Utility::create_logger(settings, class_name);
                     m_logger->error("No distance for layers specified!");
 #endif
                     //TODO(issue 6) Error handling
@@ -862,7 +862,7 @@ namespace Functions {
                     }
                 } else {
 #ifndef BENCHMARKING
-                    auto m_logger = Utility::create_logger(settings, "Functions");
+                    auto m_logger = Utility::create_logger(settings, class_name);
                     m_logger->error("No distance for layers specified!");
 #endif
                     // TODO(issue 6) Error handling
@@ -901,7 +901,7 @@ namespace Functions {
                     }
                 } else {
 #ifndef BENCHMARKING
-                    auto m_logger = Utility::create_logger(settings, "Functions");
+                    auto m_logger = Utility::create_logger(settings, class_name);
                     m_logger->error("No distance for layers specified!");
 #endif
                     // TODO(issue 6) Error handling
