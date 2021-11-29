@@ -19,7 +19,6 @@ VCycleMG::VCycleMG(Settings const &settings, Field const &out, Field const &b) :
         m_levels(Domain::getInstance()->get_levels()),
         m_n_cycle(settings.get_int("solver/pressure/n_cycle")),
         m_n_relax(settings.get_int("solver/pressure/diffusion/n_relax")),
-        m_dt(settings.get_real("physical_parameters/dt")),
         m_w(settings.get_real("solver/pressure/diffusion/w")) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());
@@ -132,7 +131,8 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
     UpdateInput(out, b, sync);  // Update first
 
     Domain *domain = Domain::getInstance();
-    const auto Nt = static_cast<size_t>(std::round(t / m_dt));
+    real dt = m_settings.get_real("physical_parameters/dt");
+    const auto Nt = static_cast<size_t>(std::round(t / dt));
     size_t act_cycles = 0;
 
     if (Nt == 1) {  // solve more accurately, in first time step

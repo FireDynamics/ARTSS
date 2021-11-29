@@ -53,7 +53,6 @@ class VCycleMG: public IPressure{
     size_t m_diffusion_max_iter;
     real m_diffusion_tol_res;
 
-    const real m_dt;
     const real m_dsign = -1;
     const real m_w;
 
