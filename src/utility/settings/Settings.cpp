@@ -3,7 +3,8 @@
 
 #include "../Utility.h"
 
-Settings::Settings::Settings(std::string path) :
+namespace Settings {
+Settings::Settings(std::string path) :
         filename(path) {
     tinyxml2::XMLDocument doc;
     doc.LoadFile(path.c_str());
@@ -28,26 +29,26 @@ Settings::Settings::Settings(std::string path) :
 }
 
 
-void Settings::Settings::read_boundaries(tinyxml2::XMLElement *elem) {
+void Settings::read_boundaries(tinyxml2::XMLElement *elem) {
     for (auto i = elem->FirstChildElement(); i; i = i->NextSiblingElement()) {
         m_boundaries.push_back(BoundarySetting(i));
     }
 }
 
-void Settings::Settings::read_obstacles(tinyxml2::XMLElement *elem) {
+void Settings::read_obstacles(tinyxml2::XMLElement *elem) {
     for (auto i = elem->FirstChildElement(); i; i = i->NextSiblingElement()) {
         m_obstacles.push_back(ObstacleSetting(i));
     }
 }
 
-void Settings::Settings::read_surfaces(tinyxml2::XMLElement *elem) {
+void Settings::read_surfaces(tinyxml2::XMLElement *elem) {
     for (auto i = elem->FirstChildElement(); i; i = i->NextSiblingElement()) {
         m_surfaces.push_back(SurfaceSetting(i));
     }
 }
 
 
-void Settings::Settings::read_config(std::string prefix, tinyxml2::XMLElement *elem) {
+void Settings::read_config(std::string prefix, tinyxml2::XMLElement *elem) {
     prefix += elem->Name();
     prefix += "/";
     for (auto i = elem->FirstAttribute(); i; i = i->Next()) {
@@ -63,7 +64,7 @@ void Settings::Settings::read_config(std::string prefix, tinyxml2::XMLElement *e
     }
 }
 
-void Settings::Settings::print_config() const {
+void Settings::print_config() const {
 #ifndef BENCHMARKING
     std::map<std::string, std::string> ordered(m_proxy.begin(), m_proxy.end());
     for(auto i = ordered.begin(); i != ordered.end(); ++i) {
@@ -84,12 +85,12 @@ void Settings::Settings::print_config() const {
 #endif
 }
 
-std::string Settings::Settings::sget(std::string path) const {
+std::string Settings::sget(std::string path) const {
     auto iter = m_proxy.find(path);
     return iter->second;
 }
 
-std::string Settings::Settings::get(std::string path) const {
+std::string Settings::get(std::string path) const {
     auto iter = m_proxy.find(path);
     if (iter == m_proxy.end()) {
 #ifndef BENCHMARKING
@@ -105,59 +106,4 @@ std::string Settings::Settings::get(std::string path) const {
 
     return iter->second;
 }
-
-Settings::BoundarySetting::BoundarySetting(tinyxml2::XMLElement *xml_element) :
-    field(xml_element->Attribute("field")),
-    patch(xml_element->Attribute("patch")),
-    type(xml_element->Attribute("type")),
-    value(std::atof(xml_element->Attribute("value"))) {
 }
-
-#ifndef BENCHMARKING
-void Settings::BoundarySetting::print(spdlog::logger logger) const {
-    logger.debug("field={} patch={} type={} value={}", field, patch, type, value);
-}
-#endif
-
-Settings::ObstacleSetting::ObstacleSetting(tinyxml2::XMLElement *xml_element) :
-    name(xml_element->Attribute("name")) {
-    for (auto i=xml_element->FirstChildElement(); i; i = i->NextSiblingElement()) {
-        if (i->Name() == std::string("geometry")) {
-            ox1 = std::atof(i->Attribute("ox1"));
-            ox2 = std::atof(i->Attribute("ox2"));
-            oy1 = std::atof(i->Attribute("oy1"));
-            oy2 = std::atof(i->Attribute("oy2"));
-            oz1 = std::atof(i->Attribute("oz1"));
-            oz2 = std::atof(i->Attribute("oz2"));
-        } else if (i->Name() == std::string("boundary")) {
-            boundaries.push_back(BoundarySetting(i));
-        }
-    }
-}
-
-#ifndef BENCHMARKING
-void Settings::ObstacleSetting::print(spdlog::logger logger) const {
-    logger.debug("ox=({}, {}) oy=({}, {}) oz=({}, {})", ox1, ox2, oy1, oy2, oz1, oz2);
-    for(auto i : boundaries) {
-        i.print(logger);
-    }
-}
-#endif
-
-Settings::SurfaceSetting::SurfaceSetting(tinyxml2::XMLElement *xml_element) :
-    id(std::atoi(xml_element->Attribute("ID"))),
-    sx1(std::atof(xml_element->Attribute("sx1"))), sx2(std::atof(xml_element->Attribute("sx2"))),
-    sy1(std::atof(xml_element->Attribute("sy1"))), sy2(std::atof(xml_element->Attribute("sy2"))),
-    sz1(std::atof(xml_element->Attribute("sz1"))), sz2(std::atof(xml_element->Attribute("sz2"))) {
-}
-
-#ifndef BENCHMARKING
-void Settings::SurfaceSetting::print(spdlog::logger logger) const {
-    logger.debug("id={} sx=({}, {}) sy=({}, {}) oz=({}, {})",
-            id,
-            sx1, sx2,
-            sy1, sy2,
-            sz1, sz2);
-}
-}
-#endif
