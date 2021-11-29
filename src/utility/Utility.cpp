@@ -68,8 +68,8 @@ std::vector<std::string> split(const char *text, char delimiter) {
 // *****************************************************************************
 std::shared_ptr<spdlog::logger> create_logger(Settings::Settings const &settings, std::string const logger_name) {
     return create_logger(
-            settings.get("logging/level"),
-            settings.get("logging/file"),
+            settings.sget("logging/level"),
+            settings.sget("logging/file"),
             logger_name);
 }
 
