@@ -10,7 +10,6 @@
 #include <vector>
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
-#include "../utility/tinyxml2.h"
 #include "../utility/Utility.h"
 #include "BoundaryDataController.h"
 #include "Multigrid.h"
@@ -20,7 +19,7 @@
 class BoundaryController {
  public:
     static BoundaryController* getInstance() { return singleton; }
-    static BoundaryController* getInstance(Settings const &settings);
+    static BoundaryController* getInstance(Settings::Settings const &settings);
 
     ~BoundaryController();
 
@@ -62,9 +61,9 @@ class BoundaryController {
     }
 
  private:
-    explicit BoundaryController(Settings const &settings);
+    explicit BoundaryController(Settings::Settings const &settings);
 
-    Settings const &m_settings;
+    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -85,9 +84,9 @@ class BoundaryController {
     bool m_has_surfaces;
 
     void read_XML();
-    void parse_boundary_parameter(std::vector<BoundarySetting> boundaries);
-    void parse_obstacle_parameter(std::vector<ObstacleSetting> obstacles);
-    void parse_surface_parameter(std::vector<SurfaceSetting> surfaces);
+    void parse_boundary_parameter(std::vector<Settings::BoundarySetting> boundaries);
+    void parse_obstacle_parameter(std::vector<Settings::ObstacleSetting> obstacles);
+    void parse_surface_parameter(std::vector<Settings::SurfaceSetting> surfaces);
 
     void detect_neighbouring_obstacles();
 };

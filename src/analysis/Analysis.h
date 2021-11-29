@@ -8,14 +8,14 @@
 #define ARTSS_ANALYSIS_ANALYSIS_H_
 
 #include "Solution.h"
-#include "../utility/Settings.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 #include "../field/Field.h"
 #include "../field/FieldController.h"
 
 class Analysis {
  public:
-    Analysis(Settings const &settings, Solution &solution, bool has_analytical_solution);
+    Analysis(Settings::Settings const &settings, Solution &solution, bool has_analytical_solution);
 
     void analyse(FieldController *solver, real t);
 
@@ -28,7 +28,7 @@ class Analysis {
     void save_variables_in_file(FieldController *field_controller);
 
  private:
-    Settings const &m_settings;
+    Settings::Settings const &m_settings;
     real m_tol = 1e-7;
 
     bool compare_solutions(read_ptr num, read_ptr ana, FieldType type, real t);

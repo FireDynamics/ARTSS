@@ -9,7 +9,7 @@
 #include "../Functions.h"
 
 
-Solution::Solution(Settings const &settings, const std::string &initial_condition, bool has_analytical_solution) :
+Solution::Solution(Settings::Settings const &settings, const std::string &initial_condition, bool has_analytical_solution) :
         m_settings(settings),
         m_u_analytical_solution(Field(FieldType::U)),
         m_v_analytical_solution(Field(FieldType::V)),

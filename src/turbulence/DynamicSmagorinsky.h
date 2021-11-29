@@ -9,11 +9,12 @@
 
 #include "../interfaces/ITurbulence.h"
 #include "../field/Field.h"
-#include "../utility/Settings.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class DynamicSmagorinsky : public ITurbulence {
 public:
-    explicit DynamicSmagorinsky(Settings const &settings);
+    explicit DynamicSmagorinsky(Settings::Settings const &settings);
     ~DynamicSmagorinsky() override = default;
 
     void calc_turbulent_viscosity(
@@ -23,7 +24,7 @@ public:
     void explicit_filtering(Field &out, Field const &in, bool sync) override;
 
 private:
-    Settings const &m_settings;
+    Settings::Settings const &m_settings;
     Field u_f, v_f, w_f;                 // filtered velocities
     Field uu, vv, ww, uv, uw, vw;           // velocity products
     Field uu_f, vv_f, ww_f, uv_f, uw_f, vw_f;     // filters of the velocity products

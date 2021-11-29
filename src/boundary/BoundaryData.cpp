@@ -11,7 +11,7 @@ inline static const std::vector<std::string> field_type_names = {"rho", "u", "v"
 inline static const std::vector<std::string> patch_names = {"front", "back", "bottom", "top", "left", "right"};
 inline static const std::vector<std::string> boundary_condition_names = {"neumann", "dirichlet", "periodic"};
 
-BoundaryData::BoundaryData(Settings const &settings) {
+BoundaryData::BoundaryData(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif

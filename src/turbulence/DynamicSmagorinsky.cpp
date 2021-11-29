@@ -14,7 +14,7 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-DynamicSmagorinsky::DynamicSmagorinsky(Settings const &settings) :
+DynamicSmagorinsky::DynamicSmagorinsky(Settings::Settings const &settings) :
     m_settings(settings),
 
     u_f(FieldType::U),

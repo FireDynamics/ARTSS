@@ -15,7 +15,7 @@
 #include "../boundary/BoundaryData.h"
 #include "SolverSelection.h"
 
-NSTempConSolver::NSTempConSolver(Settings const &settings, FieldController *field_controller) :
+NSTempConSolver::NSTempConSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());

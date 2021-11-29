@@ -14,7 +14,7 @@
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
-Visual::Visual(Settings const &settings, Solution const &solution, bool has_analytical_solution) :
+Visual::Visual(Settings::Settings const &settings, Solution const &solution, bool has_analytical_solution) :
         m_settings(settings),
         m_solution(solution),
         m_has_analytical_solution(has_analytical_solution) {

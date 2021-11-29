@@ -10,7 +10,12 @@
 #include <vector>
 
 
-Obstacle::Obstacle(Settings const &settings, real x1, real x2, real y1, real y2, real z1, real z2, const std::string &name) :
+Obstacle::Obstacle(
+    Settings::Settings const &settings,
+    real x1, real x2,
+    real y1, real y2,
+    real z1, real z2,
+    const std::string &name) :
         m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());
@@ -39,7 +44,7 @@ Obstacle::Obstacle(Settings const &settings, real x1, real x2, real y1, real y2,
 
 
 Obstacle::Obstacle(
-        Settings const &settings,
+        Settings::Settings const &settings,
         size_t coords_i1, size_t coords_j1, size_t coords_k1,
         size_t coords_i2, size_t coords_j2, size_t coords_k2,
         size_t level,

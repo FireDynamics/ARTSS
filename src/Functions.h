@@ -11,7 +11,7 @@
 
 #include "Domain.h"
 #include "field/Field.h"
-#include "utility/Settings.h"
+#include "utility/settings/Settings.h"
 
 struct FunctionNames{
     static const std::string Beltrami;
@@ -71,7 +71,7 @@ namespace Functions {  // alphabetically ordered
           size_t index_z1, size_t index_z2,
           real value);
 
-  void Layers(Settings const &settings, Field &out);
+  void Layers(Settings::Settings const &settings, Field &out);
 
   void McDermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
           real t, real nu, real A);

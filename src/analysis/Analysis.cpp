@@ -13,7 +13,7 @@
 #include "../boundary/BoundaryController.h"
 #include "../utility/Utility.h"
 
-Analysis::Analysis(Settings const &settings, Solution &solution, bool has_analytical_solution) :
+Analysis::Analysis(Settings::Settings const &settings, Solution &solution, bool has_analytical_solution) :
         m_settings(settings),
         m_has_analytic_solution(has_analytical_solution),
         m_solution(solution) {

@@ -25,7 +25,7 @@ static const std::string solver_selection_name = "SolverSelection";
 /// \param  advectionSolver Pointer to AdvectionSolver
 /// \param  advectionType Name of AdvcetionSolver
 // ***************************************************************************************
-void SetAdvectionSolver(Settings const &settings, IAdvection **advectionSolver, const std::string& advectionType) {
+void SetAdvectionSolver(Settings::Settings const &settings, IAdvection **advectionSolver, const std::string& advectionType) {
     if (advectionType == AdvectionMethods::SemiLagrangian) {
         *advectionSolver = new SLAdvect(settings);
     } else {
@@ -44,7 +44,7 @@ void SetAdvectionSolver(Settings const &settings, IAdvection **advectionSolver, 
 /// \param  diffusionSolver Pointer to DiffusionSolver
 /// \param  diffusionType Name of DiffusionSolver
 // ***************************************************************************************
-void SetDiffusionSolver(Settings const &settings, IDiffusion **diffusionSolver, const std::string& diffusionType) {
+void SetDiffusionSolver(Settings::Settings const &settings, IDiffusion **diffusionSolver, const std::string& diffusionType) {
     if (diffusionType == DiffusionMethods::Jacobi) {
         *diffusionSolver = new JacobiDiffuse(settings);
     } else if (diffusionType == DiffusionMethods::ColoredGaussSeidel) {
@@ -67,7 +67,7 @@ void SetDiffusionSolver(Settings const &settings, IDiffusion **diffusionSolver, 
 /// \param  pressureSolver Pointer to PressureSolver
 /// \param  pressureType Name of PressureSolver
 // ***************************************************************************************
-void SetPressureSolver(Settings const &settings, IPressure **pressureSolver, const std::string& pressureType,
+void SetPressureSolver(Settings::Settings const &settings, IPressure **pressureSolver, const std::string& pressureType,
                        const Field &p, const Field &rhs) {
     if (pressureType == PressureMethods::VCycleMG) {
         *pressureSolver = new VCycleMG(settings, p, rhs);
@@ -87,7 +87,7 @@ void SetPressureSolver(Settings const &settings, IPressure **pressureSolver, con
 /// \param  sourceSolver Pointer to SourceSolver
 /// \param  sourceType Name of SourceSolver
 // ***************************************************************************************
-void SetSourceSolver(Settings const &settings, ISource **sourceSolver, const std::string& sourceType) {
+void SetSourceSolver(Settings::Settings const &settings, ISource **sourceSolver, const std::string& sourceType) {
     if (sourceType == SourceMethods::ExplicitEuler) {
         *sourceSolver = new ExplicitEulerSource(settings);
     } else {
@@ -106,7 +106,7 @@ void SetSourceSolver(Settings const &settings, ISource **sourceSolver, const std
 /// \param  turbulenceSolver Pointer to TurbulenceSolver
 /// \param  turbulenceType Name of TurbulenceSolver
 // ***************************************************************************************
-void SetTurbulenceSolver(Settings const &settings, ITurbulence **turbulenceSolver, const std::string& turbulenceType) {
+void SetTurbulenceSolver(Settings::Settings const &settings, ITurbulence **turbulenceSolver, const std::string& turbulenceType) {
     if (turbulenceType == TurbulenceMethods::ConstSmagorinsky) {
         *turbulenceSolver = new ConstSmagorinsky(settings);
     } else if (turbulenceType == TurbulenceMethods::DynamicSmagorinsky) {

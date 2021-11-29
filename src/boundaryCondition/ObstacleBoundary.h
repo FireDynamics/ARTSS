@@ -7,12 +7,15 @@
 #ifndef ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H_
 #define ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H_
 
-#include <cstdlib>
-#include "../utility/GlobalMacrosTypes.h"
 #include "../boundary/BoundaryData.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
+
+#include <cstdlib>
+
 
 namespace ObstacleBoundary {
-    void apply_boundary_condition(Settings const &settings,
+    void apply_boundary_condition(Settings::Settings const &settings,
                                   real* data, size_t** index_fields, const size_t* patch_starts,
                                   const size_t* patch_ends, size_t level,
                                   BoundaryData* boundary_data, size_t id, bool sync = true);

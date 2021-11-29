@@ -9,7 +9,7 @@
 
 Domain *Domain::single = nullptr; //Singleton
 
-Domain::Domain(Settings const &settings) {
+Domain::Domain(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
@@ -68,7 +68,7 @@ void Domain::calc_MG_values() {
     }
 }
 
-Domain *Domain::getInstance(Settings const &settings) {
+Domain *Domain::getInstance(Settings::Settings const &settings) {
     if (single == nullptr) {
         single = new Domain(settings);
     }

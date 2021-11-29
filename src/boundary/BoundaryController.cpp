@@ -10,7 +10,7 @@
 BoundaryController *BoundaryController::singleton = nullptr;  // Singleton
 
 
-BoundaryController::BoundaryController(Settings const &settings) :
+BoundaryController::BoundaryController(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());
@@ -53,7 +53,7 @@ void BoundaryController::read_XML() {
 /// \brief  parses boundaries of domain from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_boundary_parameter(std::vector<BoundarySetting> boundaries) {
+void BoundaryController::parse_boundary_parameter(std::vector<Settings::BoundarySetting> boundaries) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing boundary parameter");
 #endif
@@ -71,7 +71,7 @@ void BoundaryController::parse_boundary_parameter(std::vector<BoundarySetting> b
 /// \brief  parses surfaces from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_surface_parameter(std::vector<SurfaceSetting> surfaces) {
+void BoundaryController::parse_surface_parameter(std::vector<Settings::SurfaceSetting> surfaces) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing surface parameter");
 #endif
@@ -96,7 +96,7 @@ void BoundaryController::parse_surface_parameter(std::vector<SurfaceSetting> sur
 /// \brief  parses obstacles from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_obstacle_parameter(std::vector<ObstacleSetting> obstacles) {
+void BoundaryController::parse_obstacle_parameter(std::vector<Settings::ObstacleSetting> obstacles) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing obstacle parameter");
 #endif
@@ -150,7 +150,7 @@ BoundaryController::~BoundaryController() {
 }
 
 
-BoundaryController *BoundaryController::getInstance(Settings const &settings) {
+BoundaryController *BoundaryController::getInstance(Settings::Settings const &settings) {
     if (singleton == nullptr) {
         singleton = new BoundaryController(settings);
     }

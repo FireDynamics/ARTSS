@@ -9,19 +9,20 @@
 
 #include "../interfaces/IAdvection.h"
 #include "../field/Field.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class SLAdvect : public IAdvection {
  public:
-    explicit SLAdvect(Settings const &settings) : m_settings(settings) {}
+    explicit SLAdvect(Settings::Settings const &settings) : m_settings(settings) {}
 
     ~SLAdvect() override = default;
 
     void advect(Field &out, const Field &in, const Field &u_vel, const Field &v_vel, const Field &w_vel, bool sync) override;
 
  private:
-    Settings const m_settings;
+    Settings::Settings const m_settings;
 };
 
 #endif /* ARTSS_ADVECTION_SLADVECT_H_ */

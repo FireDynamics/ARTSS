@@ -10,7 +10,7 @@
 #include "../boundaryCondition/DomainBoundary.h"
 #include "../boundaryCondition/ObstacleBoundary.h"
 
-BoundaryDataController::BoundaryDataController(Settings const &settings) :
+BoundaryDataController::BoundaryDataController(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());
@@ -33,7 +33,7 @@ BoundaryDataController::~BoundaryDataController() {
 /// \brief  Parses boundary data of XML tree to boundary data object
 /// \param  xml_element Pointer to XML element
 // *************************************************************************************************
-void BoundaryDataController::add_boundary_data(BoundarySetting boundary) {
+void BoundaryDataController::add_boundary_data(Settings::BoundarySetting boundary) {
     BoundaryCondition bc = BoundaryData::match_boundary_condition(boundary.get_type());
     real value = boundary.get_value();
 

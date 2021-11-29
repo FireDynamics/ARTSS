@@ -12,7 +12,7 @@
 /// \brief  Constructor
 /// \param  solver_controller class representative for solver
 // ***************************************************************************************
-TimeIntegration::TimeIntegration(Settings const &settings, SolverController *sc) {
+TimeIntegration::TimeIntegration(Settings::Settings const &settings, SolverController *sc) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif

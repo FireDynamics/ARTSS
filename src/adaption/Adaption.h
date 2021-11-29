@@ -10,9 +10,10 @@
 
 #include "../field/Field.h"
 #include "../interfaces/IAdaptionFunction.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../interfaces/ISolver.h"
 #include "../solver/SolverController.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 /* enum for different types of dynamic adaption:
  * NO = adaption impossible/no changes
@@ -29,7 +30,7 @@ class IAdaptionFunction;
 
 class Adaption {
 public:
-    explicit Adaption(Settings const &settings, FieldController *field_controller);
+    explicit Adaption(Settings::Settings const &settings, FieldController *field_controller);
 
     bool inline is_data_extraction_enabled() { return m_has_data_extraction; };
     bool inline is_data_extraction_before_enabled() { return m_has_data_extraction_before; }
@@ -52,10 +53,10 @@ public:
     static void expand_y_direction(long shift, bool start, size_t *arr_idx_expansion, size_t len_e);
     static void reduce_x_direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r);
     static void reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r);
-    static bool adapt_x_direction(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
-    static bool adapt_x_direction_serial(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
-    static bool adapt_y_direction(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
-    static bool adapt_y_direction_serial(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static bool adapt_x_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static bool adapt_x_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static bool adapt_y_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static bool adapt_y_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
 
     void extractData(const std::string &filename, real height, real time);
     void extractData(const std::string &filename);

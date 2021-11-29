@@ -11,7 +11,7 @@
 #include "DiffusionTurbSolver.h"
 
 
-DiffusionTurbSolver::DiffusionTurbSolver(Settings const &settings, FieldController *field_controller) :
+DiffusionTurbSolver::DiffusionTurbSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());

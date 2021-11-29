@@ -11,7 +11,7 @@
 #include "../Domain.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-Boundary::Boundary(Settings const &settings, size_t level) {
+Boundary::Boundary(Settings::Settings const &settings, size_t level) {
     m_level = level;
     init(0);
     inner_cells();
@@ -24,7 +24,7 @@ Boundary::Boundary(Settings const &settings, size_t level) {
 }
 
 Boundary::Boundary(
-        Settings const &settings,
+        Settings::Settings const &settings,
         Obstacle **obstacle_list,
         size_t number_of_obstacles,
         size_t size_obstacles,

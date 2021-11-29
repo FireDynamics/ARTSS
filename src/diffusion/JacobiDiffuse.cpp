@@ -12,7 +12,7 @@
 #include "../Domain.h"
 #include "../utility/Utility.h"
 
-JacobiDiffuse::JacobiDiffuse(Settings const &settings) :
+JacobiDiffuse::JacobiDiffuse(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(settings, typeid(this).name());

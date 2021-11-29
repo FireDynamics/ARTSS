@@ -24,7 +24,7 @@
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::buoyancy_force(
-        Settings const &settings,
+        Settings::Settings const &settings,
         Field &out,
         const Field &in, const Field &in_a,
         bool sync) {
@@ -73,7 +73,7 @@ void ISource::buoyancy_force(
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::dissipate(
-        Settings const &settings,
+        Settings::Settings const &settings,
         Field &out,
         const Field &in_u, const Field &in_v, const Field &in_w,
         bool sync) {

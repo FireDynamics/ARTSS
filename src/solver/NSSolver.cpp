@@ -14,7 +14,7 @@
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 
-NSSolver::NSSolver(Settings const &settings, FieldController *field_controller) :
+NSSolver::NSSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());

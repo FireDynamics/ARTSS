@@ -11,8 +11,9 @@
 #include "../interfaces/IDiffusion.h"
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../field/FieldController.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 #ifdef BENCHMARKING
 #include "../utility/Utility.h"
@@ -21,13 +22,13 @@
 
 class NSSolver : public ISolver {
  public:
-    NSSolver(Settings const &settings, FieldController *field_controller);
+    NSSolver(Settings::Settings const &settings, FieldController *field_controller);
     ~NSSolver();
 
     void do_step(real t, bool sync) override;
 
  private:
-    Settings const &m_settings;
+    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

@@ -15,18 +15,19 @@
 #include "../interfaces/ISolver.h"
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class NSTempTurbSolver : public ISolver {
  public:
-    NSTempTurbSolver(Settings const &settings, FieldController *fieldController);
+    NSTempTurbSolver(Settings::Settings const &settings, FieldController *fieldController);
     ~NSTempTurbSolver();
 
     void do_step(real t, bool sync) override;
 
  private:
-    Settings const &m_settings;
+    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

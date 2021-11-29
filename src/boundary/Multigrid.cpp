@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-Multigrid::Multigrid(Settings const &settings, BoundaryDataController *bdc_boundary) :
+Multigrid::Multigrid(Settings::Settings const &settings, BoundaryDataController *bdc_boundary) :
         m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());
@@ -35,7 +35,7 @@ Multigrid::Multigrid(Settings const &settings, BoundaryDataController *bdc_bound
 }
 
 Multigrid::Multigrid(
-        Settings const &settings,
+        Settings::Settings const &settings,
         size_t number_of_surfaces, Surface **surface_list,
         size_t number_of_obstacles, Obstacle **obstacle_list,
         BoundaryDataController *bdc_boundary,

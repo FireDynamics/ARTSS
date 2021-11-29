@@ -7,7 +7,7 @@
 #include "ExplicitEulerSource.h"
 #include "../boundary/BoundaryController.h"
 
-ExplicitEulerSource::ExplicitEulerSource(Settings const &settings) :
+ExplicitEulerSource::ExplicitEulerSource(Settings::Settings const &settings) :
         m_settings(settings) {
     m_dir_vel = settings.get("solver/source/dir");
 

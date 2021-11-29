@@ -7,7 +7,7 @@
 #include "Vortex.h"
 #include "../Domain.h"
 
-Vortex::Vortex(Settings const &settings, FieldController *field_controller) :
+Vortex::Vortex(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings),
         m_u(field_controller->get_field_u()),
         m_v(field_controller->get_field_v()),

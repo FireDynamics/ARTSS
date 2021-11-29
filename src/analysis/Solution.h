@@ -11,10 +11,11 @@
 #include "../field/Field.h"
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class Solution {
  public:
-    explicit Solution(Settings const &settings, const std::string &initial_condition, bool has_analytical_solution);
+    explicit Solution(Settings::Settings const &settings, const std::string &initial_condition, bool has_analytical_solution);
     void calc_analytical_solution(real t);
 
     // Getter
@@ -25,7 +26,7 @@ class Solution {
     return_ptr get_return_ptr_data_T() const { return m_T_analytical_solution.data; }
 
  private:
-    Settings const &m_settings;
+    Settings::Settings const &m_settings;
     void gauss_bubble(real t);
     void exp_sinus_prod(real t);
     void exp_sinus_sum(real t);

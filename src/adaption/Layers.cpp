@@ -9,7 +9,7 @@
 #include "../Domain.h"
 #include "Adaption.h"
 
-Layers::Layers(Settings const &settings, FieldController *field_controller) :
+Layers::Layers(Settings::Settings const &settings, FieldController *field_controller) :
         m_T(field_controller->get_field_T()),
         m_Ta(field_controller->get_field_T_ambient()),
         m_Nu(field_controller->get_field_nu_t()),

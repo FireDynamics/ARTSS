@@ -3,20 +3,23 @@
 /// \date       Aug 11, 2020
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
-//
+
 #ifndef ARTSS_SOLVER_SOLVERCONTROLLER_H_
 #define ARTSS_SOLVER_SOLVERCONTROLLER_H_
 
-#include <string>
 #include "../interfaces/ISolver.h"
 #include "../interfaces/ISource.h"
 #include "../interfaces/ISourceFunction.h"
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
+
+#include <string>
+
 
 class SolverController {
  public:
-    explicit SolverController(Settings const &settings);
+    explicit SolverController(Settings::Settings const &settings);
     ~SolverController();
 
     void solver_do_step(real t, bool sync);
@@ -34,7 +37,7 @@ class SolverController {
     void temperature_source();
     void momentum_source();
 
-    Settings const &m_settings;
+    Settings::Settings const &m_settings;
 
     FieldController *m_field_controller;
     ISolver *m_solver;

@@ -14,7 +14,7 @@
 #include "SolverSelection.h"
 
 AdvectionSolver::AdvectionSolver(
-        Settings const &settings,
+        Settings::Settings const &settings,
         FieldController *field_controller,
         real u_lin, real v_lin, real w_lin) :
     m_settings(settings),
@@ -35,7 +35,7 @@ AdvectionSolver::AdvectionSolver(
     control();
 }
 
-AdvectionSolver::AdvectionSolver(Settings const &settings, FieldController *field_controller) :
+AdvectionSolver::AdvectionSolver(Settings::Settings const &settings, FieldController *field_controller) :
     AdvectionSolver(
             settings,
             field_controller,

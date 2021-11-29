@@ -66,7 +66,7 @@ std::vector<std::string> split(const char *text, char delimiter) {
 //          ("logging/level", "logging/file")
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
-std::shared_ptr<spdlog::logger> create_logger(Settings const &settings, std::string logger_name) {
+std::shared_ptr<spdlog::logger> create_logger(Settings::Settings const &settings, std::string logger_name) {
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
 
@@ -145,7 +145,7 @@ std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list
     return result;
 }
 
-void log_field_info(Settings const &settings, Field &field, const std::string &text, const std::string &logger_name) {
+void log_field_info(Settings::Settings const &settings, Field &field, const std::string &text, const std::string &logger_name) {
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(settings, logger_name);
 #endif

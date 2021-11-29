@@ -15,6 +15,7 @@
 
 #include "utility/GlobalMacrosTypes.h"
 #include "utility/Utility.h"
+#include "utility/settings/Settings.h"
 
 enum CoordinateAxis : int {
     UNKNOWN_DIRECTION = -1, X = 0, Y = 1, Z = 2
@@ -22,10 +23,10 @@ enum CoordinateAxis : int {
 
 class Domain {
  public:
-    explicit Domain(Settings const &settings);
+    explicit Domain(Settings::Settings const &settings);
 
     static Domain *getInstance() { return single; }
-    static Domain *getInstance(Settings const &settings);
+    static Domain *getInstance(Settings::Settings const &settings);
 
     // getter
     size_t inline get_nx(size_t level = 0) const { return this->m_nx[level]; }

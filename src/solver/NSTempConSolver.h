@@ -15,19 +15,20 @@
 #include "../interfaces/IDiffusion.h"
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class NSTempConSolver: public ISolver {
  public:
-    NSTempConSolver(Settings const &settings, FieldController *field_controller);
+    NSTempConSolver(Settings::Settings const &settings, FieldController *field_controller);
     ~NSTempConSolver() override;
 
     void do_step(real t, bool sync) override;
 
 private:
-    Settings const &m_settings;
+    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

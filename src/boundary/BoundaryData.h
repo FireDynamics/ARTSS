@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 #include "../utility/Utility.h"
-#include "../utility/tinyxml2.h"
+#include "../utility/settings/Settings.h"
 #include "../field/Field.h"
 
 const size_t number_of_patches = 6;
@@ -34,7 +34,7 @@ enum BoundaryCondition : int {
 
 class BoundaryData {
  public:
-    explicit BoundaryData(Settings const &settings);
+    explicit BoundaryData(Settings::Settings const &settings);
     ~BoundaryData();
     void print();
 

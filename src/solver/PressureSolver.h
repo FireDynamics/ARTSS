@@ -9,22 +9,23 @@
 
 #include "SolverSelection.h"
 #include "../pressure/VCycleMG.h"
-#include "../utility/Utility.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryData.h"
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IPressure.h"
 #include "../field/FieldController.h"
+#include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class PressureSolver : public ISolver {
 public:
-    PressureSolver(Settings const &settings, FieldController *field_controller);
+    PressureSolver(Settings::Settings const &settings, FieldController *field_controller);
     ~PressureSolver();
     void do_step(real t, bool sync) override;
 
 private:
-    Settings const &m_settings;
+    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

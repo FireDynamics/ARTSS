@@ -18,12 +18,12 @@
 class Multigrid {
  public:
     Multigrid(
-            Settings const &settings,
+            Settings::Settings const &settings,
             size_t number_of_surfaces, Surface** surface_list,
             size_t number_of_obstacles, Obstacle** obstacle_list,
             BoundaryDataController* bdc_boundary,
             BoundaryDataController **bdc_obstacles);
-    Multigrid(Settings const &settings, BoundaryDataController *bdc_boundary);
+    Multigrid(Settings::Settings const &settings, BoundaryDataController *bdc_boundary);
     ~Multigrid();
 
     size_t get_size_inner_list(size_t level = 0) const;
@@ -56,7 +56,7 @@ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    Settings const &m_settings;
+    Settings::Settings const &m_settings;
     size_t m_levels;
     // all surfaces divided by level
     Surface*** m_MG_surface_object_list;  // m_MG_surface_object_list[level][surfaceID]

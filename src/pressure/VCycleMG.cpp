@@ -14,7 +14,7 @@
 #include "../solver/SolverSelection.h"
 
 
-VCycleMG::VCycleMG(Settings const &settings, Field const &out, Field const &b) :
+VCycleMG::VCycleMG(Settings::Settings const &settings, Field const &out, Field const &b) :
         m_settings(settings),
         m_levels(Domain::getInstance()->get_levels()),
         m_n_cycle(settings.get_int("solver/pressure/n_cycle")),

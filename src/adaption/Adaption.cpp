@@ -18,7 +18,7 @@
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-Adaption::Adaption(Settings const &settings, FieldController *field_controller) {
+Adaption::Adaption(Settings::Settings const &settings, FieldController *field_controller) {
     m_field_controller = field_controller;
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(settings, typeid(Adaption).name());
@@ -425,7 +425,7 @@ void Adaption::reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduct
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_x_direction_serial(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_x_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
@@ -534,7 +534,7 @@ bool Adaption::adapt_x_direction_serial(Settings const &settings, const real *f,
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_x_direction(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_x_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;
@@ -630,7 +630,7 @@ bool Adaption::adapt_x_direction(Settings const &settings, const real *f, real c
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_y_direction_serial(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_y_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
@@ -740,7 +740,7 @@ bool Adaption::adapt_y_direction_serial(Settings const &settings, const real *f,
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_y_direction(Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_y_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = Domain::getInstance();
 
     size_t expansion_counter_start = 0;

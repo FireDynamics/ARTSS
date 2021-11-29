@@ -8,7 +8,7 @@
 // TODO(issue 15): surface implementing
 //  - underscores instead of camel case
 //  - create file description
-Surface::Surface(Settings const &settings, SurfaceSetting const &surfsetting) {
+Surface::Surface(Settings::Settings const &settings, Settings::SurfaceSetting const &surfsetting) {
     m_boundaryDataController = new BoundaryDataController(settings);
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(settings, typeid(this).name());
@@ -61,7 +61,7 @@ Surface::Surface(Settings const &settings, SurfaceSetting const &surfsetting) {
 #endif
 }
 
-Surface::Surface(Settings const &settings, size_t surfaceID, size_t startIndex, size_t strideX, size_t strideY, size_t strideZ, size_t level) {
+Surface::Surface(Settings::Settings const &settings, size_t surfaceID, size_t startIndex, size_t strideX, size_t strideY, size_t strideZ, size_t level) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(settings, typeid(this).name());
     m_logger->info("################ SURFACE ################");
@@ -139,7 +139,7 @@ void Surface::createSurface(size_t Nx, size_t Ny) {
 #endif
 }
 
-void Surface::setBoundaryConditions(BoundarySetting const &xmlElement) {
+void Surface::setBoundaryConditions(Settings::BoundarySetting const &xmlElement) {
     m_boundaryDataController->add_boundary_data(xmlElement);
 }
 

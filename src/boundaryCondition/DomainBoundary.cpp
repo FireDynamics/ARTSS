@@ -46,7 +46,7 @@ namespace {
     /// \param  patch_end End index of patch
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_dirichlet(Settings const &settings, Field &field, size_t *d_patch, Patch patch,
+    void apply_dirichlet(Settings::Settings const &settings, Field &field, size_t *d_patch, Patch patch,
                          const size_t patch_start, const size_t patch_end, real value) {
         Domain *domain = Domain::getInstance();
         size_t level = field.get_level();
@@ -91,7 +91,7 @@ namespace {
     /// \param  patch_end End index of patch
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_neumann(Settings const &settings, Field &field, size_t *d_patch, Patch patch,
+    void apply_neumann(Settings::Settings const &settings, Field &field, size_t *d_patch, Patch patch,
                        size_t patch_start, size_t patch_end, real value) {
         size_t level = field.get_level();
         Domain *domain = Domain::getInstance();
@@ -138,7 +138,7 @@ namespace {
     /// \param  patch_end End index of patch
     /// \param  level Multigrid level
     // *********************************************************************************************
-    void apply_periodic(Settings const &settings, Field &field, size_t *d_patch, Patch patch,
+    void apply_periodic(Settings::Settings const &settings, Field &field, size_t *d_patch, Patch patch,
                         const size_t patch_start, const size_t patch_end) {
         size_t level = field.get_level();
         Domain *domain = Domain::getInstance();
@@ -189,7 +189,7 @@ namespace {
 /// \param  boundary_data Boundary data_field object of Domain
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void apply_boundary_condition(Settings const &settings, Field &field, size_t **index_fields, const size_t *patch_starts,
+void apply_boundary_condition(Settings::Settings const &settings, Field &field, size_t **index_fields, const size_t *patch_starts,
                               const size_t *patch_ends, BoundaryData *boundary_data, bool sync) {
     for (size_t i = 0; i < number_of_patches; i++) {
         size_t *d_patch = *(index_fields + i);

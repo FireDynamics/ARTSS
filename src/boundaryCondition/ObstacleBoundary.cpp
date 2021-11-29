@@ -24,7 +24,7 @@ namespace {
     /// \param  value Value of boundary condition
     /// \param  sign Sign of boundary condition (POSITIVE_SIGN or NEGATIVE_SIGN)
     // *********************************************************************************************
-    void apply_boundary_condition(Settings const &settings,
+    void apply_boundary_condition(Settings::Settings const &settings,
                                   real *data_field, const size_t *d_patch, size_t patch_start,
                                   size_t patch_end, size_t level, int8_t sign_reference_index,
                                   size_t reference_index, real value, int8_t sign) {
@@ -58,7 +58,7 @@ namespace {
     /// \param  level Multigrid level
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_dirichlet(Settings const &settings, real *data_field, size_t *d_patch, Patch p, size_t patch_start,
+    void apply_dirichlet(Settings::Settings const &settings, real *data_field, size_t *d_patch, Patch p, size_t patch_start,
                          size_t patch_end, size_t level, real value) {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(settings, "ObstacleBoundary");
@@ -115,7 +115,7 @@ namespace {
     /// \param  level Multigrid level
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_neumann(Settings const &settings, real *data_field, size_t *d_patch, Patch p, size_t patch_start,
+    void apply_neumann(Settings::Settings const &settings, real *data_field, size_t *d_patch, Patch p, size_t patch_start,
                        size_t patch_end, size_t level, real value) {
         if (level > 0) {
             value = 0;
@@ -167,7 +167,7 @@ namespace {
     /// \param  patch_end End index of patch
     /// \param  level Multigrid level
     // *********************************************************************************************
-    void apply_periodic(Settings const &settings, real *data_field, size_t *d_patch, Patch p, size_t patch_start,
+    void apply_periodic(Settings::Settings const &settings, real *data_field, size_t *d_patch, Patch p, size_t patch_start,
                         size_t patch_end, size_t level, size_t id) {
         Domain *domain = Domain::getInstance();
         size_t Nx = domain->get_Nx(level);
@@ -217,7 +217,7 @@ namespace {
 /// \param  id ID of obstacle
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void apply_boundary_condition(Settings const &settings, real *data, size_t **index_fields, const size_t *patch_starts,
+void apply_boundary_condition(Settings::Settings const &settings, real *data, size_t **index_fields, const size_t *patch_starts,
                               const size_t *patch_ends, size_t level, BoundaryData *boundary_data,
                               size_t id, bool sync) {
     for (size_t i = 0; i < number_of_patches; i++) {

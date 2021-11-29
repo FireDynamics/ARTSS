@@ -722,7 +722,7 @@ namespace Functions {
 /// \brief  Initial set up as layers throughout the domain
 /// \param  out temperature
 // ***************************************************************************************
-    void Layers(Settings const &settings, Field &out) {
+    void Layers(Settings::Settings const &settings, Field &out) {
         auto domain = Domain::getInstance();
         int n_layers = settings.get_int("initial_conditions/n_layers");
 

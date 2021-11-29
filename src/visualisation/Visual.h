@@ -11,10 +11,11 @@
 #include "../interfaces/ISolver.h"
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
 
 class Visual {
 public:
-    Visual(Settings const &settings, Solution const &solution, bool has_analytical_solution);
+    Visual(Settings::Settings const &settings, Solution const &solution, bool has_analytical_solution);
 
     void visualise(const FieldController &field_controller, real t);
 
@@ -25,7 +26,7 @@ public:
     static void write_vtk_debug(FieldController &field_controller, const std::string& filename);
 
 private:
-    Settings const &m_settings;
+    Settings::Settings const &m_settings;
 
     std::string m_filename;
     const Solution &m_solution;

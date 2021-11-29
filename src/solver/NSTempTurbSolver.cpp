@@ -15,7 +15,7 @@
 #include "../pressure/VCycleMG.h"
 #include "SolverSelection.h"
 
-NSTempTurbSolver::NSTempTurbSolver(Settings const &settings, FieldController *field_controller) :
+NSTempTurbSolver::NSTempTurbSolver(Settings::Settings const &settings, FieldController *field_controller) :
 m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());

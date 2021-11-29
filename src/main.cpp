@@ -8,9 +8,8 @@
 #include "TimeIntegration.h"
 #include "Domain.h"
 #include "boundary/BoundaryController.h"
-#include "utility/tinyxml2.h"
-#include "utility/Settings.h"
 #include "solver/SolverController.h"
+#include "utility/settings/Settings.h"
 
 #ifdef _OPENACC
     #include <openacc.h>
@@ -25,7 +24,7 @@ int main(int argc, char **argv) {
         std::exit(1);
     }
 
-    Settings settings(argv[1]);
+    Settings::Settings settings(argv[1]);
     Domain::getInstance(settings);
     BoundaryController::getInstance(settings);
 

@@ -27,7 +27,8 @@
 #include "../source/Zero.h"
 #include "../randomField/UniformRandom.h"
 
-SolverController::SolverController(Settings const &settings) :
+
+SolverController::SolverController(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());
