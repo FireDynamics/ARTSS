@@ -33,20 +33,14 @@ NSTempTurbConSolver::NSTempTurbConSolver(Settings const &settings, FieldControll
     // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));
 
-    m_nu = m_settings.get_real("physical_parameters/nu");
-
     // Turbulent viscosity for velocity diffusion
     SolverSelection::SetTurbulenceSolver(m_settings, &mu_tub, m_settings.get("solver/turbulence/type"));
 
     // Diffusion of temperature
     SolverSelection::SetDiffusionSolver(m_settings, &dif_temp, m_settings.get("solver/temperature/diffusion/type"));
 
-    m_kappa = m_settings.get_real("physical_parameters/kappa");
-
     // Diffusion for concentration
     SolverSelection::SetDiffusionSolver(m_settings, &dif_con, m_settings.get("solver/concentration/diffusion/type"));
-
-    m_gamma = m_settings.get_real("solver/concentration/diffusion/gamma");
 
     // Pressure
     SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"),
@@ -147,9 +141,11 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        dif_vel->diffuse(u, u0, u_tmp, m_nu, nu_t, sync);
-        dif_vel->diffuse(v, v0, v_tmp, m_nu, nu_t, sync);
-        dif_vel->diffuse(w, w0, w_tmp, m_nu, nu_t, sync);
+        const real nu = m_settings.get_real("physical_parameters/nu");
+
+        dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
+        dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
 
         // Couple data to prepare for adding source
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
@@ -191,6 +187,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
         // Solve diffusion equation
         // turbulence
+        real kappa = m_settings.get_real("physical_parameters/kappa");
         if (m_has_turbulence_temperature) {
             real Pr_T = m_settings.get_real("solver/temperature/turbulence/Pr_T");
             real rPr_T = 1. / Pr_T;
@@ -204,18 +201,18 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Temperature ...");
 #endif
-            dif_temp->diffuse(T, T0, T_tmp, m_kappa, kappa_t, sync);
+            dif_temp->diffuse(T, T0, T_tmp, kappa, kappa_t, sync);
 
             // Couple temperature to prepare for adding source
             FieldController::couple_scalar(T, T0, T_tmp, sync);
         } else {
             // no turbulence
-            if (m_kappa != 0.) {
+            if (kappa != 0.) {
 
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Temperature ...");
 #endif
-                dif_temp->diffuse(T, T0, T_tmp, m_kappa, sync);
+                dif_temp->diffuse(T, T0, T_tmp, kappa, sync);
 
                 // Couple temperature to prepare for adding source
                 FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -255,6 +252,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
         // Solve diffusion equation
         // turbulence
+        real gamma = m_settings.get_real("solver/concentration/diffusion/gamma");
         if (m_has_turbulence_concentration) {
             real Sc_T = m_settings.get_real("solver/concentration/turbulence/Sc_T");
             real rSc_T = 1. / Sc_T;
@@ -268,17 +266,17 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Diffuse turbulent Concentration ...");
 #endif
-            dif_con->diffuse(C, C0, C_tmp, m_gamma, gamma_t, sync);
+            dif_con->diffuse(C, C0, C_tmp, gamma, gamma_t, sync);
 
             // Couple concentration to prepare for adding source
             FieldController::couple_scalar(C, C0, C_tmp, sync);
         } else {
             // no turbulence
-            if (m_gamma != 0.) {
+            if (gamma != 0.) {
 #ifndef BENCHMARKING
                 m_logger->info("Diffuse Concentration ...");
 #endif
-                dif_con->diffuse(C, C0, C_tmp, m_gamma, sync);
+                dif_con->diffuse(C, C0, C_tmp, gamma, sync);
 
                 // Couple concentration to prepare for adding source
                 FieldController::couple_scalar(C, C0, C_tmp, sync);

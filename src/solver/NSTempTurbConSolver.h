@@ -44,9 +44,6 @@ class NSTempTurbConSolver : public ISolver {
     ISource *sou_con;
     ITurbulence *mu_tub;
 
-    real m_nu;
-    real m_kappa;
-    real m_gamma;
     std::string m_dir_vel;
 
     void control();
