@@ -192,16 +192,10 @@ void FieldController::update_device() {
     field_p.update_dev();
     field_rhs.update_dev();
     field_T.update_dev();
-    field_T_ambient.update_dev();
     field_concentration.update_dev();
-    field_force_x.update_dev();
-    field_force_y.update_dev();
-    field_force_z.update_dev();
+    field_nu_t.update_dev();
     field_source_T.update_dev();
     field_source_concentration.update_dev();
-    field_nu_t.update_dev();
-    field_kappa_t.update_dev();
-    field_gamma_t.update_dev();
 #pragma acc wait
 }
 

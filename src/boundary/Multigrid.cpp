@@ -312,7 +312,6 @@ void Multigrid::create_multigrid_obstacle_lists() {
 
     if (m_number_of_obstacle_objects > 0) {
         auto **tmp_store_obstacle = new size_t *[m_multigrid_levels + 1];
-        //TODO fill tmp_store_obstacle for level 0
         {  // count obstacle cells level 0
             size_t level = 0;
             for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
