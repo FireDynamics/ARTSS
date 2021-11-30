@@ -46,37 +46,37 @@ void Analysis::analyse(FieldController *field_controller, real t) {
 #endif
 
     for (auto boundary : m_settings.get_boundaries()) {
-        std::string field = boundary.get_field();
-
-        if (field.find(BoundaryData::get_field_type_name(FieldType::U)) != std::string::npos) {
-            compare_solutions(field_controller->get_field_u_data(),
-                              m_solution.get_return_ptr_data_u(),
-                              FieldType::U,
-                              t);
-        }
-        if (field.find(BoundaryData::get_field_type_name(FieldType::V)) != std::string::npos) {
-            compare_solutions(field_controller->get_field_v_data(),
-                              m_solution.get_return_ptr_data_v(),
-                              FieldType::V,
-                              t);
-        }
-        if (field.find(BoundaryData::get_field_type_name(FieldType::W)) != std::string::npos) {
-            compare_solutions(field_controller->get_field_w_data(),
-                              m_solution.get_return_ptr_data_w(),
-                              FieldType::W,
-                              t);
-        }
-        if (field.find(BoundaryData::get_field_type_name(FieldType::P)) != std::string::npos) {
-            compare_solutions(field_controller->get_field_p_data(),
-                              m_solution.get_return_ptr_data_p(),
-                              FieldType::P,
-                              t);
-        }
-        if (field.find(BoundaryData::get_field_type_name(FieldType::T)) != std::string::npos) {
-            compare_solutions(field_controller->get_field_T_data(),
-                              m_solution.get_return_ptr_data_T(),
-                              FieldType::T,
-                              t);
+        auto used_fields = BoundaryController::getInstance()->get_used_fields();
+        for (FieldType ft : used_fields) {
+            switch (ft) {
+                case FieldType::U:
+                    compare_solutions(field_controller->get_field_u_data(),
+                                      m_solution.get_return_ptr_data_u(),
+                                      ft, t);
+                    break;
+                case FieldType::V:
+                    compare_solutions(field_controller->get_field_v_data(),
+                                      m_solution.get_return_ptr_data_v(),
+                                      ft, t);
+                    break;
+                case FieldType::W:
+                    compare_solutions(field_controller->get_field_w_data(),
+                                      m_solution.get_return_ptr_data_w(),
+                                      ft, t);
+                    break;
+                case FieldType::P:
+                    compare_solutions(field_controller->get_field_p_data(),
+                                      m_solution.get_return_ptr_data_p(),
+                                      ft, t);
+                    break;
+                case FieldType::T:
+                    compare_solutions(field_controller->get_field_T_data(),
+                                      m_solution.get_return_ptr_data_T(),
+                                      ft, t);
+                    break;
+                default:  // do nothing
+                    break;
+            }
         }
     }
 }
