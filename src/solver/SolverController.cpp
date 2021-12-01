@@ -513,14 +513,6 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             m_logger->info("Initial values all set to zero!");
 #endif
         }
-        // Random concentration
-        if ((string_solver == SolverTypes::NSTempConSolver ||
-             string_solver == SolverTypes::NSTempTurbConSolver)
-            && m_settings.get("initial_conditions/con_fct") == FunctionNames::random_c) {
-            real Ca = m_settings.get_real("initial_conditions/Ca");        // ambient concentration
-            Functions::uniform(m_field_controller->get_field_concentration(), Ca);
-            call_random(m_field_controller->get_field_concentration());
-        }
     } else if (string_init_usr_fct == FunctionNames::jet) {
         std::string dir = m_settings.get("initial_conditions/dir");
         real value = m_settings.get_real("initial_conditions/value");
