@@ -10,9 +10,15 @@
 #include <vector>
 
 
-Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const std::string &name) {
+Obstacle::Obstacle(
+    Settings::Settings const &settings,
+    real x1, real x2,
+    real y1, real y2,
+    real z1, real z2,
+    const std::string &name) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     m_name = name;
     Domain *domain = Domain::getInstance();
@@ -38,12 +44,14 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const s
 
 
 Obstacle::Obstacle(
+        Settings::Settings const &settings,
         size_t coords_i1, size_t coords_j1, size_t coords_k1,
         size_t coords_i2, size_t coords_j2, size_t coords_k2,
         size_t level,
-        const std::string &name) {
+        const std::string &name) :
+            m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     m_name = name;
     m_level = level;
@@ -675,7 +683,7 @@ void Obstacle::calculate_area_index(
 // *************************************************************************************************
 bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger("Obstacle");
+    auto logger = Utility::create_logger(o1->m_settings, "Obstacle");
 #endif
 
     bool overlap = circular_constraints_x_direction(o1, o2);
@@ -697,7 +705,7 @@ bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
 // *************************************************************************************************
 bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger("Obstacle");
+    auto logger = Utility::create_logger(o1->m_settings, "Obstacle");
 #endif
     bool overlap = false;
 
@@ -898,7 +906,7 @@ bool Obstacle::circular_constraints_x_direction(Obstacle *o1, Obstacle *o2) {
 // *************************************************************************************************
 bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger("Obstacle");
+    auto logger = Utility::create_logger(o1->m_settings, "Obstacle");
 #endif
     bool overlap = false;
 
@@ -1101,7 +1109,7 @@ bool Obstacle::circular_constraints_y_direction(Obstacle *o1, Obstacle *o2) {
 // *************************************************************************************************
 bool Obstacle::circular_constraints_z_direction(Obstacle *o1, Obstacle *o2) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger("Obstacle");
+    auto logger = Utility::create_logger(o1->m_settings, "Obstacle");
 #endif
     bool overlap = false;
 

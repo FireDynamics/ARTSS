@@ -11,15 +11,13 @@
 #endif
 
 #include "ConstSmagorinsky.h"
-#include "../utility/Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 
-ConstSmagorinsky::ConstSmagorinsky() {
-    auto params = Parameters::getInstance();
+ConstSmagorinsky::ConstSmagorinsky(Settings::Settings const &settings) {
     // Cs value of 0.1 is found to yield the best results for wide range of flows
     // reference from Ansys Fluent Subgrid Scale models
-    m_Cs = params->get_real("solver/turbulence/Cs");
+    m_Cs = settings.get_real("solver/turbulence/Cs");
 }
 
 //============================ Calculate turbulent viscosity =======================================

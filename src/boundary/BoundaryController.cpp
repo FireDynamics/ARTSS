@@ -10,18 +10,20 @@
 BoundaryController *BoundaryController::singleton = nullptr;  // Singleton
 
 
-BoundaryController::BoundaryController() {
+BoundaryController::BoundaryController(Settings::Settings const &settings) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
-    m_bdc_boundary = new BoundaryDataController();
+    m_bdc_boundary = new BoundaryDataController(m_settings);
     read_XML();
     if (m_number_of_obstacles + m_number_of_surfaces > 0) {
-        m_multigrid = new Multigrid(m_number_of_surfaces, m_surface_list,
+        m_multigrid = new Multigrid(m_settings,
+                                    m_number_of_surfaces, m_surface_list,
                                     m_number_of_obstacles, m_obstacle_list,
                                     m_bdc_boundary, m_bdc_obstacles);
     } else {
-        m_multigrid = new Multigrid(m_bdc_boundary);
+        m_multigrid = new Multigrid(m_settings, m_bdc_boundary);
     }
 #ifndef BENCHMARKING
     print_boundaries();
@@ -37,11 +39,10 @@ void BoundaryController::read_XML() {
     m_logger->debug("start parsing XML");
 #endif
 
-    auto params = Parameters::getInstance();
-    parse_boundary_parameter(params->get_first_child("boundaries"));
-    parse_obstacle_parameter(params->get_first_child("obstacles"));
+    parse_boundary_parameter(m_settings.get_boundaries());
+    parse_obstacle_parameter(m_settings.get_obstacles());
     detect_neighbouring_obstacles();
-    parse_surface_parameter(params->get_first_child("surfaces"));
+    parse_surface_parameter(m_settings.get_surfaces());
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing XML");
 #endif
@@ -52,15 +53,13 @@ void BoundaryController::read_XML() {
 /// \brief  parses boundaries of domain from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_boundary_parameter(tinyxml2::XMLElement *xmlParameter) {
+void BoundaryController::parse_boundary_parameter(std::vector<Settings::BoundarySetting> boundaries) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing boundary parameter");
 #endif
 // BOUNDARY
-    auto curElem = xmlParameter->FirstChildElement();
-    while (curElem) {
-        m_bdc_boundary->add_boundary_data(curElem);
-        curElem = curElem->NextSiblingElement();
+    for (auto boundary : boundaries) {
+        m_bdc_boundary->add_boundary_data(boundary);
     }
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing boundary parameter");
@@ -72,23 +71,20 @@ void BoundaryController::parse_boundary_parameter(tinyxml2::XMLElement *xmlParam
 /// \brief  parses surfaces from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_surface_parameter(tinyxml2::XMLElement *xmlParameter) {
+void BoundaryController::parse_surface_parameter(std::vector<Settings::SurfaceSetting> surfaces) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing surface parameter");
 #endif
     // SURFACES
     // TODO(issue 5): surfaces
-    m_has_surfaces = (Parameters::getInstance()->get("surfaces/enabled") == "Yes");
+    m_has_surfaces = m_settings.get_bool("surfaces/enabled");
     if (m_has_surfaces) {
-        std::vector<Surface *> surfaces;
-        auto cur_elem = xmlParameter->FirstChildElement();
-        while (cur_elem) {
-            Surface *o = new Surface(cur_elem);
-            surfaces.push_back(o);
-            cur_elem = cur_elem->NextSiblingElement();
+        std::vector<Surface *> ret_surfaces;
+        for (auto surface : surfaces) {
+            ret_surfaces.push_back(new Surface(m_settings, surface));
         }
-        m_number_of_surfaces = surfaces.size();
-        m_surface_list = surfaces.data();
+        m_number_of_surfaces = ret_surfaces.size();
+        m_surface_list = ret_surfaces.data();
     }
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing surface parameter");
@@ -100,57 +96,43 @@ void BoundaryController::parse_surface_parameter(tinyxml2::XMLElement *xmlParame
 /// \brief  parses obstacles from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_obstacle_parameter(tinyxml2::XMLElement *xmlParameter) {
+void BoundaryController::parse_obstacle_parameter(std::vector<Settings::ObstacleSetting> obstacles) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing obstacle parameter");
 #endif
 // OBSTACLES
-    m_has_obstacles = (Parameters::getInstance()->get("obstacles/enabled") == "Yes");
+    m_has_obstacles = m_settings.get_bool("obstacles/enabled");
     if (m_has_obstacles) {
-        std::vector<Obstacle *> obstacles;
+        std::vector<Obstacle *> ret_obstacles;
         std::vector<BoundaryDataController *> bdc_obstacles;
-        auto cur_elem_obstacle = xmlParameter->FirstChildElement();
-        while (cur_elem_obstacle) {
-            std::string name = cur_elem_obstacle->Attribute("name");
+
+        for (auto obstacle : obstacles) {
+            std::string name = obstacle.get_name();
 #ifndef BENCHMARKING
             m_logger->debug("read obstacle '{}'", name);
 #endif
-            BoundaryDataController *bdc = new BoundaryDataController();
-            auto cur_elem = cur_elem_obstacle->FirstChildElement();
-            real ox1;
-            real ox2;
-            real oy1;
-            real oy2;
-            real oz1;
-            real oz2;
-            while (cur_elem) {
-                std::string nodeName = cur_elem->Value();
-                if (nodeName == "boundary") {
-                    bdc->add_boundary_data(cur_elem);
-                } else if (nodeName == "geometry") {
-                    ox1 = cur_elem->DoubleAttribute("ox1");
-                    ox2 = cur_elem->DoubleAttribute("ox2");
-                    oy1 = cur_elem->DoubleAttribute("oy1");
-                    oy2 = cur_elem->DoubleAttribute("oy2");
-                    oz1 = cur_elem->DoubleAttribute("oz1");
-                    oz2 = cur_elem->DoubleAttribute("oz2");
-                } else {
-#ifndef BENCHMARKING
-                    m_logger->warn("Ignoring unknown node {}", nodeName);
-#endif
-                }
-                cur_elem = cur_elem->NextSiblingElement();
+            BoundaryDataController *bdc = new BoundaryDataController(m_settings);
+            real ox1 = obstacle.get_ox1();
+            real ox2 = obstacle.get_ox2();
+            real oy1 = obstacle.get_oy1();
+            real oy2 = obstacle.get_oy2();
+            real oz1 = obstacle.get_oz1();
+            real oz2 = obstacle.get_oz2();
+
+            for (auto bound : obstacle.get_boundaries()) {
+                bdc->add_boundary_data(bound);
             }
-            Obstacle *o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2, name);
-            obstacles.push_back(o);
+
+            Obstacle *o = new Obstacle(m_settings, ox1, ox2, oy1, oy2, oz1, oz2, name);
+            ret_obstacles.push_back(o);
             bdc_obstacles.push_back(bdc);
-            cur_elem_obstacle = cur_elem_obstacle->NextSiblingElement();
         }
-        m_number_of_obstacles = obstacles.size();
+
+        m_number_of_obstacles = ret_obstacles.size();
         m_obstacle_list = new Obstacle *[m_number_of_obstacles];
         m_bdc_obstacles = new BoundaryDataController *[m_number_of_obstacles];
         for (size_t i = 0; i < m_number_of_obstacles; i++) {
-            *(m_obstacle_list + i) = obstacles[i];
+            *(m_obstacle_list + i) = ret_obstacles[i];
             *(m_bdc_obstacles + i) = bdc_obstacles[i];
         }
     }
@@ -168,9 +150,9 @@ BoundaryController::~BoundaryController() {
 }
 
 
-BoundaryController *BoundaryController::getInstance() {
+BoundaryController *BoundaryController::getInstance(Settings::Settings const &settings) {
     if (singleton == nullptr) {
-        singleton = new BoundaryController();
+        singleton = new BoundaryController(settings);
     }
     return singleton;
 }

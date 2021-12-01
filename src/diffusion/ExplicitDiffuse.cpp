@@ -11,13 +11,8 @@
 #endif
 
 #include "ExplicitDiffuse.h"
-#include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
 #include "../Domain.h"
-
-ExplicitDiffuse::ExplicitDiffuse() {
-    m_dt = Parameters::getInstance()->get_real("physical_parameters/dt");
-}
 
 //====================================== Diffuse ===============================================
 // ***************************************************************************************
@@ -56,6 +51,8 @@ void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bo
     const size_t Nx = domain->get_Nx();  // due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny();
 
+    const real dt = m_settings.get_real("physical_parameters/dt");
+
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_inner_list = boundary->get_inner_list_level_joined();
@@ -72,9 +69,9 @@ void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bo
     for (size_t ii = 0; ii < bsize_i; ++ii) {
         const size_t idx = d_inner_list[ii];
         out[idx] = in[idx] +
-                     m_dt * ((in[idx + neighbour_i] - 2 * in[idx] + in[idx - neighbour_i]) * reciprocal_dx
-                           + (in[idx + neighbour_j] - 2 * in[idx] + in[idx - neighbour_j]) * reciprocal_dy
-                           + (in[idx + neighbour_k] - 2 * in[idx] + in[idx - neighbour_k]) * reciprocal_dz
+                     dt * ((in[idx + neighbour_i] - 2 * in[idx] + in[idx - neighbour_i]) * reciprocal_dx
+                         + (in[idx + neighbour_j] - 2 * in[idx] + in[idx - neighbour_j]) * reciprocal_dy
+                         + (in[idx + neighbour_k] - 2 * in[idx] + in[idx - neighbour_k]) * reciprocal_dz
                      );
     }
 
@@ -89,6 +86,8 @@ void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Fi
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx();  // due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny();
+
+    const real dt = m_settings.get_real("physical_parameters/dt");
 
     auto boundary = BoundaryController::getInstance();
 
@@ -116,9 +115,9 @@ void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Fi
         real dk1 = (in[idx + neighbour_k] - in[idx]);
 
         out[idx] = in[idx] +
-                     m_dt * ((nu_x1 * di0 - nu_x2 * di1)    // dx // * 4 / dx;  // u_{i-0.5} - u_{i+0.5}
-                           + (nu_y1 * dj0 - nu_y2 * dj1)    // dy
-                           + (nu_z1 * dk0 - nu_z2 * dk1));  // dz
+                     dt * ((nu_x1 * di0 - nu_x2 * di1)    // dx // * 4 / dx;  // u_{i-0.5} - u_{i+0.5}
+                         + (nu_y1 * dj0 - nu_y2 * dj1)    // dy
+                         + (nu_z1 * dk0 - nu_z2 * dk1));  // dz
     }
 
     if (sync) {

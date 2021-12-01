@@ -13,18 +13,22 @@
 #include "BoundaryData.h"
 #include "BoundaryDataController.h"
 #include "../Domain.h"
-#include "../utility/tinyxml2.h"
 #include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
 
 
 class Obstacle {
  public:
-    Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const std::string &name);
-    Obstacle(
-            size_t coords_i1, size_t coords_j1, size_t coords_k1,
-            size_t coords_i2, size_t coords_j2, size_t coords_k2,
-            size_t level,
-            const std::string& name);
+    Obstacle(Settings::Settings const &settings,
+             real x1, real x2,
+             real y1, real y2,
+             real z1, real z2,
+             const std::string &name);
+    Obstacle(Settings::Settings const &settings,
+             size_t coords_i1, size_t coords_j1, size_t coords_k1,
+             size_t coords_i2, size_t coords_j2, size_t coords_k2,
+             size_t level,
+             const std::string& name);
     ~Obstacle();
 
     size_t* get_obstacle_list() const { return m_obstacle_list; }
@@ -76,6 +80,7 @@ class Obstacle {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+    Settings::Settings const &m_settings;
     std::string m_name;
     size_t m_i1, m_j1, m_k1;
     size_t m_i2, m_j2, m_k2;

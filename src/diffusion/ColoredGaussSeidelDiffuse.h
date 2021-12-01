@@ -11,10 +11,12 @@
 #include "../interfaces/IDiffusion.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class ColoredGaussSeidelDiffuse: public IDiffusion {
  public:
-    ColoredGaussSeidelDiffuse();
+    explicit ColoredGaussSeidelDiffuse(Settings::Settings const &settings);
 
     void diffuse(
             Field &out, const Field &in, const Field &b,
@@ -41,10 +43,10 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
             size_t Nx, size_t Ny);
 
  private:
+    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    real m_dt;
     real m_dsign;
     real m_w;
     size_t m_max_iter;

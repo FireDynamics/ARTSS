@@ -7,70 +7,86 @@
 #ifndef ARTSS_FUNCTIONS_H_
 #define ARTSS_FUNCTIONS_H_
 
-#include "field/Field.h"
-#include "Domain.h"
 #include <string>
 
+#include "Domain.h"
+#include "field/Field.h"
+#include "utility/settings/Settings.h"
+
 struct FunctionNames{
-    static const std::string Beltrami;
-    static const std::string BuoyancyMMS;
-    static const std::string BuoyancyST_MMS;
-    static const std::string Drift;
-    static const std::string ExpSinusProd;
-    static const std::string ExpSinusSum;
-    static const std::string GaussBubble;
-    static const std::string Hat;
-    static const std::string Jet;
-    static const std::string McDermott;
-    static const std::string RandomC;
-    static const std::string SinSinSin;
-    static const std::string Uniform;
-    static const std::string Vortex;
-    static const std::string VortexY;
-    static const std::string Zero;
+    static const std::string beltrami;
+    static const std::string buoyancy_mms;
+    static const std::string buoyancy_st_mms;
+    static const std::string drift;
+    static const std::string exp_sinus_prod;
+    static const std::string exp_sinus_sum;
+    static const std::string gauss_bubble;
+    static const std::string hat;
+    static const std::string jet;
+    static const std::string mcdermott;
+    static const std::string sin_sin_sin;
+    static const std::string uniform;
+    static const std::string vortex;
+    static const std::string vortex_y;
+    static const std::string zero;
 };
 
 namespace Functions {  // alphabetically ordered
 
-  void Beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t);
-  void BeltramiBC_p(Field &out_x);
-  void BeltramiBC_u(Field &out_x, real t);
-  void BeltramiBC_v(Field &out_x, real t);
-  void BeltramiBC_w(Field &out_x, real t);
-  void BuoyancyForce(Field &out, Field &T, Field &T_ambient);
-  void BuoyancyMMS(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t);
-  void BuoyancyST_MMS(Field &out, real t);
+  void beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+          real t, real a, real d, real nu);
+  void beltrami_bc_p(Field &out_x, real a);
+  void beltrami_bc_u(Field &out_x, real t, real a, real d, real nu);
+  void beltrami_bc_v(Field &out_x, real t, real a, real d, real nu);
+  void beltrami_bc_w(Field &out_x, real t, real a, real d, real nu);
+  void buoyancy_force(Field &out, Field &T, Field &T_ambient, real beta, real g);
+  void buoyancy_mms(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T,
+          real t, real nu, real beta, real g, real rhoa);
+  void buoyancy_st_mms(Field &out, real t, real nu, real beta, real kappa, real g, real rhoa);
 
-  void Drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
+  void drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+          real u_lin, real v_lin, real w_lin, real pa);
 
-  void ExpSinusProd(Field &out, real t);
-  void ExpSinusSum(Field &out_x, Field &out_y, Field &out_z, real t);
+  void exp_sinus_prod(Field &out, real t, real nu, real l);
+  void exp_sinus_sum(Field &out_x, Field &out_y, Field &out_z, real t, real nu);
 
-  void FacSinSinSin(Field &out);
+  void fac_sin_sin_sin(Field &out, real l);
 
-  void GaussBubble(Field &out, real t);
+  void gauss_bubble(Field &out, real t,
+          real u_lin, real v_lin, real w_lin,
+          real x_shift, real y_shift, real z_shift,
+          real l);
 
-  void Hat(Field &out);
+  void hat(Field &out,
+          real start_x, real end_x,
+          real start_y, real end_y,
+          real start_z, real end_z,
+          real val_in, real val_out);
 
-  void Jet(
+  void jet(
           Field &out,
           size_t index_x1, size_t index_x2,
           size_t index_y1, size_t index_y2,
           size_t index_z1, size_t index_z2,
           real value);
 
-  void Layers(Field &out);
+  void layers(std::string const log_level, std::string const log_file, Field &out,
+              int n_layers, std::string const dir, real *borders, real *values);
 
-  void McDermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t);
+  void mcdermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+          real t, real nu, real A);
 
-  void Random(Field &out, real range, bool is_absolute, int seed, real step_size);
+  void random(Field &out,
+          real range, bool is_absolute, int seed, real step_size);
 
-  void SinSinSin(Field &out);
+  void sin_sin_sin(Field &out, real l);
 
-  void Uniform(Field &out, real val);
+  void uniform(Field &out, real val);
 
-  void Vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
-  void VortexY(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
+  void vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+          real u_lin, real v_lin, real pa, real rhoa);
+  void vortex_y(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+          real u_lin, real v_lin, real pa, real rhoa);
 };
 
 #endif /* ARTSS_FUNCTIONS_H_ */

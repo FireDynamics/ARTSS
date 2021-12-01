@@ -5,20 +5,17 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "ExplicitEulerSource.h"
-#include "../utility/Parameters.h"
 #include "../boundary/BoundaryController.h"
 
-ExplicitEulerSource::ExplicitEulerSource() {
-    auto params = Parameters::getInstance();
-
-    m_dt = params->get_real("physical_parameters/dt");
-    m_dir_vel = params->get("solver/source/dir");
+ExplicitEulerSource::ExplicitEulerSource(Settings::Settings const &settings) :
+        m_settings(settings) {
+    m_dir_vel = settings.get("solver/source/dir");
 
     if (m_dir_vel.find('x') == std::string::npos &&
         m_dir_vel.find('y') == std::string::npos &&
         m_dir_vel.find('z') == std::string::npos) {
 #ifndef BENCHMARKING
-        m_logger = Utility::create_logger(typeid(ExplicitEulerSource).name());
+        m_logger = Utility::create_logger(settings, typeid(ExplicitEulerSource).name());
         m_logger->error("unknown direction -> exit");
 #endif
         std::exit(1);
@@ -41,7 +38,7 @@ void ExplicitEulerSource::add_source(
         Field &out_x, Field &out_y, Field &out_z,
         const Field &s_x, const Field &s_y, const Field &s_z,
         bool sync) {
-    auto dt = m_dt;
+    real dt = m_settings.get_real("physical_parameters/dt");
     auto dir = m_dir_vel;
 
     auto boundary = BoundaryController::getInstance();
@@ -100,13 +97,14 @@ void ExplicitEulerSource::add_source(Field &out, Field const &s, bool sync) {
     auto boundary = BoundaryController::getInstance();
     size_t *d_inner_list = boundary->get_inner_list_level_joined();
     auto bsize_i = boundary->get_size_inner_list();
+    real dt = m_settings.get_real("physical_parameters/dt");
 
 #pragma acc data present(out, s)
     {
 #pragma acc parallel loop independent present(out, s, d_inner_list[:bsize_i]) async
         for (size_t j = 0; j < bsize_i; ++j) {
             const size_t i = d_inner_list[j];
-            out[i] += m_dt * s[i];
+            out[i] += dt * s[i];
         }
 
         boundary->apply_boundary(out, sync);

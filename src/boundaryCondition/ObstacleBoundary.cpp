@@ -24,13 +24,14 @@ namespace {
     /// \param  value Value of boundary condition
     /// \param  sign Sign of boundary condition (POSITIVE_SIGN or NEGATIVE_SIGN)
     // *********************************************************************************************
-    void apply_boundary_condition(real *data_field, const size_t *d_patch, size_t patch_start,
+    void apply_boundary_condition(Settings::Settings const &settings,
+                                  real *data_field, const size_t *d_patch, size_t patch_start,
                                   size_t patch_end, size_t level, int8_t sign_reference_index,
                                   size_t reference_index, real value, int8_t sign) {
         Domain *domain = Domain::getInstance();
-        size_t b_size = domain->get_size(level);
+        size_t b_size __attribute__((unused)) = domain->get_size(level);
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger("ObstacleBoundary");
+        auto logger = Utility::create_logger(settings, "ObstacleBoundary");
         logger->debug("applying from {} to {} for length {}", patch_start, patch_end,
                       patch_end-patch_start+1);
 #endif
@@ -57,10 +58,10 @@ namespace {
     /// \param  level Multigrid level
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_dirichlet(real *data_field, size_t *d_patch, Patch p, size_t patch_start,
+    void apply_dirichlet(Settings::Settings const &settings, real *data_field, size_t *d_patch, Patch p, size_t patch_start,
                          size_t patch_end, size_t level, real value) {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger("ObstacleBoundary");
+        auto logger = Utility::create_logger(settings, "ObstacleBoundary");
         logger->debug("applying dirichlet to patch {}",
                       BoundaryData::get_patch_name(static_cast<Patch>(p)));
 #endif
@@ -98,7 +99,7 @@ namespace {
         if (p == FRONT || p == BOTTOM || p == LEFT) {
             sign_reference_index = NEGATIVE_SIGN;
         }
-        apply_boundary_condition(data_field, d_patch, patch_start, patch_end, level,
+        apply_boundary_condition(settings, data_field, d_patch, patch_start, patch_end, level,
                                  sign_reference_index, reference_index, value * 2,
                                  NEGATIVE_SIGN);
     }
@@ -114,7 +115,7 @@ namespace {
     /// \param  level Multigrid level
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_neumann(real *data_field, size_t *d_patch, Patch p, size_t patch_start,
+    void apply_neumann(Settings::Settings const &settings, real *data_field, size_t *d_patch, Patch p, size_t patch_start,
                        size_t patch_end, size_t level, real value) {
         if (level > 0) {
             value = 0;
@@ -142,7 +143,7 @@ namespace {
                 break;
             default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("ObstacleBoundary");
+                auto logger = Utility::create_logger(settings, "ObstacleBoundary");
                 logger->error("Unknown Patch for neumann boundary condition: {}", p);
 #endif
                 break;
@@ -152,7 +153,7 @@ namespace {
             sign_reference_index = NEGATIVE_SIGN;
         }
 
-        apply_boundary_condition(data_field, d_patch, patch_start, patch_end, level,
+        apply_boundary_condition(settings, data_field, d_patch, patch_start, patch_end, level,
                                  sign_reference_index, reference_index, -value, POSITIVE_SIGN);
     }
 
@@ -166,7 +167,7 @@ namespace {
     /// \param  patch_end End index of patch
     /// \param  level Multigrid level
     // *********************************************************************************************
-    void apply_periodic(real *data_field, size_t *d_patch, Patch p, size_t patch_start,
+    void apply_periodic(Settings::Settings const &settings, real *data_field, size_t *d_patch, Patch p, size_t patch_start,
                         size_t patch_end, size_t level, size_t id) {
         Domain *domain = Domain::getInstance();
         size_t Nx = domain->get_Nx(level);
@@ -190,7 +191,7 @@ namespace {
                 break;
             default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("ObstacleBoundary");
+                auto logger = Utility::create_logger(settings, "ObstacleBoundary");
                 logger->error("Unknown Patch for periodic boundary condition: {}", p);
 #endif
                 break;
@@ -199,7 +200,7 @@ namespace {
         if (p == BACK || p == TOP || p == RIGHT) {
             sign_reference_index = NEGATIVE_SIGN;
         }
-        apply_boundary_condition(data_field, d_patch, patch_start, patch_end, level,
+        apply_boundary_condition(settings, data_field, d_patch, patch_start, patch_end, level,
                                  sign_reference_index, reference_index, 0, POSITIVE_SIGN);
     }
 }  // namespace
@@ -216,7 +217,7 @@ namespace {
 /// \param  id ID of obstacle
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void apply_boundary_condition(real *data, size_t **index_fields, const size_t *patch_starts,
+void apply_boundary_condition(Settings::Settings const &settings, real *data, size_t **index_fields, const size_t *patch_starts,
                               const size_t *patch_ends, size_t level, BoundaryData *boundary_data,
                               size_t id, bool sync) {
     for (size_t i = 0; i < number_of_patches; i++) {
@@ -227,19 +228,19 @@ void apply_boundary_condition(real *data, size_t **index_fields, const size_t *p
         BoundaryCondition bc = boundary_data->get_boundary_condition(p);
         switch (bc) {
             case BoundaryCondition::DIRICHLET:
-                apply_dirichlet(data, d_patch, p, patch_start, patch_end, level,
+                apply_dirichlet(settings, data, d_patch, p, patch_start, patch_end, level,
                                 boundary_data->get_value(p));
                 break;
             case BoundaryCondition::NEUMANN:
-                apply_neumann(data, d_patch, p, patch_start, patch_end, level,
+                apply_neumann(settings, data, d_patch, p, patch_start, patch_end, level,
                               boundary_data->get_value(p));
                 break;
             case BoundaryCondition::PERIODIC:
-                apply_periodic(data, d_patch, p, patch_start, patch_end, level, id);
+                apply_periodic(settings, data, d_patch, p, patch_start, patch_end, level, id);
                 break;
             default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("ObstacleBoundary");
+                auto logger = Utility::create_logger(settings, "ObstacleBoundary");
                 logger->error("Unknown boundary condition: {}", bc);
 #endif
                 break;

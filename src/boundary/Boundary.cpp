@@ -11,19 +11,20 @@
 #include "../Domain.h"
 #include "../utility/GlobalMacrosTypes.h"
 
-Boundary::Boundary(size_t level) {
+Boundary::Boundary(Settings::Settings const &settings, size_t level) {
     m_level = level;
     init(0);
     inner_cells();
 
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(Boundary).name());
+    m_logger = Utility::create_logger(settings, typeid(Boundary).name());
     print(0);
     control(0);
 #endif
 }
 
 Boundary::Boundary(
+        Settings::Settings const &settings,
         Obstacle **obstacle_list,
         size_t number_of_obstacles,
         size_t size_obstacles,
@@ -33,7 +34,7 @@ Boundary::Boundary(
     inner_cells(obstacle_list, number_of_obstacles);
 
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(Boundary).name());
+    m_logger = Utility::create_logger(settings, typeid(Boundary).name());
     print(size_obstacles);
     control(size_obstacles);
 #endif

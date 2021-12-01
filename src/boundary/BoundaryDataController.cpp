@@ -10,13 +10,14 @@
 #include "../boundaryCondition/DomainBoundary.h"
 #include "../boundaryCondition/ObstacleBoundary.h"
 
-BoundaryDataController::BoundaryDataController() {
+BoundaryDataController::BoundaryDataController(Settings::Settings const &settings) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     m_boundary_data = new BoundaryData *[numberOfFieldTypes];
     for (size_t i = 0; i < numberOfFieldTypes; i++) {
-        *(m_boundary_data + i) = new BoundaryData();
+        *(m_boundary_data + i) = new BoundaryData(settings);
     }
 }
 
@@ -32,22 +33,17 @@ BoundaryDataController::~BoundaryDataController() {
 /// \brief  Parses boundary data of XML tree to boundary data object
 /// \param  xml_element Pointer to XML element
 // *************************************************************************************************
-void BoundaryDataController::add_boundary_data(tinyxml2::XMLElement *xml_element) {
-    std::vector<std::string> fieldStrings = Utility::split(xml_element->Attribute("field"), ',');
-    std::vector<std::string> patchStrings = Utility::split(xml_element->Attribute("patch"), ',');
-    std::vector<Patch> patches;
-    patches.reserve(patchStrings.size());
+void BoundaryDataController::add_boundary_data(Settings::BoundarySetting boundary) {
+    BoundaryCondition bc = BoundaryData::match_boundary_condition(boundary.get_type());
+    real value = boundary.get_value();
 
-    for (const std::string &p : patchStrings) {
-        patches.push_back(BoundaryData::match_patch(p));
-    }
+    for (auto f : Utility::split(boundary.get_field(), ',')) {
+        FieldType field_type = BoundaryData::match_field(f);
 
-    BoundaryCondition boundaryCondition = BoundaryData::match_boundary_condition(xml_element->Attribute("type"));
-    auto value = xml_element->DoubleAttribute("value");
-
-    for (const std::string &f : fieldStrings) {
-        FieldType fieldType = BoundaryData::match_field(f);
-        m_boundary_data[fieldType]->add_boundary_condition(patches, value, boundaryCondition);
+        for (auto p : Utility::split(boundary.get_patch(), ',')) {
+            Patch patch = BoundaryData::match_patch(p);
+            m_boundary_data[field_type]->add_boundary_condition(patch, value, bc);
+        }
     }
 }
 
@@ -85,6 +81,7 @@ void BoundaryDataController::apply_boundary_condition(
     FieldType field_type = field.get_type();
     if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {
         DomainBoundary::apply_boundary_condition(
+                m_settings,
                 field,
                 index_fields,
                 patch_start, patch_end,
@@ -119,6 +116,7 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
                         BoundaryData::get_field_type_name(field_type));
 #endif
         ObstacleBoundary::apply_boundary_condition(
+                m_settings,
                 data,
                 index_fields,
                 patch_start, patch_end,

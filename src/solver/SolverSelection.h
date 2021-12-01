@@ -13,6 +13,8 @@
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 struct AdvectionMethods {
     inline static const std::string SemiLagrangian = "SemiLagrangian";
@@ -45,16 +47,16 @@ struct TurbulenceMethods {
 };
 
 namespace SolverSelection {
-    void SetAdvectionSolver(IAdvection **advectionSolver, const std::string& advectionType);
+    void SetAdvectionSolver(Settings::Settings const &settings, IAdvection **advectionSolver, const std::string& advectionType);
 
-    void SetDiffusionSolver(IDiffusion **diffusionSolver, const std::string& diffusionType);
+    void SetDiffusionSolver(Settings::Settings const &settings, IDiffusion **diffusionSolver, const std::string& diffusionType);
 
-    void SetPressureSolver(IPressure **pressureSolver, const std::string& pressureType,
+    void SetPressureSolver(Settings::Settings const &settings, IPressure **pressureSolver, const std::string& pressureType,
                            const Field &p, const Field &rhs);
 
-    void SetSourceSolver(ISource **sourceSolver, const std::string& sourceType);
+    void SetSourceSolver(Settings::Settings const &settings, ISource **sourceSolver, const std::string& sourceType);
 
-    void SetTurbulenceSolver(ITurbulence **tubulenceSolver, const std::string& turbulenceType);
+    void SetTurbulenceSolver(Settings::Settings const &settings, ITurbulence **tubulenceSolver, const std::string& turbulenceType);
 };
 
 #endif /* ARTSS_SOLVER_SOLVERSELECTION_H_ */

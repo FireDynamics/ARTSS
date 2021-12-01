@@ -1,5 +1,5 @@
 
-#include "./UniformRandom.h"
+#include "UniformRandom.h"
 
 
 Field UniformRandom::random_field(size_t size) {
