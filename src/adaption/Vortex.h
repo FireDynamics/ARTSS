@@ -7,7 +7,7 @@
 #ifndef ARTSS_ADAPTION_VORTEX_H_
 #define ARTSS_ADAPTION_VORTEX_H_
 
-#include "./Adaption.h"
+#include "Adaption.h"
 #include "../interfaces/IAdaptionFunction.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
