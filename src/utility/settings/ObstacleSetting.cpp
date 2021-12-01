@@ -1,3 +1,8 @@
+/// \file       ObstacleSetting.cpp
+/// \brief      Model of Obstacles in the XML
+/// \date       Dec 01, 2021
+/// \author     von Mach
+/// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "ObstacleSetting.h"
 

@@ -1,3 +1,8 @@
+/// \file       Settings.cpp
+/// \brief      Access parameters of XML file
+/// \date       Nov 17, 2021
+/// \author     von Mach
+/// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Settings.h"
 

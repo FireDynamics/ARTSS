@@ -1,3 +1,8 @@
+/// \file       BoundarySetting.cpp
+/// \brief      Model of Boundaries in the XML
+/// \date       Dec 01, 2021
+/// \author     von Mach
+/// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "BoundarySetting.h"
 
