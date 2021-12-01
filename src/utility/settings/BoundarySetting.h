@@ -1,3 +1,10 @@
+/// \file       BoundarySetting.h
+/// \brief      Model of Boundaries in the XML
+/// \date       Dec 01, 2021
+/// \author     von Mach
+/// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
+
+
 #ifndef ARTSS_UTILITY_SETTINGS_BOUNDARYSETTING_H
 #define ARTSS_UTILITY_SETTINGS_BOUNDARYSETTING_H
 

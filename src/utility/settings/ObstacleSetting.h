@@ -1,3 +1,10 @@
+/// \file       ObstacleSetting.h
+/// \brief      Model of Obstacles in the XML
+/// \date       Dec 01, 2021
+/// \author     von Mach
+/// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
+
+
 #ifndef ARTSS_UTILITY_SETTINGS_OBSTACLESETTING_H
 #define ARTSS_UTILITY_SETTINGS_OBSTACLESETTING_H
 
