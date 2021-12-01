@@ -6,7 +6,6 @@
 
 #ifndef BENCHMARKING
 #include <spdlog/logger.h>
-#include <memory>
 #endif
 
 

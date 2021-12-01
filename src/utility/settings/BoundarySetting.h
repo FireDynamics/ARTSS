@@ -7,7 +7,6 @@
 #include "../GlobalMacrosTypes.h"
 
 #ifndef BENCHMARKING
-#include <memory>
 #include <spdlog/logger.h>
 #endif
 
