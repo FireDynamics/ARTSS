@@ -4,11 +4,12 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "NSTempTurbSolver.h"
+
 #include <string>
 #include <vector>
 #include <algorithm>
 
-#include "NSTempTurbSolver.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryData.h"
 #include "../boundary/BoundaryController.h"

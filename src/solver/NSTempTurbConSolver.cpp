@@ -4,11 +4,12 @@
 /// \author     Küsters
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "NSTempTurbConSolver.h"
+
 #include <string>
 #include <vector>
 #include <algorithm>
 
-#include "NSTempTurbConSolver.h"
 #include "../pressure/VCycleMG.h"
 #include "../Domain.h"
 #include "SolverSelection.h"

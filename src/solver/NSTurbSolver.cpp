@@ -4,11 +4,12 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "NSTurbSolver.h"
+
 #include <string>
 #include <vector>
 #include <algorithm>
 
-#include "NSTurbSolver.h"
 #include "../pressure/VCycleMG.h"
 #include "../Domain.h"
 #include "SolverSelection.h"
