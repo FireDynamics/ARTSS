@@ -1,15 +1,16 @@
 #ifndef ARTSS_UTILITY_SETTINGS_BOUNDARYSETTING_H
 #define ARTSS_UTILITY_SETTINGS_BOUNDARYSETTING_H
 
-#include "./tinyxml2.h"
+#include <string>
+
+#include "tinyxml2.h"
 #include "../GlobalMacrosTypes.h"
 
 #ifndef BENCHMARKING
-#include <spdlog/logger.h>
 #include <memory>
+#include <spdlog/logger.h>
 #endif
 
-#include <string>
 
 namespace Settings {
 class BoundarySetting {

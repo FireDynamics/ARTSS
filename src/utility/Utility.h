@@ -7,6 +7,9 @@
 #ifndef ARTSS_UTILITY_UTILITY_H_
 #define ARTSS_UTILITY_UTILITY_H_
 
+#include <string>
+#include <vector>
+
 #include "GlobalMacrosTypes.h"
 #include "settings/Settings.h"
 
@@ -19,9 +22,6 @@
 
 #include <memory>
 #endif
-
-#include <string>
-#include <vector>
 
 
 class Field;

@@ -1,7 +1,10 @@
 #ifndef ARTSS_UTILITY_SETTINGS_OBSTACLESETTING_H
 #define ARTSS_UTILITY_SETTINGS_OBSTACLESETTING_H
 
-#include "./tinyxml2.h"
+#include <string>
+#include <vector>
+
+#include "tinyxml2.h"
 #include "./BoundarySetting.h"
 #include "../GlobalMacrosTypes.h"
 
@@ -10,8 +13,6 @@
 #include <memory>
 #endif
 
-#include <string>
-#include <vector>
 
 namespace Settings {
 class ObstacleSetting {

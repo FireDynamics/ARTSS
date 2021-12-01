@@ -7,14 +7,14 @@
 #ifndef ARTSS_SOLVER_SOLVERCONTROLLER_H_
 #define ARTSS_SOLVER_SOLVERCONTROLLER_H_
 
+#include <string>
+
 #include "../interfaces/ISolver.h"
 #include "../interfaces/ISource.h"
 #include "../interfaces/ISourceFunction.h"
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
 #include "../utility/settings/Settings.h"
-
-#include <string>
 
 
 class SolverController {

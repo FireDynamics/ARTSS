@@ -1,7 +1,7 @@
 #ifndef ARTSS_UTILITY_SETTINGS_SURFACESETTING_H
 #define ARTSS_UTILITY_SETTINGS_SURFACESETTING_H
 
-#include "./tinyxml2.h"
+#include "tinyxml2.h"
 #include "../GlobalMacrosTypes.h"
 
 #ifndef BENCHMARKING
