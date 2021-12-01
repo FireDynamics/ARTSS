@@ -23,7 +23,6 @@ const std::string FunctionNames::gauss_bubble = "GaussBubble";
 const std::string FunctionNames::hat = "Hat";
 const std::string FunctionNames::jet = "Jet";
 const std::string FunctionNames::mcdermott = "McDermott";
-const std::string FunctionNames::random_c = "RandomC";
 const std::string FunctionNames::sin_sin_sin = "SinSinSin";
 const std::string FunctionNames::uniform = "Uniform";
 const std::string FunctionNames::vortex = "Vortex";

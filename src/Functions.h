@@ -24,7 +24,6 @@ struct FunctionNames{
     static const std::string hat;
     static const std::string jet;
     static const std::string mcdermott;
-    static const std::string random_c;
     static const std::string sin_sin_sin;
     static const std::string uniform;
     static const std::string vortex;
