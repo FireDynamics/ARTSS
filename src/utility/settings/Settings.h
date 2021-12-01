@@ -8,10 +8,10 @@
 #ifndef ARTSS_UTILITY_SETTINGS_H
 #define ARTSS_UTILITY_SETTINGS_H
 
-#include "./tinyxml2.h"
-#include "./BoundarySetting.h"
-#include "./ObstacleSetting.h"
-#include "./SurfaceSetting.h"
+#include "tinyxml2.h"
+#include "BoundarySetting.h"
+#include "ObstacleSetting.h"
+#include "SurfaceSetting.h"
 #include "../GlobalMacrosTypes.h"
 
 #ifndef BENCHMARKING

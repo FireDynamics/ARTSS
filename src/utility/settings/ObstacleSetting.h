@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "tinyxml2.h"
-#include "./BoundarySetting.h"
+#include "BoundarySetting.h"
 #include "../GlobalMacrosTypes.h"
 
 #ifndef BENCHMARKING
