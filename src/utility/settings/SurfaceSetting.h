@@ -9,6 +9,7 @@
 #define ARTSS_UTILITY_SETTINGS_SURFACESETTING_H
 
 #include <string>
+#include <vector>
 
 #include "BoundarySetting.h"
 #include "tinyxml2.h"
