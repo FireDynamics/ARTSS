@@ -8,10 +8,11 @@
 #define ARTSS_JOINEDLISTS_JOINEDLISTOBSTACLE_H_
 
 #include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
 
 class MultipleJoinedList {
   public:
-    MultipleJoinedList(size_t multigrid_level, size_t number_of_objects);
+    MultipleJoinedList(Settings::Settings const &settings, size_t multigrid_level, size_t number_of_objects);
     ~MultipleJoinedList();
 
     void copyin() {

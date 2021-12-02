@@ -11,15 +11,15 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Algorithm.h"
 
-Domain::Domain(
-        size_t *obstacle_list,
-        size_t size_obstacle_list,
-        size_t **surface_list,
-        PatchObject &size_surface_list,
-        size_t multigrid_level) :
-        m_multigrid_level(multigrid_level), m_size_boundary() {
+Domain::Domain(Settings::Settings const &settings,
+               size_t *obstacle_list,
+               size_t size_obstacle_list,
+               size_t **surface_list,
+               PatchObject &size_surface_list,
+               size_t multigrid_level) :
+               m_multigrid_level(multigrid_level), m_size_boundary() {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(Domain).name());
+    m_logger = Utility::create_logger(settings, typeid(Domain).name());
 #endif
     init(size_obstacle_list, size_surface_list);
     inner_cells(obstacle_list, size_obstacle_list);

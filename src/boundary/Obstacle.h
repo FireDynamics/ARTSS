@@ -1,7 +1,7 @@
 /// \file       Obstacle.h
 /// \brief      Data class of obstacle object
 /// \date       Oct 01, 2019
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_BOUNDARY_OBSTACLE_H_
@@ -10,19 +10,26 @@
 #include <cmath>
 #include <string>
 
+#include "Coordinate.h"
 #include "BoundaryData.h"
 #include "BoundaryDataController.h"
-#include "../DomainData.h"
-#include "../utility/tinyxml2.h"
-#include "../utility/Utility.h"
 #include "PatchObject.h"
-#include "Coordinate.h"
+#include "../DomainData.h"
+#include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
 
 
 class Obstacle {
  public:
-    Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const std::string &name);
-    Obstacle(Coordinate &coords_start, Coordinate &coords_end, size_t level, const std::string &name);
+    Obstacle(Settings::Settings const &settings,
+             real x1, real x2,
+             real y1, real y2,
+             real z1, real z2,
+             const std::string &name);
+    Obstacle(Settings::Settings const &settings,
+             Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
+             size_t level,
+             const std::string &name);
     ~Obstacle();
 
     size_t * get_obstacle_list() const { return m_obstacle_list; }
@@ -31,21 +38,21 @@ class Obstacle {
     size_t ** get_boundary_list() const { return m_boundary; }
     PatchObject *get_size_boundary_list() { return &m_size_boundary; }
 
-    bool is_obstacle_cell(const Coordinate &coords) const;
+    bool is_obstacle_cell(const Coordinate<size_t> &coords) const;
 
     void print();
 
-    Coordinate *get_start_coordinates() { return &m_start; }
-    Coordinate *get_end_coordinates() { return &m_end; }
-    Coordinate *get_strides() { return &m_strides; }
+    Coordinate<size_t> *get_start_coordinates() { return &m_start; }
+    Coordinate<size_t> *get_end_coordinates() { return &m_end; }
+    Coordinate<size_t> *get_strides() { return &m_strides; }
 
     std::string get_name() { return m_name; }
 
     void replace_patch(size_t *indices, size_t size, Patch p);
     void control();
 
-    bool is_corner_cell(const Coordinate &coord) const;
-    bool is_edge_cell(const Coordinate &coord) const;
+    bool is_corner_cell(const Coordinate<size_t> &coord) const;
+    bool is_edge_cell(const Coordinate<size_t> &coord) const;
     bool has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1, size_t k2) const;
 
     bool static remove_circular_constraints(Obstacle *o1, Obstacle* o2);
@@ -53,10 +60,11 @@ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+    Settings::Settings const &m_settings;
     std::string m_name;
-    Coordinate m_start;
-    Coordinate m_end;
-    Coordinate m_strides;
+    Coordinate<size_t> m_start;
+    Coordinate<size_t> m_end;
+    Coordinate<size_t> m_strides;
 
     size_t m_level = 0;
 

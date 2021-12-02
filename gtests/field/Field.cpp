@@ -6,7 +6,6 @@
 
 #include "src/DomainData.h"
 #include "src/field/Field.h"
-#include "src/utility/Parameters.h"
 #include "src/utility/GlobalMacrosTypes.h"
 
 

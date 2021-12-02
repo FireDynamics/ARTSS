@@ -1,7 +1,7 @@
 /// \file       Multigrid.h
 /// \brief      Creates all lists needed for multigrid
 /// \date       Oct 01, 2019
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Multigrid.h"
@@ -10,27 +10,30 @@
 #include <string>
 #include <vector>
 
-Multigrid::Multigrid(
-        size_t number_of_surfaces, Surface **surface_list,
-        size_t number_of_obstacles, Obstacle **obstacle_list,
-        BoundaryDataController *bdc_boundary,
-        BoundaryDataController **bdc_obstacles,
-        size_t multigrid_levels) :
+Multigrid::Multigrid(Settings::Settings const &settings,
+                     size_t number_of_surfaces, Surface **surface_list,
+                     size_t number_of_obstacles, Obstacle **obstacle_list,
+                     BoundaryDataController *bdc_boundary,
+                     BoundaryDataController **bdc_obstacles,
+                     BoundaryDataController **bdc_surfaces,
+                     size_t multigrid_levels) :
+        m_settings(settings),
         m_multigrid_levels(multigrid_levels),
         m_number_of_surface_objects(number_of_surfaces),
         m_number_of_obstacle_objects(number_of_obstacles),
-        m_jl_domain_list(multigrid_levels),
-        m_jl_domain_inner_list(multigrid_levels),
-        m_jl_obstacle_list(multigrid_levels),
-        m_jl_surface_list(multigrid_levels),
+        m_jl_domain_list(m_settings, multigrid_levels),
+        m_jl_domain_inner_list(m_settings, multigrid_levels),
+        m_jl_obstacle_list(m_settings, multigrid_levels),
+        m_jl_surface_list(m_settings, multigrid_levels),
         m_bdc_boundary(bdc_boundary),
-        m_bdc_obstacle(bdc_obstacles) {
+        m_bdc_obstacle(bdc_obstacles),
+        m_bdc_surface(bdc_surfaces) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
     m_logger->debug("starting multigrid");
 #endif
 #ifdef GPU_DEBUG
-    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
+    m_gpu_logger = Utility::create_gpu_logger(m_settings, typeid(this).name());
 #endif
     // init domain
     // list of domain objects for each level
@@ -417,7 +420,6 @@ void Multigrid::create_multigrid_surface_lists() {
     for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
         for (size_t id = 0; id < m_number_of_surface_objects; level++) {
             Patch patch = m_MG_surface_object_list[level][id]->get_patch();
-            m_MG_surface_object_list[level][id]->set_id(id);
 #ifndef BENCHMARKING
             m_logger->debug("add surface data to SJL {} {} {}", level,
                             m_MG_surface_object_list[level][id]->get_size_surface_list());
@@ -454,7 +456,8 @@ void Multigrid::create_multigrid_domain_lists() {
             size_surface_list->add_value(patch, m_jl_surface_list_patch_divided[patch]->get_slice_size(level));
         }
         size_t *slice_obstacle_list = m_jl_obstacle_list.get_slice(level);
-        auto domain = new Domain(slice_obstacle_list,
+        auto domain = new Domain(m_settings,
+                                 slice_obstacle_list,
                                  m_jl_obstacle_list.get_slice_size(level),
                                  slice_surface_list,
                                  *size_surface_list,
@@ -523,36 +526,45 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
         Surface *surface_fine = surface_list_fine[id];
 
         Patch patch = surface_fine->get_patch();
-        Coordinate &start_fine = surface_fine->get_start_coordinates();
-        Coordinate &end_fine = surface_fine->get_end_coordinates();
 
-        auto start_coarse = new Coordinate();
-        auto *end_coarse = new Coordinate(end_fine);
+        auto start_coarse = new Coordinate<size_t>();
+        auto *end_coarse = new Coordinate<size_t>();
         for (size_t axis = 0; axis < number_of_axis; axis++) {
-            (*start_coarse)[axis] = static_cast<size_t>((start_fine[axis] + 1) / 2);
-            (*end_coarse)[axis] = static_cast<size_t>((end_fine[axis] + 1) / 2);
+            size_t start_fine = surface_fine->get_start_index(CoordinateAxis(axis));
+            (*start_coarse)[axis] = static_cast<size_t>((start_fine + 1) / 2);
+
+            size_t end_fine = surface_fine->get_end_index(CoordinateAxis(axis));
+            (*end_coarse)[axis] = static_cast<size_t>((end_fine + 1) / 2);
         }
 
 #ifndef BENCHMARKING
-        if (end_fine[X] - start_fine[X] + 1 < domain_data->get_nx(level - 1)
-            && (*end_coarse)[X] - (*start_coarse)[X] + 1 >= domain_data->get_nx(level)) {
-            m_logger->warn("Be cautious! Surface '{}' fills up boundary patch '{}' at level {}", surface_fine->get_name(), level);
+        for (size_t axis = 0; axis < number_of_axis; axis++) {
+            size_t start_fine = surface_fine->get_start_index(CoordinateAxis(axis));
+            size_t end_fine = surface_fine->get_end_index(CoordinateAxis(axis));
+            if (end_fine - start_fine + 1 < domain_data->get_nx(level - 1)
+                && (*end_coarse)[axis] - (*start_coarse)[axis] + 1 >= domain_data->get_number_of_inner_cells(CoordinateAxis(axis), level)) {
+                m_logger->warn("Be cautious! Surface '{}' fills up boundary patch '{}' at level {}", surface_fine->get_name(), level);
+            }
         }
-        if (end_fine[Y] - start_fine[Y] + 1 < domain_data->get_ny(level - 1)
-            && (*end_coarse)[Y] - (*start_coarse)[Y] + 1 >= domain_data->get_ny(level)) {
-            m_logger->warn("Be cautious! Surface '{}' fills up boundary patch '{}' at level {}", surface_fine->get_name(), level);
-        }
-        if (end_fine[Z] - start_fine[Z] + 1 < domain_data->get_nz(level - 1)
-            && (*end_coarse)[Z] - (*start_coarse)[Z] + 1 >= domain_data->get_nz(level)) {
-            m_logger->warn("Be cautious! Surface '{}' fills up boundary patch '{}' at level {}", surface_fine->get_name(), level);
-        }
-        m_logger->debug("multigrid surface start fine {}|{}|{}", start_fine[X], start_fine[Y], start_fine[Z]);
-        m_logger->debug("multigrid surface end fine {}|{}|{}", end_fine[X], end_fine[Y], end_fine[Z]);
-        m_logger->debug("multigrid surface start coarse {}|{}|{}", (*start_coarse)[X], (*start_coarse)[Y], (*start_coarse)[Z]);
-        m_logger->debug("multigrid surface end coarse {}|{}|{}", (*end_coarse)[X], (*end_coarse)[Y], (*end_coarse)[Z]);
+        m_logger->debug("multigrid surface start fine {}|{}|{}",
+                        surface_fine->get_start_index(X),
+                        surface_fine->get_start_index(Y),
+                        surface_fine->get_start_index(Z));
+        m_logger->debug("multigrid surface end fine {}|{}|{}",
+                        surface_fine->get_end_index(X),
+                        surface_fine->get_end_index(Y),
+                        surface_fine->get_end_index(Z));
+        m_logger->debug("multigrid surface start coarse {}|{}|{}",
+                        (*start_coarse)[X],
+                        (*start_coarse)[Y],
+                        (*start_coarse)[Z]);
+        m_logger->debug("multigrid surface end coarse {}|{}|{}",
+                        (*end_coarse)[X],
+                        (*end_coarse)[Y],
+                        (*end_coarse)[Z]);
 #endif
 
-        auto surface_coarse = new Surface(surface_fine->get_name(), patch, *start_coarse, *end_coarse, level);
+        auto surface_coarse = new Surface(m_settings, *start_coarse, *end_coarse, level, surface_fine->get_name(), patch);
         sum += surface_coarse->get_size_surface_list();
         *(surface_list_coarse + id) = surface_coarse;
         sum_patches->add_value(patch, surface_coarse->get_size_surface_list());
@@ -585,11 +597,11 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
         Obstacle *obstacle_fine = obstacle_list_fine[id];
 
-        Coordinate *start_fine = obstacle_fine->get_start_coordinates();
-        Coordinate *end_fine = obstacle_fine->get_end_coordinates();
+        Coordinate<size_t> *start_fine = obstacle_fine->get_start_coordinates();
+        Coordinate<size_t> *end_fine = obstacle_fine->get_end_coordinates();
 
-        auto start_coarse = new Coordinate();
-        auto end_coarse = new Coordinate();
+        auto start_coarse = new Coordinate<size_t>();
+        auto end_coarse = new Coordinate<size_t>();
         for (size_t axis = 0; axis < number_of_axis; axis++) {
             (*start_coarse)[axis] = static_cast<size_t>(((*start_fine)[axis] + 1) / 2);
             (*end_coarse)[axis] = static_cast<size_t>(((*end_fine)[axis] + 1) / 2);
@@ -617,12 +629,13 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
         }
 #endif
 
-        auto obstacle_coarse = new Obstacle((*start_coarse), (*end_coarse),
+        auto obstacle_coarse = new Obstacle(m_settings,
+                                            (*start_coarse), (*end_coarse),
                                             level, obstacle_fine->get_name());
         delete start_coarse;
         delete end_coarse;
 #ifndef BENCHMARKING
-        Coordinate *strides = obstacle_coarse->get_strides();
+        Coordinate<size_t> *strides = obstacle_coarse->get_strides();
         if ((*strides)[CoordinateAxis::X] <= 1) {
             m_logger->warn("Obstacle '{}' is too small with size 1 in x-direction at level {}. "
                            "Consider less multigrid level, a higher resolution at the finest grid "
@@ -708,18 +721,18 @@ void Multigrid::send_obstacle_lists_to_GPU() {
 // *************************************************************************************************
 void Multigrid::apply_boundary_condition(Field &field, bool sync) {
     size_t level = field.get_level();
-    if (m_number_of_surface_objects > 0) {
-        Surface **surface_list = *(m_MG_surface_object_list + level);
-        for (size_t id = 0; id < m_number_of_surface_objects; ++id) {
-            (static_cast<Surface *>(*(surface_list + id)))->apply_boundary_conditions(field, sync);
-        }
-    }
     if (m_number_of_obstacle_objects > 0) {
         for (size_t id = 0; id < m_number_of_obstacle_objects; ++id) {
             (static_cast<BoundaryDataController *> (m_bdc_obstacle[id]))->apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list_patch_divided, id, sync);
         }
     }
     m_bdc_boundary->apply_boundary_condition(field, m_jl_domain_boundary_list_patch_divided, sync);
+    if (m_number_of_surface_objects > 0) {
+        Surface **surface_list = *(m_MG_surface_object_list + level);
+        for (size_t id = 0; id < m_number_of_surface_objects; ++id) {
+            (static_cast<BoundaryDataController *> (m_bdc_surface[id]))->apply_boundary_condition_surface(field, m_jl_surface_list_patch_divided, id, sync);
+        }
+    }
 }
 
 //======================================== Update lists ====================================
@@ -742,7 +755,7 @@ void Multigrid::remove_domain_lists_from_GPU() {
 }
 
 bool Multigrid::is_obstacle_cell(const size_t level,
-                                 const Coordinate &coords) {
+                                 const Coordinate<size_t> &coords) {
     Obstacle **obstacle_list = m_MG_obstacle_object_list[level];
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
         Obstacle *obstacle = obstacle_list[id];

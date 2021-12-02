@@ -9,9 +9,9 @@
 
 inline static const std::vector<std::string> boundary_condition_names = {"neumann", "dirichlet", "periodic"};
 
-BoundaryData::BoundaryData() {
+BoundaryData::BoundaryData(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
     m_values = new real[number_of_patches];
     m_boundary_conditions = new BoundaryCondition[number_of_patches];
@@ -60,16 +60,11 @@ std::string BoundaryData::get_boundary_condition_name(BoundaryCondition bc) {
 /// \param boundary_condition boundary condition
 // *************************************************************************************************
 void BoundaryData::add_boundary_condition(
-        const std::vector<Patch> &patches,
+        Patch const &patch,
         real value,
-        BoundaryCondition boundary_condition) {
-    if (!patches.empty()) {
-        m_has_values = true;
-    }
-    for (Patch patch : patches) {
-        size_t p = patch;
-        *(m_values + p) = value;
-        *(m_boundary_conditions + p) = boundary_condition;
-    }
+        BoundaryCondition const &boundary_condition) {
+    m_has_values = true;
+    m_values[patch] = value;
+    m_boundary_conditions[patch] = boundary_condition;
 }
 

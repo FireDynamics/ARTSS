@@ -5,7 +5,6 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "IPressure.h"
-#include "../utility/Parameters.h"
 #include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
@@ -21,14 +20,14 @@
 void IPressure::divergence(
         Field &out,
         const Field &in_x, const Field &in_y, const Field &in_z, bool sync) {
-    auto domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 
-    auto Nx = domain->get_Nx();
-    auto Ny = domain->get_Ny();
+    auto Nx = domain_data->get_Nx();
+    auto Ny = domain_data->get_Ny();
 
-    auto dx = domain->get_dx();
-    auto dy = domain->get_dy();
-    auto dz = domain->get_dz();
+    auto dx = domain_data->get_dx();
+    auto dy = domain_data->get_dy();
+    auto dz = domain_data->get_dz();
     auto reciprocal_dx = 1. / dx;
     auto reciprocal_dy = 1. / dy;
     auto reciprocal_dz = 1. / dz;
@@ -39,15 +38,15 @@ void IPressure::divergence(
 
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
-    // start indices for computational domain minus 1 for ghost cells
-    size_t x1 = domain->get_index_x1() - 1;
-    size_t y1 = domain->get_index_y1() - 1;
-    size_t z1 = domain->get_index_z1() - 1;
+    // start indices for computational domain_data minus 1 for ghost cells
+    size_t x1 = domain_data->get_index_x1() - 1;
+    size_t y1 = domain_data->get_index_y1() - 1;
+    size_t z1 = domain_data->get_index_z1() - 1;
 
-    // end indices for computational domain plus 1 for ghost cells
-    size_t x2 = domain->get_index_x2() + 1;
-    size_t y2 = domain->get_index_y2() + 1;
-    size_t z2 = domain->get_index_z2() + 1;
+    // end indices for computational domain_data plus 1 for ghost cells
+    size_t x2 = domain_data->get_index_x2() + 1;
+    size_t y2 = domain_data->get_index_y2() + 1;
+    size_t z2 = domain_data->get_index_z2() + 1;
 
 
     size_t neighbour_i = 1;
@@ -127,14 +126,14 @@ void IPressure::projection(
         Field &out_u, Field &out_v, Field &out_w,
         const Field &in_u, const Field &in_v, const Field &in_w,
         const Field &in_p, bool sync) {
-    auto domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
     // local variables and parameters for GPU
-    auto Nx = domain->get_Nx();
-    auto Ny = domain->get_Ny();
+    auto Nx = domain_data->get_Nx();
+    auto Ny = domain_data->get_Ny();
 
-    auto dx = domain->get_dx();
-    auto dy = domain->get_dy();
-    auto dz = domain->get_dz();
+    auto dx = domain_data->get_dx();
+    auto dy = domain_data->get_dy();
+    auto dz = domain_data->get_dz();
 
     auto reciprocal_dx = 1. / dx;
     auto reciprocal_dy = 1. / dy;

@@ -8,10 +8,11 @@
 #define ARTSS_JOINEDLISTS_JOINEDLISTDOMAIN_H_
 
 #include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
 
 class SingleJoinedList {
   public:
-    explicit SingleJoinedList(size_t multigrid_level);
+    explicit SingleJoinedList(Settings::Settings const &settings, size_t multigrid_level);
     ~SingleJoinedList();
 
     void copyin() {

@@ -10,20 +10,23 @@
 #include "../field/FieldController.h"
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IAdvection.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class AdvectionSolver : public ISolver {
  public:
     AdvectionSolver(
+        Settings::Settings const &settings,
         FieldController *field_controller,
         real u_lin, real v_lin, real w_lin);
-    explicit AdvectionSolver(FieldController *field_controller);
+    AdvectionSolver(Settings::Settings const &settings, FieldController *field_controller);
     ~AdvectionSolver();
 
     void do_step(real t, bool sync) override;
 
  private:
+    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -34,7 +37,7 @@ class AdvectionSolver : public ISolver {
     Field m_v_lin;
     Field m_w_lin;
 
-    static void control();
+    void control();
 };
 
 #endif /* ARTSS_SOLVER_ADVECTIONSOLVER_H_ */

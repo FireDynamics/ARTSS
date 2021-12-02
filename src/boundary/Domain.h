@@ -14,7 +14,8 @@
 
 class Domain {
  public:
-    Domain(size_t *obstacle_list, size_t size_obstacle_list,
+    Domain(Settings::Settings const &settings,
+           size_t *obstacle_list, size_t size_obstacle_list,
            size_t **surface_list, PatchObject &size_surface_list,
            size_t multigrid_level);
 

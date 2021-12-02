@@ -6,47 +6,53 @@
 
 #include "DomainData.h"
 
-DomainData *DomainData::single = nullptr; //Singleton
+#include <string>
 
-DomainData::DomainData() {
+
+DomainData *DomainData::single = nullptr;  // Singleton
+
+DomainData::DomainData(Settings::Settings const &settings) :
+        length_PD(),
+        start_coords_PD(),
+        end_coords_PD() {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
-    auto params = Parameters::getInstance();
-    auto solver = params->get("solver/description");
+    auto solver = settings.get("solver/description");
     if (solver.find("NS") != std::string::npos || solver.find("Pressure") != std::string::npos) {
-        m_levels = static_cast<size_t> (params->get_int("solver/pressure/n_level"));
+        m_levels = settings.get_size_t("solver/pressure/n_level");
     }
-    m_nx = new size_t[m_levels + 1];
-    m_ny = new size_t[m_levels + 1];
-    m_nz = new size_t[m_levels + 1];
+    number_of_inner_cells = new Coordinate<size_t>[m_levels + 1];
+    size_t nx = settings.get_size_t("domain_parameters/nx");
+    size_t ny = settings.get_size_t("domain_parameters/ny");
+    size_t nz = settings.get_size_t("domain_parameters/nz");
+    number_of_inner_cells[0].set_coordinate(nx, ny, nz);
 
-    m_nx[0] = static_cast<size_t> (params->get_int("domain_parameters/nx"));
-    m_ny[0] = static_cast<size_t> (params->get_int("domain_parameters/ny"));
-    m_nz[0] = static_cast<size_t> (params->get_int("domain_parameters/nz"));
+    real X1 = settings.get_real("domain_parameters/X1");
+    real X2 = settings.get_real("domain_parameters/X2");
+    real Y1 = settings.get_real("domain_parameters/Y1");
+    real Y2 = settings.get_real("domain_parameters/Y2");
+    real Z1 = settings.get_real("domain_parameters/Z1");
+    real Z2 = settings.get_real("domain_parameters/Z2");
+    start_coords_PD.set_coordinate(X1, Y1, Z1);
+    end_coords_PD.set_coordinate(X2, Y2, Z2);
 
-    m_X1 = params->get_real("domain_parameters/X1");
-    m_X2 = params->get_real("domain_parameters/X2");
-    m_Y1 = params->get_real("domain_parameters/Y1");
-    m_Y2 = params->get_real("domain_parameters/Y2");
-    m_Z1 = params->get_real("domain_parameters/Z1");
-    m_Z2 = params->get_real("domain_parameters/Z2");
-
-    bool has_computational_domain = (params->get("domain_parameters/enable_computational_domain") == XML_TRUE);
-    if (has_computational_domain){
-        m_x1 = params->get_real("domain_parameters/x1");
-        m_x2 = params->get_real("domain_parameters/x2");
-        m_y1 = params->get_real("domain_parameters/y1");
-        m_y2 = params->get_real("domain_parameters/y2");
-        m_z1 = params->get_real("domain_parameters/z1");
-        m_z2 = params->get_real("domain_parameters/z2");
+    bool has_computational_domain = settings.get_bool("domain_parameters/enable_computational_domain");
+    if (has_computational_domain) {
+        real x1 = settings.get_real("domain_parameters/x1");
+        real x2 = settings.get_real("domain_parameters/x2");
+        real y1 = settings.get_real("domain_parameters/y1");
+        real y2 = settings.get_real("domain_parameters/y2");
+        real z1 = settings.get_real("domain_parameters/z1");
+        real z2 = settings.get_real("domain_parameters/z2");
+        start_coords_CD.set_coordinate(x1, y1, z1);
+        end_coords_CD.set_coordinate(x2, y2, z2);
     } else {
-        m_x1 = m_X1;
-        m_x2 = m_X2;
-        m_y1 = m_Y1;
-        m_y2 = m_Y2;
-        m_z1 = m_Z1;
-        m_z2 = m_Z2;
+        start_coords_CD.copy(start_coords_PD);
+        end_coords_CD.copy(end_coords_PD);
+    }
+    for (size_t axis = 0; axis < number_of_axis; axis++) {
+        length_PD[axis] = fabs(end_coords_PD[axis] - start_coords_PD[axis]);
     }
 
     calc_MG_values();
@@ -61,73 +67,56 @@ DomainData::DomainData() {
 /// \brief  Calculates amount of Cells in XYZ direction for each multigrid level
 // ***************************************************************************************
 void DomainData::calc_MG_values() {
-    for (size_t l = 1; l < m_levels + 1; ++l) {
-        m_nx[l] = (m_nx[l - 1] == 1) ? 1 : static_cast<size_t> (std::round(m_nx[l - 1] / 2));
-        m_ny[l] = (m_ny[l - 1] == 1) ? 1 : static_cast<size_t> (std::round(m_ny[l - 1] / 2));
-        m_nz[l] = (m_nz[l - 1] == 1) ? 1 : static_cast<size_t> (std::round(m_nz[l - 1] / 2));
+    for (size_t level = 1; level < m_levels + 1; ++level) {
+        for (size_t axis = 0; axis < number_of_axis; axis++) {
+            number_of_inner_cells[level][axis] = (number_of_inner_cells[level - 1][axis] == 1) ? 1 : static_cast<size_t> (std::round(number_of_inner_cells[level - 1][axis] / 2));
+        }
     }
 }
 
-DomainData *DomainData::getInstance() {
+DomainData *DomainData::getInstance(Settings::Settings const &settings) {
     if (single == nullptr) {
-        single = new DomainData();
+        single = new DomainData(settings);
     }
     return single;
+}
+
+size_t DomainData::get_size(size_t level) const {
+    size_t size = 1;
+    for (size_t axis = 0; axis < number_of_axis; axis++) {
+        size *= get_number_of_cells(CoordinateAxis(axis), level);
+    }
+    return size;
 }
 
 // =============================== Resize computational Domain ========================
 // ***************************************************************************************
 /// \brief  calculates the size of the new calculation domain
-/// \params shift_x1  Amount of cells which will be resized in x direction
-/// \params shift_x2  Amount of cells which will be resized in x direction
-/// \params shift_y1  Amount of cells which will be resized in y direction
-/// \params shift_y2  Amount of cells which will be resized in y direction
-/// \params shift_z1  Amount of cells which will be resized in z direction
-/// \params shift_z2  Amount of cells which will be resized in z direction
+/// \params shift_start  Amount of cells which will be resized (left, bottom, front)
+/// \params shift_end  Amount of cells which will be resized (right, top, back)
 /// \return bool True if computational domain has been resized, False if not
 // ***************************************************************************************
-bool DomainData::resize(long shift_x1, long shift_x2, long shift_y1, long shift_y2, long shift_z1, long shift_z2) {
-    auto dx = get_dx();
-    auto dy = get_dy();
-    auto dz = get_dz();
-
+bool DomainData::resize(const Coordinate<long> &shift_start, const Coordinate<long> &shift_end) {
     bool update = false;
     real tmp;
-    if (set_new_value(shift_x1, m_X1, m_X2, m_x1, dx, &tmp)) {
-        m_x1 = tmp;
-        update = true;
-    }
-    if (set_new_value(shift_x2, m_X1, m_X2, m_x2, dx, &tmp)) {
-        m_x2 = tmp;
-        update = true;
-    }
-    if (set_new_value(shift_y1, m_Y1, m_Y2, m_y1, dy, &tmp)) {
-        m_y1 = tmp;
-        update = true;
-    }
-    if (set_new_value(shift_y2, m_Y1, m_Y2, m_y2, dy, &tmp)) {
-        m_y2 = tmp;
-        update = true;
-    }
-    if (set_new_value(shift_z1, m_Z1, m_Z2, m_z1, dz, &tmp)) {
-        m_z1 = tmp;
-        update = true;
-    }
-    if (set_new_value(shift_z2, m_Z1, m_Z2, m_z2, dz, &tmp)) {
-        m_z2 = tmp;
-        update = true;
+    for (size_t axis = 0; axis < number_of_axis; axis++) {
+        if (set_new_value(shift_start[axis], start_coords_PD[axis], end_coords_PD[axis], start_coords_CD[axis], get_spacing(CoordinateAxis(axis)), &tmp)) {
+            start_coords_CD[axis] = tmp;
+            update = true;
+        }
+        if (set_new_value(shift_end[axis], start_coords_PD[axis], end_coords_PD[axis], end_coords_CD[axis], get_spacing(CoordinateAxis(axis)), &tmp)) {
+            end_coords_CD[axis] = tmp;
+            update = true;
+        }
     }
 #pragma acc wait
     if (update) {
 #ifndef BENCHMARKING
-        m_logger->info("Resize domain: {}|{} {}|{} {}|{}", shift_x1, shift_x2,
-                                                         shift_y1, shift_y2,
-                                                         shift_z1, shift_z2);
+        m_logger->info("Resize domain at start {} and end {}", shift_start, shift_end);
 #endif
-        m_nx[0] = static_cast<size_t> (std::round(get_lx() / dx + 2));
-        m_ny[0] = static_cast<size_t> (std::round(get_ly() / dy + 2));
-        m_nz[0] = static_cast<size_t> (std::round(get_lz() / dz + 2));
-
+        for (size_t axis = 0; axis < number_of_axis; axis++) {
+            number_of_inner_cells[0][axis] = static_cast<size_t> (std::round(get_length_CD(CoordinateAxis(axis)) / get_spacing(CoordinateAxis(axis)) + 2));
+        }
         calc_MG_values();
     }
     return update;
@@ -223,26 +212,17 @@ void DomainData::control() {
 #ifndef BENCHMARKING
     if (m_levels > 0) {
         int minimum_amount_of_cells = static_cast<int>(std::pow(2, m_levels));
-        size_t nx = get_nx();
-        if (nx % minimum_amount_of_cells != 0) {
-            m_logger->warn("nx ({}) has to be a multiple of 2^levels = {}. "
-                           "Consider changing nx or levels of multi grid solver. "
-                           "Otherwise unexpected behaviour may occur.",
-                           nx, minimum_amount_of_cells);
-        }
-        size_t ny = get_ny();
-        if (ny % minimum_amount_of_cells != 0) {
-            m_logger->warn("ny ({}) has to be a multiple of 2^levels = {}. "
-                           "Consider changing ny or levels of multi grid solver. "
-                           "Otherwise unexpected behaviour may occur.",
-                           ny, minimum_amount_of_cells);
-        }
-        size_t nz = get_nz();
-        if (nz % minimum_amount_of_cells != 0) {
-            m_logger->warn("nz ({}) has to be a multiple of 2^levels = {}. "
-                           "Consider changing nz or levels of multi grid solver. "
-                           "Otherwise unexpected behaviour may occur.",
-                           nz, minimum_amount_of_cells);
+        for (size_t axis = 0; axis < number_of_axis; axis++) {
+            size_t number_of_cells = get_number_of_inner_cells(CoordinateAxis(axis));
+            if (number_of_cells % minimum_amount_of_cells != 0) {
+                std::string spacing_name = axis_names[axis];
+                std::transform(spacing_name.begin(), spacing_name.end(), spacing_name.begin(), ::tolower);
+                m_logger->warn("n{} ({}) has to be a multiple of 2^levels = {}. "
+                               "Consider changing n{} or levels of multigrid solver. "
+                               "Otherwise unexpected behaviour may occur.",
+                               spacing_name, number_of_cells, minimum_amount_of_cells,
+                               spacing_name);
+            }
         }
     }
 #endif

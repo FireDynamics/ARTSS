@@ -9,7 +9,9 @@
 
 #include <string>
 #include <vector>
+
 #include "GlobalMacrosTypes.h"
+#include "settings/Settings.h"
 
 #ifndef BENCHMARKING
 #ifdef _OPENACC
@@ -20,7 +22,10 @@
 #include "spdlog/logger.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
+
+#include <memory>
 #endif
+
 
 class Field;
 
@@ -30,10 +35,16 @@ namespace Utility {
     std::vector<std::string> split(const char *text, char delimiter);
     std::vector<std::string> split(const std::string &text, char delimiter);
     std::string remove_extension(const std::string &filename);
-    void log_field_info(Field &field, const std::string &text, const std::string &logger_name);
+    void log_field_info(Settings::Settings const &settings, Field &field, const std::string &text, const std::string &logger_name);
 
 #ifndef BENCHMARKING
-    std::shared_ptr<spdlog::logger> create_logger(std::string loggerName);
+    std::shared_ptr<spdlog::logger> create_logger(
+            std::string const level,
+            std::string const file,
+            std::string const loggerName);
+    std::shared_ptr<spdlog::logger> create_logger(
+            Settings::Settings const &settings,
+            std::string const loggerName);
 #endif
 #ifdef GPU_DEBUG
     std::shared_ptr<spdlog::logger> create_gpu_logger(std::string loggerName);

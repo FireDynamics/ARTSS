@@ -12,6 +12,8 @@
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 #include "../utility/Utility.h"
 
 struct AdvectionMethods {
@@ -45,15 +47,15 @@ struct TurbulenceMethods {
 };
 
 namespace SolverSelection {
-    void SetAdvectionSolver(IAdvection **advectionSolver, const std::string& advectionType);
+    void SetAdvectionSolver(Settings::Settings const &settings, IAdvection **advectionSolver, const std::string& advectionType);
 
-    void SetDiffusionSolver(IDiffusion **diffusionSolver, const std::string& diffusionType);
+    void SetDiffusionSolver(Settings::Settings const &settings, IDiffusion **diffusionSolver, const std::string& diffusionType);
 
-    void SetPressureSolver(IPressure **pressureSolver, const std::string& pressureType);
+    void SetPressureSolver(Settings::Settings const &settings, IPressure **pressureSolver, const std::string& pressureType);
 
-    void SetSourceSolver(ISource **sourceSolver, const std::string& sourceType);
+    void SetSourceSolver(Settings::Settings const &settings, ISource **sourceSolver, const std::string& sourceType);
 
-    void SetTurbulenceSolver(ITurbulence **tubulenceSolver, const std::string& turbulenceType);
+    void SetTurbulenceSolver(Settings::Settings const &settings, ITurbulence **turbulence_solver, const std::string& turbulenceType);
 };
 
 #endif /* ARTSS_SOLVER_SOLVERSELECTION_H_ */

@@ -1,7 +1,7 @@
 /// \file       Multigrid.h
 /// \brief      Creates all lists needed for multigrid
 /// \date       Oct 01, 2019
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_BOUNDARY_MULTIGRID_H_
@@ -13,18 +13,19 @@
 #include "Surface.h"
 #include "../DomainData.h"
 #include "../field/Field.h"
-#include "../utility/Utility.h"
-#include "../joinedLists/SingleJoinedList.h"
 #include "../joinedLists/MultipleJoinedList.h"
+#include "../joinedLists/SingleJoinedList.h"
+#include "../utility/Utility.h"
 
 class Multigrid {
  public:
-    Multigrid(
-            size_t number_of_surfaces, Surface** surface_list,
-            size_t number_of_obstacles, Obstacle** obstacle_list,
-            BoundaryDataController* bdc_boundary,
-            BoundaryDataController **bdc_obstacles,
-            size_t multigrid_level);
+    Multigrid(Settings::Settings const &settings,
+              size_t number_of_surfaces, Surface** surface_list,
+              size_t number_of_obstacles, Obstacle** obstacle_list,
+              BoundaryDataController* bdc_boundary,
+              BoundaryDataController **bdc_obstacles,
+              BoundaryDataController **bdc_surfaces,
+              size_t multigrid_level);
     ~Multigrid();
 
     // getter -- domain inner cells
@@ -52,7 +53,7 @@ class Multigrid {
 
     void apply_boundary_condition(Field &field, bool sync = false);
 
-    bool is_obstacle_cell(size_t level, const Coordinate &coords);
+    bool is_obstacle_cell(size_t level, const Coordinate<size_t> &coords);
 
 private:
 #ifndef BENCHMARKING
@@ -61,6 +62,7 @@ private:
 #ifdef GPU_DEBUG
     std::shared_ptr<spdlog::logger> m_gpu_logger;
 #endif
+    Settings::Settings const &m_settings;
     size_t m_multigrid_levels;
     // all surfaces divided by level
     Surface*** m_MG_surface_object_list;  // m_MG_surface_object_list[level][surfaceID]
@@ -98,6 +100,7 @@ private:
 
     BoundaryDataController *m_bdc_boundary;
     BoundaryDataController **m_bdc_obstacle;
+    BoundaryDataController **m_bdc_surface;
 
     void remove_domain_lists_from_GPU();
 

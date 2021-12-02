@@ -6,26 +6,21 @@
 
 #include <iostream>
 #include "TimeIntegration.h"
-#include "utility/tinyxml2.h"
-#include "utility/Parameters.h"
+#include "DomainData.h"
+#include "boundary/BoundaryController.h"
 #include "solver/SolverController.h"
-#include "visualisation/VTKWriter.h"
+#include "utility/settings/Settings.h"
 
 #ifdef _OPENACC
     #include <openacc.h>
 #endif
 
 int Field::counter = 0;
-int VTKWriter::vtk_counter = 0;
 int main(int argc, char **argv) {
     // Initialisation
     // Parameters
     std::string XML_filename;
-    auto params = Parameters::getInstance();
-    if (argc > 1) {
-        XML_filename.assign(argv[1]);
-        params->parse(XML_filename);
-    } else {
+    if (argc <= 1) {
         std::cerr << "XML file missing" << std::endl;
         std::exit(1);
     }
@@ -33,14 +28,18 @@ int main(int argc, char **argv) {
 #ifdef _OPENACC
     // Initialise GPU
     acc_device_t dev_type = acc_get_device_type();
-    acc_init( dev_type );
+    acc_init(dev_type);
 #endif
 
-    SolverController *sc = new SolverController();
+    Settings::Settings settings(argv[1]);
+    DomainData::getInstance(settings);
+    BoundaryController::getInstance(settings);
+
+    SolverController *sc = new SolverController(settings);
 
     // Integrate over time and solve numerically
     // Time integration
-    TimeIntegration ti(sc);
+    TimeIntegration ti(settings, sc);
     ti.run();
 
     // Clean up

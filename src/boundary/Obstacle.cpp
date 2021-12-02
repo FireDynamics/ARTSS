@@ -1,7 +1,7 @@
 /// \file       Obstacle.cpp
 /// \brief      Data class of obstacle object
 /// \date       Oct 01, 2019
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Obstacle.h"
@@ -10,20 +10,26 @@
 #include <vector>
 
 
-Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const std::string &name) :
-        m_name(name), m_start(), m_end(), m_level(0), m_size_boundary() {
+Obstacle::Obstacle(Settings::Settings const &settings,
+                   real x1, real x2,
+                   real y1, real y2,
+                   real z1, real z2,
+                   const std::string &name) :
+        m_settings(settings), m_name(name),
+        m_start(), m_end(),
+        m_level(0), m_size_boundary() {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
-    DomainData *domain = DomainData::getInstance();
+    DomainData *domain_data = DomainData::getInstance();
 
-    real dx = domain->get_dx();
-    real dy = domain->get_dy();
-    real dz = domain->get_dz();
+    real dx = domain_data->get_dx();
+    real dy = domain_data->get_dy();
+    real dz = domain_data->get_dz();
 
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_Y1();
-    real Z1 = domain->get_Z1();
+    real X1 = domain_data->get_X1();
+    real Y1 = domain_data->get_Y1();
+    real Z1 = domain_data->get_Z1();
 
     size_t i1 = get_matching_index(x1, dx, X1) + 1;  // plus 1 for ghost cell
     size_t j1 = get_matching_index(y1, dy, Y1) + 1;
@@ -39,17 +45,16 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const s
 }
 
 
-Obstacle::Obstacle(
-        Coordinate &coords_start,
-        Coordinate &coords_end,
-        size_t level,
-        const std::string &name) :
+Obstacle::Obstacle(Settings::Settings const &settings,
+                   Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
+                   size_t level,
+                   const std::string &name) :
+        m_settings(settings),
         m_name(name),
-        m_start(coords_start),
-        m_end(coords_end),
+        m_start(coords_start), m_end(coords_end),
         m_level(level), m_size_boundary() {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
 
     init();
@@ -62,9 +67,9 @@ Obstacle::Obstacle(
 /// \param  level Multigrid level
 // *************************************************************************************************
 void Obstacle::init() {
-    DomainData *domain = DomainData::getInstance();
-    size_t Nx = domain->get_Nx(m_level);
-    size_t Ny = domain->get_Ny(m_level);
+    DomainData *domain_data = DomainData::getInstance();
+    size_t Nx = domain_data->get_Nx(m_level);
+    size_t Ny = domain_data->get_Ny(m_level);
 
     for (size_t axis = 0; axis < number_of_axis; axis++) {
         m_strides[axis] = m_end[axis] - m_start[axis] + 1;
@@ -231,9 +236,9 @@ void Obstacle::print() {
 // *************************************************************************************************
 void Obstacle::print_details() {
 #ifndef BENCHMARKING
-    DomainData *domain = DomainData::getInstance();
-    size_t Nx = domain->get_Nx(m_level);
-    size_t Ny = domain->get_Ny(m_level);
+    DomainData *domain_data = DomainData::getInstance();
+    size_t Nx = domain_data->get_Nx(m_level);
+    size_t Ny = domain_data->get_Ny(m_level);
     size_t coords_i, coords_j, coords_k;
 
     m_logger->debug("############### OBSTACLE {} ###############", m_name);
@@ -359,9 +364,9 @@ void Obstacle::print_details() {
 /// \brief  Units test emergency solution
 // *************************************************************************************************
 void Obstacle::control() {
-    DomainData *domain = DomainData::getInstance();
-    size_t Nx = domain->get_Nx(m_level);
-    size_t Ny = domain->get_Ny(m_level);
+    DomainData *domain_data = DomainData::getInstance();
+    size_t Nx = domain_data->get_Nx(m_level);
+    size_t Ny = domain_data->get_Ny(m_level);
 
     std::string message;
     for (size_t i = 1; i < m_size_obstacle_list; i++) {
@@ -456,7 +461,7 @@ void Obstacle::control() {
 /// \param  k z-coordinate
 /// \return  bool true if yes false if no
 // *************************************************************************************************
-bool Obstacle::is_obstacle_cell(const Coordinate &coords) const {
+bool Obstacle::is_obstacle_cell(const Coordinate<size_t> &coords) const {
     return m_start[CoordinateAxis::X] <= coords[CoordinateAxis::X]
            && coords[CoordinateAxis::X] <= m_end[CoordinateAxis::X]
            && m_start[CoordinateAxis::Y] <= coords[CoordinateAxis::Y]
@@ -468,7 +473,7 @@ bool Obstacle::is_obstacle_cell(const Coordinate &coords) const {
 //======================================== Match grid ==============================================
 // *************************************************************************************************
 /// \brief  Snaps value to grid discretisation
-/// \param  obstacle_coordinate Coordinate of obstacle
+/// \param  obstacle_coordinate Coordinate<size_t> of obstacle
 /// \param  spacing dx/dy/dz
 /// \param  start_coordinate X1/Y1/Z1
 /// \return real Calculated index on grid
@@ -483,23 +488,23 @@ int Obstacle::get_matching_index(real obstacle_coordinate, real spacing, real st
 /// \param  level Multigrid level
 // *************************************************************************************************
 void Obstacle::remove_cells_at_boundary() {
-    DomainData *domain = DomainData::getInstance();
-    if (m_start[CoordinateAxis::Z] <= domain->get_index_z1(m_level)) {
+    DomainData *domain_data = DomainData::getInstance();
+    if (m_start[CoordinateAxis::Z] <= domain_data->get_index_z1(m_level)) {
         m_size_boundary[FRONT] = 0;
     }
-    if (m_end[CoordinateAxis::Z] >= domain->get_index_z2(m_level)) {
+    if (m_end[CoordinateAxis::Z] >= domain_data->get_index_z2(m_level)) {
         m_size_boundary[BACK] = 0;
     }
-    if (m_start[CoordinateAxis::Y] <= domain->get_index_y1(m_level)) {
+    if (m_start[CoordinateAxis::Y] <= domain_data->get_index_y1(m_level)) {
         m_size_boundary[BOTTOM] = 0;
     }
-    if (m_end[CoordinateAxis::Y] >= domain->get_index_y2(m_level)) {
+    if (m_end[CoordinateAxis::Y] >= domain_data->get_index_y2(m_level)) {
         m_size_boundary[TOP] = 0;
     }
-    if (m_start[CoordinateAxis::X] <= domain->get_index_x1(m_level)) {
+    if (m_start[CoordinateAxis::X] <= domain_data->get_index_x1(m_level)) {
         m_size_boundary[LEFT] = 0;
     }
-    if (m_end[CoordinateAxis::X] >= domain->get_index_x2(m_level)) {
+    if (m_end[CoordinateAxis::X] >= domain_data->get_index_x2(m_level)) {
         m_size_boundary[RIGHT] = 0;
     }
 }
@@ -539,10 +544,10 @@ void Obstacle::calculate_area_index(
         size_t *o1_coordinate, size_t *o2_coordinate,
         CoordinateAxis coordinate_axis,
         bool start) {
-    Coordinate *coords_start_o1 = o1->get_start_coordinates();
-    Coordinate *coords_end_o1 = o1->get_end_coordinates();
-    Coordinate *coords_start_o2 = o2->get_start_coordinates();
-    Coordinate *coords_end_o2 = o2->get_end_coordinates();
+    Coordinate<size_t> *coords_start_o1 = o1->get_start_coordinates();
+    Coordinate<size_t> *coords_end_o1 = o1->get_end_coordinates();
+    Coordinate<size_t> *coords_start_o2 = o2->get_start_coordinates();
+    Coordinate<size_t> *coords_end_o2 = o2->get_end_coordinates();
 
     if (start) {
         *o1_coordinate = (*coords_start_o1)[coordinate_axis];
@@ -585,7 +590,7 @@ void Obstacle::calculate_area_index(
 // *************************************************************************************************
 bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger("Obstacle");
+    auto logger = Utility::create_logger(o1->m_settings, "Obstacle");
 #endif
     bool overlap = false;
     for (size_t axis = 0; axis < number_of_axis; axis++) {
@@ -607,24 +612,24 @@ bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
 // *************************************************************************************************
 bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis coordinate_axis) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger("Obstacle");
+    auto logger = Utility::create_logger(o1->m_settings, "Obstacle");
 #endif
     bool overlap = false;
 
-    auto domain = DomainData::getInstance();
-    auto Nx = domain->get_Nx();
-    auto Ny = domain->get_Ny();
+    auto domain_data = DomainData::getInstance();
+    auto Nx = domain_data->get_Nx();
+    auto Ny = domain_data->get_Ny();
 
-    Coordinate *coords_start_o1 = o1->get_start_coordinates();
-    Coordinate *coords_end_o1 = o1->get_end_coordinates();
-    Coordinate *coords_start_o2 = o2->get_start_coordinates();
-    Coordinate *coords_end_o2 = o2->get_end_coordinates();
+    Coordinate<size_t> *coords_start_o1 = o1->get_start_coordinates();
+    Coordinate<size_t> *coords_end_o1 = o1->get_end_coordinates();
+    Coordinate<size_t> *coords_start_o2 = o2->get_start_coordinates();
+    Coordinate<size_t> *coords_end_o2 = o2->get_end_coordinates();
 
 #ifndef BENCHMARKING
     logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
                   o1->get_name(), (*coords_end_o1)[coordinate_axis],
                   o2->get_name(), (*coords_start_o2)[coordinate_axis],
-                  Coordinate::get_axis_name(coordinate_axis));
+                  Coordinate<size_t>::get_axis_name(coordinate_axis));
 #endif
     if ((*coords_end_o1)[coordinate_axis] + 1 == (*coords_start_o2)[coordinate_axis]) {
         std::swap(o1, o2);
@@ -635,7 +640,7 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
     logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
                   o1->get_name(), (*coords_start_o1)[coordinate_axis],
                   o2->get_name(), (*coords_end_o2)[coordinate_axis],
-                  Coordinate::get_axis_name(coordinate_axis));
+                  Coordinate<size_t>::get_axis_name(coordinate_axis));
 #endif
     if ((*coords_start_o1)[coordinate_axis] - 1 == (*coords_end_o2)[coordinate_axis]) {
         auto other_axes = new CoordinateAxis[2];
@@ -670,10 +675,10 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             // calculate coordinates of area which should be removed
             // the area is for both obstacle the same only if there are equally long
 
-            auto o1_remove_start = new Coordinate();
-            auto o1_remove_end = new Coordinate();
-            auto o2_remove_start = new Coordinate();
-            auto o2_remove_end = new Coordinate();
+            auto o1_remove_start = new Coordinate<size_t>();
+            auto o1_remove_end = new Coordinate<size_t>();
+            auto o2_remove_start = new Coordinate<size_t>();
+            auto o2_remove_end = new Coordinate<size_t>();
 
             if (coordinate_axis == CoordinateAxis::X) {
                 size_t o1_x1 = (*coords_start_o1)[CoordinateAxis::X];
@@ -824,7 +829,7 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
                             o1_end = true;
                         }
                     }
-                    auto tmp = new Coordinate();
+                    auto tmp = new Coordinate<size_t>();
                     (*tmp)[other_axes[0]] = o1_current_axis_0;
                     (*tmp)[other_axes[1]] = o1_current_axis_1;
                     (*tmp)[coordinate_axis] = (*o1_remove_start)[coordinate_axis];
@@ -843,7 +848,7 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
                             o2_end = true;
                         }
                     }
-                    auto tmp = new Coordinate();
+                    auto tmp = new Coordinate<size_t>();
                     (*tmp)[other_axes[0]] = o2_current_axis_0;
                     (*tmp)[other_axes[1]] = o2_current_axis_1;
                     (*tmp)[coordinate_axis] = (*o2_remove_start)[coordinate_axis];
@@ -864,7 +869,7 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
                             o1_current_axis_0 = (*o1_remove_start)[other_axes[0]];
                             o1_current_axis_1++;
                         }
-                        auto tmp = new Coordinate();
+                        auto tmp = new Coordinate<size_t>();
                         (*tmp)[other_axes[0]] = o1_current_axis_0;
                         (*tmp)[other_axes[1]] = o1_current_axis_1;
                         (*tmp)[coordinate_axis] = (*o1_remove_start)[coordinate_axis];
@@ -886,7 +891,7 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
                             o2_current_axis_0 = (*o2_remove_start)[other_axes[0]];
                             o2_current_axis_1++;
                         }
-                        auto tmp = new Coordinate();
+                        auto tmp = new Coordinate<size_t>();
                         (*tmp)[other_axes[0]] = o2_current_axis_0;
                         (*tmp)[other_axes[1]] = o2_current_axis_1;
                         (*tmp)[coordinate_axis] = (*o2_remove_start)[coordinate_axis];
@@ -945,23 +950,24 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
 //======================================== is corner cell ==========================================
 // *************************************************************************************************
 /// \brief return whether cell is a corner cell
-/// \param coord Coordinate triple
+/// \param coord Coordinate<size_t> triple
 /// \return true if cell is a corner cell, otherwise false
 // *************************************************************************************************
-bool Obstacle::is_corner_cell(const Coordinate &coord) const {
-    bool on_x = (coord[CoordinateAxis::X] == m_start[CoordinateAxis::X] || coord[CoordinateAxis::X] == m_end[CoordinateAxis::X]);
-    bool on_y = (coord[CoordinateAxis::Y] == m_start[CoordinateAxis::Y] || coord[CoordinateAxis::Y] == m_end[CoordinateAxis::Y]);
-    bool on_z = (coord[CoordinateAxis::Z] == m_start[CoordinateAxis::Z] || coord[CoordinateAxis::Z] == m_end[CoordinateAxis::Z]);
-    return on_x && on_y && on_z;
+bool Obstacle::is_corner_cell(const Coordinate<size_t> &coord) const {
+    bool is_corner_cell = true;
+    for (size_t axis = 0; axis < number_of_axis; axis++) {
+        is_corner_cell = is_corner_cell && (coord[axis] == m_start[axis] || coord[axis] == m_end[axis]);
+    }
+    return is_corner_cell;
 }
 
 //======================================== is edge cell ============================================
 // *************************************************************************************************
 /// \brief return whether cell is a edge cell
-/// \param coord Coordinate triple
+/// \param coord Coordinate<size_t> triple
 /// \return true if cell is a edge cell, otherwise false
 // *************************************************************************************************
-bool Obstacle::is_edge_cell(const Coordinate &coord) const {
+bool Obstacle::is_edge_cell(const Coordinate<size_t> &coord) const {
     bool on_x = (coord[CoordinateAxis::X] == m_start[CoordinateAxis::X] || coord[CoordinateAxis::X] == m_end[CoordinateAxis::X]);
     bool on_y = (coord[CoordinateAxis::Y] == m_start[CoordinateAxis::Y] || coord[CoordinateAxis::Y] == m_end[CoordinateAxis::Y]);
     bool on_z = (coord[CoordinateAxis::Z] == m_start[CoordinateAxis::Z] || coord[CoordinateAxis::Z] == m_end[CoordinateAxis::Z]);

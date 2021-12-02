@@ -143,7 +143,7 @@ class Field {
 
     real *data;
     static std::string get_field_type_name(FieldType f);
-    static FieldType match_field(const std::string& string);
+    static FieldType match_field(const std::string &string);
 
  private:
     static int counter;

@@ -1,18 +1,19 @@
 /// \file       Adaption.h
 /// \brief      Controller class for adaption
 /// \date       Nov 29, 2018
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_ADAPTION_ADAPTION_H_
 #define ARTSS_ADAPTION_ADAPTION_H_
 
-
+#include "../boundary/Coordinate.h"
 #include "../field/Field.h"
 #include "../interfaces/IAdaptionFunction.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../interfaces/ISolver.h"
 #include "../solver/SolverController.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 /* enum for different types of dynamic adaption:
  * NO = adaption impossible/no changes
@@ -29,7 +30,7 @@ class IAdaptionFunction;
 
 class Adaption {
 public:
-    explicit Adaption(FieldController *field_controller);
+    explicit Adaption(Settings::Settings const &settings, FieldController *field_controller);
 
     bool inline is_data_extraction_enabled() { return m_has_data_extraction; };
     bool inline is_data_extraction_before_enabled() { return m_has_data_extraction_before; }
@@ -48,14 +49,9 @@ public:
 
     void run(real t_cur);
 
-    static void expand_x_direction(long shift, bool start, size_t *arr_idx_expansion, size_t len_e);
-    static void expand_y_direction(long shift, bool start, size_t *arr_idx_expansion, size_t len_e);
-    static void reduce_x_direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r);
-    static void reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r);
-    static bool adapt_x_direction(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
-    static bool adapt_x_direction_serial(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
-    static bool adapt_y_direction(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
-    static bool adapt_y_direction_serial(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static void expand(Coordinate<long> *shift_value, bool start, size_t *arr_idx_expansion, size_t len_e, CoordinateAxis axis);
+    static void reduce(Coordinate<long> *shift, bool start, size_t *arr_idx_reduction, size_t len_r, CoordinateAxis axis);
+    static bool adapt(Settings::Settings const &settings, const Field &f, real check_value, size_t no_buffer_cell, real threshold, Coordinate<long> *shift_start, Coordinate<long> *shift_end, size_t minimal, bool reduce, CoordinateAxis axis);
 
     void extractData(const std::string &filename, real height, real time);
     void extractData(const std::string &filename);
@@ -67,7 +63,8 @@ private:
     bool isUpdateNecessary();
     void applyChanges();
 
-    long m_shift_x1, m_shift_x2, m_shift_y1, m_shift_y2, m_shift_z1, m_shift_z2;
+    Coordinate<long> m_shift_start;
+    Coordinate<long> m_shift_end;
     bool m_dynamic, m_dynamic_end;
     bool m_has_data_extraction;
     bool m_has_data_extraction_before = false;
