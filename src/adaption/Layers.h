@@ -18,18 +18,20 @@ class Layers : public IAdaptionFunction {
 public:
     Layers(Settings::Settings const &settings, FieldController *field_controller);
 
-    void apply_changes(Coordinate<long> *shift_start, Coordinate<long> *shift_end) override;
-    bool update(Coordinate<long> *shift_start, Coordinate<long> *shift_end) override;
+    bool update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
+    void apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
     bool has_reduction() override { return false; }
 
 private:
-    void adapt(real temperature, size_t no_buffer_cell, Coordinate<long> *shift_start, Coordinate<long> *shift_end, CoordinateAxis axis);
-    void set_values(Coordinate<long> *shift_start, Coordinate<long> *shift_end, bool start, CoordinateAxis axis);
+    void adaptXDirection(real temperature, size_t no_buffer_cell, long *p_shift_x1, long *p_shift_x2);
+    void adaptXDirection_serial(real temperature, size_t no_buffer_cell, long *p_shift_x1, long *p_shift_x2);
 
-    size_t get_expansion_size();
+    void setXValues(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2, bool start);
+
+    size_t getExpansionSize();
 
     size_t m_minimal;
-    size_t m_no_buffer_cells, m_time_step, m_time_counter, m_expansion_size;
+    size_t m_no_buffer_cells, m_timestep, m_timecounter, m_expansion_size;
 
     real m_check_value;
     Field &m_T, &m_Ta, &m_Nu, &m_kappa, &m_gamma;

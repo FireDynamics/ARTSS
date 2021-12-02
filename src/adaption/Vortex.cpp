@@ -42,69 +42,139 @@ bool Vortex::has_reduction() {
 /// \brief  Checks for adaption
 /// \return  bool if adaption is possible true
 // ********************************************************************************
-bool Vortex::update(Coordinate<long> *shift_start, Coordinate<long> *shift_end) {
+bool Vortex::update(
+        long *p_shift_x1, long *p_shift_x2,
+        long *p_shift_y1, long *p_shift_y2,
+        long *p_shift_z1, long *p_shift_z2) {
+    auto d_u = m_u.data;
+    auto d_v = m_v.data;
     bool adaption = false;
 
-    shift_start->set_coordinate(0, 0, 0);
-    shift_end->set_coordinate(0, 0, 0);
+    *p_shift_x1 = 0;
+    *p_shift_x2 = 0;
+    *p_shift_y1 = 0;
+    *p_shift_y2 = 0;
+    *p_shift_z1 = 0;
+    *p_shift_z2 = 0;
 
-    adaption = Adaption::adapt(m_settings, m_u, m_u_lin, m_buffer, m_threshold, shift_start, shift_end, m_minimal, m_reduction, X) || adaption;
-    if (m_y_side) {
-        adaption = Adaption::adapt(m_settings, m_v, m_v_lin, m_buffer, m_threshold, shift_start, shift_end, m_minimal, m_reduction, Y) || adaption;
-    }
+    adaption = Adaption::adapt_x_direction(m_settings, d_u, m_u_lin, m_buffer, m_threshold, p_shift_x1, p_shift_x2, m_minimal, m_reduction) || adaption;
+    if (m_y_side)
+        adaption = Adaption::adapt_y_direction(m_settings, d_v, m_v_lin, m_buffer, m_threshold, p_shift_y1, p_shift_y2, m_minimal, m_reduction) || adaption;
 
-    *shift_start *= m_minimal;
-    *shift_end *= m_minimal;
+    *p_shift_x1 *= m_minimal;
+    *p_shift_x2 *= m_minimal;
+    *p_shift_y1 *= m_minimal;
+    *p_shift_y2 *= m_minimal;
+    *p_shift_z1 *= m_minimal;
+    *p_shift_z2 *= m_minimal;
+
     return adaption;
 }
 
 // ==================================== Apply changes =============================
 // ********************************************************************************
-/// \brief  Set values for new domain_data
+/// \brief  Set values for new domain
 // ********************************************************************************
-void Vortex::apply_changes(Coordinate<long> *shift_start, Coordinate<long> *shift_end) {
-    auto domain_data = DomainData::getInstance();
-    for (size_t axis = 0; axis < number_of_axis; axis++) {
-        auto other_axes = new CoordinateAxis[2];
-        if (axis == CoordinateAxis::X) {
-            other_axes[0] = CoordinateAxis::Y;
-            other_axes[1] = CoordinateAxis::Z;
-        } else if (axis == CoordinateAxis::Y) {
-            other_axes[0] = CoordinateAxis::X;
-            other_axes[1] = CoordinateAxis::Z;
-        } else if (axis == CoordinateAxis::Z) {
-            other_axes[0] = CoordinateAxis::X;
-            other_axes[1] = CoordinateAxis::Y;
-        }
-        for (auto shift: {shift_start, shift_end}) {
-            if ((*shift)[axis] != 0) {
-                auto coordinate_axis = CoordinateAxis(axis);
-                if ((*shift)[axis] < 0) {
-                    size_t len_e =
-                            (domain_data->get_end_index_CD(other_axes[0]) - domain_data->get_start_index_CD(other_axes[0]))
-                          * (domain_data->get_end_index_CD(other_axes[1]) - domain_data->get_start_index_CD(other_axes[1]))
-                          * static_cast<size_t>(fabs((*shift)[axis]));
-                    auto *arr_idxExpansion = new size_t[len_e];
+void Vortex::apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *, long *) {
+    auto domain = DomainData::getInstance();
+
+    size_t i_start = domain->get_index_x1();//(x1 - X1) / dx;
+    size_t i_end = domain->get_index_x2() + 2;//(x2 - X1) / dx + 2;
+    size_t j_start = domain->get_index_y1();//(y1 - Y1) / dy;
+    size_t j_end = domain->get_index_y2() + 2;//(y2 - Y1) / dy + 2;
+    size_t k_start = domain->get_index_z1();//(z1 - Z1) / dz;
+    size_t k_end = domain->get_index_z2() + 2;//(z2 - Z1) / dz + 2;
+
+    if (*p_shift_x1 != 0) {
+        if (*p_shift_x1 < 0) {
+            size_t len_e = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(*p_shift_x1));
+            auto *arr_idxExpansion = new size_t[len_e];
 #pragma acc enter data create(arr_idxExpansion[:len_e])
-                    Adaption::expand(shift, true, arr_idxExpansion, len_e, coordinate_axis);
-                    Vortex::Drift_dynamic(arr_idxExpansion, len_e);
+            Adaption::expand_x_direction(*p_shift_x1, true, arr_idxExpansion, len_e);
+            Vortex::Drift_dynamic(arr_idxExpansion, len_e);
 #pragma acc exit data delete(arr_idxExpansion[:len_e])
-                    delete[] arr_idxExpansion;
-                } else {
-                    size_t len_r =
-                            (domain_data->get_end_index_CD(other_axes[0]) - domain_data->get_start_index_CD(other_axes[0]))
-                          * (domain_data->get_end_index_CD(other_axes[1]) - domain_data->get_start_index_CD(other_axes[1]))
-                          * static_cast<size_t>(fabs((*shift)[axis]));
-                    auto *arr_idxReduction = new size_t[len_r];
-#pragma acc enter data create(arr_idxReduction[:len_r])
-                    Adaption::reduce(shift, true, arr_idxReduction, len_r, coordinate_axis);
-                    Zero(arr_idxReduction, len_r);
-#pragma acc exit data delete(arr_idxReduction[:len_r])
-                    delete[] arr_idxReduction;
-                }
-            }
+            delete[] arr_idxExpansion;
         }
-        delete[] other_axes;
+#ifndef BENCHMARKING
+        else {
+            size_t len_r = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(*p_shift_x1));
+            auto *arr_idxReduction = new size_t[len_r];
+#pragma acc enter data create(arr_idxReduction[:len_r])
+            Adaption::reduce_x_direction(*p_shift_x1, true, arr_idxReduction, len_r);
+            Zero(arr_idxReduction, len_r);
+#pragma acc exit data delete(arr_idxReduction[:len_r])
+            delete[] arr_idxReduction;
+        }
+#endif
+    }
+
+    if (*p_shift_x2 != 0) {
+        if (*p_shift_x2 > 0) {
+            size_t len_e = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(*p_shift_x2));
+            auto *arr_idxExpansion = new size_t[len_e];
+#pragma acc enter data create(arr_idxExpansion[:len_e])
+            Adaption::expand_x_direction(*p_shift_x2, false, arr_idxExpansion, len_e);
+            Vortex::Drift_dynamic(arr_idxExpansion, len_e);
+#pragma acc exit data delete(arr_idxExpansion[:len_e])
+            delete[] arr_idxExpansion;
+        }
+#ifndef BENCHMARKING
+        else {
+            size_t len_r = (j_end - j_start) * (k_end - k_start) * static_cast<size_t>(fabs(*p_shift_x2));
+            auto *arr_idxReduction = new size_t[len_r];
+#pragma acc enter data create(arr_idxReduction[:len_r])
+            Adaption::reduce_x_direction(*p_shift_x2, false, arr_idxReduction, len_r);
+            Zero(arr_idxReduction, len_r);
+#pragma acc exit data delete(arr_idxReduction[:len_r])
+            delete[] arr_idxReduction;
+        }
+#endif
+    }
+
+    if (*p_shift_y1 != 0) {
+        if (*p_shift_y1 < 0) {
+            size_t len_e = (i_end - i_start) * (k_end - k_start) * static_cast<size_t>(fabs(*p_shift_y1));
+            auto *arr_idxExpansion = new size_t[len_e];
+#pragma acc enter data create(arr_idxExpansion[:len_e])
+            Adaption::expand_y_direction(*p_shift_y1, true, arr_idxExpansion, len_e);
+            Vortex::Drift_dynamic(arr_idxExpansion, len_e);
+#pragma acc exit data delete(arr_idxExpansion[:len_e])
+            delete[] arr_idxExpansion;
+        }
+#ifndef BENCHMARKING
+        else {
+            size_t len_r = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(*p_shift_y1));
+            auto *arr_idxReduction = new size_t[len_r];
+#pragma acc enter data create(arr_idxReduction[:len_r])
+            Adaption::reduce_y_Direction(*p_shift_y1, true, arr_idxReduction, len_r);
+            Zero(arr_idxReduction, len_r);
+#pragma acc exit data delete(arr_idxReduction[:len_r])
+            delete[] arr_idxReduction;
+        }
+#endif
+    }
+
+    if (*p_shift_y2 != 0) {
+        if (*p_shift_y2 > 0) {
+            size_t len_e = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(*p_shift_y2));
+            auto *arr_idxExpansion = new size_t[len_e];
+#pragma acc enter data create(arr_idxExpansion[:len_e])
+            Adaption::expand_y_direction(*p_shift_y2, false, arr_idxExpansion, len_e);
+            Vortex::Drift_dynamic(arr_idxExpansion, len_e);
+#pragma acc exit data delete(arr_idxExpansion[:len_e])
+            delete[] arr_idxExpansion;
+        }
+#ifndef BENCHMARKING
+        else {
+            size_t len_r = (i_end - i_start) * (k_end - k_start) * static_cast<size_t> (fabs(*p_shift_y2));
+            auto *arr_idxReduction = new size_t[len_r];
+#pragma acc enter data create(arr_idxReduction[:len_r])
+            Adaption::reduce_y_Direction(*p_shift_y2, false, arr_idxReduction, len_r);
+            Zero(arr_idxReduction, len_r);
+#pragma acc exit data delete(arr_idxReduction[:len_r])
+            delete[] arr_idxReduction;
+        }
+#endif
     }
 }
 

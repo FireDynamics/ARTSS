@@ -7,7 +7,7 @@
 #ifndef ARTSS_ADAPTION_ADAPTION_H_
 #define ARTSS_ADAPTION_ADAPTION_H_
 
-#include "../boundary/Coordinate.h"
+
 #include "../field/Field.h"
 #include "../interfaces/IAdaptionFunction.h"
 #include "../interfaces/ISolver.h"
@@ -49,9 +49,14 @@ public:
 
     void run(real t_cur);
 
-    static void expand(Coordinate<long> *shift_value, bool start, size_t *arr_idx_expansion, size_t len_e, CoordinateAxis axis);
-    static void reduce(Coordinate<long> *shift, bool start, size_t *arr_idx_reduction, size_t len_r, CoordinateAxis axis);
-    static bool adapt(Settings::Settings const &settings, const Field &f, real check_value, size_t no_buffer_cell, real threshold, Coordinate<long> *shift_start, Coordinate<long> *shift_end, size_t minimal, bool reduce, CoordinateAxis axis);
+    static void expand_x_direction(long shift, bool start, size_t *arr_idx_expansion, size_t len_e);
+    static void expand_y_direction(long shift, bool start, size_t *arr_idx_expansion, size_t len_e);
+    static void reduce_x_direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r);
+    static void reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r);
+    static bool adapt_x_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static bool adapt_x_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static bool adapt_y_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static bool adapt_y_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
 
     void extractData(const std::string &filename, real height, real time);
     void extractData(const std::string &filename);
@@ -63,8 +68,7 @@ private:
     bool isUpdateNecessary();
     void applyChanges();
 
-    Coordinate<long> m_shift_start;
-    Coordinate<long> m_shift_end;
+    long m_shift_x1, m_shift_x2, m_shift_y1, m_shift_y2, m_shift_z1, m_shift_z2;
     bool m_dynamic, m_dynamic_end;
     bool m_has_data_extraction;
     bool m_has_data_extraction_before = false;

@@ -17,8 +17,8 @@ class Vortex : public IAdaptionFunction {
 public:
     Vortex(Settings::Settings const &settings, FieldController *field_controller);
 
-    void apply_changes(Coordinate<long> *shift_start, Coordinate<long> *shift_end) override;
-    bool update(Coordinate<long> *shift_start, Coordinate<long> *shift_end) override;
+    bool update(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
+    void apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1, long *p_shift_y2, long *p_shift_z1, long *p_shift_z2) override;
     bool has_reduction() override;
 
 private:
