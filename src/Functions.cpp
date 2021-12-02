@@ -584,7 +584,7 @@ namespace Functions {
         if (axis == X) {
             for (int l = 0; l < n_layers; ++l) {
                 // inner cells
-#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(bord[:n_layers+1], val[:n_layers]) async
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
                 for (size_t i = 0; i < size_domain_list; i++) {
                     size_t idx = domain_data_list[i];
                     coords_k = getCoordinateK(idx, Nx, Ny);
@@ -598,7 +598,7 @@ namespace Functions {
             }
         } else if (axis == Y) {
             for (int l = 0; l < n_layers; ++l) {
-#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(bord[:n_layers+1], val[:n_layers]) async
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
                 for (size_t i = 0; i < size_domain_list; i++) {
                     size_t idx = domain_data_list[i];
                     coords_k = getCoordinateK(idx, Nx, Ny);
@@ -612,7 +612,7 @@ namespace Functions {
             }
         } else if (axis == Z) {
             for (int l = 0; l < n_layers; ++l) {
-#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(bord[:n_layers+1], val[:n_layers]) async
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
                 for (size_t i = 0; i < size_domain_list; i++) {
                     size_t idx = domain_data_list[i];
                     coords_k = getCoordinateK(idx, Nx, Ny);

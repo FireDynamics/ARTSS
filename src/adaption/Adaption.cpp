@@ -238,7 +238,8 @@ void Adaption::expand(Coordinate<long> *shift, bool start, size_t *arr_idx_expan
         other_axes[0] = CoordinateAxis::X;
         other_axes[1] = CoordinateAxis::Y;
     }
-#pragma acc data present(arr_idx_expansion[:len_e])
+    auto tmp = new Coordinate<size_t>();
+#pragma acc data present(arr_idx_expansion[:len_e]) copyin(shift, tmp, other_axes)
     {
         long shift_value = (*shift)[axis];
         size_t other_axes0_start = domain_data->get_start_index_CD(other_axes[0]);
@@ -257,7 +258,6 @@ void Adaption::expand(Coordinate<long> *shift, bool start, size_t *arr_idx_expan
             for (size_t k = other_axes1_start; k <= other_axes1_end; k++) {
                 for (size_t j = other_axes0_start; j <= other_axes0_end; j++) {
                     for (long ii = 0; ii < shift_value; ii++) {
-                        auto tmp = new Coordinate<size_t>();
                         (*tmp)[other_axes[1]] = k;
                         (*tmp)[other_axes[0]] = j;
                         (*tmp)[axis] = i1 + ii;
@@ -309,7 +309,8 @@ void Adaption::reduce(Coordinate<long> *shift, bool start, size_t *arr_idx_reduc
         other_axes[0] = CoordinateAxis::X;
         other_axes[1] = CoordinateAxis::Y;
     }
-#pragma acc data present(arr_idx_reduction[:len_r])
+    auto tmp = new Coordinate<size_t>();
+#pragma acc data present(arr_idx_reduction[:len_r]) copyin(other_axes, tmp, shift)
     {
         long shift_value = (*shift)[axis];
         size_t other_axes0_start = domain_data->get_start_index_CD(other_axes[0]);
@@ -326,13 +327,11 @@ void Adaption::reduce(Coordinate<long> *shift, bool start, size_t *arr_idx_reduc
             for (size_t k = other_axes1_start; k <= other_axes1_end; k++) {
                 for (size_t j = other_axes0_start; j <= other_axes0_end; j++) {
                     for (long ii = 0; ii < shift_value; ii++) {
-                        auto tmp = new Coordinate<size_t>();
                         (*tmp)[other_axes[1]] = k;
                         (*tmp)[other_axes[0]] = j;
                         (*tmp)[axis] = i1 - ii - 1;
                         size_t idx = tmp->get_index(Nx, Ny);
                         *(arr_idx_reduction + counter++) = idx;
-                        delete tmp;
                     }
                 }
             }
@@ -343,18 +342,17 @@ void Adaption::reduce(Coordinate<long> *shift, bool start, size_t *arr_idx_reduc
             for (size_t k = other_axes1_start; k <= other_axes1_end; k++) {
                 for (size_t j = other_axes0_start; j <= other_axes0_end; j++) {
                     for (long ii = 0; ii < shift_value; ii++) {
-                        auto tmp = new Coordinate<size_t>();
                         (*tmp)[other_axes[1]] = k;
                         (*tmp)[other_axes[0]] = j;
                         (*tmp)[axis] = i2 + ii + 2;
                         size_t idx = tmp->get_index(Nx, Ny);
                         *(arr_idx_reduction + counter++) = idx;
-                        delete tmp;
                     }
                 }
             }
         }
     }
+    delete tmp;
     delete[] other_axes;
 }
 
@@ -399,29 +397,29 @@ bool Adaption::adapt(Settings::Settings const &settings, const Field &field,
         reduction_start = false;
         reduction_end = false;
     }
-#pragma acc data present(f) copy(expansion_counter_start, expansion_counter_end, reduction_counter_start, reduction_counter_end)
+
+    auto start = new Coordinate<size_t>(
+            domain_data->get_start_index_CD(X),
+            domain_data->get_start_index_CD(Y),
+            domain_data->get_start_index_CD(Z));
+    auto end = new Coordinate<size_t>(
+            domain_data->get_end_index_CD(X),
+            domain_data->get_end_index_CD(Y),
+            domain_data->get_end_index_CD(Z));
+    auto tmp = new Coordinate<size_t>();
+#pragma acc data present(field) copy(expansion_counter_start, expansion_counter_end, reduction_counter_start, reduction_counter_end) copyin(shift_start, shift_end, tmp, other_axes)
     {
         size_t Nx = domain_data->get_Nx();
         size_t Ny = domain_data->get_Ny();
-
-        auto start = new Coordinate<size_t>(
-                domain_data->get_start_index_CD(X),
-                domain_data->get_start_index_CD(Y),
-                domain_data->get_start_index_CD(Z));
-        auto end = new Coordinate<size_t>(
-                domain_data->get_end_index_CD(X),
-                domain_data->get_end_index_CD(Y),
-                domain_data->get_end_index_CD(Z));
 
         // comments refer to the x-direction to make it easier to understand
         // expansion - expand if there is at least one cell in the buffer area fulfills the condition
         // reduction - reduce if all cells do not fulfil the condition any longer
         // loop through left side of cuboid in x direction
-#pragma acc parallel loop collapse(2) present(f) reduction(+:expansion_counter_start, reduction_counter_start, expansion_counter_end, reduction_counter_end)
+#pragma acc parallel loop collapse(2) present(field) reduction(+:expansion_counter_start, reduction_counter_start, expansion_counter_end, reduction_counter_end)
         for (size_t j = (*start)[other_axes[0]]; j <= (*end)[other_axes[0]]; j++) {
             for (size_t k = (*start)[other_axes[1]]; k <= (*end)[other_axes[1]]; k++) {
                 // check innermost plane of the buffer zone on the left side
-                auto tmp = new Coordinate<size_t>();
                 (*tmp)[other_axes[1]] = k;
                 (*tmp)[other_axes[0]] = j;
                 (*tmp)[axis] = (*start)[axis] + no_buffer_cell - 1;
@@ -454,7 +452,6 @@ bool Adaption::adapt(Settings::Settings const &settings, const Field &field,
                         reduction_counter_end++;
                     }
                 }
-                delete tmp;
             }
         }
     }
@@ -485,6 +482,7 @@ bool Adaption::adapt(Settings::Settings const &settings, const Field &field,
             (*shift_end)[axis] = -1;
         }
     }
+    delete tmp;
     delete[] other_axes;
     return (expansion_counter_end + expansion_counter_start) > 0 || reduction_counter_start == 0 ||
            reduction_counter_end == 0;
