@@ -1,4 +1,4 @@
-/// \file       Boundary.cpp
+/// \file       Domain.cpp
 /// \brief      Data class of boundary object
 /// \date       Oct 01, 2019
 /// \author     My Linh Würzburger
@@ -19,13 +19,16 @@ Domain::Domain(Settings::Settings const &settings,
                size_t multigrid_level) :
                m_multigrid_level(multigrid_level), m_size_boundary() {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(Domain).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
     init(size_obstacle_list, size_surface_list);
     inner_cells(obstacle_list, size_obstacle_list);
     boundary_cells(surface_list, size_surface_list);
 
-    Algorithm::merge_sort(m_inner_list, m_boundary_list, m_size_inner_list, m_size_boundary_list, m_domain_list);
+    Algorithm::merge_sort(settings,
+                          m_inner_list, m_boundary_list,
+                          m_size_inner_list, m_size_boundary_list,
+                          m_domain_list);
 #ifndef BENCHMARKING
     print(size_obstacle_list, size_surface_list);
     control(size_obstacle_list, size_surface_list);

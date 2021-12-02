@@ -43,9 +43,9 @@ namespace Utility {
 /// \param  start_coordinate X1/Y1/Z1
 /// \return real Calculated index (i/j/k) in (x/y/z)-direction
 // *************************************************************************************************
-    size_t get_index(real physical_coordinate, real spacing, real start_coordinate) {
-        return std::round((-start_coordinate + physical_coordinate) / spacing) + 1;
-    }
+size_t get_index(real physical_coordinate, real spacing, real start_coordinate) {
+    return std::round((-start_coordinate + physical_coordinate) / spacing) + 1;
+}
 
 // ================================= Split string at character =====================================
 // *************************************************************************************************
@@ -53,9 +53,9 @@ namespace Utility {
 /// \param  text     String
 /// \param  delimiter Where to split
 // *************************************************************************************************
-    std::vector<std::string> split(const std::string &text, char delimiter) {
-        return split(text.c_str(), delimiter);
-    }
+std::vector<std::string> split(const std::string &text, char delimiter) {
+    return split(text.c_str(), delimiter);
+}
 
 // ================================= Split string at character =====================================
 // *************************************************************************************************
@@ -63,15 +63,15 @@ namespace Utility {
 /// \param  text     String
 /// \param  delimiter Where to split
 // *************************************************************************************************
-    std::vector<std::string> split(const char *text, char delimiter) {
-        std::vector<std::string> tokens;
-        std::string token;
-        std::istringstream tokenStream(text);
-        while (std::getline(tokenStream, token, delimiter)) {
-            tokens.push_back(token);
-        }
-        return tokens;
+std::vector<std::string> split(const char *text, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(text);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
     }
+    return tokens;
+}
 
 #ifdef GPU_DEBUG
     // =====================creates a new logger for the GPU =======================
@@ -121,13 +121,12 @@ namespace Utility {
 #endif
 
 #ifndef BENCHMARKING
-
 // ======================= creates a new logger ================================
 // *****************************************************************************
 /// \brief  creates a new named logger this function is only available
 ///         if BENCHMARKING is not enabled
 /// \param  settings the settings to create the logger
-//          ("logging/level", "logging/file")
+///         ("logging/level", "logging/file")
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
 std::shared_ptr<spdlog::logger> create_logger(Settings::Settings const &settings, std::string const logger_name) {
@@ -159,22 +158,21 @@ std::shared_ptr<spdlog::logger> create_logger(
         stdout_sink->set_pattern("%^%-8l: %v%$");
     }
 
-        if (!file_sink) {
-            file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
-            file_sink->set_level(spdlog::level::trace);
-        }
-
-        std::vector<spdlog::sink_ptr> sinks;
-        sinks.reserve(2);
-        sinks.push_back(stdout_sink);
-        sinks.push_back(file_sink);
-        auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
-        logger->flush_on(spdlog::level::err);
-        logger->set_level(spdlog::level::trace);
-
-        return logger;
+    if (!file_sink) {
+        file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
+        file_sink->set_level(spdlog::level::trace);
     }
 
+    std::vector<spdlog::sink_ptr> sinks;
+    sinks.reserve(2);
+    sinks.push_back(stdout_sink);
+    sinks.push_back(file_sink);
+    auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
+    logger->flush_on(spdlog::level::err);
+    logger->set_level(spdlog::level::trace);
+
+    return logger;
+}
 #endif
 
 
@@ -182,42 +180,42 @@ void log_field_info(Settings::Settings const &settings, Field &field, const std:
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(settings, logger_name);
 #endif
-        auto boundary = BoundaryController::getInstance();
-        size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
+    auto boundary = BoundaryController::getInstance();
+    size_t *inner_list = boundary->get_domain_inner_list_level_joined();
+    size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
-        size_t idx = inner_list[0];
-        real minimum_inner = field[idx];
-        real maximum_inner = field[idx];
-        real average_inner = field[idx];
-        for (size_t i = 1; i < size_inner_list; i++) {
-            idx = inner_list[i];
-            real value = field[idx];
-            if (value < minimum_inner) {
-                minimum_inner = value;
-            }
-            if (value > maximum_inner) {
-                maximum_inner = value;
-            }
-            average_inner += value;
+    size_t idx = inner_list[0];
+    real minimum_inner = field[idx];
+    real maximum_inner = field[idx];
+    real average_inner = field[idx];
+    for (size_t i = 1; i < size_inner_list; i++) {
+        idx = inner_list[i];
+        real value = field[idx];
+        if (value < minimum_inner) {
+            minimum_inner = value;
         }
-        average_inner /= size_inner_list;
-#ifndef BENCHMARKING
-        logger->info("minimum inner {}: {}", text, minimum_inner);
-        logger->info("maximum inner {}: {}", text, maximum_inner);
-        logger->info("average inner {}: {}", text, average_inner);
-#endif
+        if (value > maximum_inner) {
+            maximum_inner = value;
+        }
+        average_inner += value;
     }
+    average_inner /= size_inner_list;
+#ifndef BENCHMARKING
+    logger->info("minimum inner {}: {}", text, minimum_inner);
+    logger->info("maximum inner {}: {}", text, maximum_inner);
+    logger->info("average inner {}: {}", text, average_inner);
+#endif
+}
 
 //================================= Remove extension ===============================================
 // *************************************************************************************************
 /// \brief  Removes extension from filename
 /// \param  filename    xml-file name (via argument)
 // *************************************************************************************************
-    std::string remove_extension(const std::string &filename) {
-        size_t lastdot = filename.find_last_of('.');
-        if (lastdot == std::string::npos) return filename;
-        return filename.substr(0, lastdot);
-    }
+std::string remove_extension(const std::string &filename) {
+    size_t lastdot = filename.find_last_of('.');
+    if (lastdot == std::string::npos) return filename;
+    return filename.substr(0, lastdot);
+}
 
 }  // namespace Utility

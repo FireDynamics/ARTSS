@@ -40,7 +40,7 @@ Multigrid::Multigrid(Settings::Settings const &settings,
     m_MG_domain_object_list = new Domain *[m_multigrid_levels + 1];
     m_jl_domain_boundary_list_patch_divided = new SingleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_jl_domain_boundary_list_patch_divided[patch]  = new SingleJoinedList(m_multigrid_levels);
+        m_jl_domain_boundary_list_patch_divided[patch]  = new SingleJoinedList(m_settings, m_multigrid_levels);
     }
 
     // init obstacle
@@ -50,7 +50,7 @@ Multigrid::Multigrid(Settings::Settings const &settings,
 
     m_jl_obstacle_boundary_list_patch_divided = new MultipleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_jl_obstacle_boundary_list_patch_divided[patch]  = new MultipleJoinedList(m_multigrid_levels, m_number_of_obstacle_objects);
+        m_jl_obstacle_boundary_list_patch_divided[patch]  = new MultipleJoinedList(m_settings, m_multigrid_levels, m_number_of_obstacle_objects);
     }
 
     m_MG_surface_object_list = new Surface **[m_multigrid_levels + 1];
@@ -58,7 +58,7 @@ Multigrid::Multigrid(Settings::Settings const &settings,
 
     m_jl_surface_list_patch_divided = new MultipleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_jl_surface_list_patch_divided[patch]  = new MultipleJoinedList(m_multigrid_levels, m_number_of_surface_objects);
+        m_jl_surface_list_patch_divided[patch]  = new MultipleJoinedList(m_settings, m_multigrid_levels, m_number_of_surface_objects);
     }
 
     if (m_number_of_obstacle_objects > 0) {
@@ -332,7 +332,8 @@ void Multigrid::create_multigrid_obstacle_lists() {
                 Obstacle *obstacle = m_MG_obstacle_object_list[level][o];
                 size_t new_size = size + obstacle->get_size_obstacle_list();
                 auto obstacle_list_tmp = new size_t[new_size];
-                Algorithm::merge_sort(list, obstacle->get_obstacle_list(),
+                Algorithm::merge_sort(m_settings,
+                                      list, obstacle->get_obstacle_list(),
                                       size, obstacle->get_size_obstacle_list(),
                                       obstacle_list_tmp);
                 delete[] list;

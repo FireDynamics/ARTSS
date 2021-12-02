@@ -19,10 +19,9 @@
 #include "../boundary/BoundaryController.h"
 
 Adaption::Adaption(Settings::Settings const &settings, FieldController *field_controller) :
-        m_shift_start(), m_shift_end() {
-    m_field_controller = field_controller;
+        m_shift_start(), m_shift_end(), m_field_controller(field_controller) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(Adaption).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
     auto domain_data = DomainData::getInstance();
     m_dynamic = settings.get_bool("adaption/dynamic");
@@ -47,7 +46,7 @@ Adaption::Adaption(Settings::Settings const &settings, FieldController *field_co
             m_logger->critical("Type {} is not defined", init);
 #endif
             std::exit(1);
-            ///TODO Error Handling
+            //TODO Error Handling
         }
 
         m_dynamic_end = false;
@@ -462,12 +461,12 @@ bool Adaption::adapt(Settings::Settings const &settings, const Field &field,
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
-        m_logger->error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
-                expansion_counter_start,
-                reduction_counter_start,
-                expansion_counter_end,
-                reduction_counter_end);
+        auto logger = Utility::create_logger(settings, typeid(Adaption).name());
+        logger->error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
+                      expansion_counter_start,
+                      reduction_counter_start,
+                      expansion_counter_end,
+                      reduction_counter_end);
 #endif
         //TODO Error Handling
         //throw std::exception();

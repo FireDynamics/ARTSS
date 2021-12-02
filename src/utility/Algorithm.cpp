@@ -19,11 +19,12 @@ namespace Algorithm {
 /// \param size_list2 size of list2
 /// \param merged_list result of merge sort. size should be size_list1 + size_list2
 // *************************************************************************************************
-    void merge_sort(const size_t *list1, const size_t *list2,
+    void merge_sort(Settings::Settings const &settings,
+                    const size_t *list1, const size_t *list2,
                     const size_t size_list1, const size_t size_list2,
                     size_t *merged_list) {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(class_name);
+        auto logger = Utility::create_logger(settings, class_name);
 #endif
         size_t counter_list1 = 0, counter_list2 = 0, counter_merged_list = 0;
         while (counter_list1 < size_list1 && counter_list2 < size_list2) {

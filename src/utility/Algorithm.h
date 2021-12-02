@@ -9,10 +9,16 @@
 
 #include <string>
 #include <vector>
+#include "settings/Settings.h"
 
 namespace Algorithm {
-    void merge_sort(const size_t *list1, const size_t *list2, size_t size_list1, size_t size_list2, size_t *merged_list);
-    std::vector<size_t> merge_sort_with_duplicates(const size_t *list1, const size_t size_list1, const size_t *list2, const size_t size_list2);
+    void merge_sort(Settings::Settings const &settings,
+                    const size_t *list1, const size_t *list2,
+                    size_t size_list1, size_t size_list2,
+                    size_t *merged_list);
+    std::vector<size_t> merge_sort_with_duplicates(
+            const size_t *list1, size_t size_list1,
+            const size_t *list2, size_t size_list2);
 };
 
 

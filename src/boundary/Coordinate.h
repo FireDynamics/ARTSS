@@ -9,10 +9,12 @@
 
 #include <cstdlib>
 #include <algorithm>
+#include <string>
+#include <vector>
 #include "../utility/GlobalMacrosTypes.h"
 #ifndef BENCHMARKING
 #include <fmt/format.h>
-#endif BENCHMARKING
+#endif
 
 inline static const std::vector<std::string> axis_names = {"X", "Y", "Z"};
 
@@ -114,24 +116,25 @@ class Coordinate {
     }
     CoordinateAxis static match_axis(const std::string &string) {
         std::string upper_case;
-        std::transform(string.begin(), string.end(), upper_case, ::toupper);
+        std::transform(string.begin(), string.end(), upper_case.begin(), ::toupper);
         for (size_t an = 0; an < axis_names.size(); an++) {
             if (axis_names[an] == string) return (CoordinateAxis) an;
         }
         return UNKNOWN_AXIS;
     }
+
   private:
     numeral *m_coordinates;
 };
 
 #ifndef BENCHMARKING
-template <class Coordinate> struct fmt::formatter<Coordinate> {
+template <typename T> struct fmt::formatter<Coordinate<T>> {
     // Parses the format specifier, if needed (in my case, only return an iterator to the context)
     constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
 
     // Actual formatting. The second parameter is the format specifier and the next parameters are the actual values from my custom type
     template <typename FormatContext>
-    auto format(const Coordinate &coord, FormatContext &ctx) -> decltype(ctx.out()) {
+    auto format(const Coordinate<T> &coord, FormatContext &ctx) -> decltype(ctx.out()) {
         return format_to(
                 ctx.out(),
                 "({}|{}|{})", coord[0], coord[1], coord[2]);

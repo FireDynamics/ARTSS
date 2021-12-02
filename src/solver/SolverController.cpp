@@ -490,9 +490,8 @@ void SolverController::set_up_fields(const std::string &string_solver) {
                 values[l] = m_settings.get_real(val_out_l);
             }
 
-            Functions::layers(log_level, log_file,
-                    m_field_controller->get_field_T(),
-                    n_layers, axis, borders, values);
+            Functions::layers(m_field_controller->get_field_T(),
+                              n_layers, axis, borders, values);
 
             if (random) {
                 call_random(m_field_controller->get_field_T());

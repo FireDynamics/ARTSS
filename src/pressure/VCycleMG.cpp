@@ -574,7 +574,7 @@ void VCycleMG::Solve(Field &out, Field &tmp, Field const &b, const size_t level,
     }
 }
 
-void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
+void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &, Field const &b, const size_t level, bool sync) {
     auto domain_data = DomainData::getInstance();
 
     // local variables and parameters for GPU
@@ -606,7 +606,7 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
     }
 }
 
-void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
+void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &, Field const &b, const size_t level, bool sync) {
     auto domain_data = DomainData::getInstance();
 
     // local variables and parameters for GPU

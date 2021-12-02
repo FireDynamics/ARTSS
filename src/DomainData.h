@@ -105,7 +105,7 @@ class DomainData {
 
     size_t inline get_levels() const { return m_levels; }
 
-    size_t inline get_size(size_t level = 0) const;
+    size_t get_size(size_t level = 0) const;
 
     bool resize(const Coordinate<long>& shift_start, const Coordinate<long>& shift_end);
 
