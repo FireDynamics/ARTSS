@@ -37,7 +37,7 @@ class Domain {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-
+    Settings::Settings const &m_settings;
     size_t m_multigrid_level;
 
     size_t *m_domain_list;

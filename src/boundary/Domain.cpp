@@ -17,15 +17,16 @@ Domain::Domain(Settings::Settings const &settings,
                size_t **surface_list,
                PatchObject &size_surface_list,
                size_t multigrid_level) :
+               m_settings(settings),
                m_multigrid_level(multigrid_level), m_size_boundary() {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     init(size_obstacle_list, size_surface_list);
     inner_cells(obstacle_list, size_obstacle_list);
     boundary_cells(surface_list, size_surface_list);
 
-    Algorithm::merge_sort(settings,
+    Algorithm::merge_sort(m_settings,
                           m_inner_list, m_boundary_list,
                           m_size_inner_list, m_size_boundary_list,
                           m_domain_list);
