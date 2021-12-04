@@ -18,7 +18,7 @@
 
 inline static const std::vector<std::string> axis_names = {"X", "Y", "Z"};
 
-const size_t number_of_axis = 3;
+const size_t number_of_axes = 3;
 enum CoordinateAxis : int {
     UNKNOWN_AXIS = -1,
     X = 0,
@@ -30,20 +30,20 @@ template<class numeral>    // TODO(cvm) restrict to numerical values
 class Coordinate {
   public:
     Coordinate(numeral x, numeral y, numeral z) {
-        m_coordinates = new numeral[number_of_axis];
+        m_coordinates = new numeral[number_of_axes];
         m_coordinates[CoordinateAxis::X] = x;
         m_coordinates[CoordinateAxis::Y] = y;
         m_coordinates[CoordinateAxis::Z] = z;
     };
 
     Coordinate() {
-        m_coordinates = new numeral[number_of_axis];
-        std::fill(m_coordinates, m_coordinates + number_of_axis, 0);
+        m_coordinates = new numeral[number_of_axes];
+        std::fill(m_coordinates, m_coordinates + number_of_axes, 0);
     };
 
     Coordinate(const Coordinate &original) {
-        m_coordinates = new numeral[number_of_axis];
-        for (size_t axis = 0; axis < number_of_axis; axis++) {
+        m_coordinates = new numeral[number_of_axes];
+        for (size_t axis = 0; axis < number_of_axes; axis++) {
             m_coordinates[axis] = original.m_coordinates[axis];
         }
     }
@@ -58,14 +58,14 @@ class Coordinate {
 
     Coordinate &operator+=(const Coordinate &rhs) {
         auto rhs_patches = rhs.m_coordinates;
-        for (size_t i = 0; i < number_of_axis; ++i) {
+        for (size_t i = 0; i < number_of_axes; ++i) {
             this->m_coordinates[i] += rhs_patches[i];
         }
         return *this;
     }
 
     Coordinate &operator+=(const numeral x) {
-        for (size_t i = 0; i < number_of_axis; ++i) {
+        for (size_t i = 0; i < number_of_axes; ++i) {
             this->m_coordinates[i] += x;
         }
         return *this;
@@ -73,14 +73,14 @@ class Coordinate {
 
     Coordinate &operator*=(const Coordinate &rhs) {
         auto rhs_patches = rhs.m_coordinates;
-        for (size_t i = 0; i < number_of_axis; ++i) {
+        for (size_t i = 0; i < number_of_axes; ++i) {
             this->m_coordinates[i] *= rhs_patches[i];
         }
         return *this;
     }
 
     Coordinate &operator*=(const numeral x) {
-        for (size_t i = 0; i < number_of_axis; ++i) {
+        for (size_t i = 0; i < number_of_axes; ++i) {
             this->m_coordinates[i] *= x;
         }
         return *this;
@@ -88,14 +88,14 @@ class Coordinate {
 
     Coordinate &operator-=(const Coordinate &rhs) {
         auto rhs_patches = rhs.m_coordinates;
-        for (size_t i = 0; i < number_of_axis; ++i) {
+        for (size_t i = 0; i < number_of_axes; ++i) {
             this->m_coordinates[i] -= rhs_patches[i];
         }
         return *this;
     }
 
     Coordinate &operator-=(const numeral x) {
-        for (size_t i = 0; i < number_of_axis; ++i) {
+        for (size_t i = 0; i < number_of_axes; ++i) {
             this->m_coordinates[i] -= x;
         }
         return *this;
@@ -111,7 +111,7 @@ class Coordinate {
     size_t get_index(size_t Nx, size_t Ny) { return IX(m_coordinates[X], m_coordinates[Y], m_coordinates[Z], Nx, Ny); }
 
     void copy(Coordinate<numeral> original) {
-        for (size_t axis = 0; axis < number_of_axis; axis++) {
+        for (size_t axis = 0; axis < number_of_axes; axis++) {
             m_coordinates[axis] = original.m_coordinates[axis];
         }
     }

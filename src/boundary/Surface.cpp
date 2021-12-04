@@ -7,10 +7,6 @@
 #include "Surface.h"
 
 
-// TODO(issue 15): surface implementing
-//  - remove surface cells from domain domain boundary cells
-//  - develop a (better) concept for boundary conditions, if necessary
-//  - make sure that surfaces does not extend to corner or edge cells
 Surface::Surface(Settings::Settings const &settings,
                  real x1, real x2,
                  real y1, real y2,
@@ -44,7 +40,7 @@ Surface::Surface(Settings::Settings const &settings,
     size_t k2 = get_matching_index(z2, dz, Z1);
     m_end.set_coordinate(i2, j2, k2);
 
-    for (size_t axis = 0; axis < number_of_axis; axis++) {
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
         if (m_start[axis] == domain_data->get_start_index_CD(CoordinateAxis(axis)) +-1) {
             m_patch = Patch(axis * 2);
         }
@@ -104,7 +100,7 @@ void Surface::print() {
 }
 
 void Surface::init() {
-    for (size_t axis = 0; axis < number_of_axis; axis++) {
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
         if (m_end[axis] != m_start[axis]) {
             m_strides[axis] = m_end[axis] - m_start[axis] + 1;
         }

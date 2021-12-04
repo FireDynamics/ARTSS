@@ -455,6 +455,7 @@ void Multigrid::create_multigrid_domain_lists() {
             size_surface_list->add_value(patch, m_jl_surface_list_patch_divided[patch]->get_slice_size(level));
         }
         size_t *slice_obstacle_list = m_jl_obstacle_list.get_slice(level);
+        // TODO(issue 178) send only obstacles which are in the computational domain
         auto domain = new Domain(m_settings,
                                  slice_obstacle_list,
                                  m_jl_obstacle_list.get_slice_size(level),
@@ -528,7 +529,7 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
 
         auto start_coarse = new Coordinate<size_t>();
         auto *end_coarse = new Coordinate<size_t>();
-        for (size_t axis = 0; axis < number_of_axis; axis++) {
+        for (size_t axis = 0; axis < number_of_axes; axis++) {
             size_t start_fine = surface_fine->get_start_index(CoordinateAxis(axis));
             (*start_coarse)[axis] = static_cast<size_t>((start_fine + 1) / 2);
 
@@ -537,7 +538,7 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
         }
 
 #ifndef BENCHMARKING
-        for (size_t axis = 0; axis < number_of_axis; axis++) {
+        for (size_t axis = 0; axis < number_of_axes; axis++) {
             size_t start_fine = surface_fine->get_start_index(CoordinateAxis(axis));
             size_t end_fine = surface_fine->get_end_index(CoordinateAxis(axis));
             if (end_fine - start_fine + 1 < domain_data->get_nx(level - 1)
@@ -601,7 +602,7 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
 
         auto start_coarse = new Coordinate<size_t>();
         auto end_coarse = new Coordinate<size_t>();
-        for (size_t axis = 0; axis < number_of_axis; axis++) {
+        for (size_t axis = 0; axis < number_of_axes; axis++) {
             (*start_coarse)[axis] = static_cast<size_t>(((*start_fine)[axis] + 1) / 2);
             (*end_coarse)[axis] = static_cast<size_t>(((*end_fine)[axis] + 1) / 2);
         }
@@ -747,6 +748,7 @@ void Multigrid::update_lists() {
     //TODO(issue 178) rework update function especially with obstacles
     // develop concept where obstacles and surfaces are distinguished by whether
     // they are in the computational domain or not.
+    // m_MG_domain_object_list[0]->update_lists()
     remove_domain_lists_from_GPU();
     create_multigrid_domain_lists();
     send_domain_lists_to_GPU();

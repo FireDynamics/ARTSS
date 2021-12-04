@@ -71,7 +71,7 @@ void Obstacle::init() {
     size_t Nx = domain_data->get_Nx(m_level);
     size_t Ny = domain_data->get_Ny(m_level);
 
-    for (size_t axis = 0; axis < number_of_axis; axis++) {
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
         m_strides[axis] = m_end[axis] - m_start[axis] + 1;
     }
 
@@ -593,7 +593,7 @@ bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
     auto logger = Utility::create_logger(o1->m_settings, "Obstacle");
 #endif
     bool overlap = false;
-    for (size_t axis = 0; axis < number_of_axis; axis++) {
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
         overlap = overlap || circular_constraints(o1, o2, static_cast<CoordinateAxis>(axis));
     }
 #ifndef BENCHMARKING
@@ -955,7 +955,7 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
 // *************************************************************************************************
 bool Obstacle::is_corner_cell(const Coordinate<size_t> &coord) const {
     bool is_corner_cell = true;
-    for (size_t axis = 0; axis < number_of_axis; axis++) {
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
         is_corner_cell = is_corner_cell && (coord[axis] == m_start[axis] || coord[axis] == m_end[axis]);
     }
     return is_corner_cell;

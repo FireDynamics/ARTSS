@@ -51,7 +51,7 @@ DomainData::DomainData(Settings::Settings const &settings) :
         start_coords_CD.copy(start_coords_PD);
         end_coords_CD.copy(end_coords_PD);
     }
-    for (size_t axis = 0; axis < number_of_axis; axis++) {
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
         length_PD[axis] = fabs(end_coords_PD[axis] - start_coords_PD[axis]);
     }
 
@@ -68,7 +68,7 @@ DomainData::DomainData(Settings::Settings const &settings) :
 // ***************************************************************************************
 void DomainData::calc_MG_values() {
     for (size_t level = 1; level < m_levels + 1; ++level) {
-        for (size_t axis = 0; axis < number_of_axis; axis++) {
+        for (size_t axis = 0; axis < number_of_axes; axis++) {
             number_of_inner_cells[level][axis] = (number_of_inner_cells[level - 1][axis] == 1) ? 1 : static_cast<size_t> (std::round(number_of_inner_cells[level - 1][axis] / 2));
         }
     }
@@ -83,7 +83,7 @@ DomainData *DomainData::getInstance(Settings::Settings const &settings) {
 
 size_t DomainData::get_size(size_t level) const {
     size_t size = 1;
-    for (size_t axis = 0; axis < number_of_axis; axis++) {
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
         size *= get_number_of_cells(CoordinateAxis(axis), level);
     }
     return size;
@@ -99,7 +99,7 @@ size_t DomainData::get_size(size_t level) const {
 bool DomainData::resize(const Coordinate<long> &shift_start, const Coordinate<long> &shift_end) {
     bool update = false;
     real tmp;
-    for (size_t axis = 0; axis < number_of_axis; axis++) {
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
         if (set_new_value(shift_start[axis], start_coords_PD[axis], end_coords_PD[axis], start_coords_CD[axis], get_spacing(CoordinateAxis(axis)), &tmp)) {
             start_coords_CD[axis] = tmp;
             update = true;
@@ -114,7 +114,7 @@ bool DomainData::resize(const Coordinate<long> &shift_start, const Coordinate<lo
 #ifndef BENCHMARKING
         m_logger->info("Resize domain at start {} and end {}", shift_start, shift_end);
 #endif
-        for (size_t axis = 0; axis < number_of_axis; axis++) {
+        for (size_t axis = 0; axis < number_of_axes; axis++) {
             number_of_inner_cells[0][axis] = static_cast<size_t> (std::round(get_length_CD(CoordinateAxis(axis)) / get_spacing(CoordinateAxis(axis)) + 2));
         }
         calc_MG_values();
@@ -212,7 +212,7 @@ void DomainData::control() {
 #ifndef BENCHMARKING
     if (m_levels > 0) {
         int minimum_amount_of_cells = static_cast<int>(std::pow(2, m_levels));
-        for (size_t axis = 0; axis < number_of_axis; axis++) {
+        for (size_t axis = 0; axis < number_of_axes; axis++) {
             size_t number_of_cells = get_number_of_inner_cells(CoordinateAxis(axis));
             if (number_of_cells % minimum_amount_of_cells != 0) {
                 std::string spacing_name = axis_names[axis];
