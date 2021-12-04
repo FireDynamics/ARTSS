@@ -38,6 +38,7 @@ class Coordinate {
 
     Coordinate() {
         m_coordinates = new numeral[number_of_axis];
+        std::fill(m_coordinates, m_coordinates + number_of_axis, 0);
     };
 
     Coordinate(const Coordinate &original) {
