@@ -1,17 +1,16 @@
-//
-// Created by linh on 01.10.19.
-//
+/// \file       Surface.cpp
+/// \brief      Data class of surface object
+/// \date       Oct 01, 2019
+/// \author     My Linh Wuerzburger
+/// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Surface.h"
 
 
 // TODO(issue 15): surface implementing
-//  - create file description
 //  - remove surface cells from domain domain boundary cells
-//  - develop a (better) concept for boundary conditions
+//  - develop a (better) concept for boundary conditions, if necessary
 //  - make sure that surfaces does not extend to corner or edge cells
-//  - consider moving parsing to BoundaryController.cpp same as for obstacles,
-//    may be not possible/practical depending on the concept for BC
 Surface::Surface(Settings::Settings const &settings,
                  real x1, real x2,
                  real y1, real y2,
@@ -19,6 +18,7 @@ Surface::Surface(Settings::Settings const &settings,
                  const std::string &name) :
         m_settings(settings),
         m_name(name),
+        m_start(), m_end(), m_strides(),
         m_level(0) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(m_settings, typeid(this).name());
@@ -92,9 +92,9 @@ void Surface::print() {
 #ifndef BENCHMARKING
     m_logger->info("Surface name {} on Patch {}", m_name, PatchObject::get_patch_name(m_patch));
     m_logger->info("strides: X: {}, Y: {}, Z:{}",
-                   get_stride(Z),
+                   get_stride(X),
                    get_stride(Y),
-                   get_stride(X));
+                   get_stride(Z));
     m_logger->info("size of Surface: {}", m_size_surface_list);
     m_logger->info("coords: ({}|{}) ({}|{}) ({}|{})",
                    m_start[X], m_end[X],
@@ -104,6 +104,11 @@ void Surface::print() {
 }
 
 void Surface::init() {
+    for (size_t axis = 0; axis < number_of_axis; axis++) {
+        if (m_end[axis] != m_start[axis]) {
+            m_strides[axis] = m_end[axis] - m_start[axis] + 1;
+        }
+    }
     m_size_surface_list = get_stride(X) * get_stride(Y) * get_stride(Z);
     m_surface_list = new size_t[m_size_surface_list];
 

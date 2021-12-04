@@ -1,6 +1,8 @@
-//
-// Created by linh on 01.10.19.
-//
+/// \file       Surface.h
+/// \brief      Data class of surface object
+/// \date       Oct 01, 2019
+/// \author     My Linh Wuerzburger
+/// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_BOUNDARY_SURFACE_H_
 #define ARTSS_BOUNDARY_SURFACE_H_
@@ -33,13 +35,12 @@ class Surface {
     size_t get_size_surface_list() const { return m_size_surface_list; }
 
     Patch get_patch() { return m_patch; }
-
-
+    size_t get_level() { return m_level; }
     std::string get_name() { return m_name; }
 
     void print();
 
-    size_t get_stride(CoordinateAxis axis) { return m_end[axis] - m_start[axis] + 1; };
+    size_t get_stride(CoordinateAxis axis) { return m_strides[axis]; };
     size_t get_start_index(CoordinateAxis axis) { return m_start[axis]; }
     size_t get_end_index(CoordinateAxis axis) { return m_end[axis]; }
 
@@ -50,9 +51,10 @@ private:
 
     Coordinate<size_t> m_start;
     Coordinate<size_t> m_end;
+    Coordinate<size_t> m_strides;
 
     size_t *m_surface_list;  // indices of surface
-    size_t m_size_surface_list;
+    size_t m_size_surface_list = 0;
 
     void init();
 
