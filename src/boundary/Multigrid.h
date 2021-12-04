@@ -81,7 +81,6 @@ private:
     SingleJoinedList m_jl_obstacle_list;  // all obstacle boundary cells
     MultipleJoinedList **m_jl_obstacle_boundary_list_patch_divided;  // [Patch]
 
-    SingleJoinedList m_jl_surface_list;
     MultipleJoinedList **m_jl_surface_list_patch_divided;  // [Patch]
 
     void create_multigrid_obstacle_lists();

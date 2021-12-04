@@ -1,4 +1,4 @@
-/// \file       Multigrid.h
+/// \file       Multigrid.cpp
 /// \brief      Creates all lists needed for multigrid
 /// \date       Oct 01, 2019
 /// \author     My Linh Wuerzburger
@@ -24,7 +24,6 @@ Multigrid::Multigrid(Settings::Settings const &settings,
         m_jl_domain_list(m_settings, multigrid_levels),
         m_jl_domain_inner_list(m_settings, multigrid_levels),
         m_jl_obstacle_list(m_settings, multigrid_levels),
-        m_jl_surface_list(m_settings, multigrid_levels),
         m_bdc_boundary(bdc_boundary),
         m_bdc_obstacle(bdc_obstacles),
         m_bdc_surface(bdc_surfaces) {
@@ -58,7 +57,7 @@ Multigrid::Multigrid(Settings::Settings const &settings,
 
     m_jl_surface_list_patch_divided = new MultipleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_jl_surface_list_patch_divided[patch]  = new MultipleJoinedList(m_settings, m_multigrid_levels, m_number_of_surface_objects);
+        m_jl_surface_list_patch_divided[patch] = new MultipleJoinedList(m_settings, m_multigrid_levels, m_number_of_surface_objects);
     }
 
     if (m_number_of_obstacle_objects > 0) {
@@ -414,7 +413,6 @@ void Multigrid::create_multigrid_surface_lists() {
         sum_surface_cells += surface_dominant_restriction(level, sum_surface_patch_divided);
     }
 
-    m_jl_surface_list.set_size(sum_surface_cells);
     for (size_t patch = 0; patch < number_of_patches; patch++) {
         m_jl_surface_list_patch_divided[patch]->set_size((*sum_surface_patch_divided)[patch]);
     }
@@ -422,12 +420,12 @@ void Multigrid::create_multigrid_surface_lists() {
         for (size_t id = 0; id < m_number_of_surface_objects; level++) {
             Patch patch = m_MG_surface_object_list[level][id]->get_patch();
 #ifndef BENCHMARKING
-            m_logger->debug("add surface data to SJL {} {} {}", level,
+            m_logger->debug("add surface data ({}) to MJL with patch={} level={} pointer={}",
+                            m_MG_surface_object_list[level][id]->get_name(),
+                            PatchObject::get_patch_name(patch), level,
                             m_MG_surface_object_list[level][id]->get_size_surface_list());
 #endif
-            m_jl_surface_list.add_data(level,
-                                       m_MG_surface_object_list[level][id]->get_size_surface_list(),
-                                       m_MG_surface_object_list[level][id]->get_surface_list());
+            // all other patches have size 0
             m_jl_surface_list_patch_divided[patch]->add_data(
                     level, id,
                     m_MG_surface_object_list[level][id]->get_size_surface_list(),
@@ -721,13 +719,18 @@ void Multigrid::send_obstacle_lists_to_GPU() {
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
 void Multigrid::apply_boundary_condition(Field &field, bool sync) {
+    // order (shouldn't) matter. Only if there are still cells which have multiple
+    // BC types (obstacle, boundary, surface), but these should be excluded
+    // first obstacles BC, then domain BC and at last surface BC.
     size_t level = field.get_level();
     if (m_number_of_obstacle_objects > 0) {
         for (size_t id = 0; id < m_number_of_obstacle_objects; ++id) {
             (static_cast<BoundaryDataController *> (m_bdc_obstacle[id]))->apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list_patch_divided, id, sync);
         }
     }
+
     m_bdc_boundary->apply_boundary_condition(field, m_jl_domain_boundary_list_patch_divided, sync);
+
     if (m_number_of_surface_objects > 0) {
         Surface **surface_list = *(m_MG_surface_object_list + level);
         for (size_t id = 0; id < m_number_of_surface_objects; ++id) {
