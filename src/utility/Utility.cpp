@@ -14,6 +14,7 @@
 
 #ifndef BENCHMARKING
 
+#include <spdlog/spdlog.h>
 #include <spdlog/cfg/helpers.h>
 #include <clocale>
 
@@ -121,6 +122,12 @@ std::vector<std::string> split(const char *text, char delimiter) {
 #endif
 
 #ifndef BENCHMARKING
+std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
+    // XMLFile should alwas exist. temp hack
+    auto &sinks = spdlog::get("XMLFile")->sinks();
+    return std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
+}
+
 // ======================= creates a new logger ================================
 // *****************************************************************************
 /// \brief  creates a new named logger this function is only available
@@ -163,11 +170,8 @@ std::shared_ptr<spdlog::logger> create_logger(
         file_sink->set_level(spdlog::level::trace);
     }
 
-    std::vector<spdlog::sink_ptr> sinks;
-    sinks.reserve(2);
-    sinks.push_back(stdout_sink);
-    sinks.push_back(file_sink);
-    auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
+    spdlog::sinks_init_list sinks = {stdout_sink, file_sink};
+    auto logger = std::make_shared<spdlog::logger>(logger_name, sinks);
     logger->flush_on(spdlog::level::err);
     logger->set_level(spdlog::level::trace);
 

@@ -392,19 +392,19 @@ void Domain::clear_lists() {
 
 void Domain::joined_list() {
     // create boundary list via merging the six boundary patches
-    std::vector<size_t> boundary_cells;
-    boundary_cells.assign(m_boundary_patch_divided[0], m_boundary_patch_divided[0] + m_size_boundary[0]);
-    for (size_t patch = 1; patch < number_of_patches; patch++) {
-        //TODO(cvm): is that even legal?
-        boundary_cells = Algorithm::merge_sort_with_duplicates(boundary_cells.data(), boundary_cells.size(), m_boundary_patch_divided[patch], m_size_boundary[patch]);
-    }
-    m_size_boundary_list = boundary_cells.size();
-    std::copy(boundary_cells.begin(), boundary_cells.end(), m_boundary_list);
+    // std::vector<size_t> boundary_cells;
+    // boundary_cells.assign(m_boundary_patch_divided[0], m_boundary_patch_divided[0] + m_size_boundary[0]);
+    // for (size_t patch = 1; patch < number_of_patches; patch++) {
+    //     //TODO(cvm): is that even legal?
+    //     boundary_cells = Algorithm::merge_sort_with_duplicates(boundary_cells.data(), boundary_cells.size(), m_boundary_patch_divided[patch], m_size_boundary[patch]);
+    // }
+    // m_size_boundary_list = boundary_cells.size();
+    // std::copy(boundary_cells.begin(), boundary_cells.end(), m_boundary_list);
 
-    m_size_domain_list = m_size_inner_list + m_size_boundary_list;
-    m_domain_list = new size_t[m_size_domain_list];
-    Algorithm::merge_sort(m_settings,
-                          m_inner_list, m_boundary_list,
-                          m_size_inner_list, m_size_boundary_list,
-                          m_domain_list);
+    // m_size_domain_list = m_size_inner_list + m_size_boundary_list;
+    // m_domain_list = new size_t[m_size_domain_list];
+    // Algorithm::merge_sort(m_settings,
+    //                       m_inner_list, m_boundary_list,
+    //                       m_size_inner_list, m_size_boundary_list,
+    //                       m_domain_list);
 }

@@ -16,7 +16,7 @@ DomainData::DomainData(Settings::Settings const &settings) :
         start_coords_PD(),
         end_coords_PD() {
 #ifndef BENCHMARKING
-    //m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
     auto solver = settings.get("solver/description");
     if (solver.find("NS") != std::string::npos || solver.find("Pressure") != std::string::npos) {
