@@ -338,7 +338,7 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
     real dz = domain_data->get_dz();
 
     // calc C for every cell and get the maximum
-#pragma acc data present(u, v, w)
+#pragma acc data present(u, v, w, inner_list[:size_inner_list])
 #pragma acc parallel loop reduction(max:cfl_max)
     for (size_t i = 0; i < size_inner_list; i++) {
         size_t idx = inner_list[i];
