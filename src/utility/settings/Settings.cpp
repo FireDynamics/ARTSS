@@ -4,7 +4,6 @@
 /// \author     von Mach
 /// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <spdlog/spdlog.h>
 #include "Settings.h"
 
 #include "../Utility.h"
