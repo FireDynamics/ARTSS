@@ -6,6 +6,9 @@
 
 #include <vector>
 #include <cmath>
+#ifdef _OPENACC
+#include <accelmath.h>
+#endif
 #include <fstream>
 
 #include "Analysis.h"
@@ -335,7 +338,8 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
     real dz = domain_data->get_dz();
 
     // calc C for every cell and get the maximum
-#pragma acc parallel loop reduction(max:cfl_max) present(u, v, w)
+#pragma acc data present(u, v, w)
+#pragma acc parallel loop reduction(max:cfl_max)
     for (size_t i = 0; i < size_inner_list; i++) {
         size_t idx = inner_list[i];
         // \frac{C}{\Delta t} = \frac{\Delta u}{\Delta x} +
