@@ -39,15 +39,17 @@ namespace Utility {
 
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> create_logger(
-            std::string const level,
-            std::string const file,
-            std::string const loggerName);
+            std::string const logger_level,
+            std::string const logger_file,
+            std::string const logger_name);
     std::shared_ptr<spdlog::logger> create_logger(
             Settings::Settings const &settings,
-            std::string const loggerName);
+            std::string const logger_name);
+    std::shared_ptr<spdlog::logger> create_logger(std::string const logger_name);
 #endif
 #ifdef GPU_DEBUG
-    std::shared_ptr<spdlog::logger> create_gpu_logger(std::string loggerName);
+    std::shared_ptr<spdlog::logger> create_gpu_logger(std::string logger_name);
+    std::shared_ptr<spdlog::logger> create_gpu_logger(Settings::Settings const &settings, std::string logger_name);
 #endif
 }  // namespace Utility
 

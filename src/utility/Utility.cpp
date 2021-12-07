@@ -75,55 +75,42 @@ std::vector<std::string> split(const char *text, char delimiter) {
 }
 
 #ifdef GPU_DEBUG
-    // =====================creates a new logger for the GPU =======================
-    // *****************************************************************************
-    /// \brief  creates a new named logger this function is only available
-    ///         if BENCHMARKING is not enabled and _OPENACC is enabled
-    /// \param  loggerName name of logger, written to log file
-    // *****************************************************************************
-        std::shared_ptr<spdlog::logger> create_gpu_logger(std::string logger_name) {
-        /*
-            static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
-            std::cout << "print name: " << logger_name << std::endl;
-            auto params = Parameters::getInstance();
-            std::string log_level = "debug";
-            std::string log_file = params->get("logging/file") + "_gpu";
+// =====================creates a new logger for the GPU =======================
+// *****************************************************************************
+/// \brief  creates a new named logger this function is only available
+///         if BENCHMARKING is not enabled and _OPENACC is enabled
+/// \param  loggerName name of logger, written to log file
+// *****************************************************************************
+std::shared_ptr<spdlog::logger> create_gpu_logger(std::string logger_name) {
+    // TODO(cvm) set gpu logger to debug and not output
+    auto &sinks = spdlog::get("XMLFile")->sinks();
+    return std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
+}
 
-            if (!file_sink) {
-                file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
-                file_sink->set_level(spdlog::level::trace);
-            }
+std::shared_ptr<spdlog::logger> create_gpu_logger(Settings::Settings const &settings, std::string const logger_name) {
+    static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
 
-            std::shared_ptr<spdlog::logger> logger = spdlog::basic_logger_mt(logger_name, log_file);
-            logger->flush_on(spdlog::level::err);
-            logger->set_level(spdlog::level::trace);
-            return logger;
-        */
+    std::string log_level = "debug";
+    std::string log_file = settings.sget("logging/file") + "_gpu";
 
-        static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
+    if (!file_sink) {
+        file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
+        file_sink->set_level(spdlog::level::trace);
+    }
 
-        auto params = Parameters::getInstance();
-        std::string log_level = params->get("logging/level");
-        std::string log_file = params->get("logging/file") + "_gpu";
-
-        if (!file_sink) {
-            file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
-            file_sink->set_level(spdlog::level::trace);
-        }
-
-        std::vector<spdlog::sink_ptr> sinks;
-        sinks.reserve(1);
-        sinks.push_back(file_sink);
-        auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
-        logger->flush_on(spdlog::level::err);
-        logger->set_level(spdlog::level::trace);
-        return logger;
-        }
+    std::vector<spdlog::sink_ptr> sinks;
+    sinks.reserve(1);
+    sinks.push_back(file_sink);
+    auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
+    logger->flush_on(spdlog::level::err);
+    logger->set_level(spdlog::level::trace);
+    return logger;
+}
 #endif
 
 #ifndef BENCHMARKING
 std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
-    // XMLFile should alwas exist. temp hack
+    // TODO(cvm) XMLFile should always exist. temp hack
     auto &sinks = spdlog::get("XMLFile")->sinks();
     return std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
 }
@@ -147,7 +134,7 @@ std::shared_ptr<spdlog::logger> create_logger(Settings::Settings const &settings
 // *****************************************************************************
 /// \brief  creates a new named logger this function is only available
 ///         if BENCHMARKING is not enabled
-/// \param  level the level of visable messages
+/// \param  level the level of visible messages
 /// \param  file the file to write into
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
