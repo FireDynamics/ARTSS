@@ -11,7 +11,7 @@ MultipleJoinedList::MultipleJoinedList(size_t multigrid_level, size_t number_of_
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
 #ifdef GPU_DEBUG
-    m_gpu_logger = Utility::create_gpu_logger(settings, typeid(this).name());
+    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
 #endif
     m_index_list = new size_t[(multigrid_level + 1) * number_of_objects + 1];
     std::fill(m_index_list, m_index_list + (multigrid_level + 1) * number_of_objects + 1, 0);

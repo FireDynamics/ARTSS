@@ -22,8 +22,8 @@
 
 namespace Utility {
     static std::string class_name = "Utility";
-    static std::string global_logger_name = "ARTSS";
-    static std::string global_gpu_logger_name = "GPU";
+    static std::string global_logger = "ARTSS";
+    static std::string global_gpu_logger = "GPU";
 
 
     std::vector<size_t> get_coordinates(size_t index, size_t Nx, size_t Ny) {
@@ -100,7 +100,7 @@ void create_gpu_logger(Settings::Settings const &settings) {
 
     // TODO (cvm) a bit unnecessary isn't it? probably able to simplify
     std::vector<spdlog::sink_ptr> sinks = {file_sink};
-    auto logger = std::make_shared<spdlog::logger>(global_gpu_logger_name, begin(sinks), end(sinks));
+    auto logger = std::make_shared<spdlog::logger>(global_gpu_logger, begin(sinks), end(sinks));
     spdlog::register_logger(logger);  // needed if spdlog::get() should be used elsewhere
     logger->flush_on(spdlog::level::err);
     logger->set_level(spdlog::level::trace);
@@ -109,7 +109,7 @@ void create_gpu_logger(Settings::Settings const &settings) {
 
 #ifndef BENCHMARKING
 std::shared_ptr<spdlog::logger> create_logger(const std::string logger_name) {
-    auto &sinks = spdlog::get(global_logger_name)->sinks();
+    auto &sinks = spdlog::get(global_logger)->sinks();
     return std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
 }
 
@@ -141,7 +141,7 @@ void create_logger(Settings::Settings const &settings) {
     }
 
     spdlog::sinks_init_list sinks = {stdout_sink, file_sink};
-    auto logger = std::make_shared<spdlog::logger>(global_logger_name, sinks);
+    auto logger = std::make_shared<spdlog::logger>(global_logger, sinks);
     spdlog::register_logger(logger);  // needed if spdlog::get() should be used elsewhere
     logger->flush_on(spdlog::level::err);
     logger->set_level(spdlog::level::trace);
