@@ -28,7 +28,7 @@ void apply_boundary_condition(Field &field, MultipleJoinedList *mjl, size_t id,
     size_t *d_patch = mjl->get_data();
     size_t patch_start = mjl->get_first_index(field.get_level(), id);
     size_t patch_end = mjl->get_last_index(field.get_level(), id) ;
-    size_t patch_size = mjl->get_slice_size(field.get_level(), id);
+    size_t patch_size __attribute__((unused)) = mjl->get_slice_size(field.get_level(), id);
 #ifdef GPU_DEBUG
     auto gpu_logger = Utility::create_gpu_logger("ObstacleBoundary_GPU");
     gpu_logger->debug("applying for [{};{}] with length {} at level {}, pointer {}, field pointer {}",
