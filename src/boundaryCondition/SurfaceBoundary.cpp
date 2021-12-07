@@ -29,7 +29,7 @@ void apply_boundary_condition(Field &field, MultipleJoinedList *mjl, size_t id,
     real *data = field.data;
     size_t patch_start = mjl->get_first_index(level, id);
     size_t patch_end = mjl->get_last_index(level, id);
-    size_t patch_size = mjl->get_slice_size(level, id);
+    size_t patch_size __attribute__((unused)) = mjl->get_slice_size(level, id);
     size_t *d_patch = mjl->get_data();
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(class_name);

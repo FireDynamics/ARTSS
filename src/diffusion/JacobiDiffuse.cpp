@@ -241,7 +241,7 @@ void JacobiDiffuse::JacobiStep(
     auto boundary = DomainController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(out.get_level());
+    auto bsize_i __attribute__((unused)) = boundary->get_size_domain_inner_list_level_joined(out.get_level());
     size_t start_index = boundary->get_domain_inner_list_level_joined_start(out.get_level());
     size_t end_index = boundary->get_domain_inner_list_level_joined_end(out.get_level()) + 1;
 
