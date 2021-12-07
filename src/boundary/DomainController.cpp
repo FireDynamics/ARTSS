@@ -1,16 +1,16 @@
-/// \file       BoundaryController.cpp
+/// \file       DomainController.cpp
 /// \brief      Controller class for boundary
 /// \date       Oct 01, 2020
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include "BoundaryController.h"
+#include "DomainController.h"
 #include <string>
 
-BoundaryController *BoundaryController::singleton = nullptr;  // Singleton
+DomainController *DomainController::singleton = nullptr;  // Singleton
 
 
-BoundaryController::BoundaryController(Settings::Settings const &settings) {
+DomainController::DomainController(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -30,7 +30,7 @@ BoundaryController::BoundaryController(Settings::Settings const &settings) {
 // *************************************************************************************************
 /// \brief  Reads in all parameters of boundary, obstacles and surfaces
 // *************************************************************************************************
-void BoundaryController::read_XML(Settings::Settings const &settings) {
+void DomainController::read_XML(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing XML");
 #endif
@@ -51,7 +51,7 @@ void BoundaryController::read_XML(Settings::Settings const &settings) {
 /// \brief  parses boundaries of domain from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_boundary_parameter(const std::vector<Settings::BoundarySetting> &boundaries) {
+void DomainController::parse_boundary_parameter(const std::vector<Settings::BoundarySetting> &boundaries) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing boundary parameter");
 #endif
@@ -69,7 +69,7 @@ void BoundaryController::parse_boundary_parameter(const std::vector<Settings::Bo
 /// \brief  parses surfaces from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_surface_parameter(const std::vector<Settings::SurfaceSetting> &surfaces) {
+void DomainController::parse_surface_parameter(const std::vector<Settings::SurfaceSetting> &surfaces) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing surface parameter");
 #endif
@@ -120,7 +120,7 @@ void BoundaryController::parse_surface_parameter(const std::vector<Settings::Sur
 /// \brief  parses obstacles from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting> &obstacles) {
+void DomainController::parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting> &obstacles) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing obstacle parameter");
 #endif
@@ -168,7 +168,7 @@ void BoundaryController::parse_obstacle_parameter(const std::vector<Settings::Ob
 #endif
 }
 
-BoundaryController::~BoundaryController() {
+DomainController::~DomainController() {
     delete m_multigrid;
     delete m_bdc_boundary;
     for (size_t i = 0; i < m_number_of_obstacles; i++) {
@@ -177,9 +177,9 @@ BoundaryController::~BoundaryController() {
 }
 
 
-BoundaryController *BoundaryController::getInstance(Settings::Settings const &settings) {
+DomainController *DomainController::getInstance(Settings::Settings const &settings) {
     if (singleton == nullptr) {
-        singleton = new BoundaryController(settings);
+        singleton = new DomainController(settings);
     }
     return singleton;
 }
@@ -188,7 +188,7 @@ BoundaryController *BoundaryController::getInstance(Settings::Settings const &se
 // *************************************************************************************************
 /// \brief  prints boundaries (outer, inner, surfaces)
 // *************************************************************************************************
-void BoundaryController::print_boundaries() {
+void DomainController::print_boundaries() {
 #ifndef BENCHMARKING
     m_logger->info("-- Info summary");
     DomainData::getInstance()->print();
@@ -207,7 +207,7 @@ void BoundaryController::print_boundaries() {
 // *************************************************************************************************
 /// \brief  Updates lists of indices
 // *************************************************************************************************
-void BoundaryController::update_lists() {
+void DomainController::update_lists() {
     m_multigrid->update_lists();
 }
 
@@ -217,7 +217,7 @@ void BoundaryController::update_lists() {
 /// \param  field   field
 /// \param  sync    synchronization (default: false)
 // *************************************************************************************************
-void BoundaryController::apply_boundary(Field &field, bool sync) {
+void DomainController::apply_boundary(Field &field, bool sync) {
     m_multigrid->apply_boundary_condition(field, sync);
 }
 
@@ -226,7 +226,7 @@ void BoundaryController::apply_boundary(Field &field, bool sync) {
 /// \brief  handling of neighbouring obstacles, removes cells with circular constraints which never
 /// change their value
 // *************************************************************************************************
-void BoundaryController::detect_neighbouring_obstacles() {
+void DomainController::detect_neighbouring_obstacles() {
 #ifndef BENCHMARKING
     m_logger->debug("start detecting neighbouring obstacles");
 #endif
@@ -245,6 +245,6 @@ void BoundaryController::detect_neighbouring_obstacles() {
 #endif
 }
 
-std::vector<FieldType> BoundaryController::get_used_fields() const {
+std::vector<FieldType> DomainController::get_used_fields() const {
     return m_bdc_boundary->get_used_fields();
 }

@@ -8,7 +8,7 @@
 #include <cmath>
 
 #include "JacobiDiffuse.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 
 JacobiDiffuse::JacobiDiffuse(Settings::Settings const &settings) :
         m_settings(settings) {
@@ -35,7 +35,7 @@ JacobiDiffuse::JacobiDiffuse(Settings::Settings const &settings) :
 void JacobiDiffuse::diffuse(Field &out, const Field &in, const Field &b,
                             const real D, bool sync) {
     auto domain = DomainData::getInstance();
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     size_t bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
@@ -132,7 +132,7 @@ void JacobiDiffuse::diffuse(
         const real D, const Field &EV, bool sync) {
     auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
@@ -238,7 +238,7 @@ void JacobiDiffuse::JacobiStep(
     const size_t Nx = domain->get_Nx(out.get_level()); //due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny(out.get_level());
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(out.get_level());
@@ -290,7 +290,7 @@ void JacobiDiffuse::JacobiStep(
     const size_t Nx = domain->get_Nx(level); //due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny(level);
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
     size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
@@ -344,7 +344,7 @@ void JacobiDiffuse::JacobiStep(
     const real reciprocal_dy = 1. / dy;
     const real reciprocal_dz = 1. / dz;
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);

@@ -9,7 +9,7 @@
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
 #include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 
 #ifndef BENCHMARKING
 
@@ -154,7 +154,7 @@ void log_field_info(Field &field, const std::string &text, const std::string &lo
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(logger_name);
 #endif
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
     size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 

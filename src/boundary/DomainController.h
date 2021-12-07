@@ -1,4 +1,4 @@
-/// \file       BoundaryController.h
+/// \file       DomainController.h
 /// \brief      Controll class for boundary
 /// \date       Oct 01, 2020
 /// \author     My Linh Würzburger
@@ -16,12 +16,12 @@
 #include "Obstacle.h"
 #include "Surface.h"
 
-class BoundaryController {
+class DomainController {
  public:
-    static BoundaryController* getInstance() { return singleton; }
-    static BoundaryController* getInstance(Settings::Settings const &settings);
+    static DomainController* getInstance() { return singleton; }
+    static DomainController* getInstance(Settings::Settings const &settings);
 
-    ~BoundaryController();
+    ~DomainController();
 
     void apply_boundary(Field &field, bool sync = true);
 
@@ -57,11 +57,11 @@ class BoundaryController {
 
  private:
     size_t get_slice_size_domain_inner_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_domain_inner_cells_level_joined(level); }  // get size of domain inner list
-    explicit BoundaryController(Settings::Settings const &settings);
+    explicit DomainController(Settings::Settings const &settings);
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    static BoundaryController* singleton;
+    static DomainController* singleton;
 
     BoundaryDataController *m_bdc_boundary;
     BoundaryDataController **m_bdc_obstacles;

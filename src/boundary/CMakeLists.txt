@@ -2,8 +2,8 @@ target_sources(artss
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/Domain.cpp
         ${CMAKE_CURRENT_LIST_DIR}/Domain.h
-        ${CMAKE_CURRENT_LIST_DIR}/BoundaryController.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/BoundaryController.h
+        ${CMAKE_CURRENT_LIST_DIR}/DomainController.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/DomainController.h
         ${CMAKE_CURRENT_LIST_DIR}/BoundaryData.cpp
         ${CMAKE_CURRENT_LIST_DIR}/BoundaryData.h
         ${CMAKE_CURRENT_LIST_DIR}/BoundaryDataController.cpp

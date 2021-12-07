@@ -6,7 +6,7 @@
 
 #include "IPressure.h"
 #include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 
 //======================================== Divergence ====================================
 // ***************************************************************************************
@@ -32,7 +32,7 @@ void IPressure::divergence(
     auto reciprocal_dy = 1. / dy;
     auto reciprocal_dz = 1. / dz;
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
 
@@ -139,7 +139,7 @@ void IPressure::projection(
     auto reciprocal_dy = 1. / dy;
     auto reciprocal_dz = 1. / dz;
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
 

@@ -12,7 +12,7 @@
 
 #include "DynamicSmagorinsky.h"
 #include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 
 DynamicSmagorinsky::DynamicSmagorinsky(Settings::Settings const &settings) :
     m_settings(settings),
@@ -194,7 +194,7 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
     const real delta_s = cbrt(dx * dy * dz);
 
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
@@ -403,7 +403,7 @@ void DynamicSmagorinsky::explicit_filtering(Field &out, Field const &in, bool sy
     // real a[3] = {1./6.,1./3.,1./6.};  // simpsons weights
 
     // Construction by product combination for trapezoidal
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 

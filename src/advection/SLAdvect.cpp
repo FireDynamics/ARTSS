@@ -17,7 +17,7 @@
 #endif
 
 #include "SLAdvect.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 #include "../DomainData.h"
 
 // ***************************************************************************************
@@ -34,7 +34,7 @@ void SLAdvect::advect(Field &out, const Field &in,
                       const Field &u_vel, const Field &v_vel, const Field &w_vel,
                       bool sync) {
     auto domain_data = DomainData::getInstance();
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();

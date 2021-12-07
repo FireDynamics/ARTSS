@@ -17,7 +17,7 @@
 #include "PressureSolver.h"
 #include "SolverController.h"
 #include "SolverSelection.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 #include "../DomainData.h"
 #include "../Functions.h"
 #include "../source/GaussFunction.h"
@@ -592,7 +592,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
     }
 
     // Sight of boundaries
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *domain_list = boundary->get_domain_inner_list_level_joined();
     size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
 

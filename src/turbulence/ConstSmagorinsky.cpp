@@ -12,7 +12,7 @@
 
 #include "ConstSmagorinsky.h"
 #include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 
 ConstSmagorinsky::ConstSmagorinsky(Settings::Settings const &settings) {
     // Cs value of 0.1 is found to yield the best results for wide range of flows
@@ -52,7 +52,7 @@ void ConstSmagorinsky::calc_turbulent_viscosity(
         real S11, S22, S33, S12, S13, S23;
         real Cs = m_Cs;
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
         auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 

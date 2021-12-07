@@ -15,7 +15,7 @@
 #include "Functions.h"
 #include "DomainData.h"
 #include "utility/Utility.h"
-#include "boundary/BoundaryController.h"
+#include "boundary/DomainController.h"
 #include "interfaces/IRandomField.h"
 
 const std::string FunctionNames::beltrami = "Beltrami";
@@ -59,7 +59,7 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -103,7 +103,7 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -142,7 +142,7 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_list_level_joined();
         size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -178,7 +178,7 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_list_level_joined();
         size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -214,7 +214,7 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_list_level_joined();
         size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -239,7 +239,7 @@ namespace Functions {
 /// \param  T_ambient    Ambient temperature
 // ***************************************************************************************
     void buoyancy_force(Field &out, Field &T, Field &T_ambient, real beta, real g) {
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
 
@@ -277,7 +277,7 @@ namespace Functions {
         real c = 2 * nu * M_PI * M_PI - 1;
         real rpi = 1. / M_PI;
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;
@@ -319,7 +319,7 @@ namespace Functions {
         real c_nu = 2 * nu * M_PI * M_PI - 1;
         real c_kappa = 2 * kappa * M_PI * M_PI - 1;
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
 
@@ -346,7 +346,7 @@ namespace Functions {
 /// \param  out_p  pressure
 // ***************************************************************************************
     void drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real w_lin, real pa) {
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
 
@@ -385,7 +385,7 @@ namespace Functions {
 
         real kpinu = 3 * l * l * M_PI * M_PI * nu;
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -426,7 +426,7 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -487,7 +487,7 @@ namespace Functions {
         real dkpi = 3 * l * l * M_PI * M_PI;
         real rdkpi = 1. / dkpi;
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -528,7 +528,7 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -574,7 +574,7 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -650,7 +650,7 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -727,7 +727,7 @@ namespace Functions {
         real dx = domain_data->get_dx();
         real dy = domain_data->get_dy();
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;
@@ -757,7 +757,7 @@ namespace Functions {
 /// \param  step_size    interval steps of random numbers
 // ***************************************************************************************
     void random(Field &out, real range, bool is_absolute, int seed, real step_size) {
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
 
@@ -804,7 +804,7 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
@@ -830,7 +830,7 @@ namespace Functions {
 /// \param  val   value of uniform distribution
 // ***************************************************************************************
     void uniform(Field &out, real val) {
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_list_level_joined();
         size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
 
@@ -870,7 +870,7 @@ namespace Functions {
         real rR_c = 1. / (2. * R_c * R_c);
         real rhoGrR_c = rhoa * G * G * rR_c;
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;
@@ -915,7 +915,7 @@ namespace Functions {
         real rR_c = 1. / (2. * R_c * R_c);
         real rhoGrR_c = rhoa * G * G * rR_c;
 
-        auto boundary = BoundaryController::getInstance();
+        auto boundary = DomainController::getInstance();
         size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;

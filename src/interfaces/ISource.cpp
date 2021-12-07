@@ -12,7 +12,7 @@
 #endif
 
 #include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 
 //======================================== Sources ====================================
 //======================================== Force ======================================
@@ -31,7 +31,7 @@ void ISource::buoyancy_force(
     real beta = settings.get_real("physical_parameters/beta");
     real g = settings.get_real("physical_parameters/g");
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
     size_t *domain_list = boundary->get_domain_list_level_joined();
 
@@ -78,7 +78,7 @@ void ISource::dissipate(
     real dt = settings.get_real("physical_parameters/dt");
     real nu = settings.get_real("physical_parameters/nu");
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *d_iList = boundary->get_domain_inner_list_level_joined();
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 

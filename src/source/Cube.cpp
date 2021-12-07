@@ -6,7 +6,7 @@
 //
 #include "Cube.h"
 #include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 
 void Cube::update_source(Field &out, real) {
     out.copy_data(m_source_field);

@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "ExplicitEulerSource.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 
 ExplicitEulerSource::ExplicitEulerSource(Settings::Settings const &settings) :
         m_settings(settings) {
@@ -41,7 +41,7 @@ void ExplicitEulerSource::add_source(
     real dt = m_settings.get_real("physical_parameters/dt");
     auto dir = m_dir_vel;
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
@@ -94,7 +94,7 @@ void ExplicitEulerSource::add_source(
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void ExplicitEulerSource::add_source(Field &out, Field const &s, bool sync) {
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
     real dt = m_settings.get_real("physical_parameters/dt");

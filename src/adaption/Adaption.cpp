@@ -16,7 +16,7 @@
 #include "Layers.h"
 #include "Vortex.h"
 #include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 
 Adaption::Adaption(Settings::Settings const &settings, FieldController *field_controller) {
     m_field_controller = field_controller;
@@ -74,7 +74,7 @@ void Adaption::run(real) {
         std::chrono::time_point<std::chrono::system_clock> start, end;
         start = std::chrono::system_clock::now();
 #endif
-        BoundaryController::getInstance()->update_lists();
+        DomainController::getInstance()->update_lists();
 #ifndef BENCHMARKING
         end = std::chrono::system_clock::now();
         if (m_has_time_measuring) {

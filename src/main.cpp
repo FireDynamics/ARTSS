@@ -7,7 +7,7 @@
 #include <iostream>
 #include "TimeIntegration.h"
 #include "DomainData.h"
-#include "boundary/BoundaryController.h"
+#include "boundary/DomainController.h"
 #include "solver/SolverController.h"
 #include "utility/settings/Settings.h"
 #include "visualisation/VTKWriter.h"
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 #endif
     Settings::Settings settings(argv[1]);
     DomainData::getInstance(settings);
-    BoundaryController::getInstance(settings);
+    DomainController::getInstance(settings);
 
     SolverController *sc = new SolverController(settings);
 

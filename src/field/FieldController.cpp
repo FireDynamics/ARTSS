@@ -7,7 +7,7 @@
 #include "FieldController.h"
 #include <string>
 #include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 
 FieldController::FieldController():
         // Variables
@@ -99,7 +99,7 @@ FieldController::FieldController():
 /// \brief  initializes boundary cells
 // ***************************************************************************************
 void FieldController::set_up_boundary() {
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     boundary->apply_boundary(field_u);
     boundary->apply_boundary(field_v);
     boundary->apply_boundary(field_w);

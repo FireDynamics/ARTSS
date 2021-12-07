@@ -11,7 +11,7 @@
 #endif
 
 #include "ExplicitDiffuse.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 #include "../DomainData.h"
 
 //====================================== Diffuse ===============================================
@@ -25,7 +25,7 @@
 // ***************************************************************************************
 void ExplicitDiffuse::diffuse(Field &out, const Field &in, Field const &, real const D, bool sync) {
     ExplicitStep(out, in, D, sync);
-    BoundaryController::getInstance()->apply_boundary(out, sync);
+    DomainController::getInstance()->apply_boundary(out, sync);
 }
 
 //====================================== Turbulent Diffuse ===============================================
@@ -41,7 +41,7 @@ void ExplicitDiffuse::diffuse(
         Field &out, Field const &in,
         Field const &, real const D, Field const &EV, bool sync) {
     ExplicitStep(out, in, D, EV, sync);
-    BoundaryController::getInstance()->apply_boundary(out, sync);
+    DomainController::getInstance()->apply_boundary(out, sync);
 }
 
 
@@ -53,7 +53,7 @@ void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bo
 
     const real dt = m_settings.get_real("physical_parameters/dt");
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
@@ -89,7 +89,7 @@ void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Fi
 
     const real dt = m_settings.get_real("physical_parameters/dt");
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);

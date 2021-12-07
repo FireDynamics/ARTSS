@@ -9,7 +9,7 @@
 #include <cmath>
 
 #include "ColoredGaussSeidelDiffuse.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 #include "../DomainData.h"
 #include "../utility/Utility.h"
 
@@ -47,7 +47,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
         Field &out, const Field &, Field const &b,
         const real D, bool sync) {
     auto domain = DomainData::getInstance();
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
@@ -135,7 +135,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
         Field &out, const Field &, const Field &b,
         const real D, const Field &EV, bool sync) {
     auto domain = DomainData::getInstance();
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
