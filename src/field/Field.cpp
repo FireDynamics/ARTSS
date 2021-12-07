@@ -7,6 +7,7 @@
 #include "Field.h"
 #include "../DomainData.h"
 
+int Field::counter = 0;
 inline static const std::vector<std::string> field_type_names = {"rho", "u", "v", "w", "p", "T", "nu"};
 
 Field::Field(FieldType type) :

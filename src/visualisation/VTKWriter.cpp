@@ -8,6 +8,7 @@
 #include "../DomainData.h"
 #include "visit_writer.h"  //( https://wci.llnl.gov/codes/visit/ )
 
+int VTKWriter::vtk_counter = 0;
 static std::string ending = ".vtk";
 
 void VTKWriter::write_numerical_debug(const FieldController &field_controller, const std::string &filename) {
