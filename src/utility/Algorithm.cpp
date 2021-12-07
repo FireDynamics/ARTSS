@@ -64,45 +64,45 @@ namespace Algorithm {
                                                    const size_t *list2, const size_t size_list2) {
         std::vector <size_t> result;
         result.reserve(size_list1 + size_list2);
-        size_t counter1 = 0;
-        size_t counter2 = 0;
+        size_t counter_list1 = 0;
+        size_t counter_list2 = 0;
 
-        if (list1[counter1] < list2[counter2]) {
-            result.push_back(list1[counter1]);
-            counter1++;
+        if (list1[counter_list1] < list2[counter_list2]) {
+            result.push_back(list1[counter_list1]);
+            counter_list1++;
+        } else if (list1[counter_list1] > list2[counter_list2]){
+            result.push_back(list2[counter_list2]);
+            counter_list2++;
         } else {
-            result.push_back(list2[counter2]);
-            counter2++;
+            result.push_back(list1[counter_list1]);
+            counter_list1++;
+            counter_list2++;
         }
-        while (counter1 < size_list1 && counter2 < size_list2) {
-            if (list1[counter1] == result[result.size() - 1]) {
-                counter1++;
-                continue;
-            }
-            if (list2[counter2] == result[result.size() - 1]) {
-                counter2++;
-                continue;
-            }
-            if (list1[counter1] < list2[counter2]) {
-                result.push_back(list1[counter1]);
-                counter1++;
+        while (counter_list1 < size_list1 && counter_list2 < size_list2) {
+            if (list1[counter_list1] < list2[counter_list2]) {
+                result.push_back(list1[counter_list1]);
+                counter_list1++;
+            } else if (list1[counter_list1] > list2[counter_list2]){
+                result.push_back(list2[counter_list2]);
+                counter_list2++;
             } else {
-                result.push_back(list2[counter2]);
-                counter2++;
+                result.push_back(list1[counter_list1]);
+                counter_list1++;
+                counter_list2++;
             }
         }
-        if (counter1 < size_list1) {
-            if (list1[counter1] == result[result.size() - 1]) {
-                counter1++;
+        if (counter_list1 < size_list1) {
+            if (list1[counter_list1] == result[result.size() - 1]) {
+                counter_list1++;
             }
-            for (size_t c = counter1; c < size_list1; c++) {
+            for (size_t c = counter_list1; c < size_list1; c++) {
                 result.push_back(list1[c]);
             }
         } else {
-            if (list2[counter2] == result[result.size() - 1]) {
-                counter2++;
+            if (list2[counter_list2] == result[result.size() - 1]) {
+                counter_list2++;
             }
-            for (size_t c = counter2; c < size_list2; c++) {
+            for (size_t c = counter_list2; c < size_list2; c++) {
                 result.push_back(list2[c]);
             }
         }

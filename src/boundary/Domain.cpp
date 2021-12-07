@@ -108,7 +108,7 @@ void Domain::control(size_t size_obstacle_list, PatchObject &size_surface_list) 
     size_t duplicates = 4 * Nx + 4 * Ny + 4 * nz;
     if (m_size_domain_list != all_cells - duplicates) {
         message += fmt::format("list size of all domain cells does not fit with sum of it parts."
-                               "Domain List: {} sum: {} duplicates: {}\n",
+                               " Domain List: {} sum: {} duplicates: {}\n",
                                m_size_domain_list, all_cells, duplicates);
         for (size_t patch = 0; patch < number_of_patches; patch++) {
             message += fmt::format("  {}: {}\n",
@@ -117,14 +117,14 @@ void Domain::control(size_t size_obstacle_list, PatchObject &size_surface_list) 
     }
     if (m_size_domain_list + size_obstacle_list + size_surface_list.get_sum() != size) {
         message += fmt::format("list size of all domain cells is not equal with domain size."
-                            " Domain List: {} Domain Size: {} Obstacle size: {} Surface size: {}",
+                            " Domain List: {} Domain Size: {} Obstacle size: {} Surface size: {}\n",
                             m_size_domain_list, domain->get_size(m_multigrid_level),
                             size_obstacle_list, size_surface_list.get_sum());
     }
     size_t innerCells = nz * ny * nx;
     if (m_size_inner_list != innerCells - size_obstacle_list) {
         message += fmt::format("list size of inner cell does not equal domain inner size minus size of obstacles."
-                            " Inner List: {} Domain inner size: {}, size obstacles: {}",
+                            " Inner List: {} Domain inner size: {}, size obstacles: {}\n",
                             m_size_inner_list, innerCells, size_obstacle_list);
     }
     size_t startIndex = IX(
@@ -217,10 +217,30 @@ void Domain::control(size_t size_obstacle_list, PatchObject &size_surface_list) 
                   + std::to_string(*(m_boundary_patch_divided[RIGHT] + m_size_boundary[RIGHT] - 1)) + ")\n";
     }
 
+    for (size_t i = 1; i < m_size_inner_list; i++) {
+        int diff = static_cast<int>(m_inner_list[i] - m_inner_list[i - 1]);
+        if (diff < 0) {
+            message = message + "inner list: sorting error at index "
+                      + std::to_string(i - 1) + "|"
+                      + std::to_string(i) + " with values "
+                      + std::to_string(m_inner_list[i - 1]) + "|"
+                      + std::to_string(m_inner_list[i]) + "\n";
+        }
+    }
+    for (size_t i = 1; i < m_size_boundary_list; i++) {
+        int diff = static_cast<int>(m_boundary_list[i] - m_boundary_list[i - 1]);
+        if (diff < 0) {
+            message = message + "boundary list: sorting error at index "
+                      + std::to_string(i - 1) + "|"
+                      + std::to_string(i) + " with values "
+                      + std::to_string(m_boundary_list[i - 1]) + "|"
+                      + std::to_string(m_boundary_list[i]) + "\n";
+        }
+    }
     for (size_t i = 1; i < m_size_domain_list; i++) {
         int diff = static_cast<int>(m_domain_list[i] - m_domain_list[i - 1]);
         if (diff < 0) {
-            message = message + "sorting error at index "
+            message = message + "domain list: sorting error at index "
                       + std::to_string(i - 1) + "|"
                       + std::to_string(i) + " with values "
                       + std::to_string(m_domain_list[i - 1]) + "|"
@@ -234,6 +254,7 @@ void Domain::control(size_t size_obstacle_list, PatchObject &size_surface_list) 
         m_logger->warn(message);
     }
 #endif
+    std::exit(1);
 }
 
 Domain::~Domain() {
@@ -266,8 +287,18 @@ void Domain::boundary_cells(size_t **surface_list, PatchObject &size_surface_lis
     auto tmp_end = new Coordinate<size_t>();
     // comments for X axis (0)
     for (size_t axis = 0; axis < number_of_axes; axis++) {
-        auto axis1 = static_cast<CoordinateAxis>((axis + 1) % number_of_axes);  // Y
-        auto axis2 = static_cast<CoordinateAxis>((axis + 2) % number_of_axes);  // Z
+        CoordinateAxis axis1;
+        CoordinateAxis axis2;
+        if (CoordinateAxis(axis) == CoordinateAxis::X) {
+            axis1 = CoordinateAxis::Y;
+            axis2 = CoordinateAxis::Z;
+        } else if (CoordinateAxis(axis) == CoordinateAxis::Y) {
+            axis1 = CoordinateAxis::X;
+            axis2 = CoordinateAxis::Z;
+        } else {
+            axis1 = CoordinateAxis::X;
+            axis2 = CoordinateAxis::Y;
+        }
 
         auto patch_start = Patch(axis * 2);  // Patch Left (0)
         auto patch_end = Patch(axis * 2 + 1);  // Patch Right (1)
