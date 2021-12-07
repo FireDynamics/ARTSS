@@ -39,7 +39,7 @@ Surface::Surface(real x1, real x2,
     m_end.set_coordinate(i2, j2, k2);
 
     for (size_t axis = 0; axis < number_of_axes; axis++) {
-        if (m_start[axis] == domain_data->get_start_index_CD(CoordinateAxis(axis)) +-1) {
+        if (m_start[axis] == domain_data->get_start_index_CD(CoordinateAxis(axis)) - 1) {
             m_patch = Patch(axis * 2);
         }
         if (m_end[axis] == domain_data->get_end_index_CD(CoordinateAxis(axis)) + 1) {
