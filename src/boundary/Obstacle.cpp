@@ -873,7 +873,6 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             delete o2_remove_start;
             delete o2_remove_end;
         }
-        delete[] other_axes;
     }
     return overlap;
 }
