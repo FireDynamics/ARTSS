@@ -10,7 +10,6 @@
 #include "GlobalMacrosTypes.h"
 #include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
-#include "../field/Field.h"
 
 #ifndef BENCHMARKING
 
@@ -23,6 +22,8 @@
 
 namespace Utility {
     static std::string class_name = "Utility";
+    static std::string global_logger_name = "ARTSS";
+    static std::string global_gpu_logger_name = "GPU";
 
 
     std::vector<size_t> get_coordinates(size_t index, size_t Nx, size_t Ny) {
@@ -82,12 +83,11 @@ std::vector<std::string> split(const char *text, char delimiter) {
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
 std::shared_ptr<spdlog::logger> create_gpu_logger(std::string logger_name) {
-    // TODO(cvm) set gpu logger to debug and not output
-    auto &sinks = spdlog::get("XMLFile")->sinks();
+    auto &sinks = spdlog::get(global_gpu_logger)->sinks();
     return std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
 }
 
-std::shared_ptr<spdlog::logger> create_gpu_logger(Settings::Settings const &settings, std::string const logger_name) {
+void create_gpu_logger(Settings::Settings const &settings) {
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
 
     std::string log_level = "debug";
@@ -98,20 +98,18 @@ std::shared_ptr<spdlog::logger> create_gpu_logger(Settings::Settings const &sett
         file_sink->set_level(spdlog::level::trace);
     }
 
-    std::vector<spdlog::sink_ptr> sinks;
-    sinks.reserve(1);
-    sinks.push_back(file_sink);
-    auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
+    // TODO (cvm) a bit unnecessary isn't it? probably able to simplify
+    std::vector<spdlog::sink_ptr> sinks = {file_sink};
+    auto logger = std::make_shared<spdlog::logger>(global_gpu_logger_name, begin(sinks), end(sinks));
+    spdlog::register_logger(logger);  // needed if spdlog::get() should be used elsewhere
     logger->flush_on(spdlog::level::err);
     logger->set_level(spdlog::level::trace);
-    return logger;
 }
 #endif
 
 #ifndef BENCHMARKING
-std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
-    // TODO(cvm) XMLFile should always exist. temp hack
-    auto &sinks = spdlog::get("XMLFile")->sinks();
+std::shared_ptr<spdlog::logger> create_logger(const std::string logger_name) {
+    auto &sinks = spdlog::get(global_logger_name)->sinks();
     return std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
 }
 
@@ -121,27 +119,12 @@ std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
 ///         if BENCHMARKING is not enabled
 /// \param  settings the settings to create the logger
 ///         ("logging/level", "logging/file")
-/// \param  loggerName name of logger, written to log file
+/// \param  logger_name name of logger, written to log file
 // *****************************************************************************
-std::shared_ptr<spdlog::logger> create_logger(Settings::Settings const &settings, std::string const logger_name) {
-    return create_logger(
-            settings.sget("logging/level"),
-            settings.sget("logging/file"),
-            logger_name);
-}
+void create_logger(Settings::Settings const &settings) {
+    std::string log_level = settings.sget("logging/level");
+    std::string log_file =  settings.sget("logging/file");
 
-// ======================= creates a new logger ================================
-// *****************************************************************************
-/// \brief  creates a new named logger this function is only available
-///         if BENCHMARKING is not enabled
-/// \param  level the level of visible messages
-/// \param  file the file to write into
-/// \param  loggerName name of logger, written to log file
-// *****************************************************************************
-std::shared_ptr<spdlog::logger> create_logger(
-        std::string const log_level,
-        std::string const log_file,
-        std::string const logger_name) {
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
 
@@ -158,18 +141,17 @@ std::shared_ptr<spdlog::logger> create_logger(
     }
 
     spdlog::sinks_init_list sinks = {stdout_sink, file_sink};
-    auto logger = std::make_shared<spdlog::logger>(logger_name, sinks);
+    auto logger = std::make_shared<spdlog::logger>(global_logger_name, sinks);
+    spdlog::register_logger(logger);  // needed if spdlog::get() should be used elsewhere
     logger->flush_on(spdlog::level::err);
     logger->set_level(spdlog::level::trace);
-
-    return logger;
 }
 #endif
 
 
-void log_field_info(Settings::Settings const &settings, Field &field, const std::string &text, const std::string &logger_name) {
+void log_field_info(Field &field, const std::string &text, const std::string &logger_name) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger(settings, logger_name);
+    auto logger = Utility::create_logger(logger_name);
 #endif
     auto boundary = BoundaryController::getInstance();
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
@@ -190,7 +172,7 @@ void log_field_info(Settings::Settings const &settings, Field &field, const std:
         }
         average_inner += value;
     }
-    average_inner /= size_inner_list;
+    average_inner /= static_cast<real>(size_inner_list);
 #ifndef BENCHMARKING
     logger->info("minimum inner {}: {}", text, minimum_inner);
     logger->info("maximum inner {}: {}", text, maximum_inner);

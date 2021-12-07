@@ -10,36 +10,34 @@
 #include <string>
 #include <vector>
 
-Multigrid::Multigrid(Settings::Settings const &settings,
-                     size_t number_of_surfaces, Surface **surface_list,
+Multigrid::Multigrid(size_t number_of_surfaces, Surface **surface_list,
                      size_t number_of_obstacles, Obstacle **obstacle_list,
                      BoundaryDataController *bdc_boundary,
                      BoundaryDataController **bdc_obstacles,
                      BoundaryDataController **bdc_surfaces,
                      size_t multigrid_levels) :
-        m_settings(settings),
         m_multigrid_levels(multigrid_levels),
         m_number_of_surface_objects(number_of_surfaces),
         m_number_of_obstacle_objects(number_of_obstacles),
-        m_jl_domain_list(m_settings, multigrid_levels),
-        m_jl_domain_inner_list(m_settings, multigrid_levels),
-        m_jl_obstacle_list(m_settings, multigrid_levels),
+        m_jl_domain_list(multigrid_levels),
+        m_jl_domain_inner_list(multigrid_levels),
+        m_jl_obstacle_list(multigrid_levels),
         m_bdc_boundary(bdc_boundary),
         m_bdc_obstacle(bdc_obstacles),
         m_bdc_surface(bdc_surfaces) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("starting multigrid");
 #endif
 #ifdef GPU_DEBUG
-    m_gpu_logger = Utility::create_gpu_logger(m_settings, typeid(this).name());
+    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
 #endif
     // init domain
     // list of domain objects for each level
     m_MG_domain_object_list = new Domain *[m_multigrid_levels + 1];
     m_jl_domain_boundary_list_patch_divided = new SingleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_jl_domain_boundary_list_patch_divided[patch]  = new SingleJoinedList(m_settings, m_multigrid_levels);
+        m_jl_domain_boundary_list_patch_divided[patch]  = new SingleJoinedList(m_multigrid_levels);
     }
 
     // init obstacle
@@ -49,7 +47,7 @@ Multigrid::Multigrid(Settings::Settings const &settings,
 
     m_jl_obstacle_boundary_list_patch_divided = new MultipleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_jl_obstacle_boundary_list_patch_divided[patch]  = new MultipleJoinedList(m_settings, m_multigrid_levels, m_number_of_obstacle_objects);
+        m_jl_obstacle_boundary_list_patch_divided[patch]  = new MultipleJoinedList(m_multigrid_levels, m_number_of_obstacle_objects);
     }
 
     m_MG_surface_object_list = new Surface **[m_multigrid_levels + 1];
@@ -57,7 +55,7 @@ Multigrid::Multigrid(Settings::Settings const &settings,
 
     m_jl_surface_list_patch_divided = new MultipleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_jl_surface_list_patch_divided[patch] = new MultipleJoinedList(m_settings, m_multigrid_levels, m_number_of_surface_objects);
+        m_jl_surface_list_patch_divided[patch] = new MultipleJoinedList(m_multigrid_levels, m_number_of_surface_objects);
     }
 
     if (m_number_of_obstacle_objects > 0) {
@@ -331,8 +329,7 @@ void Multigrid::create_multigrid_obstacle_lists() {
                 Obstacle *obstacle = m_MG_obstacle_object_list[level][o];
                 size_t new_size = size + obstacle->get_size_obstacle_list();
                 auto obstacle_list_tmp = new size_t[new_size];
-                Algorithm::merge_sort(m_settings,
-                                      list, obstacle->get_obstacle_list(),
+                Algorithm::merge_sort(list, obstacle->get_obstacle_list(),
                                       size, obstacle->get_size_obstacle_list(),
                                       obstacle_list_tmp);
                 delete[] list;
@@ -456,8 +453,7 @@ void Multigrid::create_multigrid_domain_lists() {
         }
         size_t *slice_obstacle_list = m_jl_obstacle_list.get_slice(level);
         // TODO(issue 178) send only obstacles which are in the computational domain
-        auto domain = new Domain(m_settings,
-                                 slice_obstacle_list,
+        auto domain = new Domain(slice_obstacle_list,
                                  m_jl_obstacle_list.get_slice_size(level),
                                  slice_surface_list,
                                  *size_surface_list,
@@ -564,7 +560,7 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
                         (*end_coarse)[Z]);
 #endif
 
-        auto surface_coarse = new Surface(m_settings, *start_coarse, *end_coarse, level, surface_fine->get_name(), patch);
+        auto surface_coarse = new Surface(*start_coarse, *end_coarse, level, surface_fine->get_name(), patch);
         sum += surface_coarse->get_size_surface_list();
         *(surface_list_coarse + id) = surface_coarse;
         sum_patches->add_value(patch, surface_coarse->get_size_surface_list());
@@ -629,8 +625,7 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
         }
 #endif
 
-        auto obstacle_coarse = new Obstacle(m_settings,
-                                            (*start_coarse), (*end_coarse),
+        auto obstacle_coarse = new Obstacle((*start_coarse), (*end_coarse),
                                             level, obstacle_fine->get_name());
         delete start_coarse;
         delete end_coarse;
@@ -723,7 +718,6 @@ void Multigrid::apply_boundary_condition(Field &field, bool sync) {
     // order (shouldn't) matter. Only if there are still cells which have multiple
     // BC types (obstacle, boundary, surface), but these should be excluded
     // first obstacles BC, then domain BC and at last surface BC.
-    size_t level = field.get_level();
     if (m_number_of_obstacle_objects > 0) {
         for (size_t id = 0; id < m_number_of_obstacle_objects; ++id) {
             (static_cast<BoundaryDataController *> (m_bdc_obstacle[id]))->apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list_patch_divided, id, sync);
@@ -733,7 +727,6 @@ void Multigrid::apply_boundary_condition(Field &field, bool sync) {
     m_bdc_boundary->apply_boundary_condition(field, m_jl_domain_boundary_list_patch_divided, sync);
 
     if (m_number_of_surface_objects > 0) {
-        Surface **surface_list = *(m_MG_surface_object_list + level);
         for (size_t id = 0; id < m_number_of_surface_objects; ++id) {
             (static_cast<BoundaryDataController *> (m_bdc_surface[id]))->apply_boundary_condition_surface(field, m_jl_surface_list_patch_divided, id, sync);
         }

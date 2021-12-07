@@ -4,15 +4,15 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_JOINEDLISTS_JOINEDLISTDOMAIN_H_
-#define ARTSS_JOINEDLISTS_JOINEDLISTDOMAIN_H_
+#ifndef ARTSS_JOINEDLISTS_SINGLEJOINEDLIST_H_
+#define ARTSS_JOINEDLISTS_SINGLEJOINEDLIST_H_
 
 #include "../utility/Utility.h"
 #include "../utility/settings/Settings.h"
 
 class SingleJoinedList {
   public:
-    explicit SingleJoinedList(Settings::Settings const &settings, size_t multigrid_level);
+    explicit SingleJoinedList(size_t multigrid_level);
     ~SingleJoinedList();
 
     void copyin() {
@@ -47,4 +47,4 @@ class SingleJoinedList {
 };
 
 
-#endif /* ARTSS_JOINEDLISTS_JOINEDLISTDOMAIN_H_ */
+#endif /* ARTSS_JOINEDLISTS_SINGLEJOINEDLIST_H_ */

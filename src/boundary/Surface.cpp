@@ -7,17 +7,15 @@
 #include "Surface.h"
 
 
-Surface::Surface(Settings::Settings const &settings,
-                 real x1, real x2,
+Surface::Surface(real x1, real x2,
                  real y1, real y2,
                  real z1, real z2,
                  const std::string &name) :
-        m_settings(settings),
         m_name(name),
         m_start(), m_end(), m_strides(),
         m_level(0) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("################ SURFACE ################");
 #endif
     DomainData *domain_data = DomainData::getInstance();
@@ -58,18 +56,16 @@ Surface::Surface(Settings::Settings const &settings,
 #endif
 }
 
-Surface::Surface(Settings::Settings const &settings,
-                 Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
+Surface::Surface(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
                  size_t level,
                  const std::string &name,
                  Patch patch) :
-        m_settings(settings),
         m_patch(patch),
         m_name(name),
         m_start(coords_start), m_end(coords_end),
         m_level(level) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     m_logger->info("################ SURFACE ################");
 #endif
 

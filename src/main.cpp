@@ -30,7 +30,6 @@ int main(int argc, char **argv) {
     acc_device_t dev_type = acc_get_device_type();
     acc_init(dev_type);
 #endif
-
     Settings::Settings settings(argv[1]);
     DomainData::getInstance(settings);
     BoundaryController::getInstance(settings);

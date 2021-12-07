@@ -16,7 +16,7 @@ DomainData::DomainData(Settings::Settings const &settings) :
         start_coords_PD(),
         end_coords_PD() {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto solver = settings.get("solver/description");
     if (solver.find("NS") != std::string::npos || solver.find("Pressure") != std::string::npos) {
@@ -170,7 +170,7 @@ void DomainData::print() {
 
 void DomainData::printDetails() {
 #ifndef BENCHMARKING
-    m_logger->debug("############### Domain Parameter ###############");
+    m_logger->debug("############### Domain Data Parameter ###############");
     for (size_t level = 0; level < m_levels + 1; level++) {
         m_logger->debug("For Level {} Nx: {}, Ny: {}, Nz: {}", level,
                 get_Nx(level), get_Ny(level), get_Nz(level));
@@ -204,7 +204,7 @@ void DomainData::printDetails() {
         m_logger->debug(" For Level {} domain size: {}", level, get_size(level));
     }
 
-    m_logger->debug("--------------- Domain Parameter end ---------------");
+    m_logger->debug("--------------- Domain Data Parameter end ---------------");
 #endif
 }
 

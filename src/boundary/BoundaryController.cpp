@@ -10,16 +10,14 @@
 BoundaryController *BoundaryController::singleton = nullptr;  // Singleton
 
 
-BoundaryController::BoundaryController(Settings::Settings const &settings) :
-        m_settings(settings) {
+BoundaryController::BoundaryController(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_bdc_boundary = new BoundaryDataController(m_settings);
-    read_XML();
+    m_bdc_boundary = new BoundaryDataController();
+    read_XML(settings);
     size_t multigrid_level = DomainData::getInstance()->get_levels();
-    m_multigrid = new Multigrid(m_settings,
-                                m_number_of_surfaces, m_surface_list,
+    m_multigrid = new Multigrid(m_number_of_surfaces, m_surface_list,
                                 m_number_of_obstacles, m_obstacle_list,
                                 m_bdc_boundary, m_bdc_obstacles, m_bdc_surfaces,
                                 multigrid_level);
@@ -32,15 +30,17 @@ BoundaryController::BoundaryController(Settings::Settings const &settings) :
 // *************************************************************************************************
 /// \brief  Reads in all parameters of boundary, obstacles and surfaces
 // *************************************************************************************************
-void BoundaryController::read_XML() {
+void BoundaryController::read_XML(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing XML");
 #endif
+    m_has_obstacles = settings.get_bool("obstacles/enabled");
+    m_has_surfaces = settings.get_bool("surfaces/enabled");
 
-    parse_boundary_parameter(m_settings.get_boundaries());
-    parse_obstacle_parameter(m_settings.get_obstacles());
+    parse_boundary_parameter(settings.get_boundaries());
+    parse_obstacle_parameter(settings.get_obstacles());
     detect_neighbouring_obstacles();
-    parse_surface_parameter(m_settings.get_surfaces());
+    parse_surface_parameter(settings.get_surfaces());
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing XML");
 #endif
@@ -74,7 +74,6 @@ void BoundaryController::parse_surface_parameter(const std::vector<Settings::Sur
     m_logger->debug("start parsing surface parameter");
 #endif
     // SURFACES
-    m_has_surfaces = m_settings.get_bool("surfaces/enabled");
     if (m_has_surfaces) {
         std::vector<Surface *> ret_surfaces;
         std::vector<BoundaryDataController *> bdc_surfaces;
@@ -87,9 +86,9 @@ void BoundaryController::parse_surface_parameter(const std::vector<Settings::Sur
             real y2 = surface.get_sy2();
             real z1 = surface.get_sz1();
             real z2 = surface.get_sz2();
-            auto s = new Surface(m_settings, x1, x2, y1, y2, z1, z2, name);
+            auto s = new Surface(x1, x2, y1, y2, z1, z2, name);
 
-            auto bdc = new BoundaryDataController(m_settings);
+            auto bdc = new BoundaryDataController();
             for (const auto &boundary : surface.get_boundaries()) {
                 bdc->add_boundary_data(boundary);
             }
@@ -126,7 +125,6 @@ void BoundaryController::parse_obstacle_parameter(const std::vector<Settings::Ob
     m_logger->debug("start parsing obstacle parameter");
 #endif
 // OBSTACLES
-    m_has_obstacles = m_settings.get_bool("obstacles/enabled");
     if (m_has_obstacles) {
         std::vector<Obstacle *> ret_obstacles;
         std::vector<BoundaryDataController *> bdc_obstacles;
@@ -136,7 +134,7 @@ void BoundaryController::parse_obstacle_parameter(const std::vector<Settings::Ob
 #ifndef BENCHMARKING
             m_logger->debug("read obstacle '{}'", name);
 #endif
-            auto bdc = new BoundaryDataController(m_settings);
+            auto bdc = new BoundaryDataController();
             real ox1 = obstacle.get_ox1();
             real ox2 = obstacle.get_ox2();
             real oy1 = obstacle.get_oy1();
@@ -148,7 +146,7 @@ void BoundaryController::parse_obstacle_parameter(const std::vector<Settings::Ob
                 bdc->add_boundary_data(boundary);
             }
 
-            auto o = new Obstacle(m_settings, ox1, ox2, oy1, oy2, oz1, oz2, name);
+            auto o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2, name);
             ret_obstacles.push_back(o);
             bdc_obstacles.push_back(bdc);
         }

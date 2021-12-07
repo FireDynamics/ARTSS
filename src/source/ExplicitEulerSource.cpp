@@ -15,7 +15,7 @@ ExplicitEulerSource::ExplicitEulerSource(Settings::Settings const &settings) :
         m_dir_vel.find('y') == std::string::npos &&
         m_dir_vel.find('z') == std::string::npos) {
 #ifndef BENCHMARKING
-        m_logger = Utility::create_logger(settings, typeid(ExplicitEulerSource).name());
+        m_logger = Utility::create_logger(typeid(ExplicitEulerSource).name());
         m_logger->error("unknown direction -> exit");
 #endif
         std::exit(1);

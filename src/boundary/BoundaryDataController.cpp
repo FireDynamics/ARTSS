@@ -12,14 +12,13 @@
 #include "../boundaryCondition/ObstacleBoundary.h"
 #include "../boundaryCondition/SurfaceBoundary.h"
 
-BoundaryDataController::BoundaryDataController(Settings::Settings const &settings) :
-        m_settings(settings) {
+BoundaryDataController::BoundaryDataController() {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_boundary_data = new BoundaryData *[number_of_field_types];
     for (size_t i = 0; i < number_of_field_types; i++) {
-        *(m_boundary_data + i) = new BoundaryData(settings);
+        *(m_boundary_data + i) = new BoundaryData();
     }
 }
 
@@ -82,7 +81,6 @@ void BoundaryDataController::apply_boundary_condition(
     FieldType field_type = field.get_type();
     if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {
         DomainBoundary::apply_boundary_condition(
-                m_settings,
                 field,
                 index_fields,
                 m_boundary_data[field_type],
@@ -107,7 +105,6 @@ void BoundaryDataController::apply_boundary_condition_surface(
     FieldType field_type = field.get_type();
     if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {
         SurfaceBoundary::apply_boundary_condition(
-                m_settings,
                 field,
                 index_fields,
                 m_boundary_data[field_type],
@@ -140,7 +137,6 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
                         Field::get_field_type_name(field_type));
 #endif
         ObstacleBoundary::apply_boundary_condition(
-                m_settings,
                 field,
                 index_fields,
                 m_boundary_data[field_type],

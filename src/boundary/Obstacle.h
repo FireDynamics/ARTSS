@@ -21,13 +21,11 @@
 
 class Obstacle {
  public:
-    Obstacle(Settings::Settings const &settings,
-             real x1, real x2,
+    Obstacle(real x1, real x2,
              real y1, real y2,
              real z1, real z2,
              const std::string &name);
-    Obstacle(Settings::Settings const &settings,
-             Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
+    Obstacle(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
              size_t level,
              const std::string &name);
     ~Obstacle();
@@ -60,7 +58,6 @@ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    Settings::Settings const &m_settings;
     std::string m_name;
     Coordinate<size_t> m_start;
     Coordinate<size_t> m_end;

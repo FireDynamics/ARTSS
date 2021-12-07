@@ -4,15 +4,15 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_JOINEDLISTS_JOINEDLISTOBSTACLE_H_
-#define ARTSS_JOINEDLISTS_JOINEDLISTOBSTACLE_H_
+#ifndef ARTSS_JOINEDLISTS_MULTIPLEJOINEDLIST_H_
+#define ARTSS_JOINEDLISTS_MULTIPLEJOINEDLIST_H_
 
 #include "../utility/Utility.h"
 #include "../utility/settings/Settings.h"
 
 class MultipleJoinedList {
   public:
-    MultipleJoinedList(Settings::Settings const &settings, size_t multigrid_level, size_t number_of_objects);
+    MultipleJoinedList(size_t multigrid_level, size_t number_of_objects);
     ~MultipleJoinedList();
 
     void copyin() {
@@ -49,4 +49,4 @@ class MultipleJoinedList {
 };
 
 
-#endif /* ARTSS_JOINEDLISTS_JOINEDLISTOBSTACLE_H_ */
+#endif /* ARTSS_JOINEDLISTS_MULTIPLEJOINEDLIST_H_ */

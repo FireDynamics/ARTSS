@@ -19,8 +19,7 @@
 
 class Multigrid {
  public:
-    Multigrid(Settings::Settings const &settings,
-              size_t number_of_surfaces, Surface** surface_list,
+    Multigrid(size_t number_of_surfaces, Surface** surface_list,
               size_t number_of_obstacles, Obstacle** obstacle_list,
               BoundaryDataController* bdc_boundary,
               BoundaryDataController **bdc_obstacles,
@@ -62,7 +61,6 @@ private:
 #ifdef GPU_DEBUG
     std::shared_ptr<spdlog::logger> m_gpu_logger;
 #endif
-    Settings::Settings const &m_settings;
     size_t m_multigrid_levels;
     // all surfaces divided by level
     Surface*** m_MG_surface_object_list;  // m_MG_surface_object_list[level][surfaceID]

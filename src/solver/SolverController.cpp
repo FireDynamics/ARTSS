@@ -31,7 +31,7 @@
 SolverController::SolverController(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = new FieldController();
     std::string string_solver = m_settings.get("solver/description");

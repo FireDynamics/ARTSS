@@ -19,13 +19,11 @@
 
 class Surface {
  public:
-    Surface(Settings::Settings const &settings,
-            real x1, real x2,
+    Surface(real x1, real x2,
             real y1, real y2,
             real z1, real z2,
             const std::string &name);
-    Surface(Settings::Settings const &settings,
-            Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
+    Surface(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
             size_t level,
             const std::string &name,
             Patch patch);
@@ -45,7 +43,6 @@ class Surface {
     size_t get_end_index(CoordinateAxis axis) { return m_end[axis]; }
 
 private:
-    Settings::Settings const &m_settings;
     Patch m_patch;
     std::string m_name;
 

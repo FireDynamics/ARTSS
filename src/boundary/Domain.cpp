@@ -11,16 +11,12 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Algorithm.h"
 
-Domain::Domain(Settings::Settings const &settings,
-               size_t *obstacle_list,
-               size_t size_obstacle_list,
-               size_t **surface_list,
-               PatchObject &size_surface_list,
+Domain::Domain(size_t *obstacle_list, size_t size_obstacle_list,
+               size_t **surface_list, PatchObject &size_surface_list,
                size_t multigrid_level) :
-               m_settings(settings),
                m_multigrid_level(multigrid_level), m_size_boundary() {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     init(size_obstacle_list, size_surface_list);
     inner_cells(obstacle_list, size_obstacle_list);
@@ -42,11 +38,10 @@ Domain::Domain(Settings::Settings const &settings,
 void Domain::init(size_t size_obstacle_list, PatchObject &size_surface_list) {
     auto domain_data = DomainData::getInstance();
 
-    m_size_boundary_list = 0;
     m_boundary_patch_divided = new size_t *[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        size_t axis1 = (patch + 1) % number_of_axes;  // patch left (0) -> axis 1 (Y)
-        size_t axis2 = (patch + 2) % number_of_axes;  // patch left (0) -> axis 2 (Z)
+        size_t axis1 = (patch / 2 + 1) % number_of_axes;  // patch left (0) -> axis 1 (Y)
+        size_t axis2 = (patch / 2 + 2) % number_of_axes;  // patch left (0) -> axis 2 (Z)
         m_size_boundary[patch] =
                 domain_data->get_number_of_cells(CoordinateAxis(axis1), m_multigrid_level)
               * domain_data->get_number_of_cells(CoordinateAxis(axis2), m_multigrid_level)
@@ -79,9 +74,10 @@ void Domain::print(size_t size_obstacle_list, PatchObject &size_surface_list) {
                         patch_name,
                         m_size_boundary[patch],
                         size_surface_list[patch]);
-        m_logger->debug("{} starts with {} and ends with {}", patch_name,
-                        m_boundary_patch_divided[FRONT][0],
-                        m_boundary_patch_divided[FRONT][m_size_boundary[patch] - 1]);
+        m_logger->debug("{} starts with {} and ends with {}",
+                        patch_name,
+                        m_boundary_patch_divided[patch][0],
+                        m_boundary_patch_divided[patch][m_size_boundary[patch] - 1]);
     }
     m_logger->debug("list size of inner list: {} obstacle size: {}",
                     m_size_inner_list, size_obstacle_list);
@@ -112,10 +108,10 @@ void Domain::control(size_t size_obstacle_list, PatchObject &size_surface_list) 
     size_t duplicates = 4 * Nx + 4 * Ny + 4 * nz;
     if (m_size_domain_list != all_cells - duplicates) {
         message += fmt::format("list size of all domain cells does not fit with sum of it parts."
-                               "Domain List: {} sum: {} duplicates: {}",
+                               "Domain List: {} sum: {} duplicates: {}\n",
                                m_size_domain_list, all_cells, duplicates);
         for (size_t patch = 0; patch < number_of_patches; patch++) {
-            message += fmt::format("{}: {}\n",
+            message += fmt::format("  {}: {}\n",
                                    PatchObject::get_patch_name(patch), m_size_boundary[patch]);
         }
     }
@@ -400,8 +396,7 @@ void Domain::joined_list() {
 
     m_size_domain_list = m_size_inner_list + m_size_boundary_list;
     m_domain_list = new size_t[m_size_domain_list];
-    Algorithm::merge_sort(m_settings,
-                          m_inner_list, m_boundary_list,
+    Algorithm::merge_sort(m_inner_list, m_boundary_list,
                           m_size_inner_list, m_size_boundary_list,
                           m_domain_list);
 }

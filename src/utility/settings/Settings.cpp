@@ -4,6 +4,7 @@
 /// \author     von Mach
 /// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <spdlog/spdlog.h>
 #include "Settings.h"
 
 #include "../Utility.h"
@@ -25,9 +26,12 @@ Settings::Settings(std::string path) :
 
         read_config("", i);
     }
-
+#ifdef GPU_DEBUG
+    Utility::create_gpu_logger(*this);  // create global logger
+#endif
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(*this, "XMLFile");
+    Utility::create_logger(*this);  // create global logger
+    m_logger = Utility::create_logger("XMLFile");
     m_logger->debug("start the simulation of \"{}\"", path);
     print_config();
 #endif

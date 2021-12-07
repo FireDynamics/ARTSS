@@ -20,7 +20,7 @@ NSTempTurbSolver::NSTempTurbSolver(Settings::Settings const &settings, FieldCont
         m_settings(settings),
         m_field_controller(field_controller) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("construct NSTempTurbSolver");
     m_logger->debug("set advection solver");
 #endif

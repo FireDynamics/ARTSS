@@ -12,6 +12,7 @@
 
 #include "GlobalMacrosTypes.h"
 #include "settings/Settings.h"
+#include "../field/Field.h"
 
 #ifndef BENCHMARKING
 #ifdef _OPENACC
@@ -38,18 +39,12 @@ namespace Utility {
     void log_field_info(Settings::Settings const &settings, Field &field, const std::string &text, const std::string &logger_name);
 
 #ifndef BENCHMARKING
-    std::shared_ptr<spdlog::logger> create_logger(
-            std::string const logger_level,
-            std::string const logger_file,
-            std::string const logger_name);
-    std::shared_ptr<spdlog::logger> create_logger(
-            Settings::Settings const &settings,
-            std::string const logger_name);
+    void create_logger(const Settings::Settings &settings);
     std::shared_ptr<spdlog::logger> create_logger(std::string const logger_name);
 #endif
 #ifdef GPU_DEBUG
     std::shared_ptr<spdlog::logger> create_gpu_logger(std::string logger_name);
-    std::shared_ptr<spdlog::logger> create_gpu_logger(Settings::Settings const &settings, std::string logger_name);
+    void create_gpu_logger(Settings::Settings const &settings);
 #endif
 }  // namespace Utility
 

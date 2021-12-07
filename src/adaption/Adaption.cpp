@@ -21,7 +21,7 @@
 Adaption::Adaption(Settings::Settings const &settings, FieldController *field_controller) {
     m_field_controller = field_controller;
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto domain_data = DomainData::getInstance();
     m_dynamic = settings.get_bool("adaption/dynamic");
@@ -427,7 +427,7 @@ void Adaption::reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduct
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_x_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_x_direction_serial(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
@@ -506,7 +506,7 @@ bool Adaption::adapt_x_direction_serial(Settings::Settings const &settings, cons
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(typeid(Adaption).name());
         m_logger->error("Exception in x-Adaption: {} {} {} {}",
                         size_t(expansion_start),
                         size_t(reduction_start),
@@ -536,7 +536,7 @@ bool Adaption::adapt_x_direction_serial(Settings::Settings const &settings, cons
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_x_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_x_direction(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = DomainData::getInstance();
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;
@@ -596,7 +596,7 @@ bool Adaption::adapt_x_direction(Settings::Settings const &settings, const real 
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(typeid(Adaption).name());
         m_logger->error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
                 expansion_counter_start,
                 reduction_counter_start,
@@ -632,7 +632,7 @@ bool Adaption::adapt_x_direction(Settings::Settings const &settings, const real 
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_y_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_y_direction_serial(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
@@ -711,7 +711,7 @@ bool Adaption::adapt_y_direction_serial(Settings::Settings const &settings, cons
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(typeid(Adaption).name());
         m_logger->error("Exception in y-Adaption: {} {} {} {}",
                         size_t(expansion_start),
                         size_t(reduction_start),
@@ -742,7 +742,7 @@ bool Adaption::adapt_y_direction_serial(Settings::Settings const &settings, cons
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_y_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+bool Adaption::adapt_y_direction(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
     auto domain = DomainData::getInstance();
 
     size_t expansion_counter_start = 0;
@@ -802,7 +802,7 @@ bool Adaption::adapt_y_direction(Settings::Settings const &settings, const real 
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(typeid(Adaption).name());
         m_logger->error(
             "Trying to reduce and expand at the same time (y): {}, {} | {}, {}",
             expansion_counter_start,

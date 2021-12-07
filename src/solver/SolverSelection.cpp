@@ -30,7 +30,7 @@ void SetAdvectionSolver(Settings::Settings const &settings, IAdvection **advecti
         *advectionSolver = new SLAdvect(settings);
     } else {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(settings, class_name);
+        auto logger = Utility::create_logger(class_name);
         logger->error("Advection method not yet implemented! simulation stopped!");
 #endif
         std::exit(1);
@@ -53,7 +53,7 @@ void SetDiffusionSolver(Settings::Settings const &settings, IDiffusion **diffusi
         *diffusionSolver = new ExplicitDiffuse(settings);
     } else {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(settings, class_name);
+        auto logger = Utility::create_logger(class_name);
         logger->error("Diffusion method not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);
@@ -74,7 +74,7 @@ void SetPressureSolver(Settings::Settings const &settings,
         *pressureSolver = new VCycleMG(settings);
     } else {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(settings, class_name);
+        auto logger = Utility::create_logger(class_name);
         logger->error("Pressure method not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);
@@ -93,7 +93,7 @@ void SetSourceSolver(Settings::Settings const &settings, ISource **sourceSolver,
         *sourceSolver = new ExplicitEulerSource(settings);
     } else {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(settings, class_name);
+        auto logger = Utility::create_logger(class_name);
         logger->error("Source method {} not yet implemented! Simulation stopped!", sourceType);
 #endif
         std::exit(1);
@@ -114,7 +114,7 @@ void SetTurbulenceSolver(Settings::Settings const &settings, ITurbulence **turbu
         *turbulence_solver = new DynamicSmagorinsky(settings);
     } else {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(settings, class_name);
+        auto logger = Utility::create_logger(class_name);
         logger->error("Turbulence model is not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);

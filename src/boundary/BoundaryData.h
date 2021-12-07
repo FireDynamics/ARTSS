@@ -23,7 +23,7 @@ enum BoundaryCondition : int {
 
 class BoundaryData {
  public:
-    explicit BoundaryData(Settings::Settings const &settings);
+    BoundaryData();
     ~BoundaryData();
     void print();
 

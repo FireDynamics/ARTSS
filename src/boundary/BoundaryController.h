@@ -58,8 +58,6 @@ class BoundaryController {
  private:
     size_t get_slice_size_domain_inner_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_domain_inner_cells_level_joined(level); }  // get size of domain inner list
     explicit BoundaryController(Settings::Settings const &settings);
-
-    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -80,7 +78,7 @@ class BoundaryController {
     bool m_has_obstacles;
     bool m_has_surfaces;
 
-    void read_XML();
+    void read_XML(Settings::Settings const &settings);
     void parse_boundary_parameter(const std::vector<Settings::BoundarySetting>& boundaries);
     void parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting>& obstacles);
     void parse_surface_parameter(const std::vector<Settings::SurfaceSetting>& surfaces);
