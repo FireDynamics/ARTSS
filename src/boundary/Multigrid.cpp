@@ -101,15 +101,19 @@ Multigrid::~Multigrid() {
         delete m_jl_domain_boundary_list_patch_divided[patch];
     }
 
-    delete m_jl_domain_boundary_list_patch_divided;
-    delete m_jl_obstacle_boundary_list_patch_divided;
-    delete m_jl_surface_list_patch_divided;
+    delete[] m_jl_domain_boundary_list_patch_divided;
+    delete[] m_jl_obstacle_boundary_list_patch_divided;
+    delete[] m_jl_surface_list_patch_divided;
 
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
         delete m_bdc_obstacle[id];
     }
+    delete[] m_bdc_obstacle;
+    for (size_t id = 0; id < m_number_of_surface_objects; id++) {
+        delete m_bdc_surface[id];
+    }
+    delete[] m_bdc_surface;
     delete m_bdc_boundary;
-    delete m_bdc_obstacle;
 }
 
 //======================================== Control =================================================

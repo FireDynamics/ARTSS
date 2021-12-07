@@ -227,3 +227,7 @@ void DomainData::control() {
     }
 #endif
 }
+
+DomainData::~DomainData() {
+    delete[] number_of_inner_cells;
+}

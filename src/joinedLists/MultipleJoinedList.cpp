@@ -68,7 +68,9 @@ void MultipleJoinedList::add_data(size_t level, size_t obstacle_id, size_t size,
 MultipleJoinedList::~MultipleJoinedList() {
 #pragma acc exit data delete(m_data[:m_size])
     delete[] m_index_list;
-    delete[] m_data;
+    if (m_size > 0) {
+        delete[] m_data;
+    }
     delete[] m_size_list;
 }
 

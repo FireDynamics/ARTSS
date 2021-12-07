@@ -62,7 +62,9 @@ void SingleJoinedList::add_data(size_t level, size_t size, const size_t *data) {
 SingleJoinedList::~SingleJoinedList() {
 #pragma acc exit data delete(m_data[:m_size])
     delete[] m_index_list;
-    delete[] m_data;
+    if (m_size > 0) {
+        delete[] m_data;
+    }
     delete[] m_size_list;
 }
 

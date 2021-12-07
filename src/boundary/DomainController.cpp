@@ -170,10 +170,10 @@ void DomainController::parse_obstacle_parameter(const std::vector<Settings::Obst
 
 DomainController::~DomainController() {
     delete m_multigrid;
-    delete m_bdc_boundary;
-    for (size_t i = 0; i < m_number_of_obstacles; i++) {
-        delete m_bdc_obstacles[i];
-    }
+    //delete m_bdc_boundary;
+    //for (size_t i = 0; i < m_number_of_obstacles; i++) {
+    //    delete m_bdc_obstacles[i];
+    //}
 }
 
 

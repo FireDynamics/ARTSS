@@ -98,7 +98,7 @@ namespace Algorithm {
             for (size_t c = counter_list1; c < size_list1; c++) {
                 result.push_back(list1[c]);
             }
-        } else {
+        } else if (counter_list2 < size_list2) {
             if (list2[counter_list2] == result[result.size() - 1]) {
                 counter_list2++;
             }

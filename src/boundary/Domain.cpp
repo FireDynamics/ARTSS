@@ -254,7 +254,6 @@ void Domain::control(size_t size_obstacle_list, PatchObject &size_surface_list) 
         m_logger->warn(message);
     }
 #endif
-    std::exit(1);
 }
 
 Domain::~Domain() {
