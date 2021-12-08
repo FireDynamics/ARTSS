@@ -7,7 +7,7 @@
 #ifndef ARTSS_ADAPTION_LAYERS_H_
 #define ARTSS_ADAPTION_LAYERS_H_
 
-#include "../boundary/Coordinate.h"
+#include "../dataClasses/Coordinate.h"
 #include "../field/Field.h"
 #include "../interfaces/IAdaptionFunction.h"
 #include "../solver/SolverController.h"

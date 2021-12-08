@@ -10,7 +10,7 @@
 #include <cmath>
 #include <string>
 
-#include "Coordinate.h"
+#include "../dataClasses/Coordinate.h"
 #include "BoundaryData.h"
 #include "BoundaryDataController.h"
 #include "PatchObject.h"

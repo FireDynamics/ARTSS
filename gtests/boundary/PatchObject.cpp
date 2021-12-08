@@ -6,7 +6,7 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/boundary/Coordinate.h>
+#include "src/dataClasses/Coordinate.h"
 #include "src/boundary/PatchObject.h"
 
 class PatchObjectTest : public testing::Test {

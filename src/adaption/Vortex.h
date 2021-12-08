@@ -8,7 +8,7 @@
 #define ARTSS_ADAPTION_VORTEX_H_
 
 #include "Adaption.h"
-#include "../boundary/Coordinate.h"
+#include "../dataClasses/Coordinate.h"
 #include "../interfaces/IAdaptionFunction.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"

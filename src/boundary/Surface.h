@@ -15,7 +15,7 @@
 #include "../utility/settings/Settings.h"
 
 #include "BoundaryDataController.h"
-#include "Coordinate.h"
+#include "../dataClasses/Coordinate.h"
 
 class Surface {
  public:
