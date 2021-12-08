@@ -23,19 +23,17 @@ DomainData::DomainData(Settings::Settings const &settings) :
         m_levels = settings.get_size_t("solver/pressure/n_level");
     }
     number_of_inner_cells = new Coordinate<size_t>[m_levels + 1];
-    size_t nx = settings.get_size_t("domain_parameters/nx");
-    size_t ny = settings.get_size_t("domain_parameters/ny");
-    size_t nz = settings.get_size_t("domain_parameters/nz");
-    number_of_inner_cells[0].set_coordinate(nx, ny, nz);
 
-    real X1 = settings.get_real("domain_parameters/X1");
-    real X2 = settings.get_real("domain_parameters/X2");
-    real Y1 = settings.get_real("domain_parameters/Y1");
-    real Y2 = settings.get_real("domain_parameters/Y2");
-    real Z1 = settings.get_real("domain_parameters/Z1");
-    real Z2 = settings.get_real("domain_parameters/Z2");
-    start_coords_PD.set_coordinate(X1, Y1, Z1);
-    end_coords_PD.set_coordinate(X2, Y2, Z2);
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
+        std::string axis_name = Coordinate<real>::get_axis_name(CoordinateAxis(axis));
+        start_coords_PD[axis] = settings.get_real("domain_parameters/" + axis_name + "1");
+        end_coords_PD[axis] = settings.get_real("domain_parameters/" + axis_name + "2");
+        length_PD[axis] = fabs(end_coords_PD[axis] - start_coords_PD[axis]);
+
+        std::string axis_name_lower = axis_name;
+        std::transform(axis_name.begin(), axis_name.end(), axis_name_lower.begin(), ::tolower);
+        number_of_inner_cells[0][axis] = settings.get_size_t("domain_parameters/n" + axis_name_lower);
+    }
 
     bool has_computational_domain = settings.get_bool("domain_parameters/enable_computational_domain");
     if (has_computational_domain) {
@@ -51,15 +49,13 @@ DomainData::DomainData(Settings::Settings const &settings) :
         start_coords_CD.copy(start_coords_PD);
         end_coords_CD.copy(end_coords_PD);
     }
-    for (size_t axis = 0; axis < number_of_axes; axis++) {
-        length_PD[axis] = fabs(end_coords_PD[axis] - start_coords_PD[axis]);
-    }
 
     calc_MG_values();
 #ifndef BENCHMARKING
-    printDetails();
+    print_details();
     control();
 #endif
+    std::exit(0);
 }
 
 // =============================== Calculation of MultiGrid Values ========================
@@ -138,18 +134,18 @@ real DomainData::calc_new_coord(real oldCoord, long shift, real cell_width) {
 // ***************************************************************************************
 /// \brief If resizing is valid set new coordinates
 /// \params shift  Amount of cells which will be resized
-/// \params startCoord_p Start coordinate of physical domain
-/// \params endCoord_p End coordinate of physical domain
-/// \params oldCoord Old coordinate of computational domain
-/// \params cellWidth  dx,dy,dz
-/// \params newCoord New coordinate of computational domain
+/// \params start_coord_p Start coordinate of physical domain
+/// \params end_coord_p End coordinate of physical domain
+/// \params old_coord Old coordinate of computational domain
+/// \params cell_width  dx,dy,dz
+/// \params new_coord New coordinate of computational domain
 /// \return bool True if resize is valid
 // ***************************************************************************************
-bool DomainData::set_new_value(long shift, real startCoord_p, real endCoord_p, real oldCoord, real cell_width, real *newCoord) {
+bool DomainData::set_new_value(long shift, real start_coord_p, real end_coord_p, real old_coord, real cell_width, real *new_coord) {
     bool update = false;
     if (shift != 0) {
-        *newCoord = calc_new_coord(oldCoord, shift, cell_width);
-        if (*newCoord >= startCoord_p && *newCoord <= endCoord_p) {
+        *new_coord = calc_new_coord(old_coord, shift, cell_width);
+        if (*new_coord >= start_coord_p && *new_coord <= end_coord_p) {
             update = true;
         }
     }
@@ -159,49 +155,55 @@ bool DomainData::set_new_value(long shift, real startCoord_p, real endCoord_p, r
 void DomainData::print() {
 #ifndef BENCHMARKING
     m_logger->info("-- Domain");
-    m_logger->info("Domain size inner cells: ({}|{}|{})", get_nx(),
-                                                          get_ny(),
-                                                          get_nz());
-    m_logger->info("step size (x|y|z): ({}|{}|{})", get_dx(),
-                                                    get_dy(),
-                                                    get_dz());
+    m_logger->info("Domain size inner cells: {}", *number_of_inner_cells);
+    m_logger->info("step size (x|y|z): ({}|{}|{})", get_spacing(CoordinateAxis::X),
+                                                    get_spacing(CoordinateAxis::Y),
+                                                    get_spacing(CoordinateAxis::Z));
 #endif
 }
 
-void DomainData::printDetails() {
+void DomainData::print_details() {
 #ifndef BENCHMARKING
     m_logger->debug("############### Domain Data Parameter ###############");
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->debug("For Level {} Nx: {}, Ny: {}, Nz: {}", level,
-                get_Nx(level), get_Ny(level), get_Nz(level));
+        m_logger->debug("For Level {} (Nx|Ny|Nz): ({}|{}|{})", level,
+                get_number_of_cells(CoordinateAxis::X, level),
+                get_number_of_cells(CoordinateAxis::Y, level),
+                get_number_of_cells(CoordinateAxis::Z, level));
     }
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->debug("For Level {} nx: {}, ny {}, nz {}", level,
-                get_nx(level), get_ny(level), get_nz(level));
+        m_logger->debug("For Level {} (nx|ny|nz): {}", level, number_of_inner_cells[level]);
     }
+    m_logger->debug("start coordinates in physical domain (X1|Y1|Z1) {}", start_coords_PD);
+    m_logger->debug("end coordinates in physical domain (X2|Y2|Z2) {}", end_coords_PD);
 
-    m_logger->debug("X: ({}|{}) x: ({}|{})", get_X1(), get_X2(),
-                                            get_x1(), get_x2());
-    m_logger->debug("Y: ({}|{}) y: ({}|{})", get_Y1(), get_Y2(),
-                                            get_y1(), get_y2());
-    m_logger->debug("Z: ({}|{}) z: ({}|{})", get_Z1(), get_Z2(),
-                                            get_z1(), get_z2());
+    m_logger->debug("start coordinates in computational domain (x1|y1|z1) {}", start_coords_CD);
+    m_logger->debug("end coordinates in computational domain (x1|y1|z1) {}", end_coords_CD);
 
-    m_logger->debug("Lx: {}, Ly: {}, Lz: {}", get_Lx(), get_Ly(), get_Lz());
-    m_logger->debug("lx: {}, ly: {}, lz: {}", get_lx(), get_ly(), get_lz());
+    m_logger->debug("length of physical domain (Lx|Ly|Lz): {}", length_PD);
+    m_logger->debug("length of computational domain (lx|ly|lz): ({}|{}|{})",
+                    get_length_CD(CoordinateAxis::X),
+                    get_length_CD(CoordinateAxis::Y),
+                    get_length_CD(CoordinateAxis::Z));
 
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->debug("For Level {} dx: {}, dy: {}, dz: {}", level,
-                get_dx(level), get_dy(level), get_dz(level));
+        m_logger->debug("For Level {} spacing (dx|dy|dz): ({}|{}|{})", level,
+                        get_spacing(CoordinateAxis::X, level),
+                        get_spacing(CoordinateAxis::Y, level),
+                        get_spacing(CoordinateAxis::Z, level));
     }
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->debug("for Level {} X: ({}|{}) Y: ({}|{}) Z: ({}|{})", level,
-                get_index_x1(level), get_index_x2(level),
-                get_index_y1(level), get_index_y2(level),
-                get_index_z1(level), get_index_z2(level));
+        m_logger->debug("For Level {} start index computational domain (x|y|z): ({}|{}|{})", level,
+                        get_start_index_CD(CoordinateAxis::X, level),
+                        get_start_index_CD(CoordinateAxis::Y, level),
+                        get_start_index_CD(CoordinateAxis::Z, level));
+        m_logger->debug("For Level {} end index computational domain (x|y|z): ({}|{}|{})", level,
+                        get_end_index_CD(CoordinateAxis::X, level),
+                        get_end_index_CD(CoordinateAxis::Y, level),
+                        get_end_index_CD(CoordinateAxis::Z, level));
     }
     for (size_t level = 0; level < m_levels + 1; level++) {
-        m_logger->debug(" For Level {} domain size: {}", level, get_size(level));
+        m_logger->debug("For Level {} domain size: {}", level, get_size(level));
     }
 
     m_logger->debug("--------------- Domain Data Parameter end ---------------");

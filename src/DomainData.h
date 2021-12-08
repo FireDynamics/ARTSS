@@ -16,7 +16,7 @@
 #include "utility/GlobalMacrosTypes.h"
 #include "utility/Utility.h"
 #include "utility/settings/Settings.h"
-#include "boundary/Coordinate.h"
+#include "dataClasses/Coordinate.h"
 
 class DomainData {
  public:
@@ -123,7 +123,7 @@ class DomainData {
     [[deprecated("Replaced by get_start_index_CD")]]
     size_t inline get_index_z1(size_t level = 0) const { return get_start_index_CD(CoordinateAxis::Z, level); }
     size_t inline get_start_index_CD(CoordinateAxis axis, size_t level = 0) const {
-        return static_cast<size_t> (std::round((start_coords_CD[axis] - start_coords_PD[axis]) / get_dx(level))) + 1;
+        return static_cast<size_t> (std::round((start_coords_CD[axis] - start_coords_PD[axis]) / get_spacing(axis, level))) + 1;
     }
 
     // end index of computational domain without ghost cells
@@ -134,7 +134,7 @@ class DomainData {
     [[deprecated("Replaced by get_end_index_CD")]]
     size_t inline get_index_z2(size_t level = 0) const { return get_end_index_CD(CoordinateAxis::Z, level); }
     size_t inline get_end_index_CD(CoordinateAxis axis, size_t level = 0) const {
-        return static_cast<size_t> (std::round((end_coords_CD[axis] - start_coords_PD[axis]) / get_spacing(CoordinateAxis(axis), level)));
+        return static_cast<size_t> (std::round((end_coords_CD[axis] - start_coords_PD[axis]) / get_spacing(axis, level)));
     }
 
     size_t inline get_levels() const { return m_levels; }
@@ -144,7 +144,7 @@ class DomainData {
     bool resize(const Coordinate<long>& shift_start, const Coordinate<long>& shift_end);
 
     void print();
-    void printDetails();
+    void print_details();
 
  private:
 #ifndef BENCHMARKING
@@ -155,7 +155,7 @@ class DomainData {
 
     static real calc_new_coord(real oldCoord, long shift, real cell_width);
 
-    static bool set_new_value(long shift, real startCoord_p, real endCoord_p, real oldCoord, real cell_width, real *newCoord);
+    static bool set_new_value(long shift, real start_coord_p, real end_coord_p, real old_coord, real cell_width, real *new_coord);
 
     // CD = computational domain
     Coordinate<size_t> *number_of_inner_cells;  // nx/ny/nz
