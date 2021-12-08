@@ -13,6 +13,8 @@ inline static const std::vector<std::string> field_type_names = {"rho", "u", "v"
 Field::Field(FieldType type) :
         m_level(0), m_size(DomainData::getInstance()->get_size()), m_type(type) {
     data = new real[m_size];
+    auto logger = Utility::create_logger("Field");
+    logger->info("size {} type {} pointer {} {}", m_size, get_field_type_name(m_type), static_cast<void *>(this), static_cast<void *>(data));
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
     m_gpu_logger->info("{} level {} create with field pointer: {} data pointer: {}",
@@ -53,6 +55,8 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
     // pointer to memory allocated on the device.
 #pragma acc enter data create(data[:m_size])
     set_value(val);
+    auto logger = Utility::create_logger("Field");
+    logger->info("size {} type {} pointer {} {} value {} data {}", m_size, get_field_type_name(m_type), static_cast<void *>(this), static_cast<void *>(data), val, data[0]);
 }
 
 Field::Field(const Field &original):

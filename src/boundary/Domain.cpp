@@ -337,6 +337,16 @@ void Domain::boundary_cells(size_t **surface_list, PatchObject &size_surface_lis
                 }
             }
         }
+#ifndef BENCHMARKING
+        m_logger->debug("for patch {} boundary list size: {} counter: {} surface list size: {} surface counter: {}",
+                        PatchObject::get_patch_name(patch_start),
+                        m_size_boundary[patch_start], counter_start,
+                        size_surface_list[patch_start], counter_surface_start);
+        m_logger->debug("for patch {} boundary list size: {} counter: {} surface list size: {} surface counter: {}",
+                        PatchObject::get_patch_name(patch_end),
+                        m_size_boundary[patch_end], counter_end,
+                        size_surface_list[patch_end], counter_surface_end);
+#endif
     }
     delete tmp_start;
     delete tmp_end;

@@ -9,8 +9,6 @@
 
 #include "../interfaces/IAdvection.h"
 #include "../field/Field.h"
-#include "../utility/Utility.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
 
 class SLAdvect : public IAdvection {

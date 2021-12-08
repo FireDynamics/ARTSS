@@ -76,6 +76,7 @@ std::vector<std::string> split(const char *text, char delimiter) {
     return tokens;
 }
 
+
 #ifdef GPU_DEBUG
 // =====================creates a new logger for the GPU =======================
 // *****************************************************************************
@@ -84,25 +85,26 @@ std::vector<std::string> split(const char *text, char delimiter) {
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
 std::shared_ptr<spdlog::logger> create_gpu_logger(std::string logger_name) {
-    auto &sinks = spdlog::get(global_gpu_logger)->sinks();
-    return std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
+//    auto &sinks = spdlog::get(global_gpu_logger)->sinks();
+//    return std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
+    std::string log_file = "gpu.log";
+    auto shared_file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file);
+    auto logger = std::make_shared<spdlog::logger>(logger_name, shared_file_sink);
+
+    logger->flush_on(spdlog::level::err);
+    logger->set_level(spdlog::level::trace);
+    return logger;
 }
 
 void create_gpu_logger(Settings::Settings const &settings) {
-    static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
-
+    std::string log_file = settings.sget("logging/file");
+    log_file = remove_extension(log_file) + "_gpu.log";
     std::string log_level = "debug";
-    std::string log_file = settings.sget("logging/file") + "_gpu";
 
-    if (!file_sink) {
-        file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
-        file_sink->set_level(spdlog::level::trace);
-    }
+    auto shared_file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file);
+    auto logger = std::make_shared<spdlog::logger>(global_gpu_logger, shared_file_sink);
 
-    // TODO (cvm) a bit unnecessary isn't it? probably able to simplify
-    std::vector<spdlog::sink_ptr> sinks = {file_sink};
-    auto logger = std::make_shared<spdlog::logger>(global_gpu_logger, begin(sinks), end(sinks));
-    spdlog::register_logger(logger);  // needed if spdlog::get() should be used elsewhere
+    spdlog::register_logger(logger);
     logger->flush_on(spdlog::level::err);
     logger->set_level(spdlog::level::trace);
 }

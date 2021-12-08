@@ -104,7 +104,7 @@ std::string Settings::get(std::string path) const {
 #ifndef BENCHMARKING
         m_logger->error("didn't found \"{}\" in settings", path);
         print_config();
-        throw std::invalid_argument("\"" + path + "\" is an unkown setting");
+        throw std::invalid_argument("\"" + path + "\" is an unknown setting");
 #endif
     }
 

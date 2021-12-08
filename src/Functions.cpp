@@ -543,7 +543,10 @@ namespace Functions {
 
             real x_shift2 = ((xi(coords_i, X1, dx) - x_shift) / u_lin - t) * ((xi(coords_i, X1, dx) - x_shift) / u_lin - t);
             real y_shift2 = ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t) * ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t);
-            real z_shift2 = ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t) * ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t);
+            real z_shift2 = 0;
+            if (w_lin != 0) {
+                z_shift2 = ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t) * ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t);
+            }
             real quot = 1. / (2. * l * l);
 
             out[idx] = exp(-(x_shift2 + y_shift2 + z_shift2) * quot);

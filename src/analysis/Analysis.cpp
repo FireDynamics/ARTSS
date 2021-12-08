@@ -265,20 +265,20 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
     real epsu = sqrt(rNt * sum_u);
 
 #ifndef BENCHMARKING
-    m_logger->info("RMS error of u at domain_data center is e_RMS = {}", epsu);
+    m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
 #endif
 
     std::vector<FieldType> v_fields = DomainController::getInstance()->get_used_fields();
     if (std::count(v_fields.begin(), v_fields.end(), FieldType::P)) {
         real epsp = sqrt(rNt * sum_p);
 #ifndef BENCHMARKING
-        m_logger->info("RMS error of p at domain_data center is e_RMS = {}", epsp);
+        m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
 #endif
     }
     if(std::count(v_fields.begin(), v_fields.end(), FieldType::T)) {
         real epsT = sqrt(rNt * sum_T);
 #ifndef BENCHMARKING
-        m_logger->info("RMS error of T at domain_data center is e_RMS = {}", epsT);
+        m_logger->info("RMS error of T at domain center is e_RMS = {}", epsT);
 #endif
     }
 }

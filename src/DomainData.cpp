@@ -55,7 +55,6 @@ DomainData::DomainData(Settings::Settings const &settings) :
     print_details();
     control();
 #endif
-    std::exit(0);
 }
 
 // =============================== Calculation of MultiGrid Values ========================
