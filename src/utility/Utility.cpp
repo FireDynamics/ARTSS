@@ -111,7 +111,11 @@ void create_gpu_logger(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
 std::shared_ptr<spdlog::logger> create_logger(const std::string logger_name) {
     auto &sinks = spdlog::get(global_logger)->sinks();
-    return std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
+    auto logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
+    logger->sinks()[0]->set_level(sinks[0]->level());
+    logger->sinks()[1]->set_level(sinks[1]->level());
+    logger->set_level(sinks[0]->level());
+    return logger;
 }
 
 // ======================= creates a new logger ================================
@@ -141,11 +145,14 @@ void create_logger(Settings::Settings const &settings) {
         file_sink->set_level(spdlog::level::trace);
     }
 
-    spdlog::sinks_init_list sinks = {stdout_sink, file_sink};
-    auto logger = std::make_shared<spdlog::logger>(global_logger, sinks);
-    spdlog::register_logger(logger);  // needed if spdlog::get() should be used elsewhere
-    logger->flush_on(spdlog::level::err);
-    logger->set_level(spdlog::level::trace);
+    std::vector<spdlog::sink_ptr> sinks = {stdout_sink, file_sink};
+    // TODO (cvm) does not consider log level, can be checked with combined_logger->level()
+    auto combined_logger = std::make_shared<spdlog::logger>(global_logger, begin(sinks), end(sinks));
+    auto test1= combined_logger->sinks()[0]->level();
+    auto test2 = combined_logger->sinks()[1]->level();
+    spdlog::register_logger(combined_logger);  // needed if spdlog::get() should be used elsewhere
+    combined_logger->flush_on(spdlog::level::err);
+    combined_logger->set_level(spdlog::level::trace);
 }
 #endif
 
