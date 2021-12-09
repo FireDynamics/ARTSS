@@ -9,6 +9,7 @@
 #include "visit_writer.h"  //( https://wci.llnl.gov/codes/visit/ )
 
 static std::string ending = ".vtk";
+int VTKWriter::vtk_counter = 0;
 
 void VTKWriter::write_numerical_debug(const FieldController &field_controller, const std::string &filename) {
     auto u = field_controller.get_field_u_data();

@@ -8,6 +8,7 @@
 #include "../DomainData.h"
 
 inline static const std::vector<std::string> field_type_names = {"rho", "u", "v", "w", "p", "T", "nu"};
+int Field::counter = 0;
 
 Field::Field(FieldType type) :
         m_level(0), m_size(DomainData::getInstance()->get_size()), m_type(type) {

@@ -16,8 +16,6 @@
     #include <openacc.h>
 #endif
 
-int Field::counter = 0;
-int VTKWriter::vtk_counter = 0;
 int main(int argc, char **argv) {
     // Initialisation
     // Parameters
