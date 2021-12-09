@@ -10,6 +10,8 @@
 #include <fmt/compile.h>
 #endif
 
+#include <fstream>
+
 #include "CSVWriter.h"
 
 static std::string ending = ".csv";

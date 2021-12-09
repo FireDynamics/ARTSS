@@ -9,9 +9,10 @@
 #include <string>
 #include <vector>
 
-Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
+Multigrid::Multigrid(Settings::Settings const &settings, BoundaryDataController *bdc_boundary) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     m_bdc_boundary = bdc_boundary;
     m_number_of_surface_objects = 0;
@@ -34,12 +35,14 @@ Multigrid::Multigrid(BoundaryDataController *bdc_boundary) {
 }
 
 Multigrid::Multigrid(
+        Settings::Settings const &settings,
         size_t number_of_surfaces, Surface **surface_list,
         size_t number_of_obstacles, Obstacle **obstacle_list,
         BoundaryDataController *bdc_boundary,
-        BoundaryDataController **bdc_obstacles) {
+        BoundaryDataController **bdc_obstacles) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     m_bdc_boundary = bdc_boundary;
     m_number_of_surface_objects = number_of_surfaces;
@@ -180,16 +183,16 @@ Multigrid::~Multigrid() {
     }
     delete[] m_MG_boundary_object_list;
 
-    size_t size_inner_list = get_length_of_inner_index_list_joined();
-    size_t size_boundary_list = get_length_of_boundary_index_list_joined();
+    size_t size_inner_list __attribute__((unused)) = get_length_of_inner_index_list_joined();
+    size_t size_boundary_list __attribute__((unused)) = get_length_of_boundary_index_list_joined();
 #pragma acc exit data delete(m_data_MG_inner_list_level_joined[:size_inner_list])
 #pragma acc exit data delete(m_data_MG_boundary_list_level_joined[:size_boundary_list])
     delete[] m_data_MG_inner_list_level_joined;
     delete[] m_data_MG_boundary_list_level_joined;
 
-    size_t size_boundary_slice_z = get_length_of_boundary_slice_z_joined();
-    size_t size_boundary_slice_y = get_length_of_boundary_slice_y_joined();
-    size_t size_boundary_slice_x = get_length_of_boundary_slice_x_joined();
+    size_t size_boundary_slice_z __attribute__((unused)) = get_length_of_boundary_slice_z_joined();
+    size_t size_boundary_slice_y __attribute__((unused)) = get_length_of_boundary_slice_y_joined();
+    size_t size_boundary_slice_x __attribute__((unused)) = get_length_of_boundary_slice_x_joined();
 #pragma acc exit data delete(m_data_MG_boundary_front_level_joined[:size_boundary_slice_z])
 #pragma acc exit data delete(m_data_MG_boundary_back_level_joined[:size_boundary_slice_z])
 #pragma acc exit data delete(m_data_MG_boundary_top_level_joined[:size_boundary_slice_y])
@@ -211,7 +214,7 @@ Multigrid::~Multigrid() {
     delete[] m_size_MG_boundary_slice_x_level;
 
     if (m_number_of_surface_objects > 0) {
-        size_t size_surface_list = get_length_of_surface_index_list_joined();
+        size_t size_surface_list __attribute__((unused)) = get_length_of_surface_index_list_joined();
 #pragma acc exit data delete(m_data_MG_surface_list_level_joined[:size_surface_list])
         delete[] m_MG_surface_object_list;
         delete[] m_MG_surface_index_list;
@@ -529,10 +532,10 @@ void Multigrid::add_MG_lists() {
     Boundary *b;
     if (m_number_of_obstacle_objects > 0) {
         calc_obstacles(*(m_MG_obstacle_object_list));
-        b = new Boundary(*(m_MG_obstacle_object_list), m_number_of_obstacle_objects,
+        b = new Boundary(m_settings, *(m_MG_obstacle_object_list), m_number_of_obstacle_objects,
                          get_size_obstacle_index_list(0));
     } else {
-        b = new Boundary();
+        b = new Boundary(m_settings);
     }
     // set size of respective lists
     m_size_MG_inner_index_list_level[1] = b->get_size_inner_list();
@@ -554,10 +557,10 @@ void Multigrid::add_MG_lists() {
 
         Boundary *boundary;
         if (m_number_of_obstacle_objects > 0) {
-            boundary = new Boundary(obstacle_list, m_number_of_obstacle_objects,
+            boundary = new Boundary(m_settings, obstacle_list, m_number_of_obstacle_objects,
                                     get_size_obstacle_index_list(level), level);
         } else {
-            boundary = new Boundary(level);
+            boundary = new Boundary(m_settings, level);
         }
         *(m_MG_boundary_object_list + level) = boundary;
 
@@ -671,7 +674,7 @@ void Multigrid::surface_dominant_restriction(size_t level) {
                             startIndex_fine / 2);
 #endif
 
-            Surface *surface_coarse = new Surface(surfaceID, startIndex_coarse,
+            Surface *surface_coarse = new Surface(m_settings, surfaceID, startIndex_coarse,
                                                   stride_x_coarse, stride_y_coarse, stride_z_coarse, level);
             *(surface_list_coarse + surfaceID) = surface_coarse;
             size_t index = level * m_number_of_surface_objects + surfaceID + 1;
@@ -743,7 +746,8 @@ Obstacle **Multigrid::obstacle_dominant_restriction(size_t level) {
         }
 #endif
 
-        auto obstacle_coarse = new Obstacle(i1_coarse, j1_coarse, k1_coarse,
+        auto obstacle_coarse = new Obstacle(m_settings,
+                                            i1_coarse, j1_coarse, k1_coarse,
                                             i2_coarse, j2_coarse, k2_coarse,
                                             level, obstacle_fine->get_name());
 #ifndef BENCHMARKING
@@ -968,7 +972,7 @@ void Multigrid::send_obstacle_lists_to_GPU() {
         }
 
         m_data_MG_obstacle_list_zero_joined = m_MG_obstacle_index_list[0];  // TODO(issue 33) wrong because only one obstacle is used?
-        size_t size_obstacle_list = get_size_obstacle_list();
+        size_t size_obstacle_list __attribute__((unused)) = get_size_obstacle_list();
 #pragma acc enter data copyin(m_data_MG_obstacle_front_level_joined[:size_oFront])
 #pragma acc enter data copyin(m_data_MG_obstacle_back_level_joined[:size_oBack])
 #pragma acc enter data copyin(m_data_MG_obstacle_top_level_joined[:size_oTop])
@@ -1092,16 +1096,16 @@ void Multigrid::update_lists() {
 }
 
 void Multigrid::remove_boundary_lists_from_GPU() {
-    size_t size_inner_list = get_length_of_inner_index_list_joined();
-    size_t size_boundary_list = get_length_of_boundary_index_list_joined();
+    size_t size_inner_list __attribute__((unused)) = get_length_of_inner_index_list_joined();
+    size_t size_boundary_list __attribute__((unused)) = get_length_of_boundary_index_list_joined();
 #pragma acc exit data delete(m_data_MG_inner_list_level_joined[:size_inner_list])
 #pragma acc exit data delete(m_data_MG_boundary_list_level_joined[:size_boundary_list])
     delete[] m_data_MG_inner_list_level_joined;
     delete[] m_data_MG_boundary_list_level_joined;
 
-    size_t size_boundary_slice_z = get_length_of_boundary_slice_z_joined();
-    size_t size_boundary_slice_y = get_length_of_boundary_slice_y_joined();
-    size_t size_boundary_slice_x = get_length_of_boundary_slice_x_joined();
+    size_t size_boundary_slice_z __attribute__((unused)) = get_length_of_boundary_slice_z_joined();
+    size_t size_boundary_slice_y __attribute__((unused)) = get_length_of_boundary_slice_y_joined();
+    size_t size_boundary_slice_x __attribute__((unused)) = get_length_of_boundary_slice_x_joined();
 #pragma acc exit data delete(m_data_MG_boundary_front_level_joined[:size_boundary_slice_z])
 #pragma acc exit data delete(m_data_MG_boundary_back_level_joined[:size_boundary_slice_z])
 #pragma acc exit data delete(m_data_MG_boundary_top_level_joined[:size_boundary_slice_y])

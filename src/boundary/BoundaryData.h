@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 #include "../utility/Utility.h"
-#include "../utility/tinyxml2.h"
+#include "../utility/settings/Settings.h"
 #include "../field/Field.h"
 
 const size_t number_of_patches = 6;
@@ -34,7 +34,7 @@ enum BoundaryCondition : int {
 
 class BoundaryData {
  public:
-    BoundaryData();
+    explicit BoundaryData(Settings::Settings const &settings);
     ~BoundaryData();
     void print();
 
@@ -46,10 +46,9 @@ class BoundaryData {
     static Patch match_patch(const std::string &string);
     static BoundaryCondition match_boundary_condition(const std::string &string);
 
-    void add_boundary_condition(
-            const std::vector<Patch>& patches,
-            real value,
-            BoundaryCondition boundary_condition);
+    void add_boundary_condition(Patch const &patches,
+                                real value,
+                                BoundaryCondition const &boundary_condition);
     BoundaryCondition get_boundary_condition(Patch p) const { return m_boundary_conditions[p]; }
     real get_value(Patch p) const { return m_values[p];}
 

@@ -4,42 +4,42 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <string>
 #include "Domain.h"
 
 Domain *Domain::single = nullptr; //Singleton
 
-Domain::Domain() {
+Domain::Domain(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
-    auto params = Parameters::getInstance();
-    auto solver = params->get("solver/description");
+    auto solver = settings.get("solver/description");
     if (solver.find("NS") != std::string::npos || solver.find("Pressure") != std::string::npos) {
-        m_levels = static_cast<size_t> (params->get_int("solver/pressure/n_level"));
+        m_levels = settings.get_size_t("solver/pressure/n_level");
     }
     m_nx = new size_t[m_levels + 1];
     m_ny = new size_t[m_levels + 1];
     m_nz = new size_t[m_levels + 1];
 
-    m_nx[0] = static_cast<size_t> (params->get_int("domain_parameters/nx"));
-    m_ny[0] = static_cast<size_t> (params->get_int("domain_parameters/ny"));
-    m_nz[0] = static_cast<size_t> (params->get_int("domain_parameters/nz"));
+    m_nx[0] = settings.get_size_t("domain_parameters/nx");
+    m_ny[0] = settings.get_size_t("domain_parameters/ny");
+    m_nz[0] = settings.get_size_t("domain_parameters/nz");
 
-    m_X1 = params->get_real("domain_parameters/X1");
-    m_X2 = params->get_real("domain_parameters/X2");
-    m_Y1 = params->get_real("domain_parameters/Y1");
-    m_Y2 = params->get_real("domain_parameters/Y2");
-    m_Z1 = params->get_real("domain_parameters/Z1");
-    m_Z2 = params->get_real("domain_parameters/Z2");
+    m_X1 = settings.get_real("domain_parameters/X1");
+    m_X2 = settings.get_real("domain_parameters/X2");
+    m_Y1 = settings.get_real("domain_parameters/Y1");
+    m_Y2 = settings.get_real("domain_parameters/Y2");
+    m_Z1 = settings.get_real("domain_parameters/Z1");
+    m_Z2 = settings.get_real("domain_parameters/Z2");
 
-    bool has_computational_domain = (params->get("domain_parameters/enable_computational_domain") == XML_TRUE);
-    if (has_computational_domain){
-        m_x1 = params->get_real("domain_parameters/x1");
-        m_x2 = params->get_real("domain_parameters/x2");
-        m_y1 = params->get_real("domain_parameters/y1");
-        m_y2 = params->get_real("domain_parameters/y2");
-        m_z1 = params->get_real("domain_parameters/z1");
-        m_z2 = params->get_real("domain_parameters/z2");
+    bool has_computational_domain = settings.get_bool("domain_parameters/enable_computational_domain");
+    if (has_computational_domain) {
+        m_x1 = settings.get_real("domain_parameters/x1");
+        m_x2 = settings.get_real("domain_parameters/x2");
+        m_y1 = settings.get_real("domain_parameters/y1");
+        m_y2 = settings.get_real("domain_parameters/y2");
+        m_z1 = settings.get_real("domain_parameters/z1");
+        m_z2 = settings.get_real("domain_parameters/z2");
     } else {
         m_x1 = m_X1;
         m_x2 = m_X2;
@@ -62,15 +62,15 @@ Domain::Domain() {
 // ***************************************************************************************
 void Domain::calc_MG_values() {
     for (size_t l = 1; l < m_levels + 1; ++l) {
-        m_nx[l] = (m_nx[l - 1] == 3) ? 3 : static_cast<size_t> (std::round(m_nx[l - 1] / 2));
-        m_ny[l] = (m_ny[l - 1] == 3) ? 3 : static_cast<size_t> (std::round(m_ny[l - 1] / 2));
-        m_nz[l] = (m_nz[l - 1] == 3) ? 3 : static_cast<size_t> (std::round(m_nz[l - 1] / 2));
+        m_nx[l] = (m_nx[l - 1] == 1) ? 1 : static_cast<size_t> (std::round(m_nx[l - 1] / 2));
+        m_ny[l] = (m_ny[l - 1] == 1) ? 1 : static_cast<size_t> (std::round(m_ny[l - 1] / 2));
+        m_nz[l] = (m_nz[l - 1] == 1) ? 1 : static_cast<size_t> (std::round(m_nz[l - 1] / 2));
     }
 }
 
-Domain *Domain::getInstance() {
+Domain *Domain::getInstance(Settings::Settings const &settings) {
     if (single == nullptr) {
-        single = new Domain();
+        single = new Domain(settings);
     }
     return single;
 }

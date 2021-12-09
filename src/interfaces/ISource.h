@@ -9,6 +9,7 @@
 
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class ISource {
  public:
@@ -20,10 +21,12 @@ class ISource {
             bool sync) = 0;
     virtual void add_source(Field &out, Field const &S, bool sync) = 0;
 
-    void buoyancy_force(Field &out,
+    void buoyancy_force(Settings::Settings const &settings,
+                        Field &out,
                         const Field &in, const Field &in_a,
                         bool sync = true);
-    void dissipate(Field &out,
+    void dissipate(Settings::Settings const &settings,
+                   Field &out,
                    const Field &in_u, const Field &in_v, const Field &in_w,
                    bool sync = true);
 };

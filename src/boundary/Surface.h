@@ -10,14 +10,16 @@
 
 #include "../Domain.h"
 #include "../utility/Utility.h"
-#include "../utility/tinyxml2.h"
+#include "../utility/settings/Settings.h"
 
 #include "BoundaryDataController.h"
 
 class Surface {
  public:
-    Surface(tinyxml2::XMLElement *element);
-    Surface(size_t surfaceID, size_t startIndex, size_t strideX, size_t strideY, size_t strideZ, size_t level);
+    Surface(Settings::Settings const &settings, Settings::SurfaceSetting const &surfsettings);
+    Surface(Settings::Settings const &settings,
+            size_t surfaceID, size_t startIndex,
+            size_t strideX, size_t strideY, size_t strideZ, size_t level);
     ~Surface();
     size_t* getSurfaceList() {return m_surfaceList;}
     size_t getSize_surfaceList() {return m_size_surfaceList;}
@@ -28,7 +30,7 @@ class Surface {
 
     size_t getSurfaceID() { return m_surfaceID;}
 
-    void setBoundaryConditions(tinyxml2::XMLElement *xmlElement);
+    void setBoundaryConditions(Settings::BoundarySetting const &boundary);
 
     void applyBoundaryConditions(real *dataField, FieldType FieldType, size_t level, bool sync);
 

@@ -11,20 +11,21 @@
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IDiffusion.h"
 #include "../interfaces/ITurbulence.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../field/FieldController.h"
-#include "../utility/Parameters.h"
 #include "SolverSelection.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class DiffusionTurbSolver: public ISolver {
  public:
-    explicit DiffusionTurbSolver(FieldController *field_controller);
+    explicit DiffusionTurbSolver(Settings::Settings const &settings, FieldController *field_controller);
     ~DiffusionTurbSolver();
 
     void do_step(real t, bool sync) override;
 
  private:
+    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -33,9 +34,7 @@ class DiffusionTurbSolver: public ISolver {
     IDiffusion *dif;
     ITurbulence *mu_tub;
 
-    real m_nu;
-
-    static void control();
+    void control();
 };
 
 #endif /* ARTSS_SOLVER_DIFFUSIONTURBSOLVER_H_ */

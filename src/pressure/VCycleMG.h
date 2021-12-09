@@ -9,13 +9,14 @@
 
 #include "../interfaces/IPressure.h"
 #include "../field/Field.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 
 class VCycleMG: public IPressure{
  public:
-    VCycleMG(Field const &out, Field const &b);
+    VCycleMG(Settings::Settings const &settings, Field const &out, Field const &b);
     ~VCycleMG() override;
 
     void pressure(Field &out, Field const &b, real t, bool sync) override;
@@ -34,6 +35,7 @@ class VCycleMG: public IPressure{
     void call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
     void call_solve_jacobi(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
 
+    Settings::Settings const &m_settings;
     const size_t m_levels;
     const int m_n_cycle;
     const int m_n_relax;
@@ -51,7 +53,6 @@ class VCycleMG: public IPressure{
     size_t m_diffusion_max_iter;
     real m_diffusion_tol_res;
 
-    const real m_dt;
     const real m_dsign = -1;
     const real m_w;
 

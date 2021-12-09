@@ -8,7 +8,6 @@
 #include <sstream>
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
-#include "Parameters.h"
 #include "../Domain.h"
 #include "../boundary/BoundaryController.h"
 #include "../field/Field.h"
@@ -63,15 +62,31 @@ std::vector<std::string> split(const char *text, char delimiter) {
 // *****************************************************************************
 /// \brief  creates a new named logger this function is only available
 ///         if BENCHMARKING is not enabled
+/// \param  settings the settings to create the logger
+//          ("logging/level", "logging/file")
 /// \param  loggerName name of logger, written to log file
 // *****************************************************************************
-std::shared_ptr<spdlog::logger> create_logger(std::string logger_name) {
+std::shared_ptr<spdlog::logger> create_logger(Settings::Settings const &settings, std::string const logger_name) {
+    return create_logger(
+            settings.sget("logging/level"),
+            settings.sget("logging/file"),
+            logger_name);
+}
+
+// ======================= creates a new logger ================================
+// *****************************************************************************
+/// \brief  creates a new named logger this function is only available
+///         if BENCHMARKING is not enabled
+/// \param  level the level of visable messages
+/// \param  file the file to write into
+/// \param  loggerName name of logger, written to log file
+// *****************************************************************************
+std::shared_ptr<spdlog::logger> create_logger(
+        std::string const log_level,
+        std::string const log_file,
+        std::string const logger_name) {
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
-
-    auto params = Parameters::getInstance();
-    std::string log_level = params->get("logging/level");
-    std::string log_file = params->get("logging/file");
 
     if (!stdout_sink) {
         stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -145,9 +160,9 @@ std::vector<size_t> mergeSortedListsToUniqueList(size_t *list1, size_t size_list
     return result;
 }
 
-void log_field_info(Field &field, const std::string &text, const std::string &logger_name) {
+void log_field_info(Settings::Settings const &settings, Field &field, const std::string &text, const std::string &logger_name) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger(logger_name);
+    auto logger = Utility::create_logger(settings, logger_name);
 #endif
     auto boundary = BoundaryController::getInstance();
     size_t *inner_list = boundary->get_inner_list_level_joined();

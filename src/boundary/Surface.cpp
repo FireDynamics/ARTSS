@@ -8,10 +8,10 @@
 // TODO(issue 15): surface implementing
 //  - underscores instead of camel case
 //  - create file description
-Surface::Surface(tinyxml2::XMLElement* element) {
-    m_boundaryDataController = new BoundaryDataController();
+Surface::Surface(Settings::Settings const &settings, Settings::SurfaceSetting const &surfsetting) {
+    m_boundaryDataController = new BoundaryDataController(settings);
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
     m_logger->info("################ SURFACE ################");
 #endif
     auto domain = Domain::getInstance();
@@ -31,18 +31,18 @@ Surface::Surface(tinyxml2::XMLElement* element) {
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
-    m_surfaceID = element->IntAttribute("ID");
+    m_surfaceID = surfsetting.get_id();
 
 #ifndef BENCHMARKING
     m_logger->info("surface ID {}", m_surfaceID);
 #endif
 
-    real sx1 = element->DoubleAttribute("sx1");
-    real sx2 = element->DoubleAttribute("sx2");
-    real sy1 = element->DoubleAttribute("sy1");
-    real sy2 = element->DoubleAttribute("sy2");
-    real sz1 = element->DoubleAttribute("sz1");
-    real sz2 = element->DoubleAttribute("sz2");
+    real sx1 = surfsetting.get_sx1();
+    real sx2 = surfsetting.get_sx2();
+    real sy1 = surfsetting.get_sy1();
+    real sy2 = surfsetting.get_sy2();
+    real sz1 = surfsetting.get_sz1();
+    real sz2 = surfsetting.get_sz2();
     real lsx = fabs(sx2 - sx1);
     real lsy = fabs(sy2 - sy1);
     real lsz = fabs(sz2 - sz1);
@@ -61,9 +61,9 @@ Surface::Surface(tinyxml2::XMLElement* element) {
 #endif
 }
 
-Surface::Surface(size_t surfaceID, size_t startIndex, size_t strideX, size_t strideY, size_t strideZ, size_t level) {
+Surface::Surface(Settings::Settings const &settings, size_t surfaceID, size_t startIndex, size_t strideX, size_t strideY, size_t strideZ, size_t level) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
     m_logger->info("################ SURFACE ################");
 #endif
     m_surfaceID = surfaceID;
@@ -139,7 +139,7 @@ void Surface::createSurface(size_t Nx, size_t Ny) {
 #endif
 }
 
-void Surface::setBoundaryConditions(tinyxml2::XMLElement *xmlElement) {
+void Surface::setBoundaryConditions(Settings::BoundarySetting const &xmlElement) {
     m_boundaryDataController->add_boundary_data(xmlElement);
 }
 
@@ -153,6 +153,6 @@ size_t Surface::get_k2() {
     return m_k1 + m_strideZ - 1;
 }
 
-void Surface::applyBoundaryConditions(real *dataField, FieldType fieldType, size_t level, bool sync) {
+void Surface::applyBoundaryConditions(real *, FieldType, size_t, bool) {
     // m_bdc_boundary->apply_boundary_condition(dataField, indexFields, patch_starts, patch_ends, fieldType, level, sync);
 }

@@ -11,16 +11,18 @@
 #include "BoundaryData.h"
 #include "Obstacle.h"
 #include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
 
 class Boundary {
  public:
     ~Boundary();
     Boundary(
+            Settings::Settings const &settings,
             Obstacle** obstacle_list,
             size_t number_of_obstacles,
             size_t size_obstacles,
             size_t level = 0);
-    explicit Boundary(size_t level = 0);
+    explicit Boundary(Settings::Settings const &settings, size_t level = 0);
     void init(size_t size_obstacles);
 
     size_t* get_boundary_list() const { return m_boundary_list; }
