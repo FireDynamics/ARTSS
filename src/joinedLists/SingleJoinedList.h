@@ -16,8 +16,8 @@ class SingleJoinedList {
 
     void copyin() {
 #pragma acc enter data copyin(m_data[:m_size])
-#ifdef GPU_DEBUG
-        m_gpu_logger->debug("copyin gpu index list with data pointer: {} and size: {}", static_cast<void *>(m_data), m_size);
+#ifndef BENCHMARKING
+        m_logger->debug("copyin gpu index list with data pointer: {} and size: {}", static_cast<void *>(m_data), m_size);
 #endif
     }
 
