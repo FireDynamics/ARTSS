@@ -10,15 +10,19 @@
 
 #include "../DomainData.h"
 #include "../utility/Utility.h"
-#include "../utility/tinyxml2.h"
+#include "../utility/settings/Settings.h"
 
 #include "BoundaryDataController.h"
 #include "Coordinate.h"
 
 class Surface {
  public:
-    Surface(tinyxml2::XMLElement *element);
-    Surface(const std::string &name, Patch patch, Coordinate &start, Coordinate &end, size_t level);
+    Surface(Settings::Settings const &settings, Settings::SurfaceSetting const &surface_setting);
+    Surface(Settings::Settings const &settings,
+            const std::string &name,
+            Patch patch,
+            Coordinate &start, Coordinate &end,
+            size_t level);
     ~Surface();
 
     size_t * get_surface_list() { return m_surface_list; }
@@ -42,12 +46,11 @@ class Surface {
     Coordinate & get_end_coordinates() { return m_end; }
 
 private:
+    Settings::Settings const &m_settings;
+    size_t m_level = 0;
     size_t m_id;
     Patch m_patch;
     std::string m_name;
-
-    real *m_bc_values;
-    BoundaryCondition *m_boundary_conditions;
 
     Coordinate m_start;
     Coordinate m_end;

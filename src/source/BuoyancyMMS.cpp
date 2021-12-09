@@ -6,10 +6,11 @@
 //
 #include "BuoyancyMMS.h"
 #include "../boundary/BoundaryController.h"
-#include "../utility/Parameters.h"
 #include "../DomainData.h"
 
-BuoyancyMMS::BuoyancyMMS() : m_source_field(FieldType::RHO) {
+BuoyancyMMS::BuoyancyMMS(Settings::Settings const &settings) :
+        m_settings(settings),
+        m_source_field(FieldType::RHO) {
     set_up();
 }
 
@@ -31,13 +32,11 @@ void BuoyancyMMS::set_up() {
     real dx = domain->get_dx();
     real dy = domain->get_dy();
 
-    auto params = Parameters::getInstance();
-
-    real nu = params->get_real("physical_parameters/nu");
-    real beta = params->get_real("physical_parameters/beta");
-    real kappa = params->get_real("physical_parameters/kappa");
-    real g = params->get_real("physical_parameters/g");
-    real rhoa = params->get_real("initial_conditions/rhoa");
+    real nu = m_settings.get_real("physical_parameters/nu");
+    real beta = m_settings.get_real("physical_parameters/beta");
+    real kappa = m_settings.get_real("physical_parameters/kappa");
+    real g = m_settings.get_real("physical_parameters/g");
+    real rhoa = m_settings.get_real("initial_conditions/rhoa");
     real rbeta = 1. / beta;
     real rg = 1. / g;
     real c_nu = 2 * nu * M_PI * M_PI - 1;

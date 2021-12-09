@@ -9,9 +9,11 @@
 
 #include <string>
 #include <vector>
+
 #include "../boundary/PatchObject.h"
+#include "../field/Field.h"
 #include "../utility/Utility.h"
-#include "../utility/tinyxml2.h"
+#include "../utility/settings/Settings.h"
 
 const size_t number_of_boundary_conditions = 3;
 enum BoundaryCondition : int {
@@ -23,7 +25,7 @@ enum BoundaryCondition : int {
 
 class BoundaryData {
  public:
-    BoundaryData();
+    explicit BoundaryData(Settings::Settings const &settings);
     ~BoundaryData();
     void print();
 
@@ -31,10 +33,9 @@ class BoundaryData {
 
     static BoundaryCondition match_boundary_condition(const std::string &string);
 
-    void add_boundary_condition(
-            const std::vector<Patch>& patches,
-            real value,
-            BoundaryCondition boundary_condition);
+    void add_boundary_condition(Patch const &patches,
+                                real value,
+                                BoundaryCondition const &boundary_condition);
     BoundaryCondition get_boundary_condition(Patch p) const { return m_boundary_conditions[p]; }
     real get_value(Patch p) const { return m_values[p];}
 

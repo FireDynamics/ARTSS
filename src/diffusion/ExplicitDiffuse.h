@@ -9,10 +9,13 @@
 
 #include "../interfaces/IDiffusion.h"
 #include "../field/Field.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
+
 
 class ExplicitDiffuse : public IDiffusion {
 public:
-    ExplicitDiffuse();
+    explicit ExplicitDiffuse(Settings::Settings const &settings) : m_settings(settings) {}
 
     void diffuse(
             Field &out, const Field &in, const Field &b,
@@ -27,7 +30,7 @@ public:
                       real D, const Field &EV, bool sync = true);
 
 private:
-    real m_dt;
+    Settings::Settings const &m_settings;
 };
 
 #endif /* ARTSS_DIFFUSION_EXPLICITDIFFUSE_H_ */

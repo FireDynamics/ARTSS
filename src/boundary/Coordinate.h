@@ -8,6 +8,10 @@
 #define ARTSS_COORDINATE_H_
 
 #include <cstdlib>
+#include <string>
+#include <vector>
+
+
 #include "../utility/GlobalMacrosTypes.h"
 
 inline static const std::vector<std::string> axis_names = {"X", "Y", "Z"};

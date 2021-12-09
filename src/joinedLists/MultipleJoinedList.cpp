@@ -6,9 +6,9 @@
 //
 #include "MultipleJoinedList.h"
 
-MultipleJoinedList::MultipleJoinedList(size_t multigrid_level, size_t number_of_objects) : m_number_of_objects(number_of_objects) {
+MultipleJoinedList::MultipleJoinedList(Settings::Settings const &settings, size_t multigrid_level, size_t number_of_objects) : m_number_of_objects(number_of_objects) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());

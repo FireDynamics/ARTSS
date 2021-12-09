@@ -10,19 +10,26 @@
 #include <cmath>
 #include <string>
 
+#include "Coordinate.h"
 #include "BoundaryData.h"
 #include "BoundaryDataController.h"
-#include "../DomainData.h"
-#include "../utility/tinyxml2.h"
-#include "../utility/Utility.h"
 #include "PatchObject.h"
-#include "Coordinate.h"
+#include "../DomainData.h"
+#include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
 
 
 class Obstacle {
  public:
-    Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const std::string &name);
-    Obstacle(Coordinate &coords_start, Coordinate &coords_end, size_t level, const std::string &name);
+    Obstacle(Settings::Settings const &settings,
+             real x1, real x2,
+             real y1, real y2,
+             real z1, real z2,
+             const std::string &name);
+    Obstacle(Settings::Settings const &settings,
+             Coordinate &coords_start, Coordinate &coords_end,
+             size_t level,
+             const std::string &name);
     ~Obstacle();
 
     size_t * get_obstacle_list() const { return m_obstacle_list; }
@@ -53,6 +60,7 @@ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+    Settings::Settings const &m_settings;
     std::string m_name;
     Coordinate m_start;
     Coordinate m_end;

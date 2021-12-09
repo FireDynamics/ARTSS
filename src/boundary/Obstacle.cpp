@@ -10,10 +10,18 @@
 #include <vector>
 
 
-Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const std::string &name) :
-        m_name(name), m_start(), m_end(), m_level(0), m_size_boundary() {
+Obstacle::Obstacle(Settings::Settings const &settings,
+                   real x1, real x2,
+                   real y1, real y2,
+                   real z1, real z2,
+                   const std::string &name) :
+        m_settings(settings),
+        m_name(name),
+        m_start(), m_end(),
+        m_level(0),
+        m_size_boundary() {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
     DomainData *domain = DomainData::getInstance();
 
@@ -39,17 +47,18 @@ Obstacle::Obstacle(real x1, real x2, real y1, real y2, real z1, real z2, const s
 }
 
 
-Obstacle::Obstacle(
-        Coordinate &coords_start,
-        Coordinate &coords_end,
-        size_t level,
-        const std::string &name) :
+Obstacle::Obstacle(Settings::Settings const &settings,
+                   Coordinate &coords_start,
+                   Coordinate &coords_end,
+                   size_t level,
+                   const std::string &name) :
+        m_settings(settings),
         m_name(name),
         m_start(coords_start),
         m_end(coords_end),
         m_level(level), m_size_boundary() {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(m_settings, typeid(this).name());
 #endif
 
     init();
@@ -585,7 +594,7 @@ void Obstacle::calculate_area_index(
 // *************************************************************************************************
 bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger("Obstacle");
+    auto logger = Utility::create_logger(o1->m_settings, "Obstacle");
 #endif
     bool overlap = false;
     for (size_t axis = 0; axis < number_of_axis; axis++) {
@@ -607,7 +616,7 @@ bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
 // *************************************************************************************************
 bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis coordinate_axis) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger("Obstacle");
+    auto logger = Utility::create_logger(o1->m_settings, "Obstacle");
 #endif
     bool overlap = false;
 

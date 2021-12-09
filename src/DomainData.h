@@ -14,14 +14,14 @@
 #include <cstddef>
 
 #include "utility/GlobalMacrosTypes.h"
-#include "utility/Parameters.h"
 #include "utility/Utility.h"
+#include "utility/settings/Settings.h"
 
 class DomainData {
  public:
-    DomainData();
-
-    static DomainData *getInstance();
+    explicit DomainData(Settings::Settings const &settings);
+    static DomainData *getInstance() { return single; }
+    static DomainData *getInstance(Settings::Settings const &settings);
 
     // getter
     size_t inline get_nx(size_t level = 0) const { return this->m_nx[level]; }

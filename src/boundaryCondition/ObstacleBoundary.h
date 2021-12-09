@@ -8,12 +8,14 @@
 #define ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H_
 
 #include <cstdlib>
-#include "../utility/GlobalMacrosTypes.h"
 #include "../boundary/BoundaryData.h"
 #include "../joinedLists/MultipleJoinedList.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 namespace ObstacleBoundary {
-    void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
+    void apply_boundary_condition(Settings::Settings const &settings,
+                                  Field &field, MultipleJoinedList **index_fields,
                                   BoundaryData* boundary_data, size_t id, bool sync = true);
 }  // namespace ObstacleBoundary
 

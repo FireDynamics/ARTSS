@@ -15,17 +15,19 @@
 #include "../interfaces/ISolver.h"
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class NSTempTurbSolver : public ISolver {
  public:
-    explicit NSTempTurbSolver(FieldController *fieldController);
+    NSTempTurbSolver(Settings::Settings const &settings, FieldController *fieldController);
     ~NSTempTurbSolver();
 
     void do_step(real t, bool sync) override;
 
  private:
+    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -40,12 +42,9 @@ class NSTempTurbSolver : public ISolver {
     ISource *sou_temp;
     ITurbulence *mu_tub;
 
-    real m_nu;
-    real m_kappa;
-
     std::string m_dir_vel;
 
-    static void control();
+    void control();
 
     bool m_hasTurbulence;
     bool m_hasDissipation;

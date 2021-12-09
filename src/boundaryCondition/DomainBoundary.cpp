@@ -21,7 +21,7 @@ namespace DomainBoundary {
         /// \param  value Value of boundary condition
         /// \param  sign Sign of boundary condition ( POSITIVE_SIGN or NEGATIVE_SIGN )
         // *********************************************************************************************
-        void apply_boundary_condition(
+        void apply_boundary_condition(Settings::Settings const &settings,
                 Field &field, SingleJoinedList *jl,
                 int8_t sign_reference_index, size_t reference_index, real value, int8_t sign) {
             size_t level = field.get_level();
@@ -31,7 +31,7 @@ namespace DomainBoundary {
             size_t patch_size = jl->get_slice_size(level);
             size_t *d_patch = jl->get_data();
 #ifndef BENCHMARKING
-            auto logger = Utility::create_logger("DomainBoundary");
+            auto logger = Utility::create_logger(settings, "DomainBoundary");
             logger->debug("apply_boundary_condition ! apply domain boundary pointer patch: {} size: {}", static_cast<void *>(d_patch), jl->get_size());
             logger->debug("apply_boundary_condition ! apply domain boundary pointer field: {} size: {}", static_cast<void *>(field.data), field.get_size());
             logger->debug("apply_boundary_condition ! start {} end {} size {} level {}", patch_start, patch_end, jl->get_slice_size(level), level);
@@ -55,7 +55,7 @@ namespace DomainBoundary {
         /// \param  patch Patch
         /// \param  value Value of boundary condition
         // *********************************************************************************************
-        void apply_dirichlet(Field &field, SingleJoinedList *jl, Patch patch, real value) {
+        void apply_dirichlet(Settings::Settings const &settings, Field &field, SingleJoinedList *jl, Patch patch, real value) {
             DomainData *domain = DomainData::getInstance();
             size_t level = field.get_level();
             size_t reference_index = 0;
@@ -75,7 +75,7 @@ namespace DomainBoundary {
                     break;
                 default:
 #ifndef BENCHMARKING
-                    auto logger = Utility::create_logger("DomainBoundary");
+                    auto logger = Utility::create_logger(settings, "DomainBoundary");
                     logger->error("Unknown Patch for dirichlet boundary condition: {}", patch);
 #endif
                     break;
@@ -85,7 +85,7 @@ namespace DomainBoundary {
                 sign_reference_index = NEGATIVE_SIGN;
             }
 
-            apply_boundary_condition(field, jl, sign_reference_index, reference_index, value * 2, NEGATIVE_SIGN);
+            apply_boundary_condition(settings, field, jl, sign_reference_index, reference_index, value * 2, NEGATIVE_SIGN);
         }
 
         //======================================== Apply neumann =======================================
@@ -98,7 +98,7 @@ namespace DomainBoundary {
         /// \param  patch_end End index of patch
         /// \param  value Value of boundary condition
         // *********************************************************************************************
-        void apply_neumann(Field &field, SingleJoinedList *jl, Patch patch, real value) {
+        void apply_neumann(Settings::Settings const &settings, Field &field, SingleJoinedList *jl, Patch patch, real value) {
             size_t level = field.get_level();
             DomainData *domain = DomainData::getInstance();
             size_t reference_index = 0;
@@ -121,7 +121,7 @@ namespace DomainBoundary {
                     break;
                 default:
 #ifndef BENCHMARKING
-                    auto logger = Utility::create_logger("DomainBoundary");
+                    auto logger = Utility::create_logger(settings, "DomainBoundary");
                     logger->error("Unknown Patch for neumann boundary condition: {}", patch);
 #endif
                     break;
@@ -130,7 +130,7 @@ namespace DomainBoundary {
             if (patch == BACK || patch == TOP || patch == RIGHT) {
                 sign_reference_index = NEGATIVE_SIGN;
             }
-            apply_boundary_condition(field, jl, sign_reference_index, reference_index, value, POSITIVE_SIGN);
+            apply_boundary_condition(settings, field, jl, sign_reference_index, reference_index, value, POSITIVE_SIGN);
         }
 
         //======================================== Apply periodic ======================================
@@ -143,7 +143,7 @@ namespace DomainBoundary {
         /// \param  patch_end End index of patch
         /// \param  level Multigrid level
         // *********************************************************************************************
-        void apply_periodic(Field &field, SingleJoinedList *jl, Patch patch) {
+        void apply_periodic(Settings::Settings const &settings, Field &field, SingleJoinedList *jl, Patch patch) {
             size_t level = field.get_level();
             DomainData *domain = DomainData::getInstance();
             size_t Nx = domain->get_Nx(level);
@@ -167,7 +167,7 @@ namespace DomainBoundary {
                     break;
                 default:
 #ifndef BENCHMARKING
-                    auto logger = Utility::create_logger("DomainBoundary");
+                    auto logger = Utility::create_logger(settings, "DomainBoundary");
                     logger->error("Unknown Patch for periodic boundary condition: {}", patch);
 #endif
                     break;
@@ -177,7 +177,7 @@ namespace DomainBoundary {
                 sign_reference_index = NEGATIVE_SIGN;
             }
 
-            apply_boundary_condition(field, jl, sign_reference_index, reference_index, 0, POSITIVE_SIGN);
+            apply_boundary_condition(settings, field, jl, sign_reference_index, reference_index, 0, POSITIVE_SIGN);
         }
     }
 
@@ -189,9 +189,9 @@ namespace DomainBoundary {
 /// \param  boundary_data Boundary data_field object of Domain
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-    void apply_boundary_condition(Field &field, SingleJoinedList **index_fields, BoundaryData *boundary_data, bool sync) {
+    void apply_boundary_condition(Settings::Settings const &settings, Field &field, SingleJoinedList **index_fields, BoundaryData *boundary_data, bool sync) {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger("DomainBoundary");
+        auto logger = Utility::create_logger(settings, "DomainBoundary");
 #endif
         for (size_t i = 0; i < number_of_patches; i++) {
             size_t level = field.get_level();
@@ -211,20 +211,19 @@ namespace DomainBoundary {
                     if (field.get_level() == 0) {
                         value = boundary_data->get_value(p);
                     }
-                    apply_dirichlet(field, jl, p, value);
+                    apply_dirichlet(settings, field, jl, p, value);
                     break;
                 case BoundaryCondition::NEUMANN:
                     if (field.get_level() == 0) {
                         value = boundary_data->get_value(p);
                     }
-                    apply_neumann(field, jl, p, value);
+                    apply_neumann(settings, field, jl, p, value);
                     break;
                 case BoundaryCondition::PERIODIC:
-                    apply_periodic(field, jl, p);
+                    apply_periodic(settings, field, jl, p);
                     break;
                 default:
 #ifndef BENCHMARKING
-                    //   auto logger = Utility::create_logger("DomainBoundary");
                     logger->error("Unknown boundary condition: {}", bc);
 #endif
                     break;

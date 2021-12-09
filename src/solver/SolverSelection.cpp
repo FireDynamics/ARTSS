@@ -25,12 +25,12 @@ static const std::string solver_selection_name = "SolverSelection";
 /// \param  advectionSolver Pointer to AdvectionSolver
 /// \param  advectionType Name of AdvcetionSolver
 // ***************************************************************************************
-void SetAdvectionSolver(IAdvection **advectionSolver, const std::string& advectionType) {
+void SetAdvectionSolver(Settings::Settings const &settings, IAdvection **advectionSolver, const std::string& advectionType) {
     if (advectionType == AdvectionMethods::SemiLagrangian) {
-        *advectionSolver = new SLAdvect();
+        *advectionSolver = new SLAdvect(settings);
     } else {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(solver_selection_name);
+        auto logger = Utility::create_logger(settings, solver_selection_name);
         logger->error("Advection method not yet implemented! simulation stopped!");
 #endif
         std::exit(1);
@@ -44,16 +44,16 @@ void SetAdvectionSolver(IAdvection **advectionSolver, const std::string& advecti
 /// \param  diffusionSolver Pointer to DiffusionSolver
 /// \param  diffusionType Name of DiffusionSolver
 // ***************************************************************************************
-void SetDiffusionSolver(IDiffusion **diffusionSolver, const std::string& diffusionType) {
+void SetDiffusionSolver(Settings::Settings const &settings, IDiffusion **diffusionSolver, const std::string& diffusionType) {
     if (diffusionType == DiffusionMethods::Jacobi) {
-        *diffusionSolver = new JacobiDiffuse();
+        *diffusionSolver = new JacobiDiffuse(settings);
     } else if (diffusionType == DiffusionMethods::ColoredGaussSeidel) {
-        *diffusionSolver = new ColoredGaussSeidelDiffuse();
+        *diffusionSolver = new ColoredGaussSeidelDiffuse(settings);
     } else if (diffusionType == DiffusionMethods::Explicit) {
-        *diffusionSolver = new ExplicitDiffuse();
+        *diffusionSolver = new ExplicitDiffuse(settings);
     } else {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(solver_selection_name);
+        auto logger = Utility::create_logger(settings, solver_selection_name);
         logger->error("Diffusion method not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);
@@ -67,12 +67,12 @@ void SetDiffusionSolver(IDiffusion **diffusionSolver, const std::string& diffusi
 /// \param  pressureSolver Pointer to PressureSolver
 /// \param  pressureType Name of PressureSolver
 // ***************************************************************************************
-void SetPressureSolver(IPressure **pressureSolver, const std::string& pressureType) {
+void SetPressureSolver(Settings::Settings const &settings, IPressure **pressureSolver, const std::string& pressureType) {
     if (pressureType == PressureMethods::VCycleMG) {
-        *pressureSolver = new VCycleMG();
+        *pressureSolver = new VCycleMG(settings);
     } else {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(solver_selection_name);
+        auto logger = Utility::create_logger(settings, solver_selection_name);
         logger->error("Pressure method not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);
@@ -86,12 +86,12 @@ void SetPressureSolver(IPressure **pressureSolver, const std::string& pressureTy
 /// \param  sourceSolver Pointer to SourceSolver
 /// \param  sourceType Name of SourceSolver
 // ***************************************************************************************
-void SetSourceSolver(ISource **sourceSolver, const std::string& sourceType) {
+void SetSourceSolver(Settings::Settings const &settings, ISource **sourceSolver, const std::string& sourceType) {
     if (sourceType == SourceMethods::ExplicitEuler) {
-        *sourceSolver = new ExplicitEulerSource();
+        *sourceSolver = new ExplicitEulerSource(settings);
     } else {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(solver_selection_name);
+        auto logger = Utility::create_logger(settings, solver_selection_name);
         logger->error("Source method {} not yet implemented! Simulation stopped!", sourceType);
 #endif
         std::exit(1);
@@ -105,14 +105,14 @@ void SetSourceSolver(ISource **sourceSolver, const std::string& sourceType) {
 /// \param  turbulenceSolver Pointer to TurbulenceSolver
 /// \param  turbulenceType Name of TurbulenceSolver
 // ***************************************************************************************
-void SetTurbulenceSolver(ITurbulence **turbulenceSolver, const std::string& turbulenceType) {
+void SetTurbulenceSolver(Settings::Settings const &settings, ITurbulence **turbulenceSolver, const std::string& turbulenceType) {
     if (turbulenceType == TurbulenceMethods::ConstSmagorinsky) {
-        *turbulenceSolver = new ConstSmagorinsky();
+        *turbulenceSolver = new ConstSmagorinsky(settings);
     } else if (turbulenceType == TurbulenceMethods::DynamicSmagorinsky) {
-        *turbulenceSolver = new DynamicSmagorinsky();
+        *turbulenceSolver = new DynamicSmagorinsky(settings);
     } else {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(solver_selection_name);
+        auto logger = Utility::create_logger(settings, solver_selection_name);
         logger->error("Turbulence model is not yet implemented! Simulation stopped!");
 #endif
         std::exit(1);

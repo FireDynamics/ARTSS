@@ -11,7 +11,7 @@
 
 class SingleJoinedList {
   public:
-    explicit SingleJoinedList(size_t multigrid_level);
+    explicit SingleJoinedList(Settings::Settings const &settings, size_t multigrid_level);
     ~SingleJoinedList();
 
     void copyin() {

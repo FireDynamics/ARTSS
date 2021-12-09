@@ -5,7 +5,6 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "IPressure.h"
-#include "../utility/Parameters.h"
 #include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 

@@ -11,24 +11,26 @@
 #include "../interfaces/IDiffusion.h"
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class DiffusionSolver: public ISolver {
  public:
-    DiffusionSolver(FieldController *field_controller);
+    DiffusionSolver(Settings::Settings const &settings, FieldController *field_controller);
     ~DiffusionSolver();
 
     void do_step(real t, bool sync) override;
 
  private:
+    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
 
     FieldController *m_field_controller;
     IDiffusion *dif;
-    real m_nu;
 
-    static void control();
+    void control();
 };
 
 #endif /* ARTSS_SOLVER_DIFFUSIONSOLVER_H_ */

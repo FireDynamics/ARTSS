@@ -13,38 +13,30 @@
 //  - make sure that surfaces does not extend to corner or edge cells
 //  - consider moving parsing to BoundaryController.cpp same as for obstacles,
 //    may be not possible/practical depending on the concept for BC
-Surface::Surface(tinyxml2::XMLElement *element) {
+Surface::Surface(Settings::Settings const &settings, Settings::SurfaceSetting const &surface_setting) :
+        m_settings(settings), m_level(0) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
     m_logger->debug("################ SURFACE ################");
 #endif
-    m_bc_values = new real[number_of_field_types];
-    m_boundary_conditions = new BoundaryCondition[number_of_field_types];
 
-    m_name = element->Attribute("name");
-    m_patch = PatchObject::match_patch(element->Attribute("patch"));
+//    m_name = surface_setting.get_name();
+//    m_patch = PatchObject::match_patch(element->Attribute("patch"));
 #ifndef BENCHMARKING
     m_logger->debug("read surface '{}' for patch {}", m_name, PatchObject::get_patch_name(m_patch));
 #endif
 
-    auto cur_elem = element->FirstChildElement();
-    while (cur_elem) {
-        std::string node_name = cur_elem->Value();
-        if (node_name == "boundary") {
-            create_boundary(cur_elem);
-        } else if (node_name == "geometry") {
-            create_geometry(cur_elem);
-        } else {
-#ifndef BENCHMARKING
-            m_logger->warn("Ignoring unknown node {}", node_name);
-#endif
-        }
-        cur_elem = cur_elem->NextSiblingElement();
-    }
+    real sx1 = surface_setting.get_sx1();
+    real sx2 = surface_setting.get_sx2();
+    real sy1 = surface_setting.get_sy1();
+    real sy2 = surface_setting.get_sy2();
+    real sz1 = surface_setting.get_sz1();
+    real sz2 = surface_setting.get_sz2();
 
-    DomainData *domain_data = DomainData::getInstance();
-    size_t Nx = domain_data->get_Nx();
-    size_t Ny = domain_data->get_Ny();
+    //TODO
+    auto domain = DomainData::getInstance();
+    size_t Nx = domain->get_Nx(m_level);
+    size_t Ny = domain->get_Ny(m_level);
     createSurface(Nx, Ny);
     print();
 #ifndef BENCHMARKING
@@ -52,10 +44,10 @@ Surface::Surface(tinyxml2::XMLElement *element) {
 #endif
 }
 
-Surface::Surface(const std::string &name, Patch patch, Coordinate &start, Coordinate &end, size_t level) :
-    m_patch(patch), m_name(name), m_start(start), m_end(end) {
+Surface::Surface(Settings::Settings const &settings, const std::string &name, Patch patch, Coordinate &start, Coordinate &end, size_t level) :
+    m_settings(settings), m_patch(patch), m_name(name), m_start(start), m_end(end) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
     m_logger->info("################ SURFACE ################");
 #endif
 
@@ -127,94 +119,4 @@ void Surface::apply_boundary_conditions(Field &field, bool sync) {
 
 size_t Surface::get_matching_index(real surface_coordinate, real spacing, real start_coordinate) {
     return static_cast<int>(round((-start_coordinate + surface_coordinate) / spacing));
-}
-
-void Surface::create_boundary(tinyxml2::XMLElement *element) {
-    std::vector<std::string> field_strings = Utility::split(element->Attribute("field"), ',');
-    BoundaryCondition boundary_condition = BoundaryData::match_boundary_condition(element->Attribute("type"));
-    auto value = element->DoubleAttribute("value");
-
-    for (const std::string &f: field_strings) {
-        FieldType field_type = Field::match_field(f);
-        m_boundary_conditions[field_type] = boundary_condition;
-        m_bc_values[field_type] = value;
-    }
-}
-
-void Surface::create_geometry(tinyxml2::XMLElement *cur_elem) {
-    DomainData *domain_data = DomainData::getInstance();
-    real dx = domain_data->get_dx();
-    real dy = domain_data->get_dy();
-    real dz = domain_data->get_dz();
-
-    real X1 = domain_data->get_X1();
-    real Y1 = domain_data->get_Y1();
-    real Z1 = domain_data->get_Z1();
-
-    real sx1, sx2;
-    real sy1, sy2;
-    real sz1, sz2;
-
-    size_t i1, i2, j1, j2, k1, k2;
-    if (m_patch == Patch::FRONT || m_patch == Patch::BACK) {
-        sx1 = cur_elem->DoubleAttribute("sx1");
-        sx2 = cur_elem->DoubleAttribute("sx2");
-        i1 = get_matching_index(sx1, dx, X1) + 1;
-        i2 = get_matching_index(sx2, dx, X1);
-
-        sy1 = cur_elem->DoubleAttribute("sy1");
-        sy2 = cur_elem->DoubleAttribute("sy2");
-        j1 = get_matching_index(sy1, dy, Y1) + 1;
-        j2 = get_matching_index(sy2, dy, Y1);
-
-        if (m_patch == Patch::FRONT) {
-            k1 = 0;
-        } else {
-            k1 = domain_data->get_Nz() - 1;
-        }
-        k2 = k1;
-
-        m_start.set_coordinate(i1, j1, k1);
-        m_end.set_coordinate(i2, j2, k2);
-    } else if (m_patch == Patch::BOTTOM || m_patch == Patch::TOP) {
-        sx1 = cur_elem->DoubleAttribute("sx1");
-        sx2 = cur_elem->DoubleAttribute("sx2");
-        i1 = get_matching_index(sx1, dx, X1) + 1;
-        i2 = get_matching_index(sx2, dx, X1);
-
-        sz1 = cur_elem->DoubleAttribute("sz1");
-        sz2 = cur_elem->DoubleAttribute("sz2");
-        k1 = get_matching_index(sz1, dz, Z1) + 1;
-        k2 = get_matching_index(sz2, dz, Z1);
-
-        if (m_patch == Patch::BOTTOM) {
-            j1 = 0;
-        } else {
-            j1 = domain_data->get_Ny() - 1;
-        }
-        j2 = j1;
-
-        m_start.set_coordinate(i1, j1, k1);
-        m_end.set_coordinate(i2, j2, k2);
-    } else if (m_patch == Patch::LEFT || m_patch == Patch::RIGHT) {
-        sy1 = cur_elem->DoubleAttribute("sy1");
-        sy2 = cur_elem->DoubleAttribute("sy2");
-        j1 = get_matching_index(sy1, dy, Y1) + 1;
-        j2 = get_matching_index(sy2, dy, Y1);
-
-        sz1 = cur_elem->DoubleAttribute("sz1");
-        sz2 = cur_elem->DoubleAttribute("sz2");
-        k1 = get_matching_index(sz1, dz, Z1) + 1;
-        k2 = get_matching_index(sz2, dz, Z1);
-
-        if (m_patch == Patch::LEFT) {
-            i1 = 0;
-        } else {
-            i1 = domain_data->get_Nx() - 1;
-        }
-        i2 = i1;
-
-        m_start.set_coordinate(i1, j1, k1);
-        m_end.set_coordinate(i2, j2, k2);
-    }
 }

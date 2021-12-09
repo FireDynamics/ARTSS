@@ -6,29 +6,28 @@
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
 
+#include "ColoredGaussSeidelDiffuse.h"
+
 #include <cmath>
 
-#include "ColoredGaussSeidelDiffuse.h"
 #include "../boundary/BoundaryController.h"
-#include "../utility/Parameters.h"
 #include "../DomainData.h"
 #include "../utility/Utility.h"
 
 
 // ========================== Constructor =================================
-ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse() {
+ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse(Settings::Settings const &settings) :
+    m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
-    auto params = Parameters::getInstance();
 
-    m_dt = params->get_real("physical_parameters/dt");
     m_dsign = 1.;
-    m_w = params->get_real("solver/diffusion/w");
+    m_w = m_settings.get_real("solver/diffusion/w");
 
-    if (params->get("solver/diffusion/type") == "ColoredGaussSeidel") {
-        m_max_iter = static_cast<size_t>(params->get_int("solver/diffusion/max_iter"));
-        m_tol_res = params->get_real("solver/diffusion/tol_res");
+    if (m_settings.get("solver/diffusion/type") == "ColoredGaussSeidel") {
+        m_max_iter = m_settings.get_size_t("solver/diffusion/max_iter");
+        m_tol_res = m_settings.get_real("solver/diffusion/tol_res");
     } else {
         m_max_iter = 10000;
         m_tol_res = 1e-16;
@@ -53,7 +52,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
 
     auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
-    size_t* d_inner_list = boundary->get_domain_inner_list_level_joined();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize])
 {
@@ -68,9 +67,10 @@ void ColoredGaussSeidelDiffuse::diffuse(
     const real reciprocal_dy = 1. / dy;
     const real reciprocal_dz = 1. / dz;
 
-    const real alpha_x = D * m_dt * reciprocal_dx * reciprocal_dx;  // due to better pgi handling of scalars (instead of arrays)
-    const real alpha_y = D * m_dt * reciprocal_dy * reciprocal_dy;
-    const real alpha_z = D * m_dt * reciprocal_dz * reciprocal_dz;
+    const real dt = m_settings.get_real("physical_parameters/dt");
+    const real alpha_x = D * dt * reciprocal_dx * reciprocal_dx;  // due to better pgi handling of scalars (instead of arrays)
+    const real alpha_y = D * dt * reciprocal_dy * reciprocal_dy;
+    const real alpha_z = D * dt * reciprocal_dz * reciprocal_dz;
 
     const real rbeta    = (1. + 2. * (alpha_x + alpha_y + alpha_z));
     const real beta     = 1. / rbeta;
@@ -155,7 +155,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
     const real reciprocal_dy = 1. / dy;
     const real reciprocal_dz = 1. / dz;
 
-    real dt = m_dt;
+    real dt = m_settings.get_real("physical_parameters/dt");
 
     real alpha_x, alpha_y, alpha_z, rbeta;  // calculated in colored_gauss_seidel_step!
 

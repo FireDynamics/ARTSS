@@ -19,12 +19,12 @@
 
 class Multigrid {
  public:
-    Multigrid(
-            size_t number_of_surfaces, Surface** surface_list,
-            size_t number_of_obstacles, Obstacle** obstacle_list,
-            BoundaryDataController* bdc_boundary,
-            BoundaryDataController **bdc_obstacles,
-            size_t multigrid_level);
+    Multigrid(Settings::Settings const &settings,
+              size_t number_of_surfaces, Surface** surface_list,
+              size_t number_of_obstacles, Obstacle** obstacle_list,
+              BoundaryDataController* bdc_boundary,
+              BoundaryDataController **bdc_obstacles,
+              size_t multigrid_level);
     ~Multigrid();
 
     // getter -- domain inner cells
@@ -58,6 +58,7 @@ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+    Settings::Settings const &m_settings;
 #ifdef GPU_DEBUG
     std::shared_ptr<spdlog::logger> m_gpu_logger;
 #endif

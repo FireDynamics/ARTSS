@@ -23,13 +23,14 @@ namespace {
     /// \param  value Value of boundary condition
     /// \param  sign Sign of boundary condition (POSITIVE_SIGN or NEGATIVE_SIGN)
     // *********************************************************************************************
-    void apply_boundary_condition(Field &field, MultipleJoinedList *mjl, size_t id,
+    void apply_boundary_condition(Settings::Settings const &settings,
+                                  Field &field, MultipleJoinedList *mjl, size_t id,
                                   int8_t sign_reference_index, size_t reference_index,
                                   real value, int8_t sign) {
         size_t *d_patch = mjl->get_data();
         size_t patch_start = mjl->get_first_index(field.get_level(), id);
         size_t patch_end = mjl->get_last_index(field.get_level(), id) ;
-        size_t patch_size = mjl->get_slice_size(field.get_level(), id);
+        size_t patch_size __attribute__((unused)) = mjl->get_slice_size(field.get_level(), id);
 #ifdef GPU_DEBUG
         auto gpu_logger = Utility::create_gpu_logger("ObstacleBoundary_GPU");
         gpu_logger->debug("applying for [{};{}] with length {} at level {}, pointer {}, field pointer {}",
@@ -61,9 +62,12 @@ namespace {
     /// \param  level Multigrid level
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_dirichlet(Field &field, MultipleJoinedList *mjl, size_t id, Patch p, real value) {
+    void apply_dirichlet(Settings::Settings const &settings,
+                         Field &field,
+                         MultipleJoinedList *mjl, size_t id,  Patch p,
+                         real value) {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger("ObstacleBoundary");
+        auto logger = Utility::create_logger(settings, "ObstacleBoundary");
         logger->debug("applying dirichlet to id={} patch {}", id,
                       PatchObject::get_patch_name(static_cast<Patch>(p)));
 #endif
@@ -102,7 +106,8 @@ namespace {
         if (p == FRONT || p == BOTTOM || p == LEFT) {
             sign_reference_index = NEGATIVE_SIGN;
         }
-        apply_boundary_condition(field, mjl, id,
+        apply_boundary_condition(settings,
+                                 field, mjl, id,
                                  sign_reference_index, reference_index, value * 2,
                                  NEGATIVE_SIGN);
     }
@@ -118,7 +123,10 @@ namespace {
     /// \param  level Multigrid level
     /// \param  value Value of boundary condition
     // *********************************************************************************************
-    void apply_neumann(Field &field, MultipleJoinedList *mjl, size_t id, Patch p, real value) {
+    void apply_neumann(Settings::Settings const &settings,
+                       Field &field,
+                       MultipleJoinedList *mjl, size_t id, Patch p,
+                       real value) {
         size_t level = field.get_level();
         if (level > 0) {
             value = 0;
@@ -146,7 +154,7 @@ namespace {
                 break;
             default:
 #ifndef BENCHMARKING
-                auto logger = Utility::create_logger("ObstacleBoundary");
+                auto logger = Utility::create_logger(settings, "ObstacleBoundary");
                 logger->error("Unknown Patch for neumann boundary condition: {}", p);
 #endif
                 break;
@@ -156,7 +164,8 @@ namespace {
             sign_reference_index = NEGATIVE_SIGN;
         }
 
-        apply_boundary_condition(field, mjl, id,
+        apply_boundary_condition(settings,
+                                 field, mjl, id,
                                  sign_reference_index, reference_index, -value, POSITIVE_SIGN);
     }
 }  // namespace
@@ -172,10 +181,11 @@ namespace {
 /// \param  id ID of obstacle
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
+void apply_boundary_condition(Settings::Settings const &settings,
+                              Field &field, MultipleJoinedList **index_fields,
                               BoundaryData *boundary_data, size_t id, bool sync) {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger("ObstacleBoundary");
+        auto logger = Utility::create_logger(settings, "ObstacleBoundary");
 #endif
         size_t level = field.get_level();
         for (size_t p = 0; p < number_of_patches; p++) {
@@ -191,11 +201,11 @@ void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
             BoundaryCondition bc = boundary_data->get_boundary_condition(patch);
             switch (bc) {
                 case BoundaryCondition::DIRICHLET:
-                    apply_dirichlet(field, index_fields[patch], id, patch,
+                    apply_dirichlet(settings, field, index_fields[patch], id, patch,
                                     boundary_data->get_value(patch));
                     break;
                 case BoundaryCondition::NEUMANN:
-                    apply_neumann(field, index_fields[patch], id, patch,
+                    apply_neumann(settings, field, index_fields[patch], id, patch,
                                   boundary_data->get_value(patch));
                     break;
                 case BoundaryCondition::PERIODIC:

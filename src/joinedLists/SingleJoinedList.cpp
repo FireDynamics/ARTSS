@@ -6,9 +6,9 @@
 //
 #include "SingleJoinedList.h"
 
-SingleJoinedList::SingleJoinedList(size_t multigrid_level) {
+SingleJoinedList::SingleJoinedList(Settings::Settings const &settings, size_t multigrid_level) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger = Utility::create_logger(settings, typeid(this).name());
 #endif
 #ifdef GPU_DEBUG
     m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
