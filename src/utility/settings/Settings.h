@@ -28,7 +28,7 @@
 namespace Settings {
 class Settings {
  public:
-     explicit Settings(std::string path);
+     explicit Settings(const std::string& path);
      void print_config() const;
 
      std::string get(std::string path) const;

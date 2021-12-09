@@ -11,7 +11,7 @@
 
 class SingleJoinedList {
   public:
-    explicit SingleJoinedList(Settings::Settings const &settings, size_t multigrid_level);
+    explicit SingleJoinedList(size_t multigrid_level);
     ~SingleJoinedList();
 
     void copyin() {
@@ -39,9 +39,6 @@ class SingleJoinedList {
     size_t *m_index_list;  // starting index of each level
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
-#endif
-#ifdef GPU_DEBUG
-    std::shared_ptr<spdlog::logger> m_gpu_logger;
 #endif
 };
 

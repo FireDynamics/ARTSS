@@ -15,8 +15,7 @@
 #include "../utility/settings/Settings.h"
 
 namespace DomainBoundary {
-    void apply_boundary_condition(Settings::Settings const &settings,
-                                  Field &field, SingleJoinedList** index_fields,
+    void apply_boundary_condition(Field &field, SingleJoinedList** index_fields,
                                   BoundaryData* boundary_data, bool sync = true);
 }  // namespace DomainBoundary
 #endif /* ARTSS_BOUNDARYCONDITION_DOMAINBOUNDARY_H */

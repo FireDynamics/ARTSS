@@ -17,9 +17,8 @@
 
 class Surface {
  public:
-    Surface(Settings::Settings const &settings, Settings::SurfaceSetting const &surface_setting);
-    Surface(Settings::Settings const &settings,
-            const std::string &name,
+    explicit Surface(Settings::SurfaceSetting const &surface_setting);
+    Surface(const std::string &name,
             Patch patch,
             Coordinate &start, Coordinate &end,
             size_t level);
@@ -46,7 +45,6 @@ class Surface {
     Coordinate & get_end_coordinates() { return m_end; }
 
 private:
-    Settings::Settings const &m_settings;
     size_t m_level = 0;
     size_t m_id;
     Patch m_patch;

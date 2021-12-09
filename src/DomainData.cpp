@@ -11,7 +11,7 @@ DomainData *DomainData::single = nullptr; //Singleton
 
 DomainData::DomainData(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto solver = settings.get("solver/description");
     if (solver.find("NS") != std::string::npos || solver.find("Pressure") != std::string::npos) {

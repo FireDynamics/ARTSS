@@ -61,16 +61,16 @@ class Field {
     /// \brief copy data array to GPU
     void copyin() {
 #pragma acc enter data copyin(data[:m_size])
-#ifdef GPU_DEBUG
-    m_gpu_logger->debug("{} level {} copyin with data pointer: {}", get_field_type_name(m_type), m_level, static_cast<void *>(data));
+#ifndef BENCHMARKING
+    m_logger->debug("{} level {} copyin with data pointer: {}", get_field_type_name(m_type), m_level, static_cast<void *>(data));
 #endif
     }
 
     /// \brief fill data array with the specified number
     /// \param val value to be set
     void set_value(real val) const {
-#ifdef GPU_DEBUG
-        m_gpu_logger->debug("set value to {} for {}", val, static_cast<void *>(data));
+#ifndef BENCHMARKING
+        m_logger->debug("set value to {} for {}", val, static_cast<void *>(data));
 #endif
 #pragma acc parallel loop independent present(this->data[:m_size]) async
         for (size_t i = 0; i < m_size; i++) {
@@ -83,8 +83,8 @@ class Field {
     /// \param Field &other
     void copy_data(const Field &other) const {
         auto other_data = other.data;
-#ifdef GPU_DEBUG
-        m_gpu_logger->debug("copy data of {} ({}) to {} ({}) for level {}",
+#ifndef BENCHMARKING
+        m_logger->debug("copy data of {} ({}) to {} ({}) for level {}",
                             get_field_type_name(other.get_type()), static_cast<void *>(other_data),
                             get_field_type_name(m_type), static_cast<void *>(data),
                             m_level);
@@ -151,8 +151,8 @@ class Field {
     size_t const m_size;
     FieldType const m_type;
 
-#ifdef GPU_DEBUG
-    std::shared_ptr<spdlog::logger> m_gpu_logger;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
 #endif
 };
 

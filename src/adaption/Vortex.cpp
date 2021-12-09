@@ -57,9 +57,9 @@ bool Vortex::update(
     *p_shift_z1 = 0;
     *p_shift_z2 = 0;
 
-    adaption = Adaption::adapt_x_direction(m_settings, d_u, m_u_lin, m_buffer, m_threshold, p_shift_x1, p_shift_x2, m_minimal, m_reduction) || adaption;
+    adaption = Adaption::adapt_x_direction(d_u, m_u_lin, m_buffer, m_threshold, p_shift_x1, p_shift_x2, m_minimal, m_reduction) || adaption;
     if (m_y_side)
-        adaption = Adaption::adapt_y_direction(m_settings, d_v, m_v_lin, m_buffer, m_threshold, p_shift_y1, p_shift_y2, m_minimal, m_reduction) || adaption;
+        adaption = Adaption::adapt_y_direction(d_v, m_v_lin, m_buffer, m_threshold, p_shift_y1, p_shift_y2, m_minimal, m_reduction) || adaption;
 
     *p_shift_x1 *= m_minimal;
     *p_shift_x2 *= m_minimal;

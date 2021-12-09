@@ -19,7 +19,7 @@ Visual::Visual(Settings::Settings const &settings, Solution const &solution, boo
         m_solution(solution),
         m_has_analytical_solution(has_analytical_solution) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_filename = Utility::remove_extension(settings.get_filename());
 

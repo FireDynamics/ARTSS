@@ -19,7 +19,7 @@
 ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse(Settings::Settings const &settings) :
     m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
 
     m_dsign = 1.;

@@ -18,7 +18,7 @@
 NSTempTurbConSolver::NSTempTurbConSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = field_controller;
 

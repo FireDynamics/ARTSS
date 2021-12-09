@@ -13,7 +13,7 @@
 BoundaryDataController::BoundaryDataController(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_boundary_data = new BoundaryData *[number_of_field_types];
     for (size_t i = 0; i < number_of_field_types; i++) {
@@ -79,12 +79,10 @@ void BoundaryDataController::apply_boundary_condition(
         bool sync) {
     FieldType field_type = field.get_type();
     if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {
-        DomainBoundary::apply_boundary_condition(
-                m_settings,
-                field,
-                index_fields,
-                m_boundary_data[field_type],
-                sync);
+        DomainBoundary::apply_boundary_condition(field,
+                                                 index_fields,
+                                                 m_boundary_data[field_type],
+                                                 sync);
     }
 }
 
@@ -111,13 +109,11 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
         m_logger->debug("apply obstacle boundary conditions of id={} {}", id,
                         Field::get_field_type_name(field_type));
 #endif
-        ObstacleBoundary::apply_boundary_condition(
-                m_settings,
-                field,
-                index_fields,
-                m_boundary_data[field_type],
-                id,
-                sync);
+        ObstacleBoundary::apply_boundary_condition(field,
+                                                   index_fields,
+                                                   m_boundary_data[field_type],
+                                                   id,
+                                                   sync);
     }
 }
 

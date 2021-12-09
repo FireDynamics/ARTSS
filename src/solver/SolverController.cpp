@@ -31,7 +31,7 @@
 SolverController::SolverController(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = new FieldController();
     std::string string_solver = m_settings.get("solver/description");
@@ -490,9 +490,8 @@ void SolverController::set_up_fields(const std::string &string_solver) {
                 values[l] = m_settings.get_real(val_out_l);
             }
 
-            Functions::layers(log_level, log_file,
-                    m_field_controller->get_field_T(),
-                    n_layers, dir, borders, values);
+            Functions::layers(m_field_controller->get_field_T(),
+                              n_layers, dir, borders, values);
 
             if (random) {
                 call_random(m_field_controller->get_field_T());

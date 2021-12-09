@@ -555,10 +555,13 @@ namespace Functions {
 /// \brief  Initial set up as layers throughout the domain
 /// \param  out temperature
 // ***************************************************************************************
-    void layers(std::string const log_level, std::string const log_file, Field &out,
-            int n_layers, std::string dir,
-            real *borders, real *values) {
+    void layers(Field &out,
+                int n_layers, const std::string &dir,
+                real *borders, const real *values) {
         auto domain = DomainData::getInstance();
+#ifndef BENCHMARKING
+        auto m_logger = Utility::create_logger(class_name);
+#endif
 
         // layer border
         if (dir == "x") {
@@ -578,7 +581,6 @@ namespace Functions {
             borders[n_layers] = z2;
         } else {
 #ifndef BENCHMARKING
-            auto m_logger = Utility::create_logger(log_level, log_file, class_name);
             m_logger->error("No distance for layers specified!");
 #endif
             //TODO(issue 6) Error handling
@@ -652,7 +654,6 @@ namespace Functions {
 
         } else {
 #ifndef BENCHMARKING
-            auto m_logger = Utility::create_logger(log_level, log_file, class_name);
             m_logger->error("No distance for layers specified!");
 #endif
             //TODO(issue 6) Error handling

@@ -11,7 +11,7 @@ inline static const std::vector<std::string> boundary_condition_names = {"neuman
 
 BoundaryData::BoundaryData(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_values = new real[number_of_patches];
     m_boundary_conditions = new BoundaryCondition[number_of_patches];

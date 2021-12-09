@@ -18,7 +18,7 @@ Analysis::Analysis(Settings::Settings const &settings, Solution &solution, bool 
         m_has_analytic_solution(has_analytical_solution),
         m_solution(solution) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     if (m_has_analytic_solution) {
         m_tol = m_settings.get_real("solver/solution/tol");

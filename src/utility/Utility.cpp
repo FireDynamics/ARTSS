@@ -10,9 +10,9 @@
 #include "GlobalMacrosTypes.h"
 #include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
-#include "../field/Field.h"
 
 #ifndef BENCHMARKING
+#include <spdlog/spdlog.h>
 #include <spdlog/cfg/helpers.h>
 #include <clocale>
 #endif
@@ -20,19 +20,21 @@
 
 namespace Utility {
     static std::string class_name = "Utility";
+    static std::string global_logger = "ARTSS";
 
-    // do not use, only for debugging purpose
-    std::vector<size_t> get_coordinates(size_t index, size_t Nx, size_t Ny) {
-        std::vector<size_t> coordinates;
-        coordinates.reserve(3);
-        size_t k = getCoordinateK(index, Nx, Ny);
-        size_t j = getCoordinateJ(index, Nx, Ny, k);
-        size_t i = getCoordinateI(index, Nx, Ny, j, k);
-        coordinates.push_back(i);
-        coordinates.push_back(j);
-        coordinates.push_back(k);
-        return coordinates;
-    }
+    // do not use only for debug purpose
+std::vector<size_t> get_coordinates(size_t index, size_t Nx, size_t Ny) {
+    std::vector<size_t> coordinates;
+    coordinates.reserve(3);
+    size_t k = getCoordinateK(index, Nx, Ny);
+    size_t j = getCoordinateJ(index, Nx, Ny, k);
+    size_t i = getCoordinateI(index, Nx, Ny, j, k);
+    coordinates.push_back(i);
+    coordinates.push_back(j);
+    coordinates.push_back(k);
+    return coordinates;
+}
+
 //======================================== get index ===============================================
 // *************************************************************************************************
 /// \brief  Snaps value to grid discretisation
@@ -71,83 +73,30 @@ std::vector<std::string> split(const char *text, char delimiter) {
     return tokens;
 }
 
-#ifdef GPU_DEBUG
-    // =====================creates a new logger for the GPU =======================
-    // *****************************************************************************
-    /// \brief  creates a new named logger this function is only available
-    ///         if BENCHMARKING is not enabled and _OPENACC is enabled
-    /// \param  loggerName name of logger, written to log file
-    // *****************************************************************************
-        std::shared_ptr<spdlog::logger> create_gpu_logger(std::string logger_name) {
-        /*
-            static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
-            std::cout << "print name: " << logger_name << std::endl;
-            std::string log_level = "debug";
-            std::string log_file = "gpu.log";
-
-            if (!file_sink) {
-                file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
-                file_sink->set_level(spdlog::level::trace);
-            }
-
-            std::shared_ptr<spdlog::logger> logger = spdlog::basic_logger_mt(logger_name, log_file);
-            logger->flush_on(spdlog::level::err);
-            logger->set_level(spdlog::level::trace);
-            return logger;
-        */
-
-        static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
-
-        std::string log_level = "debug";
-        std::string log_file = "gpu.log";
-
-        if (!file_sink) {
-            file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
-            file_sink->set_level(spdlog::level::trace);
-        }
-
-        std::vector<spdlog::sink_ptr> sinks;
-        sinks.reserve(1);
-        sinks.push_back(file_sink);
-        auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
-        logger->flush_on(spdlog::level::err);
-        logger->set_level(spdlog::level::trace);
-        return logger;
-        }
-#endif
-
 #ifndef BENCHMARKING
-// ======================= creates a new logger ================================
-// *****************************************************************************
-/// \brief  creates a new named logger this function is only available
-///         if BENCHMARKING is not enabled
-/// \param  settings the settings to create the logger
-//          ("logging/level", "logging/file")
-/// \param  loggerName name of logger, written to log file
-// *****************************************************************************
-std::shared_ptr<spdlog::logger> create_logger(Settings::Settings const &settings, std::string const logger_name) {
-    return create_logger(
-            settings.sget("logging/level"),
-            settings.sget("logging/file"),
-            logger_name);
+std::shared_ptr<spdlog::logger> create_logger(const std::string &logger_name) {
+    auto &sinks = spdlog::get(global_logger)->sinks();
+    auto logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
+    logger->sinks()[0]->set_level(sinks[0]->level());
+    logger->sinks()[1]->set_level(sinks[1]->level());
+    logger->set_level(sinks[0]->level());
+    return logger;
 }
 
 // ======================= creates a new logger ================================
 // *****************************************************************************
 /// \brief  creates a new named logger this function is only available
 ///         if BENCHMARKING is not enabled
-/// \param  level the level of visable messages
-/// \param  file the file to write into
-/// \param  loggerName name of logger, written to log file
+/// \param  settings the settings to create the logger
+///         ("logging/level", "logging/file")
+/// \param  logger_name name of logger, written to log file
 // *****************************************************************************
-std::shared_ptr<spdlog::logger> create_logger(
-    std::string const log_level,
-    std::string const log_file,
-    std::string const logger_name) {
+void create_logger(Settings::Settings const &settings) {
+    std::string log_level = settings.sget("logging/level");
+    std::string log_file =  settings.sget("logging/file");
+
     static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
     static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
-
-
 
     if (!stdout_sink) {
         stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -161,22 +110,18 @@ std::shared_ptr<spdlog::logger> create_logger(
         file_sink->set_level(spdlog::level::trace);
     }
 
-    std::vector<spdlog::sink_ptr> sinks;
-    sinks.reserve(2);
-    sinks.push_back(stdout_sink);
-    sinks.push_back(file_sink);
-    auto logger = std::make_shared<spdlog::logger>(logger_name, begin(sinks), end(sinks));
-    logger->flush_on(spdlog::level::err);
-    logger->set_level(spdlog::level::trace);
-
-    return logger;
+    std::vector<spdlog::sink_ptr> sinks = {stdout_sink, file_sink};
+    auto combined_logger = std::make_shared<spdlog::logger>(global_logger, begin(sinks), end(sinks));
+    spdlog::register_logger(combined_logger);  // needed if spdlog::get() should be used elsewhere
+    combined_logger->flush_on(spdlog::level::err);
+    combined_logger->set_level(spdlog::level::trace);
 }
 #endif
 
 
-void log_field_info(Settings::Settings const &settings, Field &field, const std::string &text, const std::string &logger_name) {
+void log_field_info(Field &field, const std::string &text, const std::string &logger_name) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger(settings, logger_name);
+    auto logger = Utility::create_logger(logger_name);
 #endif
     auto boundary = BoundaryController::getInstance();
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
@@ -197,13 +142,13 @@ void log_field_info(Settings::Settings const &settings, Field &field, const std:
         }
         average_inner += value;
     }
-    average_inner /= size_inner_list;
+    average_inner /= static_cast<real>(size_inner_list);
 #ifndef BENCHMARKING
     logger->info("minimum inner {}: {}", text, minimum_inner);
     logger->info("maximum inner {}: {}", text, maximum_inner);
     logger->info("average inner {}: {}", text, average_inner);
 #endif
-    }
+}
 
 //================================= Remove extension ===============================================
 // *************************************************************************************************

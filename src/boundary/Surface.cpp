@@ -13,10 +13,10 @@
 //  - make sure that surfaces does not extend to corner or edge cells
 //  - consider moving parsing to BoundaryController.cpp same as for obstacles,
 //    may be not possible/practical depending on the concept for BC
-Surface::Surface(Settings::Settings const &settings, Settings::SurfaceSetting const &surface_setting) :
-        m_settings(settings), m_level(0) {
+Surface::Surface(Settings::SurfaceSetting const &surface_setting) :
+        m_level(0) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("################ SURFACE ################");
 #endif
 
@@ -44,10 +44,10 @@ Surface::Surface(Settings::Settings const &settings, Settings::SurfaceSetting co
 #endif
 }
 
-Surface::Surface(Settings::Settings const &settings, const std::string &name, Patch patch, Coordinate &start, Coordinate &end, size_t level) :
-    m_settings(settings), m_patch(patch), m_name(name), m_start(start), m_end(end) {
+Surface::Surface(const std::string &name, Patch patch, Coordinate &start, Coordinate &end, size_t level) :
+        m_patch(patch), m_name(name), m_start(start), m_end(end) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     m_logger->info("################ SURFACE ################");
 #endif
 

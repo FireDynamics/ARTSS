@@ -59,9 +59,6 @@ private:
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     Settings::Settings const &m_settings;
-#ifdef GPU_DEBUG
-    std::shared_ptr<spdlog::logger> m_gpu_logger;
-#endif
     size_t m_multigrid_levels;
     // all surfaces divided by level
     Surface*** m_MG_surface_object_list;  // m_MG_surface_object_list[level][surfaceID]

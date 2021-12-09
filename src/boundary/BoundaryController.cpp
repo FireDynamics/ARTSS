@@ -13,7 +13,7 @@ BoundaryController *BoundaryController::singleton = nullptr;  // Singleton
 BoundaryController::BoundaryController(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_bdc_boundary = new BoundaryDataController(m_settings);
     read_XML();
@@ -79,7 +79,7 @@ void BoundaryController::parse_surface_parameter(std::vector<Settings::SurfaceSe
     if (m_has_surfaces) {
         std::vector<Surface *> ret_surfaces;
         for (auto surface : surfaces) {
-            ret_surfaces.push_back(new Surface(m_settings, surface));
+            ret_surfaces.push_back(new Surface(surface));
         }
         m_number_of_surfaces = ret_surfaces.size();
         //TODO(cvm) vector surfaces will be destroyed after this method therefore I need to preserve the data
@@ -122,7 +122,7 @@ void BoundaryController::parse_obstacle_parameter(std::vector<Settings::Obstacle
                 bdc->add_boundary_data(bound);
             }
 
-            Obstacle *o = new Obstacle(m_settings, ox1, ox2, oy1, oy2, oz1, oz2, name);
+            Obstacle *o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2, name);
             ret_obstacles.push_back(o);
             bdc_obstacles.push_back(bdc);
         }

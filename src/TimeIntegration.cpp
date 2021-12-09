@@ -14,7 +14,7 @@
 // ***************************************************************************************
 TimeIntegration::TimeIntegration(Settings::Settings const &settings, SolverController *sc) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
 
     m_dt = settings.get_real("physical_parameters/dt");

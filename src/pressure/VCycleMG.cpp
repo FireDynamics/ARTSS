@@ -21,7 +21,7 @@ VCycleMG::VCycleMG(Settings::Settings const &settings) :
         m_n_relax(settings.get_int("solver/pressure/diffusion/n_relax")),
         m_w(settings.get_real("solver/pressure/diffusion/w")) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("construct VCycleMG");
 #endif
     std::string diffusion_type = m_settings.get("solver/pressure/diffusion/type");

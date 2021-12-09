@@ -23,7 +23,7 @@ AdvectionSolver::AdvectionSolver(
     m_v_lin(FieldType::V, v_lin),
     m_w_lin(FieldType::W, w_lin) {
 #ifndef BENCHMARKING
-     m_logger = Utility::create_logger(settings, typeid(this).name());
+     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     std::string advectionType = m_settings.get("solver/advection/type");
     SolverSelection::SetAdvectionSolver(m_settings, &adv, m_settings.get("solver/advection/type"));

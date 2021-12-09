@@ -13,7 +13,7 @@
 JacobiDiffuse::JacobiDiffuse(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_dsign = 1.;
     m_w = settings.get_real("solver/diffusion/w");
@@ -241,7 +241,7 @@ void JacobiDiffuse::JacobiStep(
     auto boundary = BoundaryController::getInstance();
 
     size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(out.get_level());
+    auto bsize_i __attribute__((unused)) = boundary->get_size_domain_inner_list_level_joined(out.get_level());
     size_t start_index = boundary->get_domain_inner_list_level_joined_start(out.get_level());
     size_t end_index = boundary->get_domain_inner_list_level_joined_end(out.get_level()) + 1;
 

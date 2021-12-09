@@ -21,25 +21,22 @@ Multigrid::Multigrid(
         m_multigrid_levels(multigrid_levels),
         m_number_of_surface_objects(number_of_surfaces),
         m_number_of_obstacle_objects(number_of_obstacles),
-        m_jl_domain_list(m_settings, multigrid_levels),
-        m_jl_domain_inner_list(m_settings, multigrid_levels),
-        m_jl_obstacle_list(m_settings, multigrid_levels),
-        m_jl_surface_list(m_settings, multigrid_levels),
+        m_jl_domain_list(multigrid_levels),
+        m_jl_domain_inner_list(multigrid_levels),
+        m_jl_obstacle_list(multigrid_levels),
+        m_jl_surface_list(multigrid_levels),
         m_bdc_boundary(bdc_boundary),
         m_bdc_obstacle(bdc_obstacles) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("starting multigrid");
-#endif
-#ifdef GPU_DEBUG
-    m_gpu_logger = Utility::create_gpu_logger(typeid(this).name());
 #endif
     // init domain
     // list of domain objects for each level
     m_MG_domain_object_list = new Domain *[m_multigrid_levels + 1];
     m_jl_domain_boundary_list_patch_divided = new SingleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_jl_domain_boundary_list_patch_divided[patch]  = new SingleJoinedList(m_settings, m_multigrid_levels);
+        m_jl_domain_boundary_list_patch_divided[patch]  = new SingleJoinedList(m_multigrid_levels);
     }
 
     // init obstacle
@@ -49,7 +46,7 @@ Multigrid::Multigrid(
 
     m_jl_obstacle_boundary_list_patch_divided = new MultipleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_jl_obstacle_boundary_list_patch_divided[patch]  = new MultipleJoinedList(m_settings, m_multigrid_levels, m_number_of_obstacle_objects);
+        m_jl_obstacle_boundary_list_patch_divided[patch]  = new MultipleJoinedList(m_multigrid_levels, m_number_of_obstacle_objects);
     }
 
     m_MG_surface_object_list = new Surface **[m_multigrid_levels + 1];
@@ -57,7 +54,7 @@ Multigrid::Multigrid(
 
     m_jl_surface_list_patch_divided = new MultipleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_jl_surface_list_patch_divided[patch]  = new MultipleJoinedList(m_settings, m_multigrid_levels, m_number_of_surface_objects);
+        m_jl_surface_list_patch_divided[patch]  = new MultipleJoinedList(m_multigrid_levels, m_number_of_surface_objects);
     }
 
     if (m_number_of_obstacle_objects > 0) {
@@ -331,8 +328,7 @@ void Multigrid::create_multigrid_obstacle_lists() {
                 Obstacle *obstacle = m_MG_obstacle_object_list[level][o];
                 size_t new_size = size + obstacle->get_size_obstacle_list();
                 auto obstacle_list_tmp = new size_t[new_size];
-                Algorithm::merge_sort(m_settings,
-                                      list, obstacle->get_obstacle_list(),
+                Algorithm::merge_sort(list, obstacle->get_obstacle_list(),
                                       size, obstacle->get_size_obstacle_list(),
                                       obstacle_list_tmp);
                 delete[] list;
@@ -457,8 +453,7 @@ void Multigrid::create_multigrid_domain_lists() {
             size_surface_list->add_value(patch, m_jl_surface_list_patch_divided[patch]->get_slice_size(level));
         }
         size_t *slice_obstacle_list = m_jl_obstacle_list.get_slice(level);
-        auto domain = new Domain(m_settings,
-                                 slice_obstacle_list,
+        auto domain = new Domain(slice_obstacle_list,
                                  m_jl_obstacle_list.get_slice_size(level),
                                  slice_surface_list,
                                  *size_surface_list,
@@ -556,7 +551,7 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
         m_logger->debug("multigrid surface end coarse {}|{}|{}", (*end_coarse)[X], (*end_coarse)[Y], (*end_coarse)[Z]);
 #endif
 
-        auto surface_coarse = new Surface(m_settings, surface_fine->get_name(), patch, *start_coarse, *end_coarse, level);
+        auto surface_coarse = new Surface(surface_fine->get_name(), patch, *start_coarse, *end_coarse, level);
         sum += surface_coarse->get_size_surface_list();
         *(surface_list_coarse + id) = surface_coarse;
         sum_patches->add_value(patch, surface_coarse->get_size_surface_list());
@@ -621,8 +616,7 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
         }
 #endif
 
-        auto obstacle_coarse = new Obstacle(m_settings,
-                                            (*start_coarse), (*end_coarse),
+        auto obstacle_coarse = new Obstacle((*start_coarse), (*end_coarse),
                                             level, obstacle_fine->get_name());
         delete start_coarse;
         delete end_coarse;

@@ -10,7 +10,7 @@
 PressureSolver::PressureSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(PressureSolver).name());
+    m_logger = Utility::create_logger(typeid(PressureSolver).name());
 #endif
     m_field_controller = field_controller;
     auto p_type = m_settings.get("solver/pressure/type");

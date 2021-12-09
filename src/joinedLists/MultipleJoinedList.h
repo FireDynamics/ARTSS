@@ -11,13 +11,13 @@
 
 class MultipleJoinedList {
   public:
-    MultipleJoinedList(Settings::Settings const &settings, size_t multigrid_level, size_t number_of_objects);
+    MultipleJoinedList(size_t multigrid_level, size_t number_of_objects);
     ~MultipleJoinedList();
 
     void copyin() {
 #pragma acc enter data copyin(m_data[:m_size])
-#ifdef GPU_DEBUG
-        m_gpu_logger->debug("copyin gpu index list with data pointer: {} and size: {}", static_cast<void *>(m_data), m_size);
+#ifndef BENCHMARKING
+        m_logger->debug("copyin gpu index list with data pointer: {} and size: {}", static_cast<void *>(m_data), m_size);
 #endif
     }
 
@@ -41,9 +41,6 @@ class MultipleJoinedList {
     size_t m_number_of_objects;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
-#endif
-#ifdef GPU_DEBUG
-    std::shared_ptr<spdlog::logger> m_gpu_logger;
 #endif
 };
 

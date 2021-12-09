@@ -12,9 +12,9 @@ inline static const std::vector<std::string> field_type_names = {"rho", "u", "v"
 Field::Field(FieldType type) :
         m_level(0), m_size(DomainData::getInstance()->get_size()), m_type(type) {
     data = new real[m_size];
-#ifdef GPU_DEBUG
-    m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
-    m_gpu_logger->info("{} level {} create with field pointer: {} data pointer: {}",
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger("Field_GPU_" + std::to_string(counter++));
+    m_logger->info("{} level {} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
 #endif
@@ -40,9 +40,9 @@ Field::Field(FieldType type, real val, size_t level) :
 Field::Field(FieldType type, real val, size_t level, size_t size):
         m_level(level), m_size(size), m_type(type) {
     data = new real[m_size];
-#ifdef GPU_DEBUG
-    m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
-    m_gpu_logger->info("{} level {} create with field pointer: {} data pointer: {}",
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger("Field_GPU_" + std::to_string(counter++));
+    m_logger->info("{} level {} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
 #endif
@@ -57,9 +57,9 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
 Field::Field(const Field &original):
         data(new real[original.m_size]), m_level(original.m_level),
         m_size(original.m_size), m_type(original.m_type) {
-#ifdef GPU_DEBUG
-    m_gpu_logger = Utility::create_gpu_logger("Field_GPU_" + std::to_string(counter++));
-    m_gpu_logger->info("{} level {} create with field pointer: {} data pointer: {}",
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger("Field_GPU_" + std::to_string(counter++));
+    m_logger->info("{} level {} create with field pointer: {} data pointer: {}",
                         get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
 #endif
