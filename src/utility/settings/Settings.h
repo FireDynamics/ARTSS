@@ -24,6 +24,7 @@
 #include <vector>
 #include <unordered_map>
 #include <filesystem>
+#include <variant>
 
 
 namespace Settings {
@@ -68,9 +69,68 @@ namespace Settings {
         std::string file;
         std::string level;
     };
+    struct Uniform {
+        real value;
+    };
+    struct Zero {};
+    struct GaussBubble {
+        real u_lin;
+        real v_lin;
+        real w_lin;
+        real x_shift;
+        real y_shift;
+        real z_shift;
+        real l;
+    };
+    struct random_parameters {
+        bool absolute;
+        bool custom_seed;
+        bool custom_steps;
+        size_t seed;
+        real step_size;
+        real range;
+    };
     struct initial_conditions_parameters {
         std::string usr_fct;
         bool random;
+        std::variant<Uniform,Zero,GaussBubble> ic;
+        struct random_parameters random_parameters;
+    };
+    struct boundary {
+        std::string patch;
+        std::string field_type;
+        std::string boundary_condition;
+        real value;
+    };
+    struct surface {
+        real sx1;
+        real sy1;
+        real sz1;
+        real sx2;
+        real sy2;
+        real sz2;
+        struct boundary boundary_parameters;
+    };
+    struct surfaces_parameters {
+        bool enabled;
+        std::vector<struct surface> surfaces;
+    };
+    struct boundaries {
+        std::vector<struct boundary> boundaries;
+    };
+    struct obstacle {
+        std::string name;
+        real ox1;
+        real oy1;
+        real oz1;
+        real ox2;
+        real oy2;
+        real oz2;
+        std::vector<struct boundary> boundaries;
+    };
+    struct obstacles_parameters {
+        bool enabled;
+        std::vector<struct obstacle> obstacles;
     };
     struct Settings_new {
         struct physical_parameters physical_parameters;
@@ -78,12 +138,14 @@ namespace Settings {
         struct domain_parameters domain_parameters;
         //struct adaption_parameters adaption_parameters;
         //struct boundaries_parameters boundaries_parameters;
-        //struct obstacles_parameters obstacles_parameters;
-        //struct surfaces_parameters surfaces_parameters;
+        struct obstacles_parameters obstacles_parameters;
+        struct surfaces_parameters surfaces_parameters;
         struct initial_conditions_parameters initial_conditions_parameters;
         struct visualisation_parameters visualisation_parameters;
         struct logging_parameters logging_parameters;
     };
+    surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLDocument &doc);
+    obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLDocument &doc);
     initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLDocument &doc);
     visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLDocument &doc);
     logging_parameters parse_logging_parameters(tinyxml2::XMLDocument &doc);

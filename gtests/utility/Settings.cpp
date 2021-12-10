@@ -154,3 +154,23 @@ TEST(SettingsTest, requiredInitialConditionsParameters) {
     EXPECT_FALSE(initial_conditions_parameters.random);
     EXPECT_EQ(initial_conditions_parameters.usr_fct, "Uniform");
 }
+TEST(SettingsTest, requiredObstaclesParameters) {
+    std::string xml = R"(
+<ARTSS>
+    <obstacles enabled="No" />
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::obstacles_parameters obstacles_parameters = Settings::parse_obstacles_parameters(doc);
+    EXPECT_FALSE(obstacles_parameters.enabled);
+}
+TEST(SettingsTest, requiredSurfacesParameters) {
+    std::string xml = R"(
+<ARTSS>
+    <surfaces enabled="No" />
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::surfaces_parameters surfaces_parameters = Settings::parse_surfaces_parameters(doc);
+    EXPECT_FALSE(surfaces_parameters.enabled);
+}

@@ -123,6 +123,20 @@ initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLD
     icp.usr_fct = get_required_string(values, "usr_fct", context);
     return icp;
 }
+obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLDocument &doc) {
+    std::string context = "obstacles";
+    Map values = map_parameters(doc, context);
+    obstacles_parameters op{};
+    op.enabled = get_required_bool(values, "enabled", context);
+    return op;
+}
+surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLDocument &doc) {
+    std::string context = "surfaces";
+    Map values = map_parameters(doc, context);
+    surfaces_parameters sp{};
+    sp.enabled = get_required_bool(values, "enabled", context);
+    return sp;
+}
 logging_parameters parse_logging_parameters(tinyxml2::XMLDocument &doc) {
     std::string context = "logging";
     Map values = map_parameters(doc, context);
@@ -148,6 +162,8 @@ Settings_new parse_settings(const std::string &file_content) {
     doc.Parse(file_content.c_str());
     return {parse_physical_parameters(doc),
             parse_domain_parameters(doc),
+            parse_obstacles_parameters(doc),
+            parse_surfaces_parameters(doc),
             parse_initial_conditions_parameters(doc),
             parse_visualisation_parameters(doc),
             parse_logging_parameters(doc)};
