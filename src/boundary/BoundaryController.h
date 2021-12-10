@@ -12,6 +12,7 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
 #include "BoundaryDataController.h"
+#include "Coordinate.h"
 #include "Multigrid.h"
 #include "Obstacle.h"
 #include "Surface.h"
@@ -51,7 +52,7 @@ class BoundaryController {
 
     std::vector<FieldType> get_used_fields() const;
 
-    bool inline is_obstacle_cell(const size_t level, const Coordinate &coords) {
+    bool inline is_obstacle_cell(const size_t level, const Coordinate<size_t> &coords) {
         return m_multigrid->is_obstacle_cell(level, coords);
     }
 

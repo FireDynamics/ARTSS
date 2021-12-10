@@ -44,7 +44,7 @@ Surface::Surface(Settings::SurfaceSetting const &surface_setting) :
 #endif
 }
 
-Surface::Surface(const std::string &name, Patch patch, Coordinate &start, Coordinate &end, size_t level) :
+Surface::Surface(const std::string &name, Patch patch, Coordinate<size_t> &start, Coordinate<size_t> &end, size_t level) :
         m_patch(patch), m_name(name), m_start(start), m_end(end) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());

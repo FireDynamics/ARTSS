@@ -20,7 +20,7 @@ class Surface {
     explicit Surface(Settings::SurfaceSetting const &surface_setting);
     Surface(const std::string &name,
             Patch patch,
-            Coordinate &start, Coordinate &end,
+            Coordinate<size_t> &start, Coordinate<size_t> &end,
             size_t level);
     ~Surface();
 
@@ -41,8 +41,8 @@ class Surface {
 
     void print();
 
-    Coordinate & get_start_coordinates() { return m_start; }
-    Coordinate & get_end_coordinates() { return m_end; }
+    Coordinate<size_t> & get_start_coordinates() { return m_start; }
+    Coordinate<size_t> & get_end_coordinates() { return m_end; }
 
 private:
     size_t m_level = 0;
@@ -50,8 +50,8 @@ private:
     Patch m_patch;
     std::string m_name;
 
-    Coordinate m_start;
-    Coordinate m_end;
+    Coordinate<size_t> m_start;
+    Coordinate<size_t> m_end;
 
     size_t *m_surface_list;  // indices of surface
     size_t m_size_surfaceList;

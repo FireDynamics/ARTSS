@@ -522,12 +522,12 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
         Surface *surface_fine = surface_list_fine[id];
 
         Patch patch = surface_fine->get_patch();
-        Coordinate &start_fine = surface_fine->get_start_coordinates();
-        Coordinate &end_fine = surface_fine->get_end_coordinates();
+        Coordinate<size_t> &start_fine = surface_fine->get_start_coordinates();
+        Coordinate<size_t> &end_fine = surface_fine->get_end_coordinates();
 
-        auto start_coarse = new Coordinate();
-        auto *end_coarse = new Coordinate(end_fine);
-        for (size_t axis = 0; axis < number_of_axis; axis++) {
+        auto start_coarse = new Coordinate<size_t>();
+        auto *end_coarse = new Coordinate<size_t>(end_fine);
+        for (size_t axis = 0; axis < number_of_axes; axis++) {
             (*start_coarse)[axis] = static_cast<size_t>((start_fine[axis] + 1) / 2);
             (*end_coarse)[axis] = static_cast<size_t>((end_fine[axis] + 1) / 2);
         }
@@ -584,12 +584,12 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
         Obstacle *obstacle_fine = obstacle_list_fine[id];
 
-        Coordinate *start_fine = obstacle_fine->get_start_coordinates();
-        Coordinate *end_fine = obstacle_fine->get_end_coordinates();
+        Coordinate<size_t> *start_fine = obstacle_fine->get_start_coordinates();
+        Coordinate<size_t> *end_fine = obstacle_fine->get_end_coordinates();
 
-        auto start_coarse = new Coordinate();
-        auto end_coarse = new Coordinate();
-        for (size_t axis = 0; axis < number_of_axis; axis++) {
+        auto start_coarse = new Coordinate<size_t>();
+        auto end_coarse = new Coordinate<size_t>();
+        for (size_t axis = 0; axis < number_of_axes; axis++) {
             (*start_coarse)[axis] = static_cast<size_t>(((*start_fine)[axis] + 1) / 2);
             (*end_coarse)[axis] = static_cast<size_t>(((*end_fine)[axis] + 1) / 2);
         }
@@ -621,7 +621,7 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
         delete start_coarse;
         delete end_coarse;
 #ifndef BENCHMARKING
-        Coordinate *strides = obstacle_coarse->get_strides();
+        Coordinate<size_t> *strides = obstacle_coarse->get_strides();
         if ((*strides)[CoordinateAxis::X] <= 1) {
             m_logger->warn("Obstacle '{}' is too small with size 1 in x-direction at level {}. "
                            "Consider less multigrid level, a higher resolution at the finest grid "
@@ -741,7 +741,7 @@ void Multigrid::remove_domain_lists_from_GPU() {
 }
 
 bool Multigrid::is_obstacle_cell(const size_t level,
-                                 const Coordinate &coords) {
+                                 const Coordinate<size_t> &coords) {
     Obstacle **obstacle_list = m_MG_obstacle_object_list[level];
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
         Obstacle *obstacle = obstacle_list[id];

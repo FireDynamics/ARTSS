@@ -25,7 +25,7 @@ class Obstacle {
              real y1, real y2,
              real z1, real z2,
              const std::string &name);
-    Obstacle(Coordinate &coords_start, Coordinate &coords_end,
+    Obstacle(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
              size_t level,
              const std::string &name);
     ~Obstacle();
@@ -36,21 +36,21 @@ class Obstacle {
     size_t ** get_boundary_list() const { return m_boundary; }
     PatchObject *get_size_boundary_list() { return &m_size_boundary; }
 
-    bool is_obstacle_cell(const Coordinate &coords) const;
+    bool is_obstacle_cell(const Coordinate<size_t> &coords) const;
 
     void print();
 
-    Coordinate *get_start_coordinates() { return &m_start; }
-    Coordinate *get_end_coordinates() { return &m_end; }
-    Coordinate *get_strides() { return &m_strides; }
+    Coordinate<size_t> *get_start_coordinates() { return &m_start; }
+    Coordinate<size_t> *get_end_coordinates() { return &m_end; }
+    Coordinate<size_t> *get_strides() { return &m_strides; }
 
     std::string get_name() { return m_name; }
 
     void replace_patch(size_t *indices, size_t size, Patch p);
     void control();
 
-    bool is_corner_cell(const Coordinate &coord) const;
-    bool is_edge_cell(const Coordinate &coord) const;
+    bool is_corner_cell(const Coordinate<size_t> &coord) const;
+    bool is_edge_cell(const Coordinate<size_t> &coord) const;
     bool has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1, size_t k2) const;
 
     bool static remove_circular_constraints(Obstacle *o1, Obstacle* o2);
@@ -59,9 +59,9 @@ private:
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     std::string m_name;
-    Coordinate m_start;
-    Coordinate m_end;
-    Coordinate m_strides;
+    Coordinate<size_t> m_start;
+    Coordinate<size_t> m_end;
+    Coordinate<size_t> m_strides;
 
     size_t m_level = 0;
 
