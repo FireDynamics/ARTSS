@@ -66,10 +66,6 @@ private:
 #endif
 
     size_t get_matching_index(real surface_coordinate, real spacing, real start_coordinate);
-
-    void create_boundary(tinyxml2::XMLElement *element);
-
-    void create_geometry(tinyxml2::XMLElement *element);
 };
 
 
