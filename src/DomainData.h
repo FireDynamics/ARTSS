@@ -20,6 +20,7 @@
 class DomainData {
  public:
     explicit DomainData(Settings::Settings const &settings);
+    ~DomainData();
     static DomainData *getInstance() { return single; }
     static DomainData *getInstance(Settings::Settings const &settings);
 

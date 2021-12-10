@@ -247,3 +247,9 @@ void DomainData::control() {
     }
 #endif
 }
+
+DomainData::~DomainData() {
+    delete[] m_nx;
+    delete[] m_ny;
+    delete[] m_nz;
+}

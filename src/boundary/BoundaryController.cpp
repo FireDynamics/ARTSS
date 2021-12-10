@@ -84,6 +84,9 @@ void BoundaryController::parse_surface_parameter(std::vector<Settings::SurfaceSe
         m_number_of_surfaces = ret_surfaces.size();
         //TODO(cvm) vector surfaces will be destroyed after this method therefore I need to preserve the data
         std::memcpy(m_surface_list, ret_surfaces.data(), ret_surfaces.size());
+    } else {
+        m_surface_list = new Surface *[m_number_of_surfaces];
+        //m_bdc_surfaces = new BoundaryDataController *[m_number_of_surfaces];
     }
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing surface parameter");
@@ -145,10 +148,10 @@ void BoundaryController::parse_obstacle_parameter(std::vector<Settings::Obstacle
 
 BoundaryController::~BoundaryController() {
     delete m_multigrid;
-    delete m_bdc_boundary;
-    for (size_t i = 0; i < m_number_of_obstacles; i++) {
-        delete m_bdc_obstacles[i];
-    }
+    //delete m_bdc_boundary;
+    //for (size_t i = 0; i < m_number_of_obstacles; i++) {
+    //    delete m_bdc_obstacles[i];
+    //}
 }
 
 

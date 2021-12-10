@@ -12,9 +12,10 @@
 #include <string>
 #include <vector>
 #include "../utility/GlobalMacrosTypes.h"
-//#ifndef BENCHMARKING
-//#include <fmt/format.h>
-//#endif
+#ifndef BENCHMARKING
+//#include <fmt/core.h>
+//#include <fmt/compile.h>
+#endif
 
 inline static const std::vector<std::string> axis_names = {"X", "Y", "Z"};
 
