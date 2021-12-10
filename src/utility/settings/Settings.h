@@ -23,11 +23,77 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <filesystem>
 
 
 namespace Settings {
+    class config_error : std::runtime_error { ;
+    public:
+        explicit config_error(const std::string &message) : std::runtime_error(message) {}
+        explicit config_error(const char *message) : std::runtime_error(message) {};
+    };
+    struct domain_parameters {
+        bool enable_computational_domain;
+        real X1;
+        real X2;
+        real Y1;
+        real Y2;
+        real Z1;
+        real Z2;
+        real x1;
+        real x2;
+        real y1;
+        real y2;
+        real z1;
+        real z2;
+        size_t nx;
+        size_t ny;
+        size_t nz;
+    };
+    struct physical_parameters {
+        real t_end;
+        real dt;
+        real nu;
+        real beta;
+        real g;
+        real kappa;
+    };
+    struct visualisation_parameters {
+        bool save_vtk;
+        bool save_csv;
+        size_t vtk_nth_plot;
+        size_t csv_nth_plot;
+    };
+    struct logging_parameters {
+        std::string file;
+        std::string level;
+    };
+    struct initial_conditions_parameters {
+        std::string usr_fct;
+        bool random;
+    };
+    struct Settings_new {
+        struct physical_parameters physical_parameters;
+        //struct solver_parameters solver__parameters;
+        struct domain_parameters domain_parameters;
+        //struct adaption_parameters adaption_parameters;
+        //struct boundaries_parameters boundaries_parameters;
+        //struct obstacles_parameters obstacles_parameters;
+        //struct surfaces_parameters surfaces_parameters;
+        struct initial_conditions_parameters initial_conditions_parameters;
+        struct visualisation_parameters visualisation_parameters;
+        struct logging_parameters logging_parameters;
+    };
+    initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLDocument &doc);
+    visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLDocument &doc);
+    logging_parameters parse_logging_parameters(tinyxml2::XMLDocument &doc);
+    domain_parameters parse_domain_parameters(tinyxml2::XMLDocument &doc);
+    physical_parameters parse_physical_parameters(tinyxml2::XMLDocument &doc);
+    Settings_new parse_settings(const std::string &file_content);
+    Settings_new parse_settings_from_file(const std::filesystem::path &path);
+
 class Settings {
- public:
+public:
      explicit Settings(std::string path);
      void print_config() const;
 
