@@ -27,7 +27,7 @@ Settings::Settings(const std::string &path) :
     }
 
 #ifndef BENCHMARKING
-    Utility::create_logger(*this);  // create global logger
+    Utility::create_logger(sget("logging/level"), sget("logging/file"));  // create global logger
     m_logger = Utility::create_logger("XMLFile");
     m_logger->debug("start the simulation of \"{}\"", path);
     print_config();

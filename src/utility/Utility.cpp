@@ -91,26 +91,18 @@ std::shared_ptr<spdlog::logger> create_logger(const std::string &logger_name) {
 ///         ("logging/level", "logging/file")
 /// \param  logger_name name of logger, written to log file
 // *****************************************************************************
-void create_logger(Settings::Settings const &settings) {
-    std::string log_level = settings.sget("logging/level");
-    std::string log_file =  settings.sget("logging/file");
+void create_logger(const std::string &log_level, const std::optional<std::string> &log_file) {
+    std::vector<spdlog::sink_ptr> sinks;
+    static auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    auto level = spdlog::level::from_str(log_level);
+    stdout_sink->set_level(level);
+    stdout_sink->set_pattern("%^%-8l: %v%$");
+    sinks.emplace_back(stdout_sink);
 
-    static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdout_sink;
-    static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> file_sink;
+    static auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file.value_or("file.log"), false);
+    file_sink->set_level(spdlog::level::trace);
+    sinks.emplace_back(file_sink);
 
-    if (!stdout_sink) {
-        stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        auto level = spdlog::level::from_str(log_level);
-        stdout_sink->set_level(level);
-        stdout_sink->set_pattern("%^%-8l: %v%$");
-    }
-
-    if (!file_sink) {
-        file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file, false);
-        file_sink->set_level(spdlog::level::trace);
-    }
-
-    std::vector<spdlog::sink_ptr> sinks = {stdout_sink, file_sink};
     auto combined_logger = std::make_shared<spdlog::logger>(global_logger, begin(sinks), end(sinks));
     spdlog::register_logger(combined_logger);  // needed if spdlog::get() should be used elsewhere
     combined_logger->flush_on(spdlog::level::err);

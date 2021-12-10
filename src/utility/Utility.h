@@ -36,7 +36,7 @@ namespace Utility {
     void log_field_info(Field &field, const std::string &text, const std::string &logger_name);
 
 #ifndef BENCHMARKING
-    void create_logger(const Settings::Settings &settings);
+    void create_logger(const std::string &log_level, const std::optional<std::string> &log_file);
     std::shared_ptr<spdlog::logger> create_logger(std::string const& logger_name);
 #endif
 }  // namespace Utility
