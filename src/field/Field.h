@@ -69,9 +69,9 @@ class Field {
     /// \brief fill data array with the specified number
     /// \param val value to be set
     void set_value(real val) const {
-#ifndef BENCHMARKING
-        m_logger->debug("set value to {} for {}", val, static_cast<void *>(data));
-#endif
+//#ifndef BENCHMARKING
+//        m_logger->debug("set value to {} for {}", val, static_cast<void *>(data));
+//#endif
 #pragma acc parallel loop independent present(this->data[:m_size]) async
         for (size_t i = 0; i < m_size; i++) {
             this->data[i] = val;

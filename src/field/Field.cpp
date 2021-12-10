@@ -41,12 +41,12 @@ Field::Field(FieldType type, real val, size_t level) :
 Field::Field(FieldType type, real val, size_t level, size_t size):
         m_level(level), m_size(size), m_type(type) {
     data = new real[m_size];
-#ifndef BENCHMARKING
-    m_logger = Utility::create_logger("Field_GPU_" + std::to_string(counter++));
-    m_logger->info("{} level {} create with field pointer: {} data pointer: {}",
-                        get_field_type_name(m_type), m_level,
-                        static_cast<void *>(this), static_cast<void *>(data));
-#endif
+//#ifndef BENCHMARKING
+//    m_logger = Utility::create_logger("Field_GPU_" + std::to_string(counter++));
+//    m_logger->info("{} level {} create with field pointer: {} data pointer: {}",
+//                        get_field_type_name(m_type), m_level,
+//                        static_cast<void *>(this), static_cast<void *>(data));
+//#endif
 #pragma acc enter data create(this)
 #pragma acc update device(this)
     // note that the pointer is to host memory, so we overwrite with a
@@ -58,12 +58,12 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
 Field::Field(const Field &original):
         data(new real[original.m_size]), m_level(original.m_level),
         m_size(original.m_size), m_type(original.m_type) {
-#ifndef BENCHMARKING
-    m_logger = Utility::create_logger("Field_GPU_" + std::to_string(counter++));
-    m_logger->info("{} level {} create with field pointer: {} data pointer: {}",
-                        get_field_type_name(m_type), m_level,
-                        static_cast<void *>(this), static_cast<void *>(data));
-#endif
+//#ifndef BENCHMARKING
+//    m_logger = Utility::create_logger("Field_GPU_" + std::to_string(counter++));
+//    m_logger->info("{} level {} create with field pointer: {} data pointer: {}",
+//                        get_field_type_name(m_type), m_level,
+//                        static_cast<void *>(this), static_cast<void *>(data));
+//#endif
 #pragma acc enter data copyin(this[:1]) create(data[:m_size])
     this->copy_data(original);
 }
