@@ -7,12 +7,15 @@
 #ifndef ARTSS_COORDINATE_H_
 #define ARTSS_COORDINATE_H_
 
+
 #include <cstdlib>
 #include <algorithm>
 #include <string>
 #include <vector>
 #include "../utility/GlobalMacrosTypes.h"
 #ifndef BENCHMARKING
+#include "../visualisation/CSVWriter.h"
+//#include <fmt/compile.h>
 //#include <fmt/core.h>
 //#include <fmt/compile.h>
 #endif
@@ -116,18 +119,18 @@ private:
 };
 
 #ifndef BENCHMARKING
-//template <typename T> struct fmt::formatter<Coordinate<T>> {
-//    // Parses the format specifier, if needed (in my case, only return an iterator to the context)
-//    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
-//
-//    // Actual formatting. The second parameter is the format specifier and the next parameters are the actual values from my custom type
-//    template <typename FormatContext>
-//    auto format(const Coordinate<T> &coord, FormatContext &ctx) -> decltype(ctx.out()) {
-//        return format_to(
-//                ctx.out(),
-//                "({}|{}|{})", coord[0], coord[1], coord[2]);
-//    }
-//};
+template <typename T> struct fmt::formatter<Coordinate<T>> {
+    // Parses the format specifier, if needed (in my case, only return an iterator to the context)
+    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+    // Actual formatting. The second parameter is the format specifier and the next parameters are the actual values from my custom type
+    template <typename FormatContext>
+    auto format(const Coordinate<T> &coord, FormatContext &ctx) -> decltype(ctx.out()) {
+        return format_to(
+                ctx.out(),
+                "({}|{}|{})", coord[0], coord[1], coord[2]);
+    }
+};
 #endif
 
 #endif /* ARTSS_COORDINATE_H_ */
