@@ -15,7 +15,7 @@ BoundaryController::BoundaryController(Settings::Settings const &settings) :
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_bdc_boundary = new BoundaryDataController(m_settings);
+    m_bdc_boundary = new BoundaryDataController();
     read_XML();
     size_t multigrid_level = DomainData::getInstance()->get_levels();
     m_multigrid = new Multigrid(m_settings,
@@ -51,12 +51,12 @@ void BoundaryController::read_XML() {
 /// \brief  parses boundaries of domain from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_boundary_parameter(std::vector<Settings::BoundarySetting> boundaries) {
+void BoundaryController::parse_boundary_parameter(const std::vector<Settings::BoundarySetting> &boundaries) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing boundary parameter");
 #endif
 // BOUNDARY
-    for (auto boundary : boundaries) {
+    for (const auto &boundary: boundaries) {
         m_bdc_boundary->add_boundary_data(boundary);
     }
 #ifndef BENCHMARKING
@@ -69,7 +69,7 @@ void BoundaryController::parse_boundary_parameter(std::vector<Settings::Boundary
 /// \brief  parses surfaces from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_surface_parameter(std::vector<Settings::SurfaceSetting> surfaces) {
+void BoundaryController::parse_surface_parameter(const std::vector<Settings::SurfaceSetting> &surfaces) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing surface parameter");
 #endif
@@ -78,8 +78,9 @@ void BoundaryController::parse_surface_parameter(std::vector<Settings::SurfaceSe
     m_has_surfaces = m_settings.get_bool("surfaces/enabled");
     if (m_has_surfaces) {
         std::vector<Surface *> ret_surfaces;
-        for (auto surface : surfaces) {
-            ret_surfaces.push_back(new Surface(surface));
+        ret_surfaces.reserve(surfaces.size());
+        for (auto surface: surfaces) {
+            ret_surfaces.emplace_back(new Surface(surface));
         }
         m_number_of_surfaces = ret_surfaces.size();
         //TODO(cvm) vector surfaces will be destroyed after this method therefore I need to preserve the data
@@ -98,7 +99,7 @@ void BoundaryController::parse_surface_parameter(std::vector<Settings::SurfaceSe
 /// \brief  parses obstacles from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_obstacle_parameter(std::vector<Settings::ObstacleSetting> obstacles) {
+void BoundaryController::parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting> &obstacles) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing obstacle parameter");
 #endif
@@ -108,12 +109,12 @@ void BoundaryController::parse_obstacle_parameter(std::vector<Settings::Obstacle
         std::vector<Obstacle *> ret_obstacles;
         std::vector<BoundaryDataController *> bdc_obstacles;
 
-        for (auto obstacle : obstacles) {
+        for (const Settings::ObstacleSetting &obstacle: obstacles) {
             std::string name = obstacle.get_name();
 #ifndef BENCHMARKING
             m_logger->debug("read obstacle '{}'", name);
 #endif
-            BoundaryDataController *bdc = new BoundaryDataController(m_settings);
+            auto bdc = new BoundaryDataController();
             real ox1 = obstacle.get_ox1();
             real ox2 = obstacle.get_ox2();
             real oy1 = obstacle.get_oy1();
@@ -121,13 +122,13 @@ void BoundaryController::parse_obstacle_parameter(std::vector<Settings::Obstacle
             real oz1 = obstacle.get_oz1();
             real oz2 = obstacle.get_oz2();
 
-            for (auto bound : obstacle.get_boundaries()) {
+            for (const auto &bound: obstacle.get_boundaries()) {
                 bdc->add_boundary_data(bound);
             }
 
-            Obstacle *o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2, name);
-            ret_obstacles.push_back(o);
-            bdc_obstacles.push_back(bdc);
+            auto o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2, name);
+            ret_obstacles.emplace_back(o);
+            bdc_obstacles.emplace_back(bdc);
         }
 
         m_number_of_obstacles = ret_obstacles.size();
@@ -148,10 +149,6 @@ void BoundaryController::parse_obstacle_parameter(std::vector<Settings::Obstacle
 
 BoundaryController::~BoundaryController() {
     delete m_multigrid;
-    //delete m_bdc_boundary;
-    //for (size_t i = 0; i < m_number_of_obstacles; i++) {
-    //    delete m_bdc_obstacles[i];
-    //}
 }
 
 
@@ -213,7 +210,8 @@ void BoundaryController::detect_neighbouring_obstacles() {
         for (size_t o2 = o1 + 1; o2 < m_number_of_obstacles; o2++) {
             Obstacle *obstacle2 = m_obstacle_list[o2];
 #ifndef BENCHMARKING
-            m_logger->debug("scan for neighbouring cells for '{}' and '{}'", obstacle1->get_name(), obstacle2->get_name());
+            m_logger->debug("scan for neighbouring cells for '{}' and '{}'", obstacle1->get_name(),
+                            obstacle2->get_name());
 #endif
             Obstacle::remove_circular_constraints(obstacle1, obstacle2);
         }

@@ -9,7 +9,7 @@
 
 inline static const std::vector<std::string> boundary_condition_names = {"neumann", "dirichlet", "periodic"};
 
-BoundaryData::BoundaryData(Settings::Settings const &settings) {
+BoundaryData::BoundaryData() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif

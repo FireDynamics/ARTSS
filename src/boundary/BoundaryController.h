@@ -81,9 +81,9 @@ class BoundaryController {
     bool m_has_surfaces;
 
     void read_XML();
-    void parse_boundary_parameter(std::vector<Settings::BoundarySetting> boundaries);
-    void parse_obstacle_parameter(std::vector<Settings::ObstacleSetting> obstacles);
-    void parse_surface_parameter(std::vector<Settings::SurfaceSetting> surfaces);
+    void parse_boundary_parameter(const std::vector<Settings::BoundarySetting>& boundaries);
+    void parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting>& obstacles);
+    void parse_surface_parameter(const std::vector<Settings::SurfaceSetting>& surfaces);
 
     void detect_neighbouring_obstacles();
 };

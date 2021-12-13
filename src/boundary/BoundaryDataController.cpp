@@ -10,14 +10,13 @@
 #include "../boundaryCondition/DomainBoundary.h"
 #include "../boundaryCondition/ObstacleBoundary.h"
 
-BoundaryDataController::BoundaryDataController(Settings::Settings const &settings) :
-        m_settings(settings) {
+BoundaryDataController::BoundaryDataController() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_boundary_data = new BoundaryData *[number_of_field_types];
     for (size_t i = 0; i < number_of_field_types; i++) {
-        *(m_boundary_data + i) = new BoundaryData(settings);
+        *(m_boundary_data + i) = new BoundaryData();
     }
 }
 
@@ -33,14 +32,14 @@ BoundaryDataController::~BoundaryDataController() {
 /// \brief  Parses boundary data of XML tree to boundary data object
 /// \param  xml_element Pointer to XML element
 // *************************************************************************************************
-void BoundaryDataController::add_boundary_data(Settings::BoundarySetting boundary) {
+void BoundaryDataController::add_boundary_data(const Settings::BoundarySetting &boundary) {
     BoundaryCondition bc = BoundaryData::match_boundary_condition(boundary.get_type());
     real value = boundary.get_value();
 
-    for (auto f : Utility::split(boundary.get_field(), ',')) {
+    for (const std::string &f: Utility::split(boundary.get_field(), ',')) {
         FieldType field_type = Field::match_field(f);
 
-        for (auto p : Utility::split(boundary.get_patch(), ',')) {
+        for (const std::string &p: Utility::split(boundary.get_patch(), ',')) {
             Patch patch = PatchObject::match_patch(p);
             m_boundary_data[field_type]->add_boundary_condition(patch, value, bc);
         }
