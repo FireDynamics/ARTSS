@@ -555,61 +555,38 @@ namespace Functions {
 /// \brief  Initial set up as layers throughout the domain
 /// \param  out temperature
 // ***************************************************************************************
-    void layers(Field &out,
-                int n_layers, const std::string &dir,
-                real *borders, const real *values) {
-        auto domain = DomainData::getInstance();
-#ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(class_name);
-#endif
+    void layers(Field &out, int n_layers, const CoordinateAxis axis, real *borders, const real *values) {
+        auto domain_data = DomainData::getInstance();
 
         // layer border
-        if (dir == "x") {
-            real x1 = domain->get_x1();
-            real x2 = domain->get_x2();
-            borders[0] = x1;
-            borders[n_layers] = x2;
-        } else if (dir == "y") {
-            real y1 = domain->get_y1();
-            real y2 = domain->get_y2();
-            borders[0] = y1;
-            borders[n_layers] = y2;
-        } else if (dir == "z") {
-            real z1 = domain->get_z1();
-            real z2 = domain->get_z2();
-            borders[0] = z1;
-            borders[n_layers] = z2;
-        } else {
-#ifndef BENCHMARKING
-            m_logger->error("No distance for layers specified!");
-#endif
-            //TODO(issue 6) Error handling
-        }
+        borders[0] = domain_data->get_start_coord_CD(axis);
+        borders[n_layers] = domain_data->get_end_coord_CD(axis);
 
         // set values into layers
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         auto boundary = BoundaryController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
+        size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
         size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
         real x, y, z;
 
-        if (dir == "x") {
+        //TODO highly inefficient
+        if (axis == X) {
             for (int l = 0; l < n_layers; ++l) {
                 // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
                 for (size_t i = 0; i < size_domain_list; i++) {
-                    size_t idx = domain_list[i];
+                    size_t idx = domain_data_list[i];
                     coords_k = getCoordinateK(idx, Nx, Ny);
                     coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                     coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -619,13 +596,11 @@ namespace Functions {
                     }
                 }
             }
-
-        } else if (dir == "y") {
+        } else if (axis == Y) {
             for (int l = 0; l < n_layers; ++l) {
-                // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
                 for (size_t i = 0; i < size_domain_list; i++) {
-                    size_t idx = domain_list[i];
+                    size_t idx = domain_data_list[i];
                     coords_k = getCoordinateK(idx, Nx, Ny);
                     coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                     coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -635,13 +610,11 @@ namespace Functions {
                     }
                 }
             }
-
-        } else if (dir == "z") {
+        } else if (axis == Z) {
             for (int l = 0; l < n_layers; ++l) {
-                // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
                 for (size_t i = 0; i < size_domain_list; i++) {
-                    size_t idx = domain_list[i];
+                    size_t idx = domain_data_list[i];
                     coords_k = getCoordinateK(idx, Nx, Ny);
                     coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                     coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -651,12 +624,6 @@ namespace Functions {
                     }
                 }
             }
-
-        } else {
-#ifndef BENCHMARKING
-            m_logger->error("No distance for layers specified!");
-#endif
-            //TODO(issue 6) Error handling
         }
     }
 

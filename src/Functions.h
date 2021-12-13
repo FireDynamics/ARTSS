@@ -70,7 +70,8 @@ namespace Functions {  // alphabetically ordered
           size_t index_z1, size_t index_z2,
           real value);
 
-  void layers(Field &out, int n_layers, const std::string &dir, real *borders, const real *values);
+  void layers(Field &out, int n_layers, CoordinateAxis axis,
+              real *borders, const real *values);
 
   void mcdermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
           real t, real nu, real A);

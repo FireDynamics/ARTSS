@@ -474,7 +474,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 
             int n_layers = m_settings.get_int("initial_conditions/n_layers");
             std::string const dir = m_settings.get("initial_conditions/dir");
-
+            CoordinateAxis axis = Coordinate<int>::match_axis(dir);
             real *borders = new real[n_layers + 1];
             real *values = new real[n_layers];
 
@@ -491,7 +491,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             }
 
             Functions::layers(m_field_controller->get_field_T(),
-                              n_layers, dir, borders, values);
+                              n_layers, axis, borders, values);
 
             if (random) {
                 call_random(m_field_controller->get_field_T());
