@@ -170,7 +170,9 @@ void Adaption::applyChanges() {
     start = std::chrono::system_clock::now();
 #endif
     auto domain = DomainData::getInstance();
-    if (domain->resize(m_shift_x1, m_shift_x2, m_shift_y1, m_shift_y2, m_shift_z1, m_shift_z2)) {
+    auto shift_start = new Coordinate<long>(m_shift_x1, m_shift_y1, m_shift_z1);
+    auto shift_end = new Coordinate<long>(m_shift_x2, m_shift_y2, m_shift_z2);
+    if (domain->resize(*shift_start, *shift_end)) {
         if (domain->get_X1() == domain->get_x1() &&
             domain->get_X2() == domain->get_x2() &&
             domain->get_Y1() == domain->get_y1() &&
