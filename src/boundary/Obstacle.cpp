@@ -15,7 +15,6 @@ Obstacle::Obstacle(real x1, real x2,
                    real z1, real z2,
                    const std::string &name) :
         m_name(name),
-        m_start(), m_end(),
         m_level(0),
         m_size_boundary() {
 #ifndef BENCHMARKING
