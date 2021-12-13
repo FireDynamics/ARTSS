@@ -14,10 +14,7 @@
 #include <vector>
 #include "../utility/GlobalMacrosTypes.h"
 #ifndef BENCHMARKING
-#include "../visualisation/CSVWriter.h"
-//#include <fmt/compile.h>
-//#include <fmt/core.h>
-//#include <fmt/compile.h>
+#include <fmt/format.h>
 #endif
 
 inline static const std::vector<std::string> axis_names = {"X", "Y", "Z"};
