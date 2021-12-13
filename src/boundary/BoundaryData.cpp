@@ -5,7 +5,6 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 #include "BoundaryData.h"
 #include "../DomainData.h"
-#include "../utility/Utility.h"
 
 inline static const std::vector<std::string> boundary_condition_names = {"neumann", "dirichlet", "periodic"};
 
