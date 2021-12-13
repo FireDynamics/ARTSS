@@ -1,25 +1,25 @@
 /// \file       BoundaryDataController.h
-/// \brief      Controll class for boundary data
+/// \brief      Controller class for boundary data
 /// \date       Dec 09, 2019
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_BOUNDARY_BOUNDARYDATACONTROLLER_H_
 #define ARTSS_BOUNDARY_BOUNDARYDATACONTROLLER_H_
 
-#include "../utility/Utility.h"
-#include "../utility/settings/Settings.h"
+#include <vector>
+
 #include "BoundaryData.h"
 #include "../field/Field.h"
 #include "../joinedLists/SingleJoinedList.h"
 #include "../joinedLists/MultipleJoinedList.h"
-
-#include <vector>
+#include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
 
 
 class BoundaryDataController {
  public:
-    explicit BoundaryDataController();
+    BoundaryDataController();
     ~BoundaryDataController();
     void add_boundary_data(const Settings::BoundarySetting& boundary);
     void apply_boundary_condition(
@@ -39,6 +39,7 @@ class BoundaryDataController {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+
 };
 
 #endif /* ARTSS_BOUNDARY_BOUNDARYDATACONTROLLER_H_ */
