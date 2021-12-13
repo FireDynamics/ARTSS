@@ -51,7 +51,7 @@ Other:
   ${YELLOW}--cudaversion${NC}                     \t set CUDA Version
   ${YELLOW}--cc${NC}
   ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (35|50|60|62|70|72|75|80)
-  ${YELLOW}-checkout${NC}                         \t set libraries in external folder to a specific version (spdlog v1.9.2, fmt 8.0.1)
+  ${YELLOW}-checkout${NC}                         \t set libraries in external folder to a specific version (spdlog v1.9.2, fmt 8.0.1, googletest release-1.8.1)
    ${YELLOW}-d${NC}
    ${YELLOW}--debugmode${NC}                      \t set debug flag for build type (default: ${BUILDTYPE})
 
