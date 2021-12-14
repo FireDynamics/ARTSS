@@ -69,7 +69,7 @@ void Domain::print(size_t size_obstacle_list, PatchObject &size_surface_list) {
     m_logger->debug("Domain starts with {} and ends with {}",
                     m_domain_list[0], m_domain_list[m_size_domain_list - 1]);
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        std::string patch_name = PatchObject::get_patch_name(patch);
+        std::string patch_name = Mapping::get_patch_name(Patch(patch));
         m_logger->debug("list size of domain boundary {}: {} surface size: {}",
                         patch_name,
                         m_size_boundary[patch],
@@ -112,7 +112,7 @@ void Domain::control(size_t size_obstacle_list, PatchObject &size_surface_list) 
                                m_size_domain_list, all_cells, duplicates);
         for (size_t patch = 0; patch < number_of_patches; patch++) {
             message += fmt::format("  {}: {}\n",
-                                   PatchObject::get_patch_name(patch), m_size_boundary[patch]);
+                                   Mapping::get_patch_name(Patch(patch)), m_size_boundary[patch]);
         }
     }
     if (m_size_domain_list + size_obstacle_list + size_surface_list.get_sum() != size) {
@@ -339,11 +339,11 @@ void Domain::boundary_cells(size_t **surface_list, PatchObject &size_surface_lis
         }
 #ifndef BENCHMARKING
         m_logger->debug("for patch {} boundary list size: {} counter: {} surface list size: {} surface counter: {}",
-                        PatchObject::get_patch_name(patch_start),
+                        Mapping::get_patch_name(patch_start),
                         m_size_boundary[patch_start], counter_start,
                         size_surface_list[patch_start], counter_surface_start);
         m_logger->debug("for patch {} boundary list size: {} counter: {} surface list size: {} surface counter: {}",
-                        PatchObject::get_patch_name(patch_end),
+                        Mapping::get_patch_name(patch_end),
                         m_size_boundary[patch_end], counter_end,
                         size_surface_list[patch_end], counter_surface_end);
 #endif

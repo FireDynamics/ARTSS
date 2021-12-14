@@ -227,21 +227,21 @@ void NSTempSolver::control() {
         // TODO Error Handling
     }
 
-    if (m_settings.get("solver/temperature/advection/field") != Field::get_field_type_name(FieldType::T)) {
+    if (m_settings.get("solver/temperature/advection/field") != Mapping::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error Handling
     }
-    if (m_settings.get("solver/temperature/diffusion/field") != Field::get_field_type_name(FieldType::T)) {
+    if (m_settings.get("solver/temperature/diffusion/field") != Mapping::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error Handling
     }
-    if (m_settings.get("solver/pressure/field") != Field::get_field_type_name(FieldType::P)) {
+    if (m_settings.get("solver/pressure/field") != Mapping::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

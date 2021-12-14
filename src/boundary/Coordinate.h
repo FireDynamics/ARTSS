@@ -11,58 +11,55 @@
 #include <cstdlib>
 #include <algorithm>
 #include <string>
-#include <vector>
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Mapping.h"
 
 #ifndef BENCHMARKING
 #include <fmt/format.h>
 #endif
 
-inline static const std::vector<std::string> axis_names = {"X", "Y", "Z"};
-
-const size_t number_of_axes = 3;
-enum CoordinateAxis : int {
-    UNKNOWN_AXIS = -1,
-    X = 0,
-    Y = 1,
-    Z = 2
-};
-namespace Axis {
-    CoordinateAxis match_axis(const std::string &string);
-    std::string get_axis_name(CoordinateAxis axis);
-    //TODO cvm forward declaration
-//    CoordinateAxis to_axis(Patch patch);
-}
-
-template<class numeral>    // TODO(cvm) restrict to numerical values
+template<class numeral>
 class Coordinate {
 public:
-    Coordinate(numeral x, numeral y, numeral z) {
-        m_coordinates = new numeral[number_of_axes];
-        m_coordinates[CoordinateAxis::X] = x;
-        m_coordinates[CoordinateAxis::Y] = y;
-        m_coordinates[CoordinateAxis::Z] = z;
+    Coordinate(numeral numeral_x, numeral numeral_y, numeral numeral_z) {
+        x = numeral_x;
+        y = numeral_y;
+        z = numeral_z;
     };
 
-    Coordinate() {
-        m_coordinates = new numeral[number_of_axes];
-        std::fill(m_coordinates, m_coordinates + number_of_axes, 0);
-    };
+    Coordinate() = default;
 
     Coordinate(const Coordinate &original) {
-        m_coordinates = new numeral[number_of_axes];
-        for (size_t axis = 0; axis < number_of_axes; axis++) {
-            m_coordinates[axis] = original.m_coordinates[axis];
+        x = original.x;
+        y = original.y;
+        z = original.z;
+    }
+
+    inline numeral &operator[](size_t i) {
+        if (i == CoordinateAxis::X) {
+            return x;
         }
+        if (i == CoordinateAxis::Y) {
+            return y;
+        }
+        if (i == CoordinateAxis::Z) {
+            return z;
+        }
+        throw std::runtime_error("unknown axis");
     }
 
-    static std::string get_axis_name(CoordinateAxis axis) {
-        return axis_names[axis];
+    const inline numeral &operator[](size_t i) const {
+        if (i == CoordinateAxis::X) {
+            return x;
+        }
+        if (i == CoordinateAxis::Y) {
+            return y;
+        }
+        if (i == CoordinateAxis::Z) {
+            return z;
+        }
+        throw std::runtime_error("unknown axis");
     }
-
-    ~Coordinate() { delete[] m_coordinates; }
-
-    inline numeral &operator[](size_t i) const { return m_coordinates[i]; }
 
     Coordinate &operator+=(const Coordinate &rhs) {
         auto rhs_patches = rhs.m_coordinates;
@@ -72,46 +69,46 @@ public:
         return *this;
     }
 
-    Coordinate &operator+=(const numeral x) {
-        for (size_t i = 0; i < number_of_axes; ++i) {
-            this->m_coordinates[i] += x;
-        }
+    Coordinate &operator+=(const numeral n) {
+        x += n;
+        y += n;
+        z += n;
         return *this;
     }
 
     Coordinate &operator*=(const Coordinate &rhs) {
-        auto rhs_patches = rhs.m_coordinates;
+        x *= rhs.x;
+        y *= rhs.y;
+        z *= rhs.z;
+        return *this;
+    }
+
+    Coordinate &operator*=(const numeral n) {
         for (size_t i = 0; i < number_of_axes; ++i) {
-            this->m_coordinates[i] *= rhs_patches[i];
+            this->m_coordinates[i] *= n;
         }
         return *this;
     }
 
-    Coordinate &operator*=(const numeral x) {
-        for (size_t i = 0; i < number_of_axes; ++i) {
-            this->m_coordinates[i] *= x;
-        }
-        return *this;
+
+    void set_coordinate(numeral numeral_x, numeral numeral_y, numeral numeral_z) {
+        x = numeral_x;
+        y = numeral_y,
+        z = numeral_z;
     }
 
-
-    void set_coordinate(numeral x, numeral y, numeral z) {
-        m_coordinates[X] = x;
-        m_coordinates[Y] = y,
-        m_coordinates[Z] = z;
-    }
-
-    //TODO(cvm) restrict to numeral=size_t, partial specialisation?
-    size_t get_index(size_t Nx, size_t Ny) { return IX(m_coordinates[X], m_coordinates[Y], m_coordinates[Z], Nx, Ny); }
+    size_t get_index(size_t Nx, size_t Ny) { return IX(x, y, z, Nx, Ny); }
 
     void copy(Coordinate<numeral> original) {
-        for (size_t axis = 0; axis < number_of_axes; axis++) {
-            m_coordinates[axis] = original.m_coordinates[axis];
-        }
+        x = original.x;
+        y = original.y;
+        z = original.z;
     }
 
 private:
-    numeral *m_coordinates;
+    numeral x = 0;
+    numeral y = 0;
+    numeral z = 0;
 };
 
 #ifndef BENCHMARKING
@@ -124,7 +121,7 @@ template <typename T> struct fmt::formatter<Coordinate<T>> {
     auto format(const Coordinate<T> &coord, FormatContext &ctx) -> decltype(ctx.out()) {
         return format_to(
                 ctx.out(),
-                "({}|{}|{})", coord[0], coord[1], coord[2]);
+                "({}|{}|{})", coord[X], coord[Y], coord[Z]);
     }
 };
 #endif

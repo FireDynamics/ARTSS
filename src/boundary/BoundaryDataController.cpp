@@ -39,14 +39,14 @@ BoundaryDataController::~BoundaryDataController() {
 /// \param  xml_element Pointer to XML element
 // *************************************************************************************************
 void BoundaryDataController::add_boundary_data(const Settings::BoundarySetting &boundary) {
-    BoundaryCondition bc = BoundaryData::match_boundary_condition(boundary.get_type());
+    BoundaryCondition bc = Mapping::match_boundary_condition(boundary.get_type());
     real value = boundary.get_value();
 
     for (const auto &f : Utility::split(boundary.get_field(), ',')) {
-        FieldType field_type = Field::match_field(f);
+        FieldType field_type = Mapping::match_field(f);
 
         for (const auto &p : Utility::split(boundary.get_patch(), ',')) {
-            Patch patch = PatchObject::match_patch(p);
+            Patch patch = Mapping::match_patch(p);
             m_boundary_data[field_type]->add_boundary_condition(patch, value, bc);
         }
     }
@@ -62,7 +62,7 @@ void BoundaryDataController::print() const {
         auto boundary = *(m_boundary_data + i);
         if (!boundary->is_empty()) {
             m_logger->info("--- found boundary conditions for field {} ({}): ",
-                           Field::get_field_type_name(static_cast<FieldType>(i)), i);
+                           Mapping::get_field_type_name(FieldType(i)), i);
             boundary->print();
         }
     }
@@ -137,7 +137,7 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
     if (!(static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty()) {
 #ifndef BENCHMARKING
         m_logger->debug("apply obstacle boundary conditions of id={} {}", id,
-                        Field::get_field_type_name(field_type));
+                        Mapping::get_field_type_name(field_type));
 #endif
         ObstacleBoundary::apply_boundary_condition(field,
                                                    index_fields,

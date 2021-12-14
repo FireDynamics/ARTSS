@@ -10,18 +10,8 @@
 #include <cstdlib>
 #include <string>
 #include "Coordinate.h"
+#include "../utility/Mapping.h"
 
-
-constexpr size_t number_of_patches = 6;
-enum Patch : int {
-    UNKNOWN_PATCH = -1,
-    LEFT = 0,
-    RIGHT = 1,
-    BOTTOM = 2,
-    TOP = 3,
-    FRONT = 4,
-    BACK = 5
-};
 
 class PatchObject {
   public:
@@ -39,20 +29,15 @@ class PatchObject {
         return *this;
     }
 
-    size_t get_sum();
+    size_t get_sum() {
+        size_t sum = 0;
+        for (size_t patch = 0; patch < number_of_patches; patch++) {
+            sum += m_patches[patch];
+        }
+        return sum;
+    }
     void add_value(size_t patch, size_t value) { m_patches[patch] += value; }
 
-    static std::string get_patch_name(size_t p);
-    static Patch match_patch(const std::string &string);
-    /// \brief get patch of the given axis.
-    /// \details e.g. Axis X (0) start = false, results in Patch Right (1)
-    static Patch to_patch(CoordinateAxis axis, bool start) {
-        size_t p = axis * 2;
-        if (!start) {
-            p++;
-        }
-        return Patch(p);
-    }
   private:
     std::array<size_t, number_of_patches> m_patches;
 };

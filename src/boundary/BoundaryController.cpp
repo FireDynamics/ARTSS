@@ -79,7 +79,7 @@ return_surface BoundaryController::parse_surface_parameter(const std::vector<Set
         bdc_surfaces.reserve(surfaces.size());
         for (const auto &surface: surface_setting) {
             std::string name = surface.get_name();
-            Patch patch = PatchObject::match_patch(surface.get_patch());
+            Patch patch = Mapping::match_patch(surface.get_patch());
             real sx1 = surface.get_sx1();
             real sx2 = surface.get_sx2();
             real sy1 = surface.get_sy1();

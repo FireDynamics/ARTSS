@@ -11,15 +11,8 @@
 #include <utility>
 #include <iostream>
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Mapping.h"
 #include "../utility/Utility.h"
-
-#ifndef ENUM_TYPES
-#define ENUM_TYPES
-const size_t number_of_field_types = 7;
-enum FieldType : int {
-    UNKNOWN_FIELD = -1, RHO = 0, U = 1, V = 2, W = 3, P = 4, T = 5, NU = 6
-};
-#endif
 
 class Field {
  public:
@@ -62,7 +55,7 @@ class Field {
     void copyin() {
 #pragma acc enter data copyin(data[:m_size])
 #ifndef BENCHMARKING
-    m_logger->debug("{} level {} copyin with data pointer: {}", get_field_type_name(m_type), m_level, static_cast<void *>(data));
+    m_logger->debug("{} level {} copyin with data pointer: {}", Mapping::get_field_type_name(m_type), m_level, static_cast<void *>(data));
 #endif
     }
 
@@ -85,8 +78,8 @@ class Field {
         auto other_data = other.data;
 #ifndef BENCHMARKING
         m_logger->debug("copy data of {} ({}) to {} ({}) for level {}",
-                            get_field_type_name(other.get_type()), static_cast<void *>(other_data),
-                            get_field_type_name(m_type), static_cast<void *>(data),
+                            Mapping::get_field_type_name(other.get_type()), static_cast<void *>(other_data),
+                            Mapping::get_field_type_name(m_type), static_cast<void *>(data),
                             m_level);
 #endif
 #pragma acc parallel loop independent present(this->data[:m_size], other_data[:m_size]) async
@@ -142,9 +135,6 @@ class Field {
     }
 
     real *data;
-    static std::string get_field_type_name(FieldType f);
-    static FieldType match_field(const std::string& string);
-
  private:
     static int counter;
     size_t const m_level;

@@ -207,7 +207,7 @@ void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
         }
         auto p = static_cast<Patch>(i);
 #ifndef BENCHMARKING
-        logger->debug("apply_boundary_condition ! level {} for {}", mjl->get_slice_size(level), level, PatchObject::get_patch_name(p));
+        logger->debug("apply_boundary_condition ! level {} for {}", mjl->get_slice_size(level), level, Mapping::get_patch_name(p));
 #endif
         BoundaryCondition bc = boundary_data->get_boundary_condition(p);
         real value = 0;

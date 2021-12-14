@@ -97,13 +97,13 @@ bool Analysis::compare_solutions(read_ptr num, read_ptr ana, FieldType type, rea
     if (res <= m_tol) {
 #ifndef BENCHMARKING
         m_logger->info("{} PASSED Test at time {} with error e = {}",
-                       Field::get_field_type_name(type), t, res);
+                       Mapping::get_field_type_name(type), t, res);
 #endif
         verification = true;
     } else {
 #ifndef BENCHMARKING
         m_logger->warn("{} FAILED Test at time {} with error e = {}",
-                       Field::get_field_type_name(type), t, res);
+                       Mapping::get_field_type_name(type), t, res);
 #endif
     }
     return verification;
@@ -371,8 +371,8 @@ void Analysis::save_variables_in_file(FieldController *field_controller) {
     fields[FieldType::T] = &field_controller->get_field_T();
 
     for (auto &v_field: v_fields) {
-        write_file(*fields[v_field], Field::get_field_type_name(v_field));
-        write_obstacles(*fields[v_field], Field::get_field_type_name(v_field));
+        write_file(*fields[v_field], Mapping::get_field_type_name(v_field));
+        write_obstacles(*fields[v_field], Mapping::get_field_type_name(v_field));
     }
 }
 

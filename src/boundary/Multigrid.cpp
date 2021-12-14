@@ -143,7 +143,7 @@ void Multigrid::control() {
                 }
                 message += fmt::format("length calculated/stored of domain boundary '{}' does not equals its original size size: "
                                        "original: {} saved: {} calculated: {} control: {}\n",
-                                       PatchObject::get_patch_name(static_cast<Patch>(patch)),
+                                       Mapping::get_patch_name(static_cast<Patch>(patch)),
                                        original_len, saved_len, calculated_len, control);
             }
         }
@@ -230,14 +230,14 @@ void Multigrid::print() {
             size_t start_index = m_jl_domain_boundary_list_patch_divided[patch]->get_first_index(level);
             size_t end_index = m_jl_domain_boundary_list_patch_divided[patch]->get_last_index(level);
             m_logger->debug("For Level {} domain boundary '{}' starts at index {} and ends with index {}",
-                            level, PatchObject::get_patch_name(patch),
+                            level, Mapping::get_patch_name(Patch(patch)),
                             start_index, end_index);
             m_logger->debug(" and the corresponding indices at this position {} | {}",
                             m_jl_domain_boundary_list_patch_divided[patch]->get_data()[start_index],
                             m_jl_domain_boundary_list_patch_divided[patch]->get_data()[end_index]);
         }
         m_logger->debug("Total number of '{}' boundary cells: {}",
-                        PatchObject::get_patch_name(patch),
+                        Mapping::get_patch_name(Patch(patch)),
                         m_jl_domain_boundary_list_patch_divided[patch]->get_size());
     }
 
@@ -251,13 +251,13 @@ void Multigrid::print() {
             for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
                 m_logger->debug("For Level {} obstacle '{}' starts at index {} and ends with index {} with length {}",
                                 level,
-                                PatchObject::get_patch_name(patch),
+                                Mapping::get_patch_name(Patch(patch)),
                                 m_jl_obstacle_boundary_list_patch_divided[patch]->get_first_index(level, 0),
                                 m_jl_obstacle_boundary_list_patch_divided[patch]->get_last_index(level, m_number_of_obstacle_objects - 1),
                                 m_jl_obstacle_boundary_list_patch_divided[patch]->get_slice_size(level));
             }
             m_logger->debug("Total number of '{}' obstacle cells: {}",
-                            PatchObject::get_patch_name(patch),
+                            Mapping::get_patch_name(Patch(patch)),
                             m_jl_obstacle_boundary_list_patch_divided[patch]->get_size());
         }
     }
@@ -349,7 +349,7 @@ void Multigrid::create_multigrid_obstacle_lists() {
                 for (size_t patch = 0; patch < number_of_patches; patch++) {
 #ifndef BENCHMARKING
                     m_logger->debug("add obstacle boundary data to MJL for obstacle '{}' patch '{}' level={}, number of obstacle boundary cells={}",
-                                    obstacle.get_name(), PatchObject::get_patch_name(patch), level,
+                                    obstacle.get_name(), Mapping::get_patch_name(Patch(patch)), level,
                                     (*obstacle_size)[patch]);
 #endif
                     m_jl_obstacle_boundary_list_patch_divided[patch]->add_data(level, id, (*obstacle_size)[patch], obstacle_boundary_cells[patch].data());
@@ -478,7 +478,7 @@ void Multigrid::create_multigrid_domain_lists() {
         for (size_t patch = 0; patch < number_of_patches; patch++) {
 #ifndef BENCHMARKING
             m_logger->debug("add domain boundary data to SJL for patch '{}' level {} size {}",
-                            PatchObject::get_patch_name(patch), level,
+                            Mapping::get_patch_name(Patch(patch)), level,
                             (*all_boundary_sizes)[level]);
 #endif
             m_jl_domain_boundary_list_patch_divided[patch]->add_data(level, (*all_boundary_sizes)[patch], all_boundaries[patch]);
@@ -583,7 +583,7 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
             auto coordinate_axis = CoordinateAxis(axis);
             if (end_fine[axis] - start_fine[axis] + 1 < domain_data->get_number_of_inner_cells(coordinate_axis, level - 1)
                 && end_coarse[CoordinateAxis::X] - start_coarse[CoordinateAxis::X] + 1 >= domain_data->get_number_of_inner_cells(coordinate_axis, level)) {
-                m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in {}-direction at level {}", obstacle_fine.get_name(), Coordinate<size_t>::get_axis_name(coordinate_axis), level);
+                m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in {}-direction at level {}", obstacle_fine.get_name(), Mapping::get_axis_name(coordinate_axis), level);
             }
         }
 
@@ -603,7 +603,7 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
                 m_logger->warn("Obstacle '{}' is too small with size 1 in {}-direction at level {}. "
                                "Consider less multigrid level, a higher resolution at the finest grid "
                                "or expanding the obstacle. Otherwise only the right boundary condition "
-                               "will be applied.", obstacle_fine.get_name(), Coordinate<size_t>::get_axis_name(CoordinateAxis(axis)), level);
+                               "will be applied.", obstacle_fine.get_name(), Mapping::get_axis_name(CoordinateAxis(axis)), level);
             }
         }
 #endif

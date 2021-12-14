@@ -49,7 +49,7 @@ void PressureSolver::do_step(real t, bool sync) {
 // *****************************************************************************
 void PressureSolver::control() {
     auto p_field = m_settings.get("solver/pressure/field");
-    if (p_field != Field::get_field_type_name(FieldType::P)) {
+    if (p_field != Mapping::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

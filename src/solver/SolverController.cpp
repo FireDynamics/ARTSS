@@ -474,7 +474,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 
             int n_layers = m_settings.get_int("initial_conditions/n_layers");
             std::string const dir = m_settings.get("initial_conditions/dir");
-            CoordinateAxis axis = Axis::match_axis(dir);
+            CoordinateAxis axis = Mapping::match_axis(dir);
             real *borders = new real[n_layers + 1];
             real *values = new real[n_layers];
 

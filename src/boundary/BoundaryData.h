@@ -15,23 +15,11 @@
 #include "../utility/Utility.h"
 #include "../utility/settings/Settings.h"
 
-const size_t number_of_boundary_conditions = 3;
-enum BoundaryCondition : int {
-    UNKNOWN_CONDITION = -1,
-    NEUMANN = 0,
-    DIRICHLET = 1,
-    PERIODIC = 2
-};
-
 class BoundaryData {
  public:
     explicit BoundaryData();
     ~BoundaryData();
     void print();
-
-    static std::string get_boundary_condition_name(BoundaryCondition bc);
-
-    static BoundaryCondition match_boundary_condition(const std::string &string);
 
     void add_boundary_condition(Patch const &patches,
                                 real value,

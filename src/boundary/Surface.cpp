@@ -20,7 +20,7 @@ Surface::Surface(real x1, real x2,
     m_logger->debug("################ SURFACE ################");
 #endif
 #ifndef BENCHMARKING
-    m_logger->debug("read surface '{}' for patch {}", m_name, PatchObject::get_patch_name(m_patch));
+    m_logger->debug("read surface '{}' for patch {}", m_name, Mapping::get_patch_name(m_patch));
 #endif
 
 

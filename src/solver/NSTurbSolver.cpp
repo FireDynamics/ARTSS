@@ -161,7 +161,7 @@ void NSTurbSolver::control() {
         // TODO Error handling
     }
 
-    if (m_settings.get("solver/pressure/field") != Field::get_field_type_name(FieldType::P)) {
+    if (m_settings.get("solver/pressure/field") != Mapping::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

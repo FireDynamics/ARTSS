@@ -607,7 +607,7 @@ bool Obstacle::circular_constraints(Obstacle &obstacle1, Obstacle &obstacle2, Co
     logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
                   obstacle1.get_name(), obstacle1.get_end_coordinate(coordinate_axis),
                   obstacle2.get_name(), obstacle2.get_start_coordinate(coordinate_axis),
-                  Coordinate<size_t>::get_axis_name(coordinate_axis));
+                  Mapping::get_axis_name(coordinate_axis));
 #endif
     if (obstacle1.get_end_coordinate(coordinate_axis) + 1 == obstacle2.get_start_coordinate(coordinate_axis)) {
         return tmp(obstacle2, obstacle1, coordinate_axis);
@@ -632,7 +632,7 @@ bool Obstacle::tmp(Obstacle &o1, Obstacle &o2, CoordinateAxis coordinate_axis) {
     logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
                   o1.get_name(), coords_start_o1[coordinate_axis],
                   o2.get_name(), coords_end_o2[coordinate_axis],
-                  Coordinate<size_t>::get_axis_name(coordinate_axis));
+                  Mapping::get_axis_name(coordinate_axis));
 #endif
     if (coords_start_o1[coordinate_axis] - 1 == coords_end_o2[coordinate_axis]) {
         auto other_axes = new CoordinateAxis[2];
@@ -661,8 +661,8 @@ bool Obstacle::tmp(Obstacle &o1, Obstacle &o2, CoordinateAxis coordinate_axis) {
 #ifndef BENCHMARKING
             // for constraints in x-direction: front patch of o1 and back patch of o2
             logger->debug("neighbouring obstacles ! obstacles are next to each other. Working on '{}' {} side and on '{}' {} side",
-                          o1.get_name(), PatchObject::get_patch_name(o1_patch),
-                          o2.get_name(), PatchObject::get_patch_name(o2_patch));
+                          o1.get_name(), Mapping::get_patch_name(o1_patch),
+                          o2.get_name(), Mapping::get_patch_name(o2_patch));
 #endif
             overlap = true;
             // calculate coordinates of area which should be removed
@@ -889,7 +889,7 @@ bool Obstacle::tmp(Obstacle &o1, Obstacle &o2, CoordinateAxis coordinate_axis) {
             size_t o1_diff_actual = (*o1.get_size_boundary_list())[o1_patch] - o1_new_size;
 #ifndef BENCHMARKING
             logger->debug("neighbouring obstacles ! new size of obstacle '{}' {} patch: {} -> {} ({}|{})",
-                          o1.get_name(), PatchObject::get_patch_name(o1_patch),
+                          o1.get_name(), Mapping::get_patch_name(o1_patch),
                           (*o1.get_size_boundary_list())[o1_patch], o1_new_size,
                           o1_diff_target, o1_diff_actual);
 #endif
@@ -907,7 +907,7 @@ bool Obstacle::tmp(Obstacle &o1, Obstacle &o2, CoordinateAxis coordinate_axis) {
             size_t o2_diff_actual = (*o2.get_size_boundary_list())[o2_patch] - o2_new_size;
 #ifndef BENCHMARKING
             logger->debug("neighbouring obstacles ! new size of obstacle '{}' {} patch: {} -> {} ({}|{})",
-                          o2.get_name(), PatchObject::get_patch_name(o2_patch),
+                          o2.get_name(), Mapping::get_patch_name(o2_patch),
                           (*o2.get_size_boundary_list())[o2_patch], o2_new_size,
                           o2_diff_target, o2_diff_actual);
 #endif

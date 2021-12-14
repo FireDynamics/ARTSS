@@ -68,7 +68,7 @@ namespace {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);
         logger->debug("applying dirichlet to id={} patch {}", id,
-                      PatchObject::get_patch_name(static_cast<Patch>(p)));
+                      Mapping::get_patch_name(p));
 #endif
         size_t level = field.get_level();
         if (level > 0) {
@@ -189,7 +189,7 @@ void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
             if (size_patch == 0) {
 #ifndef BENCHMARKING
                 logger->debug("skipping apply boundary condition id={} for: {}",
-                              id,PatchObject::get_patch_name(patch));
+                              id, Mapping::get_patch_name(patch));
 #endif
                 continue;
             }

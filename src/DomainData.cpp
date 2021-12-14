@@ -25,7 +25,7 @@ DomainData::DomainData(Settings::Settings const &settings) :
     number_of_inner_cells = new Coordinate<size_t>[m_levels + 1];
 
     for (size_t axis = 0; axis < number_of_axes; axis++) {
-        std::string axis_name = Coordinate<real>::get_axis_name(CoordinateAxis(axis));
+        std::string axis_name = Mapping::get_axis_name(CoordinateAxis(axis));
         start_coords_PD[axis] = settings.get_real("domain_parameters/" + axis_name + "1");
         end_coords_PD[axis] = settings.get_real("domain_parameters/" + axis_name + "2");
         length_PD[axis] = fabs(end_coords_PD[axis] - start_coords_PD[axis]);

@@ -7,7 +7,6 @@
 #include "Field.h"
 #include "../DomainData.h"
 
-inline static const std::vector<std::string> field_type_names = {"rho", "u", "v", "w", "p", "T", "nu"};
 int Field::counter = 0;
 
 Field::Field(FieldType type) :
@@ -16,7 +15,7 @@ Field::Field(FieldType type) :
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger("Field_GPU_" + std::to_string(counter++));
     m_logger->debug("{} level {} create with field pointer: {} data pointer: {}",
-                        get_field_type_name(m_type), m_level,
+                        Mapping::get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
 #endif
 #pragma acc enter data create(this)
@@ -44,7 +43,7 @@ Field::Field(FieldType type, real val, size_t level, size_t size):
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger("Field_GPU_" + std::to_string(counter++));
     m_logger->debug("{} level {} create with field pointer: {} data pointer: {}",
-                        get_field_type_name(m_type), m_level,
+                        Mapping::get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
 #endif
 #pragma acc enter data create(this)
@@ -61,7 +60,7 @@ Field::Field(const Field &original):
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger("Field_GPU_" + std::to_string(counter++));
     m_logger->debug("{} level {} create with field pointer: {} data pointer: {}",
-                        get_field_type_name(m_type), m_level,
+                        Mapping::get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
 #endif
 #pragma acc enter data copyin(this[:1]) create(data[:m_size])
@@ -72,25 +71,5 @@ Field::~Field() {
 #pragma acc exit data delete(data[:m_size])
 #pragma acc exit data delete(this)
     delete[] data;
-}
-
-//====================================== Matches ===================================================
-// *************************************************************************************************
-/// \brief  matches string to field_type_names
-/// \param  string           string to be matched
-// *************************************************************************************************
-FieldType Field::match_field(const std::string &string) {
-    for (size_t fn = 0; fn < field_type_names.size(); fn++) {
-        if (field_type_names[fn] == string) return (FieldType) fn;
-    }
-    return UNKNOWN_FIELD;
-}
-
-std::string Field::get_field_type_name(FieldType f) {
-    if (f != FieldType::UNKNOWN_FIELD) {
-        return field_type_names[f];
-    } else {
-        return "UNKNOWN FIELD";
-    }
 }
 
