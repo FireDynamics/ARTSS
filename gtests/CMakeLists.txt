@@ -8,6 +8,7 @@ target_sources(artss_gtest
 add_subdirectory(boundary)
 add_subdirectory(field)
 add_subdirectory(randomField)
+add_subdirectory(joinedLists)
 
 target_include_directories(artss_gtest PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(artss_gtest gtest gtest_main)
