@@ -28,12 +28,16 @@ class Obstacle {
     Obstacle(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
              size_t level,
              const std::string &name);
-    ~Obstacle();
+    Obstacle(Obstacle &&obst) = delete;
+    Obstacle& operator=(Obstacle &&) = delete;
+    Obstacle(const Obstacle &obst) = default;
+    Obstacle &operator=(const Obstacle &) = default;
+    ~Obstacle() = default;
 
-    size_t * get_obstacle_list() const { return m_obstacle_list; }
-    size_t get_size_obstacle_list() const { return m_size_obstacle_list; }
+    const size_t * get_obstacle_list() const { return m_obstacle_list.data(); }
+    size_t get_size_obstacle_list() const { return m_obstacle_list.size(); }
 
-    size_t ** get_boundary_list() const { return m_boundary; }
+    const std::vector<std::vector<size_t>> & get_boundary_list() const { return m_boundary; }
     PatchObject *get_size_boundary_list() { return &m_size_boundary; }
 
     bool is_obstacle_cell(const Coordinate<size_t> &coords) const;
@@ -59,6 +63,7 @@ class Obstacle {
 
     bool static remove_circular_constraints(Obstacle &o1, Obstacle &o2);
 private:
+    static bool tmp(Obstacle &o1, Obstacle &o2, CoordinateAxis axis);
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -69,8 +74,8 @@ private:
 
     size_t m_level = 0;
 
-    size_t* m_obstacle_list;
-    size_t ** m_boundary;
+    std::vector<size_t> m_obstacle_list;
+    std::vector<std::vector<size_t>> m_boundary;
 
     size_t m_size_obstacle_list;
     PatchObject m_size_boundary;

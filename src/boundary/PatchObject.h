@@ -12,7 +12,7 @@
 #include "Coordinate.h"
 
 
-const size_t number_of_patches = 6;
+constexpr size_t number_of_patches = 6;
 enum Patch : int {
     UNKNOWN_PATCH = -1,
     LEFT = 0,
@@ -25,10 +25,11 @@ enum Patch : int {
 
 class PatchObject {
   public:
-    PatchObject();
-    ~PatchObject();
+    PatchObject() = default;
+    ~PatchObject() = default;
 
-    inline size_t &operator[](size_t i) const { return m_patches[i]; }
+    inline size_t &operator[](size_t i) { return m_patches[i]; }  // r/w
+    inline size_t const &operator[](size_t i) const { return m_patches[i]; }  // read only
 
     PatchObject &operator+=(const PatchObject &rhs) {
         auto rhs_patches = rhs.m_patches;
@@ -53,7 +54,7 @@ class PatchObject {
         return Patch(p);
     }
   private:
-    size_t *m_patches;
+    std::array<size_t, number_of_patches> m_patches;
 };
 
 

@@ -74,7 +74,7 @@ void Obstacle::init() {
     }
 
     m_size_obstacle_list = m_strides[CoordinateAxis::X] * m_strides[CoordinateAxis::Y] * m_strides[CoordinateAxis::Z];
-    m_obstacle_list = new size_t[m_size_obstacle_list];
+    m_obstacle_list.resize(m_size_obstacle_list);
 
     m_size_boundary[FRONT] = m_strides[CoordinateAxis::Y] * m_strides[CoordinateAxis::X];
     m_size_boundary[BACK] = m_strides[CoordinateAxis::Y] * m_strides[CoordinateAxis::X];
@@ -84,9 +84,9 @@ void Obstacle::init() {
     m_size_boundary[RIGHT] = m_strides[CoordinateAxis::Z] * m_strides[CoordinateAxis::Y];
     remove_cells_at_boundary();
 
-    m_boundary = new size_t *[number_of_patches];
+    m_boundary.resize(number_of_patches);
     for (size_t patch = 0; patch < number_of_patches; patch++) {
-        m_boundary[patch] = new size_t[m_size_boundary[patch]];
+        m_boundary[patch].resize(m_size_boundary[patch]);
     }
 
     create_obstacle(Nx, Ny);
@@ -95,28 +95,18 @@ void Obstacle::init() {
     print_details();
 }
 
-Obstacle::~Obstacle() {
-    delete[] m_obstacle_list;
-
-    for (size_t patch = 0; patch < number_of_patches; patch++) {
-        delete[] m_boundary[patch];
-    }
-    delete[] m_boundary;
-}
-
 //===================================== Create obstacle ============================================
 // *************************************************************************************************
 /// \brief  Creates lists of indices of obstacle cells
 // *************************************************************************************************
 void Obstacle::create_obstacle(size_t Nx, size_t Ny) {
-
     size_t counter = 0;
     // fill obstacleList with corresponding indices
     for (size_t k = m_start[CoordinateAxis::Z]; k <= m_end[CoordinateAxis::Z]; ++k) {
         for (size_t j = m_start[CoordinateAxis::Y]; j <= m_end[CoordinateAxis::Y]; ++j) {
             for (size_t i = m_start[CoordinateAxis::X]; i <= m_end[CoordinateAxis::X]; ++i) {
                 size_t idx = IX(i, j, k, Nx, Ny);
-                *(m_obstacle_list + counter) = idx;
+                m_obstacle_list[counter] = idx;
                 counter++;
             }
         }
@@ -521,8 +511,11 @@ bool Obstacle::has_overlap(size_t o1_coord1, size_t o1_coord2, size_t o2_coord1,
 }
 
 void Obstacle::replace_patch(size_t *indices, size_t size, Patch p) {
-    delete[] m_boundary[p];
-    m_boundary[p] = indices;
+    m_boundary[p].clear();
+    m_boundary[p].resize(size);
+    for (size_t i = 0; i < size; i++) {
+        m_boundary[p][i] = indices[i];
+    }
     m_size_boundary[p] = size;
 }
 
@@ -608,10 +601,26 @@ bool Obstacle::remove_circular_constraints(Obstacle &o1, Obstacle &o2) {
 /// \param o1 obstacle 1
 /// \param o2 obstacle 2
 // *************************************************************************************************
-bool Obstacle::circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis coordinate_axis) {
+bool Obstacle::circular_constraints(Obstacle &obstacle1, Obstacle &obstacle2, CoordinateAxis coordinate_axis) {
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(typeid(Obstacle).name());
+    logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
+                  obstacle1.get_name(), obstacle1.get_end_coordinate(coordinate_axis),
+                  obstacle2.get_name(), obstacle2.get_start_coordinate(coordinate_axis),
+                  Coordinate<size_t>::get_axis_name(coordinate_axis));
 #endif
+    if (obstacle1.get_end_coordinate(coordinate_axis) + 1 == obstacle2.get_start_coordinate(coordinate_axis)) {
+        return tmp(obstacle2, obstacle1, coordinate_axis);
+    } else {
+        return tmp(obstacle1, obstacle2, coordinate_axis);
+    }
+}
+bool Obstacle::tmp(Obstacle &o1, Obstacle &o2, CoordinateAxis coordinate_axis) {
+    const Coordinate<size_t> &coords_start_o1 = (o1.get_start_coordinates());
+    const Coordinate<size_t> &coords_end_o1 = (o1.get_end_coordinates());
+    const Coordinate<size_t> &coords_start_o2 = (o2.get_start_coordinates());
+    const Coordinate<size_t> &coords_end_o2 = (o2.get_end_coordinates());
+
     bool overlap = false;
 
     auto domain_data = DomainData::getInstance();
@@ -619,20 +628,7 @@ bool Obstacle::circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis c
     auto Ny = domain_data->get_Ny();
 
 #ifndef BENCHMARKING
-    logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
-                  o1.get_name(), o1.get_end_coordinate(coordinate_axis),
-                  o2.get_name(), o2.get_start_coordinate(coordinate_axis),
-                  Coordinate<size_t>::get_axis_name(coordinate_axis));
-#endif
-    if (o1.get_end_coordinate(coordinate_axis) + 1 == o2.get_start_coordinate(coordinate_axis)) {
-        std::swap(o1, o2);
-    }
-
-    const Coordinate<size_t> &coords_start_o1 = (o1.get_start_coordinates());
-    const Coordinate<size_t> &coords_end_o1 = (o1.get_end_coordinates());
-    const Coordinate<size_t> &coords_start_o2 = (o2.get_start_coordinates());
-    const Coordinate<size_t> &coords_end_o2 = (o2.get_end_coordinates());
-#ifndef BENCHMARKING
+    auto logger = Utility::create_logger(typeid(Obstacle).name());
     logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
                   o1.get_name(), coords_start_o1[coordinate_axis],
                   o2.get_name(), coords_end_o2[coordinate_axis],
