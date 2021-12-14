@@ -15,7 +15,7 @@
 
 class PatchObject {
   public:
-    PatchObject() = default;
+    PatchObject() { m_patches.fill(0); };
     ~PatchObject() = default;
 
     inline size_t &operator[](size_t i) { return m_patches[i]; }  // r/w
