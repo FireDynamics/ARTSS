@@ -12,13 +12,12 @@
 #include "PatchObject.h"
 #include "../utility/Algorithm.h"
 
-Multigrid::Multigrid(
-        const std::vector<Surface> &surfaces,
-        const std::vector<BoundaryDataController> &bdc_surfaces,
-        const std::vector<Obstacle> &obstacles,
-        const std::vector<BoundaryDataController> &bdc_obstacles,
-        BoundaryDataController *bdc_boundary,
-        size_t multigrid_levels) :
+Multigrid::Multigrid(const std::vector<Surface> &surfaces,
+                     const std::vector<BoundaryDataController> &bdc_surfaces,
+                     const std::vector<Obstacle> &obstacles,
+                     const std::vector<BoundaryDataController> &bdc_obstacles,
+                     BoundaryDataController *bdc_boundary,
+                     size_t multigrid_levels) :
         m_multigrid_levels(multigrid_levels),
         m_number_of_surface_objects(surfaces.size()),
         m_number_of_obstacle_objects(obstacles.size()),
@@ -51,8 +50,8 @@ Multigrid::Multigrid(
         m_jl_obstacle_boundary_list_patch_divided[patch]  = new MultipleJoinedList(m_multigrid_levels, m_number_of_obstacle_objects);
     }
 
-    m_MG_surface_object_list.reserve(m_multigrid_levels + 1);
-    m_MG_surface_object_list.emplace_back(surfaces);  // level 0
+    m_MG_surface_object_list.resize(m_multigrid_levels + 1);
+    m_MG_surface_object_list[0] = surfaces;  // level 0
 
     m_jl_surface_list_patch_divided = new MultipleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
@@ -394,21 +393,19 @@ void Multigrid::create_multigrid_surface_lists() {
         sum_surface_cells += surface_dominant_restriction(level, sum_surface_patch_divided);
     }
 
-    m_jl_surface_list.set_size(sum_surface_cells);
     for (size_t patch = 0; patch < number_of_patches; patch++) {
         m_jl_surface_list_patch_divided[patch]->set_size((*sum_surface_patch_divided)[patch]);
     }
     for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
         for (size_t id = 0; id < m_number_of_surface_objects; level++) {
             Patch patch = m_MG_surface_object_list[level][id].get_patch();
-            m_MG_surface_object_list[level][id].set_id(id);
 #ifndef BENCHMARKING
-            m_logger->debug("add surface data to SJL {} {} {}", level,
+            m_logger->debug("add surface data ({}) to MJL with patch={} level={} pointer={}",
+                            m_MG_surface_object_list[level][id].get_name(),
+                            Mapping::get_patch_name(patch), level,
                             m_MG_surface_object_list[level][id].get_size_surface_list());
 #endif
-            m_jl_surface_list.add_data(level,
-                                       m_MG_surface_object_list[level][id].get_size_surface_list(),
-                                       m_MG_surface_object_list[level][id].get_surface_list());
+            // all other patches have size 0
             m_jl_surface_list_patch_divided[patch]->add_data(
                     level, id,
                     m_MG_surface_object_list[level][id].get_size_surface_list(),
@@ -438,6 +435,7 @@ void Multigrid::create_multigrid_domain_lists() {
             size_surface_list->add_value(patch, m_jl_surface_list_patch_divided[patch]->get_slice_size(level));
         }
         size_t *slice_obstacle_list = m_jl_obstacle_list.get_slice(level);
+        // TODO(issue 178) send only obstacles which are in the computational domain
         auto domain = new Domain(slice_obstacle_list,
                                  m_jl_obstacle_list.get_slice_size(level),
                                  slice_surface_list,
@@ -500,16 +498,15 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
     DomainData *domain_data = DomainData::getInstance();
 
     std::vector<Surface> surface_list_fine = m_MG_surface_object_list[level - 1];
-    std::vector<Surface> surface_list_coarse;
-    surface_list_coarse.reserve(m_number_of_surface_objects);
-    m_MG_surface_object_list[level] = surface_list_coarse;
+    m_MG_surface_object_list[level].reserve(m_number_of_obstacle_objects);
+    std::vector<Surface> &surface_list_coarse = m_MG_surface_object_list[level];
     // loop through surfaces
     for (size_t id = 0; id < m_number_of_surface_objects; id++) {
         Surface &surface_fine = surface_list_fine[id];
 
         Patch patch = surface_fine.get_patch();
-        Coordinate<size_t> &start_fine = surface_fine.get_start_coordinates();
-        Coordinate<size_t> &end_fine = surface_fine.get_end_coordinates();
+        const Coordinate<size_t> &start_fine = surface_fine.get_start_coordinates();
+        const Coordinate<size_t> &end_fine = surface_fine.get_end_coordinates();
 
         Coordinate<size_t> start_coarse;
         Coordinate<size_t> end_coarse;
@@ -531,11 +528,9 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
         m_logger->debug("multigrid surface start coarse {}", start_coarse);
         m_logger->debug("multigrid surface end coarse {}", end_coarse);
 #endif
-
-        Surface surface_coarse(surface_fine.get_name(), patch, start_coarse, end_coarse, level);
-        sum += surface_coarse.get_size_surface_list();
-        surface_list_coarse[id] = surface_coarse;
-        sum_patches->add_value(patch, surface_coarse.get_size_surface_list());
+        surface_list_coarse.emplace_back(start_coarse, end_coarse, level, surface_fine.get_name(), patch);
+        sum += surface_list_coarse.back().get_size_surface_list();
+        sum_patches->add_value(patch, surface_list_coarse.back().get_size_surface_list());
     }  // end surface id loop
     return sum;
 }

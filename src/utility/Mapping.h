@@ -51,7 +51,7 @@ enum BoundaryCondition : int {
 namespace Mapping {
     std::string get_axis_name(CoordinateAxis axis);
     //std::string get_axis_name(size_t axis) { return get_axis_name(CoordinateAxis(axis)); }
-    CoordinateAxis match_axis(const std::string &string);
+    CoordinateAxis match_axis(std::string string);
     CoordinateAxis to_axis(Patch patch);
     //CoordinateAxis to_axis(size_t patch) { return to_axis(Patch(patch)); }
 

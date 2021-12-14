@@ -12,61 +12,64 @@ Surface::Surface(real x1, real x2,
                  real z1, real z2,
                  const std::string &name,
                  Patch patch) :
-        m_name(name),
         m_patch(patch),
+        m_name(name),
         m_level(0) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("################ SURFACE ################");
 #endif
+    DomainData *domain_data = DomainData::getInstance();
+    Coordinate<real> tmp_start(x1, y1, z1);
+    Coordinate<real> tmp_end(x2, y2, z2);
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
+        auto coord_axis = CoordinateAxis(axis);
+        m_start[axis] = get_matching_index(tmp_start[axis],
+                                           domain_data->get_spacing(coord_axis, m_level),
+                                           domain_data->get_start_coord_PD(coord_axis)) + 1;
+        m_end[axis] = get_matching_index(tmp_end[axis],
+                                         domain_data->get_spacing(coord_axis, m_level),
+                                         domain_data->get_start_coord_PD(coord_axis));
+    }
+
 #ifndef BENCHMARKING
     m_logger->debug("read surface '{}' for patch {}", m_name, Mapping::get_patch_name(m_patch));
 #endif
-
-
-    //TODO
-    auto domain = DomainData::getInstance();
-    size_t Nx = domain->get_Nx(m_level);
-    size_t Ny = domain->get_Ny(m_level);
-    createSurface(Nx, Ny);
-    print();
+    init();
 #ifndef BENCHMARKING
+    print();
     m_logger->info("----------------END SURFACE ----------------");
 #endif
 }
 
-Surface::Surface(const std::string &name, Patch patch, Coordinate<size_t> &start, Coordinate<size_t> &end, size_t level) :
-        m_patch(patch), m_name(name), m_start(start), m_end(end) {
+Surface::Surface(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
+                 size_t level,
+                 const std::string &name,
+                 Patch patch) :
+        m_patch(patch),
+        m_name(name),
+        m_start(coords_start), m_end(coords_end),
+        m_level(level) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
     m_logger->info("################ SURFACE ################");
 #endif
 
-    DomainData *domain = DomainData::getInstance();
-    size_t Nx = domain->get_Nx(level);
-    size_t Ny = domain->get_Ny(level);
-
-    init(Nx, Ny);
+    init();
 #ifndef BENCHMARKING
+    print();
     m_logger->info("----------------END SURFACE ----------------");
 #endif
 }
 
-Surface::~Surface() {
-    for (BoundaryData *bd: dataList) {
-        delete (bd);
-    }
-    delete (m_surface_list);
-}
-
 void Surface::print() {
 #ifndef BENCHMARKING
-    m_logger->info("Surface name {}", m_name);
+    m_logger->info("Surface name {} on Patch {}", m_name, Mapping::get_patch_name(m_patch));
     m_logger->info("strides: X: {}, Y: {}, Z:{}",
-                   get_stride_z(),
-                   get_stride_y(),
-                   get_stride_x());
-    m_logger->info("size of Surface: {}", m_size_surfaceList);
+                   get_stride(X),
+                   get_stride(Y),
+                   get_stride(Z));
+    m_logger->info("size of Surface: {}", m_size_surface_list);
     m_logger->info("coords: ({}|{}) ({}|{}) ({}|{})",
                    m_start[X], m_end[X],
                    m_start[Y], m_end[Y],
@@ -74,18 +77,22 @@ void Surface::print() {
 #endif
 }
 
-void Surface::init(size_t Nx, size_t Ny) {
-    m_size_surfaceList = get_stride_x() * get_stride_y() * get_stride_z();
-    m_surface_list = new size_t[m_size_surfaceList];
+void Surface::init() {
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
+        if (m_end[axis] != m_start[axis]) {
+            m_strides[axis] = m_end[axis] - m_start[axis] + 1;
+        }
+    }
+    m_size_surface_list = get_stride(X) * get_stride(Y) * get_stride(Z);
+    m_surface_list.resize(m_size_surface_list);
 
-    createSurface(Nx, Ny);
-    print();
-}
+    DomainData *domain_data = DomainData::getInstance();
+    size_t Nx = domain_data->get_number_of_inner_cells(CoordinateAxis::X);
+    size_t Ny = domain_data->get_number_of_inner_cells(CoordinateAxis::Y);
 
-void Surface::createSurface(size_t Nx, size_t Ny) {
     size_t counter = 0;
 #ifndef BENCHMARKING
-    m_logger->info("list size of sList: {}", m_size_surfaceList);
+    m_logger->info("list size of sList: {}", m_size_surface_list);
 #endif
     // fill sList with corresponding indices
     for (size_t k = m_start[Z]; k < m_end[Z]; ++k) {
@@ -98,14 +105,9 @@ void Surface::createSurface(size_t Nx, size_t Ny) {
     }
 #ifndef BENCHMARKING
     m_logger->debug("control create Surface ({}|{})", counter,
-                   m_size_surfaceList);
+                    m_size_surface_list);
     m_logger->debug("end of creating sList");
 #endif
-}
-
-void Surface::apply_boundary_conditions(Field &field, bool sync) {
-    // m_bdc_boundary->apply_boundary_condition(dataField, indexFields, patch_starts, patch_ends, fieldType, level, sync);
-    //TODO(issue 5)
 }
 
 size_t Surface::get_matching_index(real surface_coordinate, real spacing, real start_coordinate) {
