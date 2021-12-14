@@ -436,7 +436,8 @@ void Domain::joined_list() {
 
     m_size_domain_list = m_size_inner_list + m_size_boundary_list;
     m_domain_list = new size_t[m_size_domain_list];
-    Algorithm::merge_sort(m_inner_list, m_boundary_list,
-                          m_size_inner_list, m_size_boundary_list,
-                          m_domain_list);
+    auto merged_list = Algorithm::merge_sort(m_inner_list, m_boundary_list,
+                          m_size_inner_list, m_size_boundary_list);
+    //TODO (cvm) copy command
+    std::copy(merged_list.begin(), merged_list.end(), m_domain_list);
 }

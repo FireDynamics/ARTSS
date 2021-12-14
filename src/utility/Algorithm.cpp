@@ -19,9 +19,10 @@ namespace Algorithm {
 /// \param size_list2 size of list2
 /// \param merged_list result of merge sort. size should be size_list1 + size_list2
 // *************************************************************************************************
-    void merge_sort(const size_t *list1, const size_t *list2,
-                    const size_t size_list1, const size_t size_list2,
-                    size_t *merged_list) {
+    std::vector<size_t> merge_sort(const size_t *list1, const size_t *list2,
+                    const size_t size_list1, const size_t size_list2) {
+        std::vector<size_t> merged_list;
+        merged_list.resize(size_list1 + size_list2);
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);
 #endif
@@ -49,6 +50,7 @@ namespace Algorithm {
         logger->debug("merge sort: end of merge sort counter_list1: {}|{} counter_list2: {}|{} counter_merged_list: {}|{}",
                       counter_list1, size_list1, counter_list2, size_list2, counter_merged_list, size_list1 + size_list2);
 #endif
+        return merged_list;
     }
 
 //======================================== merge sort ==============================================

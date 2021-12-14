@@ -43,8 +43,8 @@ Multigrid::Multigrid(
 
     // init obstacle
     // list of obstacle objects for each level
-    m_MG_obstacle_object_list.reserve(m_multigrid_levels + 1);
-    m_MG_obstacle_object_list.emplace_back(obstacles);  // level 0
+    m_MG_obstacle_object_list.resize(m_multigrid_levels + 1);
+    m_MG_obstacle_object_list[0] = obstacles;  // level 0
 
     m_jl_obstacle_boundary_list_patch_divided = new MultipleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
@@ -307,24 +307,22 @@ void Multigrid::create_multigrid_obstacle_lists() {
             }
 
             // merge obstacles
-            auto *list = const_cast<size_t*>(m_MG_obstacle_object_list[level][0].get_obstacle_list());
-
+            const auto *list = m_MG_obstacle_object_list[level][0].get_obstacle_list();
             size_t size = m_MG_obstacle_object_list[level][0].get_size_obstacle_list();
+            std::vector<size_t> data;
+            data.assign(list, list + size);
+
             for (size_t o = 1; o < m_number_of_obstacle_objects; o++) {
-                //TODO (cvm) better idea for merging all obstacles ?
                 Obstacle &obstacle = m_MG_obstacle_object_list[level][o];
-                size_t new_size = size + obstacle.get_size_obstacle_list();
-                auto obstacle_list_tmp = new size_t[new_size];
-                Algorithm::merge_sort(list, obstacle.get_obstacle_list(),
-                                      size, obstacle.get_size_obstacle_list(),
-                                      obstacle_list_tmp);
-                delete[] list;
-                list = new size_t[new_size];
-                std::copy(obstacle_list_tmp, obstacle_list_tmp + new_size, list);
-                size = new_size;
-                delete[] obstacle_list_tmp;
+                data = Algorithm::merge_sort(list, obstacle.get_obstacle_list(),
+                                             size, obstacle.get_size_obstacle_list());
+                list = data.data();
+                size = data.size();
             }
-            tmp_store_obstacle[level] = list;
+            //TODO(cvm) copy command
+            auto obstacle_list_tmp = new size_t[size];
+            std::copy(&data[0], &data[size], obstacle_list_tmp);
+            tmp_store_obstacle[level] = obstacle_list_tmp;
 #ifndef BENCHMARKING
             m_logger->debug("create_multigrid_obstacle_list ! calculated size {} original size {}", size, sum_obstacle_cells_level_divided[level]);
 #endif
@@ -562,9 +560,8 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
     }
     DomainData *domain_data = DomainData::getInstance();
     std::vector<Obstacle> obstacle_list_fine = m_MG_obstacle_object_list[level - 1];
-    std::vector<Obstacle> obstacle_list_coarse;
-    obstacle_list_coarse.reserve(m_number_of_obstacle_objects);
-    m_MG_obstacle_object_list[level] = obstacle_list_coarse;
+    m_MG_obstacle_object_list[level].reserve(m_number_of_obstacle_objects);
+    std::vector<Obstacle> &obstacle_list_coarse = m_MG_obstacle_object_list[level];
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
         Obstacle &obstacle_fine = obstacle_list_fine[id];
 
@@ -595,7 +592,7 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
         }
 #endif
 
-        obstacle_list_coarse.emplace_back(start_coarse, end_coarse,                                 level, obstacle_fine.get_name());
+        obstacle_list_coarse.emplace_back(start_coarse, end_coarse, level, obstacle_fine.get_name());
 #ifndef BENCHMARKING
         Coordinate<size_t> strides = obstacle_list_coarse.back().get_strides();
         for (size_t axis = 0; axis < number_of_axes; axis++) {
