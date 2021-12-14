@@ -8,8 +8,8 @@
 #include "../DomainData.h"
 #include "visit_writer.h"  //( https://wci.llnl.gov/codes/visit/ )
 
-static std::string ending = ".vtk";
 int VTKWriter::vtk_counter = 0;
+static std::string ending = ".vtk";
 
 void VTKWriter::write_numerical_debug(const FieldController &field_controller, const std::string &filename) {
     auto u = field_controller.get_field_u_data();
@@ -469,26 +469,25 @@ void VTKWriter::vtk_prepare_and_write_debug(const char *filename, read_ptr *data
 }
 
 void VTKWriter::write_field(const Field &field, const std::string &filename, const std::string &var_name) {
-    /*
     std::string fname = std::to_string(VTKWriter::vtk_counter++) + "_" + filename;
     int size_vars = 1;
     const char *var_names[] = {"x-coords", "y-coords", "z-coords",
                                "index_i", "index_j", "index_k",
                                var_name.c_str()};
-    DomainData *domain = DomainData::getInstance();
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_Y1();
-    real Z1 = domain->get_Z1();
+    DomainData *domain_data = DomainData::getInstance();
+    real X1 = domain_data->get_X1();
+    real Y1 = domain_data->get_Y1();
+    real Z1 = domain_data->get_Z1();
 
-    int Nx = static_cast<int>(domain->get_Nx());
-    int Ny = static_cast<int>(domain->get_Ny());
-    int Nz = static_cast<int>(domain->get_Nz());
+    int Nx = static_cast<int>(domain_data->get_Nx());
+    int Ny = static_cast<int>(domain_data->get_Ny());
+    int Nz = static_cast<int>(domain_data->get_Nz());
 
-    real dx = domain->get_dx();
-    real dy = domain->get_dy();
-    real dz = domain->get_dz();
+    real dx = domain_data->get_dx();
+    real dy = domain_data->get_dy();
+    real dz = domain_data->get_dz();
 
-    int size = static_cast<int>(domain->get_size());
+    int size = static_cast<int>(domain_data->get_size());
 
     // Dimensions of the rectilinear array (+1 for zonal values)
     int dims[] = {Nx + 1, Ny + 1, Nz + 1};
@@ -548,5 +547,4 @@ void VTKWriter::write_field(const Field &field, const std::string &filename, con
     delete[] (x_coords);
     delete[] (y_coords);
     delete[] (z_coords);
-     */
 }
