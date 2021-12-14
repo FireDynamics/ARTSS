@@ -17,8 +17,8 @@
 #include "Obstacle.h"
 #include "Surface.h"
 using return_surface = std::tuple<std::vector<Surface>, std::vector<BoundaryDataController>>;
-using return_obstacle = std::tuple<std::vector<Obstacle>&, std::vector<BoundaryDataController>&>;
-using return_xml_objects = std::tuple<std::vector<Surface>, std::vector<BoundaryDataController>, std::vector<Obstacle>&, std::vector<BoundaryDataController>&>;
+using return_obstacle = std::tuple<std::vector<Obstacle>, std::vector<BoundaryDataController>>;
+using return_xml_objects = std::tuple<std::vector<Surface>, std::vector<BoundaryDataController>, std::vector<Obstacle>, std::vector<BoundaryDataController>>;
 
 class BoundaryController {
  public:
