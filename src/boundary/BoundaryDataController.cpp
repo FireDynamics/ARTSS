@@ -12,13 +12,17 @@
 #include "../boundaryCondition/ObstacleBoundary.h"
 #include "../boundaryCondition/SurfaceBoundary.h"
 
-BoundaryDataController::BoundaryDataController() {
+BoundaryDataController::BoundaryDataController(const std::vector<Settings::BoundarySetting> &boundary) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_boundary_data = new BoundaryData *[number_of_field_types];
     for (size_t i = 0; i < number_of_field_types; i++) {
         *(m_boundary_data + i) = new BoundaryData();
+    }
+
+    for (const auto &b : boundary) {
+        add_boundary_data(b);
     }
 }
 
@@ -52,7 +56,7 @@ void BoundaryDataController::add_boundary_data(const Settings::BoundarySetting &
 // *************************************************************************************************
 /// \brief  Prints info of boundary data
 // *************************************************************************************************
-void BoundaryDataController::print() {
+void BoundaryDataController::print() const {
 #ifndef BENCHMARKING
     for (size_t i = 0; i < number_of_field_types; i++) {
         auto boundary = *(m_boundary_data + i);
@@ -157,5 +161,6 @@ std::vector<FieldType> BoundaryDataController::get_used_fields() {
             v_fields.push_back(static_cast<FieldType>(fieldType));
         }
     }
+    v_fields.shrink_to_fit();
     return v_fields;
 }

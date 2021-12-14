@@ -17,6 +17,8 @@
 #include "Obstacle.h"
 #include "Surface.h"
 using return_surface = std::tuple<std::vector<Surface>, std::vector<BoundaryDataController>>;
+using return_obstacle = std::tuple<std::vector<Obstacle>, std::vector<BoundaryDataController>>;
+using return_xml_objects = std::tuple<std::vector<Surface>, std::vector<BoundaryDataController>, std::vector<Obstacle>, std::vector<BoundaryDataController>>;
 
 class BoundaryController {
  public:
@@ -27,7 +29,6 @@ class BoundaryController {
 
     void apply_boundary(Field &field, bool sync = true);
 
-    void print_boundaries();
     void update_lists();
 
     /// \brief get array of joined domain inner list
@@ -49,9 +50,7 @@ class BoundaryController {
     size_t get_obstacle_list_level_joined_start(size_t level) const { return m_multigrid->get_start_index_obstacle_cells_level_joined(level); }
     size_t get_obstacle_list_level_joined_end(size_t level) const { return m_multigrid->get_end_index_obstacle_cells_level_joined(level); }
 
-    size_t get_size_surfaceList() const {return m_size_surface_list;}
-
-    std::vector<FieldType> get_used_fields() const;
+    [[nodiscard]] std::vector<FieldType> get_used_fields() const;
 
     bool inline is_obstacle_cell(const size_t level, const Coordinate<size_t> &coords) {
         return m_multigrid->is_obstacle_cell(level, coords);
@@ -68,23 +67,19 @@ class BoundaryController {
     static BoundaryController* singleton;
 
     BoundaryDataController *m_bdc_boundary;
-    BoundaryDataController **m_bdc_obstacles;
     Multigrid* m_multigrid;
-
-    Obstacle** m_obstacle_list;
-    size_t m_number_of_obstacles = 0;
-
-    size_t m_size_surface_list = 0;
 
     bool m_has_obstacles;
     bool m_has_surfaces;
 
-    return_surface read_XML();
+    return_xml_objects read_XML();
     void parse_boundary_parameter(const std::vector<Settings::BoundarySetting>& boundaries);
-    void parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting>& obstacles);
+    return_obstacle parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting>& obstacle_setting);
     return_surface parse_surface_parameter(const std::vector<Settings::SurfaceSetting>& surface_setting);
 
-    void detect_neighbouring_obstacles();
+    void detect_neighbouring_obstacles(std::vector<Obstacle> &obstacle_list);
+    void print_boundaries(const std::vector<BoundaryDataController> &bdc_surfaces, const std::vector<BoundaryDataController> &bdc_obstacles);
+
 };
 
 #endif /* ARTSS_BOUNDARY_BOUNDARYCONTROLLER_H_ */

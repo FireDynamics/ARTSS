@@ -19,9 +19,8 @@
 
 class BoundaryDataController {
  public:
-    BoundaryDataController();
+    explicit BoundaryDataController(const std::vector<Settings::BoundarySetting> &boundary);
     ~BoundaryDataController();
-    void add_boundary_data(const Settings::BoundarySetting& boundary);
     void apply_boundary_condition(
             Field &field,
             SingleJoinedList **index_fields,
@@ -36,7 +35,7 @@ class BoundaryDataController {
             MultipleJoinedList **index_fields,
             size_t id,
             bool sync = false);
-    void print();
+    void print() const;
     std::vector<FieldType> get_used_fields();
 
  private:
@@ -45,6 +44,7 @@ class BoundaryDataController {
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
 
+    void add_boundary_data(const Settings::BoundarySetting& boundary);
 };
 
 #endif /* ARTSS_BOUNDARY_BOUNDARYDATACONTROLLER_H_ */

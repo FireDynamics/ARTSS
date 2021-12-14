@@ -214,7 +214,7 @@ void Obstacle::create_obstacle(size_t Nx, size_t Ny) {
 // *************************************************************************************************
 /// \brief  Print obstacle infos
 // *************************************************************************************************
-void Obstacle::print() {
+void Obstacle::print() const {
 #ifndef BENCHMARKING
     m_logger->info("-- Obstacle {}", m_name);
     m_logger->info("\t strides (x y z): {} {} {}", m_strides[CoordinateAxis::X], m_strides[CoordinateAxis::Y], m_strides[CoordinateAxis::Z]);
@@ -538,14 +538,14 @@ void Obstacle::replace_patch(size_t *indices, size_t size, Patch p) {
 /// \param start true = (i/j/k)1 or false = (i/j/k)2
 // *************************************************************************************************
 void Obstacle::calculate_area_index(
-        Obstacle *o1, Obstacle *o2,
+        Obstacle &o1, Obstacle &o2,
         size_t *o1_coordinate, size_t *o2_coordinate,
         CoordinateAxis coordinate_axis,
         bool start) {
-    Coordinate<size_t> coords_start_o1 = o1->get_start_coordinates();
-    Coordinate<size_t> coords_end_o1 = o1->get_end_coordinates();
-    Coordinate<size_t> coords_start_o2 = o2->get_start_coordinates();
-    Coordinate<size_t> coords_end_o2 = o2->get_end_coordinates();
+    Coordinate<size_t> coords_start_o1 = o1.get_start_coordinates();
+    Coordinate<size_t> coords_end_o1 = o1.get_end_coordinates();
+    Coordinate<size_t> coords_start_o2 = o2.get_start_coordinates();
+    Coordinate<size_t> coords_end_o2 = o2.get_end_coordinates();
 
     if (start) {
         *o1_coordinate = coords_start_o1[coordinate_axis];
@@ -586,7 +586,7 @@ void Obstacle::calculate_area_index(
 /// \param o2 Obstacle 2
 /// \return true, if cells were removed otherwise false
 // *************************************************************************************************
-bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
+bool Obstacle::remove_circular_constraints(Obstacle &o1, Obstacle &o2) {
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(typeid(Obstacle).name());
 #endif
@@ -596,7 +596,7 @@ bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
     }
 #ifndef BENCHMARKING
     if (overlap) {
-        logger->debug("neighbouring obstacles ! {} is next to {}", o1->get_name(), o2->get_name());
+        logger->debug("neighbouring obstacles ! {} is next to {}", o1.get_name(), o2.get_name());
     }
 #endif
     return overlap;
@@ -608,7 +608,7 @@ bool Obstacle::remove_circular_constraints(Obstacle *o1, Obstacle *o2) {
 /// \param o1 obstacle 1
 /// \param o2 obstacle 2
 // *************************************************************************************************
-bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis coordinate_axis) {
+bool Obstacle::circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis coordinate_axis) {
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(typeid(Obstacle).name());
 #endif
@@ -620,22 +620,22 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
 
 #ifndef BENCHMARKING
     logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
-                  o1->get_name(), o1->get_end_coordinate(coordinate_axis),
-                  o2->get_name(), o2->get_start_coordinate(coordinate_axis),
+                  o1.get_name(), o1.get_end_coordinate(coordinate_axis),
+                  o2.get_name(), o2.get_start_coordinate(coordinate_axis),
                   Coordinate<size_t>::get_axis_name(coordinate_axis));
 #endif
-    if (o1->get_end_coordinate(coordinate_axis) + 1 == o2->get_start_coordinate(coordinate_axis)) {
+    if (o1.get_end_coordinate(coordinate_axis) + 1 == o2.get_start_coordinate(coordinate_axis)) {
         std::swap(o1, o2);
     }
 
-    const Coordinate<size_t> &coords_start_o1 = (o1->get_start_coordinates());
-    const Coordinate<size_t> &coords_end_o1 = (o1->get_end_coordinates());
-    const Coordinate<size_t> &coords_start_o2 = (o2->get_start_coordinates());
-    const Coordinate<size_t> &coords_end_o2 = (o2->get_end_coordinates());
+    const Coordinate<size_t> &coords_start_o1 = (o1.get_start_coordinates());
+    const Coordinate<size_t> &coords_end_o1 = (o1.get_end_coordinates());
+    const Coordinate<size_t> &coords_start_o2 = (o2.get_start_coordinates());
+    const Coordinate<size_t> &coords_end_o2 = (o2.get_end_coordinates());
 #ifndef BENCHMARKING
     logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
-                  o1->get_name(), coords_start_o1[coordinate_axis],
-                  o2->get_name(), coords_end_o2[coordinate_axis],
+                  o1.get_name(), coords_start_o1[coordinate_axis],
+                  o2.get_name(), coords_end_o2[coordinate_axis],
                   Coordinate<size_t>::get_axis_name(coordinate_axis));
 #endif
     if (coords_start_o1[coordinate_axis] - 1 == coords_end_o2[coordinate_axis]) {
@@ -665,8 +665,8 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
 #ifndef BENCHMARKING
             // for constraints in x-direction: front patch of o1 and back patch of o2
             logger->debug("neighbouring obstacles ! obstacles are next to each other. Working on '{}' {} side and on '{}' {} side",
-                          o1->get_name(), PatchObject::get_patch_name(o1_patch),
-                          o2->get_name(), PatchObject::get_patch_name(o2_patch));
+                          o1.get_name(), PatchObject::get_patch_name(o1_patch),
+                          o2.get_name(), PatchObject::get_patch_name(o2_patch));
 #endif
             overlap = true;
             // calculate coordinates of area which should be removed
@@ -757,38 +757,38 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
                           o1_remove_start[CoordinateAxis::X], o1_remove_end[CoordinateAxis::X],
                           o1_remove_start[CoordinateAxis::Y], o1_remove_end[CoordinateAxis::Y],
                           o1_remove_start[CoordinateAxis::Z], o1_remove_end[CoordinateAxis::Z],
-                          o1->get_name());
+                          o1.get_name());
             logger->debug("neighbouring obstacles ! removing indices in area ({}|{}) ({}|{}) ({}|{}) for {}",
                           o2_remove_start[CoordinateAxis::X], o2_remove_end[CoordinateAxis::X],
                           o2_remove_start[CoordinateAxis::Y], o2_remove_end[CoordinateAxis::Y],
                           o2_remove_start[CoordinateAxis::Z], o2_remove_end[CoordinateAxis::Z],
-                          o2->get_name());
+                          o2.get_name());
 #endif
 
             std::vector<size_t> o1_new;
-            o1_new.reserve((*o1->get_size_boundary_list())[o1_patch]);
+            o1_new.reserve((*o1.get_size_boundary_list())[o1_patch]);
             std::vector<size_t> o2_new;
-            o2_new.reserve((*o2->get_size_boundary_list())[o2_patch]);
+            o2_new.reserve((*o2.get_size_boundary_list())[o2_patch]);
 
             // add all cells which are smaller than the smallest removing index of o1
             size_t o1_counter_old = 0;
             size_t o1_smallest_removing_index = o1_remove_start.get_index(Nx, Ny);
-            size_t o1_current_index = o1->get_boundary_list()[o1_patch][o1_counter_old];
+            size_t o1_current_index = o1.get_boundary_list()[o1_patch][o1_counter_old];
             while (o1_current_index < o1_smallest_removing_index) {
                 o1_new.push_back(o1_current_index);
                 o1_counter_old++;
-                o1_current_index = o1->get_boundary_list()[o1_patch][o1_counter_old];
+                o1_current_index = o1.get_boundary_list()[o1_patch][o1_counter_old];
             }
             size_t o1_new_size = o1_counter_old;
 
             // add all cells which are smaller than the smallest removing index of o2
             size_t o2_counter_old = 0;
             size_t o2_smallest_removing_index = o2_remove_start.get_index(Nx, Ny);
-            size_t o2_current_index = o2->get_boundary_list()[o2_patch][o2_counter_old];
+            size_t o2_current_index = o2.get_boundary_list()[o2_patch][o2_counter_old];
             while (o2_current_index < o2_smallest_removing_index) {
                 o2_new.push_back(o2_current_index);
                 o2_counter_old++;
-                o2_current_index = o2->get_boundary_list()[o2_patch][o2_counter_old];
+                o2_current_index = o2.get_boundary_list()[o2_patch][o2_counter_old];
             }
             size_t o2_new_size = o2_counter_old;
 
@@ -801,12 +801,12 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             size_t o2_current_axis_1 = o2_remove_start[other_axes[1]];
             size_t o2_removing_index = o2_smallest_removing_index;
             bool o2_end = false;
-            for (; o1_counter_old < (*o1->get_size_boundary_list())[o1_patch]
-                   && o2_counter_old < (*o2->get_size_boundary_list())[o2_patch]
+            for (; o1_counter_old < (*o1.get_size_boundary_list())[o1_patch]
+                   && o2_counter_old < (*o2.get_size_boundary_list())[o2_patch]
                    && !o1_end && !o2_end;
                    o1_counter_old++, o2_counter_old++) {
-                o1_current_index = o1->get_boundary_list()[o1_patch][o1_counter_old];
-                o2_current_index = o2->get_boundary_list()[o2_patch][o2_counter_old];
+                o1_current_index = o1.get_boundary_list()[o1_patch][o1_counter_old];
+                o2_current_index = o2.get_boundary_list()[o2_patch][o2_counter_old];
                 if (o1_current_index != o1_removing_index) {
                     o1_new.push_back(o1_current_index);
                     o1_new_size++;
@@ -844,8 +844,8 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             }
 
             if (!o1_end) {
-                for (; o1_counter_old < (*o1->get_size_boundary_list())[o1_patch] && o1_current_axis_1 <= o1_remove_end[other_axes[1]]; o1_counter_old++) {
-                    o1_current_index = o1->get_boundary_list()[o1_patch][o1_counter_old];
+                for (; o1_counter_old < (*o1.get_size_boundary_list())[o1_patch] && o1_current_axis_1 <= o1_remove_end[other_axes[1]]; o1_counter_old++) {
+                    o1_current_index = o1.get_boundary_list()[o1_patch][o1_counter_old];
                     if (o1_current_index != o1_removing_index) {
                         o1_new.push_back(o1_current_index);
                         o1_new_size++;
@@ -864,8 +864,8 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             }
 
             if (!o2_end) {
-                for (; o2_counter_old < (*o2->get_size_boundary_list())[o2_patch] && o2_current_axis_1 <= o2_remove_end[other_axes[1]]; o2_counter_old++) {
-                    o2_current_index = o2->get_boundary_list()[o2_patch][o2_counter_old];
+                for (; o2_counter_old < (*o2.get_size_boundary_list())[o2_patch] && o2_current_axis_1 <= o2_remove_end[other_axes[1]]; o2_counter_old++) {
+                    o2_current_index = o2.get_boundary_list()[o2_patch][o2_counter_old];
                     if (o2_current_index != o2_removing_index) {
                         o2_new.push_back(o2_current_index);
                         o2_new_size++;
@@ -883,41 +883,41 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
                 }
             }
 
-            for (; o1_counter_old < (*o1->get_size_boundary_list())[o1_patch]; o1_counter_old++) {
-                o1_new.push_back(o1->get_boundary_list()[o1_patch][o1_counter_old]);
+            for (; o1_counter_old < (*o1.get_size_boundary_list())[o1_patch]; o1_counter_old++) {
+                o1_new.push_back(o1.get_boundary_list()[o1_patch][o1_counter_old]);
                 o1_new_size++;
             }
             o1_new.resize(o1_new_size);
 
             size_t o1_diff_target = (o1_remove_end[other_axes[0]] - o1_remove_start[other_axes[0]] + 1) * (o1_remove_end[other_axes[1]] - o1_remove_start[other_axes[1]] + 1);
-            size_t o1_diff_actual = (*o1->get_size_boundary_list())[o1_patch] - o1_new_size;
+            size_t o1_diff_actual = (*o1.get_size_boundary_list())[o1_patch] - o1_new_size;
 #ifndef BENCHMARKING
             logger->debug("neighbouring obstacles ! new size of obstacle '{}' {} patch: {} -> {} ({}|{})",
-                          o1->get_name(), PatchObject::get_patch_name(o1_patch),
-                          (*o1->get_size_boundary_list())[o1_patch], o1_new_size,
+                          o1.get_name(), PatchObject::get_patch_name(o1_patch),
+                          (*o1.get_size_boundary_list())[o1_patch], o1_new_size,
                           o1_diff_target, o1_diff_actual);
 #endif
             auto o1_new_data = new size_t[o1_new_size];
             std::copy(o1_new.begin(), o1_new.end(), o1_new_data);
-            o1->replace_patch(o1_new_data, o1_new_size, o1_patch);
+            o1.replace_patch(o1_new_data, o1_new_size, o1_patch);
 
-            for (; o2_counter_old < (*o2->get_size_boundary_list())[o2_patch]; o2_counter_old++) {
-                o2_new.push_back(o2->get_boundary_list()[o2_patch][o2_counter_old]);
+            for (; o2_counter_old < (*o2.get_size_boundary_list())[o2_patch]; o2_counter_old++) {
+                o2_new.push_back(o2.get_boundary_list()[o2_patch][o2_counter_old]);
                 o2_new_size++;
             }
             o2_new.resize(o2_new_size);
 
             size_t o2_diff_target = (o2_remove_end[other_axes[0]] - o2_remove_start[other_axes[0]] + 1) * (o2_remove_end[other_axes[1]] - o2_remove_start[other_axes[1]] + 1);
-            size_t o2_diff_actual = (*o2->get_size_boundary_list())[o2_patch] - o2_new_size;
+            size_t o2_diff_actual = (*o2.get_size_boundary_list())[o2_patch] - o2_new_size;
 #ifndef BENCHMARKING
             logger->debug("neighbouring obstacles ! new size of obstacle '{}' {} patch: {} -> {} ({}|{})",
-                          o2->get_name(), PatchObject::get_patch_name(o2_patch),
-                          (*o2->get_size_boundary_list())[o2_patch], o2_new_size,
+                          o2.get_name(), PatchObject::get_patch_name(o2_patch),
+                          (*o2.get_size_boundary_list())[o2_patch], o2_new_size,
                           o2_diff_target, o2_diff_actual);
 #endif
             auto o2_new_data = new size_t[o2_new_size];
             std::copy(o2_new.begin(), o2_new.end(), o2_new_data);
-            o2->replace_patch(o2_new_data, o2_new_size, o2_patch);
+            o2.replace_patch(o2_new_data, o2_new_size, o2_patch);
         }
         delete[] other_axes;
     }

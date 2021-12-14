@@ -17,8 +17,10 @@ BoundaryData::BoundaryData() {
 }
 
 BoundaryData::~BoundaryData() {
-    delete[] m_values;
-    delete[] m_boundary_conditions;
+    if (m_has_values) {
+        delete[] m_values;
+        delete[] m_boundary_conditions;
+    }
 }
 
 //====================================== Print =====================================================
