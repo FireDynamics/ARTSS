@@ -18,15 +18,15 @@ class Domain {
            size_t **surface_list, PatchObject &size_surface_list,
            size_t multigrid_level);
 
-    ~Domain();
+    ~Domain() = default;
 
-    size_t * get_domain_list() const { return m_domain_list; }
-    size_t get_size_domain_list() const { return m_size_domain_list; }
+    const size_t * get_domain_list() const { return m_domain_list.data(); }
+    size_t get_size_domain_list() const { return m_domain_list.size(); }
 
-    size_t * get_inner_list() const { return m_inner_list; }
-    size_t get_size_inner_list() const { return m_size_inner_list; }
+    const size_t * get_inner_list() const { return m_inner_list.data(); }
+    size_t get_size_inner_list() const { return m_inner_list.size(); }
 
-    size_t ** get_boundary_list() const { return m_boundary_patch_divided; }
+    const std::vector<std::vector<size_t>> get_boundary_list() const { return m_boundary_patch_divided; }
     PatchObject * get_size_boundary_list() { return &m_size_boundary; }
 
     void update_lists(size_t *obstacle_list, size_t size_obstacle_list, size_t **surface_list, PatchObject &size_surface_list);
@@ -38,17 +38,14 @@ class Domain {
 #endif
     size_t m_multigrid_level;
 
-    size_t *m_domain_list;
-    size_t m_size_domain_list;
+    std::vector<size_t> m_domain_list;
 
-    size_t **m_boundary_patch_divided;  // boundary cells, patch divided
+    std::vector<std::vector<size_t>> m_boundary_patch_divided;  // boundary cells, patch divided
     PatchObject m_size_boundary;
 
-    size_t *m_boundary_list;  // boundary cells altogether
-    size_t m_size_boundary_list;
+    std::vector<size_t> m_boundary_list;  // boundary cells altogether
 
-    size_t *m_inner_list;
-    size_t m_size_inner_list;
+    std::vector<size_t> m_inner_list;
 
     void init(size_t size_obstacle_list, PatchObject &size_surface_list);
     void inner_cells(const size_t *obstacle_list, size_t size_obstacle_list);

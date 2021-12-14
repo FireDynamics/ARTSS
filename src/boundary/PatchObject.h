@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <string>
 #include <array>
+
 #include "Coordinate.h"
 #include "../utility/Mapping.h"
 

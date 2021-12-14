@@ -15,14 +15,14 @@ BoundaryController::BoundaryController(Settings::Settings const &settings) :
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    auto [surfaces, bdc_surfaces, obstacles, bdc_obstacles] = read_XML();
+    auto [bdc_domain, surfaces, bdc_surfaces, obstacles, bdc_obstacles] = read_XML();
     size_t multigrid_level = DomainData::getInstance()->get_levels();
     m_multigrid = new Multigrid(surfaces, bdc_surfaces,
                                 obstacles, bdc_obstacles,
-                                m_bdc_boundary,
+                                bdc_domain,
                                 multigrid_level);
 #ifndef BENCHMARKING
-    print_boundaries(bdc_surfaces, bdc_obstacles);
+    print_boundaries(bdc_domain, bdc_surfaces, bdc_obstacles);
 #endif
 }
 
@@ -33,31 +33,21 @@ BoundaryController::BoundaryController(Settings::Settings const &settings) :
 return_xml_objects BoundaryController::read_XML() {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing XML");
+    m_logger->debug("start parsing boundary parameter");
 #endif
-
-    parse_boundary_parameter(m_settings.get_boundaries());
+    // TODO (cvm)
+   BoundaryDataController bdc_domain(m_settings.get_boundaries());
+#ifndef BENCHMARKING
+    m_logger->debug("finished parsing boundary parameter");
+#endif
+    //BoundaryDataController bdc_domain = parse_boundary_parameter(m_settings.get_boundaries());
     auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(m_settings.get_obstacles());
     detect_neighbouring_obstacles(obstacles);
     auto [surfaces, bdc_surfaces] = parse_surface_parameter(m_settings.get_surfaces());
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing XML");
 #endif
-    return {surfaces, bdc_surfaces, obstacles, bdc_obstacles};
-}
-
-// ================================= Parser ========================================================
-// *************************************************************************************************
-/// \brief  parses boundaries of domain from XML file
-/// \param  xmlParameter pointer to XMLElement to start with
-// *************************************************************************************************
-void BoundaryController::parse_boundary_parameter(const std::vector<Settings::BoundarySetting> &boundaries) {
-#ifndef BENCHMARKING
-    m_logger->debug("start parsing boundary parameter");
-#endif
-    m_bdc_boundary = new BoundaryDataController(boundaries);
-#ifndef BENCHMARKING
-    m_logger->debug("finished parsing boundary parameter");
-#endif
+    return {bdc_domain, surfaces, bdc_surfaces, obstacles, bdc_obstacles};
 }
 
 // ================================= Parser ========================================================
@@ -152,11 +142,11 @@ BoundaryController *BoundaryController::getInstance(Settings::Settings const &se
 // *************************************************************************************************
 /// \brief  prints boundaries (outer, inner, surfaces)
 // *************************************************************************************************
-void BoundaryController::print_boundaries(const std::vector<BoundaryDataController> &bdc_surfaces, const std::vector<BoundaryDataController> &bdc_obstacles) {
+void BoundaryController::print_boundaries(const BoundaryDataController &bdc_domain, const std::vector<BoundaryDataController> &bdc_surfaces, const std::vector<BoundaryDataController> &bdc_obstacles) {
 #ifndef BENCHMARKING
     m_logger->info("-- Info summary");
     DomainData::getInstance()->print();
-    m_bdc_boundary->print();
+    bdc_domain.print();
     for (const auto & bdc_obstacle : bdc_obstacles) {
         bdc_obstacle.print();
     }
@@ -211,5 +201,5 @@ void BoundaryController::detect_neighbouring_obstacles(std::vector<Obstacle> &ob
 }
 
 std::vector<FieldType> BoundaryController::get_used_fields() const {
-    return m_bdc_boundary->get_used_fields();
+    return m_multigrid->get_used_fields();
 }

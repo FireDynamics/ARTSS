@@ -18,7 +18,7 @@
 #include "Surface.h"
 using return_surface = std::tuple<std::vector<Surface>, std::vector<BoundaryDataController>>;
 using return_obstacle = std::tuple<std::vector<Obstacle>, std::vector<BoundaryDataController>>;
-using return_xml_objects = std::tuple<std::vector<Surface>, std::vector<BoundaryDataController>, std::vector<Obstacle>, std::vector<BoundaryDataController>>;
+using return_xml_objects = std::tuple<BoundaryDataController, std::vector<Surface>, std::vector<BoundaryDataController>, std::vector<Obstacle>, std::vector<BoundaryDataController>>;
 
 class BoundaryController {
  public:
@@ -66,19 +66,17 @@ class BoundaryController {
 #endif
     static BoundaryController* singleton;
 
-    BoundaryDataController *m_bdc_boundary;
     Multigrid* m_multigrid;
 
     bool m_has_obstacles;
     bool m_has_surfaces;
 
     return_xml_objects read_XML();
-    void parse_boundary_parameter(const std::vector<Settings::BoundarySetting>& boundaries);
     return_obstacle parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting>& obstacle_setting);
     return_surface parse_surface_parameter(const std::vector<Settings::SurfaceSetting>& surface_setting);
 
     void detect_neighbouring_obstacles(std::vector<Obstacle> &obstacle_list);
-    void print_boundaries(const std::vector<BoundaryDataController> &bdc_surfaces, const std::vector<BoundaryDataController> &bdc_obstacles);
+    void print_boundaries(const BoundaryDataController &bdc_domain, const std::vector<BoundaryDataController> &bdc_surfaces, const std::vector<BoundaryDataController> &bdc_obstacles);
 
 };
 

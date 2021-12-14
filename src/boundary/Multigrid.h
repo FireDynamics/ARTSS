@@ -21,7 +21,7 @@ class Multigrid {
  public:
     Multigrid(const std::vector<Surface> &surfaces, const std::vector<BoundaryDataController> &bdc_surfaces,
               const std::vector<Obstacle> &obstacles, const std::vector<BoundaryDataController> &bdc_obstacles,
-              BoundaryDataController* bdc_boundary,
+              const BoundaryDataController &bdc_domain,
               size_t multigrid_level);
     ~Multigrid();
 
@@ -52,6 +52,8 @@ class Multigrid {
 
     bool is_obstacle_cell(size_t level, const Coordinate<size_t> &coords);
 
+    std::vector<FieldType> get_used_fields();
+
 private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
@@ -64,7 +66,7 @@ private:
     std::vector<std::vector<Obstacle>> m_MG_obstacle_object_list;  // m_MG_obstacle_object_list[level][obstacleID]
     size_t m_number_of_obstacle_objects = 0;
     // boundary for each level
-    Domain** m_MG_domain_object_list;  // m_MG_boundary_object_list[level]
+    std::vector<Domain> m_MG_domain_object_list;  // m_MG_boundary_object_list[level]
 
     //---- all level joined / arrays for GPU -----
     SingleJoinedList m_jl_domain_list;
@@ -74,7 +76,6 @@ private:
     SingleJoinedList m_jl_obstacle_list;  // all obstacle boundary cells
     MultipleJoinedList **m_jl_obstacle_boundary_list_patch_divided;  // [Patch]
 
-    SingleJoinedList m_jl_surface_list;
     MultipleJoinedList **m_jl_surface_list_patch_divided;  // [Patch]
 
     void create_multigrid_obstacle_lists();
@@ -91,7 +92,7 @@ private:
     void control();
     void print();
 
-    BoundaryDataController *m_bdc_boundary;
+    BoundaryDataController m_bdc_domain;
     std::vector<BoundaryDataController> m_bdc_obstacle;
     std::vector<BoundaryDataController> m_bdc_surface;
 
