@@ -11,6 +11,8 @@
 #include <cstdlib>
 #include <algorithm>
 #include <string>
+#include <stdexcept>
+
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Mapping.h"
 
