@@ -122,7 +122,7 @@ real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
     size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
-    //// weighted 2-norm
+    // weighted 2-norm
     // absolute error
     for (size_t i = 0; i < size_inner_list; i++) {
         size_t idx = inner_list[i];
