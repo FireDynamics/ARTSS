@@ -31,6 +31,11 @@ class BoundaryDataController {
             MultipleJoinedList **index_fields,
             size_t id,
             bool sync = false);
+    void apply_boundary_condition_surface(
+            Field &field,
+            MultipleJoinedList **index_fields,
+            size_t id,
+            bool sync = false);
     void print();
     std::vector<FieldType> get_used_fields();
 

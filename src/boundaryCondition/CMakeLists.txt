@@ -4,4 +4,6 @@ target_sources(artss
         ${CMAKE_CURRENT_LIST_DIR}/DomainBoundary.h
         ${CMAKE_CURRENT_LIST_DIR}/ObstacleBoundary.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ObstacleBoundary.h
+        ${CMAKE_CURRENT_LIST_DIR}/SurfaceBoundary.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/SurfaceBoundary.h
 )
