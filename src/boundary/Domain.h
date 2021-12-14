@@ -36,7 +36,6 @@ class Domain {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-
     size_t m_multigrid_level;
 
     size_t *m_domain_list;
@@ -56,6 +55,8 @@ class Domain {
     void boundary_cells(size_t **surface_list, PatchObject &size_surface_list);
     void print(size_t size_obstacle_list, PatchObject &size_surface_list);
     void clear_lists();
+
+    void joined_list();
 };
 
 #endif /* ARTSS_BOUNDARY_DOMAIN_H_ */
