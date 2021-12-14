@@ -16,7 +16,7 @@
 
 class PatchObject {
   public:
-    PatchObject() { m_patches.fill(0); };
+    PatchObject() = default;
     ~PatchObject() = default;
 
     inline size_t &operator[](size_t i) { return m_patches[i]; }  // r/w
@@ -40,7 +40,7 @@ class PatchObject {
     void add_value(size_t patch, size_t value) { m_patches[patch] += value; }
 
   private:
-    std::array<size_t, number_of_patches> m_patches;
+    std::array<size_t, number_of_patches> m_patches{0};
 };
 
 
