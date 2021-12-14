@@ -25,7 +25,7 @@ enum BoundaryCondition : int {
 
 class BoundaryData {
  public:
-    BoundaryData();
+    explicit BoundaryData();
     ~BoundaryData();
     void print();
 

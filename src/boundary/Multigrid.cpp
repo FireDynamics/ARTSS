@@ -5,22 +5,23 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Multigrid.h"
+
+#include <string>
+#include <vector>
+
 #include "PatchObject.h"
 #include "../utility/Algorithm.h"
-#include <string>
-#include <utility>
-#include <vector>
 
 Multigrid::Multigrid(
         const std::vector<Surface> &surfaces,
         const std::vector<BoundaryDataController> &bdc_surfaces,
-        size_t number_of_obstacles, Obstacle **obstacle_list,
+        const std::vector<Obstacle> &obstacles,
+        const std::vector<BoundaryDataController> &bdc_obstacles,
         BoundaryDataController *bdc_boundary,
-        BoundaryDataController **bdc_obstacles,
         size_t multigrid_levels) :
         m_multigrid_levels(multigrid_levels),
         m_number_of_surface_objects(surfaces.size()),
-        m_number_of_obstacle_objects(number_of_obstacles),
+        m_number_of_obstacle_objects(obstacles.size()),
         m_jl_domain_list(multigrid_levels),
         m_jl_domain_inner_list(multigrid_levels),
         m_jl_obstacle_list(multigrid_levels),
@@ -42,15 +43,15 @@ Multigrid::Multigrid(
 
     // init obstacle
     // list of obstacle objects for each level
-    m_MG_obstacle_object_list = new Obstacle **[m_multigrid_levels + 1];
-    m_MG_obstacle_object_list[0] = obstacle_list;  // level 0
+    m_MG_obstacle_object_list.reserve(m_multigrid_levels + 1);
+    m_MG_obstacle_object_list.emplace_back(obstacles);  // level 0
 
     m_jl_obstacle_boundary_list_patch_divided = new MultipleJoinedList*[number_of_patches];
     for (size_t patch = 0; patch < number_of_patches; patch++) {
         m_jl_obstacle_boundary_list_patch_divided[patch]  = new MultipleJoinedList(m_multigrid_levels, m_number_of_obstacle_objects);
     }
 
-    m_MG_surface_object_list.reserve(m_multigrid_levels);
+    m_MG_surface_object_list.reserve(m_multigrid_levels + 1);
     m_MG_surface_object_list.emplace_back(surfaces);  // level 0
 
     m_jl_surface_list_patch_divided = new MultipleJoinedList*[number_of_patches];
@@ -78,15 +79,9 @@ Multigrid::Multigrid(
 
 Multigrid::~Multigrid() {
     for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        Obstacle **obstacle_level = m_MG_obstacle_object_list[level];
-        for (size_t obstacle = 0; obstacle < m_number_of_obstacle_objects; obstacle++) {
-            delete obstacle_level[obstacle];
-        }
-        delete[] obstacle_level;
         delete m_MG_domain_object_list[level];
     }
     delete[] m_MG_domain_object_list;
-    delete[] m_MG_obstacle_object_list;
 
 
     for (size_t patch = 0; patch < number_of_patches; patch++) {
@@ -99,10 +94,6 @@ Multigrid::~Multigrid() {
     delete[] m_jl_obstacle_boundary_list_patch_divided;
     delete[] m_jl_surface_list_patch_divided;
 
-    for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
-        delete m_bdc_obstacle[id];
-    }
-    delete[] m_bdc_obstacle;
     delete m_bdc_boundary;
 }
 
@@ -309,22 +300,23 @@ void Multigrid::create_multigrid_obstacle_lists() {
         {  // count obstacle cells level 0
             size_t level = 0;
             for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
-                sum_obstacle_cells_level_divided[level] += m_MG_obstacle_object_list[level][id]->get_size_obstacle_list();
-                PatchObject *obstacle_boundary = m_MG_obstacle_object_list[level][id]->get_size_boundary_list();
+                sum_obstacle_cells_level_divided[level] += m_MG_obstacle_object_list[level][id].get_size_obstacle_list();
+                PatchObject *obstacle_boundary = m_MG_obstacle_object_list[level][id].get_size_boundary_list();
                 *sum_obstacle_boundary += *obstacle_boundary;
                 sum_obstacle_cells += sum_obstacle_cells_level_divided[level];
             }
 
             // merge obstacles
-            size_t *list = m_MG_obstacle_object_list[level][0]->get_obstacle_list();
-            size_t size = m_MG_obstacle_object_list[level][0]->get_size_obstacle_list();
+            auto *list = const_cast<size_t*>(m_MG_obstacle_object_list[level][0].get_obstacle_list());
+
+            size_t size = m_MG_obstacle_object_list[level][0].get_size_obstacle_list();
             for (size_t o = 1; o < m_number_of_obstacle_objects; o++) {
                 //TODO (cvm) better idea for merging all obstacles ?
-                Obstacle *obstacle = m_MG_obstacle_object_list[level][o];
-                size_t new_size = size + obstacle->get_size_obstacle_list();
+                Obstacle &obstacle = m_MG_obstacle_object_list[level][o];
+                size_t new_size = size + obstacle.get_size_obstacle_list();
                 auto obstacle_list_tmp = new size_t[new_size];
-                Algorithm::merge_sort(list, obstacle->get_obstacle_list(),
-                                      size, obstacle->get_size_obstacle_list(),
+                Algorithm::merge_sort(list, obstacle.get_obstacle_list(),
+                                      size, obstacle.get_size_obstacle_list(),
                                       obstacle_list_tmp);
                 delete[] list;
                 list = new size_t[new_size];
@@ -349,18 +341,18 @@ void Multigrid::create_multigrid_obstacle_lists() {
             m_jl_obstacle_boundary_list_patch_divided[patch]->set_size((*sum_obstacle_boundary)[patch]);
         }
         for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-            Obstacle **obstacle_list = m_MG_obstacle_object_list[level];
+            auto &obstacle_list = m_MG_obstacle_object_list[level];
             for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
-                Obstacle *obstacle = obstacle_list[id];
-                size_t **obstacle_boundary_cells = obstacle->get_boundary_list();
-                PatchObject *obstacle_size = obstacle->get_size_boundary_list();
+                Obstacle &obstacle = obstacle_list[id];
+                const auto &obstacle_boundary_cells = obstacle.get_boundary_list();
+                PatchObject *obstacle_size = obstacle.get_size_boundary_list();
                 for (size_t patch = 0; patch < number_of_patches; patch++) {
 #ifndef BENCHMARKING
                     m_logger->debug("add obstacle boundary data to MJL for obstacle '{}' patch '{}' level={}, number of obstacle boundary cells={}",
-                                    obstacle->get_name(), PatchObject::get_patch_name(patch), level,
+                                    obstacle.get_name(), PatchObject::get_patch_name(patch), level,
                                     (*obstacle_size)[patch]);
 #endif
-                    m_jl_obstacle_boundary_list_patch_divided[patch]->add_data(level, id, (*obstacle_size)[patch], obstacle_boundary_cells[patch]);
+                    m_jl_obstacle_boundary_list_patch_divided[patch]->add_data(level, id, (*obstacle_size)[patch], obstacle_boundary_cells[patch].data());
                 }
             }
         }
@@ -569,14 +561,15 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
         return 0;
     }
     DomainData *domain_data = DomainData::getInstance();
-    Obstacle **obstacle_list_fine = m_MG_obstacle_object_list[level - 1];
-    auto obstacle_list_coarse = new Obstacle *[m_number_of_obstacle_objects];
+    std::vector<Obstacle> obstacle_list_fine = m_MG_obstacle_object_list[level - 1];
+    std::vector<Obstacle> obstacle_list_coarse;
+    obstacle_list_coarse.reserve(m_number_of_obstacle_objects);
     m_MG_obstacle_object_list[level] = obstacle_list_coarse;
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
-        Obstacle *obstacle_fine = obstacle_list_fine[id];
+        Obstacle &obstacle_fine = obstacle_list_fine[id];
 
-        Coordinate<size_t> start_fine = obstacle_fine->get_start_coordinates();
-        Coordinate<size_t> end_fine = obstacle_fine->get_end_coordinates();
+        Coordinate<size_t> start_fine = obstacle_fine.get_start_coordinates();
+        Coordinate<size_t> end_fine = obstacle_fine.get_end_coordinates();
 
         Coordinate<size_t> start_coarse;
         Coordinate<size_t> end_coarse;
@@ -590,45 +583,43 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
             auto coordinate_axis = CoordinateAxis(axis);
             if (end_fine[axis] - start_fine[axis] + 1 < domain_data->get_number_of_inner_cells(coordinate_axis, level - 1)
                 && end_coarse[CoordinateAxis::X] - start_coarse[CoordinateAxis::X] + 1 >= domain_data->get_number_of_inner_cells(coordinate_axis, level)) {
-                m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in {}-direction at level {}", obstacle_fine->get_name(), Coordinate<size_t>::get_axis_name(coordinate_axis), level);
+                m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in {}-direction at level {}", obstacle_fine.get_name(), Coordinate<size_t>::get_axis_name(coordinate_axis), level);
             }
         }
 
         for (size_t c = 0; c < id; c++) {
-            if (obstacle_list_coarse[c]->has_overlap(start_coarse[CoordinateAxis::X], end_coarse[CoordinateAxis::X], start_coarse[CoordinateAxis::Y], end_coarse[CoordinateAxis::Y], start_coarse[CoordinateAxis::Z], end_coarse[CoordinateAxis::Z])) {
+            if (obstacle_list_coarse[c].has_overlap(start_coarse[CoordinateAxis::X], end_coarse[CoordinateAxis::X], start_coarse[CoordinateAxis::Y], end_coarse[CoordinateAxis::Y], start_coarse[CoordinateAxis::Z], end_coarse[CoordinateAxis::Z])) {
                 m_logger->debug("overlapping of obstacle {} with obstacle {} on level {}",
-                                obstacle_list_coarse[c]->get_name(), obstacle_fine->get_name(), level);
+                                obstacle_list_coarse[c].get_name(), obstacle_fine.get_name(), level);
             }
         }
 #endif
 
-        auto obstacle_coarse = new Obstacle(start_coarse, end_coarse,
-                                            level, obstacle_fine->get_name());
+        obstacle_list_coarse.emplace_back(start_coarse, end_coarse,                                 level, obstacle_fine.get_name());
 #ifndef BENCHMARKING
-        Coordinate<size_t> strides = obstacle_coarse->get_strides();
+        Coordinate<size_t> strides = obstacle_list_coarse.back().get_strides();
         for (size_t axis = 0; axis < number_of_axes; axis++) {
             if (strides[axis] <= 1) {
                 m_logger->warn("Obstacle '{}' is too small with size 1 in {}-direction at level {}. "
                                "Consider less multigrid level, a higher resolution at the finest grid "
                                "or expanding the obstacle. Otherwise only the right boundary condition "
-                               "will be applied.", obstacle_fine->get_name(), Coordinate<size_t>::get_axis_name(CoordinateAxis(axis)), level);
+                               "will be applied.", obstacle_fine.get_name(), Coordinate<size_t>::get_axis_name(CoordinateAxis(axis)), level);
             }
         }
 #endif
-        obstacle_list_coarse[id] = obstacle_coarse;
-        *sum_patches += *obstacle_coarse->get_size_boundary_list();
+        *sum_patches += *obstacle_list_coarse.back().get_size_boundary_list();
     }
 
     // merge obstacles
-    size_t *list = obstacle_list_coarse[0]->get_obstacle_list();
-    size_t size = obstacle_list_coarse[0]->get_size_obstacle_list();
+    const auto *list = obstacle_list_coarse[0].get_obstacle_list();
+    size_t size = obstacle_list_coarse[0].get_size_obstacle_list();
     std::vector<size_t> data;
     data.assign(list, list + size);
 
     for (size_t o = 1; o < m_number_of_obstacle_objects; o++) {
-        Obstacle *obstacle = obstacle_list_coarse[o];
-        data = Algorithm::merge_sort_with_duplicates(list, size, obstacle->get_obstacle_list(),
-                                                     obstacle->get_size_obstacle_list());
+        Obstacle &obstacle = obstacle_list_coarse[o];
+        data = Algorithm::merge_sort_with_duplicates(list, size, obstacle.get_obstacle_list(),
+                                                     obstacle.get_size_obstacle_list());
         list = data.data();
         size = data.size();
     }
@@ -680,16 +671,14 @@ void Multigrid::send_obstacle_lists_to_GPU() {
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
 void Multigrid::apply_boundary_condition(Field &field, bool sync) {
-    size_t level = field.get_level();
     if (m_number_of_surface_objects > 0) {
         for (size_t id = 0; id < m_number_of_surface_objects; ++id) {
-            //TODO surfaces
-            //m_bdc_surface[id].apply_boundary_condition_surface(field, id, sync);
+            m_bdc_surface[id].apply_boundary_condition_surface(field, m_jl_surface_list_patch_divided, id, sync);
         }
     }
     if (m_number_of_obstacle_objects > 0) {
         for (size_t id = 0; id < m_number_of_obstacle_objects; ++id) {
-            (static_cast<BoundaryDataController *> (m_bdc_obstacle[id]))->apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list_patch_divided, id, sync);
+            m_bdc_obstacle[id].apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list_patch_divided, id, sync);
         }
     }
     m_bdc_boundary->apply_boundary_condition(field, m_jl_domain_boundary_list_patch_divided, sync);
@@ -716,10 +705,10 @@ void Multigrid::remove_domain_lists_from_GPU() {
 
 bool Multigrid::is_obstacle_cell(const size_t level,
                                  const Coordinate<size_t> &coords) {
-    Obstacle **obstacle_list = m_MG_obstacle_object_list[level];
+    std::vector<Obstacle> obstacle_list = m_MG_obstacle_object_list[level];
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
-        Obstacle *obstacle = obstacle_list[id];
-        if (obstacle->is_obstacle_cell(coords)) {
+        Obstacle &obstacle = obstacle_list[id];
+        if (obstacle.is_obstacle_cell(coords)) {
             return true;
         }
     }

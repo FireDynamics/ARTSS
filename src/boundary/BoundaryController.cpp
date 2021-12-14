@@ -15,15 +15,14 @@ BoundaryController::BoundaryController(Settings::Settings const &settings) :
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_bdc_boundary = new BoundaryDataController();
-    auto [surfaces, bdc_surfaces] = read_XML();
+    auto [surfaces, bdc_surfaces, obstacles, bdc_obstacles] = read_XML();
     size_t multigrid_level = DomainData::getInstance()->get_levels();
     m_multigrid = new Multigrid(surfaces, bdc_surfaces,
-                                m_number_of_obstacles, m_obstacle_list,
-                                m_bdc_boundary, m_bdc_obstacles,
+                                obstacles, bdc_obstacles,
+                                m_bdc_boundary,
                                 multigrid_level);
 #ifndef BENCHMARKING
-    print_boundaries();
+    print_boundaries(bdc_surfaces, bdc_obstacles);
 #endif
 }
 
@@ -31,19 +30,19 @@ BoundaryController::BoundaryController(Settings::Settings const &settings) :
 // *************************************************************************************************
 /// \brief  Reads in all parameters of boundary, obstacles and surfaces
 // *************************************************************************************************
-return_surface BoundaryController::read_XML() {
+return_xml_objects BoundaryController::read_XML() {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing XML");
 #endif
 
     parse_boundary_parameter(m_settings.get_boundaries());
-    parse_obstacle_parameter(m_settings.get_obstacles());
-    detect_neighbouring_obstacles();
-    return_surface ret_surfaces = parse_surface_parameter(m_settings.get_surfaces());
+    auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(m_settings.get_obstacles());
+    detect_neighbouring_obstacles(obstacles);
+    auto [surfaces, bdc_surfaces] = parse_surface_parameter(m_settings.get_surfaces());
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing XML");
 #endif
-    return ret_surfaces;
+    return {surfaces, bdc_surfaces, obstacles, bdc_obstacles};
 }
 
 // ================================= Parser ========================================================
@@ -55,10 +54,7 @@ void BoundaryController::parse_boundary_parameter(const std::vector<Settings::Bo
 #ifndef BENCHMARKING
     m_logger->debug("start parsing boundary parameter");
 #endif
-// BOUNDARY
-    for (const auto &boundary: boundaries) {
-        m_bdc_boundary->add_boundary_data(boundary);
-    }
+    m_bdc_boundary = new BoundaryDataController(boundaries);
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing boundary parameter");
 #endif
@@ -91,12 +87,7 @@ return_surface BoundaryController::parse_surface_parameter(const std::vector<Set
             real sz1 = surface.get_sz1();
             real sz2 = surface.get_sz2();
             surfaces.emplace_back(sx1, sx2, sy1, sy2, sz1, sz2, name, patch);
-
-            BoundaryDataController bdc;
-            for (const auto &boundary: surface.get_boundaries()) {
-                bdc.add_boundary_data(boundary);
-            }
-            bdc_surfaces.emplace_back(bdc);
+            bdc_surfaces.emplace_back(surface.get_boundaries());
         }
     }
 #ifndef BENCHMARKING
@@ -112,22 +103,22 @@ return_surface BoundaryController::parse_surface_parameter(const std::vector<Set
 /// \brief  parses obstacles from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting> &obstacles) {
+return_obstacle BoundaryController::parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting> &obstacle_setting) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing obstacle parameter");
 #endif
 // OBSTACLES
     m_has_obstacles = m_settings.get_bool("obstacles/enabled");
+    std::vector<Obstacle> obstacles;
+    std::vector<BoundaryDataController> bdc_obstacles;
     if (m_has_obstacles) {
-        std::vector<Obstacle *> ret_obstacles;
-        std::vector<BoundaryDataController *> bdc_obstacles;
-
-        for (const Settings::ObstacleSetting &obstacle: obstacles) {
+        obstacles.reserve(obstacle_setting.size());
+        bdc_obstacles.reserve(obstacle_setting.size());
+        for (const Settings::ObstacleSetting &obstacle: obstacle_setting) {
             std::string name = obstacle.get_name();
 #ifndef BENCHMARKING
             m_logger->debug("read obstacle '{}'", name);
 #endif
-            auto bdc = new BoundaryDataController();
             real ox1 = obstacle.get_ox1();
             real ox2 = obstacle.get_ox2();
             real oy1 = obstacle.get_oy1();
@@ -135,29 +126,14 @@ void BoundaryController::parse_obstacle_parameter(const std::vector<Settings::Ob
             real oz1 = obstacle.get_oz1();
             real oz2 = obstacle.get_oz2();
 
-            for (const auto &bound: obstacle.get_boundaries()) {
-                bdc->add_boundary_data(bound);
-            }
-
-            auto o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2, name);
-            ret_obstacles.emplace_back(o);
-            bdc_obstacles.emplace_back(bdc);
+            obstacles.emplace_back(ox1, ox2, oy1, oy2, oz1, oz2, name);
+            bdc_obstacles.emplace_back(obstacle.get_boundaries());
         }
-
-        m_number_of_obstacles = ret_obstacles.size();
-        m_obstacle_list = new Obstacle *[m_number_of_obstacles];
-        m_bdc_obstacles = new BoundaryDataController *[m_number_of_obstacles];
-        for (size_t i = 0; i < m_number_of_obstacles; i++) {
-            *(m_obstacle_list + i) = ret_obstacles[i];
-            *(m_bdc_obstacles + i) = bdc_obstacles[i];
-        }
-    } else {
-        m_obstacle_list = new Obstacle *[m_number_of_obstacles];
-        m_bdc_obstacles = new BoundaryDataController *[m_number_of_obstacles];
     }
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing obstacle parameter");
 #endif
+    return {obstacles, bdc_obstacles};
 }
 
 BoundaryController::~BoundaryController() {
@@ -176,14 +152,16 @@ BoundaryController *BoundaryController::getInstance(Settings::Settings const &se
 // *************************************************************************************************
 /// \brief  prints boundaries (outer, inner, surfaces)
 // *************************************************************************************************
-void BoundaryController::print_boundaries() {
+void BoundaryController::print_boundaries(const std::vector<BoundaryDataController> &bdc_surfaces, const std::vector<BoundaryDataController> &bdc_obstacles) {
 #ifndef BENCHMARKING
     m_logger->info("-- Info summary");
     DomainData::getInstance()->print();
     m_bdc_boundary->print();
-    for (size_t i = 0; i < m_number_of_obstacles; i++) {
-        m_obstacle_list[i]->print();
-        m_bdc_obstacles[i]->print();
+    for (const auto & bdc_obstacle : bdc_obstacles) {
+        bdc_obstacle.print();
+    }
+    for (const auto & bdc_surface : bdc_surfaces) {
+        bdc_surface.print();
     }
 #endif
 }
@@ -211,17 +189,18 @@ void BoundaryController::apply_boundary(Field &field, bool sync) {
 /// \brief  handling of neighbouring obstacles, removes cells with circular constraints which never
 /// change their value
 // *************************************************************************************************
-void BoundaryController::detect_neighbouring_obstacles() {
+void BoundaryController::detect_neighbouring_obstacles(std::vector<Obstacle> &obstacle_list) {
 #ifndef BENCHMARKING
     m_logger->debug("start detecting neighbouring obstacles");
 #endif
-    for (size_t o1 = 0; o1 < m_number_of_obstacles; o1++) {
-        Obstacle *obstacle1 = m_obstacle_list[o1];
-        for (size_t o2 = o1 + 1; o2 < m_number_of_obstacles; o2++) {
-            Obstacle *obstacle2 = m_obstacle_list[o2];
+    size_t number_of_obstacles = obstacle_list.size();
+    for (size_t id1 = 0; id1 < number_of_obstacles; id1++) {
+        Obstacle &obstacle1 = obstacle_list[id1];
+        for (size_t id2 = id1 + 1; id2 < number_of_obstacles; id2++) {
+            Obstacle &obstacle2 = obstacle_list[id2];
 #ifndef BENCHMARKING
-            m_logger->debug("scan for neighbouring cells for '{}' and '{}'", obstacle1->get_name(),
-                            obstacle2->get_name());
+            m_logger->debug("scan for neighbouring cells for '{}' and '{}'", obstacle1.get_name(),
+                            obstacle2.get_name());
 #endif
             Obstacle::remove_circular_constraints(obstacle1, obstacle2);
         }

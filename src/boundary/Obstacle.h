@@ -28,17 +28,21 @@ class Obstacle {
     Obstacle(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
              size_t level,
              const std::string &name);
-    ~Obstacle();
+    Obstacle(Obstacle &&obst) = delete;
+    Obstacle& operator=(Obstacle &&) = delete;
+    Obstacle(const Obstacle &obst) = default;
+    Obstacle &operator=(const Obstacle &) = default;
+    ~Obstacle() = default;
 
-    size_t * get_obstacle_list() const { return m_obstacle_list; }
-    size_t get_size_obstacle_list() const { return m_size_obstacle_list; }
+    const size_t * get_obstacle_list() const { return m_obstacle_list.data(); }
+    size_t get_size_obstacle_list() const { return m_obstacle_list.size(); }
 
-    size_t ** get_boundary_list() const { return m_boundary; }
+    const std::vector<std::vector<size_t>> & get_boundary_list() const { return m_boundary; }
     PatchObject *get_size_boundary_list() { return &m_size_boundary; }
 
     bool is_obstacle_cell(const Coordinate<size_t> &coords) const;
 
-    void print();
+    void print() const;
 
     size_t get_start_coordinate(CoordinateAxis axis) { return m_start[axis]; }
     size_t get_end_coordinate(CoordinateAxis axis) { return m_end[axis]; }
@@ -57,8 +61,9 @@ class Obstacle {
     bool is_edge_cell(const Coordinate<size_t> &coord) const;
     bool has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1, size_t k2) const;
 
-    bool static remove_circular_constraints(Obstacle *o1, Obstacle* o2);
+    bool static remove_circular_constraints(Obstacle &o1, Obstacle &o2);
 private:
+    static bool tmp(Obstacle &o1, Obstacle &o2, CoordinateAxis axis);
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -69,8 +74,8 @@ private:
 
     size_t m_level = 0;
 
-    size_t* m_obstacle_list;
-    size_t ** m_boundary;
+    std::vector<size_t> m_obstacle_list;
+    std::vector<std::vector<size_t>> m_boundary;
 
     size_t m_size_obstacle_list;
     PatchObject m_size_boundary;
@@ -87,11 +92,11 @@ private:
     static int get_matching_index(real obstacle_coordinate, real spacing, real start_coordinate);
     static bool has_overlap(size_t o1_coord1, size_t o1_coord2, size_t o2_coord1, size_t o2_coord2);
     static void calculate_area_index(
-            Obstacle *o1, Obstacle *o2,
+            Obstacle &o1, Obstacle &o2,
             size_t *o1_coordinate, size_t *o2_coordinate,
             CoordinateAxis coordinate_axis,
             bool start);
-    static bool circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis coordinate_axis);
+    static bool circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis coordinate_axis);
 };
 
 #endif /* ARTSS_BOUNDARY_OBSTACLE_H_ */

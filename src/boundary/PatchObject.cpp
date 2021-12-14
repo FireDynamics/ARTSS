@@ -10,15 +10,6 @@
 
 inline static const std::vector<std::string> patch_names = {"left", "right", "bottom", "top", "front", "back"};
 
-PatchObject::PatchObject() {
-    m_patches = new size_t[number_of_patches];
-    std::fill(m_patches, m_patches + number_of_patches, 0);
-}
-
-PatchObject::~PatchObject() {
-    delete[] m_patches;
-}
-
 std::string PatchObject::get_patch_name(size_t p) {
     return patch_names[p];
 }
