@@ -63,7 +63,6 @@ class Obstacle {
 
     bool static remove_circular_constraints(Obstacle &o1, Obstacle &o2);
 private:
-    static bool tmp(Obstacle &o1, Obstacle &o2, CoordinateAxis axis);
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

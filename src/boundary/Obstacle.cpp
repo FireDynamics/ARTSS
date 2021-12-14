@@ -583,16 +583,29 @@ bool Obstacle::remove_circular_constraints(Obstacle &o1, Obstacle &o2) {
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(typeid(Obstacle).name());
 #endif
-    bool overlap = false;
+    bool any_overlap = false;
     for (size_t axis = 0; axis < number_of_axes; axis++) {
-        overlap = overlap || circular_constraints(o1, o2, static_cast<CoordinateAxis>(axis));
+        auto coordinate_axis = CoordinateAxis(axis);
+#ifndef BENCHMARKING
+        logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
+                      o1.get_name(), o1.get_end_coordinate(coordinate_axis),
+                      o2.get_name(), o2.get_start_coordinate(coordinate_axis),
+                      Mapping::get_axis_name(coordinate_axis));
+#endif
+        bool overlap;
+        if (o1.get_end_coordinate(coordinate_axis) + 1 == o2.get_start_coordinate(coordinate_axis)) {
+            overlap = circular_constraints(o2, o1, coordinate_axis);
+        } else {
+            overlap = circular_constraints(o1, o2, coordinate_axis);
+        }
+        any_overlap = any_overlap || overlap;
     }
 #ifndef BENCHMARKING
-    if (overlap) {
+    if (any_overlap) {
         logger->debug("neighbouring obstacles ! {} is next to {}", o1.get_name(), o2.get_name());
     }
 #endif
-    return overlap;
+    return any_overlap;
 }
 
 //============================ circular constraints =================================
@@ -601,21 +614,7 @@ bool Obstacle::remove_circular_constraints(Obstacle &o1, Obstacle &o2) {
 /// \param o1 obstacle 1
 /// \param o2 obstacle 2
 // *************************************************************************************************
-bool Obstacle::circular_constraints(Obstacle &obstacle1, Obstacle &obstacle2, CoordinateAxis coordinate_axis) {
-#ifndef BENCHMARKING
-    auto logger = Utility::create_logger(typeid(Obstacle).name());
-    logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
-                  obstacle1.get_name(), obstacle1.get_end_coordinate(coordinate_axis),
-                  obstacle2.get_name(), obstacle2.get_start_coordinate(coordinate_axis),
-                  Mapping::get_axis_name(coordinate_axis));
-#endif
-    if (obstacle1.get_end_coordinate(coordinate_axis) + 1 == obstacle2.get_start_coordinate(coordinate_axis)) {
-        return tmp(obstacle2, obstacle1, coordinate_axis);
-    } else {
-        return tmp(obstacle1, obstacle2, coordinate_axis);
-    }
-}
-bool Obstacle::tmp(Obstacle &o1, Obstacle &o2, CoordinateAxis coordinate_axis) {
+bool Obstacle::circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis coordinate_axis) {
     const Coordinate<size_t> &coords_start_o1 = (o1.get_start_coordinates());
     const Coordinate<size_t> &coords_end_o1 = (o1.get_end_coordinates());
     const Coordinate<size_t> &coords_start_o2 = (o2.get_start_coordinates());
