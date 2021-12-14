@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
 
 #include "GlobalMacrosTypes.h"
 #include "settings/Settings.h"
@@ -28,7 +29,7 @@
 class Field;
 
 namespace Utility {
-    std::vector<size_t> get_coordinates(size_t index, size_t Nx, size_t Ny);
+    std::tuple<size_t, size_t, size_t> get_coordinates(size_t index, size_t Nx, size_t Ny);
     size_t get_index(real physical_coordinate, real spacing, real start_coordinate);
     std::vector<std::string> split(const char *text, char delimiter);
     std::vector<std::string> split(const std::string &text, char delimiter);
