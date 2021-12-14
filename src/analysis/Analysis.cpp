@@ -255,33 +255,29 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
     if (!m_has_analytic_solution) {
         return;
     }
+    real dt = m_settings.get_real("physical_parameters/dt");
+    real t_end = m_settings.get_real("physical_parameters/t_end");
+    auto Nt = static_cast<size_t>(std::round(t_end / dt));
+    real rNt = 1. / static_cast<real>(Nt);
 
-    if (m_has_analytic_solution) {
-        // local variables and parameters
-        real dt = m_settings.get_real("physical_parameters/dt");
-        real t_end = m_settings.get_real("physical_parameters/t_end");
-        auto Nt = static_cast<size_t>(std::round(t_end / dt));
-        real rNt = 1. / static_cast<real>(Nt);
-
-        real epsu = sqrt(rNt * sum_u);
+    real epsu = sqrt(rNt * sum_u);
 
 #ifndef BENCHMARKING
-        m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
+    m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
 #endif
 
-        std::vector<FieldType> v_fields = BoundaryController::getInstance()->get_used_fields();
-        if (std::count(v_fields.begin(), v_fields.end(), FieldType::P)) {
-            real epsp = sqrt(rNt * sum_p);
+    std::vector<FieldType> v_fields = BoundaryController::getInstance()->get_used_fields();
+    if (std::count(v_fields.begin(), v_fields.end(), FieldType::P)) {
+        real epsp = sqrt(rNt * sum_p);
 #ifndef BENCHMARKING
-            m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
+        m_logger->info("RMS error of p at domain center is e_RMS = {}", epsp);
 #endif
-        }
-        if(std::count(v_fields.begin(), v_fields.end(), FieldType::T)) {
-            real epsT = sqrt(rNt * sum_T);
+    }
+    if(std::count(v_fields.begin(), v_fields.end(), FieldType::T)) {
+        real epsT = sqrt(rNt * sum_T);
 #ifndef BENCHMARKING
-            m_logger->info("RMS error of T at domain center is e_RMS = {}", epsT);
+        m_logger->info("RMS error of T at domain center is e_RMS = {}", epsT);
 #endif
-        }
     }
 }
 
@@ -293,14 +289,14 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
 // ***************************************************************************************
 bool Analysis::check_time_step_VN(const real dt) {
     bool VN_check;
-    auto domain = DomainData::getInstance();
+    auto domain_data_data = DomainData::getInstance();
 
     // local variables and parameters
     real nu = m_settings.get_real("physical_parameters/nu");
 
-    real dx = domain->get_dx();
-    real dy = domain->get_dy();
-    real dz = domain->get_dz();
+    real dx = domain_data_data->get_dx();
+    real dy = domain_data_data->get_dy();
+    real dz = domain_data_data->get_dz();
 
     real dx2sum = (dx * dx + dy * dy + dz * dz);
     real rdx2 = 1. / dx2sum;
@@ -328,19 +324,19 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
     real cfl_max = 0;  // highest seen C. C is always positive, so 0 is a lower bound
     real cfl_local;    // C in the local cell
 
-    auto boundary = BoundaryController::getInstance();
-    auto domain = DomainData::getInstance();
+    auto boundary_controller = BoundaryController::getInstance();
+    auto domain_data = DomainData::getInstance();
 
     // local variables and parameters
-    size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
+    size_t *inner_list = boundary_controller->get_domain_inner_list_level_joined();
+    size_t size_inner_list = boundary_controller->get_size_domain_inner_list_level_joined(0);
 
-    real dx = domain->get_dx();
-    real dy = domain->get_dy();
-    real dz = domain->get_dz();
+    real dx = domain_data->get_dx();
+    real dy = domain_data->get_dy();
+    real dz = domain_data->get_dz();
 
     // calc C for every cell and get the maximum
-#pragma acc data present(u, v, w)
+#pragma acc data present(u, v, w, inner_list[:size_inner_list])
 #pragma acc parallel loop reduction(max:cfl_max)
     for (size_t i = 0; i < size_inner_list; i++) {
         size_t idx = inner_list[i];
