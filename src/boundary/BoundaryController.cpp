@@ -1,7 +1,7 @@
 /// \file       BoundaryController.cpp
 /// \brief      Controller class for boundary
 /// \date       Oct 01, 2020
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "BoundaryController.h"
@@ -16,10 +16,9 @@ BoundaryController::BoundaryController(Settings::Settings const &settings) :
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_bdc_boundary = new BoundaryDataController();
-    read_XML();
+    auto [surfaces, bdc_surfaces] = read_XML();
     size_t multigrid_level = DomainData::getInstance()->get_levels();
-    m_multigrid = new Multigrid(m_settings,
-                                m_number_of_surfaces, m_surface_list,
+    m_multigrid = new Multigrid(surfaces, bdc_surfaces,
                                 m_number_of_obstacles, m_obstacle_list,
                                 m_bdc_boundary, m_bdc_obstacles,
                                 multigrid_level);
@@ -32,7 +31,7 @@ BoundaryController::BoundaryController(Settings::Settings const &settings) :
 // *************************************************************************************************
 /// \brief  Reads in all parameters of boundary, obstacles and surfaces
 // *************************************************************************************************
-void BoundaryController::read_XML() {
+return_surface BoundaryController::read_XML() {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing XML");
 #endif
@@ -40,10 +39,11 @@ void BoundaryController::read_XML() {
     parse_boundary_parameter(m_settings.get_boundaries());
     parse_obstacle_parameter(m_settings.get_obstacles());
     detect_neighbouring_obstacles();
-    parse_surface_parameter(m_settings.get_surfaces());
+    return_surface ret_surfaces = parse_surface_parameter(m_settings.get_surfaces());
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing XML");
 #endif
+    return ret_surfaces;
 }
 
 // ================================= Parser ========================================================
@@ -69,29 +69,42 @@ void BoundaryController::parse_boundary_parameter(const std::vector<Settings::Bo
 /// \brief  parses surfaces from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-void BoundaryController::parse_surface_parameter(const std::vector<Settings::SurfaceSetting> &surfaces) {
+return_surface BoundaryController::parse_surface_parameter(const std::vector<Settings::SurfaceSetting> &surface_setting) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing surface parameter");
 #endif
     // SURFACES
     // TODO(issue 5): surfaces
     m_has_surfaces = m_settings.get_bool("surfaces/enabled");
+    std::vector<Surface> surfaces;
+    std::vector<BoundaryDataController> bdc_surfaces;
     if (m_has_surfaces) {
-        std::vector<Surface *> ret_surfaces;
-        ret_surfaces.reserve(surfaces.size());
-        for (auto surface: surfaces) {
-            ret_surfaces.emplace_back(new Surface(surface));
+        surfaces.reserve(surfaces.size());
+        bdc_surfaces.reserve(surfaces.size());
+        for (const auto &surface: surface_setting) {
+            std::string name = surface.get_name();
+            Patch patch = PatchObject::match_patch(surface.get_patch());
+            real sx1 = surface.get_sx1();
+            real sx2 = surface.get_sx2();
+            real sy1 = surface.get_sy1();
+            real sy2 = surface.get_sy2();
+            real sz1 = surface.get_sz1();
+            real sz2 = surface.get_sz2();
+            surfaces.emplace_back(sx1, sx2, sy1, sy2, sz1, sz2, name, patch);
+
+            BoundaryDataController bdc;
+            for (const auto &boundary: surface.get_boundaries()) {
+                bdc.add_boundary_data(boundary);
+            }
+            bdc_surfaces.emplace_back(bdc);
         }
-        m_number_of_surfaces = ret_surfaces.size();
-        //TODO(cvm) vector surfaces will be destroyed after this method therefore I need to preserve the data
-        std::memcpy(m_surface_list, ret_surfaces.data(), ret_surfaces.size());
-    } else {
-        m_surface_list = new Surface *[m_number_of_surfaces];
-        //m_bdc_surfaces = new BoundaryDataController *[m_number_of_surfaces];
     }
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing surface parameter");
 #endif
+    surfaces.shrink_to_fit();
+    bdc_surfaces.shrink_to_fit();
+    return {surfaces, bdc_surfaces};
 }
 
 // ================================= Parser ========================================================
@@ -171,9 +184,6 @@ void BoundaryController::print_boundaries() {
     for (size_t i = 0; i < m_number_of_obstacles; i++) {
         m_obstacle_list[i]->print();
         m_bdc_obstacles[i]->print();
-    }
-    for (size_t i = 0; i < m_number_of_surfaces; i++) {
-        m_surface_list[i]->print();
     }
 #endif
 }

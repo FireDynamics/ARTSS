@@ -16,6 +16,7 @@
 #include "Multigrid.h"
 #include "Obstacle.h"
 #include "Surface.h"
+using return_surface = std::tuple<std::vector<Surface>, std::vector<BoundaryDataController>>;
 
 class BoundaryController {
  public:
@@ -70,8 +71,6 @@ class BoundaryController {
     BoundaryDataController **m_bdc_obstacles;
     Multigrid* m_multigrid;
 
-    Surface** m_surface_list;
-    size_t m_number_of_surfaces = 0;
     Obstacle** m_obstacle_list;
     size_t m_number_of_obstacles = 0;
 
@@ -80,10 +79,10 @@ class BoundaryController {
     bool m_has_obstacles;
     bool m_has_surfaces;
 
-    void read_XML();
+    return_surface read_XML();
     void parse_boundary_parameter(const std::vector<Settings::BoundarySetting>& boundaries);
     void parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting>& obstacles);
-    void parse_surface_parameter(const std::vector<Settings::SurfaceSetting>& surfaces);
+    return_surface parse_surface_parameter(const std::vector<Settings::SurfaceSetting>& surface_setting);
 
     void detect_neighbouring_obstacles();
 };

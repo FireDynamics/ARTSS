@@ -14,6 +14,7 @@
 #include "BoundarySetting.h"
 #include "tinyxml2.h"
 #include "../GlobalMacrosTypes.h"
+#include "../../boundary/PatchObject.h"
 
 #ifndef BENCHMARKING
 #include <spdlog/logger.h>
@@ -26,6 +27,7 @@ class SurfaceSetting {
     explicit SurfaceSetting(tinyxml2::XMLElement *xml_element);
 
     std::string get_name() const { return name; }
+    std::string get_patch() const { return patch; }
     real get_sx1() const { return sx1; }
     real get_sx2() const { return sx2; }
     real get_sy1() const { return sy1; }

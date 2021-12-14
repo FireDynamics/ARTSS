@@ -1,37 +1,28 @@
-//
-// Created by linh on 01.10.19.
-//
+/// \file       Surface.cpp
+/// \brief      Data class of surface object
+/// \date       Oct 01, 2019
+/// \author     My Linh Wuerzburger
+/// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Surface.h"
 
 
-// TODO(issue 15): surface implementing
-//  - underscores instead of camel case
-//  - create file description
-//  - remove surface cells from domain domain boundary cells
-//  - develop a concept for boundary conditions
-//  - make sure that surfaces does not extend to corner or edge cells
-//  - consider moving parsing to BoundaryController.cpp same as for obstacles,
-//    may be not possible/practical depending on the concept for BC
-Surface::Surface(Settings::SurfaceSetting const &surface_setting) :
+Surface::Surface(real x1, real x2,
+                 real y1, real y2,
+                 real z1, real z2,
+                 const std::string &name,
+                 Patch patch) :
+        m_name(name),
+        m_patch(patch),
         m_level(0) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("################ SURFACE ################");
 #endif
-
-//    m_name = surface_setting.get_name();
-//    m_patch = PatchObject::match_patch(element->Attribute("patch"));
 #ifndef BENCHMARKING
     m_logger->debug("read surface '{}' for patch {}", m_name, PatchObject::get_patch_name(m_patch));
 #endif
 
-    real sx1 = surface_setting.get_sx1();
-    real sx2 = surface_setting.get_sx2();
-    real sy1 = surface_setting.get_sy1();
-    real sy2 = surface_setting.get_sy2();
-    real sz1 = surface_setting.get_sz1();
-    real sz2 = surface_setting.get_sz2();
 
     //TODO
     auto domain = DomainData::getInstance();

@@ -17,7 +17,11 @@
 
 class Surface {
  public:
-    explicit Surface(Settings::SurfaceSetting const &surface_setting);
+    Surface(real x1, real x2,
+            real y1, real y2,
+            real z1, real z2,
+            const std::string &name,
+            Patch patch);
     Surface(const std::string &name,
             Patch patch,
             Coordinate<size_t> &start, Coordinate<size_t> &end,

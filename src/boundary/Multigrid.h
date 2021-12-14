@@ -19,8 +19,7 @@
 
 class Multigrid {
  public:
-    Multigrid(Settings::Settings const &settings,
-              size_t number_of_surfaces, Surface** surface_list,
+    Multigrid(const std::vector<Surface>& surfaces, const std::vector<BoundaryDataController> &bdc_surfaces,
               size_t number_of_obstacles, Obstacle** obstacle_list,
               BoundaryDataController* bdc_boundary,
               BoundaryDataController **bdc_obstacles,
@@ -58,10 +57,9 @@ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    Settings::Settings const &m_settings;
     size_t m_multigrid_levels;
     // all surfaces divided by level
-    Surface*** m_MG_surface_object_list;  // m_MG_surface_object_list[level][surfaceID]
+    std::vector<std::vector<Surface>> m_MG_surface_object_list;  // m_MG_surface_object_list[level][surfaceID]
     size_t m_number_of_surface_objects = 0;
     // all obstacles divided by level
     Obstacle*** m_MG_obstacle_object_list;  // m_MG_obstacle_object_list[level][obstacleID]
@@ -96,6 +94,7 @@ private:
 
     BoundaryDataController *m_bdc_boundary;
     BoundaryDataController **m_bdc_obstacle;
+    std::vector<BoundaryDataController> m_bdc_surface;
 
     void remove_domain_lists_from_GPU();
 
