@@ -19,8 +19,8 @@
 
 
 namespace Utility {
-    static std::string class_name = "Utility";
-    static std::string global_logger = "ARTSS";
+    const static std::string class_name = "Utility";
+    const static std::string global_logger = "ARTSS";
 
     // do not use only for debug purpose
 std::vector<size_t> get_coordinates(size_t index, size_t Nx, size_t Ny) {
