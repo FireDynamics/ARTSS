@@ -102,7 +102,7 @@ void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords,
 
 std::string Visual::create_filename(const std::string &filename,
                                     int counter, bool analytical) {
-    std::string fname = std::move(filename);
+    std::string fname = filename;
     if (analytical) {
         fname.append("_ana_");
     } else {
