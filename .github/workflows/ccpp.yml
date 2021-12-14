@@ -82,7 +82,7 @@ jobs:
         run: |
           git submodule update --init
           ./compile.sh --docker-build
-          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "./compile.sh --jobs 4 -s -m -d && cd build && ctest -E 'gpu|gtest'"
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "./compile.sh --jobs 4 -s -m -d && cd build && ctest --output-on-failure -E 'gpu|gtest'"
           
   unit-tests_serial:
     
