@@ -16,7 +16,7 @@ jobs:
     - name: compile
       run: |
         git submodule update --init
-        ./compile.sh --jobs 4 --gcc -s
+        ./compile.sh --jobs 4 --gcc -s --checkout
         
   build-gcc-serial-benchmarking:
 
@@ -27,7 +27,7 @@ jobs:
     - name: compile
       run: |
         git submodule update --init
-        ./compile.sh --jobs 4 --gcc --sb
+        ./compile.sh --jobs 4 --gcc --sb --checkout
         
   build-pgi-multicore:
     
@@ -38,7 +38,7 @@ jobs:
         run: |
           git submodule update --init
           ./compile.sh --docker-build
-          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh -m --jobs 4
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh -m --jobs 4 --checkout
 
   build-pgi-multicore-benchmarking:
     
@@ -60,7 +60,7 @@ jobs:
         run: |
           git submodule update --init
           ./compile.sh --docker-build
-          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh --jobs 4 -s
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh --jobs 4 -s --checkout
         
   build-pgi-serial-benchmarking:
     
@@ -82,7 +82,7 @@ jobs:
         run: |
           git submodule update --init
           ./compile.sh --docker-build
-          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "./compile.sh --jobs 4 -s -m -d && cd build && ctest -E 'gpu|gtest'"
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "./compile.sh --jobs 4 -s -m -d && cd build && ctest -E 'gpu|gtest' --checkout"
           
   unit-tests_serial:
     
@@ -94,7 +94,7 @@ jobs:
           git submodule update --init
           mkdir build
           ./compile.sh --docker-build
-          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "cd build && cmake .. && make artss_gtest && gtests/bin/artss_gtest"
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "cd build && cmake .. && make artss_gtest && gtests/bin/artss_gtest --checkout"
   test-xml:
     
     runs-on: ubuntu-latest
