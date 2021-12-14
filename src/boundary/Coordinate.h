@@ -29,6 +29,7 @@ enum CoordinateAxis : int {
 };
 namespace Axis {
     CoordinateAxis match_axis(const std::string &string);
+    std::string get_axis_name(CoordinateAxis axis);
     //TODO cvm forward declaration
 //    CoordinateAxis to_axis(Patch patch);
 }

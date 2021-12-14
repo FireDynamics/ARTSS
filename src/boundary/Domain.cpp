@@ -1,7 +1,7 @@
 /// \file       Boundary.cpp
 /// \brief      Data class of boundary object
 /// \date       Oct 01, 2019
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Domain.h"
