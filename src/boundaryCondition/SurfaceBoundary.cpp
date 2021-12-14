@@ -194,7 +194,7 @@ void apply_periodic(Field &field, MultipleJoinedList *mjl,
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
 void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
-                              BoundaryData *boundary_data, size_t id, bool sync) {
+                              const BoundaryData &boundary_data, size_t id, bool sync) {
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(class_name);
 #endif
@@ -205,22 +205,22 @@ void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
         if (patch_size == 0) {
             continue;
         }
-        auto p = static_cast<Patch>(i);
+        auto p = Patch(i);
 #ifndef BENCHMARKING
         logger->debug("apply_boundary_condition ! level {} for {}", mjl->get_slice_size(level), level, Mapping::get_patch_name(p));
 #endif
-        BoundaryCondition bc = boundary_data->get_boundary_condition(p);
+        BoundaryCondition bc = boundary_data.get_boundary_condition(p);
         real value = 0;
         switch (bc) {
             case BoundaryCondition::DIRICHLET:
                 if (field.get_level() == 0) {
-                    value = boundary_data->get_value(p);
+                    value = boundary_data.get_value(p);
                 }
                 apply_dirichlet(field, mjl, id, p, value);
                 break;
             case BoundaryCondition::NEUMANN:
                 if (field.get_level() == 0) {
-                    value = boundary_data->get_value(p);
+                    value = boundary_data.get_value(p);
                 }
                 apply_neumann(field, mjl, id, p, value);
                 break;

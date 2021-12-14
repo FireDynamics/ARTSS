@@ -20,7 +20,7 @@
 class BoundaryDataController {
  public:
     explicit BoundaryDataController(const std::vector<Settings::BoundarySetting> &boundary);
-    ~BoundaryDataController();
+    ~BoundaryDataController() = default;
     void apply_boundary_condition(
             Field &field,
             SingleJoinedList **index_fields,
@@ -39,7 +39,7 @@ class BoundaryDataController {
     std::vector<FieldType> get_used_fields();
 
  private:
-    BoundaryData** m_boundary_data;
+    std::vector<BoundaryData> m_boundary_data;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

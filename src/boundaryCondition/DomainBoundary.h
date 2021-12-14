@@ -16,6 +16,6 @@
 
 namespace DomainBoundary {
     void apply_boundary_condition(Field &field, SingleJoinedList** index_fields,
-                                  BoundaryData* boundary_data, bool sync = true);
+                                  const BoundaryData &boundary_data, bool sync = true);
 }  // namespace DomainBoundary
 #endif /* ARTSS_BOUNDARYCONDITION_DOMAINBOUNDARY_H */

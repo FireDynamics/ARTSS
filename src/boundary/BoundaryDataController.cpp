@@ -16,21 +16,14 @@ BoundaryDataController::BoundaryDataController(const std::vector<Settings::Bound
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_boundary_data = new BoundaryData *[number_of_field_types];
+    m_boundary_data.resize(number_of_field_types);
     for (size_t i = 0; i < number_of_field_types; i++) {
-        *(m_boundary_data + i) = new BoundaryData();
+        m_boundary_data.emplace_back(BoundaryData());
     }
 
     for (const auto &b : boundary) {
         add_boundary_data(b);
     }
-}
-
-BoundaryDataController::~BoundaryDataController() {
-    for (size_t i = 0; i < number_of_field_types; i++) {
-        delete m_boundary_data[i];
-    }
-    delete[] m_boundary_data;
 }
 
 // =================================== Add boundary data ===========================================
@@ -47,7 +40,7 @@ void BoundaryDataController::add_boundary_data(const Settings::BoundarySetting &
 
         for (const auto &p : Utility::split(boundary.get_patch(), ',')) {
             Patch patch = Mapping::match_patch(p);
-            m_boundary_data[field_type]->add_boundary_condition(patch, value, bc);
+            m_boundary_data[field_type].add_boundary_condition(patch, value, bc);
         }
     }
 }
@@ -59,11 +52,10 @@ void BoundaryDataController::add_boundary_data(const Settings::BoundarySetting &
 void BoundaryDataController::print() const {
 #ifndef BENCHMARKING
     for (size_t i = 0; i < number_of_field_types; i++) {
-        auto boundary = *(m_boundary_data + i);
-        if (!boundary->is_empty()) {
+        if (!m_boundary_data[i].is_empty()) {
             m_logger->info("--- found boundary conditions for field {} ({}): ",
                            Mapping::get_field_type_name(FieldType(i)), i);
-            boundary->print();
+            m_boundary_data[i].print();
         }
     }
 #endif
@@ -83,7 +75,7 @@ void BoundaryDataController::apply_boundary_condition(
         SingleJoinedList **index_fields,
         bool sync) {
     FieldType field_type = field.get_type();
-    if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {
+    if (!m_boundary_data[field_type].is_empty()) {
         DomainBoundary::apply_boundary_condition(field,
                                                  index_fields,
                                                  m_boundary_data[field_type],
@@ -106,7 +98,7 @@ void BoundaryDataController::apply_boundary_condition_surface(
         size_t id,
         bool sync) {
     FieldType field_type = field.get_type();
-    if (!((static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty())) {
+    if (!m_boundary_data[field_type].is_empty()) {
         SurfaceBoundary::apply_boundary_condition(
                 field,
                 index_fields,
@@ -134,7 +126,7 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
         size_t id,
         bool sync) {
     FieldType field_type = field.get_type();
-    if (!(static_cast<BoundaryData *> (*(m_boundary_data + field_type)))->is_empty()) {
+    if (!m_boundary_data[field_type].is_empty()) {
 #ifndef BENCHMARKING
         m_logger->debug("apply obstacle boundary conditions of id={} {}", id,
                         Mapping::get_field_type_name(field_type));
@@ -156,9 +148,9 @@ void BoundaryDataController::apply_boundary_condition_obstacle(
 std::vector<FieldType> BoundaryDataController::get_used_fields() {
     std::vector<FieldType> v_fields;
     v_fields.reserve(number_of_field_types);
-    for (size_t fieldType = 0; fieldType < number_of_field_types; fieldType++) {
-        if (!(static_cast<BoundaryData *> (*(m_boundary_data + fieldType)))->is_empty()) {
-            v_fields.push_back(static_cast<FieldType>(fieldType));
+    for (size_t field_type = 0; field_type < number_of_field_types; field_type++) {
+        if (!m_boundary_data[field_type].is_empty()) {
+            v_fields.push_back(FieldType(field_type));
         }
     }
     v_fields.shrink_to_fit();

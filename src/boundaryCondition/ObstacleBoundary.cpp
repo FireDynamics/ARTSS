@@ -178,7 +178,7 @@ namespace {
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
 void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
-                              BoundaryData *boundary_data, size_t id, bool sync) {
+                              const BoundaryData &boundary_data, size_t id, bool sync) {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);
 #endif
@@ -193,15 +193,15 @@ void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
 #endif
                 continue;
             }
-            BoundaryCondition bc = boundary_data->get_boundary_condition(patch);
+            BoundaryCondition bc = boundary_data.get_boundary_condition(patch);
             switch (bc) {
                 case BoundaryCondition::DIRICHLET:
                     apply_dirichlet(field, index_fields[patch], id, patch,
-                                    boundary_data->get_value(patch));
+                                    boundary_data.get_value(patch));
                     break;
                 case BoundaryCondition::NEUMANN:
                     apply_neumann(field, index_fields[patch], id, patch,
-                                  boundary_data->get_value(patch));
+                                  boundary_data.get_value(patch));
                     break;
                 case BoundaryCondition::PERIODIC:
 #ifndef BENCHMARKING

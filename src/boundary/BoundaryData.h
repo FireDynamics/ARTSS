@@ -18,8 +18,8 @@
 class BoundaryData {
  public:
     explicit BoundaryData();
-    ~BoundaryData();
-    void print();
+    ~BoundaryData() = default;
+    void print() const;
 
     void add_boundary_condition(Patch const &patches,
                                 real value,
@@ -33,8 +33,8 @@ class BoundaryData {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    BoundaryCondition* m_boundary_conditions;
-    real* m_values;
+    std::vector<BoundaryCondition> m_boundary_conditions;
+    std::vector<real> m_values;
 
     bool m_has_values = false;
 };

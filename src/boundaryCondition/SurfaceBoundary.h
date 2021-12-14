@@ -16,6 +16,6 @@
 
 namespace SurfaceBoundary {
     void apply_boundary_condition(Field &field, MultipleJoinedList** index_fields,
-                                  BoundaryData* boundary_data, size_t id, bool sync = true);
+                                  const BoundaryData &boundary_data, size_t id, bool sync = true);
 }  // namespace SurfaceBoundary
 #endif /* ARTSS_BOUNDARYCONDITION_SURFACEBOUNDARY_H */

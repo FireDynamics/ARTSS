@@ -11,25 +11,18 @@ BoundaryData::BoundaryData() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_values = new real[number_of_patches];
-    m_boundary_conditions = new BoundaryCondition[number_of_patches];
-}
-
-BoundaryData::~BoundaryData() {
-    if (m_has_values) {
-        delete[] m_values;
-        delete[] m_boundary_conditions;
-    }
+    m_values.resize(number_of_patches);
+    m_boundary_conditions.resize(number_of_patches);
 }
 
 //====================================== Print =====================================================
 // *************************************************************************************************
 /// \brief  Print boundary infos
 // *************************************************************************************************
-void BoundaryData::print() {
+void BoundaryData::print() const {
 #ifndef BENCHMARKING
     for (size_t i = 0; i < number_of_patches; i++) {
-        std::string p = Mapping::get_patch_name(static_cast<Patch>(i));
+        std::string p = Mapping::get_patch_name(Patch(i));
         std::string bc = Mapping::get_boundary_condition_name(m_boundary_conditions[i]);
         real val = m_values[i];
         m_logger->info("\t Patch {} with {} {}", p, bc, val);

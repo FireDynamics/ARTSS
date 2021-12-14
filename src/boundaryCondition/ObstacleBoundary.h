@@ -15,7 +15,7 @@
 
 namespace ObstacleBoundary {
     void apply_boundary_condition(Field &field, MultipleJoinedList **index_fields,
-                                  BoundaryData* boundary_data, size_t id, bool sync = true);
+                                  const BoundaryData &boundary_data, size_t id, bool sync = true);
 }  // namespace ObstacleBoundary
 
 #endif /* ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H_ */

@@ -190,7 +190,7 @@ static const std::string class_name = "DomainBoundary";
 /// \param  boundary_data Boundary data_field object of Domain
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
-    void apply_boundary_condition(Field &field, SingleJoinedList **index_fields, BoundaryData *boundary_data, bool sync) {
+    void apply_boundary_condition(Field &field, SingleJoinedList **index_fields, const BoundaryData &boundary_data, bool sync) {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);
 #endif
@@ -205,18 +205,18 @@ static const std::string class_name = "DomainBoundary";
 #ifndef BENCHMARKING
             logger->debug("apply_boundary_condition ! level {} for {}", jl->get_slice_size(level), level, Mapping::get_patch_name(p));
 #endif
-            BoundaryCondition bc = boundary_data->get_boundary_condition(p);
+            BoundaryCondition bc = boundary_data.get_boundary_condition(p);
             real value = 0;
             switch (bc) {
                 case BoundaryCondition::DIRICHLET:
                     if (field.get_level() == 0) {
-                        value = boundary_data->get_value(p);
+                        value = boundary_data.get_value(p);
                     }
                     apply_dirichlet(field, jl, p, value);
                     break;
                 case BoundaryCondition::NEUMANN:
                     if (field.get_level() == 0) {
-                        value = boundary_data->get_value(p);
+                        value = boundary_data.get_value(p);
                     }
                     apply_neumann(field, jl, p, value);
                     break;
