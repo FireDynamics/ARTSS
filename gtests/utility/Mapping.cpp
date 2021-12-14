@@ -25,7 +25,7 @@ TEST(MappingTest, matchPatch) {
     EXPECT_EQ(patch_unknown, Patch::UNKNOWN_PATCH);
 }
 
-TEST(MappingTest, get_boundary_patch_name) {
+TEST(MappingTest, getBoundaryPatchName) {
     std::string front = Mapping::get_patch_name(Patch::FRONT);
     EXPECT_EQ("front", front);
     std::string back = Mapping::get_patch_name(Patch::BACK);
@@ -64,3 +64,47 @@ TEST(MappingTest, getName) {
     EXPECT_EQ("Z", Mapping::get_axis_name(Z));
 }
 
+TEST(MappingTest, matchField) {
+    FieldType field_type_rho = Mapping::match_field("rho");
+    ASSERT_EQ(field_type_rho, FieldType::RHO);
+    FieldType field_type_u = Mapping::match_field("u");
+    ASSERT_EQ(field_type_u, FieldType::U);
+    FieldType field_type_v = Mapping::match_field("v");
+    ASSERT_EQ(field_type_v, FieldType::V);
+    FieldType field_type_w = Mapping::match_field("w");
+    ASSERT_EQ(field_type_w, FieldType::W);
+    FieldType field_type_p = Mapping::match_field("p");
+    ASSERT_EQ(field_type_p, FieldType::P);
+    FieldType field_type_T = Mapping::match_field("T");
+    ASSERT_EQ(field_type_T, FieldType::T);
+    FieldType field_type_unknown = Mapping::match_field("a");
+    ASSERT_EQ(field_type_unknown, FieldType::UNKNOWN_FIELD);
+}
+
+TEST(MappingTest, matchBoundaryCondition) {
+    BoundaryCondition bc_neumann = Mapping::match_boundary_condition("neumann");
+    ASSERT_EQ(bc_neumann, BoundaryCondition::NEUMANN);
+    BoundaryCondition bc_dirichlet = Mapping::match_boundary_condition("dirichlet");
+    ASSERT_EQ(bc_dirichlet, BoundaryCondition::DIRICHLET);
+    BoundaryCondition bc_periodic = Mapping::match_boundary_condition("periodic");
+    ASSERT_EQ(bc_periodic, BoundaryCondition::PERIODIC);
+    BoundaryCondition bc_unknown = Mapping::match_boundary_condition("a");
+    ASSERT_EQ(bc_unknown, BoundaryCondition::UNKNOWN_CONDITION);
+}
+
+TEST(MappingTest, getFieldTypeName) {
+    std::string rho = Mapping::get_field_type_name(FieldType::RHO);
+    ASSERT_EQ("rho", rho);
+    std::string u = Mapping::get_field_type_name(FieldType::U);
+    ASSERT_EQ("u", u);
+    std::string v = Mapping::get_field_type_name(FieldType::V);
+    ASSERT_EQ("v", v);
+    std::string w = Mapping::get_field_type_name(FieldType::W);
+    ASSERT_EQ("w", w);
+    std::string p = Mapping::get_field_type_name(FieldType::P);
+    ASSERT_EQ("p", p);
+    std::string T = Mapping::get_field_type_name(FieldType::T);
+    ASSERT_STRCASEEQ("T", T.c_str());
+
+//    ASSERT_EXIT((Mapping::get_field_type_name(FieldType::UNKNOWN_FIELD),exit(0)),::testing::KilledBySignal(SIGEV_SIGNAL),".*");
+}
