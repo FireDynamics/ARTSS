@@ -40,9 +40,13 @@ class Obstacle {
 
     void print();
 
-    Coordinate<size_t> get_start_coordinates() const { return m_start; }
-    Coordinate<size_t> get_end_coordinates() const { return m_end; }
-    Coordinate<size_t> get_strides() const { return m_strides; }
+    size_t get_start_coordinate(CoordinateAxis axis) { return m_start[axis]; }
+    size_t get_end_coordinate(CoordinateAxis axis) { return m_end[axis]; }
+    size_t get_stride(CoordinateAxis axis) { return m_strides[axis]; }
+
+    [[nodiscard]] const Coordinate<size_t> &get_start_coordinates() const { return m_start; }
+    [[nodiscard]] const Coordinate<size_t> &get_end_coordinates() const { return m_end; }
+    [[nodiscard]] const Coordinate<size_t> &get_strides() const { return m_strides; }
 
     std::string get_name() { return m_name; }
 
@@ -59,9 +63,9 @@ private:
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     std::string m_name;
-    Coordinate<size_t> m_start;
-    Coordinate<size_t> m_end;
-    Coordinate<size_t> m_strides;
+    const Coordinate<size_t> m_start;
+    const Coordinate<size_t> m_end;
+    const Coordinate<size_t> m_strides;
 
     size_t m_level = 0;
 

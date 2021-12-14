@@ -617,22 +617,21 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
     auto domain_data = DomainData::getInstance();
     auto Nx = domain_data->get_Nx();
     auto Ny = domain_data->get_Ny();
-    Coordinate<size_t> coords_start_o1(o1->get_start_coordinates());
-    Coordinate<size_t> coords_end_o1(o1->get_end_coordinates());
-    Coordinate<size_t> coords_start_o2(o2->get_start_coordinates());
-    Coordinate<size_t> coords_end_o2(o2->get_end_coordinates());
 
 #ifndef BENCHMARKING
     logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
-                  o1->get_name(), coords_end_o1[coordinate_axis],
-                  o2->get_name(), coords_start_o2[coordinate_axis],
+                  o1->get_name(), o1->get_end_coordinate(coordinate_axis),
+                  o2->get_name(), o2->get_start_coordinate(coordinate_axis),
                   Coordinate<size_t>::get_axis_name(coordinate_axis));
 #endif
-    if (coords_end_o1[coordinate_axis] + 1 == coords_start_o2[coordinate_axis]) {
+    if (o1->get_end_coordinate(coordinate_axis) + 1 == o2->get_start_coordinate(coordinate_axis)) {
         std::swap(o1, o2);
-        std::swap(coords_start_o1, coords_start_o2);
-        std::swap(coords_end_o1, coords_end_o2);
     }
+
+    const Coordinate<size_t> &coords_start_o1 = (o1->get_start_coordinates());
+    const Coordinate<size_t> &coords_end_o1 = (o1->get_end_coordinates());
+    const Coordinate<size_t> &coords_start_o2 = (o2->get_start_coordinates());
+    const Coordinate<size_t> &coords_end_o2 = (o2->get_end_coordinates());
 #ifndef BENCHMARKING
     logger->debug("neighbouring obstacles ! comparing {} {} with {} {} in {} direction",
                   o1->get_name(), coords_start_o1[coordinate_axis],
@@ -678,27 +677,80 @@ bool Obstacle::circular_constraints(Obstacle *o1, Obstacle *o2, CoordinateAxis c
             Coordinate<size_t> o2_remove_start;
             Coordinate<size_t> o2_remove_end;
 
-            o1_remove_start[coordinate_axis] = coords_start_o1[coordinate_axis];
-            o1_remove_end[coordinate_axis] = coords_start_o1[coordinate_axis];
+            if (coordinate_axis == CoordinateAxis::X) {
+                size_t o1_x1 = coords_start_o1[CoordinateAxis::X];
+                size_t o2_x2 = coords_end_o2[CoordinateAxis::X];
 
-            o2_remove_start[coordinate_axis] = coords_end_o2[coordinate_axis];
-            o2_remove_end[coordinate_axis] = coords_end_o2[coordinate_axis];
-
-            for (size_t a = 0; a < number_of_axes - 1; a++) {
-                auto axis = CoordinateAxis(a);
                 size_t o1_y1;
                 size_t o2_y1;
-                Obstacle::calculate_area_index(o1, o2, &o1_y1, &o2_y1, axis, true);
+                Obstacle::calculate_area_index(o1, o2, &o1_y1, &o2_y1, CoordinateAxis::Y, true);
+                size_t o1_y2;
+                size_t o2_y2;
+                Obstacle::calculate_area_index(o1, o2, &o1_y2, &o2_y2, CoordinateAxis::Y, false);
+
+                size_t o1_z1;
+                size_t o2_z1;
+                Obstacle::calculate_area_index(o1, o2, &o1_z1, &o2_z1, CoordinateAxis::Z, true);
+
+                size_t o1_z2;
+                size_t o2_z2;
+                Obstacle::calculate_area_index(o1, o2, &o1_z2, &o2_z2, CoordinateAxis::Z, false);
+
+                o1_remove_start.set_coordinate(o1_x1, o1_y1, o1_z1);
+                o1_remove_end.set_coordinate(o1_x1, o1_y2, o1_z2);
+
+                o2_remove_start.set_coordinate(o2_x2, o2_y1, o2_z1);
+                o2_remove_end.set_coordinate(o2_x2, o2_y2, o2_z2);
+            } else if (coordinate_axis == CoordinateAxis::Y) {
+                size_t o1_x1;
+                size_t o2_x1;
+                Obstacle::calculate_area_index(o1, o2, &o1_x1, &o2_x1, CoordinateAxis::X, true);
+
+                size_t o1_x2;
+                size_t o2_x2;
+                Obstacle::calculate_area_index(o1, o2, &o1_x2, &o2_x2, CoordinateAxis::X, false);
+
+                size_t o1_y1 = coords_start_o1[CoordinateAxis::Y];
+                size_t o2_y2 = coords_end_o2[CoordinateAxis::Y];
+
+                size_t o1_z1;
+                size_t o2_z1;
+                Obstacle::calculate_area_index(o1, o2, &o1_z1, &o2_z1, CoordinateAxis::Z, true);
+
+                size_t o1_z2;
+                size_t o2_z2;
+                Obstacle::calculate_area_index(o1, o2, &o1_z2, &o2_z2, CoordinateAxis::Z, false);
+
+                o1_remove_start.set_coordinate(o1_x1, o1_y1, o1_z1);
+                o1_remove_end.set_coordinate(o1_x2, o1_y1, o1_z2);
+
+                o2_remove_start.set_coordinate(o2_x1, o2_y2, o2_z1);
+                o2_remove_end.set_coordinate(o2_x2, o2_y2, o2_z2);
+            } else if (coordinate_axis == CoordinateAxis::Z) {
+                size_t o1_x1;
+                size_t o2_x1;
+                Obstacle::calculate_area_index(o1, o2, &o1_x1, &o2_x1, CoordinateAxis::X, true);
+
+                size_t o1_x2;
+                size_t o2_x2;
+                Obstacle::calculate_area_index(o1, o2, &o1_x2, &o2_x2, CoordinateAxis::X, false);
+
+                size_t o1_y1;
+                size_t o2_y1;
+                Obstacle::calculate_area_index(o1, o2, &o1_y1, &o2_y1, CoordinateAxis::Y, true);
 
                 size_t o1_y2;
                 size_t o2_y2;
-                Obstacle::calculate_area_index(o1, o2, &o1_y2, &o2_y2, axis, false);
+                Obstacle::calculate_area_index(o1, o2, &o1_y2, &o2_y2, CoordinateAxis::Y, false);
 
-                o1_remove_start[axis] = o1_y1;
-                o1_remove_end[axis] = o1_y2;
+                size_t o1_z1 = coords_start_o1[CoordinateAxis::Z];
+                size_t o2_z2 = coords_end_o2[CoordinateAxis::Z];
 
-                o2_remove_start[axis] = o2_y1;
-                o2_remove_end[axis] = o2_y2;
+                o1_remove_start.set_coordinate(o1_x1, o1_y1, o1_z1);
+                o1_remove_end.set_coordinate(o1_x2, o1_y2, o1_z1);
+
+                o2_remove_start.set_coordinate(o2_x1, o2_y1, o2_z2);
+                o2_remove_end.set_coordinate(o2_x2, o2_y2, o2_z2);
             }
 #ifndef BENCHMARKING
             logger->debug("neighbouring obstacles ! removing indices in area ({}|{}) ({}|{}) ({}|{}) for {}",
