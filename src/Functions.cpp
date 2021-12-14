@@ -47,17 +47,17 @@ namespace Functions {
 /// \param  t time
 // ***************************************************************************************
     void beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, real a, real d, real nu) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         auto boundary = BoundaryController::getInstance();
         size_t *domain_list = boundary->get_domain_inner_list_level_joined();
@@ -91,17 +91,17 @@ namespace Functions {
 /// \param  out_x  pressure
 // ***************************************************************************************
     void beltrami_bc_p(Field &out_x, real a) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         auto boundary = BoundaryController::getInstance();
         size_t *domain_list = boundary->get_domain_inner_list_level_joined();
@@ -130,17 +130,17 @@ namespace Functions {
 /// \param  t time
 // ***************************************************************************************
     void beltrami_bc_u(Field &out_x, real t, real a, real d, real nu) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         auto boundary = BoundaryController::getInstance();
         size_t *domain_list = boundary->get_domain_list_level_joined();
@@ -166,17 +166,17 @@ namespace Functions {
 /// \param  t time
 // ***************************************************************************************
     void beltrami_bc_v(Field &out_x, real t, real a, real d, real nu) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         auto boundary = BoundaryController::getInstance();
         size_t *domain_list = boundary->get_domain_list_level_joined();
@@ -202,17 +202,17 @@ namespace Functions {
 /// \param  t time
 // ***************************************************************************************
     void beltrami_bc_w(Field &out_x, real t, real a, real d, real nu) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         auto boundary = BoundaryController::getInstance();
         size_t *domain_list = boundary->get_domain_list_level_joined();
@@ -262,15 +262,15 @@ namespace Functions {
 /// \param  t   time
 // ***************************************************************************************
     void buoyancy_mms(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t, real nu, real beta, real g, real rhoa) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
 
         real rbeta = 1. / beta;
         real rg = 1. / g;
@@ -304,15 +304,15 @@ namespace Functions {
 /// \param  t time
 // ***************************************************************************************
     void buoyancy_st_mms(Field &out, real t, real nu, real beta, real kappa, real g, real rhoa) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
 
         real rbeta = 1. / beta;
         real rg = 1. / g;
@@ -369,17 +369,17 @@ namespace Functions {
 /// \param  t   time
 // ***************************************************************************************
     void exp_sinus_prod(Field &out, real t, real nu, real l) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         real A = 1.0;
 
@@ -413,18 +413,18 @@ namespace Functions {
 /// \param  t   time
 // ***************************************************************************************
     void exp_sinus_sum(Field &out_x, Field &out_y, Field &out_z, real t, real nu) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
-        size_t Nz = domain->get_Nz();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
+        size_t Nz = domain_data->get_Nz();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         auto boundary = BoundaryController::getInstance();
         size_t *domain_list = boundary->get_domain_inner_list_level_joined();
@@ -472,17 +472,17 @@ namespace Functions {
 /// \param  out velocity
 // ***************************************************************************************
     void fac_sin_sin_sin(Field &out, real l) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         real dkpi = 3 * l * l * M_PI * M_PI;
         real rdkpi = 1. / dkpi;
@@ -516,17 +516,17 @@ namespace Functions {
             real u_lin, real v_lin, real w_lin,
             real x_shift, real y_shift, real z_shift,
             real l) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         auto boundary = BoundaryController::getInstance();
         size_t *domain_list = boundary->get_domain_inner_list_level_joined();
@@ -543,7 +543,10 @@ namespace Functions {
 
             real x_shift2 = ((xi(coords_i, X1, dx) - x_shift) / u_lin - t) * ((xi(coords_i, X1, dx) - x_shift) / u_lin - t);
             real y_shift2 = ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t) * ((yj(coords_j, Y1, dy) - y_shift) / v_lin - t);
-            real z_shift2 = ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t) * ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t);
+            real z_shift2 = 0;
+            if (w_lin != 0) {
+                z_shift2 = ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t) * ((zk(coords_k, Z1, dz) - z_shift) / w_lin - t);
+            }
             real quot = 1. / (2. * l * l);
 
             out[idx] = exp(-(x_shift2 + y_shift2 + z_shift2) * quot);
@@ -638,17 +641,17 @@ namespace Functions {
             real start_y, real end_y,
             real start_z, real end_z,
             real val_in, real val_out) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         auto boundary = BoundaryController::getInstance();
         size_t *domain_list = boundary->get_domain_inner_list_level_joined();
@@ -691,10 +694,10 @@ namespace Functions {
             const size_t index_y1, const size_t index_y2,
             const size_t index_z1, const size_t index_z2,
             real value) {
-        auto domain = DomainData::getInstance();
+        auto domain_data = DomainData::getInstance();
 
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
 #pragma acc parallel loop independent present(out) async
         for (size_t i = index_x1; i <= index_x2; i++) {
@@ -717,15 +720,15 @@ namespace Functions {
 /// \param  t   time
 // ***************************************************************************************
     void mcdermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, real nu, real A) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
 
         auto boundary = BoundaryController::getInstance();
         size_t *domain_list = boundary->get_domain_inner_list_level_joined();
@@ -792,17 +795,17 @@ namespace Functions {
 /// \param  out   pressure
 // ***************************************************************************************
     void sin_sin_sin(Field &out, real l) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
-        real Z1 = domain->get_Z1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
+        real Z1 = domain_data->get_Z1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
-        real dz = domain->get_dz();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
+        real dz = domain_data->get_dz();
 
         auto boundary = BoundaryController::getInstance();
         size_t *domain_list = boundary->get_domain_inner_list_level_joined();
@@ -851,18 +854,18 @@ namespace Functions {
 /// \param  out_p    pressure
 // ***************************************************************************************
     void vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real pa, real rhoa) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
 
 
-        real L = domain->get_lx();
+        real L = domain_data->get_lx();
         real R_c = L / 20.;
         real G = 0.04 * u_lin * R_c * sqrt(exp(1));
 
@@ -897,17 +900,17 @@ namespace Functions {
     }
 
     void vortex_y(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real pa, real rhoa) {
-        auto domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        real X1 = domain->get_X1();
-        real Y1 = domain->get_Y1();
+        real X1 = domain_data->get_X1();
+        real Y1 = domain_data->get_Y1();
 
-        real dx = domain->get_dx();
-        real dy = domain->get_dy();
+        real dx = domain_data->get_dx();
+        real dy = domain_data->get_dy();
 
-        real L = domain->get_ly();
+        real L = domain_data->get_ly();
         real R_c = L / 20.;
         real G = 0.04 * u_lin * R_c * sqrt(exp(1));
 
