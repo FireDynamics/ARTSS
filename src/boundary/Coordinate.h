@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include "../utility/GlobalMacrosTypes.h"
+
 #ifndef BENCHMARKING
 #include <fmt/format.h>
 #endif
@@ -26,6 +27,11 @@ enum CoordinateAxis : int {
     Y = 1,
     Z = 2
 };
+namespace Axis {
+    CoordinateAxis match_axis(const std::string &string);
+    //TODO cvm forward declaration
+//    CoordinateAxis to_axis(Patch patch);
+}
 
 template<class numeral>    // TODO(cvm) restrict to numerical values
 class Coordinate {
@@ -91,7 +97,7 @@ public:
     void set_coordinate(numeral x, numeral y, numeral z) {
         m_coordinates[X] = x;
         m_coordinates[Y] = y,
-                m_coordinates[Z] = z;
+        m_coordinates[Z] = z;
     }
 
     //TODO(cvm) restrict to numeral=size_t, partial specialisation?
@@ -101,14 +107,6 @@ public:
         for (size_t axis = 0; axis < number_of_axes; axis++) {
             m_coordinates[axis] = original.m_coordinates[axis];
         }
-    }
-    CoordinateAxis static match_axis(const std::string &string) {
-        std::string upper_case;
-        //std::transform(string.begin(), string.end(), upper_case.begin(), ::toupper);
-        for (size_t an = 0; an < axis_names.size(); an++) {
-            if (axis_names[an] == string) return (CoordinateAxis) an;
-        }
-        return UNKNOWN_AXIS;
     }
 
 private:

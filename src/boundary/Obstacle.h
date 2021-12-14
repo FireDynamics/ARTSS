@@ -63,9 +63,9 @@ private:
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     std::string m_name;
-    const Coordinate<size_t> m_start;
-    const Coordinate<size_t> m_end;
-    const Coordinate<size_t> m_strides;
+    Coordinate<size_t> m_start;
+    Coordinate<size_t> m_end;
+    Coordinate<size_t> m_strides;
 
     size_t m_level = 0;
 

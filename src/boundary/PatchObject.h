@@ -9,6 +9,8 @@
 
 #include <cstdlib>
 #include <string>
+#include "Coordinate.h"
+
 
 const size_t number_of_patches = 6;
 enum Patch : int {
@@ -41,6 +43,15 @@ class PatchObject {
 
     static std::string get_patch_name(size_t p);
     static Patch match_patch(const std::string &string);
+    /// \brief get patch of the given axis.
+    /// \details e.g. Axis X (0) start = false, results in Patch Right (1)
+    static Patch to_patch(CoordinateAxis axis, bool start) {
+        size_t p = axis * 2;
+        if (!start) {
+            p++;
+        }
+        return Patch(p);
+    }
   private:
     size_t *m_patches;
 };
