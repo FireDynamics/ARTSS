@@ -1,12 +1,14 @@
-/// \file       JoinedList.h
-/// \brief      
+/// \file       SingleJoinedList.h
+/// \brief      stores indices lists for GPU, only differs between multilevel for multigrid.
+/// \details    Meant to be for Domain object, as there is only one for each level
 /// \date       Oct 22, 2021
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_JOINEDLISTS_JOINEDLISTDOMAIN_H_
-#define ARTSS_JOINEDLISTS_JOINEDLISTDOMAIN_H_
+#ifndef ARTSS_GPULISTS_SINGLEJOINEDLIST_H_
+#define ARTSS_GPULISTS_SINGLEJOINEDLIST_H_
 
+#include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
 
 class SingleJoinedList {
@@ -26,7 +28,9 @@ class SingleJoinedList {
     size_t get_first_index(size_t level) const;
     size_t get_last_index(size_t level) const;
     size_t get_slice_size(size_t level) const;
+    /// \brief get length of GPU array
     size_t get_size() const { return m_size; }
+    /// \brief get pointer to GPU array
     size_t * get_data() const { return m_data; }
     size_t * get_slice(size_t level);
 
@@ -43,4 +47,4 @@ class SingleJoinedList {
 };
 
 
-#endif /* ARTSS_JOINEDLISTS_JOINEDLISTDOMAIN_H_ */
+#endif /* ARTSS_GPULISTS_SINGLEJOINEDLIST_H_ */

@@ -1,11 +1,12 @@
-/// \file       JoinedListObstacle.h
-/// \brief      
+/// \file       MultipleJoinedList.h
+/// \brief      stores indices lists for GPU, differs between multilevel for multigrid and multiple objects
+/// \details    Meant to be for surface and obstacle objects, as there may be multiple objects for each multigrid level
 /// \date       Oct 23, 2021
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_JOINEDLISTS_JOINEDLISTOBSTACLE_H_
-#define ARTSS_JOINEDLISTS_JOINEDLISTOBSTACLE_H_
+#ifndef ARTSS_GPULISTS_MULTIPLEJOINEDLIST_H_
+#define ARTSS_GPULISTS_MULTIPLEJOINEDLIST_H_
 
 #include "../utility/Utility.h"
 
@@ -32,7 +33,7 @@ class MultipleJoinedList {
     size_t * get_slice(size_t level);
 
     void set_size(size_t size);
-    void add_data(size_t level, size_t obstacle_id, size_t size, const size_t *data);
+    void add_data(size_t level, size_t object_id, size_t size, const size_t *data);
   private:
     size_t *m_data;
     size_t m_size = 0;
@@ -45,4 +46,4 @@ class MultipleJoinedList {
 };
 
 
-#endif /* ARTSS_JOINEDLISTS_JOINEDLISTOBSTACLE_H_ */
+#endif /* ARTSS_GPULISTS_MULTIPLEJOINEDLIST_H_ */
