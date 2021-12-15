@@ -8,62 +8,64 @@
 #include <vector>
 #include "BoundaryData.h"
 
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../utility/Utility.h"
 #include "../utility/settings/Settings.h"
 
 #include "BoundaryDataController.h"
+#include "Coordinate.h"
 
 class Surface {
  public:
-    Surface(Settings::Settings const &settings, Settings::SurfaceSetting const &surfsettings);
-    Surface(Settings::Settings const &settings,
-            size_t surfaceID, size_t startIndex,
-            size_t strideX, size_t strideY, size_t strideZ, size_t level);
+    explicit Surface(Settings::SurfaceSetting const &surface_setting);
+    Surface(const std::string &name,
+            Patch patch,
+            Coordinate &start, Coordinate &end,
+            size_t level);
     ~Surface();
-    size_t* getSurfaceList() {return m_surfaceList;}
-    size_t getSize_surfaceList() {return m_size_surfaceList;}
 
-    size_t getStrideX() { return m_strideX;}
-    size_t getStrideY() { return m_strideY;}
-    size_t getStrideZ() { return m_strideZ;}
+    size_t * get_surface_list() { return m_surface_list; }
+    size_t get_size_surface_list() const { return m_size_surfaceList; }
 
-    size_t getSurfaceID() { return m_surfaceID;}
+    Patch get_patch() { return m_patch; }
 
-    void setBoundaryConditions(Settings::BoundarySetting const &boundary);
+    size_t get_stride_x() { return m_end[X] - m_start[X] + 1;}
+    size_t get_stride_y() { return m_end[Y] - m_start[Y] + 1;}
+    size_t get_stride_z() { return m_end[Z] - m_start[Z] + 1;}
 
-    void applyBoundaryConditions(real *dataField, FieldType FieldType, size_t level, bool sync);
+    std::string get_name() { return m_name; }
+    size_t get_id() { return m_id; }
+    void set_id(size_t id) { m_id = id; }
+
+    void apply_boundary_conditions(Field &field, bool sync);
 
     void print();
 
- private:
-    BoundaryDataController* m_boundaryDataController;
+    Coordinate & get_start_coordinates() { return m_start; }
+    Coordinate & get_end_coordinates() { return m_end; }
 
-    size_t m_surfaceID;
+private:
+    size_t m_level = 0;
+    size_t m_id;
+    Patch m_patch;
+    std::string m_name;
 
-    size_t m_i1;
-    size_t m_j1;
-    size_t m_k1;
+    Coordinate m_start;
+    Coordinate m_end;
 
-    size_t *m_surfaceList;  // indices of surface
+    size_t *m_surface_list;  // indices of surface
     size_t m_size_surfaceList;
-
-    size_t m_strideX;
-    size_t m_strideY;
-    size_t m_strideZ;
 
     std::vector<BoundaryData*> dataList;
 
     void init(size_t Nx, size_t Ny);
     void createSurface(size_t Nx, size_t Ny);
 
-    size_t get_i2();
-    size_t get_j2();
-    size_t get_k2();
-
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+
+    size_t get_matching_index(real surface_coordinate, real spacing, real start_coordinate);
 };
 
 

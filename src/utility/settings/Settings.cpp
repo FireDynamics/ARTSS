@@ -9,7 +9,7 @@
 #include "../Utility.h"
 
 namespace Settings {
-Settings::Settings(std::string path) :
+Settings::Settings(const std::string &path) :
         filename(path) {
     tinyxml2::XMLDocument doc;
     doc.LoadFile(path.c_str());
@@ -27,7 +27,8 @@ Settings::Settings(std::string path) :
     }
 
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(*this, "XMLFile");
+    Utility::create_logger(sget("logging/level"), sget("logging/file"));  // create global logger
+    m_logger = Utility::create_logger("XMLFile");
     m_logger->debug("start the simulation of \"{}\"", path);
     print_config();
 #endif

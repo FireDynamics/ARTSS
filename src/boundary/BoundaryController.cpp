@@ -1,5 +1,5 @@
 /// \file       BoundaryController.cpp
-/// \brief      Controll class for boundary
+/// \brief      Controller class for boundary
 /// \date       Oct 01, 2020
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
@@ -13,18 +13,16 @@ BoundaryController *BoundaryController::singleton = nullptr;  // Singleton
 BoundaryController::BoundaryController(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_bdc_boundary = new BoundaryDataController(m_settings);
     read_XML();
-    if (m_number_of_obstacles + m_number_of_surfaces > 0) {
-        m_multigrid = new Multigrid(m_settings,
-                                    m_number_of_surfaces, m_surface_list,
-                                    m_number_of_obstacles, m_obstacle_list,
-                                    m_bdc_boundary, m_bdc_obstacles);
-    } else {
-        m_multigrid = new Multigrid(m_settings, m_bdc_boundary);
-    }
+    size_t multigrid_level = DomainData::getInstance()->get_levels();
+    m_multigrid = new Multigrid(m_settings,
+                                m_number_of_surfaces, m_surface_list,
+                                m_number_of_obstacles, m_obstacle_list,
+                                m_bdc_boundary, m_bdc_obstacles,
+                                multigrid_level);
 #ifndef BENCHMARKING
     print_boundaries();
 #endif
@@ -81,10 +79,11 @@ void BoundaryController::parse_surface_parameter(std::vector<Settings::SurfaceSe
     if (m_has_surfaces) {
         std::vector<Surface *> ret_surfaces;
         for (auto surface : surfaces) {
-            ret_surfaces.push_back(new Surface(m_settings, surface));
+            ret_surfaces.push_back(new Surface(surface));
         }
         m_number_of_surfaces = ret_surfaces.size();
-        m_surface_list = ret_surfaces.data();
+        //TODO(cvm) vector surfaces will be destroyed after this method therefore I need to preserve the data
+        std::memcpy(m_surface_list, ret_surfaces.data(), ret_surfaces.size());
     }
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing surface parameter");
@@ -123,7 +122,7 @@ void BoundaryController::parse_obstacle_parameter(std::vector<Settings::Obstacle
                 bdc->add_boundary_data(bound);
             }
 
-            Obstacle *o = new Obstacle(m_settings, ox1, ox2, oy1, oy2, oz1, oz2, name);
+            Obstacle *o = new Obstacle(ox1, ox2, oy1, oy2, oz1, oz2, name);
             ret_obstacles.push_back(o);
             bdc_obstacles.push_back(bdc);
         }
@@ -135,6 +134,9 @@ void BoundaryController::parse_obstacle_parameter(std::vector<Settings::Obstacle
             *(m_obstacle_list + i) = ret_obstacles[i];
             *(m_bdc_obstacles + i) = bdc_obstacles[i];
         }
+    } else {
+        m_obstacle_list = new Obstacle *[m_number_of_obstacles];
+        m_bdc_obstacles = new BoundaryDataController *[m_number_of_obstacles];
     }
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing obstacle parameter");
@@ -142,10 +144,10 @@ void BoundaryController::parse_obstacle_parameter(std::vector<Settings::Obstacle
 }
 
 BoundaryController::~BoundaryController() {
-    delete (m_multigrid);
-    delete (m_bdc_boundary);
+    delete m_multigrid;
+    delete m_bdc_boundary;
     for (size_t i = 0; i < m_number_of_obstacles; i++) {
-        delete (m_bdc_obstacles[i]);
+        delete m_bdc_obstacles[i];
     }
 }
 
@@ -164,7 +166,7 @@ BoundaryController *BoundaryController::getInstance(Settings::Settings const &se
 void BoundaryController::print_boundaries() {
 #ifndef BENCHMARKING
     m_logger->info("-- Info summary");
-    Domain::getInstance()->print();
+    DomainData::getInstance()->print();
     m_bdc_boundary->print();
     for (size_t i = 0; i < m_number_of_obstacles; i++) {
         m_obstacle_list[i]->print();
@@ -207,72 +209,15 @@ void BoundaryController::detect_neighbouring_obstacles() {
         Obstacle *obstacle1 = m_obstacle_list[o1];
         for (size_t o2 = o1 + 1; o2 < m_number_of_obstacles; o2++) {
             Obstacle *obstacle2 = m_obstacle_list[o2];
+#ifndef BENCHMARKING
+            m_logger->debug("scan for neighbouring cells for '{}' and '{}'", obstacle1->get_name(), obstacle2->get_name());
+#endif
             Obstacle::remove_circular_constraints(obstacle1, obstacle2);
         }
     }
 #ifndef BENCHMARKING
     m_logger->debug("finished detecting neighbouring obstacles");
 #endif
-}
-
-size_t BoundaryController::get_size_inner_list_level_joined() const {
-    return m_multigrid->get_size_inner_list_level_joined();
-}
-
-size_t BoundaryController::get_size_boundary_list_level_joined() const {
-    return m_multigrid->get_size_boundary_list_level_joined();
-}
-
-size_t *BoundaryController::get_obstacle_list() const {
-    return m_multigrid->get_obstacle_list();
-}
-
-size_t BoundaryController::get_size_boundary_list() const {
-    return m_multigrid->get_size_boundary_list();
-}
-
-size_t BoundaryController::get_size_inner_list() const {
-    return m_multigrid->get_size_inner_list();
-}
-
-size_t BoundaryController::get_size_obstacle_list() const {
-    return m_multigrid->get_size_obstacle_list();
-}
-
-size_t *BoundaryController::get_inner_list_level_joined() const {
-    return m_multigrid->get_inner_list_level_joined();
-}
-
-size_t BoundaryController::get_inner_list_level_joined_start(size_t level) const {
-    return m_multigrid->get_inner_list_level_joined_start(level);
-}
-
-size_t BoundaryController::get_inner_list_level_joined_end(size_t level) const {
-    return m_multigrid->get_inner_list_level_joined_end(level);
-}
-
-size_t *BoundaryController::get_boundary_list_level_joined() const {
-    return m_multigrid->get_boundary_list_level_joined();
-}
-
-size_t BoundaryController::get_boundary_list_level_joined_start(size_t level) const {
-    return m_multigrid->get_boundary_list_level_joined_start(level);
-}
-
-size_t BoundaryController::get_boundary_list_level_joined_end(size_t level) const {
-    return m_multigrid->get_boundary_list_level_joined_end(level);
-}
-
-size_t BoundaryController::get_obstacle_stride_x(size_t id, size_t level) const {
-    return m_multigrid->get_obstacle_stride_x(id, level);
-}
-
-size_t BoundaryController::get_obstacle_stride_y(size_t id, size_t level) const {
-    return m_multigrid->get_obstacle_stride_y(id, level);
-}
-
-size_t BoundaryController::get_obstacle_stride_z(size_t id, size_t level) const {
-    return m_multigrid->get_obstacle_stride_z(id, level);
 }
 
 std::vector<FieldType> BoundaryController::get_used_fields() const {

@@ -11,14 +11,14 @@
 #include <algorithm>
 
 #include "../pressure/VCycleMG.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 
 NSTurbSolver::NSTurbSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = field_controller;
 
@@ -32,9 +32,7 @@ NSTurbSolver::NSTurbSolver(Settings::Settings const &settings, FieldController *
     SolverSelection::SetTurbulenceSolver(m_settings, &mu_tub, m_settings.get("solver/turbulence/type"));
 
     //Pressure
-    SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"),
-                                       m_field_controller->get_field_p(),
-                                       m_field_controller->get_field_rhs());
+    SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"));
 
     // Source
     SolverSelection::SetSourceSolver(m_settings, &sou_vel, m_settings.get("solver/source/type"));
@@ -77,7 +75,7 @@ void NSTurbSolver::do_step(real t, bool sync) {
     auto nu = m_settings.get_real("physical_parameters/nu");
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, \
-                         p, rhs, fx, fy, fz, nu_t)
+                         p, rhs, f_x, f_y, f_z, nu_t)
     {
         // 1. Solve advection equation
 #ifndef BENCHMARKING
@@ -163,7 +161,7 @@ void NSTurbSolver::control() {
         // TODO Error handling
     }
 
-    if (m_settings.get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
+    if (m_settings.get("solver/pressure/field") != Field::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

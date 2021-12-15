@@ -11,14 +11,14 @@
 #include <algorithm>
 
 #include "../pressure/VCycleMG.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 
 NSSolver::NSSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = field_controller;
 
@@ -32,9 +32,7 @@ NSSolver::NSSolver(Settings::Settings const &settings, FieldController *field_co
 
     //Pressure
     std::string pressureType = m_settings.get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(m_settings, &pres, pressureType,
-                                       m_field_controller->get_field_p(),
-                                       m_field_controller->get_field_rhs());
+    SolverSelection::SetPressureSolver(m_settings, &pres, pressureType);
 
     //Source
     std::string sourceType = m_settings.get("solver/source/type");
@@ -75,7 +73,7 @@ void NSSolver::do_step(real t, bool sync) {
 
     real nu = m_settings.get_real("physical_parameters/nu");
 
-#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, rhs, fx, fy, fz)
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, rhs, f_x, f_y, f_z)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
@@ -158,7 +156,7 @@ void NSSolver::control() {
         // TODO Error Handling
     }
 
-    if (m_settings.get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
+    if (m_settings.get("solver/pressure/field") != Field::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

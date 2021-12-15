@@ -11,7 +11,7 @@
 #endif
 
 #include "DynamicSmagorinsky.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
 DynamicSmagorinsky::DynamicSmagorinsky(Settings::Settings const &settings) :
@@ -174,7 +174,7 @@ DynamicSmagorinsky::DynamicSmagorinsky(Settings::Settings const &settings) :
 void DynamicSmagorinsky::calc_turbulent_viscosity(
         Field &ev,
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx();
     const size_t Ny = domain->get_Ny();
@@ -195,8 +195,8 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
 
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
     // Velocity filter
     explicit_filtering(u_f, in_u, sync);
@@ -393,10 +393,10 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void DynamicSmagorinsky::explicit_filtering(Field &out, Field const &in, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
-    const size_t Nx = domain->get_Nx(out.get_level());
-    const size_t Ny = domain->get_Ny(out.get_level());
+    const size_t Nx = domain->get_Nx();
+    const size_t Ny = domain->get_Ny();
 
     // Implement a discrete filter by trapezoidal or simpsons rule.
     real a[3] = {1. / 4., 1. / 2., 1. / 4.};  // trapezoidal weights
@@ -404,8 +404,8 @@ void DynamicSmagorinsky::explicit_filtering(Field &out, Field const &in, bool sy
 
     // Construction by product combination for trapezoidal
     auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
     real sum;
 #pragma acc parallel loop independent present(out, in, a[:3], d_inner_list[:bsize_i]) async

@@ -9,20 +9,11 @@
 
 #include <string>
 #include <vector>
+
+#include "../boundary/PatchObject.h"
+#include "../field/Field.h"
 #include "../utility/Utility.h"
 #include "../utility/settings/Settings.h"
-#include "../field/Field.h"
-
-const size_t number_of_patches = 6;
-enum Patch : int {
-    UNKNOWN_PATCH = -1,
-    FRONT = 0,
-    BACK = 1,
-    BOTTOM = 2,
-    TOP = 3,
-    LEFT = 4,
-    RIGHT = 5
-};
 
 const size_t number_of_boundary_conditions = 3;
 enum BoundaryCondition : int {
@@ -38,12 +29,8 @@ class BoundaryData {
     ~BoundaryData();
     void print();
 
-    static std::string get_field_type_name(FieldType f);
     static std::string get_boundary_condition_name(BoundaryCondition bc);
-    static std::string get_patch_name(Patch p);
 
-    static FieldType match_field(const std::string& string);
-    static Patch match_patch(const std::string &string);
     static BoundaryCondition match_boundary_condition(const std::string &string);
 
     void add_boundary_condition(Patch const &patches,

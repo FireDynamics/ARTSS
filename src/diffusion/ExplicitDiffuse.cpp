@@ -12,7 +12,7 @@
 
 #include "ExplicitDiffuse.h"
 #include "../boundary/BoundaryController.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 
 //====================================== Diffuse ===============================================
 // ***************************************************************************************
@@ -46,7 +46,7 @@ void ExplicitDiffuse::diffuse(
 
 
 void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx();  // due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny();
@@ -55,8 +55,8 @@ void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bo
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
     real reciprocal_dx = D / (domain->get_dx() * domain->get_dx());
     real reciprocal_dy = D / (domain->get_dy() * domain->get_dy());
@@ -82,7 +82,7 @@ void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bo
 
 // Turbulent Diffuse
 void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Field const &EV, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     const size_t Nx = domain->get_Nx();  // due to unnecessary parameter passing of *this
     const size_t Ny = domain->get_Ny();
@@ -91,13 +91,13 @@ void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Fi
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
     const size_t neighbour_i = 1;
     const size_t neighbour_j = Nx;
     const size_t neighbour_k = Nx * Ny;
-#pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i], ev) async
+#pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i], EV) async
     for (size_t ii = 0; ii < bsize_i; ++ii) {
         const size_t idx = d_inner_list[ii];
         real nu_x1 = 0.5 * (EV[idx + neighbour_i] + EV[idx]) + D;

@@ -9,7 +9,7 @@
 
 #include "SolverSelection.h"
 #include "../pressure/VCycleMG.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryData.h"
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IPressure.h"

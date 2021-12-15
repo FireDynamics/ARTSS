@@ -10,7 +10,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryData.h"
 #include "../boundary/BoundaryController.h"
 #include "../pressure/VCycleMG.h"
@@ -19,33 +19,56 @@
 NSTempTurbSolver::NSTempTurbSolver(Settings::Settings const &settings, FieldController *field_controller) :
 m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger->debug("construct NSTempTurbSolver");
 #endif
     m_field_controller = field_controller;
 
+#ifndef BENCHMARKING
+    m_logger->debug("set advection solver");
+#endif
     // Advection of velocity
     SolverSelection::SetAdvectionSolver(m_settings, &adv_vel, m_settings.get("solver/advection/type"));
 
+#ifndef BENCHMARKING
+    m_logger->debug("set advection solver");
+#endif
     // Advection of temperature
     SolverSelection::SetAdvectionSolver(m_settings, &adv_temp, m_settings.get("solver/temperature/advection/type"));
 
+#ifndef BENCHMARKING
+    m_logger->debug("set diffusion solver");
+#endif
     // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));
 
+#ifndef BENCHMARKING
+    m_logger->debug("set turbulence solver");
+#endif
     // Turbulent viscosity for velocity diffusion
     SolverSelection::SetTurbulenceSolver(m_settings, &mu_tub, m_settings.get("solver/turbulence/type"));
 
+#ifndef BENCHMARKING
+    m_logger->debug("set diffusion solver");
+#endif
     // Diffusion of temperature
     SolverSelection::SetDiffusionSolver(m_settings, &dif_temp, m_settings.get("solver/temperature/diffusion/type"));
 
+#ifndef BENCHMARKING
+    m_logger->debug("set pressure solver");
+#endif
     // Pressure
-    SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"),
-                                       m_field_controller->get_field_p(),
-                                       m_field_controller->get_field_rhs());
+    SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"));
 
+#ifndef BENCHMARKING
+    m_logger->debug("set source solver vel");
+#endif
     // Source of velocity
     SolverSelection::SetSourceSolver(m_settings, &sou_vel, m_settings.get("solver/source/type"));
 
+#ifndef BENCHMARKING
+    m_logger->debug("set source solver temp");
+#endif
     // Source of temperature
     SolverSelection::SetSourceSolver(m_settings, &sou_temp, m_settings.get("solver/temperature/source/type"));
 
@@ -99,8 +122,8 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
     Field &kappa_t = m_field_controller->get_field_kappa();  // kappa_t - Eddy thermal diffusivity
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
-                         w0, w_tmp, p, p0, rhs, T, T0, T_tmp, \
-                         fx, fy, fz, S_T, nu_t, kappa_t)
+                         w0, w_tmp, p, rhs, T, T0, T_tmp, \
+                         f_x, f_y, f_z, S_T, nu_t, kappa_t)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
@@ -255,21 +278,21 @@ void NSTempTurbSolver::control() {
         // TODO Error handling
     }
 
-    if (m_settings.get("solver/temperature/advection/field") != BoundaryData::get_field_type_name(FieldType::T)) {
+    if (m_settings.get("solver/temperature/advection/field") != Field::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/temperature/diffusion/field") != BoundaryData::get_field_type_name(FieldType::T)) {
+    if (m_settings.get("solver/temperature/diffusion/field") != Field::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
+    if (m_settings.get("solver/pressure/field") != Field::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

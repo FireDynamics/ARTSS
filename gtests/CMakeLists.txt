@@ -1,5 +1,11 @@
 add_executable(artss_gtest ${ARTSS_SOURCE_FILES})
 
+target_sources(artss_gtest
+    PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Environment.cpp
+    )
+
+add_subdirectory(boundary)
 add_subdirectory(field)
 add_subdirectory(randomField)
 

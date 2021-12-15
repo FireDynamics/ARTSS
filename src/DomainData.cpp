@@ -5,13 +5,13 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include <string>
-#include "Domain.h"
+#include "DomainData.h"
 
-Domain *Domain::single = nullptr; //Singleton
+DomainData *DomainData::single = nullptr; //Singleton
 
-Domain::Domain(Settings::Settings const &settings) {
+DomainData::DomainData(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto solver = settings.get("solver/description");
     if (solver.find("NS") != std::string::npos || solver.find("Pressure") != std::string::npos) {
@@ -60,7 +60,7 @@ Domain::Domain(Settings::Settings const &settings) {
 // ***************************************************************************************
 /// \brief  Calculates amount of Cells in XYZ direction for each multigrid level
 // ***************************************************************************************
-void Domain::calc_MG_values() {
+void DomainData::calc_MG_values() {
     for (size_t l = 1; l < m_levels + 1; ++l) {
         m_nx[l] = (m_nx[l - 1] == 1) ? 1 : static_cast<size_t> (std::round(m_nx[l - 1] / 2));
         m_ny[l] = (m_ny[l - 1] == 1) ? 1 : static_cast<size_t> (std::round(m_ny[l - 1] / 2));
@@ -68,9 +68,9 @@ void Domain::calc_MG_values() {
     }
 }
 
-Domain *Domain::getInstance(Settings::Settings const &settings) {
+DomainData *DomainData::getInstance(Settings::Settings const &settings) {
     if (single == nullptr) {
-        single = new Domain(settings);
+        single = new DomainData(settings);
     }
     return single;
 }
@@ -86,7 +86,7 @@ Domain *Domain::getInstance(Settings::Settings const &settings) {
 /// \params shift_z2  Amount of cells which will be resized in z direction
 /// \return bool True if computational domain has been resized, False if not
 // ***************************************************************************************
-bool Domain::resize(long shift_x1, long shift_x2, long shift_y1, long shift_y2, long shift_z1, long shift_z2) {
+bool DomainData::resize(long shift_x1, long shift_x2, long shift_y1, long shift_y2, long shift_z1, long shift_z2) {
     auto dx = get_dx();
     auto dy = get_dy();
     auto dz = get_dz();
@@ -141,7 +141,7 @@ bool Domain::resize(long shift_x1, long shift_x2, long shift_y1, long shift_y2, 
 /// \params cellWidth  dx,dy,dz
 /// \return coordinate of new computational domain
 // ***************************************************************************************
-real Domain::calc_new_coord(real oldCoord, long shift, real cell_width) {
+real DomainData::calc_new_coord(real oldCoord, long shift, real cell_width) {
     return oldCoord + static_cast<real>(shift) * cell_width;
 }
 
@@ -156,7 +156,7 @@ real Domain::calc_new_coord(real oldCoord, long shift, real cell_width) {
 /// \params newCoord New coordinate of computational domain
 /// \return bool True if resize is valid
 // ***************************************************************************************
-bool Domain::set_new_value(long shift, real startCoord_p, real endCoord_p, real oldCoord, real cell_width, real *newCoord) {
+bool DomainData::set_new_value(long shift, real startCoord_p, real endCoord_p, real oldCoord, real cell_width, real *newCoord) {
     bool update = false;
     if (shift != 0) {
         *newCoord = calc_new_coord(oldCoord, shift, cell_width);
@@ -167,7 +167,7 @@ bool Domain::set_new_value(long shift, real startCoord_p, real endCoord_p, real 
     return update;
 }
 
-void Domain::print() {
+void DomainData::print() {
 #ifndef BENCHMARKING
     m_logger->info("-- Domain");
     m_logger->info("Domain size inner cells: ({}|{}|{})", get_nx(),
@@ -179,7 +179,7 @@ void Domain::print() {
 #endif
 }
 
-void Domain::printDetails() {
+void DomainData::printDetails() {
 #ifndef BENCHMARKING
     m_logger->debug("############### Domain Parameter ###############");
     for (size_t level = 0; level < m_levels + 1; level++) {
@@ -219,7 +219,7 @@ void Domain::printDetails() {
 #endif
 }
 
-void Domain::control() {
+void DomainData::control() {
 #ifndef BENCHMARKING
     if (m_levels > 0) {
         int minimum_amount_of_cells = static_cast<int>(std::pow(2, m_levels));

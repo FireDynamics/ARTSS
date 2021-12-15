@@ -15,7 +15,7 @@ ExplicitEulerSource::ExplicitEulerSource(Settings::Settings const &settings) :
         m_dir_vel.find('y') == std::string::npos &&
         m_dir_vel.find('z') == std::string::npos) {
 #ifndef BENCHMARKING
-        m_logger = Utility::create_logger(settings, typeid(ExplicitEulerSource).name());
+        m_logger = Utility::create_logger(typeid(ExplicitEulerSource).name());
         m_logger->error("unknown direction -> exit");
 #endif
         std::exit(1);
@@ -42,8 +42,8 @@ void ExplicitEulerSource::add_source(
     auto dir = m_dir_vel;
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
 #pragma acc data present(out_x, out_y, out_z, s_x, s_y, s_z)
     {
@@ -95,8 +95,8 @@ void ExplicitEulerSource::add_source(
 // ***************************************************************************************
 void ExplicitEulerSource::add_source(Field &out, Field const &s, bool sync) {
     auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
     real dt = m_settings.get_real("physical_parameters/dt");
 
 #pragma acc data present(out, s)

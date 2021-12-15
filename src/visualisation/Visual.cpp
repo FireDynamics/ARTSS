@@ -11,7 +11,7 @@
 #include <utility>
 
 #include "Visual.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
@@ -20,7 +20,7 @@ Visual::Visual(Settings::Settings const &settings, Solution const &solution, boo
         m_solution(solution),
         m_has_analytical_solution(has_analytical_solution) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_filename = Utility::remove_extension(settings.get_filename());
 
@@ -44,79 +44,45 @@ void Visual::visualise(const FieldController &field_controller, real t) {
 
     int n = static_cast<int> (std::round(t / dt));
 
-    std::string filename = create_filename(m_filename, n, false);
+    std::string filename_numerical = create_filename(m_filename, n, false);
+    std::string filename_analytical = create_filename(m_filename, n, true);
     if (m_save_vtk) {
         if (fmod(n, m_vtk_plots) == 0 || t >= t_end) {
-            VTKWriter::write_numerical(field_controller, filename);
+            VTKWriter::write_numerical(field_controller, filename_numerical);
             if (m_has_analytical_solution) {
-                VTKWriter::write_analytical(m_solution, filename);
+                VTKWriter::write_analytical(m_solution, filename_analytical);
             }
         }
     }
 
     if (m_save_csv) {
         if (fmod(n, m_csv_plots) == 0 || t >= t_end) {
-            CSVWriter::write_numerical(field_controller, filename);
+            CSVWriter::write_numerical(field_controller, filename_numerical);
             if (m_has_analytical_solution) {
-                CSVWriter::write_analytical(m_solution, filename);
+                CSVWriter::write_analytical(m_solution, filename_analytical);
             }
         }
     }
 }
 
 void Visual::write_csv(FieldController &field_controller, const std::string &filename){
-    //TODO method update host/device whatever
-    field_controller.get_field_u().update_host();
-    field_controller.get_field_v().update_host();
-    field_controller.get_field_w().update_host();
-    field_controller.get_field_p().update_host();
-    field_controller.get_field_rhs().update_host();
-    field_controller.get_field_T().update_host();
-    field_controller.get_field_concentration().update_host();
-    field_controller.get_field_source_T().update_host();
-    field_controller.get_field_source_concentration().update_host();
-    field_controller.get_field_nu_t().update_host();
+    field_controller.update_host();
     CSVWriter::write_numerical(field_controller, filename);
 }
 
 void Visual::write_vtk(FieldController &field_controller, const std::string &filename){
-    //TODO method update host/device whatever
-    field_controller.get_field_u().update_host();
-    field_controller.get_field_v().update_host();
-    field_controller.get_field_w().update_host();
-    field_controller.get_field_p().update_host();
-    field_controller.get_field_rhs().update_host();
-    field_controller.get_field_T().update_host();
-    field_controller.get_field_concentration().update_host();
-    field_controller.get_field_source_T().update_host();
-    field_controller.get_field_source_concentration().update_host();
-    field_controller.get_field_nu_t().update_host();
+    field_controller.update_host();
     VTKWriter::write_numerical(field_controller, filename);
 }
 
 void Visual::write_vtk_debug(FieldController &field_controller, const std::string &filename){
-    //TODO method update host/device whatever
-    field_controller.get_field_u().update_host();
-    field_controller.get_field_v().update_host();
-    field_controller.get_field_w().update_host();
-    field_controller.get_field_p().update_host();
-    field_controller.get_field_rhs().update_host();
-    field_controller.get_field_T().update_host();
-    field_controller.get_field_concentration().update_host();
-    field_controller.get_field_source_T().update_host();
-    field_controller.get_field_source_concentration().update_host();
-    field_controller.get_field_nu_t().update_host();
-    field_controller.get_field_force_x().update_host();
-    field_controller.get_field_force_y().update_host();
-    field_controller.get_field_force_z().update_host();
-    field_controller.get_field_kappa().update_host();
-    field_controller.get_field_gamma().update_host();
+    field_controller.update_host_debug();
     VTKWriter::write_numerical_debug(field_controller, filename);
 }
 
 void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords,
                              int Nx, int Ny, int Nz, real dx, real dy, real dz) {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     real X1 = domain->get_X1();
     real Y1 = domain->get_Y1();
     real Z1 = domain->get_Z1();

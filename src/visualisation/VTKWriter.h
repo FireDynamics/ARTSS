@@ -34,6 +34,7 @@ private:
                                       read_ptr u, read_ptr v, read_ptr w,
                                       read_ptr p,
                                       read_ptr T);
+    static int vtk_counter;
 };
 
 #endif /* ARTSS_VISUALISATION_VTKWRITER_H */

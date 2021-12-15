@@ -8,52 +8,35 @@
 // TODO(issue 15): surface implementing
 //  - underscores instead of camel case
 //  - create file description
-Surface::Surface(Settings::Settings const &settings, Settings::SurfaceSetting const &surfsetting) {
-    m_boundaryDataController = new BoundaryDataController(settings);
+//  - remove surface cells from domain domain boundary cells
+//  - develop a concept for boundary conditions
+//  - make sure that surfaces does not extend to corner or edge cells
+//  - consider moving parsing to BoundaryController.cpp same as for obstacles,
+//    may be not possible/practical depending on the concept for BC
+Surface::Surface(Settings::SurfaceSetting const &surface_setting) :
+        m_level(0) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
-    m_logger->info("################ SURFACE ################");
-#endif
-    auto domain = Domain::getInstance();
-
-    real dx = domain->get_dx();
-    real dy = domain->get_dy();
-    real dz = domain->get_dz();
-
-    real rdx = 1./dx;
-    real rdy = 1./dy;
-    real rdz = 1./dz;
-
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_X1();
-    real Z1 = domain->get_X1();
-
-    size_t Nx = domain->get_Nx();
-    size_t Ny = domain->get_Ny();
-
-    m_surfaceID = surfsetting.get_id();
-
-#ifndef BENCHMARKING
-    m_logger->info("surface ID {}", m_surfaceID);
+    m_logger = Utility::create_logger(typeid(this).name());
+    m_logger->debug("################ SURFACE ################");
 #endif
 
-    real sx1 = surfsetting.get_sx1();
-    real sx2 = surfsetting.get_sx2();
-    real sy1 = surfsetting.get_sy1();
-    real sy2 = surfsetting.get_sy2();
-    real sz1 = surfsetting.get_sz1();
-    real sz2 = surfsetting.get_sz2();
-    real lsx = fabs(sx2 - sx1);
-    real lsy = fabs(sy2 - sy1);
-    real lsz = fabs(sz2 - sz1);
-    m_strideX = static_cast<size_t> (floor(lsx * rdx + 1 + 0.5));
-    m_strideY = static_cast<size_t> (floor(lsy * rdy + 1 + 0.5));
-    m_strideZ = static_cast<size_t> (floor(lsz * rdz + 1 + 0.5));
-    // round due to cells at boundary (sx as midpoint of cells in xml)
-    m_i1 = static_cast<size_t> (round(fabs(sx1 - (X1-0.5*dx)) * rdx));
-    m_j1 = static_cast<size_t> (round(fabs(sy1 - (Y1-0.5*dy)) * rdy));
-    m_k1 = static_cast<size_t> (round(fabs(sz1 - (Z1-0.5*dz)) * rdz));
+//    m_name = surface_setting.get_name();
+//    m_patch = PatchObject::match_patch(element->Attribute("patch"));
+#ifndef BENCHMARKING
+    m_logger->debug("read surface '{}' for patch {}", m_name, PatchObject::get_patch_name(m_patch));
+#endif
 
+    real sx1 = surface_setting.get_sx1();
+    real sx2 = surface_setting.get_sx2();
+    real sy1 = surface_setting.get_sy1();
+    real sy2 = surface_setting.get_sy2();
+    real sz1 = surface_setting.get_sz1();
+    real sz2 = surface_setting.get_sz2();
+
+    //TODO
+    auto domain = DomainData::getInstance();
+    size_t Nx = domain->get_Nx(m_level);
+    size_t Ny = domain->get_Ny(m_level);
     createSurface(Nx, Ny);
     print();
 #ifndef BENCHMARKING
@@ -61,23 +44,16 @@ Surface::Surface(Settings::Settings const &settings, Settings::SurfaceSetting co
 #endif
 }
 
-Surface::Surface(Settings::Settings const &settings, size_t surfaceID, size_t startIndex, size_t strideX, size_t strideY, size_t strideZ, size_t level) {
+Surface::Surface(const std::string &name, Patch patch, Coordinate &start, Coordinate &end, size_t level) :
+        m_patch(patch), m_name(name), m_start(start), m_end(end) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
     m_logger->info("################ SURFACE ################");
 #endif
-    m_surfaceID = surfaceID;
 
-    m_strideX = strideX;
-    m_strideY = strideY;
-    m_strideZ = strideZ;
-
-    Domain* domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx(level);
     size_t Ny = domain->get_Ny(level);
-    m_k1 = getCoordinateK(startIndex, Nx, Ny);
-    m_j1 = getCoordinateJ(startIndex, Nx, Ny, m_k1);
-    m_i1 = getCoordinateI(startIndex, Nx, Ny, m_j1, m_k1);
 
     init(Nx, Ny);
 #ifndef BENCHMARKING
@@ -86,31 +62,30 @@ Surface::Surface(Settings::Settings const &settings, size_t surfaceID, size_t st
 }
 
 Surface::~Surface() {
-    for (BoundaryData* bd : dataList) {
-        delete(bd);
+    for (BoundaryData *bd: dataList) {
+        delete (bd);
     }
-    delete(m_surfaceList);
+    delete (m_surface_list);
 }
 
 void Surface::print() {
 #ifndef BENCHMARKING
-    size_t i2 = get_i2();
-    size_t j2 = get_j2();
-    size_t k2 = get_k2();
-    m_logger->info("Surface ID {}", m_surfaceID);
-    m_logger->info("strides: X: {}, Y: {}, Z:{}", m_strideZ,
-                                                  m_strideY,
-                                                  m_strideX);
+    m_logger->info("Surface name {}", m_name);
+    m_logger->info("strides: X: {}, Y: {}, Z:{}",
+                   get_stride_z(),
+                   get_stride_y(),
+                   get_stride_x());
     m_logger->info("size of Surface: {}", m_size_surfaceList);
-    m_logger->info("coords: ({}|{}) ({}|{}) ({}|{})", m_i1, i2,
-                                                      m_j1, j2,
-                                                      m_k1, k2);
+    m_logger->info("coords: ({}|{}) ({}|{}) ({}|{})",
+                   m_start[X], m_end[X],
+                   m_start[Y], m_end[Y],
+                   m_start[Z], m_end[Z]);
 #endif
 }
 
 void Surface::init(size_t Nx, size_t Ny) {
-    m_size_surfaceList = m_strideX * m_strideY * m_strideZ;
-    m_surfaceList = new size_t[m_size_surfaceList];
+    m_size_surfaceList = get_stride_x() * get_stride_y() * get_stride_z();
+    m_surface_list = new size_t[m_size_surfaceList];
 
     createSurface(Nx, Ny);
     print();
@@ -121,38 +96,27 @@ void Surface::createSurface(size_t Nx, size_t Ny) {
 #ifndef BENCHMARKING
     m_logger->info("list size of sList: {}", m_size_surfaceList);
 #endif
-
     // fill sList with corresponding indices
-    for (size_t k = m_k1; k < m_k1 + m_strideZ; ++k) {
-        for (size_t j = m_j1; j < m_j1 + m_strideY; ++j) {
-            for (size_t i = m_i1; i < m_i1 + m_strideX; ++i) {
-                size_t idx = (size_t)(IX(i,j,k,Nx,Ny));
-                *(m_surfaceList + counter) = idx ;
-                counter++;
+    for (size_t k = m_start[Z]; k < m_end[Z]; ++k) {
+        for (size_t j = m_start[Y]; j < m_end[Y]; ++j) {
+            for (size_t i = m_start[X]; i < m_end[X]; ++i) {
+                size_t idx = IX(i, j, k, Nx, Ny);
+                m_surface_list[counter++] = idx;
             }
         }
     }
 #ifndef BENCHMARKING
-    m_logger->info("control create Surface ({}|{})", counter,
-                                                     m_size_surfaceList);
-    m_logger->info("end of creating sList");
+    m_logger->debug("control create Surface ({}|{})", counter,
+                   m_size_surfaceList);
+    m_logger->debug("end of creating sList");
 #endif
 }
 
-void Surface::setBoundaryConditions(Settings::BoundarySetting const &xmlElement) {
-    m_boundaryDataController->add_boundary_data(xmlElement);
-}
-
-size_t Surface::get_i2() {
-    return m_i1 + m_strideX - 1;
-}
-size_t Surface::get_j2() {
-    return m_j1 + m_strideY - 1;
-}
-size_t Surface::get_k2() {
-    return m_k1 + m_strideZ - 1;
-}
-
-void Surface::applyBoundaryConditions(real *, FieldType, size_t, bool) {
+void Surface::apply_boundary_conditions(Field &field, bool sync) {
     // m_bdc_boundary->apply_boundary_condition(dataField, indexFields, patch_starts, patch_ends, fieldType, level, sync);
+    //TODO(issue 5)
+}
+
+size_t Surface::get_matching_index(real surface_coordinate, real spacing, real start_coordinate) {
+    return static_cast<int>(round((-start_coordinate + surface_coordinate) / spacing));
 }

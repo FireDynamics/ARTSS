@@ -8,14 +8,14 @@
 #define ARTSS_BOUNDARYCONDITION_DOMAINBOUNDARY_H
 
 #include "../boundary/BoundaryData.h"
+#include "../field/Field.h"
 #include "../utility/Utility.h"
+#include "../joinedLists/SingleJoinedList.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
 
 namespace DomainBoundary {
-    void apply_boundary_condition(Settings::Settings const &settings,
-                                  Field &field, size_t** index_fields,
-                                  const size_t* patch_starts, const size_t* patch_ends,
+    void apply_boundary_condition(Field &field, SingleJoinedList** index_fields,
                                   BoundaryData* boundary_data, bool sync = true);
 }  // namespace DomainBoundary
 #endif /* ARTSS_BOUNDARYCONDITION_DOMAINBOUNDARY_H */

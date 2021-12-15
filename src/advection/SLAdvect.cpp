@@ -18,7 +18,7 @@
 
 #include "SLAdvect.h"
 #include "../boundary/BoundaryController.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 
 // ***************************************************************************************
 /// \brief  solves advection \f$ \partial_t \phi_1 = - (u \cdot \nabla) \phi_0 \f$ via
@@ -33,11 +33,11 @@
 void SLAdvect::advect(Field &out, const Field &in,
                       const Field &u_vel, const Field &v_vel, const Field &w_vel,
                       bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     auto boundary = BoundaryController::getInstance();
 
-    auto bsize_i = boundary->get_size_inner_list();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
+    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
 
 #pragma acc data present(out, in, u_vel, v_vel, w_vel, d_inner_list[:bsize_i])
     {

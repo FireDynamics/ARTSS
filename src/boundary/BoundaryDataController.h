@@ -10,6 +10,9 @@
 #include "../utility/Utility.h"
 #include "../utility/settings/Settings.h"
 #include "BoundaryData.h"
+#include "../field/Field.h"
+#include "../joinedLists/SingleJoinedList.h"
+#include "../joinedLists/MultipleJoinedList.h"
 
 #include <vector>
 
@@ -20,16 +23,12 @@ class BoundaryDataController {
     ~BoundaryDataController();
     void add_boundary_data(Settings::BoundarySetting boundary);
     void apply_boundary_condition(
-            Field &data,
-            size_t **index_fields,
-            const size_t *patch_start, const size_t *patch_end,
+            Field &field,
+            SingleJoinedList **index_fields,
             bool sync = false);
     void apply_boundary_condition_obstacle(
-            real *data,
-            size_t **index_fields,
-            size_t *patch_start, size_t *patch_end,
-            FieldType field_type,
-            size_t level,
+            Field &field,
+            MultipleJoinedList **index_fields,
             size_t id,
             bool sync = false);
     void print();

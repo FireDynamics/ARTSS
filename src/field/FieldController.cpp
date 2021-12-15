@@ -6,15 +6,15 @@
 //
 #include "FieldController.h"
 #include <string>
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
 FieldController::FieldController():
         // Variables
         // Velocities
-        field_u(FieldType::U),
-        field_v(FieldType::V),
-        field_w(FieldType::W),
+        field_u(FieldType::U, 0),  // initialise with 0 in case they won't be used (e.g. pressure test) to prevent uninitialised warnings in valgrind
+        field_v(FieldType::V, 0),
+        field_w(FieldType::W, 0),
 
         field_u0(FieldType::U),
         field_v0(FieldType::V),
@@ -30,12 +30,12 @@ FieldController::FieldController():
         field_gamma_t(FieldType::RHO),
 
         // Pressure
-        field_p(FieldType::P),
+        field_p(FieldType::P, 0),
         field_p0(FieldType::P),
         field_rhs(FieldType::P),
 
         // Temperature
-        field_T(FieldType::T),
+        field_T(FieldType::T, 0),
         field_T0(FieldType::T),
         field_T_tmp(FieldType::T),
         field_T_ambient(FieldType::T),
@@ -55,7 +55,7 @@ FieldController::FieldController():
         field_source_concentration(FieldType::RHO),
 
         // Fields for sight of boundaries
-        sight(FieldType::RHO, 1.0) {
+        sight(FieldType::UNKNOWN_FIELD, 1.0) {
 
     field_u.copyin();
     field_v.copyin();
@@ -69,30 +69,29 @@ FieldController::FieldController():
     field_v_tmp.copyin();
     field_w_tmp.copyin();
 
+    field_nu_t.copyin();
+    field_kappa_t.copyin();
+    field_gamma_t.copyin();
+
     field_p.copyin();
     field_p0.copyin();
     field_rhs.copyin();
 
     field_T.copyin();
+    field_T0.copyin();
+    field_T_tmp.copyin();
     field_T_ambient.copyin();
 
     field_concentration.copyin();
+    field_concentration0.copyin();
+    field_concentration_tmp.copyin();
 
     field_force_x.copyin();
     field_force_y.copyin();
     field_force_z.copyin();
 
     field_source_T.copyin();
-    field_T0.copyin();
-    field_T_tmp.copyin();
-
     field_source_concentration.copyin();
-    field_concentration0.copyin();
-    field_concentration_tmp.copyin();
-
-    field_nu_t.copyin();
-    field_kappa_t.copyin();
-    field_gamma_t.copyin();
 }
 
 // ========================================== Set up boundary =======================================
@@ -193,20 +192,28 @@ void FieldController::update_device() {
     field_p.update_dev();
     field_rhs.update_dev();
     field_T.update_dev();
-    field_T_ambient.update_dev();
     field_concentration.update_dev();
-    field_force_x.update_dev();
-    field_force_y.update_dev();
-    field_force_z.update_dev();
+    field_nu_t.update_dev();
     field_source_T.update_dev();
     field_source_concentration.update_dev();
-    field_nu_t.update_dev();
-    field_kappa_t.update_dev();
-    field_gamma_t.update_dev();
 #pragma acc wait
 }
 
-void FieldController::update_host(){
+void FieldController::update_host() {
+    field_u.update_host();
+    field_v.update_host();
+    field_w.update_host();
+    field_p.update_host();
+    field_rhs.update_host();
+    field_T.update_host();
+    field_concentration.update_host();
+    field_nu_t.update_host();
+    field_source_T.update_host();
+    field_source_concentration.update_host();
+#pragma acc wait
+}
+
+void FieldController::update_host_debug() {
     field_u.update_host();
     field_v.update_host();
     field_w.update_host();

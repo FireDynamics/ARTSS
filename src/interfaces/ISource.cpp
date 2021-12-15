@@ -11,7 +11,7 @@
 #include <accelmath.h>
 #endif
 
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
 
 //======================================== Sources ====================================
@@ -32,28 +32,15 @@ void ISource::buoyancy_force(
     real g = settings.get_real("physical_parameters/g");
 
     auto boundary = BoundaryController::getInstance();
+    size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
+    size_t *domain_list = boundary->get_domain_list_level_joined();
 
-    size_t *d_iList = boundary->get_inner_list_level_joined();
-    size_t *d_bList = boundary->get_boundary_list_level_joined();
-
-    auto bsize_i = boundary->get_size_inner_list();
-    auto bsize_b = boundary->get_size_boundary_list();
-
-#pragma acc data present(d_iList[:bsize_i], d_bList[:bsize_b], out, in, ina)
+#pragma acc data present(domain_list[:size_domain_list], out, in, in_a)
     {
-        // inner cells
 #pragma acc kernels async
 #pragma acc loop independent
-        for (size_t i = 0; i < bsize_i; ++i) {
-            const size_t idx = d_iList[i];
-            out[idx] = -beta * (in[idx] - in_a[idx]) * g;
-        }
-
-        // boundary cells
-#pragma acc kernels async
-#pragma acc loop independent
-        for (size_t i = 0; i < bsize_b; ++i) {
-            const size_t idx = d_bList[i];
+        for (size_t i = 0; i < size_domain_list; ++i) {
+            const size_t idx = domain_list[i];
             out[idx] = -beta * (in[idx] - in_a[idx]) * g;
         }
 
@@ -77,7 +64,7 @@ void ISource::dissipate(
         Field &out,
         const Field &in_u, const Field &in_v, const Field &in_w,
         bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 
@@ -92,8 +79,8 @@ void ISource::dissipate(
     real nu = settings.get_real("physical_parameters/nu");
 
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    size_t *d_iList = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;

@@ -6,7 +6,7 @@
 
 #include "Layers.h"
 #include <chrono>
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "Adaption.h"
 
 Layers::Layers(Settings::Settings const &settings, FieldController *field_controller) :
@@ -15,7 +15,7 @@ Layers::Layers(Settings::Settings const &settings, FieldController *field_contro
         m_Nu(field_controller->get_field_nu_t()),
         m_kappa(field_controller->get_field_kappa()),
         m_gamma(field_controller->get_field_gamma()) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     m_minimal = static_cast<size_t> (std::pow(2, domain->get_levels()));
     m_timecounter = 0;
 
@@ -41,7 +41,7 @@ bool Layers::update(
     } else {
         m_timecounter = 0;
     }
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     *p_shift_x1 = 0;
     *p_shift_x2 = 0;
@@ -110,7 +110,7 @@ size_t Layers::getExpansionSize() {
 /// \params start x-values at x1 (start = true) or x-values at x2 (start=false)
 // ********************************************************************************
 void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *, long *, long *, long *, bool start) {
-    Domain *domain = Domain::getInstance();
+    DomainData *domain = DomainData::getInstance();
 
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
@@ -131,7 +131,7 @@ void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *, long *, long
         long shift = *p_shift_x1;
         size_t index;
         size_t idx;
-#pragma acc parallel loop collapse(3) present(m_nu, m_gamma, m_kappa, m_T, m_Ta)
+#pragma acc parallel loop collapse(3) present(m_Nu, m_gamma, m_kappa, m_T, m_Ta)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 for (int i = 0; i >= shift; i--) {
@@ -150,7 +150,7 @@ void Layers::setXValues(long *p_shift_x1, long *p_shift_x2, long *, long *, long
         long shift = *p_shift_x2;
         size_t index;
         size_t idx;
-#pragma acc parallel loop collapse(3) present(m_nu, m_gamma, m_kappa, m_T, m_Ta)
+#pragma acc parallel loop collapse(3) present(m_Nu, m_gamma, m_kappa, m_T, m_Ta)
         for (size_t j = j_start; j < j_end; j++) {
             for (size_t k = k_start; k < k_end; k++) {
                 for (int i = 0; i <= shift; i++) {
@@ -187,7 +187,7 @@ void Layers::apply_changes(long *p_shift_x1, long *p_shift_x2, long *p_shift_y1,
 /// \param  no_buffer_cell Buffersize
 // ***************************************************************************************
 void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shift_x1, long *p_shift_x2) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
 
     auto data = m_T.data;
     size_t size __attribute__((unused)) = domain->get_size();
@@ -247,7 +247,7 @@ void Layers::adaptXDirection(real checkValue, size_t no_buffer_cell, long *p_shi
 /// \param  no_buffer_cell Buffersize
 // ***************************************************************************************
 void Layers::adaptXDirection_serial(real checkValue, size_t no_buffer_cell, long *p_shift_x1, long *p_shift_x2) {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
 

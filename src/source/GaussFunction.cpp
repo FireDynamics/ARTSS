@@ -5,9 +5,11 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
 #include "GaussFunction.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 #include "../boundary/BoundaryController.h"
-
+#ifdef _OPENACC
+#include "accel.h"
+#endif
 GaussFunction::GaussFunction(
         real HRR, real cp,
         real x0, real y0, real z0,
@@ -46,7 +48,7 @@ void GaussFunction::update_source(Field &out, real t_cur) {
 /// \param  sigma Radius of Gaussian
 // ***************************************************************************************
 void GaussFunction::create_spatial_values() {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     size_t level = m_field_spatial_values.get_level();
 
@@ -70,15 +72,15 @@ void GaussFunction::create_spatial_values() {
 
     // set Gaussian to cells
     auto boundary = BoundaryController::getInstance();
-    size_t *d_iList = boundary->get_inner_list_level_joined();
+    size_t *domain_list = boundary->get_domain_inner_list_level_joined();
 
-    auto bsize_i = boundary->get_size_inner_list();
+    auto size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
 
     real HRRrV;
 
     real V = 0.;
-    for (size_t l = 0; l < bsize_i; ++l) {
-        const size_t idx = d_iList[l];
+    for (size_t l = 0; l < size_domain_list; ++l) {
+        const size_t idx = domain_list[l];
         size_t k = getCoordinateK(idx, Nx, Ny);
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
@@ -93,8 +95,8 @@ void GaussFunction::create_spatial_values() {
     HRRrV = m_HRR / V;       // in case of concentration Ys*HRR
     real rcp = 1. / m_cp;    // to get [K/s] for energy equation (d_t T), rho:=1, otherwise *1/rho; in case of concentration 1/Hc to get kg/m^3s
 
-    for (size_t l = 0; l < bsize_i; ++l) {
-        const size_t idx = d_iList[l];
+    for (size_t l = 0; l < size_domain_list; ++l) {
+        const size_t idx = domain_list[l];
         size_t k = getCoordinateK(idx, Nx, Ny);
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);

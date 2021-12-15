@@ -10,13 +10,11 @@
 PressureSolver::PressureSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(PressureSolver).name());
+    m_logger = Utility::create_logger(typeid(PressureSolver).name());
 #endif
     m_field_controller = field_controller;
     auto p_type = m_settings.get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(m_settings, &this->pres, p_type,
-                                       m_field_controller->get_field_p(),
-                                       m_field_controller->get_field_rhs());
+    SolverSelection::SetPressureSolver(m_settings, &this->pres, p_type);
     control();
 }
 
@@ -51,7 +49,7 @@ void PressureSolver::do_step(real t, bool sync) {
 // *****************************************************************************
 void PressureSolver::control() {
     auto p_field = m_settings.get("solver/pressure/field");
-    if (p_field != BoundaryData::get_field_type_name(FieldType::P)) {
+    if (p_field != Field::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

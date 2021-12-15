@@ -6,9 +6,10 @@
 
 #include <iostream>
 #include "TimeIntegration.h"
-#include "Domain.h"
+#include "DomainData.h"
 #include "boundary/BoundaryController.h"
 #include "solver/SolverController.h"
+#include "visualisation/VTKWriter.h"
 #include "utility/settings/Settings.h"
 
 #ifdef _OPENACC
@@ -24,17 +25,17 @@ int main(int argc, char **argv) {
         std::exit(1);
     }
 
-    Settings::Settings settings(argv[1]);
-    Domain::getInstance(settings);
-    BoundaryController::getInstance(settings);
-
-    SolverController *sc = new SolverController(settings);
-
 #ifdef _OPENACC
     // Initialise GPU
     acc_device_t dev_type = acc_get_device_type();
     acc_init(dev_type);
 #endif
+
+    Settings::Settings settings(argv[1]);
+    DomainData::getInstance(settings);
+    BoundaryController::getInstance(settings);
+
+    SolverController *sc = new SolverController(settings);
 
     // Integrate over time and solve numerically
     // Time integration

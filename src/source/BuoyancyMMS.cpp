@@ -6,7 +6,7 @@
 //
 #include "BuoyancyMMS.h"
 #include "../boundary/BoundaryController.h"
-#include "../Domain.h"
+#include "../DomainData.h"
 
 BuoyancyMMS::BuoyancyMMS(Settings::Settings const &settings) :
         m_settings(settings),
@@ -21,7 +21,7 @@ BuoyancyMMS::BuoyancyMMS(Settings::Settings const &settings) :
 /// \param  t   time
 // ***************************************************************************************
 void BuoyancyMMS::set_up() {
-    auto domain = Domain::getInstance();
+    auto domain = DomainData::getInstance();
     // local variables and parameters for GPU
     size_t Nx = domain->get_Nx();
     size_t Ny = domain->get_Ny();
@@ -44,31 +44,18 @@ void BuoyancyMMS::set_up() {
 
     auto boundary = BoundaryController::getInstance();
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    size_t *d_bList = boundary->get_boundary_list_level_joined();
-
-    auto bsize_i = boundary->get_size_inner_list();
-    auto bsize_b = boundary->get_size_boundary_list();
+    size_t *domain_list = boundary->get_domain_list_level_joined();
+    auto size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
 
     // inner cells
-    for (size_t l = 0; l < bsize_i; ++l) {
-        const size_t idx = d_inner_list[l];
+#pragma acc parallel loop independent present(m_source_field, domain_list[:size_domain_list]) async
+    for (size_t l = 0; l < size_domain_list; ++l) {
+        const size_t idx = domain_list[l];
         size_t k = getCoordinateK(idx, Nx, Ny);
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
         m_source_field[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
     }
-
-    // boundary cells
-    for (size_t l = 0; l < bsize_b; ++l) {
-        const size_t idx = d_bList[l];
-        size_t k = getCoordinateK(idx, Nx, Ny);
-        size_t j = getCoordinateJ(idx, Nx, Ny, k);
-        size_t i = getCoordinateI(idx, Nx, Ny, j, k);
-        m_source_field[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * std::sin(M_PI * (xi(i, X1, dx) + yj(j, Y1, dy)));
-    }
-
-    m_source_field.update_dev();
 }
 
 void BuoyancyMMS::update_source(Field &out, real t_cur) {
