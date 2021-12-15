@@ -1,7 +1,7 @@
 /// \file       Multigrid.h
 /// \brief      Creates all lists needed for multigrid
 /// \date       Oct 01, 2019
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_BOUNDARY_MULTIGRID_H_

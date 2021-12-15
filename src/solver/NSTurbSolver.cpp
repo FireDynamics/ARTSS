@@ -12,8 +12,6 @@
 
 #include "SolverSelection.h"
 #include "../domain/DomainData.h"
-#include "../domain/BoundaryData.h"
-#include "../pressure/VCycleMG.h"
 
 NSTurbSolver::NSTurbSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {

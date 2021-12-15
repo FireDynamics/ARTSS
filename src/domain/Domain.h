@@ -1,7 +1,7 @@
 /// \file       Domain.h
 /// \brief      stores index lists of domain
 /// \date       Oct 01, 2019
-/// \author     My Linh Wuerzburger
+/// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_BOUNDARY_DOMAIN_H_

@@ -55,7 +55,7 @@ private:
     Coordinate<size_t> m_strides;
 
     std::vector<size_t> m_surface_list;  // indices of surface
-    size_t m_size_surface_list;
+    size_t m_size_surface_list = 0;
 
     void init();
 

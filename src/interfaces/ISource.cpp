@@ -85,7 +85,7 @@ void ISource::dissipate(
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
     size_t neighbour_k = Nx * Ny;
-#pragma acc data present(out, in_u, in_v, in_w, d_iList[:bsize_i])
+#pragma acc data present(out, in_u, in_v, in_w, domain_inner_list[:size_domain_inner_list])
     {
         // inner
 #pragma acc kernels async

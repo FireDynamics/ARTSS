@@ -1,7 +1,7 @@
-/// \file       Multigrid.h
+/// \file       Multigrid.cpp
 /// \brief      Creates all lists needed for multigrid
 /// \date       Oct 01, 2019
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Multigrid.h"
@@ -651,17 +651,22 @@ void Multigrid::send_obstacle_lists_to_GPU() {
 /// \param  sync synchronous kernel launching (true, default: false)
 // *************************************************************************************************
 void Multigrid::apply_boundary_condition(Field &field, bool sync) {
-    if (m_number_of_surface_objects > 0) {
-        for (size_t id = 0; id < m_number_of_surface_objects; ++id) {
-            m_bdc_surface[id].apply_boundary_condition_surface(field, m_jl_surface_list_patch_divided, id, sync);
-        }
-    }
+    // order (shouldn't) matter. Only if there are still cells which have multiple
+    // BC types (obstacle, boundary, surface), but these should be excluded
+    // first obstacles BC, then domain BC and at last surface BC.
     if (m_number_of_obstacle_objects > 0) {
         for (size_t id = 0; id < m_number_of_obstacle_objects; ++id) {
             m_bdc_obstacle[id].apply_boundary_condition_obstacle(field, m_jl_obstacle_boundary_list_patch_divided, id, sync);
         }
     }
+
     m_bdc_domain.apply_boundary_condition(field, m_jl_domain_boundary_list_patch_divided, sync);
+
+    if (m_number_of_surface_objects > 0) {
+        for (size_t id = 0; id < m_number_of_surface_objects; ++id) {
+            m_bdc_surface[id].apply_boundary_condition_surface(field, m_jl_surface_list_patch_divided, id, sync);
+        }
+    }
 }
 
 //======================================== Update lists ====================================
@@ -672,6 +677,7 @@ void Multigrid::update_lists() {
     //TODO(issue 178) rework update function especially with obstacles
     // develop concept where obstacles and surfaces are distinguished by whether
     // they are in the computational domain or not.
+    // m_MG_domain_object_list[0]->update_lists()
     remove_domain_lists_from_GPU();
     create_multigrid_domain_lists();
     send_domain_lists_to_GPU();

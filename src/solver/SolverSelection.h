@@ -47,15 +47,25 @@ struct TurbulenceMethods {
 };
 
 namespace SolverSelection {
-    void SetAdvectionSolver(Settings::Settings const &settings, IAdvection **advectionSolver, const std::string& advectionType);
+    void SetAdvectionSolver(Settings::Settings const &settings,
+                            IAdvection **advection_solver,
+                            const std::string& advection_type);
 
-    void SetDiffusionSolver(Settings::Settings const &settings, IDiffusion **diffusionSolver, const std::string& diffusionType);
+    void SetDiffusionSolver(Settings::Settings const &settings,
+                            IDiffusion **diffusion_solver,
+                            const std::string& diffusion_type);
 
-    void SetPressureSolver(Settings::Settings const &settings, IPressure **pressureSolver, const std::string& pressureType);
+    void SetPressureSolver(Settings::Settings const &settings,
+                           IPressure **pressure_solver,
+                           const std::string& pressure_type);
 
-    void SetSourceSolver(Settings::Settings const &settings, ISource **sourceSolver, const std::string& sourceType);
+    void SetSourceSolver(Settings::Settings const &settings,
+                         ISource **source_solver,
+                         const std::string& source_type);
 
-    void SetTurbulenceSolver(Settings::Settings const &settings, ITurbulence **tubulenceSolver, const std::string& turbulenceType);
+    void SetTurbulenceSolver(Settings::Settings const &settings,
+                             ITurbulence **turbulence_solver,
+                             const std::string& turbulence_type);
 };
 
 #endif /* ARTSS_SOLVER_SOLVERSELECTION_H_ */

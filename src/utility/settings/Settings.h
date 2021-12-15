@@ -31,8 +31,8 @@ class Settings {
      explicit Settings(const std::string& path);
      void print_config() const;
 
-     std::string get(std::string path) const;
-     std::string sget(std::string path) const;
+     std::string get(const std::string& path) const;
+     std::string sget(const std::string& path) const;
      void set(std::string path, std::string val) {
          sset(path, val);
 #ifndef BENCHMARKING

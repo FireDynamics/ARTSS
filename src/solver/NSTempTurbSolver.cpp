@@ -15,14 +15,11 @@
 #include "SolverSelection.h"
 
 NSTempTurbSolver::NSTempTurbSolver(Settings::Settings const &settings, FieldController *field_controller) :
-m_settings(settings) {
+        m_settings(settings),
+        m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("construct NSTempTurbSolver");
-#endif
-    m_field_controller = field_controller;
-
-#ifndef BENCHMARKING
     m_logger->debug("set advection solver");
 #endif
     // Advection of velocity
@@ -283,6 +280,7 @@ void NSTempTurbSolver::control() {
         std::exit(1);
         // TODO Error handling
     }
+
     if (m_settings.get("solver/temperature/diffusion/field") != Mapping::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
@@ -290,6 +288,7 @@ void NSTempTurbSolver::control() {
         std::exit(1);
         // TODO Error handling
     }
+
     if (m_settings.get("solver/pressure/field") != Mapping::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");

@@ -34,9 +34,9 @@ void IPressure::divergence(
 
     auto domain_controller = DomainController::getInstance();
 
-    size_t *d_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
-    auto bsize_i = domain_controller->get_size_domain_inner_list_level_joined(0);
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     // start indices for computational domain_data minus 1 for ghost cells
     size_t x1 = domain_data->get_index_x1() - 1;
@@ -52,13 +52,13 @@ void IPressure::divergence(
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
     size_t neighbour_k = Nx * Ny;
-#pragma acc data present(d_inner_list[:bsize_i])
+#pragma acc data present(domain_inner_list[:size_domain_inner_list])
 #pragma acc data present(out, in_x, in_y, in_z)
     {
 #pragma acc kernels async
 #pragma acc loop independent
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_inner_list[j];
+        for (size_t j = 0; j < size_domain_inner_list; ++j) {
+            const size_t i = domain_inner_list[j];
             real value_in_x = 0.5 * reciprocal_dx * (in_x[i + neighbour_i] - in_x[i - neighbour_i]) ;
             real value_in_y = 0.5 * reciprocal_dy * (in_y[i + neighbour_j] - in_y[i - neighbour_j]) ;
             real value_in_z = 0.5 * reciprocal_dz * (in_z[i + neighbour_k] - in_z[i - neighbour_k]) ;
@@ -141,20 +141,20 @@ void IPressure::projection(
 
     auto domain_controller = DomainController::getInstance();
 
-    size_t *d_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
-    auto bsize_i = domain_controller->get_size_domain_inner_list_level_joined(0);
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
     size_t neighbour_k = Nx * Ny;
-#pragma acc data present(d_inner_list[:bsize_i])
+#pragma acc data present(domain_inner_list[:size_domain_inner_list])
 #pragma acc data present(out_u, out_v, out_w, in_u, in_v, in_w, in_p)
     {
 #pragma acc kernels async
 #pragma acc loop independent
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_inner_list[j];
+        for (size_t j = 0; j < size_domain_inner_list; ++j) {
+            const size_t i = domain_inner_list[j];
             out_u[i] = in_u[i] - 0.5 * reciprocal_dx * (in_p[i + neighbour_i] - in_p[i - neighbour_i]);
             out_v[i] = in_v[i] - 0.5 * reciprocal_dy * (in_p[i + neighbour_j] - in_p[i - neighbour_j]);
             out_w[i] = in_w[i] - 0.5 * reciprocal_dz * (in_p[i + neighbour_k] - in_p[i - neighbour_k]);
