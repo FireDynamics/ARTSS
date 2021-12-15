@@ -6,8 +6,8 @@
 //
 #include "FieldController.h"
 #include <string>
-#include "../boundary/DomainData.h"
-#include "../boundary/DomainController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 
 FieldController::FieldController():
         // Variables

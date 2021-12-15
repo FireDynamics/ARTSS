@@ -11,8 +11,8 @@
 #include <accelmath.h>
 #endif
 
-#include "../boundary/DomainData.h"
-#include "../boundary/DomainController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 
 //======================================== Sources ====================================
 //======================================== Force ======================================

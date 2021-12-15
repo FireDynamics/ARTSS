@@ -5,8 +5,8 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "ObstacleBoundary.h"
-#include "../boundary/DomainData.h"
-#include "../boundary/DomainController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 
 
 namespace ObstacleBoundary {

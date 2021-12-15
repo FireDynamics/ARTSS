@@ -7,10 +7,10 @@
 #ifndef ARTSS_BOUNDARYCONDITION_DOMAINBOUNDARY_H
 #define ARTSS_BOUNDARYCONDITION_DOMAINBOUNDARY_H
 
-#include "../boundary/BoundaryData.h"
+#include "../domain/BoundaryData.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
-#include "../joinedLists/SingleJoinedList.h"
+#include "../GPULists/SingleJoinedList.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
 

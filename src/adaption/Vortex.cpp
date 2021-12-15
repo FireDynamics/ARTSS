@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Vortex.h"
-#include "../boundary/DomainData.h"
+#include "../domain/DomainData.h"
 
 Vortex::Vortex(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings),

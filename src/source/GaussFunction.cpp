@@ -5,11 +5,14 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
 #include "GaussFunction.h"
-#include "../boundary/DomainData.h"
-#include "../boundary/DomainController.h"
+
 #ifdef _OPENACC
 #include "accel.h"
 #endif
+
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
+
 GaussFunction::GaussFunction(
         real HRR, real cp,
         real x0, real y0, real z0,

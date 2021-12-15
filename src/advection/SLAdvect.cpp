@@ -10,15 +10,16 @@
 ///         stable semi-Lagrangian approach (backtrace and linear interpolation)
 // ***************************************************************************************
 
+#include "SLAdvect.h"
+
 #include <cmath>
 
 #ifdef _OPENACC
 #include <accelmath.h>
 #endif
 
-#include "SLAdvect.h"
-#include "../boundary/DomainController.h"
-#include "../boundary/DomainData.h"
+#include "../domain/DomainController.h"
+#include "../domain/DomainData.h"
 
 // ***************************************************************************************
 /// \brief  solves advection \f$ \partial_t \phi_1 = - (u \cdot \nabla) \phi_0 \f$ via

@@ -7,9 +7,9 @@
 #ifndef ARTSS_BOUNDARYCONDITION_SURFACEBOUNDARY_H
 #define ARTSS_BOUNDARYCONDITION_SURFACEBOUNDARY_H
 
-#include "../boundary/BoundaryData.h"
+#include "../domain/BoundaryData.h"
 #include "../field/Field.h"
-#include "../joinedLists/MultipleJoinedList.h"
+#include "../GPULists/MultipleJoinedList.h"
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"

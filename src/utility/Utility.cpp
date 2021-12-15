@@ -4,12 +4,14 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "Utility.h"
+
 #include <cmath>
 #include <sstream>
-#include "Utility.h"
+
 #include "GlobalMacrosTypes.h"
-#include "../boundary/DomainData.h"
-#include "../boundary/DomainController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 
 #ifndef BENCHMARKING
 #include <spdlog/spdlog.h>

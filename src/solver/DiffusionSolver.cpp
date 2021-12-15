@@ -10,8 +10,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "../interfaces/IDiffusion.h"
-#include "../boundary/DomainData.h"
+#include "../domain/DomainData.h"
 #include "SolverSelection.h"
 
 DiffusionSolver::DiffusionSolver(Settings::Settings const &settings, FieldController *field_controller) :

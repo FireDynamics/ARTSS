@@ -5,8 +5,8 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
 #include "Cube.h"
-#include "../boundary/DomainData.h"
-#include "../boundary/DomainController.h"
+
+#include "../domain/DomainData.h"
 
 void Cube::update_source(Field &out, real) {
     out.copy_data(m_source_field);

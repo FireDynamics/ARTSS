@@ -4,6 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 
+#include "SolverController.h"
+
 #include "AdvectionSolver.h"
 #include "AdvectionDiffusionSolver.h"
 #include "DiffusionSolver.h"
@@ -15,10 +17,9 @@
 #include "NSTempConSolver.h"
 #include "NSTempTurbConSolver.h"
 #include "PressureSolver.h"
-#include "SolverController.h"
 #include "SolverSelection.h"
-#include "../boundary/DomainController.h"
-#include "../boundary/DomainData.h"
+#include "../domain/DomainController.h"
+#include "../domain/DomainData.h"
 #include "../Functions.h"
 #include "../source/GaussFunction.h"
 #include "../source/BuoyancyMMS.h"

@@ -4,15 +4,16 @@
 /// \author     Max Boehler
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "ExplicitDiffuse.h"
+
 #include <cmath>
 
 #ifdef _OPENACC
 #include <accelmath.h>
 #endif
 
-#include "ExplicitDiffuse.h"
-#include "../boundary/DomainController.h"
-#include "../boundary/DomainData.h"
+#include "../domain/DomainController.h"
+#include "../domain/DomainData.h"
 
 //====================================== Diffuse ===============================================
 // ***************************************************************************************

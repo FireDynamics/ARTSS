@@ -4,14 +4,15 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "Visual.h"
+
 #include <cmath>
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <utility>
 
-#include "Visual.h"
-#include "../boundary/DomainData.h"
+#include "../domain/DomainData.h"
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 

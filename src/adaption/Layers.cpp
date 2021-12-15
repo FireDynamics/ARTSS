@@ -5,9 +5,11 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Layers.h"
+
 #include <chrono>
-#include "../boundary/DomainData.h"
+
 #include "Adaption.h"
+#include "../domain/DomainData.h"
 
 Layers::Layers(Settings::Settings const &settings, FieldController *field_controller) :
         m_T(field_controller->get_field_T()),

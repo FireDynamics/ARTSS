@@ -4,6 +4,8 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "Functions.h"
+
 #include <cmath>
 
 #ifdef _OPENACC
@@ -12,10 +14,9 @@
 #include <ctime>
 #include <random>
 
-#include "Functions.h"
-#include "boundary/DomainData.h"
+#include "domain/DomainData.h"
+#include "domain/DomainController.h"
 #include "utility/Utility.h"
-#include "boundary/DomainController.h"
 
 const std::string FunctionNames::beltrami = "Beltrami";
 const std::string FunctionNames::buoyancy_mms = "BuoyancyMMS";

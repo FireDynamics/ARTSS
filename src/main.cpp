@@ -6,10 +6,9 @@
 
 #include <iostream>
 #include "TimeIntegration.h"
-#include "boundary/DomainData.h"
-#include "boundary/DomainController.h"
+#include "domain/DomainData.h"
+#include "domain/DomainController.h"
 #include "solver/SolverController.h"
-#include "visualisation/VTKWriter.h"
 #include "utility/settings/Settings.h"
 
 #ifdef _OPENACC

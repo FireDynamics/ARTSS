@@ -5,10 +5,11 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "JacobiDiffuse.h"
+
 #include <cmath>
 
-#include "JacobiDiffuse.h"
-#include "../boundary/DomainController.h"
+#include "../domain/DomainController.h"
 
 JacobiDiffuse::JacobiDiffuse(Settings::Settings const &settings) :
         m_settings(settings) {

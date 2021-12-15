@@ -14,7 +14,7 @@
 #include "BoundarySetting.h"
 #include "tinyxml2.h"
 #include "../GlobalMacrosTypes.h"
-#include "../../boundary/PatchObject.h"
+#include "../../domain/PatchObject.h"
 
 #ifndef BENCHMARKING
 #include <spdlog/logger.h>

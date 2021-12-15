@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "ExplicitEulerSource.h"
-#include "../boundary/DomainController.h"
+#include "../domain/DomainController.h"
 
 ExplicitEulerSource::ExplicitEulerSource(Settings::Settings const &settings) :
         m_settings(settings) {

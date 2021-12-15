@@ -9,8 +9,8 @@
 #include <fstream>
 
 #include "Analysis.h"
-#include "../boundary/DomainController.h"
-#include "../boundary/DomainData.h"
+#include "../domain/DomainController.h"
+#include "../domain/DomainData.h"
 #include "../utility/Utility.h"
 
 Analysis::Analysis(Settings::Settings const &settings, Solution &solution, bool has_analytical_solution) :

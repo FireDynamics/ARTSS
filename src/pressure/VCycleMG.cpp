@@ -7,8 +7,8 @@
 #include <cmath>
 
 #include "VCycleMG.h"
-#include "../boundary/DomainData.h"
-#include "../boundary/DomainController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 #include "../diffusion/ColoredGaussSeidelDiffuse.h"
 #include "../diffusion/JacobiDiffuse.h"
 #include "../solver/SolverSelection.h"

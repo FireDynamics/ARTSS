@@ -4,15 +4,16 @@
 /// \author       Suryanarayana Maddu
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "ConstSmagorinsky.h"
+
 #include <cmath>
 
 #ifdef _OPENACC
 #include <accelmath.h>
 #endif
 
-#include "ConstSmagorinsky.h"
-#include "../boundary/DomainData.h"
-#include "../boundary/DomainController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 
 ConstSmagorinsky::ConstSmagorinsky(Settings::Settings const &settings) {
     // Cs value of 0.1 is found to yield the best results for wide range of flows

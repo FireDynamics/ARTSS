@@ -11,8 +11,8 @@
 
 #include "BoundaryData.h"
 #include "../field/Field.h"
-#include "../joinedLists/SingleJoinedList.h"
-#include "../joinedLists/MultipleJoinedList.h"
+#include "../GPULists/SingleJoinedList.h"
+#include "../GPULists/MultipleJoinedList.h"
 #include "../utility/Utility.h"
 #include "../utility/settings/Settings.h"
 

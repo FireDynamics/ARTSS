@@ -10,8 +10,8 @@
 
 #include <cmath>
 
-#include "../boundary/DomainController.h"
-#include "../boundary/DomainData.h"
+#include "../domain/DomainController.h"
+#include "../domain/DomainData.h"
 #include "../utility/Utility.h"
 
 

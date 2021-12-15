@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include "../boundary/PatchObject.h"
+#include "../domain/PatchObject.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
 #include "../utility/settings/Settings.h"

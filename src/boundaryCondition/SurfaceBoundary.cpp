@@ -5,7 +5,7 @@
 /// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "SurfaceBoundary.h"
-#include "../boundary/DomainData.h"
+#include "../domain/DomainData.h"
 
 namespace SurfaceBoundary {
     std::string class_name = "SurfaceBoundary";

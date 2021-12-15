@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "DomainBoundary.h"
-#include "../boundary/DomainData.h"
+#include "../domain/DomainData.h"
 
 namespace DomainBoundary {
 static const std::string class_name = "DomainBoundary";

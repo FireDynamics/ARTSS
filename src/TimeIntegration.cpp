@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "TimeIntegration.h"
-#include "boundary/DomainData.h"
+#include "domain/DomainData.h"
 
 // ==================================== Constructor ====================================
 // ***************************************************************************************

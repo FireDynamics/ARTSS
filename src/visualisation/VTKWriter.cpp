@@ -5,8 +5,8 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "VTKWriter.h"
-#include "../boundary/DomainData.h"
 #include "visit_writer.h"  //( https://wci.llnl.gov/codes/visit/ )
+#include "../domain/DomainData.h"
 
 int VTKWriter::vtk_counter = 0;
 static std::string ending = ".vtk";

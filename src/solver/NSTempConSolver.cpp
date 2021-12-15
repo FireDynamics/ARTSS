@@ -11,10 +11,8 @@
 #include <vector>
 #include <algorithm>
 
-#include "../pressure/VCycleMG.h"
-#include "../boundary/DomainData.h"
-#include "../boundary/BoundaryData.h"
 #include "SolverSelection.h"
+#include "../domain/DomainData.h"
 
 NSTempConSolver::NSTempConSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {

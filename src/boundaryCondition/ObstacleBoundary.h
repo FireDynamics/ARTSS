@@ -8,8 +8,8 @@
 #define ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H_
 
 #include <cstdlib>
-#include "../boundary/BoundaryData.h"
-#include "../joinedLists/MultipleJoinedList.h"
+#include "../domain/BoundaryData.h"
+#include "../GPULists/MultipleJoinedList.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
 

@@ -10,10 +10,8 @@
 #include <vector>
 #include <algorithm>
 
-#include "../boundary/DomainData.h"
-#include "../boundary/BoundaryData.h"
-#include "../boundary/DomainController.h"
-#include "../pressure/VCycleMG.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 #include "SolverSelection.h"
 
 NSTempTurbSolver::NSTempTurbSolver(Settings::Settings const &settings, FieldController *field_controller) :

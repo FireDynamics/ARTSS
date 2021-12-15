@@ -14,8 +14,8 @@
 #include "DomainData.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
-#include "../joinedLists/SingleJoinedList.h"
-#include "../joinedLists/MultipleJoinedList.h"
+#include "../GPULists/SingleJoinedList.h"
+#include "../GPULists/MultipleJoinedList.h"
 
 class Multigrid {
  public:

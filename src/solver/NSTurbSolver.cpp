@@ -10,10 +10,10 @@
 #include <vector>
 #include <algorithm>
 
-#include "../pressure/VCycleMG.h"
-#include "../boundary/DomainData.h"
 #include "SolverSelection.h"
-#include "../boundary/BoundaryData.h"
+#include "../domain/DomainData.h"
+#include "../domain/BoundaryData.h"
+#include "../pressure/VCycleMG.h"
 
 NSTurbSolver::NSTurbSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
