@@ -1,5 +1,5 @@
-/// \file       Domain.h
-/// \brief      XML Domain parameters to variables
+/// \file       DomainData.h
+/// \brief      stores information about the domain
 /// \date       Jul 16, 2018
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
