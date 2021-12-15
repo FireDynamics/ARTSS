@@ -58,8 +58,6 @@ namespace Mapping {
     std::string get_patch_name(Patch p);
     //std::string get_patch_name(size_t p) { return get_patch_name(Patch(p)); }
     Patch match_patch(const std::string &string);
-    /// \brief get patch of the given axis.
-    /// \details e.g. Axis X (0) start = false, results in Patch Right (1)
     Patch to_patch(CoordinateAxis axis, bool start);
     //Patch to_patch(size_t axis, bool start) { return to_patch(CoordinateAxis(axis), start); }
 
