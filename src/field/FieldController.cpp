@@ -99,16 +99,16 @@ FieldController::FieldController():
 /// \brief  initializes boundary cells
 // ***************************************************************************************
 void FieldController::set_up_boundary() {
-    auto boundary = DomainController::getInstance();
-    boundary->apply_boundary(field_u);
-    boundary->apply_boundary(field_v);
-    boundary->apply_boundary(field_w);
-    boundary->apply_boundary(field_p);
-    boundary->apply_boundary(field_T);
-    boundary->apply_boundary(field_concentration);
+    auto domain_controller = DomainController::getInstance();
+    domain_controller->apply_boundary(field_u);
+    domain_controller->apply_boundary(field_v);
+    domain_controller->apply_boundary(field_w);
+    domain_controller->apply_boundary(field_p);
+    domain_controller->apply_boundary(field_T);
+    domain_controller->apply_boundary(field_concentration);
 
     // TODO necessary?
-    boundary->apply_boundary(field_T_ambient);
+    domain_controller->apply_boundary(field_T_ambient);
 }
 
 //======================================= Update data ==================================

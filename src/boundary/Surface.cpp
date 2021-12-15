@@ -19,7 +19,7 @@ Surface::Surface(real x1, real x2,
     m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("################ SURFACE ################");
 #endif
-    DomainData *domain_data = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
     Coordinate<real> tmp_start(x1, y1, z1);
     Coordinate<real> tmp_end(x2, y2, z2);
     for (size_t axis = 0; axis < number_of_axes; axis++) {
@@ -86,7 +86,7 @@ void Surface::init() {
     m_size_surface_list = get_stride(X) * get_stride(Y) * get_stride(Z);
     m_surface_list.resize(m_size_surface_list);
 
-    DomainData *domain_data = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_number_of_inner_cells(CoordinateAxis::X);
     size_t Ny = domain_data->get_number_of_inner_cells(CoordinateAxis::Y);
 

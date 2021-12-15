@@ -59,15 +59,15 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x, out_y, out_z, out_p) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x, out_y, out_z, out_p) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -103,15 +103,15 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -142,15 +142,15 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_list_level_joined();
-        size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -178,15 +178,15 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_list_level_joined();
-        size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -214,15 +214,15 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_list_level_joined();
-        size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -239,14 +239,14 @@ namespace Functions {
 /// \param  T_ambient    Ambient temperature
 // ***************************************************************************************
     void buoyancy_force(Field &out, Field &T, Field &T_ambient, real beta, real g) {
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out, T, T_ambient) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out, T, T_ambient) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             out[idx] = -beta * (T[idx] - T_ambient[idx]) * g;
         }
     }
@@ -277,15 +277,15 @@ namespace Functions {
         real c = 2 * nu * M_PI * M_PI - 1;
         real rpi = 1. / M_PI;
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x, out_y, out_z, out_p, out_T) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x, out_y, out_z, out_p, out_T) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -319,16 +319,16 @@ namespace Functions {
         real c_nu = 2 * nu * M_PI * M_PI - 1;
         real c_kappa = 2 * kappa * M_PI * M_PI - 1;
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -346,14 +346,14 @@ namespace Functions {
 /// \param  out_p  pressure
 // ***************************************************************************************
     void drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real w_lin, real pa) {
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x, out_y, out_z, out_p) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x, out_y, out_z, out_p) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             out_x[idx] = u_lin;
             out_y[idx] = v_lin;
             out_z[idx] = w_lin;
@@ -385,15 +385,15 @@ namespace Functions {
 
         real kpinu = 3 * l * l * M_PI * M_PI * nu;
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         //inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -426,17 +426,17 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         if (Nz > 3) {
             real d = 3.;                // 3D
             // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x, out_y, out_z) async
-            for (size_t i = 0; i < size_domain_list; i++) {
-                size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x, out_y, out_z) async
+            for (size_t i = 0; i < size_domain_inner_list; i++) {
+                size_t idx = domain_inner_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -452,9 +452,9 @@ namespace Functions {
             real d = 2.;                // 2D
 
             // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x, out_y, out_z) async
-            for (size_t i = 0; i < size_domain_list; i++) {
-                size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x, out_y, out_z) async
+            for (size_t i = 0; i < size_domain_inner_list; i++) {
+                size_t idx = domain_inner_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
                 coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -487,15 +487,15 @@ namespace Functions {
         real dkpi = 3 * l * l * M_PI * M_PI;
         real rdkpi = 1. / dkpi;
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -528,15 +528,15 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -577,9 +577,9 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_data_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_data_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
         real x, y, z;
 
@@ -587,8 +587,8 @@ namespace Functions {
         if (axis == X) {
             for (int l = 0; l < n_layers; ++l) {
                 // inner cells
-#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
-                for (size_t i = 0; i < size_domain_list; i++) {
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_inner_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
+                for (size_t i = 0; i < size_domain_inner_list; i++) {
                     size_t idx = domain_data_list[i];
                     coords_k = getCoordinateK(idx, Nx, Ny);
                     coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
@@ -601,8 +601,8 @@ namespace Functions {
             }
         } else if (axis == Y) {
             for (int l = 0; l < n_layers; ++l) {
-#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
-                for (size_t i = 0; i < size_domain_list; i++) {
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_inner_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
+                for (size_t i = 0; i < size_domain_inner_list; i++) {
                     size_t idx = domain_data_list[i];
                     coords_k = getCoordinateK(idx, Nx, Ny);
                     coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
@@ -615,8 +615,8 @@ namespace Functions {
             }
         } else if (axis == Z) {
             for (int l = 0; l < n_layers; ++l) {
-#pragma acc parallel loop independent present(domain_data_list[:size_domain_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
-                for (size_t i = 0; i < size_domain_list; i++) {
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_inner_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
+                for (size_t i = 0; i < size_domain_inner_list; i++) {
                     size_t idx = domain_data_list[i];
                     coords_k = getCoordinateK(idx, Nx, Ny);
                     coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
@@ -653,15 +653,15 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -730,15 +730,15 @@ namespace Functions {
         real dx = domain_data->get_dx();
         real dy = domain_data->get_dy();
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x, out_y, out_z, out_p) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x, out_y, out_z, out_p) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -760,9 +760,9 @@ namespace Functions {
 /// \param  step_size    interval steps of random numbers
 // ***************************************************************************************
     void random(Field &out, real range, bool is_absolute, int seed, real step_size) {
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
         std::mt19937 mt;
         int steps = static_cast<int>(range / step_size);
@@ -776,8 +776,8 @@ namespace Functions {
 
         out.update_host();
         // inner cells
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             // generate secret number between -range and range:
             double no = dist(mt) * step_size;
             if (is_absolute) {
@@ -807,15 +807,15 @@ namespace Functions {
         real dy = domain_data->get_dy();
         real dz = domain_data->get_dz();
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_i, coords_j, coords_k;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -833,14 +833,14 @@ namespace Functions {
 /// \param  val   value of uniform distribution
 // ***************************************************************************************
     void uniform(Field &out, real val) {
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_list_level_joined();
-        size_t size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             out[idx] = val;
         }
     }
@@ -873,15 +873,15 @@ namespace Functions {
         real rR_c = 1. / (2. * R_c * R_c);
         real rhoGrR_c = rhoa * G * G * rR_c;
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x, out_y, out_z, out_p) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x, out_y, out_z, out_p) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
@@ -918,15 +918,15 @@ namespace Functions {
         real rR_c = 1. / (2. * R_c * R_c);
         real rhoGrR_c = rhoa * G * G * rR_c;
 
-        auto boundary = DomainController::getInstance();
-        size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-        size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
         size_t coords_k, coords_i, coords_j;
 
         // inner cells
-#pragma acc parallel loop independent present(domain_list[:size_domain_list], out_x, out_y, out_z, out_p) async
-        for (size_t i = 0; i < size_domain_list; i++) {
-            size_t idx = domain_list[i];
+#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x, out_y, out_z, out_p) async
+        for (size_t i = 0; i < size_domain_inner_list; i++) {
+            size_t idx = domain_inner_list[i];
             coords_k = getCoordinateK(idx, Nx, Ny);
             coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
             coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);

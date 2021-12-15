@@ -525,18 +525,18 @@ void SolverController::set_up_fields(const std::string &string_solver) {
     } else if (string_init_usr_fct == FunctionNames::jet) {
         std::string dir = m_settings.get("initial_conditions/dir");
         real value = m_settings.get_real("initial_conditions/value");
-        auto domain = DomainData::getInstance();
+        auto domain_data = DomainData::getInstance();
         if (dir == "x") {
             real y1 = m_settings.get_real("initial_conditions/y1");
             real y2 = m_settings.get_real("initial_conditions/y2");
             real z1 = m_settings.get_real("initial_conditions/z1");
             real z2 = m_settings.get_real("initial_conditions/z2");
-            size_t index_x1 = domain->get_index_x1();
-            size_t index_x2 = domain->get_index_x2();
-            size_t index_y1 = Utility::get_index(y1, domain->get_dy(), domain->get_Y1());
-            size_t index_y2 = Utility::get_index(y2, domain->get_dy(), domain->get_Y1());
-            size_t index_z1 = Utility::get_index(z1, domain->get_dz(), domain->get_Z1());
-            size_t index_z2 = Utility::get_index(z2, domain->get_dz(), domain->get_Z1());
+            size_t index_x1 = domain_data->get_index_x1();
+            size_t index_x2 = domain_data->get_index_x2();
+            size_t index_y1 = Utility::get_index(y1, domain_data->get_dy(), domain_data->get_Y1());
+            size_t index_y2 = Utility::get_index(y2, domain_data->get_dy(), domain_data->get_Y1());
+            size_t index_z1 = Utility::get_index(z1, domain_data->get_dz(), domain_data->get_Z1());
+            size_t index_z2 = Utility::get_index(z2, domain_data->get_dz(), domain_data->get_Z1());
             Functions::jet(m_field_controller->get_field_u(),
                            index_x1, index_x2,
                            index_y1, index_y2,
@@ -550,12 +550,12 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             real x2 = m_settings.get_real("initial_conditions/x2");
             real z1 = m_settings.get_real("initial_conditions/z1");
             real z2 = m_settings.get_real("initial_conditions/z2");
-            size_t index_x1 = Utility::get_index(x1, domain->get_dx(), domain->get_X1());
-            size_t index_x2 = Utility::get_index(x2, domain->get_dx(), domain->get_X1());
-            size_t index_y1 = domain->get_index_y1();
-            size_t index_y2 = domain->get_index_y2();
-            size_t index_z1 = Utility::get_index(z1, domain->get_dz(), domain->get_Z1());
-            size_t index_z2 = Utility::get_index(z2, domain->get_dz(), domain->get_Z1());
+            size_t index_x1 = Utility::get_index(x1, domain_data->get_dx(), domain_data->get_X1());
+            size_t index_x2 = Utility::get_index(x2, domain_data->get_dx(), domain_data->get_X1());
+            size_t index_y1 = domain_data->get_index_y1();
+            size_t index_y2 = domain_data->get_index_y2();
+            size_t index_z1 = Utility::get_index(z1, domain_data->get_dz(), domain_data->get_Z1());
+            size_t index_z2 = Utility::get_index(z2, domain_data->get_dz(), domain_data->get_Z1());
             Functions::jet(m_field_controller->get_field_v(),
                            index_x1, index_x2,
                            index_y1, index_y2,
@@ -569,12 +569,12 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             real x2 = m_settings.get_real("initial_conditions/x2");
             real y1 = m_settings.get_real("initial_conditions/y1");
             real y2 = m_settings.get_real("initial_conditions/y2");
-            size_t index_x1 = Utility::get_index(x1, domain->get_dx(), domain->get_X1());
-            size_t index_x2 = Utility::get_index(x2, domain->get_dx(), domain->get_X1());
-            size_t index_y1 = Utility::get_index(y1, domain->get_dy(), domain->get_Y1());
-            size_t index_y2 = Utility::get_index(y2, domain->get_dy(), domain->get_Y1());
-            size_t index_z1 = domain->get_index_z1();
-            size_t index_z2 = domain->get_index_z2();
+            size_t index_x1 = Utility::get_index(x1, domain_data->get_dx(), domain_data->get_X1());
+            size_t index_x2 = Utility::get_index(x2, domain_data->get_dx(), domain_data->get_X1());
+            size_t index_y1 = Utility::get_index(y1, domain_data->get_dy(), domain_data->get_Y1());
+            size_t index_y2 = Utility::get_index(y2, domain_data->get_dy(), domain_data->get_Y1());
+            size_t index_z1 = domain_data->get_index_z1();
+            size_t index_z2 = domain_data->get_index_z2();
             Functions::jet(m_field_controller->get_field_w(),
                            index_x1, index_x2,
                            index_y1, index_y2,
@@ -592,14 +592,14 @@ void SolverController::set_up_fields(const std::string &string_solver) {
     }
 
     // Sight of boundaries
-    auto boundary = DomainController::getInstance();
-    size_t *domain_list = boundary->get_domain_inner_list_level_joined();
-    size_t size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     Field &sight = m_field_controller->get_field_sight();
     sight.update_host();
-    for (size_t i = 0; i < size_domain_list; i++) {
-        size_t idx = domain_list[i];
+    for (size_t i = 0; i < size_domain_inner_list; i++) {
+        size_t idx = domain_inner_list[i];
         sight[idx] = 0.;
     }
 }

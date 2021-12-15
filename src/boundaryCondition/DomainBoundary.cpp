@@ -57,18 +57,18 @@ static const std::string class_name = "DomainBoundary";
         /// \param  value Value of boundary condition
         // *********************************************************************************************
         void apply_dirichlet(Field &field, SingleJoinedList *jl, Patch patch, real value) {
-            DomainData *domain = DomainData::getInstance();
+            auto domain_data = DomainData::getInstance();
             size_t level = field.get_level();
             size_t reference_index = 0;
             int8_t sign_reference_index = POSITIVE_SIGN;
             switch (patch) {
                 case FRONT:
                 case BACK:
-                    reference_index = domain->get_Nx(level) * domain->get_Ny(level);
+                    reference_index = domain_data->get_Nx(level) * domain_data->get_Ny(level);
                     break;
                 case BOTTOM:
                 case TOP:
-                    reference_index = domain->get_Nx(level);
+                    reference_index = domain_data->get_Nx(level);
                     break;
                 case LEFT:
                 case RIGHT:
@@ -101,23 +101,23 @@ static const std::string class_name = "DomainBoundary";
         // *********************************************************************************************
         void apply_neumann(Field &field, SingleJoinedList *jl, Patch patch, real value) {
             size_t level = field.get_level();
-            DomainData *domain = DomainData::getInstance();
+            auto domain_data = DomainData::getInstance();
             size_t reference_index = 0;
             int8_t sign_reference_index = POSITIVE_SIGN;
             switch (patch) {
                 case FRONT:
                 case BACK:
-                    value *= domain->get_dz(level);
-                    reference_index = domain->get_Nx(level) * domain->get_Ny(level);
+                    value *= domain_data->get_dz(level);
+                    reference_index = domain_data->get_Nx(level) * domain_data->get_Ny(level);
                     break;
                 case BOTTOM:
                 case TOP:
-                    value *= domain->get_dy(level);
-                    reference_index = domain->get_Nx(level);
+                    value *= domain_data->get_dy(level);
+                    reference_index = domain_data->get_Nx(level);
                     break;
                 case LEFT:
                 case RIGHT:
-                    value *= domain->get_dz(level);
+                    value *= domain_data->get_dz(level);
                     reference_index = 1;
                     break;
                 default:
@@ -146,9 +146,9 @@ static const std::string class_name = "DomainBoundary";
         // *********************************************************************************************
         void apply_periodic(Field &field, SingleJoinedList *jl, Patch patch) {
             size_t level = field.get_level();
-            DomainData *domain = DomainData::getInstance();
-            size_t Nx = domain->get_Nx(level);
-            size_t Ny = domain->get_Ny(level);
+            auto domain_data = DomainData::getInstance();
+            size_t Nx = domain_data->get_Nx(level);
+            size_t Ny = domain_data->get_Ny(level);
 
             size_t reference_index = 0;
             int8_t sign_reference_index = POSITIVE_SIGN;
@@ -156,15 +156,15 @@ static const std::string class_name = "DomainBoundary";
             switch (patch) {
                 case FRONT:
                 case BACK:
-                    reference_index = Nx * Ny * DomainData::getInstance()->get_nz(level);
+                    reference_index = Nx * Ny * domain_data->get_nz(level);
                     break;
                 case BOTTOM:
                 case TOP:
-                    reference_index = Nx * DomainData::getInstance()->get_ny(level);
+                    reference_index = Nx * domain_data->get_ny(level);
                     break;
                 case LEFT:
                 case RIGHT:
-                    reference_index = DomainData::getInstance()->get_nx(level);
+                    reference_index = domain_data->get_nx(level);
                     break;
                 default:
 #ifndef BENCHMARKING

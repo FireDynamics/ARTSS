@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 
     Settings::Settings settings(argv[1]);
     auto domain_data = DomainData::getInstance(settings);
-    auto boundary_controller = DomainController::getInstance(settings);
+    auto domain_controller = DomainController::getInstance(settings);
 
     SolverController *sc = new SolverController(settings);
 
@@ -45,6 +45,6 @@ int main(int argc, char **argv) {
     // Clean up
     delete sc;
     delete domain_data;
-    delete boundary_controller;
+    delete domain_controller;
     return 0;
 }

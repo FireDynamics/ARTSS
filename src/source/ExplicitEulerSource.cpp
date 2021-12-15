@@ -41,44 +41,44 @@ void ExplicitEulerSource::add_source(
     real dt = m_settings.get_real("physical_parameters/dt");
     auto dir = m_dir_vel;
 
-    auto boundary = DomainController::getInstance();
-    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
 #pragma acc data present(out_x, out_y, out_z, s_x, s_y, s_z)
     {
         // check directions of source
         // x - direction
         if (dir.find('x') != std::string::npos) {
-#pragma acc parallel loop independent present(out_x, s_x, d_inner_list[:bsize_i]) async
-            for (size_t j = 0; j < bsize_i; ++j) {
-                const size_t i = d_inner_list[j];
+#pragma acc parallel loop independent present(out_x, s_x, domain_inner_list[:size_domain_inner_list]) async
+            for (size_t j = 0; j < size_domain_inner_list; ++j) {
+                const size_t i = domain_inner_list[j];
                 out_x[i] += dt * s_x[i];
             }
 
-            boundary->apply_boundary(out_x, sync);
+            domain_controller->apply_boundary(out_x, sync);
         } // end x- direction
 
         // y - direction
         if (dir.find('y') != std::string::npos) {
-#pragma acc parallel loop independent present(out_y, s_y, d_inner_list[:bsize_i]) async
-            for (size_t j = 0; j < bsize_i; ++j) {
-                const size_t i = d_inner_list[j];
+#pragma acc parallel loop independent present(out_y, s_y, domain_inner_list[:size_domain_inner_list]) async
+            for (size_t j = 0; j < size_domain_inner_list; ++j) {
+                const size_t i = domain_inner_list[j];
                 out_y[i] += dt * s_y[i];
             }
 
-            boundary->apply_boundary(out_y, sync);
+            domain_controller->apply_boundary(out_y, sync);
         } // end y- direction
 
         // z - direction
         if (dir.find('z') != std::string::npos) {
-#pragma acc parallel loop independent present(out_z, s_z, d_inner_list[:bsize_i]) async
-            for (size_t j = 0; j < bsize_i; ++j) {
-                const size_t i = d_inner_list[j];
+#pragma acc parallel loop independent present(out_z, s_z, domain_inner_list[:size_domain_inner_list]) async
+            for (size_t j = 0; j < size_domain_inner_list; ++j) {
+                const size_t i = domain_inner_list[j];
                 out_z[i] += dt * s_z[i];
             }
 
-            boundary->apply_boundary(out_z, sync);
+            domain_controller->apply_boundary(out_z, sync);
         } // end z- direction
 
         if (sync) {
@@ -94,20 +94,20 @@ void ExplicitEulerSource::add_source(
 /// \param  sync  synchronous kernel launching (true, default: false)
 // ***************************************************************************************
 void ExplicitEulerSource::add_source(Field &out, Field const &s, bool sync) {
-    auto boundary = DomainController::getInstance();
-    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
     real dt = m_settings.get_real("physical_parameters/dt");
 
 #pragma acc data present(out, s)
     {
-#pragma acc parallel loop independent present(out, s, d_inner_list[:bsize_i]) async
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_inner_list[j];
+#pragma acc parallel loop independent present(out, s, domain_inner_list[:size_domain_inner_list]) async
+        for (size_t j = 0; j < size_domain_inner_list; ++j) {
+            const size_t i = domain_inner_list[j];
             out[i] += dt * s[i];
         }
 
-        boundary->apply_boundary(out, sync);
+        domain_controller->apply_boundary(out, sync);
 
         if (sync) {
 #pragma acc wait

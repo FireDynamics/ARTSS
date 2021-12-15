@@ -483,7 +483,7 @@ size_t Multigrid::surface_dominant_restriction(size_t level, PatchObject *sum_pa
     size_t sum = 0;
     // add index to m_surface_list if any of l-1 indices building the l index was a surface
     // dominant restriction
-    DomainData *domain_data = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 
     std::vector<Surface> surface_list_fine = m_MG_surface_object_list[level - 1];
     m_MG_surface_object_list[level].reserve(m_number_of_obstacle_objects);
@@ -541,7 +541,7 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
         tmp_store_obstacle[level] = new size_t[0];
         return 0;
     }
-    DomainData *domain_data = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
     std::vector<Obstacle> obstacle_list_fine = m_MG_obstacle_object_list[level - 1];
     m_MG_obstacle_object_list[level].reserve(m_number_of_obstacle_objects);
     std::vector<Obstacle> &obstacle_list_coarse = m_MG_obstacle_object_list[level];

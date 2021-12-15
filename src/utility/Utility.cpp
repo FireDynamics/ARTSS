@@ -115,16 +115,16 @@ void log_field_info(Field &field, const std::string &text, const std::string &lo
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(logger_name);
 #endif
-    auto boundary = DomainController::getInstance();
-    size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
-    size_t idx = inner_list[0];
+    size_t idx = domain_inner_list[0];
     real minimum_inner = field[idx];
     real maximum_inner = field[idx];
     real average_inner = field[idx];
-    for (size_t i = 1; i < size_inner_list; i++) {
-        idx = inner_list[i];
+    for (size_t i = 1; i < size_domain_inner_list; i++) {
+        idx = domain_inner_list[i];
         real value = field[idx];
         if (value < minimum_inner) {
             minimum_inner = value;
@@ -134,7 +134,7 @@ void log_field_info(Field &field, const std::string &text, const std::string &lo
         }
         average_inner += value;
     }
-    average_inner /= static_cast<real>(size_inner_list);
+    average_inner /= static_cast<real>(size_domain_inner_list);
 #ifndef BENCHMARKING
     logger->info("minimum inner {}: {}", text, minimum_inner);
     logger->info("maximum inner {}: {}", text, maximum_inner);

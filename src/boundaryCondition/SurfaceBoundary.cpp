@@ -58,18 +58,18 @@ void apply_boundary_condition(Field &field, MultipleJoinedList *mjl, size_t id,
 // *********************************************************************************************
 void apply_dirichlet(Field &field, MultipleJoinedList *mjl,
                      size_t id, Patch patch, real value) {
-    DomainData *surface = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
     size_t level = field.get_level();
     size_t reference_index = 0;
     int8_t sign_reference_index = POSITIVE_SIGN;
     switch (patch) {
         case FRONT:
         case BACK:
-            reference_index = surface->get_Nx(level) * surface->get_Ny(level);
+            reference_index = domain_data->get_Nx(level) * domain_data->get_Ny(level);
             break;
         case BOTTOM:
         case TOP:
-            reference_index = surface->get_Nx(level);
+            reference_index = domain_data->get_Nx(level);
             break;
         case LEFT:
         case RIGHT:
@@ -103,23 +103,23 @@ void apply_dirichlet(Field &field, MultipleJoinedList *mjl,
 void apply_neumann(Field &field, MultipleJoinedList *mjl,
                    size_t id, Patch patch, real value) {
     size_t level = field.get_level();
-    DomainData *surface = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
     size_t reference_index = 0;
     int8_t sign_reference_index = POSITIVE_SIGN;
     switch (patch) {
         case FRONT:
         case BACK:
-            value *= surface->get_dz(level);
-            reference_index = surface->get_Nx(level) * surface->get_Ny(level);
+            value *= domain_data->get_dz(level);
+            reference_index = domain_data->get_Nx(level) * domain_data->get_Ny(level);
             break;
         case BOTTOM:
         case TOP:
-            value *= surface->get_dy(level);
-            reference_index = surface->get_Nx(level);
+            value *= domain_data->get_dy(level);
+            reference_index = domain_data->get_Nx(level);
             break;
         case LEFT:
         case RIGHT:
-            value *= surface->get_dz(level);
+            value *= domain_data->get_dz(level);
             reference_index = 1;
             break;
         default:
@@ -149,9 +149,9 @@ void apply_neumann(Field &field, MultipleJoinedList *mjl,
 void apply_periodic(Field &field, MultipleJoinedList *mjl,
                     size_t id, Patch patch) {
     size_t level = field.get_level();
-    DomainData *surface = DomainData::getInstance();
-    size_t Nx = surface->get_Nx(level);
-    size_t Ny = surface->get_Ny(level);
+    auto domain_data = DomainData::getInstance();
+    size_t Nx = domain_data->get_Nx(level);
+    size_t Ny = domain_data->get_Ny(level);
 
     size_t reference_index = 0;
     int8_t sign_reference_index = POSITIVE_SIGN;
@@ -159,15 +159,15 @@ void apply_periodic(Field &field, MultipleJoinedList *mjl,
     switch (patch) {
         case FRONT:
         case BACK:
-            reference_index = Nx * Ny * DomainData::getInstance()->get_nz(level);
+            reference_index = Nx * Ny * domain_data->get_nz(level);
             break;
         case BOTTOM:
         case TOP:
-            reference_index = Nx * DomainData::getInstance()->get_ny(level);
+            reference_index = Nx * domain_data->get_ny(level);
             break;
         case LEFT:
         case RIGHT:
-            reference_index = DomainData::getInstance()->get_nx(level);
+            reference_index = domain_data->get_nx(level);
             break;
         default:
 #ifndef BENCHMARKING

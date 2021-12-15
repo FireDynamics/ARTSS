@@ -98,7 +98,7 @@ void Domain::control(size_t size_obstacle_list, PatchObject &size_surface_list) 
 #ifndef BENCHMARKING
     // TODO(n16h7): clean up
     std::string message;
-    DomainData *domain = DomainData::getInstance();
+    auto domain = DomainData::getInstance();
     size_t size = domain->get_size(m_multigrid_level);
 
     size_t nx = domain->get_nx(m_multigrid_level);
@@ -351,16 +351,16 @@ void Domain::boundary_cells(size_t **surface_list, PatchObject &size_surface_lis
 /// \param  number_of_obstacles Amount of obstacles
 // *************************************************************************************************
 void Domain::inner_cells(const size_t *obstacle_list, size_t size_obstacle_list) {
-    DomainData *domain = DomainData::getInstance();
-    size_t k1 = domain->get_index_z1(m_multigrid_level);
-    size_t j1 = domain->get_index_y1(m_multigrid_level);
-    size_t i1 = domain->get_index_x1(m_multigrid_level);
-    size_t k2 = domain->get_index_z2(m_multigrid_level);
-    size_t j2 = domain->get_index_y2(m_multigrid_level);
-    size_t i2 = domain->get_index_x2(m_multigrid_level);
+    auto domain_data = DomainData::getInstance();
+    size_t k1 = domain_data->get_index_z1(m_multigrid_level);
+    size_t j1 = domain_data->get_index_y1(m_multigrid_level);
+    size_t i1 = domain_data->get_index_x1(m_multigrid_level);
+    size_t k2 = domain_data->get_index_z2(m_multigrid_level);
+    size_t j2 = domain_data->get_index_y2(m_multigrid_level);
+    size_t i2 = domain_data->get_index_x2(m_multigrid_level);
 
-    size_t Nx = domain->get_Nx(m_multigrid_level);
-    size_t Ny = domain->get_Ny(m_multigrid_level);
+    size_t Nx = domain_data->get_Nx(m_multigrid_level);
+    size_t Ny = domain_data->get_Ny(m_multigrid_level);
 
     size_t counter_inner_cells = 0;
     size_t counter_obstacle_list = 0;

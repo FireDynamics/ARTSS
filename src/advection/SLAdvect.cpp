@@ -34,10 +34,10 @@ void SLAdvect::advect(Field &out, const Field &in,
                       const Field &u_vel, const Field &v_vel, const Field &w_vel,
                       bool sync) {
     auto domain_data = DomainData::getInstance();
-    auto boundary = DomainController::getInstance();
+    auto domain_controller = DomainController::getInstance();
 
-    auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
-    size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto bsize_i = domain_controller->get_size_domain_inner_list_level_joined(0);
+    size_t *d_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
 #pragma acc data present(out, in, u_vel, v_vel, w_vel, d_inner_list[:bsize_i])
     {
@@ -160,7 +160,7 @@ void SLAdvect::advect(Field &out, const Field &in,
             auto tmp = s110 + t * (s111 - s110);  // row-major
             out[idx] = tmp;
         }
-        boundary->apply_boundary(out, sync);
+        domain_controller->apply_boundary(out, sync);
 
         if (sync) {
 #pragma acc wait

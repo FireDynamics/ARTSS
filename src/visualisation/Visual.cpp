@@ -82,10 +82,10 @@ void Visual::write_vtk_debug(FieldController &field_controller, const std::strin
 
 void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords,
                              int Nx, int Ny, int Nz, real dx, real dy, real dz) {
-    DomainData *domain = DomainData::getInstance();
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_Y1();
-    real Z1 = domain->get_Z1();
+    auto domain_data = DomainData::getInstance();
+    real X1 = domain_data->get_X1();
+    real Y1 = domain_data->get_Y1();
+    real Z1 = domain_data->get_Z1();
 
     // Initialize grid
     for (int k = 0; k < Nz; k++) {

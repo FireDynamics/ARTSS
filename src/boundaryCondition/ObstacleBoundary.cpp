@@ -74,9 +74,9 @@ namespace {
         if (level > 0) {
             value = 0;
         }
-        DomainData *domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx(level);
-        size_t Ny = domain->get_Ny(level);
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx(level);
+        size_t Ny = domain_data->get_Ny(level);
         size_t reference_index = 0;
         int8_t sign_reference_index = POSITIVE_SIGN;
         switch (p) {
@@ -128,25 +128,25 @@ namespace {
         if (level > 0) {
             value = 0;
         }
-        DomainData *domain = DomainData::getInstance();
-        size_t Nx = domain->get_Nx(level);
-        size_t Ny = domain->get_Ny(level);
+        auto domain_data = DomainData::getInstance();
+        size_t Nx = domain_data->get_Nx(level);
+        size_t Ny = domain_data->get_Ny(level);
         size_t reference_index = 0;
         int8_t sign_reference_index = POSITIVE_SIGN;
         switch (p) {
             case FRONT:
             case BACK:
-                value *= domain->get_dz(level);
+                value *= domain_data->get_dz(level);
                 reference_index = Nx * Ny;
                 break;
             case TOP:
             case BOTTOM:
-                value *= domain->get_dy(level);
+                value *= domain_data->get_dy(level);
                 reference_index = Nx;
                 break;
             case LEFT:
             case RIGHT:
-                value *= domain->get_dx(level);
+                value *= domain_data->get_dx(level);
                 reference_index = 1;
                 break;
             default:

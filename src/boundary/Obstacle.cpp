@@ -21,7 +21,7 @@ Obstacle::Obstacle(real x1, real x2,
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    DomainData *domain_data = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 
     real dx = domain_data->get_dx();
     real dy = domain_data->get_dy();
@@ -65,7 +65,7 @@ Obstacle::Obstacle(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_
 /// \param  level Multigrid level
 // *************************************************************************************************
 void Obstacle::init() {
-    DomainData *domain_data = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_Nx(m_level);
     size_t Ny = domain_data->get_Ny(m_level);
 
@@ -224,9 +224,9 @@ void Obstacle::print() const {
 // *************************************************************************************************
 void Obstacle::print_details() {
 #ifndef BENCHMARKING
-    DomainData *domain = DomainData::getInstance();
-    size_t Nx = domain->get_Nx(m_level);
-    size_t Ny = domain->get_Ny(m_level);
+    auto domain_data = DomainData::getInstance();
+    size_t Nx = domain_data->get_Nx(m_level);
+    size_t Ny = domain_data->get_Ny(m_level);
     size_t coords_i, coords_j, coords_k;
 
     m_logger->debug("############### OBSTACLE {} ###############", m_name);
@@ -352,7 +352,7 @@ void Obstacle::print_details() {
 /// \brief  Units test emergency solution
 // *************************************************************************************************
 void Obstacle::control() {
-    DomainData *domain_data = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_Nx(m_level);
     size_t Ny = domain_data->get_Ny(m_level);
 
@@ -476,7 +476,7 @@ int Obstacle::get_matching_index(real obstacle_coordinate, real spacing, real st
 /// \param  level Multigrid level
 // *************************************************************************************************
 void Obstacle::remove_cells_at_boundary() {
-    DomainData *domain_data = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
     if (m_start[CoordinateAxis::Z] <= domain_data->get_index_z1(m_level)) {
         m_size_boundary[FRONT] = 0;
     }

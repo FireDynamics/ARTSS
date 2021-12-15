@@ -136,7 +136,7 @@ void VCycleMG::UpdateInput(Field &out, const Field &b, bool sync) {
 void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
     UpdateInput(out, b, sync);  // Update first
 
-    auto domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
     real dt = m_settings.get_real("physical_parameters/dt");
     const auto Nt = static_cast<size_t>(std::round(t / dt));
     size_t act_cycles = 0;
@@ -149,20 +149,20 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
         real sum;
         const real tol_res = m_settings.get_real("solver/pressure/tol_res");
 
-        const size_t Nx = domain->get_Nx();
-        const size_t Ny = domain->get_Ny();
+        const size_t Nx = domain_data->get_Nx();
+        const size_t Ny = domain_data->get_Ny();
 
-        const real dx = domain->get_dx();
-        const real dy = domain->get_dy();
-        const real dz = domain->get_dz();
+        const real dx = domain_data->get_dx();
+        const real dy = domain_data->get_dy();
+        const real dz = domain_data->get_dz();
 
         const real reciprocal_dx2 = 1. / (dx * dx);
         const real reciprocal_dy2 = 1. / (dy * dy);
         const real reciprocal_dz2 = 1. / (dz * dz);
 
-        DomainController *boundary = DomainController::getInstance();
-        const size_t bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
-        size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
+        auto domain_controller = DomainController::getInstance();
+        const size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
         const size_t neighbour_i = 1;
         const size_t neighbour_j = Nx;
@@ -177,9 +177,9 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
             sum = 0.;
 
             // calculate residuum in inner cells
-#pragma acc parallel loop independent present(out, b, data_inner_list[:bsize_i]) async
-            for (size_t j = 0; j < bsize_i; ++j) {
-                const size_t i = data_inner_list[j];
+#pragma acc parallel loop independent present(out, b, domain_inner_list[:size_domain_inner_list]) async
+            for (size_t j = 0; j < size_domain_inner_list; ++j) {
+                const size_t i = domain_inner_list[j];
                 r = b[i] - (reciprocal_dx2 * (out[i - neighbour_i] - 2 * out[i] + out[i + neighbour_i])
                           + reciprocal_dy2 * (out[i - neighbour_j] - 2 * out[i] + out[i + neighbour_j])
                           + reciprocal_dz2 * (out[i - neighbour_k] - 2 * out[i] + out[i + neighbour_k]));
@@ -207,7 +207,7 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
-    auto boundary = DomainController::getInstance();
+    auto domain_controller = DomainController::getInstance();
     //===================== No refinement, when max_level = 0 =========//
     if (m_levels == 0) {
         Field *field_mg_temporal_level = m_mg_temporal_solution[0];
@@ -236,10 +236,10 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
             Smooth(*field_error1_level, *field_mg_temporal_level, *field_residuum1_level, level, sync);
 
             Residuum(*field_residuum0_level, *field_error1_level, *field_residuum1_level, level, sync);
-            boundary->apply_boundary(*field_residuum0_level, sync);  // for m_residuum0 only Dirichlet BC
+            domain_controller->apply_boundary(*field_residuum0_level, sync);  // for m_residuum0 only Dirichlet BC
 
             Restrict(*field_residuum1_level_plus_1, *field_residuum0_level, level, sync);
-            boundary->apply_boundary(*field_residuum1_level_plus_1, sync);  // for m_residuum1 only Dirichlet BC
+            domain_controller->apply_boundary(*field_residuum1_level_plus_1, sync);  // for m_residuum1 only Dirichlet BC
 
             field_error1_level_plus_1->set_value(0);
         }
@@ -259,7 +259,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
                          field_residuum1_level_minus_1)
         {
             Prolongate(*field_error0_level_minus_1, *field_error1_level, level, sync);
-            boundary->apply_boundary(*field_error0_level_minus_1, sync);
+            domain_controller->apply_boundary(*field_error0_level_minus_1, sync);
 
             // correct
             *field_error1_level_minus_1 += *field_error0_level_minus_1;
@@ -274,7 +274,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
         }
     }
     out.copy_data(*m_error1[0]);
-    boundary->apply_boundary(out, sync);
+    domain_controller->apply_boundary(out, sync);
 
     if (sync) {
 #pragma acc wait
@@ -291,8 +291,8 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::Smooth(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
-    DomainController *boundary = DomainController::getInstance();
-    boundary->apply_boundary(out, sync);
+    auto domain_controller = DomainController::getInstance();
+    domain_controller->apply_boundary(out, sync);
 
     (this->*m_smooth_function)(out, tmp, b, level, sync);
 
@@ -311,36 +311,36 @@ void VCycleMG::Smooth(Field &out, Field &tmp, Field const &b, const size_t level
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // ************************************************************************
 void VCycleMG::Residuum(Field &out, Field const &in, Field const &b, const size_t level, bool sync) {
-    DomainData *domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(level);
-    const size_t Ny = domain->get_Ny(level);
+    const size_t Nx = domain_data->get_Nx(level);
+    const size_t Ny = domain_data->get_Ny(level);
 
-    const real dx = domain->get_dx(level);
-    const real dy = domain->get_dy(level);
-    const real dz = domain->get_dz(level);
+    const real dx = domain_data->get_dx(level);
+    const real dy = domain_data->get_dy(level);
+    const real dz = domain_data->get_dz(level);
 
     const real reciprocal_dx2 = 1. / (dx * dx);
     const real reciprocal_dy2 = 1. / (dy * dy);
     const real reciprocal_dz2 = 1. / (dz * dz);
 
-    DomainController *boundary = DomainController::getInstance();
-    size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
-    const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
-    const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = domain_controller->get_domain_inner_list_level_joined_start(level);
+    const size_t end_i = domain_controller->get_domain_inner_list_level_joined_end(level) + 1;
 
     // neighbour cells, i/j/k represent the directions
     const size_t neighbour_cell_i = 1;
     const size_t neighbour_cell_j = Nx;
     const size_t neighbour_cell_k = Nx * Ny;
-#pragma acc data present(b, in, out, data_inner_list[start_i:(end_i-start_i)])
+#pragma acc data present(b, in, out, domain_inner_list[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
 #pragma acc loop independent
         for (size_t j = start_i; j < end_i; ++j) {
-            const size_t i = data_inner_list[j];
+            const size_t i = domain_inner_list[j];
             real weighted = (reciprocal_dx2 * (in[i - neighbour_cell_i] - 2 * in[i] + in[i + neighbour_cell_i])
                            + reciprocal_dy2 * (in[i - neighbour_cell_j] - 2 * in[i] + in[i + neighbour_cell_j])
                            + reciprocal_dz2 * (in[i - neighbour_cell_k] - 2 * in[i] + in[i + neighbour_cell_k]));
@@ -362,27 +362,27 @@ void VCycleMG::Residuum(Field &out, Field const &in, Field const &b, const size_
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::Restrict(Field &out, Field const &in, const size_t level, bool sync) {
-    auto domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 
     // local variables and parameters for GPU
     // coarse grid
-    const size_t Nx_coarse = domain->get_Nx(out.get_level());
-    const size_t Ny_coarse = domain->get_Ny(out.get_level());
+    const size_t Nx_coarse = domain_data->get_Nx(out.get_level());
+    const size_t Ny_coarse = domain_data->get_Ny(out.get_level());
 
     // fine grid
-    const size_t Nx_fine = domain->get_Nx(in.get_level());
-    const size_t Ny_fine = domain->get_Ny(in.get_level());
+    const size_t Nx_fine = domain_data->get_Nx(in.get_level());
+    const size_t Ny_fine = domain_data->get_Ny(in.get_level());
 
-    auto boundary = DomainController::getInstance();
-    size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
-    const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level + 1);
-    const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level + 1) + 1;
+    const size_t start_i = domain_controller->get_domain_inner_list_level_joined_start(level + 1);
+    const size_t end_i = domain_controller->get_domain_inner_list_level_joined_end(level + 1) + 1;
 
 #ifndef BENCHMARKING
     if (end_i == start_i) {
         m_logger->warn("Be cautious: Obstacle might fill up inner cells completely in level {} with Nx_fine= {}!",
-                       level + 1, domain->get_nx(out.get_level()));
+                       level + 1, domain_data->get_nx(out.get_level()));
     }
 #endif
 
@@ -393,12 +393,12 @@ void VCycleMG::Restrict(Field &out, Field const &in, const size_t level, bool sy
     // average from eight neighboring cells
     // obstacles not used in fine grid, since coarse grid only obstacle if one of 8 fine grids was an obstacle,
     // thus if coarse cell inner cell, then surrounding fine cells also inner cells!
-#pragma acc data present(in, out, data_inner_list[start_i:(end_i-start_i)])
+#pragma acc data present(in, out, domain_inner_list[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
 #pragma acc loop independent
         for (size_t l = start_i; l < end_i; ++l) {
-            const size_t idx = data_inner_list[l];
+            const size_t idx = domain_inner_list[l];
             const size_t k = getCoordinateK(idx, Nx_coarse, Ny_coarse);
             const size_t j = getCoordinateJ(idx, Nx_coarse, Ny_coarse, k);
             const size_t i = getCoordinateI(idx, Nx_coarse, Ny_coarse, j, k);
@@ -432,22 +432,22 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
 #ifndef  BENCHMARKING
     m_logger->debug("Prolongate");
 #endif
-    DomainData *domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 
     // local variables and parameters for GPU
     // fine grid
-    const size_t Nx_fine = domain->get_Nx(out.get_level());
-    const size_t Ny_fine = domain->get_Ny(out.get_level());
+    const size_t Nx_fine = domain_data->get_Nx(out.get_level());
+    const size_t Ny_fine = domain_data->get_Ny(out.get_level());
 
     // coarse grid
-    const size_t Nx_coarse = domain->get_Nx(in.get_level());
-    const size_t Ny_coarse = domain->get_Ny(in.get_level());
+    const size_t Nx_coarse = domain_data->get_Nx(in.get_level());
+    const size_t Ny_coarse = domain_data->get_Ny(in.get_level());
 
-    DomainController *boundary = DomainController::getInstance();
-    size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
-    const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
-    const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = domain_controller->get_domain_inner_list_level_joined_start(level);
+    const size_t end_i = domain_controller->get_domain_inner_list_level_joined_end(level) + 1;
 
     // neighbour cells, i/j/k represent the directions
     const size_t neighbour_cell_i = 1;
@@ -455,12 +455,12 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
     const size_t neighbour_cell_k = Nx_coarse * Ny_coarse;
 
     // prolongate
-#pragma acc data present(in, out, data_inner_list[start_i:(end_i-start_i)])
+#pragma acc data present(in, out, domain_inner_list[start_i:(end_i-start_i)])
     {
 #pragma acc kernels async
 #pragma acc loop independent
         for (size_t l = start_i; l < end_i; ++l) {
-            const size_t idx = data_inner_list[l];
+            const size_t idx = domain_inner_list[l];
             const size_t k = getCoordinateK(idx, Nx_coarse, Ny_coarse);
             const size_t j = getCoordinateJ(idx, Nx_coarse, Ny_coarse, k);
             const size_t i = getCoordinateI(idx, Nx_coarse, Ny_coarse, j, k);
@@ -554,9 +554,9 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::Solve(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
-    auto domain = DomainData::getInstance();
-    const size_t Nx = domain->get_Nx(out.get_level());
-    const size_t Ny = domain->get_Ny(out.get_level());
+    auto domain_data = DomainData::getInstance();
+    const size_t Nx = domain_data->get_Nx(out.get_level());
+    const size_t Ny = domain_data->get_Ny(out.get_level());
 
     if (Nx <= 4 && Ny <= 4) {
 #ifndef BENCHMARKING
@@ -575,15 +575,15 @@ void VCycleMG::Solve(Field &out, Field &tmp, Field const &b, const size_t level,
 }
 
 void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
-    auto domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 
     // local variables and parameters for GPU
-    const real dx = domain->get_dx(level);
-    const real dy = domain->get_dy(level);
-    const real dz = domain->get_dz(level);
+    const real dx = domain_data->get_dx(level);
+    const real dy = domain_data->get_dy(level);
+    const real dz = domain_data->get_dz(level);
 
-    DomainController *boundary = DomainController::getInstance();
-    boundary->apply_boundary(out, sync);
+    auto domain_controller = DomainController::getInstance();
+    domain_controller->apply_boundary(out, sync);
 
     const real reciprocal_dx2 = 1. / (dx * dx);
     const real reciprocal_dy2 = 1. / (dy * dy);
@@ -601,30 +601,30 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
         for (int i = 0; i < m_n_relax; i++) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
                     out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
-            boundary->apply_boundary(out, sync);
+            domain_controller->apply_boundary(out, sync);
         }
     }
 }
 
 void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
-    auto domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(level);
-    const size_t Ny = domain->get_Ny(level);
+    const size_t Nx = domain_data->get_Nx(level);
+    const size_t Ny = domain_data->get_Ny(level);
 
-    const real dx = domain->get_dx(level);
-    const real dy = domain->get_dy(level);
-    const real dz = domain->get_dz(level);
+    const real dx = domain_data->get_dx(level);
+    const real dy = domain_data->get_dy(level);
+    const real dz = domain_data->get_dz(level);
 
-    DomainController *boundary = DomainController::getInstance();
-    size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
-    const size_t bsize_i __attribute__((unused)) = boundary->get_size_domain_inner_list_level_joined(level);
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    const size_t size_domain_inner_list __attribute__((unused)) = domain_controller->get_size_domain_inner_list_level_joined(level);
 
-    const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
-    const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = domain_controller->get_domain_inner_list_level_joined_start(level);
+    const size_t end_i = domain_controller->get_domain_inner_list_level_joined_end(level) + 1;
 
-    boundary->apply_boundary(out, sync);
+    domain_controller->apply_boundary(out, sync);
 
     const real reciprocal_dx2 = 1. / (dx * dx);
     const real reciprocal_dy2 = 1. / (dy * dy);
@@ -652,12 +652,12 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
         while (res > tol_res && it < max_it) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
                     out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
-            boundary->apply_boundary(out, sync);
+            domain_controller->apply_boundary(out, sync);
 
             sum = 0.;
-#pragma acc parallel loop independent present(out, data_inner_list[:bsize_i]) async
+#pragma acc parallel loop independent present(out, domain_inner_list[:size_domain_inner_list]) async
             for (size_t j = start_i; j < end_i; ++j) {
-                const size_t i = data_inner_list[j];
+                const size_t i = domain_inner_list[j];
                 res = b[i] - (reciprocal_dx2 * (out.data[i - neighbour_i] - 2 * out.data[i] + out.data[i + neighbour_i])
                            +  reciprocal_dy2 * (out.data[i - neighbour_j] - 2 * out.data[i] + out.data[i + neighbour_j])
                            +  reciprocal_dz2 * (out.data[i - neighbour_k] - 2 * out.data[i] + out.data[i + neighbour_k]));
@@ -673,15 +673,15 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
 }
 
 void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
-    auto domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 
     // local variables and parameters for GPU
-    const real dx = domain->get_dx(level);
-    const real dy = domain->get_dy(level);
-    const real dz = domain->get_dz(level);
+    const real dx = domain_data->get_dx(level);
+    const real dy = domain_data->get_dy(level);
+    const real dz = domain_data->get_dz(level);
 
-    DomainController *boundary = DomainController::getInstance();
-    boundary->apply_boundary(out, sync);
+    auto domain_controller = DomainController::getInstance();
+    domain_controller->apply_boundary(out, sync);
 
     const real reciprocal_dx2 = 1. / (dx * dx);
     const real reciprocal_dy2 = 1. / (dy * dy);
@@ -701,7 +701,7 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
         size_t it = 0;
         for (int i = 0; i < m_n_relax; i++) {
             JacobiDiffuse::JacobiStep(level, out, tmp, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
-            boundary->apply_boundary(out, sync);
+            domain_controller->apply_boundary(out, sync);
             Field::swap(tmp, out);
             it++;
         }
@@ -716,25 +716,25 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
 #ifndef BENCHMARKING
     m_logger->debug("solve_jacobi ! start");
 #endif
-    auto domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx(level);
-    const size_t Ny = domain->get_Ny(level);
+    const size_t Nx = domain_data->get_Nx(level);
+    const size_t Ny = domain_data->get_Ny(level);
 
-    const real dx = domain->get_dx(level);
-    const real dy = domain->get_dy(level);
-    const real dz = domain->get_dz(level);
+    const real dx = domain_data->get_dx(level);
+    const real dy = domain_data->get_dy(level);
+    const real dz = domain_data->get_dz(level);
 
-    DomainController *boundary = DomainController::getInstance();
+    auto domain_controller = DomainController::getInstance();
 
-    size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
-    const size_t bsize_i __attribute__((unused)) = boundary->get_size_domain_inner_list_level_joined(level);
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    const size_t size_domain_inner_list __attribute__((unused)) = domain_controller->get_size_domain_inner_list_level_joined(level);
 
-    const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
-    const size_t end_i = boundary->get_domain_inner_list_level_joined_end(level) + 1;
+    const size_t start_i = domain_controller->get_domain_inner_list_level_joined_start(level);
+    const size_t end_i = domain_controller->get_domain_inner_list_level_joined_end(level) + 1;
 
-    boundary->apply_boundary(out, sync);
+    domain_controller->apply_boundary(out, sync);
 
     const real reciprocal_dx2 = 1. / (dx * dx);
     const real reciprocal_dy2 = 1. / (dy * dy);
@@ -760,13 +760,13 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
         const size_t neighbour_k = Nx * Ny;
         while (res > m_diffusion_tol_res && it < m_diffusion_max_iter) {
             JacobiDiffuse::JacobiStep(level, out, tmp, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
-            boundary->apply_boundary(out, sync);
+            domain_controller->apply_boundary(out, sync);
 
             sum = 0.;
 
-#pragma acc parallel loop independent present(out, tmp, data_inner_list[:bsize_i]) async
+#pragma acc parallel loop independent present(out, tmp, domain_inner_list[:size_domain_inner_list]) async
             for (size_t j = start_i; j < end_i; ++j) {
-                const size_t i = data_inner_list[j];
+                const size_t i = domain_inner_list[j];
                 res = b[i] - (reciprocal_dx2 * (out[i - neighbour_i] - 2 * out[i] + out.data[i + neighbour_i])
                            +  reciprocal_dy2 * (out[i - neighbour_j] - 2 * out[i] + out.data[i + neighbour_j])
                            +  reciprocal_dz2 * (out[i - neighbour_k] - 2 * out[i] + out.data[i + neighbour_k]));

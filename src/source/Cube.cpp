@@ -27,17 +27,17 @@ void Cube::set_up(
         real value,
         real x_start, real y_start, real z_start,
         real x_end, real y_end, real z_end) {
-    DomainData *domain = DomainData::getInstance();
-    size_t Nx = domain->get_Nx();
-    size_t Ny = domain->get_Ny();
+    auto domain_data = DomainData::getInstance();
+    size_t Nx = domain_data->get_Nx();
+    size_t Ny = domain_data->get_Ny();
 
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_Y1();
-    real Z1 = domain->get_Z1();
+    real X1 = domain_data->get_X1();
+    real Y1 = domain_data->get_Y1();
+    real Z1 = domain_data->get_Z1();
 
-    real dx = domain->get_dx();
-    real dy = domain->get_dy();
-    real dz = domain->get_dz();
+    real dx = domain_data->get_dx();
+    real dy = domain_data->get_dy();
+    real dz = domain_data->get_dz();
 
     size_t index_start_x = Utility::get_index(x_start, dx, X1);
     size_t index_end_x = Utility::get_index(x_end, dx, X1);
