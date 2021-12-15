@@ -80,7 +80,7 @@ void ISource::dissipate(
 
     auto domain_controller = DomainController::getInstance();
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
-    auto bsize_i = domain_controller->get_size_domain_inner_list_level_joined(0);
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
@@ -90,7 +90,7 @@ void ISource::dissipate(
         // inner
 #pragma acc kernels async
 #pragma acc loop independent
-        for (size_t j = 0; j < bsize_i; ++j) {
+        for (size_t j = 0; j < size_domain_inner_list; ++j) {
             const size_t i = domain_inner_list[j];
             real out_h = nu * (2 * (0.5 * reciprocal_dx * (in_u[i + neighbour_i] - in_u[i - neighbour_i]))
                                  * (0.5 * reciprocal_dx * (in_u[i + neighbour_i] - in_u[i - neighbour_i]))
