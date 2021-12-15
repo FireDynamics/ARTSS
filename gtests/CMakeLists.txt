@@ -5,7 +5,7 @@ target_sources(artss_gtest
     ${CMAKE_CURRENT_LIST_DIR}/Environment.cpp
     )
 
-add_subdirectory(boundary)
+add_subdirectory(domain)
 add_subdirectory(field)
 add_subdirectory(randomField)
 add_subdirectory(joinedLists)

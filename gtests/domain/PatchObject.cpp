@@ -6,8 +6,8 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/boundary/Coordinate.h>
-#include "src/boundary/PatchObject.h"
+#include <src/domain/Coordinate.h>
+#include "src/domain/PatchObject.h"
 
 TEST(PatchObjectTest, constructorVal) {
     PatchObject po;

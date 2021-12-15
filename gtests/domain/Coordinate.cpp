@@ -6,7 +6,7 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/boundary/Coordinate.h>
+#include <src/domain/Coordinate.h>
 
 TEST(CoordinateTest, constructorVal) {
     Coordinate<size_t> coord;
