@@ -9,7 +9,7 @@ target_sources(artss
 add_subdirectory(adaption)
 add_subdirectory(advection)
 add_subdirectory(analysis)
-add_subdirectory(boundary)
+add_subdirectory(domain)
 add_subdirectory(boundaryCondition)
 add_subdirectory(diffusion)
 add_subdirectory(field)
