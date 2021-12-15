@@ -655,8 +655,8 @@ bool Obstacle::circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis c
                 coords_start_o2[other_axes[1]], coords_end_o2[other_axes[1]]);
         if (overlap1 && overlap2) {
             Coordinate<size_t> tmp;
-            auto o1_patch = static_cast<Patch>(coordinate_axis * 2);
-            auto o2_patch = static_cast<Patch>(coordinate_axis * 2 + 1);
+            auto o1_patch = Mapping::to_patch(coordinate_axis, true);
+            auto o2_patch = Mapping::to_patch(coordinate_axis, false);
 #ifndef BENCHMARKING
             // for constraints in x-direction: front patch of o1 and back patch of o2
             logger->debug("neighbouring obstacles ! obstacles are next to each other. Working on '{}' {} side and on '{}' {} side",
