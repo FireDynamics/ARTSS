@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "Visual.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "../analysis/Solution.h"
 #include "../field/FieldController.h"
 

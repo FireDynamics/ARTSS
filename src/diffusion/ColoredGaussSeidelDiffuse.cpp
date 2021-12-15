@@ -11,7 +11,7 @@
 #include <cmath>
 
 #include "../boundary/DomainController.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "../utility/Utility.h"
 
 

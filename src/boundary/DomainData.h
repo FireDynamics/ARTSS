@@ -13,10 +13,10 @@
 #endif
 #include <cstddef>
 
-#include "boundary/Coordinate.h"
-#include "utility/GlobalMacrosTypes.h"
-#include "utility/Utility.h"
-#include "utility/settings/Settings.h"
+#include "Coordinate.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
 
 class DomainData {
  public:

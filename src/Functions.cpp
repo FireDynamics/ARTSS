@@ -13,7 +13,7 @@
 #include <random>
 
 #include "Functions.h"
-#include "DomainData.h"
+#include "boundary/DomainData.h"
 #include "utility/Utility.h"
 #include "boundary/DomainController.h"
 

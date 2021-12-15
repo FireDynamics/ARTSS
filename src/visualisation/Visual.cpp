@@ -11,7 +11,7 @@
 #include <utility>
 
 #include "Visual.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 

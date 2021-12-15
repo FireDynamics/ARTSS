@@ -12,7 +12,7 @@
 
 #include "ExplicitDiffuse.h"
 #include "../boundary/DomainController.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 
 //====================================== Diffuse ===============================================
 // ***************************************************************************************

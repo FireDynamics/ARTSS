@@ -18,7 +18,7 @@
 #include "SolverController.h"
 #include "SolverSelection.h"
 #include "../boundary/DomainController.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "../Functions.h"
 #include "../source/GaussFunction.h"
 #include "../source/BuoyancyMMS.h"

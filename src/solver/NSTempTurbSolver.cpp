@@ -10,7 +10,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "../boundary/BoundaryData.h"
 #include "../boundary/DomainController.h"
 #include "../pressure/VCycleMG.h"

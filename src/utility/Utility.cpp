@@ -8,7 +8,7 @@
 #include <sstream>
 #include "Utility.h"
 #include "GlobalMacrosTypes.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "../boundary/DomainController.h"
 
 #ifndef BENCHMARKING

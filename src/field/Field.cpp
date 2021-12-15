@@ -5,7 +5,7 @@
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "Field.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 
 int Field::counter = 0;
 

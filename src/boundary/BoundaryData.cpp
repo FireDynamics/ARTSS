@@ -4,7 +4,7 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 #include "BoundaryData.h"
-#include "../DomainData.h"
+#include "DomainData.h"
 
 
 BoundaryData::BoundaryData() {

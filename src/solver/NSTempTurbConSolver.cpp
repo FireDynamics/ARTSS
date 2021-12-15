@@ -11,7 +11,7 @@
 #include <algorithm>
 
 #include "../pressure/VCycleMG.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "SolverSelection.h"
 #include "../boundary/BoundaryData.h"
 

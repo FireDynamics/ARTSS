@@ -10,7 +10,7 @@
 
 #include "Analysis.h"
 #include "../boundary/DomainController.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "../utility/Utility.h"
 
 Analysis::Analysis(Settings::Settings const &settings, Solution &solution, bool has_analytical_solution) :

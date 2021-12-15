@@ -11,7 +11,7 @@
 #endif
 
 #include "DynamicSmagorinsky.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "../boundary/DomainController.h"
 
 DynamicSmagorinsky::DynamicSmagorinsky(Settings::Settings const &settings) :

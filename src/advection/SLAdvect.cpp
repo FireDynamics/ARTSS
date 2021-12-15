@@ -18,7 +18,7 @@
 
 #include "SLAdvect.h"
 #include "../boundary/DomainController.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 
 // ***************************************************************************************
 /// \brief  solves advection \f$ \partial_t \phi_1 = - (u \cdot \nabla) \phi_0 \f$ via

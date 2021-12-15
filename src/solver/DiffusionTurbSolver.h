@@ -7,7 +7,7 @@
 #ifndef ARTSS_SOLVER_DIFFUSIONTURBSOLVER_H_
 #define ARTSS_SOLVER_DIFFUSIONTURBSOLVER_H_
 
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IDiffusion.h"
 #include "../interfaces/ITurbulence.h"

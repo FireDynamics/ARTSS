@@ -6,7 +6,7 @@
 
 #include "Layers.h"
 #include <chrono>
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "Adaption.h"
 
 Layers::Layers(Settings::Settings const &settings, FieldController *field_controller) :

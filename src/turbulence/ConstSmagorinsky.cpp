@@ -11,7 +11,7 @@
 #endif
 
 #include "ConstSmagorinsky.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "../boundary/DomainController.h"
 
 ConstSmagorinsky::ConstSmagorinsky(Settings::Settings const &settings) {

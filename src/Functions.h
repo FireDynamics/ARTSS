@@ -9,7 +9,7 @@
 
 #include <string>
 
-#include "DomainData.h"
+#include "boundary/DomainData.h"
 #include "field/Field.h"
 #include "utility/settings/Settings.h"
 

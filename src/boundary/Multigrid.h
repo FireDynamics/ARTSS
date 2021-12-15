@@ -11,7 +11,7 @@
 #include "BoundaryDataController.h"
 #include "Obstacle.h"
 #include "Surface.h"
-#include "../DomainData.h"
+#include "DomainData.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
 #include "../joinedLists/SingleJoinedList.h"

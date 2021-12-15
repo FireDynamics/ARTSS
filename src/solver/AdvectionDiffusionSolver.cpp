@@ -9,7 +9,7 @@
 #include <algorithm>
 
 #include "AdvectionDiffusionSolver.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "SolverSelection.h"
 #include "../utility/Utility.h"
 

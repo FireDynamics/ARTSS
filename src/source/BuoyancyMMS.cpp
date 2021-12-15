@@ -6,7 +6,7 @@
 //
 #include "BuoyancyMMS.h"
 #include "../boundary/DomainController.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 
 BuoyancyMMS::BuoyancyMMS(Settings::Settings const &settings) :
         m_settings(settings),

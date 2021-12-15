@@ -7,7 +7,7 @@
 #include "Domain.h"
 #include <cmath>
 #include <string>
-#include "../DomainData.h"
+#include "DomainData.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Algorithm.h"
 

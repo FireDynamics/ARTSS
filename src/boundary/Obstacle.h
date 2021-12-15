@@ -14,7 +14,7 @@
 #include "BoundaryData.h"
 #include "BoundaryDataController.h"
 #include "PatchObject.h"
-#include "../DomainData.h"
+#include "DomainData.h"
 #include "../utility/Utility.h"
 #include "../utility/settings/Settings.h"
 

@@ -10,7 +10,7 @@
 
 #include "AdvectionSolver.h"
 #include "../interfaces/IAdvection.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "SolverSelection.h"
 
 AdvectionSolver::AdvectionSolver(

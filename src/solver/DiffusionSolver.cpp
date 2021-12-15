@@ -11,7 +11,7 @@
 #include <algorithm>
 
 #include "../interfaces/IDiffusion.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "SolverSelection.h"
 
 DiffusionSolver::DiffusionSolver(Settings::Settings const &settings, FieldController *field_controller) :

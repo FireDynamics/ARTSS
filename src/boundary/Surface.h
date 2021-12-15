@@ -13,7 +13,7 @@
 #include "BoundaryData.h"
 #include "BoundaryDataController.h"
 #include "Coordinate.h"
-#include "../DomainData.h"
+#include "DomainData.h"
 #include "../utility/Utility.h"
 #include "../utility/Mapping.h"
 #include "../utility/settings/Settings.h"

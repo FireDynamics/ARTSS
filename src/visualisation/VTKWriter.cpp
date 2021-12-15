@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "VTKWriter.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "visit_writer.h"  //( https://wci.llnl.gov/codes/visit/ )
 
 int VTKWriter::vtk_counter = 0;

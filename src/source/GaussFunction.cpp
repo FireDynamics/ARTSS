@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
 #include "GaussFunction.h"
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "../boundary/DomainController.h"
 #ifdef _OPENACC
 #include "accel.h"

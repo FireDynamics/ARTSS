@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include "TimeIntegration.h"
-#include "DomainData.h"
+#include "boundary/DomainData.h"
 #include "boundary/DomainController.h"
 #include "solver/SolverController.h"
 #include "visualisation/VTKWriter.h"

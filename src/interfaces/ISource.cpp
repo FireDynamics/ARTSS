@@ -11,7 +11,7 @@
 #include <accelmath.h>
 #endif
 
-#include "../DomainData.h"
+#include "../boundary/DomainData.h"
 #include "../boundary/DomainController.h"
 
 //======================================== Sources ====================================
