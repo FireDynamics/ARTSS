@@ -1,7 +1,7 @@
 /// \file       DomainController.h
-/// \brief      Controll class for boundary
+/// \brief      Controller class for domain, grants access to indices lists
 /// \date       Oct 01, 2020
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_BOUNDARY_BOUNDARYCONTROLLER_H_

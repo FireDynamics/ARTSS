@@ -1,5 +1,5 @@
 /// \file       DomainController.cpp
-/// \brief      Controller class for boundary
+/// \brief      Controller class for domain, grants access to indices lists
 /// \date       Oct 01, 2020
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
