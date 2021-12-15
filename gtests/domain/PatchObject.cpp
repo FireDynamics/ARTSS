@@ -6,7 +6,7 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/domain/Coordinate.h>
+#include "src/domain/Coordinate.h"
 #include "src/domain/PatchObject.h"
 
 TEST(PatchObjectTest, constructorVal) {

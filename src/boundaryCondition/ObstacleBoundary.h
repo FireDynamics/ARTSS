@@ -1,7 +1,7 @@
 /// \file       ObstacleBoundary.h
 /// \brief      Applies boundary condition for obstacle boundary
 /// \date       Feb 03, 2020
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #ifndef ARTSS_BOUNDARYCONDITION_OBSTACLEBOUNDARY_H_

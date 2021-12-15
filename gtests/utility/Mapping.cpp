@@ -6,7 +6,7 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/boundary/Coordinate.h>
+#include "src/domain/Coordinate.h"
 
 TEST(MappingTest, matchPatch) {
     Patch patch_front = Mapping::match_patch("front");
