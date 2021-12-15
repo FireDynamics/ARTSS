@@ -6,7 +6,7 @@
 
 #include "ObstacleBoundary.h"
 #include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 
 
 namespace ObstacleBoundary {

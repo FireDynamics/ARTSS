@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 //
 #include "BuoyancyMMS.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 #include "../DomainData.h"
 
 BuoyancyMMS::BuoyancyMMS(Settings::Settings const &settings) :
@@ -42,7 +42,7 @@ void BuoyancyMMS::set_up() {
     real c_nu = 2 * nu * M_PI * M_PI - 1;
     real c_kappa = 2 * kappa * M_PI * M_PI - 1;
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
 
     size_t *domain_list = boundary->get_domain_list_level_joined();
     auto size_domain_list = boundary->get_slice_size_domain_list_level_joined(0);

@@ -1,4 +1,4 @@
-/// \file       BoundaryController.h
+/// \file       DomainController.h
 /// \brief      Controll class for boundary
 /// \date       Oct 01, 2020
 /// \author     My Linh Würzburger
@@ -20,12 +20,12 @@ using return_surface = std::tuple<std::vector<Surface>, std::vector<BoundaryData
 using return_obstacle = std::tuple<std::vector<Obstacle>, std::vector<BoundaryDataController>>;
 using return_xml_objects = std::tuple<BoundaryDataController, std::vector<Surface>, std::vector<BoundaryDataController>, std::vector<Obstacle>, std::vector<BoundaryDataController>>;
 
-class BoundaryController {
+class DomainController {
  public:
-    static BoundaryController* getInstance() { return singleton; }
-    static BoundaryController* getInstance(Settings::Settings const &settings);
+    static DomainController* getInstance() { return singleton; }
+    static DomainController* getInstance(Settings::Settings const &settings);
 
-    ~BoundaryController();
+    ~DomainController();
 
     void apply_boundary(Field &field, bool sync = true);
 
@@ -57,14 +57,14 @@ class BoundaryController {
     }
 
  private:
-    explicit BoundaryController(Settings::Settings const &settings);
+    explicit DomainController(Settings::Settings const &settings);
     size_t get_slice_size_domain_inner_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_domain_inner_cells_level_joined(level); }  // get size of domain inner list
 
     Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    static BoundaryController* singleton;
+    static DomainController* singleton;
 
     Multigrid* m_multigrid;
 

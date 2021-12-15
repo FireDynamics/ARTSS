@@ -8,7 +8,7 @@
 
 #include "VCycleMG.h"
 #include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 #include "../diffusion/ColoredGaussSeidelDiffuse.h"
 #include "../diffusion/JacobiDiffuse.h"
 #include "../solver/SolverSelection.h"
@@ -160,7 +160,7 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
         const real reciprocal_dy2 = 1. / (dy * dy);
         const real reciprocal_dz2 = 1. / (dz * dz);
 
-        BoundaryController *boundary = BoundaryController::getInstance();
+        DomainController *boundary = DomainController::getInstance();
         const size_t bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
         size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
 
@@ -207,7 +207,7 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     //===================== No refinement, when max_level = 0 =========//
     if (m_levels == 0) {
         Field *field_mg_temporal_level = m_mg_temporal_solution[0];
@@ -291,7 +291,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // *****************************************************************************
 void VCycleMG::Smooth(Field &out, Field &tmp, Field const &b, const size_t level, bool sync) {
-    BoundaryController *boundary = BoundaryController::getInstance();
+    DomainController *boundary = DomainController::getInstance();
     boundary->apply_boundary(out, sync);
 
     (this->*m_smooth_function)(out, tmp, b, level, sync);
@@ -325,7 +325,7 @@ void VCycleMG::Residuum(Field &out, Field const &in, Field const &b, const size_
     const real reciprocal_dy2 = 1. / (dy * dy);
     const real reciprocal_dz2 = 1. / (dz * dz);
 
-    BoundaryController *boundary = BoundaryController::getInstance();
+    DomainController *boundary = DomainController::getInstance();
     size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
 
     const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
@@ -373,7 +373,7 @@ void VCycleMG::Restrict(Field &out, Field const &in, const size_t level, bool sy
     const size_t Nx_fine = domain->get_Nx(in.get_level());
     const size_t Ny_fine = domain->get_Ny(in.get_level());
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
 
     const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level + 1);
@@ -443,7 +443,7 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
     const size_t Nx_coarse = domain->get_Nx(in.get_level());
     const size_t Ny_coarse = domain->get_Ny(in.get_level());
 
-    BoundaryController *boundary = BoundaryController::getInstance();
+    DomainController *boundary = DomainController::getInstance();
     size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
 
     const size_t start_i = boundary->get_domain_inner_list_level_joined_start(level);
@@ -582,7 +582,7 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
     const real dy = domain->get_dy(level);
     const real dz = domain->get_dz(level);
 
-    BoundaryController *boundary = BoundaryController::getInstance();
+    DomainController *boundary = DomainController::getInstance();
     boundary->apply_boundary(out, sync);
 
     const real reciprocal_dx2 = 1. / (dx * dx);
@@ -617,7 +617,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
     const real dy = domain->get_dy(level);
     const real dz = domain->get_dz(level);
 
-    BoundaryController *boundary = BoundaryController::getInstance();
+    DomainController *boundary = DomainController::getInstance();
     size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
     const size_t bsize_i __attribute__((unused)) = boundary->get_size_domain_inner_list_level_joined(level);
 
@@ -680,7 +680,7 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
     const real dy = domain->get_dy(level);
     const real dz = domain->get_dz(level);
 
-    BoundaryController *boundary = BoundaryController::getInstance();
+    DomainController *boundary = DomainController::getInstance();
     boundary->apply_boundary(out, sync);
 
     const real reciprocal_dx2 = 1. / (dx * dx);
@@ -726,7 +726,7 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
     const real dy = domain->get_dy(level);
     const real dz = domain->get_dz(level);
 
-    BoundaryController *boundary = BoundaryController::getInstance();
+    DomainController *boundary = DomainController::getInstance();
 
     size_t *data_inner_list = boundary->get_domain_inner_list_level_joined();
     const size_t bsize_i __attribute__((unused)) = boundary->get_size_domain_inner_list_level_joined(level);

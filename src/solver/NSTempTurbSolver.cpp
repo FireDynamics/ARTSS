@@ -12,7 +12,7 @@
 
 #include "../DomainData.h"
 #include "../boundary/BoundaryData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 #include "../pressure/VCycleMG.h"
 #include "SolverSelection.h"
 

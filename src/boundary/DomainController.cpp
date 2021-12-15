@@ -1,16 +1,16 @@
-/// \file       BoundaryController.cpp
+/// \file       DomainController.cpp
 /// \brief      Controller class for boundary
 /// \date       Oct 01, 2020
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include "BoundaryController.h"
+#include "DomainController.h"
 #include <string>
 
-BoundaryController *BoundaryController::singleton = nullptr;  // Singleton
+DomainController *DomainController::singleton = nullptr;  // Singleton
 
 
-BoundaryController::BoundaryController(Settings::Settings const &settings) :
+DomainController::DomainController(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
@@ -30,7 +30,7 @@ BoundaryController::BoundaryController(Settings::Settings const &settings) :
 // *************************************************************************************************
 /// \brief  Reads in all parameters of boundary, obstacles and surfaces
 // *************************************************************************************************
-return_xml_objects BoundaryController::read_XML() {
+return_xml_objects DomainController::read_XML() {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing XML");
     m_logger->debug("start parsing boundary parameter");
@@ -55,7 +55,7 @@ return_xml_objects BoundaryController::read_XML() {
 /// \brief  parses surfaces from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-return_surface BoundaryController::parse_surface_parameter(const std::vector<Settings::SurfaceSetting> &surface_setting) {
+return_surface DomainController::parse_surface_parameter(const std::vector<Settings::SurfaceSetting> &surface_setting) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing surface parameter");
 #endif
@@ -93,7 +93,7 @@ return_surface BoundaryController::parse_surface_parameter(const std::vector<Set
 /// \brief  parses obstacles from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-return_obstacle BoundaryController::parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting> &obstacle_setting) {
+return_obstacle DomainController::parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting> &obstacle_setting) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing obstacle parameter");
 #endif
@@ -126,14 +126,14 @@ return_obstacle BoundaryController::parse_obstacle_parameter(const std::vector<S
     return {obstacles, bdc_obstacles};
 }
 
-BoundaryController::~BoundaryController() {
+DomainController::~DomainController() {
     delete m_multigrid;
 }
 
 
-BoundaryController *BoundaryController::getInstance(Settings::Settings const &settings) {
+DomainController *DomainController::getInstance(Settings::Settings const &settings) {
     if (singleton == nullptr) {
-        singleton = new BoundaryController(settings);
+        singleton = new DomainController(settings);
     }
     return singleton;
 }
@@ -142,7 +142,7 @@ BoundaryController *BoundaryController::getInstance(Settings::Settings const &se
 // *************************************************************************************************
 /// \brief  prints boundaries (outer, inner, surfaces)
 // *************************************************************************************************
-void BoundaryController::print_boundaries(const BoundaryDataController &bdc_domain, const std::vector<BoundaryDataController> &bdc_surfaces, const std::vector<BoundaryDataController> &bdc_obstacles) {
+void DomainController::print_boundaries(const BoundaryDataController &bdc_domain, const std::vector<BoundaryDataController> &bdc_surfaces, const std::vector<BoundaryDataController> &bdc_obstacles) {
 #ifndef BENCHMARKING
     m_logger->info("-- Info summary");
     DomainData::getInstance()->print();
@@ -160,7 +160,7 @@ void BoundaryController::print_boundaries(const BoundaryDataController &bdc_doma
 // *************************************************************************************************
 /// \brief  Updates lists of indices
 // *************************************************************************************************
-void BoundaryController::update_lists() {
+void DomainController::update_lists() {
     m_multigrid->update_lists();
 }
 
@@ -170,7 +170,7 @@ void BoundaryController::update_lists() {
 /// \param  field   field
 /// \param  sync    synchronization (default: false)
 // *************************************************************************************************
-void BoundaryController::apply_boundary(Field &field, bool sync) {
+void DomainController::apply_boundary(Field &field, bool sync) {
     m_multigrid->apply_boundary_condition(field, sync);
 }
 
@@ -179,7 +179,7 @@ void BoundaryController::apply_boundary(Field &field, bool sync) {
 /// \brief  handling of neighbouring obstacles, removes cells with circular constraints which never
 /// change their value
 // *************************************************************************************************
-void BoundaryController::detect_neighbouring_obstacles(std::vector<Obstacle> &obstacle_list) {
+void DomainController::detect_neighbouring_obstacles(std::vector<Obstacle> &obstacle_list) {
 #ifndef BENCHMARKING
     m_logger->debug("start detecting neighbouring obstacles");
 #endif
@@ -200,6 +200,6 @@ void BoundaryController::detect_neighbouring_obstacles(std::vector<Obstacle> &ob
 #endif
 }
 
-std::vector<FieldType> BoundaryController::get_used_fields() const {
+std::vector<FieldType> DomainController::get_used_fields() const {
     return m_multigrid->get_used_fields();
 }

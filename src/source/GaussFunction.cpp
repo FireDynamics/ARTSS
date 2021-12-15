@@ -6,7 +6,7 @@
 //
 #include "GaussFunction.h"
 #include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 #ifdef _OPENACC
 #include "accel.h"
 #endif
@@ -71,7 +71,7 @@ void GaussFunction::create_spatial_values() {
     real r_sigma_z_2 = 1. / sigma_z_2;
 
     // set Gaussian to cells
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *domain_list = boundary->get_domain_inner_list_level_joined();
 
     auto size_domain_list = boundary->get_size_domain_inner_list_level_joined(0);

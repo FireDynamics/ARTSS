@@ -9,7 +9,7 @@
 #include <fstream>
 
 #include "Analysis.h"
-#include "../boundary/BoundaryController.h"
+#include "../boundary/DomainController.h"
 #include "../DomainData.h"
 #include "../utility/Utility.h"
 
@@ -45,7 +45,7 @@ void Analysis::analyse(FieldController *field_controller, real t) {
     m_logger->info("Compare to analytical solution:");
 #endif
 
-    auto used_fields = BoundaryController::getInstance()->get_used_fields();
+    auto used_fields = DomainController::getInstance()->get_used_fields();
     for (FieldType ft : used_fields) {
         switch (ft) {
             case FieldType::U:
@@ -118,7 +118,7 @@ bool Analysis::compare_solutions(read_ptr num, read_ptr ana, FieldType type, rea
 real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
     real sum = 0.;
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
     size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
@@ -155,7 +155,7 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
     real sumr = 0.;
     real rr;
 
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
     size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
 
@@ -215,7 +215,7 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
 /// \param  sum     pointer to sum for (u,p,T results)
 // ***************************************************************************************
 void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t, real *sum) {
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     size_t *inner_list = boundary->get_domain_inner_list_level_joined();
 
     size_t ix = inner_list[boundary->get_size_domain_inner_list_level_joined(0) / 2];
@@ -266,7 +266,7 @@ void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
     m_logger->info("RMS error of u at domain center is e_RMS = {}", epsu);
 #endif
 
-    std::vector<FieldType> v_fields = BoundaryController::getInstance()->get_used_fields();
+    std::vector<FieldType> v_fields = DomainController::getInstance()->get_used_fields();
     if (std::count(v_fields.begin(), v_fields.end(), FieldType::P)) {
         real epsp = sqrt(rNt * sum_p);
 #ifndef BENCHMARKING
@@ -324,7 +324,7 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
     real cfl_max = 0;  // highest seen C. C is always positive, so 0 is a lower bound
     real cfl_local;    // C in the local cell
 
-    auto boundary_controller = BoundaryController::getInstance();
+    auto boundary_controller = DomainController::getInstance();
     auto domain_data = DomainData::getInstance();
 
     // local variables and parameters
@@ -359,7 +359,7 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
 /// \param  field_controller    pointer to field controller
 // ***************************************************************************************
 void Analysis::save_variables_in_file(FieldController *field_controller) {
-    auto boundary = BoundaryController::getInstance();
+    auto boundary = DomainController::getInstance();
     std::vector<FieldType> v_fields = boundary->get_used_fields();
 
     Field *fields[number_of_field_types];
@@ -388,7 +388,7 @@ void Analysis::write_file(const Field &field, const std::string &filename) {
 }
 
 void Analysis::write_obstacles(const Field &field, const std::string &filename) {
-    BoundaryController *boundary = BoundaryController::getInstance();
+    DomainController *boundary = DomainController::getInstance();
     size_t *obstacle_list = boundary->get_obstacle_list_level_joined();
     size_t size = boundary->get_slice_size_obstacle_list_level_joined(0);
     real *data = field.data;
