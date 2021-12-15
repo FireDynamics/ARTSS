@@ -119,13 +119,13 @@ real Analysis::calc_absolute_spatial_error(read_ptr num, read_ptr ana) {
     real sum = 0.;
 
     auto domain_controller = DomainController::getInstance();
-    size_t *inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
     size_t size_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     //// weighted 2-norm
     // absolute error
     for (size_t i = 0; i < size_inner_list; i++) {
-        size_t idx = inner_list[i];
+        size_t idx = domain_inner_list[i];
         real r = std::fabs(num[idx] - ana[idx]);
         sum += r * r;
     }
@@ -156,12 +156,12 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
     real rr;
 
     auto domain_controller = DomainController::getInstance();
-    size_t *inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
     size_t size_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     // relative part with norm of analytical solution as denominator
     for (size_t i = 0; i < size_inner_list; i++) {
-        rr = ana[inner_list[i]];
+        rr = ana[domain_inner_list[i]];
         sumr += rr * rr;
     }
 
@@ -183,7 +183,7 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
 
         // relative part with norm of numerical solution as quotient
         for (size_t i = 0; i < size_inner_list; i++) {
-            rr = num[inner_list[i]];
+            rr = num[domain_inner_list[i]];
             sumr += rr * rr;
         }
 
@@ -216,9 +216,9 @@ real Analysis::calc_relative_spatial_error(read_ptr num, read_ptr ana) {
 // ***************************************************************************************
 void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t, real *sum) {
     auto domain_controller = DomainController::getInstance();
-    size_t *inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
-    size_t ix = inner_list[domain_controller->get_size_domain_inner_list_level_joined(0) / 2];
+    size_t ix = domain_inner_list[domain_controller->get_size_domain_inner_list_level_joined(0) / 2];
     //take median of indices in inner_list to get center point ix
     //std::nth_element(inner_list.begin(), inner_list.begin() + inner_list.size()/2, inner_list.end());
     //size_t ix = inner_list[inner_list.size()/2];
@@ -328,18 +328,18 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
     auto domain_data = DomainData::getInstance();
 
     // local variables and parameters
-    size_t *inner_list = domain_controller->get_domain_inner_list_level_joined();
-    size_t size_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     real dx = domain_data->get_dx();
     real dy = domain_data->get_dy();
     real dz = domain_data->get_dz();
 
     // calc C for every cell and get the maximum
-#pragma acc data present(u, v, w, inner_list[:size_inner_list])
+#pragma acc data present(u, v, w, domain_inner_list[:size_domain_inner_list])
 #pragma acc parallel loop reduction(max:cfl_max)
-    for (size_t i = 0; i < size_inner_list; i++) {
-        size_t idx = inner_list[i];
+    for (size_t i = 0; i < size_domain_inner_list; i++) {
+        size_t idx = domain_inner_list[i];
         // \frac{C}{\Delta t} = \frac{\Delta u}{\Delta x} +
         //                      \frac{\Delta v}{\Delta y} +
         //                      \frac{\Delta w}{\Delta z} +
