@@ -9,11 +9,7 @@
 #include "src/joinedLists/SingleJoinedList.h"
 
 
-class SingleJoinedListTest : public testing::Test {
-};
-
-TEST_F(SingleJoinedListTest, constructor_level0) {
-#define BENCHMARKING
+TEST(SingleJoinedListTest, constructor_level0) {
     size_t mg_level = 0;
     SingleJoinedList *jl = new SingleJoinedList(mg_level);
     for (size_t level = 0; level < mg_level + 1; level++) {
@@ -23,10 +19,9 @@ TEST_F(SingleJoinedListTest, constructor_level0) {
     }
     ASSERT_EQ(jl->get_first_index(mg_level + 1), 0);
     ASSERT_EQ(jl->get_size(), 0);
-#undef BENCHMARKING
 }
 
-TEST_F(SingleJoinedListTest, constructor_level2) {
+TEST(SingleJoinedListTest, constructor_level2) {
     size_t mg_level = 2;
     SingleJoinedList *jl = new SingleJoinedList(mg_level);
     for (size_t level = 0; level < mg_level + 1; level++) {
