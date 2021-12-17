@@ -69,9 +69,10 @@ bool DataAssimilation::requires_rollback() {
     if (flag) {
         int msg_len;
         MPI_Get_count(&status, MPI_CHAR, &msg_len);
-        char *msg = new char[msg_len];
-        MPI_Recv(msg, msg_len, MPI_CHAR, 1, status.MPI_TAG, MPI_COMM_WORLD, &status);
-        config_rollback(msg);  // TODO(MPI): could be done in a third process
+        std::vector<char> msg;
+        msg.resize(msg_len);
+        MPI_Recv(msg.data(), msg_len, MPI_CHAR, 1, status.MPI_TAG, MPI_COMM_WORLD, &status);
+        config_rollback(msg.data());  // TODO(MPI): could be done in a third process
     }
     return flag;
 }
