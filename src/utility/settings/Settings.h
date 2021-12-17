@@ -135,6 +135,7 @@ namespace Settings {
         struct visualisation_parameters visualisation_parameters;
         struct logging_parameters logging_parameters;
     };
+    random_parameters parse_random_parameters(tinyxml2::XMLDocument &doc, const std::string &parent_context, bool is_random);
     surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLDocument &doc);
     obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLDocument &doc);
     initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLDocument &doc);

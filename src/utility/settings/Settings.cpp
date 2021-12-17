@@ -87,6 +87,9 @@ bool get_required_bool(const Map &map, const std::string &key, const std::string
         throw config_error(fmt::format("Value {} is for {} required.", key, context));
     }
 }
+std::string create_context(const std::string &parent_context, const std::string &own_context) {
+    return parent_context + "/" + own_context;
+}
 
 domain_parameters parse_domain_parameters(tinyxml2::XMLDocument &doc) {
     std::string context = "domain_parameters";
@@ -129,11 +132,25 @@ visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLDocument &d
     }
     return vp;
 }
+random_parameters parse_random_parameters(tinyxml2::XMLDocument &doc, const std::string &parent_context, bool is_random) {
+    std::string context = create_context(parent_context, "random");
+    Map values = map_parameters(doc, context);
+    random_parameters rp{};
+    if (is_random) {
+        rp.absolute = get_required_bool(values, "absolute", context);
+        rp.custom_seed = get_required_bool(values, "custom_seed", context);
+        rp.custom_steps = get_required_bool(values, "custom_steps", context);
+    }
+    return rp;
+}
 initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLDocument &doc) {
     std::string context = "initial_conditions";
     Map values = map_parameters(doc, context);
     initial_conditions_parameters icp{};
+
     icp.random = get_required_bool(values, "random", context);
+    icp.random_parameters = parse_random_parameters(doc, context, icp.random);
+
     icp.usr_fct = get_required_string(values, "usr_fct", context);
     return icp;
 }
@@ -165,10 +182,10 @@ physical_parameters parse_physical_parameters(tinyxml2::XMLDocument &doc) {
     physical_parameters pp{};
     pp.t_end = get_required_real(values, "t_end", context);
     pp.dt = get_required_real(values, "dt", context);
-    pp.nu = get_optional_real(values, "nu", 0.000031);
-    pp.beta = get_optional_real(values, "beta", 0.00334);
+    pp.nu = get_optional_real(values, "nu", 3.1e-5);
+    pp.beta = get_optional_real(values, "beta", 3.34e-3);
     pp.g = get_optional_real(values, "g", -9.81);
-    pp.kappa = get_optional_real(values, "kappa", 0.0000425);
+    pp.kappa = get_optional_real(values, "kappa", 4.25e-5);
     return pp;
 }
 Settings_new parse_settings(const std::string &file_content) {
