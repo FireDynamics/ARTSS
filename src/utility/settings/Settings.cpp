@@ -9,11 +9,13 @@
 #include "Settings.h"
 
 #include "../Utility.h"
+#include "../Mapping.h"
 #include <fmt/format.h>
 
 namespace Settings {
 using Map = std::map<std::string, std::string>;
 static const std::string xml_true = "Yes";
+static const std::string xml_false = "No";
 
 Map map_parameters(tinyxml2::XMLDocument &doc, const std::string &context) {
     Map values;
@@ -72,6 +74,12 @@ std::string get_required_string(const Map &map, const std::string &key, const st
         throw config_error(fmt::format("Value {} is for {} required.", key, context));
     }
 }
+bool get_optional_bool(const Map &map, const std::string &key, const bool default_value) {
+    if (auto iter = map.find(key); iter != map.end()) {
+        return iter->second == xml_true;
+    }
+    return default_value;
+}
 bool get_required_bool(const Map &map, const std::string &key, const std::string &context) {
     try {
         return map.at(key) == xml_true;
@@ -84,25 +92,23 @@ domain_parameters parse_domain_parameters(tinyxml2::XMLDocument &doc) {
     std::string context = "domain_parameters";
     Map values = map_parameters(doc, context);
     domain_parameters dp{};
-    dp.X1 = get_required_real(values, "X1", context);
-    dp.X2 = get_required_real(values, "X2", context);
-    dp.Y1 = get_required_real(values, "Y1", context);
-    dp.Y2 = get_required_real(values, "Y2", context);
-    dp.Z1 = get_required_real(values, "Z1", context);
-    dp.Z2 = get_required_real(values, "Z2", context);
 
-    dp.x1 = get_optional_real(values, "x1", 0);
-    dp.x2 = get_optional_real(values, "x2", 0);
-    dp.y1 = get_optional_real(values, "y1", 0);
-    dp.y2 = get_optional_real(values, "y2", 0);
-    dp.z1 = get_optional_real(values, "z1", 0);
-    dp.z2 = get_optional_real(values, "z2", 0);
-
-    dp.nx = get_required_size_t(values, "nx", context);
-    dp.ny = get_required_size_t(values, "ny", context);
-    dp.nz = get_required_size_t(values, "nz", context);
-
-    dp.enable_computational_domain = get_required_bool(values, "enable_computational_domain", context);
+    dp.enable_computational_domain = get_optional_bool(values, "enable_computational_domain", false);
+    for (size_t a = 0; a < number_of_axes; a++) {
+        auto axis = CoordinateAxis(a);
+        std::string axis_name = Mapping::get_axis_name(axis);
+        std::string axis_name_low = Utility::to_lower(axis_name);
+        dp.start_coords_PD[axis] = get_required_real(values, axis_name + "1", context);
+        dp.end_coords_PD[axis] = get_required_real(values, axis_name + "2", context);
+        dp.number_of_inner_cells[axis] = get_required_size_t(values, "n" +axis_name_low, context);
+        if (dp.enable_computational_domain) {
+            dp.start_coords_PD[axis] = get_required_real(values, axis_name_low + "1", context);
+            dp.end_coords_PD[axis] = get_required_real(values, axis_name_low + "2", context);
+        } else {
+           dp.start_coords_PD[axis] = dp.start_coords_PD[axis];
+           dp.end_coords_PD[axis] =  dp.end_coords_PD[axis];
+        }
+    }
     return dp;
 }
 visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLDocument &doc) {
@@ -110,9 +116,17 @@ visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLDocument &d
     Map values = map_parameters(doc, context);
     visualisation_parameters vp{};
     vp.csv_nth_plot = get_optional_size_t(values, "csv_nth_plot", 1);
-    vp.vtk_nth_plot = get_optional_size_t(values, "vtk_nth_plot", 1);
-    vp.save_csv = get_required_bool(values, "save_csv", context);
+    if (vp.csv_nth_plot) {
+        vp.save_csv = get_required_bool(values, "save_csv", context);
+    } else {
+        vp.save_csv = get_optional_bool(values, "csv_nth_plot", 0);
+    }
     vp.save_vtk = get_required_bool(values, "save_vtk", context);
+    if (vp.vtk_nth_plot) {
+        vp.save_vtk = get_required_bool(values, "save_vtk", context);
+    } else {
+        vp.save_vtk = get_optional_bool(values, "vtk_nth_plot", 0);
+    }
     return vp;
 }
 initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLDocument &doc) {

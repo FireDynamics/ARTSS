@@ -13,6 +13,7 @@
 #include "ObstacleSetting.h"
 #include "SurfaceSetting.h"
 #include "../GlobalMacrosTypes.h"
+#include "../../boundary/Coordinate.h"
 
 #ifndef BENCHMARKING
 #include <spdlog/logger.h>
@@ -35,21 +36,11 @@ namespace Settings {
     };
     struct domain_parameters {
         bool enable_computational_domain;
-        real X1;
-        real X2;
-        real Y1;
-        real Y2;
-        real Z1;
-        real Z2;
-        real x1;
-        real x2;
-        real y1;
-        real y2;
-        real z1;
-        real z2;
-        size_t nx;
-        size_t ny;
-        size_t nz;
+        Coordinate<real> start_coords_CD;  // x1/y1/z1
+        Coordinate<real> end_coords_CD;  // x2/y2/z2
+        Coordinate<real> start_coords_PD;  // X1/Y1/Z1
+        Coordinate<real> end_coords_PD;  // X2/Y2/Z2
+        Coordinate<size_t> number_of_inner_cells;  // nx/ny/nz
     };
     struct physical_parameters {
         real t_end;

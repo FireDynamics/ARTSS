@@ -31,6 +31,16 @@ size_t get_index(real physical_coordinate, real spacing, real start_coordinate) 
     return std::round((-start_coordinate + physical_coordinate) / spacing) + 1;
 }
 
+std::string to_upper(std::string string) {
+    std::transform(string.begin(), string.end(), string.begin(), ::toupper);
+    return string;
+}
+
+std::string to_lower(std::string string) {
+    std::transform(string.begin(), string.end(), string.begin(), ::tolower);
+    return string;
+}
+
 // ================================= Split string at character =====================================
 // *************************************************************************************************
 /// \brief  Splits a string at a defined char
