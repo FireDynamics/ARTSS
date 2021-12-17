@@ -11,10 +11,7 @@
 
 DomainData *DomainData::single = nullptr;  // Singleton
 
-DomainData::DomainData(Settings::Settings const &settings) :
-        length_PD(),
-        start_coords_PD(),
-        end_coords_PD() {
+DomainData::DomainData(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
