@@ -10,6 +10,7 @@
 
 #include "../Utility.h"
 #include "../Mapping.h"
+#include "../../Functions.h"
 #include <fmt/format.h>
 
 namespace Settings {
@@ -153,6 +154,13 @@ random_parameters parse_random_parameters(tinyxml2::XMLDocument &doc, const std:
     }
     return rp;
 }
+uniform parse_ic_uniform_parameters(tinyxml2::XMLDocument &doc, const std::string &parent_context) {
+    std::string context = create_context(context, FunctionNames::uniform);
+    Map values = map_parameters(doc, context);
+    uniform uniform {};
+
+    uniform.value = get_required_real(values, "val", context);
+}
 initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLDocument &doc) {
     std::string context = "initial_conditions";
     Map values = map_parameters(doc, context);
@@ -162,6 +170,9 @@ initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLD
     icp.random_parameters = parse_random_parameters(doc, context, icp.random);
 
     icp.usr_fct = get_required_string(values, "usr_fct", context);
+    if (icp.usr_fct == FunctionNames::uniform) {
+        icp.ic = parse_ic_uniform_parameters(doc, context);
+    }
     return icp;
 }
 obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLDocument &doc) {

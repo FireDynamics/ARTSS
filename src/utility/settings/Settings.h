@@ -60,11 +60,11 @@ namespace Settings {
         std::string file;
         std::string level;
     };
-    struct Uniform {
+    struct uniform {
         real value;
     };
-    struct Zero {};
-    struct GaussBubble {
+    struct zero {};
+    struct gauss_bubble {
         real u_lin;
         real v_lin;
         real w_lin;
@@ -84,7 +84,7 @@ namespace Settings {
     struct initial_conditions_parameters {
         std::string usr_fct;
         bool random;
-        std::variant<Uniform,Zero,GaussBubble> ic;
+        std::variant<uniform,zero,gauss_bubble> ic;
         struct random_parameters random_parameters;
     };
     struct boundary {
