@@ -137,9 +137,19 @@ random_parameters parse_random_parameters(tinyxml2::XMLDocument &doc, const std:
     Map values = map_parameters(doc, context);
     random_parameters rp{};
     if (is_random) {
-        rp.absolute = get_required_bool(values, "absolute", context);
+        rp.absolute = get_optional_bool(values, "absolute", false);
         rp.custom_seed = get_required_bool(values, "custom_seed", context);
+        if (rp.custom_seed) {
+            rp.seed = get_required_size_t(values, "seed", context);
+        } else {
+            rp.seed = get_optional_size_t(values, "seed", 0);
+        }
         rp.custom_steps = get_required_bool(values, "custom_steps", context);
+        if (rp.custom_steps) {
+            rp.step_size = get_required_real(values, "step_size", context);
+        } else {
+            rp.step_size = get_optional_real(values, "step_size", 1);
+        }
     }
     return rp;
 }
