@@ -12,16 +12,19 @@
 #include "../Mapping.h"
 #include "../../Functions.h"
 #include <fmt/format.h>
+#include <iostream>
 
 namespace Settings {
-using Map = std::map<std::string, std::string>;
 static const std::string xml_true = "Yes";
 static const std::string xml_false = "No";
+static const char delimiter = ',';
 
-Map map_parameters(tinyxml2::XMLDocument &doc, const std::string &context) {
+return_xml_data map_parameters(tinyxml2::XMLElement *head, const std::string &context) {
     Map values;
-    for (auto i = doc.RootElement()->FirstChildElement(); i; i = i->NextSiblingElement()) {
+    tinyxml2::XMLElement *subsection;
+    for (auto i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
         if (i->Name() == context) {
+            subsection = i;
             for (auto e = i->FirstAttribute(); e; e = e->Next()) {
                 values[e->Name()] = e->Value();
             }
@@ -31,7 +34,7 @@ Map map_parameters(tinyxml2::XMLDocument &doc, const std::string &context) {
             break;
         }
     }
-    return values;
+    return {subsection, values};
 }
 
 size_t get_optional_size_t(const Map &map, const std::string &key, size_t default_value) {
@@ -92,9 +95,9 @@ std::string create_context(const std::string &parent_context, const std::string 
     return parent_context + "/" + own_context;
 }
 
-domain_parameters parse_domain_parameters(tinyxml2::XMLDocument &doc) {
+domain_parameters parse_domain_parameters(tinyxml2::XMLElement *root) {
     std::string context = "domain_parameters";
-    Map values = map_parameters(doc, context);
+    auto [subsection, values] = map_parameters(root, context);
     domain_parameters dp{};
 
     dp.enable_computational_domain = get_optional_bool(values, "enable_computational_domain", false);
@@ -115,9 +118,9 @@ domain_parameters parse_domain_parameters(tinyxml2::XMLDocument &doc) {
     }
     return dp;
 }
-visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLDocument &doc) {
+visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLElement *root) {
     std::string context = "visualisation";
-    Map values = map_parameters(doc, context);
+    auto [subsection, values] = map_parameters(root, context);
     visualisation_parameters vp{};
     vp.csv_nth_plot = get_optional_size_t(values, "csv_nth_plot", 1);
     if (vp.csv_nth_plot) {
@@ -133,9 +136,10 @@ visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLDocument &d
     }
     return vp;
 }
-random_parameters parse_random_parameters(tinyxml2::XMLDocument &doc, const std::string &parent_context, bool is_random) {
-    std::string context = create_context(parent_context, "random");
-    Map values = map_parameters(doc, context);
+random_parameters parse_random_parameters(tinyxml2::XMLElement *head, const std::string &parent_context, bool is_random) {
+    std::string own_context = "random";
+    std::string context = create_context(parent_context, own_context);
+    auto [subsection, values] = map_parameters(head, own_context);
     random_parameters rp{};
     if (is_random) {
         rp.absolute = get_optional_bool(values, "absolute", false);
@@ -154,52 +158,141 @@ random_parameters parse_random_parameters(tinyxml2::XMLDocument &doc, const std:
     }
     return rp;
 }
-uniform parse_ic_uniform_parameters(tinyxml2::XMLDocument &doc, const std::string &parent_context) {
-    std::string context = create_context(context, FunctionNames::uniform);
-    Map values = map_parameters(doc, context);
-    uniform uniform {};
+namespace initial_conditions {
+    uniform parse_uniform_parameters(tinyxml2::XMLElement *root, const std::string &parent_context) {
+        std::string own_context = FunctionNames::uniform;
+        std::string context = create_context(parent_context, own_context);
+        auto[subsection, values] = map_parameters(root, own_context);
+        uniform uniform{};
 
-    uniform.value = get_required_real(values, "val", context);
+        uniform.value = get_required_real(values, "val", context);
+        return uniform;
+    }
+
+    gauss_bubble parse_gauss_bubble_parameters(tinyxml2::XMLElement *root, const std::string &parent_context) {
+        std::string own_context = FunctionNames::gauss_bubble;
+        std::string context = create_context(parent_context, own_context);
+        auto[subsection, values] = map_parameters(root, own_context);
+        gauss_bubble gauss_bubble{};
+
+        gauss_bubble.l = get_required_real(values, "l", context);
+        gauss_bubble.u_lin = get_required_real(values, "u_lin", context);
+        gauss_bubble.v_lin = get_required_real(values, "v_lin", context);
+        gauss_bubble.w_lin = get_required_real(values, "w_lin", context);
+        gauss_bubble.x_shift = get_required_real(values, "x_shift", context);
+        gauss_bubble.y_shift = get_required_real(values, "y_shift", context);
+        gauss_bubble.z_shift = get_required_real(values, "z_shift", context);
+        return gauss_bubble;
+    }
 }
-initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLDocument &doc) {
+initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLElement *root) {
     std::string context = "initial_conditions";
-    Map values = map_parameters(doc, context);
+    auto [subsection, values] = map_parameters(root, context);
     initial_conditions_parameters icp{};
 
     icp.random = get_required_bool(values, "random", context);
-    icp.random_parameters = parse_random_parameters(doc, context, icp.random);
+    icp.random_parameters = parse_random_parameters(subsection, context, icp.random);
 
     icp.usr_fct = get_required_string(values, "usr_fct", context);
     if (icp.usr_fct == FunctionNames::uniform) {
-        icp.ic = parse_ic_uniform_parameters(doc, context);
+        icp.ic = initial_conditions::parse_uniform_parameters(subsection, context);
+    } else if (icp.usr_fct == FunctionNames::gauss_bubble) {
+        icp.ic = initial_conditions::parse_gauss_bubble_parameters(subsection, context);
+    } else {
+        throw config_error(fmt::format("{} has no parsing implementation.", icp.usr_fct));
     }
     return icp;
 }
-obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLDocument &doc) {
+boundary parse_boundary(tinyxml2::XMLElement *head, const std::string &parent_context) {
+    std::string own_context = "boundary";
+    std::string context = create_context(parent_context, own_context);
+    auto [subsection, values] = map_parameters(head, own_context);
+    boundary boundary {};
+
+    boundary.value = get_required_real(values, "value", context);
+    boundary.boundary_condition = Mapping::match_boundary_condition(get_required_string(values, "type", context));
+    auto fields = Utility::split(get_required_string(values, "field", context), delimiter);
+    for (const std::string &string : fields) {
+        boundary.field_type.emplace_back(Mapping::match_field(string));
+    }
+    auto patches = Utility::split(get_required_string(values, "patch", context), delimiter);
+    for (const std::string &string : patches) {
+        boundary.patch.emplace_back(Mapping::match_patch(string));
+    }
+    return boundary;
+}
+boundaries_parameters parse_boundaries_parameters(tinyxml2::XMLElement *root) {
+    std::string context = "boundaries";
+    auto [subsection, values] = map_parameters(root, context);
+    boundaries_parameters bp{};
+
+    for (auto i = subsection->FirstChildElement(); i; i = subsection->NextSiblingElement()) {
+        if (subsection->Name() == std::string("boundary")) {
+            bp.boundaries.emplace_back(parse_boundary(i, context));
+        }
+    }
+    return bp;
+}
+obstacle parse_obstacle(tinyxml2::XMLElement *head, const std::string &parent_context) {
+    std::string own_context = "obstacle";
+    std::string context = create_context(parent_context, own_context);
+    auto [subsection, values] = map_parameters(head, own_context);
+
+    obstacle obstacle {};
+    obstacle.name = get_required_string(values, "name", context);
+
+    std::string context_geometry = create_context(context, fmt::format("geometry ({})", obstacle.name));
+    auto [subsection_geometry, values_geometry] = map_parameters(subsection, "geometry");
+    for (size_t a = 0; a < number_of_axes; a++) {
+        auto axis = CoordinateAxis(a);
+        std::string axis_name = Mapping::get_axis_name(axis);
+        obstacle.start_coords[axis] = get_required_real(values_geometry, "o" + axis_name + "1", context);
+        obstacle.end_coords[axis] = get_required_real(values_geometry, "o" + axis_name + "2", context);
+    }
+
+    std::string context_boundaries = create_context(context, fmt::format("boundaries ({})", obstacle.name));
+    for (auto i = subsection->FirstChildElement(); i; i = subsection->NextSiblingElement()) {
+        if (subsection->Name() == std::string("boundary")) {
+            obstacle.boundaries.emplace_back(parse_boundary(i, context_boundaries));
+        }
+    }
+    return obstacle;
+}
+obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLElement *root) {
     std::string context = "obstacles";
-    Map values = map_parameters(doc, context);
+    auto [subsection, values] = map_parameters(root, context);
     obstacles_parameters op{};
     op.enabled = get_required_bool(values, "enabled", context);
+    if (op.enabled) {
+        for (auto i = subsection->FirstChildElement(); i; i = subsection->NextSiblingElement()) {
+            op.obstacles.emplace_back(parse_obstacle(i, context));
+        }
+    }
+    op.obstacles.shrink_to_fit();
     return op;
 }
-surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLDocument &doc) {
+surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLElement *root) {
     std::string context = "surfaces";
-    Map values = map_parameters(doc, context);
+    auto [subsection, values] = map_parameters(root, context);
     surfaces_parameters sp{};
+
     sp.enabled = get_required_bool(values, "enabled", context);
+    if (sp.enabled) {
+        throw config_error(fmt::format("handling of surfaces are not fully implemented yet. Please check Issue #5."));
+    }
     return sp;
 }
-logging_parameters parse_logging_parameters(tinyxml2::XMLDocument &doc) {
+logging_parameters parse_logging_parameters(tinyxml2::XMLElement *root) {
     std::string context = "logging";
-    Map values = map_parameters(doc, context);
+    auto [subsection, values] = map_parameters(root, context);
     logging_parameters lp{};
     lp.file = get_required_string(values, "file", context);
     lp.level = get_required_string(values, "level", context);
     return lp;
 }
-physical_parameters parse_physical_parameters(tinyxml2::XMLDocument &doc) {
+physical_parameters parse_physical_parameters(tinyxml2::XMLElement *root) {
     std::string context = "physical_parameters";
-    Map values = map_parameters(doc, context);
+    auto [subsection, values] = map_parameters(root, context);
     physical_parameters pp{};
     pp.t_end = get_required_real(values, "t_end", context);
     pp.dt = get_required_real(values, "dt", context);
@@ -212,13 +305,15 @@ physical_parameters parse_physical_parameters(tinyxml2::XMLDocument &doc) {
 Settings_new parse_settings(const std::string &file_content) {
     tinyxml2::XMLDocument doc;
     doc.Parse(file_content.c_str());
-    return {parse_physical_parameters(doc),
-            parse_domain_parameters(doc),
-            parse_obstacles_parameters(doc),
-            parse_surfaces_parameters(doc),
-            parse_initial_conditions_parameters(doc),
-            parse_visualisation_parameters(doc),
-            parse_logging_parameters(doc)};
+    tinyxml2::XMLElement *root = doc.RootElement();
+    return {parse_physical_parameters(root),
+            parse_domain_parameters(root),
+            parse_boundaries_parameters(root),
+            parse_obstacles_parameters(root),
+            parse_surfaces_parameters(root),
+            parse_initial_conditions_parameters(root),
+            parse_visualisation_parameters(root),
+            parse_logging_parameters(root)};
 }
 
 Settings_new parse_settings_from_file(const std::filesystem::path &path) {

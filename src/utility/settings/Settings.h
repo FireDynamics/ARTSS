@@ -13,7 +13,7 @@
 #include "ObstacleSetting.h"
 #include "SurfaceSetting.h"
 #include "../GlobalMacrosTypes.h"
-#include "../../boundary/Coordinate.h"
+#include "../../domain/Coordinate.h"
 
 #ifndef BENCHMARKING
 #include <spdlog/logger.h>
@@ -27,7 +27,8 @@
 #include <filesystem>
 #include <variant>
 
-
+using Map = std::map<std::string, std::string>;
+using return_xml_data = std::tuple<tinyxml2::XMLElement*,Map>;
 namespace Settings {
     class config_error : std::runtime_error { ;
     public:
@@ -88,35 +89,27 @@ namespace Settings {
         struct random_parameters random_parameters;
     };
     struct boundary {
-        std::string patch;
-        std::string field_type;
-        std::string boundary_condition;
+        std::vector<Patch> patch;
+        std::vector<FieldType> field_type;
+        BoundaryCondition boundary_condition;
         real value;
     };
     struct surface {
-        real sx1;
-        real sy1;
-        real sz1;
-        real sx2;
-        real sy2;
-        real sz2;
+        Coordinate<real> start_coords;
+        Coordinate<real> end_coords;
         struct boundary boundary_parameters;
     };
     struct surfaces_parameters {
         bool enabled;
         std::vector<struct surface> surfaces;
     };
-    struct boundaries {
+    struct boundaries_parameters {
         std::vector<struct boundary> boundaries;
     };
     struct obstacle {
         std::string name;
-        real ox1;
-        real oy1;
-        real oz1;
-        real ox2;
-        real oy2;
-        real oz2;
+        Coordinate<real> start_coords;
+        Coordinate<real> end_coords;
         std::vector<struct boundary> boundaries;
     };
     struct obstacles_parameters {
@@ -128,21 +121,22 @@ namespace Settings {
         //struct solver_parameters solver__parameters;
         struct domain_parameters domain_parameters;
         //struct adaption_parameters adaption_parameters;
-        //struct boundaries_parameters boundaries_parameters;
+        struct boundaries_parameters boundaries_parameters;
         struct obstacles_parameters obstacles_parameters;
         struct surfaces_parameters surfaces_parameters;
         struct initial_conditions_parameters initial_conditions_parameters;
         struct visualisation_parameters visualisation_parameters;
         struct logging_parameters logging_parameters;
     };
-    random_parameters parse_random_parameters(tinyxml2::XMLDocument &doc, const std::string &parent_context, bool is_random);
-    surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLDocument &doc);
-    obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLDocument &doc);
-    initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLDocument &doc);
-    visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLDocument &doc);
-    logging_parameters parse_logging_parameters(tinyxml2::XMLDocument &doc);
-    domain_parameters parse_domain_parameters(tinyxml2::XMLDocument &doc);
-    physical_parameters parse_physical_parameters(tinyxml2::XMLDocument &doc);
+    random_parameters parse_random_parameters(tinyxml2::XMLElement *head, const std::string &parent_context, bool is_random);
+    surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLElement *root);
+    obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLElement *root);
+    boundaries_parameters parse_boundaries_parameters(tinyxml2::XMLElement *root);
+    initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLElement *root);
+    visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLElement *root);
+    logging_parameters parse_logging_parameters(tinyxml2::XMLElement *root);
+    domain_parameters parse_domain_parameters(tinyxml2::XMLElement *root);
+    physical_parameters parse_physical_parameters(tinyxml2::XMLElement *root);
     Settings_new parse_settings(const std::string &file_content);
     Settings_new parse_settings_from_file(const std::filesystem::path &path);
 
