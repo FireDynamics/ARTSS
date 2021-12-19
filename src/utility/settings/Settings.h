@@ -116,11 +116,14 @@ namespace Settings {
         bool enabled;
         std::vector<struct obstacle> obstacles;
     };
+    struct adaption_parameters {
+        bool enabled;
+    };
     struct Settings_new {
         struct physical_parameters physical_parameters;
         //struct solver_parameters solver__parameters;
         struct domain_parameters domain_parameters;
-        //struct adaption_parameters adaption_parameters;
+        struct adaption_parameters adaption_parameters;
         struct boundaries_parameters boundaries_parameters;
         struct obstacles_parameters obstacles_parameters;
         struct surfaces_parameters surfaces_parameters;
@@ -131,6 +134,7 @@ namespace Settings {
     random_parameters parse_random_parameters(tinyxml2::XMLElement *head, const std::string &parent_context, bool is_random);
     surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLElement *root);
     obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLElement *root);
+    adaption_parameters parse_adaption_parameters(tinyxml2::XMLElement *root);
     boundaries_parameters parse_boundaries_parameters(tinyxml2::XMLElement *root);
     initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLElement *root);
     visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLElement *root);

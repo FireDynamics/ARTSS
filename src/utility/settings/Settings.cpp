@@ -278,9 +278,21 @@ surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLElement *root) {
 
     sp.enabled = get_required_bool(values, "enabled", context);
     if (sp.enabled) {
-        throw config_error(fmt::format("handling of surfaces are not fully implemented yet. Please check Issue #5."));
+        throw config_error(fmt::format("handling of surfaces are not fully implemented yet. Please check issue #5."));
     }
     return sp;
+}
+adaption_parameters parse_adaption_parameters(tinyxml2::XMLElement *root) {
+    std::string context = "adaption";
+    auto [subsection, values] = map_parameters(root, context);
+    adaption_parameters ap{};
+
+    ap.enabled = get_required_bool(values, "enabled", context);
+    if (ap.enabled) {
+        //TODO (issue 178) parse adaption parameters
+        throw config_error(fmt::format("handling of adaption is not fully implemented yet. Please check issue #178"));
+    }
+    return ap;
 }
 logging_parameters parse_logging_parameters(tinyxml2::XMLElement *root) {
     std::string context = "logging";
@@ -308,6 +320,7 @@ Settings_new parse_settings(const std::string &file_content) {
     tinyxml2::XMLElement *root = doc.RootElement();
     return {parse_physical_parameters(root),
             parse_domain_parameters(root),
+            parse_adaption_parameters(root),
             parse_boundaries_parameters(root),
             parse_obstacles_parameters(root),
             parse_surfaces_parameters(root),
