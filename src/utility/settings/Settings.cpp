@@ -314,11 +314,24 @@ physical_parameters parse_physical_parameters(tinyxml2::XMLElement *root) {
     pp.kappa = get_optional_real(values, "kappa", 4.25e-5);
     return pp;
 }
+solver_parameters parse_solver_parameters(tinyxml2::XMLElement *root) {
+    std::string context = "solver";
+    auto[subsection, values] = map_parameters(root, context);
+    solver_parameters sp{};
+
+    sp.description = get_required_string(values, "description", context);
+
+
+
+    return sp;
+}
+
 Settings_new parse_settings(const std::string &file_content) {
     tinyxml2::XMLDocument doc;
     doc.Parse(file_content.c_str());
     tinyxml2::XMLElement *root = doc.RootElement();
     return {parse_physical_parameters(root),
+            parse_solver_parameters(root),
             parse_domain_parameters(root),
             parse_adaption_parameters(root),
             parse_boundaries_parameters(root),

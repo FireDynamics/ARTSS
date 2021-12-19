@@ -119,9 +119,56 @@ namespace Settings {
     struct adaption_parameters {
         bool enabled;
     };
+    struct advection_solver {
+        std::string type;
+        std::vector<FieldType> fields;
+    };
+    struct diffusion_solver {
+        std::string type;
+        std::vector<FieldType> fields;
+    };
+    struct turbulence_solver {
+        std::string type;
+    };
+    struct source_solver {
+        std::string type;
+        std::string force_fct;
+        CoordinateAxis direction;
+        bool use_init_values;
+    };
+    struct pressure_solver {
+        std::string type;
+        FieldType field;
+    };
+    struct temperature_solver {
+        advection_solver advection;
+        diffusion_solver diffusion;
+        bool has_turbulence;
+        real prandtl_number;
+        source_solver source;
+    };
+    struct concentration_solver {
+        advection_solver advection;
+        diffusion_solver diffusion;
+        bool has_turbulence;
+        real prandtl_number;
+        source_solver source;
+    };
+    struct solver_parameters {
+        std::string description;
+        advection_solver advection_solver;
+        diffusion_solver diffusion_solver;
+        turbulence_solver turbulence_solver;
+        source_solver source_solver;
+        pressure_solver pressure_solver;
+        temperature_solver temperature_solver;
+        concentration_solver concentration_solver;
+        bool analytical_solution;
+        real solution_tolerance;
+    };
     struct Settings_new {
         struct physical_parameters physical_parameters;
-        //struct solver_parameters solver__parameters;
+        struct solver_parameters solver_parameters;
         struct domain_parameters domain_parameters;
         struct adaption_parameters adaption_parameters;
         struct boundaries_parameters boundaries_parameters;
@@ -132,6 +179,7 @@ namespace Settings {
         struct logging_parameters logging_parameters;
     };
     random_parameters parse_random_parameters(tinyxml2::XMLElement *head, const std::string &parent_context, bool is_random);
+    solver_parameters parse_solver_parameters(tinyxml2::XMLElement *root);
     surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLElement *root);
     obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLElement *root);
     adaption_parameters parse_adaption_parameters(tinyxml2::XMLElement *root);
