@@ -11,8 +11,8 @@
 #include "../Utility.h"
 #include "../Mapping.h"
 #include "../../Functions.h"
-#include "src/interfaces/ISolver.h"
-#include "src/solver/SolverSelection.h"
+#include "../../interfaces/ISolver.h"
+#include "../../solver/SolverSelection.h"
 #include <fmt/format.h>
 #include <iostream>
 
