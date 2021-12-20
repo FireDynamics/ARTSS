@@ -4,15 +4,16 @@
 /// \author       Suryanarayana Maddu
 /// \copyright    <2015-2018> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "ConstSmagorinsky.h"
+
 #include <cmath>
 
 #ifdef _OPENACC
 #include <accelmath.h>
 #endif
 
-#include "ConstSmagorinsky.h"
-#include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 
 ConstSmagorinsky::ConstSmagorinsky(Settings::Settings const &settings) {
     // Cs value of 0.1 is found to yield the best results for wide range of flows
@@ -33,15 +34,15 @@ void ConstSmagorinsky::calc_turbulent_viscosity(
             Field &ev,
             Field const &in_u, Field const &in_v, Field const &in_w,
             bool sync) {
-    auto domain = DomainData::getInstance();
+    auto domain_data = DomainData::getInstance();
 #pragma acc data present(ev, in_u, in_v, in_w)
     {
-        const size_t Nx = domain->get_Nx();
-        const size_t Ny = domain->get_Ny();
+        const size_t Nx = domain_data->get_Nx();
+        const size_t Ny = domain_data->get_Ny();
 
-        const real dx = domain->get_dx();
-        const real dy = domain->get_dy();
-        const real dz = domain->get_dz();
+        const real dx = domain_data->get_dx();
+        const real dy = domain_data->get_dy();
+        const real dz = domain_data->get_dz();
 
         const real reciprocal_dx = 1. / dx;
         const real reciprocal_dy = 1. / dy;
@@ -52,16 +53,16 @@ void ConstSmagorinsky::calc_turbulent_viscosity(
         real S11, S22, S33, S12, S13, S23;
         real Cs = m_Cs;
 
-        auto boundary = BoundaryController::getInstance();
-        size_t *d_inner_list = boundary->get_domain_inner_list_level_joined();
-        auto bsize_i = boundary->get_size_domain_inner_list_level_joined(0);
+        auto domain_controller = DomainController::getInstance();
+        size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+        auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
         size_t neighbour_i = 1;
         size_t neighbour_j = Nx;
         size_t neighbour_k = Nx * Ny;
-#pragma acc parallel loop independent present(ev, in_u, in_v, in_w, d_inner_list[:bsize_i]) async
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_inner_list[j];
+#pragma acc parallel loop independent present(ev, in_u, in_v, in_w, domain_inner_list[:size_domain_inner_list]) async
+        for (size_t j = 0; j < size_domain_inner_list; ++j) {
+            const size_t i = domain_inner_list[j];
             S11 = (in_u[i + neighbour_i] - in_u[i - neighbour_i]) * 0.5 * reciprocal_dx;
             S22 = (in_v[i + neighbour_j] - in_v[i - neighbour_j]) * 0.5 * reciprocal_dy;
             S33 = (in_w[i + neighbour_k] - in_w[i - neighbour_k]) * 0.5 * reciprocal_dz;
@@ -84,7 +85,7 @@ void ConstSmagorinsky::calc_turbulent_viscosity(
         if (sync) {
 #pragma acc wait
         }
-        boundary->apply_boundary(ev, sync);
+        domain_controller->apply_boundary(ev, sync);
     }
 }
 

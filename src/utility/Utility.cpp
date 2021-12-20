@@ -4,12 +4,14 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "Utility.h"
+
 #include <cmath>
 #include <sstream>
-#include "Utility.h"
+
 #include "GlobalMacrosTypes.h"
-#include "../DomainData.h"
-#include "../boundary/BoundaryController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 
 #ifndef BENCHMARKING
 #include <spdlog/spdlog.h>
@@ -19,8 +21,8 @@
 
 
 namespace Utility {
-    static std::string class_name = "Utility";
-    static std::string global_logger = "ARTSS";
+const static std::string class_name = "Utility";
+const static std::string global_logger = "ARTSS";
 
     // do not use only for debug purpose
 std::tuple<size_t, size_t, size_t> get_coordinates(size_t index, size_t Nx, size_t Ny) {
@@ -110,16 +112,16 @@ void log_field_info(Field &field, const std::string &text, const std::string &lo
 #ifndef BENCHMARKING
     auto logger = Utility::create_logger(logger_name);
 #endif
-    auto boundary = BoundaryController::getInstance();
-    size_t *inner_list = boundary->get_domain_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_domain_inner_list_level_joined(0);
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
-    size_t idx = inner_list[0];
+    size_t idx = domain_inner_list[0];
     real minimum_inner = field[idx];
     real maximum_inner = field[idx];
     real average_inner = field[idx];
-    for (size_t i = 1; i < size_inner_list; i++) {
-        idx = inner_list[i];
+    for (size_t i = 1; i < size_domain_inner_list; i++) {
+        idx = domain_inner_list[i];
         real value = field[idx];
         if (value < minimum_inner) {
             minimum_inner = value;
@@ -129,7 +131,7 @@ void log_field_info(Field &field, const std::string &text, const std::string &lo
         }
         average_inner += value;
     }
-    average_inner /= static_cast<real>(size_inner_list);
+    average_inner /= static_cast<real>(size_domain_inner_list);
 #ifndef BENCHMARKING
     logger->info("minimum inner {}: {}", text, minimum_inner);
     logger->info("maximum inner {}: {}", text, maximum_inner);

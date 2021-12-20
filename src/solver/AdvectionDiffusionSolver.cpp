@@ -4,14 +4,14 @@
 /// \author   Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "AdvectionDiffusionSolver.h"
+
 #include <string>
 #include <vector>
 #include <algorithm>
 
-#include "AdvectionDiffusionSolver.h"
-#include "../DomainData.h"
 #include "SolverSelection.h"
-#include "../utility/Utility.h"
+#include "../domain/DomainData.h"
 
 
 AdvectionDiffusionSolver::AdvectionDiffusionSolver(Settings::Settings const &settings, FieldController *field_controller) :

@@ -1,0 +1,21 @@
+target_sources(artss
+    PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/Domain.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/Domain.h
+        ${CMAKE_CURRENT_LIST_DIR}/DomainData.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/DomainData.h
+        ${CMAKE_CURRENT_LIST_DIR}/DomainController.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/DomainController.h
+        ${CMAKE_CURRENT_LIST_DIR}/BoundaryData.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/BoundaryData.h
+        ${CMAKE_CURRENT_LIST_DIR}/BoundaryDataController.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/BoundaryDataController.h
+        ${CMAKE_CURRENT_LIST_DIR}/Coordinate.h
+        ${CMAKE_CURRENT_LIST_DIR}/Multigrid.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/Multigrid.h
+        ${CMAKE_CURRENT_LIST_DIR}/Obstacle.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/Obstacle.h
+        ${CMAKE_CURRENT_LIST_DIR}/PatchObject.h
+        ${CMAKE_CURRENT_LIST_DIR}/Surface.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/Surface.h
+)

@@ -4,14 +4,14 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "AdvectionSolver.h"
+
 #include <string>
 #include <vector>
 #include <algorithm>
 
-#include "AdvectionSolver.h"
-#include "../interfaces/IAdvection.h"
-#include "../DomainData.h"
 #include "SolverSelection.h"
+#include "../domain/DomainData.h"
 
 AdvectionSolver::AdvectionSolver(
         Settings::Settings const &settings,

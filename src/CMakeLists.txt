@@ -1,7 +1,5 @@
 target_sources(artss
     PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/DomainData.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/DomainData.h
         ${CMAKE_CURRENT_LIST_DIR}/Functions.cpp
         ${CMAKE_CURRENT_LIST_DIR}/Functions.h
         ${CMAKE_CURRENT_LIST_DIR}/TimeIntegration.cpp
@@ -11,12 +9,12 @@ target_sources(artss
 add_subdirectory(adaption)
 add_subdirectory(advection)
 add_subdirectory(analysis)
-add_subdirectory(boundary)
 add_subdirectory(boundaryCondition)
 add_subdirectory(diffusion)
+add_subdirectory(domain)
 add_subdirectory(field)
+add_subdirectory(GPULists)
 add_subdirectory(interfaces)
-add_subdirectory(joinedLists)
 add_subdirectory(pressure)
 add_subdirectory(randomField)
 add_subdirectory(solver)

@@ -4,14 +4,15 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "Visual.h"
+
 #include <cmath>
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <utility>
 
-#include "Visual.h"
-#include "../DomainData.h"
+#include "../domain/DomainData.h"
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
@@ -82,10 +83,10 @@ void Visual::write_vtk_debug(FieldController &field_controller, const std::strin
 
 void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords,
                              int Nx, int Ny, int Nz, real dx, real dy, real dz) {
-    DomainData *domain = DomainData::getInstance();
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_Y1();
-    real Z1 = domain->get_Z1();
+    auto domain_data = DomainData::getInstance();
+    real X1 = domain_data->get_X1();
+    real Y1 = domain_data->get_Y1();
+    real Z1 = domain_data->get_Z1();
 
     // Initialize grid
     for (int k = 0; k < Nz; k++) {
@@ -102,7 +103,7 @@ void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords,
 
 std::string Visual::create_filename(const std::string &filename,
                                     int counter, bool analytical) {
-    std::string fname = std::move(filename);
+    std::string fname = filename;
     if (analytical) {
         fname.append("_ana_");
     } else {

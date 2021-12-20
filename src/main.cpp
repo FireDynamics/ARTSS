@@ -6,10 +6,9 @@
 
 #include <iostream>
 #include "TimeIntegration.h"
-#include "DomainData.h"
-#include "boundary/BoundaryController.h"
+#include "domain/DomainData.h"
+#include "domain/DomainController.h"
 #include "solver/SolverController.h"
-#include "visualisation/VTKWriter.h"
 #include "utility/settings/Settings.h"
 
 #ifdef _OPENACC
@@ -32,8 +31,8 @@ int main(int argc, char **argv) {
 #endif
 
     Settings::Settings settings(argv[1]);
-    DomainData::getInstance(settings);
-    BoundaryController::getInstance(settings);
+    auto domain_data = DomainData::getInstance(settings);
+    auto domain_controller = DomainController::getInstance(settings);
 
     SolverController *sc = new SolverController(settings);
 
@@ -44,5 +43,7 @@ int main(int argc, char **argv) {
 
     // Clean up
     delete sc;
+    delete domain_data;
+    delete domain_controller;
     return 0;
 }

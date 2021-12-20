@@ -22,12 +22,14 @@ static const std::string class_name = "SolverSelection";
 // =================== Set advection solver ==================
 // ***************************************************************************************
 /// \brief  Sets the advection solver
-/// \param  advectionSolver Pointer to AdvectionSolver
-/// \param  advectionType Name of AdvcetionSolver
+/// \param  advection_solver Pointer to AdvectionSolver
+/// \param  advection_type Name of AdvcetionSolver
 // ***************************************************************************************
-void SetAdvectionSolver(Settings::Settings const &settings, IAdvection **advectionSolver, const std::string& advectionType) {
-    if (advectionType == AdvectionMethods::SemiLagrangian) {
-        *advectionSolver = new SLAdvect(settings);
+void SetAdvectionSolver(Settings::Settings const &settings,
+                        IAdvection **advection_solver,
+                        const std::string& advection_type) {
+    if (advection_type == AdvectionMethods::SemiLagrangian) {
+        *advection_solver = new SLAdvect(settings);
     } else {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);
@@ -41,16 +43,18 @@ void SetAdvectionSolver(Settings::Settings const &settings, IAdvection **advecti
 // =================== Set diffusion solver ==================
 // ***************************************************************************************
 /// \brief  Sets the diffusion solver
-/// \param  diffusionSolver Pointer to DiffusionSolver
-/// \param  diffusionType Name of DiffusionSolver
+/// \param  diffusion_solver Pointer to DiffusionSolver
+/// \param  diffusion_type Name of DiffusionSolver
 // ***************************************************************************************
-void SetDiffusionSolver(Settings::Settings const &settings, IDiffusion **diffusionSolver, const std::string& diffusionType) {
-    if (diffusionType == DiffusionMethods::Jacobi) {
-        *diffusionSolver = new JacobiDiffuse(settings);
-    } else if (diffusionType == DiffusionMethods::ColoredGaussSeidel) {
-        *diffusionSolver = new ColoredGaussSeidelDiffuse(settings);
-    } else if (diffusionType == DiffusionMethods::Explicit) {
-        *diffusionSolver = new ExplicitDiffuse(settings);
+void SetDiffusionSolver(Settings::Settings const &settings,
+                        IDiffusion **diffusion_solver,
+                        const std::string& diffusion_type) {
+    if (diffusion_type == DiffusionMethods::Jacobi) {
+        *diffusion_solver = new JacobiDiffuse(settings);
+    } else if (diffusion_type == DiffusionMethods::ColoredGaussSeidel) {
+        *diffusion_solver = new ColoredGaussSeidelDiffuse(settings);
+    } else if (diffusion_type == DiffusionMethods::Explicit) {
+        *diffusion_solver = new ExplicitDiffuse(settings);
     } else {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);
@@ -64,12 +68,14 @@ void SetDiffusionSolver(Settings::Settings const &settings, IDiffusion **diffusi
 // =================== Set pressure solver ==================
 // ***************************************************************************************
 /// \brief  Sets the pressure solver
-/// \param  pressureSolver Pointer to PressureSolver
-/// \param  pressureType Name of PressureSolver
+/// \param  pressure_solver Pointer to PressureSolver
+/// \param  pressure_type Name of PressureSolver
 // ***************************************************************************************
-void SetPressureSolver(Settings::Settings const &settings, IPressure **pressureSolver, const std::string& pressureType) {
-    if (pressureType == PressureMethods::VCycleMG) {
-        *pressureSolver = new VCycleMG(settings);
+void SetPressureSolver(Settings::Settings const &settings,
+                       IPressure **pressure_solver,
+                       const std::string &pressure_type) {
+    if (pressure_type == PressureMethods::VCycleMG) {
+        *pressure_solver = new VCycleMG(settings);
     } else {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);
@@ -83,16 +89,18 @@ void SetPressureSolver(Settings::Settings const &settings, IPressure **pressureS
 // =================== Set source solver ==================
 // ***************************************************************************************
 /// \brief  Sets the source solver
-/// \param  sourceSolver Pointer to SourceSolver
-/// \param  sourceType Name of SourceSolver
+/// \param  source_solver Pointer to SourceSolver
+/// \param  source_type Name of SourceSolver
 // ***************************************************************************************
-void SetSourceSolver(Settings::Settings const &settings, ISource **sourceSolver, const std::string& sourceType) {
-    if (sourceType == SourceMethods::ExplicitEuler) {
-        *sourceSolver = new ExplicitEulerSource(settings);
+void SetSourceSolver(Settings::Settings const &settings,
+                     ISource **source_solver,
+                     const std::string& source_type) {
+    if (source_type == SourceMethods::ExplicitEuler) {
+        *source_solver = new ExplicitEulerSource(settings);
     } else {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);
-        logger->error("Source method {} not yet implemented! Simulation stopped!", sourceType);
+        logger->error("Source method {} not yet implemented! Simulation stopped!", source_type);
 #endif
         std::exit(1);
         // TODO Error handling
@@ -102,14 +110,16 @@ void SetSourceSolver(Settings::Settings const &settings, ISource **sourceSolver,
 // =================== Set turbulence solver ==================
 // ***************************************************************************************
 /// \brief  Sets the turbulence solver
-/// \param  turbulenceSolver Pointer to TurbulenceSolver
-/// \param  turbulenceType Name of TurbulenceSolver
+/// \param  turbulence_solver Pointer to TurbulenceSolver
+/// \param  turbulence_type Name of TurbulenceSolver
 // ***************************************************************************************
-void SetTurbulenceSolver(Settings::Settings const &settings, ITurbulence **turbulenceSolver, const std::string& turbulenceType) {
-    if (turbulenceType == TurbulenceMethods::ConstSmagorinsky) {
-        *turbulenceSolver = new ConstSmagorinsky(settings);
-    } else if (turbulenceType == TurbulenceMethods::DynamicSmagorinsky) {
-        *turbulenceSolver = new DynamicSmagorinsky(settings);
+void SetTurbulenceSolver(Settings::Settings const &settings,
+                         ITurbulence **turbulence_solver,
+                         const std::string& turbulence_type) {
+    if (turbulence_type == TurbulenceMethods::ConstSmagorinsky) {
+        *turbulence_solver = new ConstSmagorinsky(settings);
+    } else if (turbulence_type == TurbulenceMethods::DynamicSmagorinsky) {
+        *turbulence_solver = new DynamicSmagorinsky(settings);
     } else {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);

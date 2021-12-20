@@ -10,21 +10,16 @@
 #include <vector>
 #include <algorithm>
 
-#include "../DomainData.h"
-#include "../boundary/BoundaryData.h"
-#include "../boundary/BoundaryController.h"
-#include "../pressure/VCycleMG.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 #include "SolverSelection.h"
 
 NSTempTurbSolver::NSTempTurbSolver(Settings::Settings const &settings, FieldController *field_controller) :
-m_settings(settings) {
+        m_settings(settings),
+        m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("construct NSTempTurbSolver");
-#endif
-    m_field_controller = field_controller;
-
-#ifndef BENCHMARKING
     m_logger->debug("set advection solver");
 #endif
     // Advection of velocity
@@ -278,21 +273,23 @@ void NSTempTurbSolver::control() {
         // TODO Error handling
     }
 
-    if (m_settings.get("solver/temperature/advection/field") != Field::get_field_type_name(FieldType::T)) {
+    if (m_settings.get("solver/temperature/advection/field") != Mapping::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/temperature/diffusion/field") != Field::get_field_type_name(FieldType::T)) {
+
+    if (m_settings.get("solver/temperature/diffusion/field") != Mapping::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/pressure/field") != Field::get_field_type_name(FieldType::P)) {
+
+    if (m_settings.get("solver/pressure/field") != Mapping::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
