@@ -12,27 +12,21 @@
 
 #include "../domain/DomainController.h"
 #include "../domain/DomainData.h"
-#include "../utility/Utility.h"
 
 
 // ========================== Constructor =================================
 ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse(Settings::Settings const &settings) :
-    m_settings(settings) {
+        m_settings(settings),
+        m_dsign(1),
+        m_w(m_settings.get_real("solver/diffusion/w")),
+        m_max_iter(m_settings.get_size_t("solver/diffusion/max_iter")),
+        m_tol_res(m_settings.get_real("solver/diffusion/tol_res")) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-
-    m_dsign = 1.;
-    m_w = m_settings.get_real("solver/diffusion/w");
-
-    if (m_settings.get("solver/diffusion/type") == "ColoredGaussSeidel") {
-        m_max_iter = m_settings.get_size_t("solver/diffusion/max_iter");
-        m_tol_res = m_settings.get_real("solver/diffusion/tol_res");
-    } else {
-        m_max_iter = 10000;
-        m_tol_res = 1e-16;
-    }
+    create_red_black_lists();
 }
+
 
 // ========================== Diffuse =================================
 // ************************************************************************
@@ -45,80 +39,71 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse(Settings::Settings const &s
 /// \param  sync    synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ColoredGaussSeidelDiffuse::diffuse(
-        Field &out, const Field &, Field const &b,
+        Field &out, const Field &in, Field const &b,
         const real D, bool sync) {
     auto domain_data = DomainData::getInstance();
     auto domain_controller = DomainController::getInstance();
 
-    auto bsize_i = domain_controller->get_size_domain_inner_list_level_joined(0);
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
-//#pragma acc data present(d_out[:bsize], d_b[:bsize])
-{
-    const size_t Nx = domain_data->get_Nx();  // due to unnecessary parameter passing of *this
-    const size_t Ny = domain_data->get_Ny();
+#pragma acc data present(out, b, in)
+    {
+        out.copy_data(in);  // cgs only calculates on out
+        const real dx = domain_data->get_spacing(CoordinateAxis::X);  // due to unnecessary parameter passing of *this
+        const real dy = domain_data->get_spacing(CoordinateAxis::Y);
+        const real dz = domain_data->get_spacing(CoordinateAxis::Z);
 
-    const real dx = domain_data->get_dx();  // due to unnecessary parameter passing of *this
-    const real dy = domain_data->get_dy();
-    const real dz = domain_data->get_dz();
+        const real reciprocal_dx = 1. / dx;
+        const real reciprocal_dy = 1. / dy;
+        const real reciprocal_dz = 1. / dz;
 
-    const real reciprocal_dx = 1. / dx;
-    const real reciprocal_dy = 1. / dy;
-    const real reciprocal_dz = 1. / dz;
+        const real dt = m_settings.get_real("physical_parameters/dt");
+        const real alpha_x = D * dt * reciprocal_dx * reciprocal_dx;  // due to better pgi handling of scalars (instead of arrays)
+        const real alpha_y = D * dt * reciprocal_dy * reciprocal_dy;
+        const real alpha_z = D * dt * reciprocal_dz * reciprocal_dz;
 
-    const real dt = m_settings.get_real("physical_parameters/dt");
-    const real alpha_x = D * dt * reciprocal_dx * reciprocal_dx;  // due to better pgi handling of scalars (instead of arrays)
-    const real alpha_y = D * dt * reciprocal_dy * reciprocal_dy;
-    const real alpha_z = D * dt * reciprocal_dz * reciprocal_dz;
+        const real reciprocal_beta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
+        const real beta = 1. / reciprocal_beta;
 
-    const real rbeta    = (1. + 2. * (alpha_x + alpha_y + alpha_z));
-    const real beta     = 1. / rbeta;
+        const real dsign = m_dsign;
+        const real w = m_w;
 
-    const real dsign    = m_dsign;
-    const real w        = m_w;
+        size_t it = 0;
+        const size_t max_it = m_max_iter;
+        const real tol_res = m_tol_res;
 
-    size_t it           = 0;
-    const size_t max_it = m_max_iter;
-    const real tol_res  = m_tol_res;
+        real sum;
+        real res = 1.;
+        while (res > tol_res && it < max_it) {
+            in.copy_data(out);  // necessary for calculation of residuum
+            colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, dsign, w, sync);
+            domain_controller->apply_boundary(out, sync);
 
-    real sum;
-    real res = 1.;
+            sum = 0;
 
-    const size_t neighbour_i = 1;
-    const size_t neighbour_j = Nx;
-    const size_t neighbour_k = Nx * Ny;
-    while (res > tol_res && it < max_it) {
-        colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, dsign, w, sync);
-        domain_controller->apply_boundary(out, sync);
+#pragma acc parallel loop independent present(out, in, domain_inner_list[:size_domain_inner_list]) async
+            for (size_t j = 0; j < size_domain_inner_list; ++j) {
+                const size_t index = domain_inner_list[j];
+                res = reciprocal_beta * (out[index] - in[index]);
+                sum += res * res;
+            }
 
-        sum = 0;
+#pragma acc wait
+            res = sqrt(sum);
+            it++;
+        } //end while
 
-//#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], domain_inner_list[:bsize_i]) async
-        for (size_t j = 0; j < bsize_i; ++j){
-        const size_t index = domain_inner_list[j];
-            res = (- alpha_x * (out[index + neighbour_i] + out[index - neighbour_i])
-                   - alpha_y * (out[index + neighbour_j] + out[index - neighbour_j])
-                   - alpha_z * (out[index + neighbour_k] + out[index - neighbour_k])
-                   + rbeta * out[index] - b[index]);
-            // TODO: find a way to exclude obstacle indices! Jacobi now uses res=D*(out-in)
-            sum += res * res;
+        if (sync) {
+#pragma acc wait
         }
 
-//#pragma acc wait
-        res = sqrt(sum);
-        it++;
-    } //end while
-
-    if (sync) {
-//#pragma acc wait
-    }
-
 #ifndef BENCHMARKING
-    m_logger->info("Number of iterations: {}", it);
-    m_logger->info("Colored Gauss-Seidel ||res|| = {:.5e}", res);
+        m_logger->info("Number of iterations: {}", it);
+        m_logger->info("Colored Gauss-Seidel ||res|| = {:.5e}", res);
 #endif
-} //end data region
+    } //end data region
 }
 
 // ===================== Turbulent version ============================
@@ -138,73 +123,73 @@ void ColoredGaussSeidelDiffuse::diffuse(
     auto domain_data = DomainData::getInstance();
     auto domain_controller = DomainController::getInstance();
 
-    auto bsize_i = domain_controller->get_size_domain_inner_list_level_joined(0);
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
-    size_t* domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
 //#pragma acc data present(d_out[:bsize], d_b[:bsize], d_EV[:bsize])
-{
-    const size_t Nx = domain_data->get_Nx();
-    const size_t Ny = domain_data->get_Ny();
+    {
+        const size_t Nx = domain_data->get_Nx();
+        const size_t Ny = domain_data->get_Ny();
 
-    const real dx = domain_data->get_dx();
-    const real dy = domain_data->get_dy();
-    const real dz = domain_data->get_dz();
+        const real dx = domain_data->get_dx();
+        const real dy = domain_data->get_dy();
+        const real dz = domain_data->get_dz();
 
-    const real reciprocal_dx = 1. / dx;
-    const real reciprocal_dy = 1. / dy;
-    const real reciprocal_dz = 1. / dz;
+        const real reciprocal_dx = 1. / dx;
+        const real reciprocal_dy = 1. / dy;
+        const real reciprocal_dz = 1. / dz;
 
-    real dt = m_settings.get_real("physical_parameters/dt");
+        real dt = m_settings.get_real("physical_parameters/dt");
 
-    real alpha_x, alpha_y, alpha_z, rbeta;  // calculated in colored_gauss_seidel_step!
+        real alpha_x, alpha_y, alpha_z, rbeta;  // calculated in colored_gauss_seidel_step!
 
-    const real dsign = m_dsign;
-    const real w = m_w;
+        const real dsign = m_dsign;
+        const real w = m_w;
 
-    size_t it = 0;
-    const size_t max_it = m_max_iter;
-    const real tol_res = m_tol_res;
-    real sum;
-    real res = 1.;
+        size_t it = 0;
+        const size_t max_it = m_max_iter;
+        const real tol_res = m_tol_res;
+        real sum;
+        real res = 1.;
 
-    const size_t neighbour_i = 1;
-    const size_t neighbour_j = Nx;
-    const size_t neighbour_k = Nx * Ny;
-    while (res > tol_res && it < max_it) {
-        colored_gauss_seidel_step(out, b, dsign, w, D, EV, dt, sync);
-        domain_controller->apply_boundary(out, sync);
+        const size_t neighbour_i = 1;
+        const size_t neighbour_j = Nx;
+        const size_t neighbour_k = Nx * Ny;
+        while (res > tol_res && it < max_it) {
+            colored_gauss_seidel_step(out, b, dsign, w, D, EV, dt, sync);
+            domain_controller->apply_boundary(out, sync);
 
-        sum = 0;
+            sum = 0;
 
-//#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_EV[:bsize], domain_inner_list[:bsize_i]) async
-    for (size_t j = 0; j < bsize_i; ++j){
-        const size_t i = domain_inner_list[j];
-        alpha_x = (D + EV[i]) * dt * reciprocal_dx * reciprocal_dx;
-        alpha_y = (D + EV[i]) * dt * reciprocal_dy * reciprocal_dy;
-        alpha_z = (D + EV[i]) * dt * reciprocal_dz * reciprocal_dz;
-        rbeta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
+//#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_EV[:bsize], domain_inner_list[:size_domain_inner_list]) async
+            for (size_t j = 0; j < size_domain_inner_list; ++j) {
+                const size_t i = domain_inner_list[j];
+                alpha_x = (D + EV[i]) * dt * reciprocal_dx * reciprocal_dx;
+                alpha_y = (D + EV[i]) * dt * reciprocal_dy * reciprocal_dy;
+                alpha_z = (D + EV[i]) * dt * reciprocal_dz * reciprocal_dz;
+                rbeta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
 
-            res = (- alpha_x * (out[i + neighbour_i] + out[i - neighbour_i])
-                   - alpha_y * (out[i + neighbour_j] + out[i - neighbour_j])
-                   - alpha_z * (out[i + neighbour_k] + out[i - neighbour_k])
-                   + rbeta * out[i] - b[i]);
-            sum += res * res;
+                res = (-alpha_x * (out[i + neighbour_i] + out[i - neighbour_i])
+                       - alpha_y * (out[i + neighbour_j] + out[i - neighbour_j])
+                       - alpha_z * (out[i + neighbour_k] + out[i - neighbour_k])
+                       + rbeta * out[i] - b[i]);
+                sum += res * res;
+            }
+
+//#pragma acc wait
+            res = sqrt(sum);
+            it++;
+
+        } //end while
+
+        if (sync) {
+//#pragma acc wait
         }
 
-//#pragma acc wait
-        res = sqrt(sum);
-        it++;
-
-    } //end while
-
-    if (sync) {
-//#pragma acc wait
-    }
-
 #ifndef BENCHMARKING
-    m_logger->info("Number of iterations: {}", it);
-    m_logger->info("Colored Gauss-Seidel ||res|| = {.5e}", res);
+        m_logger->info("Number of iterations: {}", it);
+        m_logger->info("Colored Gauss-Seidel ||res|| = {.5e}", res);
 #endif
     }
 }
@@ -239,81 +224,81 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
     auto d_b = b.data;
 
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize]) async
-{
-    // TODO: exclude obstacles!
-    // red
+    {
+        // TODO: exclude obstacles!
+        // red
 //#pragma acc loop independent collapse(3)
-    for (size_t k = 1; k < nz - 1; k += 2) {
-        for (size_t j = 1; j < ny - 1; j += 2) {
-            for (size_t i = 1; i < nx - 1; i += 2) {
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+        for (size_t k = 1; k < nz - 1; k += 2) {
+            for (size_t j = 1; j < ny - 1; j += 2) {
+                for (size_t i = 1; i < nx - 1; i += 2) {
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+                }
             }
         }
-    }
 //#pragma acc loop independent collapse(3)
-    for (size_t k = 1; k < nz - 1; k += 2) {
-        for (size_t j = 2; j < ny - 1; j += 2) {
-            for (size_t i = 2; i < nx - 1; i += 2) {
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+        for (size_t k = 1; k < nz - 1; k += 2) {
+            for (size_t j = 2; j < ny - 1; j += 2) {
+                for (size_t i = 2; i < nx - 1; i += 2) {
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+                }
             }
         }
-    }
 //#pragma acc loop independent collapse(3)
-    for (size_t k = 2; k < nz - 1; k += 2) {
-        for (size_t j = 1; j < ny - 1; j += 2) {
-            for (size_t i = 2; i < nx - 1; i += 2) {
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+        for (size_t k = 2; k < nz - 1; k += 2) {
+            for (size_t j = 1; j < ny - 1; j += 2) {
+                for (size_t i = 2; i < nx - 1; i += 2) {
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+                }
             }
         }
-    }
 //#pragma acc loop independent collapse(3)
-    for (size_t k = 2; k < nz - 1; k += 2) {
-        for (size_t j = 2; j < ny - 1; j += 2) {
-            for (size_t i = 1; i < nx - 1; i += 2) {
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+        for (size_t k = 2; k < nz - 1; k += 2) {
+            for (size_t j = 2; j < ny - 1; j += 2) {
+                for (size_t i = 1; i < nx - 1; i += 2) {
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+                }
             }
         }
-    }
-} //end data region
+    } //end data region
 
 //#pragma acc wait
 
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize]) async
-{
-    //black
+    {
+        //black
 //#pragma acc loop independent collapse(3)
-    for (size_t k = 1; k < nz - 1; k += 2) {
-        for (size_t j = 1; j < ny - 1; j += 2) {
-            for (size_t i = 2; i < nx - 1; i += 2) {
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+        for (size_t k = 1; k < nz - 1; k += 2) {
+            for (size_t j = 1; j < ny - 1; j += 2) {
+                for (size_t i = 2; i < nx - 1; i += 2) {
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+                }
+            }
+        }
+//#pragma acc loop independent collapse(3)
+        for (size_t k = 1; k < nz - 1; k += 2) {
+            for (size_t j = 2; j < ny - 1; j += 2) {
+                for (size_t i = 1; i < nx - 1; i += 2) {
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+                }
+            }
+        }
+//#pragma acc loop independent collapse(3)
+        for (size_t k = 2; k < nz - 1; k += 2) {
+            for (size_t j = 1; j < ny - 1; j += 2) {
+                for (size_t i = 1; i < nx - 1; i += 2) {
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+                }
+            }
+        }
+//#pragma acc loop independent collapse(3)
+        for (size_t k = 2; k < nz - 1; k += 2) {
+            for (size_t j = 2; j < ny - 1; j += 2) {
+                for (size_t i = 2; i < nx - 1; i += 2) {
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
+                }
             }
         }
     }
-//#pragma acc loop independent collapse(3)
-    for (size_t k = 1; k < nz - 1; k += 2) {
-        for (size_t j = 2; j < ny - 1; j += 2) {
-            for (size_t i = 1; i < nx - 1; i += 2) {
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
-            }
-        }
-    }
-//#pragma acc loop independent collapse(3)
-    for (size_t k = 2; k < nz - 1; k += 2) {
-        for (size_t j = 1; j < ny - 1; j += 2) {
-            for (size_t i = 1; i < nx - 1; i += 2) {
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
-            }
-        }
-    }
-//#pragma acc loop independent collapse(3)
-    for (size_t k = 2; k < nz - 1; k += 2) {
-        for (size_t j = 2; j < ny - 1; j += 2) {
-            for (size_t i = 2; i < nx - 1; i += 2) {
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, alpha_x, alpha_y, alpha_z, dsign, beta, w, nx, ny);
-            }
-        }
-    }
-}
 
 #pragma acc wait
 }
@@ -352,135 +337,135 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
 
     real aX, aY, aZ, bb, rb;  // multipliers calculated
 
-    auto d_out  = out.data;
-    auto d_b    = b.data;
-    auto d_EV   = EV.data;
+    auto d_out = out.data;
+    auto d_b = b.data;
+    auto d_EV = EV.data;
 
 // TODO: exclude obstacles!
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize], d_EV[:bsize]) async
-{
-    // red
+    {
+        // red
 //#pragma acc loop independent collapse(3)
-    for (size_t k = 1; k < Nz - 1; k += 2) {
-        for (size_t j = 1; j < Ny - 1; j += 2) {
-            for (size_t i = 1; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
+        for (size_t k = 1; k < Nz - 1; k += 2) {
+            for (size_t j = 1; j < Ny - 1; j += 2) {
+                for (size_t i = 1; i < Nx - 1; i += 2) {
+                    aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                    aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                    aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
-                rb = (1. + 2. * (aX + aY + aZ));
-                bb = 1. / rb;
+                    rb = (1. + 2. * (aX + aY + aZ));
+                    bb = 1. / rb;
 
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                }
+            }
+            for (size_t j = 2; j < Ny - 1; j += 2) {
+                for (size_t i = 2; i < Nx - 1; i += 2) {
+                    aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                    aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                    aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
+
+                    rb = (1. + 2. * (aX + aY + aZ));
+                    bb = 1. / rb;
+
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                }
             }
         }
-        for (size_t j = 2; j < Ny - 1; j += 2) {
-            for (size_t i = 2; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
+//#pragma acc loop independent collapse(3)
+        for (size_t k = 2; k < Nz - 1; k += 2) {
+            for (size_t j = 1; j < Ny - 1; j += 2) {
+                for (size_t i = 2; i < Nx - 1; i += 2) {
+                    aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                    aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                    aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
-                rb = (1. + 2. * (aX + aY + aZ));
-                bb = 1. / rb;
+                    rb = (1. + 2. * (aX + aY + aZ));
+                    bb = 1. / rb;
 
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                }
+            }
+            for (size_t j = 2; j < Ny - 1; j += 2) {
+                for (size_t i = 1; i < Nx - 1; i += 2) {
+                    aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                    aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                    aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
+
+                    rb = (1. + 2. * (aX + aY + aZ));
+                    bb = 1. / rb;
+
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                }
             }
         }
     }
-//#pragma acc loop independent collapse(3)
-    for (size_t k = 2; k < Nz - 1; k += 2) {
-        for (size_t j = 1; j < Ny - 1; j += 2) {
-            for (size_t i = 2; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
-
-                rb = (1. + 2. * (aX + aY + aZ));
-                bb = 1. / rb;
-
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
-            }
-        }
-        for (size_t j = 2; j < Ny - 1; j += 2) {
-            for (size_t i = 1; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
-
-                rb = (1. + 2. * (aX + aY + aZ));
-                bb = 1. / rb;
-
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
-            }
-        }
-    }
-}
 #pragma acc wait
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize], d_EV[:bsize]) async
-{
-    // black
+    {
+        // black
 //#pragma acc loop independent collapse(3)
-    for (size_t k = 1; k < Nz - 1; k += 2) {
-        for (size_t j = 1; j < Ny - 1; j += 2) {
-            for (size_t i = 2; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
+        for (size_t k = 1; k < Nz - 1; k += 2) {
+            for (size_t j = 1; j < Ny - 1; j += 2) {
+                for (size_t i = 2; i < Nx - 1; i += 2) {
+                    aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                    aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                    aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
-                rb = (1. + 2. * (aX + aY + aZ));
-                bb = 1. / rb;
+                    rb = (1. + 2. * (aX + aY + aZ));
+                    bb = 1. / rb;
 
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                }
             }
         }
-    }
 //#pragma acc loop independent collapse(3)
-    for (size_t k = 1; k < Nz - 1; k += 2) {
-        for (size_t j = 2; j < Ny - 1; j += 2) {
-            for (size_t i = 1; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
+        for (size_t k = 1; k < Nz - 1; k += 2) {
+            for (size_t j = 2; j < Ny - 1; j += 2) {
+                for (size_t i = 1; i < Nx - 1; i += 2) {
+                    aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                    aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                    aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
-                rb = (1. + 2. * (aX + aY + aZ));
-                bb = 1. / rb;
+                    rb = (1. + 2. * (aX + aY + aZ));
+                    bb = 1. / rb;
 
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                }
             }
         }
-    }
 //#pragma acc loop independent collapse(3)
-    for (size_t k = 2; k < Nz - 1; k += 2) {
-        for (size_t j = 1; j < Ny - 1; j += 2) {
-            for (size_t i = 1; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
+        for (size_t k = 2; k < Nz - 1; k += 2) {
+            for (size_t j = 1; j < Ny - 1; j += 2) {
+                for (size_t i = 1; i < Nx - 1; i += 2) {
+                    aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                    aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                    aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
-                rb = (1. + 2. * (aX + aY + aZ));
-                bb = 1. / rb;
+                    rb = (1. + 2. * (aX + aY + aZ));
+                    bb = 1. / rb;
 
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                }
             }
         }
-    }
 //#pragma acc loop independent collapse(3)
-    for (size_t k = 2; k < Nz - 1; k += 2) {
-        for (size_t j = 2; j < Ny - 1; j += 2) {
-            for (size_t i = 2; i < Nx - 1; i += 2) {
-                aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
-                aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
-                aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
+        for (size_t k = 2; k < Nz - 1; k += 2) {
+            for (size_t j = 2; j < Ny - 1; j += 2) {
+                for (size_t i = 2; i < Nx - 1; i += 2) {
+                    aX = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dx * reciprocal_dx;
+                    aY = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dy * reciprocal_dy;
+                    aZ = (D + d_EV[IX(i, j, k, Nx, Ny)]) * dt * reciprocal_dz * reciprocal_dz;
 
-                rb = (1. + 2. * (aX + aY + aZ));
-                bb = 1. / rb;
+                    rb = (1. + 2. * (aX + aY + aZ));
+                    bb = 1. / rb;
 
-                colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                    colored_gauss_seidel_stencil(i, j, k, d_out, d_b, aX, aY, aZ, dsign, bb, w, Nx, Ny);
+                }
             }
         }
-    }
-} // end data region
-//#pragma acc wait
+    } // end data region
+#pragma acc wait
 }
 
 // ========================= CGS stencil ==============================
@@ -508,19 +493,40 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_stencil(
         const real alpha_x, const real alpha_y, const real alpha_z,
         const real dsign, const real beta, const real w,
         const size_t Nx, const size_t Ny) {
-    real d_out_x    = *(out + IX(i + 1, j, k, Nx, Ny)); // per value (not access) necessary due to performance issues
-    real d_out_x2   = *(out + (IX(i - 1, j, k, Nx, Ny)));
-    real d_out_y    = *(out + (IX(i, j + 1, k, Nx, Ny)));
-    real d_out_y2   = *(out + IX(i, j - 1, k, Nx, Ny));
-    real d_out_z    = *(out + (IX(i, j, k + 1, Nx, Ny)));
-    real d_out_z2   = *(out + (IX(i, j, k - 1, Nx, Ny)));
-    real d_b        = *(b + IX(i, j, k, Nx, Ny));
-    real r_out      = *(out + IX(i, j, k, Nx, Ny));
+    real d_out_x = *(out + IX(i + 1, j, k, Nx, Ny)); // per value (not access) necessary due to performance issues
+    real d_out_x2 = *(out + (IX(i - 1, j, k, Nx, Ny)));
+    real d_out_y = *(out + (IX(i, j + 1, k, Nx, Ny)));
+    real d_out_y2 = *(out + IX(i, j - 1, k, Nx, Ny));
+    real d_out_z = *(out + (IX(i, j, k + 1, Nx, Ny)));
+    real d_out_z2 = *(out + (IX(i, j, k - 1, Nx, Ny)));
+    real d_b = *(b + IX(i, j, k, Nx, Ny));
+    real r_out = *(out + IX(i, j, k, Nx, Ny));
 
-    real out_h      = beta * (dsign * d_b\
-                         + alpha_x * (d_out_x + d_out_x2)\
-                         + alpha_y * (d_out_y + d_out_y2)\
+    real out_h = beta * (dsign * d_b
+                         + alpha_x * (d_out_x + d_out_x2)
+                         + alpha_y * (d_out_y + d_out_y2)
                          + alpha_z * (d_out_z + d_out_z2));
 
     *(out + IX(i, j, k, Nx, Ny)) = (1 - w) * r_out + w * out_h;
-};
+}
+
+void ColoredGaussSeidelDiffuse::create_red_black_lists() {
+    auto domain_data = DomainData::getInstance();
+    size_t Nx = domain_data->get_number_of_cells(CoordinateAxis::X);
+    size_t Ny = domain_data->get_number_of_cells(CoordinateAxis::Y);
+    auto domain_controller = DomainController::getInstance();
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    for (size_t c = 0; c < size_domain_inner_list; c++) {
+        size_t index = domain_inner_list[c];
+        size_t k = getCoordinateK(index, Nx, Ny);
+        size_t j = getCoordinateJ(index, Nx, Ny, k);
+        size_t i = getCoordinateI(index, Nx, Ny, j, k);
+
+        if ((i + j + k) % 2 == 0) {
+            even_indices.emplace_back(index);
+        } else {
+            odd_indices.emplace_back(index);
+        }
+    }
+}

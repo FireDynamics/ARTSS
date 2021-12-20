@@ -43,6 +43,7 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
             size_t Nx, size_t Ny);
 
  private:
+    void create_red_black_lists();
     Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
@@ -51,6 +52,9 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
     real m_w;
     size_t m_max_iter;
     real m_tol_res;
+
+    std::vector<size_t> even_indices;
+    std::vector<size_t> odd_indices;
 };
 
 #endif /* ARTSS_DIFFUSION_COLOREDGAUSSSEIDEL_H */
