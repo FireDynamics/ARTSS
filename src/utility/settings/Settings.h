@@ -28,7 +28,7 @@
 #include <variant>
 
 using Map = std::map<std::string, std::string>;
-using return_xml_data = std::tuple<tinyxml2::XMLElement*,Map>;
+using return_xml_data = std::tuple<const tinyxml2::XMLElement*,Map>;
 namespace Settings {
     class config_error : std::runtime_error { ;
     public:
@@ -178,17 +178,17 @@ namespace Settings {
         struct visualisation_parameters visualisation_parameters;
         struct logging_parameters logging_parameters;
     };
-    random_parameters parse_random_parameters(tinyxml2::XMLElement *head, const std::string &parent_context, bool is_random);
-    solver_parameters parse_solver_parameters(tinyxml2::XMLElement *root);
-    surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLElement *root);
-    obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLElement *root);
-    adaption_parameters parse_adaption_parameters(tinyxml2::XMLElement *root);
-    boundaries_parameters parse_boundaries_parameters(tinyxml2::XMLElement *root);
-    initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLElement *root);
-    visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLElement *root);
-    logging_parameters parse_logging_parameters(tinyxml2::XMLElement *root);
-    domain_parameters parse_domain_parameters(tinyxml2::XMLElement *root);
-    physical_parameters parse_physical_parameters(tinyxml2::XMLElement *root);
+    random_parameters parse_random_parameters(const tinyxml2::XMLElement *head, const std::string &parent_context, bool is_random);
+    solver_parameters parse_solver_parameters(const tinyxml2::XMLElement *root);
+    surfaces_parameters parse_surfaces_parameters(const tinyxml2::XMLElement *root);
+    obstacles_parameters parse_obstacles_parameters(const tinyxml2::XMLElement *root);
+    adaption_parameters parse_adaption_parameters(const tinyxml2::XMLElement *root);
+    boundaries_parameters parse_boundaries_parameters(const tinyxml2::XMLElement *root);
+    initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root);
+    visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root);
+    logging_parameters parse_logging_parameters(const tinyxml2::XMLElement *root);
+    domain_parameters parse_domain_parameters(const tinyxml2::XMLElement *root);
+    physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root);
     Settings_new parse_settings(const std::string &file_content);
     Settings_new parse_settings_from_file(const std::filesystem::path &path);
 

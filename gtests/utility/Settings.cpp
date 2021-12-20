@@ -112,6 +112,7 @@ TEST(SettingsTest, requiredLoggingParameters) {
     EXPECT_EQ(logging_parameters.file, "tmp.log");
     EXPECT_EQ(logging_parameters.level, "debug");
 }
+
 TEST(SettingsTest, requiredVisualisationParameters) {
     std::string xml = R"(
 <ARTSS>
@@ -122,12 +123,14 @@ TEST(SettingsTest, requiredVisualisationParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(doc.RootElement());
+    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(
+            doc.RootElement());
     EXPECT_TRUE(visualisation_parameters.save_csv);
     EXPECT_TRUE(visualisation_parameters.save_vtk);
     EXPECT_EQ(visualisation_parameters.vtk_nth_plot, 10);
     EXPECT_EQ(visualisation_parameters.csv_nth_plot, 21);
 }
+
 TEST(SettingsTest, optionalVisualisationParameters) {
     std::string xml = R"(
 <ARTSS>
@@ -136,12 +139,14 @@ TEST(SettingsTest, optionalVisualisationParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(doc.RootElement());
+    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(
+            doc.RootElement());
     EXPECT_FALSE(visualisation_parameters.save_csv);
     EXPECT_FALSE(visualisation_parameters.save_vtk);
     EXPECT_EQ(visualisation_parameters.vtk_nth_plot, 0);
     EXPECT_EQ(visualisation_parameters.csv_nth_plot, 0);
 }
+
 TEST(SettingsTest, requiredInitialConditionsParameters) {
     std::string xml = R"(
 <ARTSS>
@@ -151,10 +156,40 @@ TEST(SettingsTest, requiredInitialConditionsParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(doc.RootElement());
+    Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
+            doc.RootElement());
     EXPECT_FALSE(initial_conditions_parameters.random);
     EXPECT_EQ(initial_conditions_parameters.usr_fct, "Uniform");
+    EXPECT_EQ(std::get<Settings::uniform>(initial_conditions_parameters.ic).value, 10);
 }
+
+TEST(SettingsTest, requiredInitialConditionsParameters2) {
+    std::string xml = R"(
+<ARTSS>
+    <initial_conditions usr_fct="Uniform" random="Yes">
+        <val> 1 </val>
+        <random absolute="Yes" custom_seed="Yes" custom_steps="Yes">
+          <seed> 0 </seed>
+          <step_size> 0.1 </step_size>
+          <range> 1 </range>
+        </random>
+    </initial_conditions>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
+            doc.RootElement());
+    EXPECT_TRUE(initial_conditions_parameters.random);
+    EXPECT_EQ(initial_conditions_parameters.usr_fct, "Uniform");
+    EXPECT_EQ(std::get<Settings::uniform>(initial_conditions_parameters.ic).value, 1);
+    EXPECT_TRUE(initial_conditions_parameters.random_parameters.absolute);
+    EXPECT_TRUE(initial_conditions_parameters.random_parameters.custom_seed);
+    EXPECT_TRUE(initial_conditions_parameters.random_parameters.custom_steps);
+    EXPECT_EQ(initial_conditions_parameters.random_parameters.range, 1);
+    EXPECT_EQ(initial_conditions_parameters.random_parameters.seed, 0);
+    EXPECT_EQ(initial_conditions_parameters.random_parameters.step_size, 0.1);
+}
+
 TEST(SettingsTest, requiredObstaclesParameters) {
     std::string xml = R"(
 <ARTSS>
@@ -165,6 +200,7 @@ TEST(SettingsTest, requiredObstaclesParameters) {
     Settings::obstacles_parameters obstacles_parameters = Settings::parse_obstacles_parameters(doc.RootElement());
     EXPECT_FALSE(obstacles_parameters.enabled);
 }
+
 TEST(SettingsTest, requiredSurfacesParameters) {
     std::string xml = R"(
 <ARTSS>

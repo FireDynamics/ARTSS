@@ -19,9 +19,9 @@ namespace Settings {
     static const std::string xml_false = "No";
     static const char delimiter = ',';
 
-    return_xml_data map_parameters(tinyxml2::XMLElement *head, const std::string &context) {
+    return_xml_data map_parameters(const tinyxml2::XMLElement *head, const std::string &context) {
         Map values;
-        tinyxml2::XMLElement *subsection;
+        const tinyxml2::XMLElement *subsection;
         for (auto i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
             if (i->Name() == context) {
                 subsection = i;
@@ -103,7 +103,7 @@ namespace Settings {
         return parent_context + "/" + own_context;
     }
 
-    domain_parameters parse_domain_parameters(tinyxml2::XMLElement *root) {
+    domain_parameters parse_domain_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "domain_parameters";
         auto[subsection, values] = map_parameters(root, context);
         domain_parameters dp{};
@@ -127,7 +127,7 @@ namespace Settings {
         return dp;
     }
 
-    visualisation_parameters parse_visualisation_parameters(tinyxml2::XMLElement *root) {
+    visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "visualisation";
         auto[subsection, values] = map_parameters(root, context);
         visualisation_parameters vp{};
@@ -146,7 +146,7 @@ namespace Settings {
         return vp;
     }
 
-    random_parameters parse_random_parameters(tinyxml2::XMLElement *head,
+    random_parameters parse_random_parameters(const tinyxml2::XMLElement *head,
                                               const std::string &parent_context,
                                               bool is_random) {
         std::string own_context = "random";
@@ -199,13 +199,13 @@ namespace Settings {
         }
     }
 
-    initial_conditions_parameters parse_initial_conditions_parameters(tinyxml2::XMLElement *root) {
+    initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "initial_conditions";
         auto[subsection, values] = map_parameters(root, context);
         initial_conditions_parameters icp{};
 
         icp.random = get_required_bool(values, "random", context);
-        icp.random_parameters = parse_random_parameters(root, context, icp.random);
+        icp.random_parameters = parse_random_parameters(subsection, context, icp.random);
 
         icp.usr_fct = get_required_string(values, "usr_fct", context);
         if (icp.usr_fct == FunctionNames::uniform) {
@@ -218,7 +218,7 @@ namespace Settings {
         return icp;
     }
 
-    boundary parse_boundary(tinyxml2::XMLElement *head, const std::string &parent_context) {
+    boundary parse_boundary(const tinyxml2::XMLElement *head, const std::string &parent_context) {
         std::string own_context = "boundary";
         std::string context = create_context(parent_context, own_context);
         auto[subsection, values] = map_parameters(head, own_context);
@@ -237,7 +237,7 @@ namespace Settings {
         return boundary;
     }
 
-    boundaries_parameters parse_boundaries_parameters(tinyxml2::XMLElement *root) {
+    boundaries_parameters parse_boundaries_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "boundaries";
         auto[subsection, values] = map_parameters(root, context);
         boundaries_parameters bp{};
@@ -250,7 +250,7 @@ namespace Settings {
         return bp;
     }
 
-    obstacle parse_obstacle(tinyxml2::XMLElement *head, const std::string &parent_context) {
+    obstacle parse_obstacle(const tinyxml2::XMLElement *head, const std::string &parent_context) {
         std::string own_context = "obstacle";
         std::string context = create_context(parent_context, own_context);
         auto[subsection, values] = map_parameters(head, own_context);
@@ -276,7 +276,7 @@ namespace Settings {
         return obstacle;
     }
 
-    obstacles_parameters parse_obstacles_parameters(tinyxml2::XMLElement *root) {
+    obstacles_parameters parse_obstacles_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "obstacles";
         auto[subsection, values] = map_parameters(root, context);
         obstacles_parameters op{};
@@ -290,7 +290,7 @@ namespace Settings {
         return op;
     }
 
-    surfaces_parameters parse_surfaces_parameters(tinyxml2::XMLElement *root) {
+    surfaces_parameters parse_surfaces_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "surfaces";
         auto[subsection, values] = map_parameters(root, context);
         surfaces_parameters sp{};
@@ -303,7 +303,7 @@ namespace Settings {
         return sp;
     }
 
-    adaption_parameters parse_adaption_parameters(tinyxml2::XMLElement *root) {
+    adaption_parameters parse_adaption_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "adaption";
         auto[subsection, values] = map_parameters(root, context);
         adaption_parameters ap{};
@@ -317,7 +317,7 @@ namespace Settings {
         return ap;
     }
 
-    logging_parameters parse_logging_parameters(tinyxml2::XMLElement *root) {
+    logging_parameters parse_logging_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "logging";
         auto[subsection, values] = map_parameters(root, context);
         logging_parameters lp{};
@@ -326,7 +326,7 @@ namespace Settings {
         return lp;
     }
 
-    physical_parameters parse_physical_parameters(tinyxml2::XMLElement *root) {
+    physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "physical_parameters";
         auto[subsection, values] = map_parameters(root, context);
         physical_parameters pp{};
@@ -339,7 +339,7 @@ namespace Settings {
         return pp;
     }
 
-    solver_parameters parse_solver_parameters(tinyxml2::XMLElement *root) {
+    solver_parameters parse_solver_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "solver";
         auto[subsection, values] = map_parameters(root, context);
         solver_parameters sp{};
