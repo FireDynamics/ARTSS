@@ -255,7 +255,7 @@ namespace Settings {
         auto[subsection, values] = map_parameter_section(root, context);
         boundaries_parameters bp{};
 
-        for (auto i = subsection->FirstChildElement(); i; i = subsection->NextSiblingElement()) {
+        for (auto i = subsection->FirstChildElement(); i; i = i->NextSiblingElement()) {
             if (i->Name() == std::string("boundary")) {
                 bp.boundaries.emplace_back(parse_boundary(i, context));
             }

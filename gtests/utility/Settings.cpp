@@ -218,23 +218,73 @@ TEST(SettingsTest, boundaries) {
 <ARTSS>
     <boundaries>
         <boundary field="u,v,w" patch="front,back,bottom,top,left,right" type="dirichlet" value="0.0" />
-        <boundary field="p" patch="front,back,bottom,top,left,right" type="neumann" value="0.0" />
+        <boundary field="p" patch="front,back,bottom,top,left,right" type="neumann" value="1.0" />
         <boundary field="T" patch="front,back,top,left,right" type="dirichlet" value="299.14" />
-        <boundary field="T" patch="bottom" type="neumann" value="0.0" />
+        <boundary field="T" patch="bottom" type="periodic" value="-10.0" />
     </boundaries>
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     Settings::boundaries_parameters boundaries_parameters = Settings::parse_boundaries_parameters(doc.RootElement());
-    EXPECT_NE(std::find(boundaries_parameters.boundaries[0].field_type.begin(), boundaries_parameters.boundaries[0].field_type.end(), FieldType::U), boundaries_parameters.boundaries[0].field_type.end());
-    EXPECT_EQ(boundaries_parameters.boundaries[0].field_type[0], FieldType::U);
-    EXPECT_EQ(boundaries_parameters.boundaries[0].field_type[1], FieldType::V);
-    EXPECT_EQ(boundaries_parameters.boundaries[0].field_type[2], FieldType::W);
 
+    // field types
+    EXPECT_NE(std::find(boundaries_parameters.boundaries[0].field_type.begin(),
+                        boundaries_parameters.boundaries[0].field_type.end(),
+                        FieldType::U),
+              boundaries_parameters.boundaries[0].field_type.end());
+    EXPECT_NE(std::find(boundaries_parameters.boundaries[0].field_type.begin(),
+                        boundaries_parameters.boundaries[0].field_type.end(),
+                        FieldType::V),
+              boundaries_parameters.boundaries[0].field_type.end());
+    EXPECT_NE(std::find(boundaries_parameters.boundaries[0].field_type.begin(),
+                        boundaries_parameters.boundaries[0].field_type.end(),
+                        FieldType::W),
+              boundaries_parameters.boundaries[0].field_type.end());
+    EXPECT_NE(std::find(boundaries_parameters.boundaries[1].field_type.begin(),
+                        boundaries_parameters.boundaries[1].field_type.end(),
+                        FieldType::P),
+              boundaries_parameters.boundaries[1].field_type.end());
+    EXPECT_NE(std::find(boundaries_parameters.boundaries[2].field_type.begin(),
+                        boundaries_parameters.boundaries[2].field_type.end(),
+                        FieldType::T),
+              boundaries_parameters.boundaries[2].field_type.end());
+    EXPECT_NE(std::find(boundaries_parameters.boundaries[3].field_type.begin(),
+                        boundaries_parameters.boundaries[3].field_type.end(),
+                        FieldType::T),
+              boundaries_parameters.boundaries[3].field_type.end());
 
-    EXPECT_EQ(boundaries_parameters.boundaries[1].field_type[0], FieldType::P);
+    // patches
+    for (size_t p = 0; p < number_of_patches; p++) {
+        auto patch = Patch(p);
+        EXPECT_NE(std::find(boundaries_parameters.boundaries[0].patch.begin(),
+                            boundaries_parameters.boundaries[0].patch.end(),
+                            patch),
+                  boundaries_parameters.boundaries[0].patch.end());
+        EXPECT_NE(std::find(boundaries_parameters.boundaries[1].patch.begin(),
+                            boundaries_parameters.boundaries[1].patch.end(),
+                            patch),
+                  boundaries_parameters.boundaries[1].patch.end());
+    }
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+        EXPECT_NE(std::find(boundaries_parameters.boundaries[2].patch.begin(),
+                            boundaries_parameters.boundaries[2].patch.end(),
+                            patch),
+                  boundaries_parameters.boundaries[2].patch.end());
+    }
+    EXPECT_NE(std::find(boundaries_parameters.boundaries[3].patch.begin(),
+                        boundaries_parameters.boundaries[3].patch.end(),
+                        Patch::BOTTOM),
+              boundaries_parameters.boundaries[3].patch.end());
 
-    EXPECT_EQ(boundaries_parameters.boundaries[2].field_type[0], FieldType::T);
+    // boundary condition
+    EXPECT_EQ(boundaries_parameters.boundaries[0].boundary_condition, BoundaryCondition::DIRICHLET);
+    EXPECT_EQ(boundaries_parameters.boundaries[1].boundary_condition, BoundaryCondition::NEUMANN);
+    EXPECT_EQ(boundaries_parameters.boundaries[2].boundary_condition, BoundaryCondition::DIRICHLET);
+    EXPECT_EQ(boundaries_parameters.boundaries[3].boundary_condition, BoundaryCondition::PERIODIC);
 
-    EXPECT_EQ(boundaries_parameters.boundaries[3].field_type[0], FieldType::T);
+    // value
+    EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[0].value, 0);
+    EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[1].value, 1);
+    EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[2].value, 299.14);
+    EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[3].value, -10);
 }
