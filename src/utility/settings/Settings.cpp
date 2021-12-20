@@ -195,6 +195,16 @@ namespace Settings {
             return uniform;
         }
 
+        exp_sinus_prod parse_exp_sinus_prod(const Map &values,
+                                            const std::string &parent_context) {
+            std::string own_context = FunctionNames::exp_sinus_prod;
+            std::string context = create_context(parent_context, own_context);
+            exp_sinus_prod exp_sinus_prod{};
+
+            exp_sinus_prod.l = get_required_real(values, "l", context);
+            return exp_sinus_prod;
+        }
+
         gauss_bubble parse_gauss_bubble_parameters(const Map &values,
                                                    const std::string &parent_context) {
             std::string own_context = FunctionNames::gauss_bubble;
@@ -243,6 +253,10 @@ namespace Settings {
             icp.ic = initial_conditions::parse_gauss_bubble_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::hat) {
             icp.ic = initial_conditions::parse_hat_parameters(values, context);
+        } else if (icp.usr_fct == FunctionNames::exp_sinus_sum) {
+            // TODO no values
+        } else if (icp.usr_fct == FunctionNames::exp_sinus_prod) {
+            icp.ic = initial_conditions::parse_exp_sinus_prod(values, context);
         } else {
             throw config_error(fmt::format("{} has no parsing implementation.", icp.usr_fct));
         }
