@@ -19,7 +19,7 @@ TEST(SettingsTest, goodCase) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc);
+    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement());
     EXPECT_EQ(physical_parameters.t_end, 1.0);
     EXPECT_EQ(physical_parameters.dt, 0.1);
 }
@@ -35,7 +35,7 @@ TEST(SettingsTest, goodCaseOptional) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc);
+    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement());
     EXPECT_EQ(physical_parameters.t_end, 1.0);
     EXPECT_EQ(physical_parameters.dt, 0.1);
     EXPECT_EQ(physical_parameters.beta, 0.3);
@@ -52,7 +52,7 @@ TEST(SettingsTest, unknownAttribute) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc);
+    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement());
     EXPECT_EQ(physical_parameters.t_end, 1.0);
     EXPECT_EQ(physical_parameters.dt, 0.1);
 //TODO expect what?
@@ -67,7 +67,7 @@ TEST(SettingsTest, requiredAttributeMissing) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    EXPECT_THROW(Settings::parse_physical_parameters(doc), Settings::config_error);
+    EXPECT_THROW(Settings::parse_physical_parameters(doc.RootElement()), Settings::config_error);
 }
 
 TEST(SettingsTest, requiredDomainParameters) {
@@ -87,17 +87,17 @@ TEST(SettingsTest, requiredDomainParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::domain_parameters domain_parameters = Settings::parse_domain_parameters(doc);
+    Settings::domain_parameters domain_parameters = Settings::parse_domain_parameters(doc.RootElement());
     EXPECT_EQ(domain_parameters.enable_computational_domain, 1.0);
-    EXPECT_EQ(domain_parameters.X1, 1.0);
-    EXPECT_EQ(domain_parameters.Y1, -12.0);
-    EXPECT_EQ(domain_parameters.Z1, -1.0);
-    EXPECT_EQ(domain_parameters.X2, 3.0);
-    EXPECT_EQ(domain_parameters.Y2, -4.0);
-    EXPECT_EQ(domain_parameters.Z2, 0);
-    EXPECT_EQ(domain_parameters.nx, 20);
-    EXPECT_EQ(domain_parameters.ny, 21);
-    EXPECT_EQ(domain_parameters.nz, 1);
+    EXPECT_EQ(domain_parameters.start_coords_PD[CoordinateAxis::X], 1.0);
+    EXPECT_EQ(domain_parameters.start_coords_PD[CoordinateAxis::Y], -12.0);
+    EXPECT_EQ(domain_parameters.start_coords_PD[CoordinateAxis::Z], -1.0);
+    EXPECT_EQ(domain_parameters.end_coords_PD[CoordinateAxis::X], 3.0);
+    EXPECT_EQ(domain_parameters.end_coords_PD[CoordinateAxis::Y], -4.0);
+    EXPECT_EQ(domain_parameters.end_coords_PD[CoordinateAxis::Z], 0);
+    EXPECT_EQ(domain_parameters.number_of_inner_cells[CoordinateAxis::X], 20);
+    EXPECT_EQ(domain_parameters.number_of_inner_cells[CoordinateAxis::Y], 21);
+    EXPECT_EQ(domain_parameters.number_of_inner_cells[CoordinateAxis::Z], 1);
 }
 
 TEST(SettingsTest, requiredLoggingParameters) {
@@ -108,7 +108,7 @@ TEST(SettingsTest, requiredLoggingParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::logging_parameters logging_parameters = Settings::parse_logging_parameters(doc);
+    Settings::logging_parameters logging_parameters = Settings::parse_logging_parameters(doc.RootElement());
     EXPECT_EQ(logging_parameters.file, "tmp.log");
     EXPECT_EQ(logging_parameters.level, "debug");
 }
@@ -122,7 +122,7 @@ TEST(SettingsTest, requiredVisualisationParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(doc);
+    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(doc.RootElement());
     EXPECT_TRUE(visualisation_parameters.save_csv);
     EXPECT_TRUE(visualisation_parameters.save_vtk);
     EXPECT_EQ(visualisation_parameters.vtk_nth_plot, 10);
@@ -136,7 +136,7 @@ TEST(SettingsTest, optionalVisualisationParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(doc);
+    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(doc.RootElement());
     EXPECT_FALSE(visualisation_parameters.save_csv);
     EXPECT_FALSE(visualisation_parameters.save_vtk);
     EXPECT_EQ(visualisation_parameters.vtk_nth_plot, 1);
@@ -150,7 +150,7 @@ TEST(SettingsTest, requiredInitialConditionsParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(doc);
+    Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(doc.RootElement());
     EXPECT_FALSE(initial_conditions_parameters.random);
     EXPECT_EQ(initial_conditions_parameters.usr_fct, "Uniform");
 }
@@ -161,7 +161,7 @@ TEST(SettingsTest, requiredObstaclesParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::obstacles_parameters obstacles_parameters = Settings::parse_obstacles_parameters(doc);
+    Settings::obstacles_parameters obstacles_parameters = Settings::parse_obstacles_parameters(doc.RootElement());
     EXPECT_FALSE(obstacles_parameters.enabled);
 }
 TEST(SettingsTest, requiredSurfacesParameters) {
@@ -171,6 +171,6 @@ TEST(SettingsTest, requiredSurfacesParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::surfaces_parameters surfaces_parameters = Settings::parse_surfaces_parameters(doc);
+    Settings::surfaces_parameters surfaces_parameters = Settings::parse_surfaces_parameters(doc.RootElement());
     EXPECT_FALSE(surfaces_parameters.enabled);
 }

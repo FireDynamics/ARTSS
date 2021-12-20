@@ -156,13 +156,13 @@ namespace Settings {
     };
     struct solver_parameters {
         std::string description;
-        advection_solver advection_solver;
-        diffusion_solver diffusion_solver;
-        turbulence_solver turbulence_solver;
-        source_solver source_solver;
-        pressure_solver pressure_solver;
-        temperature_solver temperature_solver;
-        concentration_solver concentration_solver;
+        advection_solver advection;
+        diffusion_solver diffusion;
+        turbulence_solver turbulence;
+        source_solver source;
+        pressure_solver pressure;
+        temperature_solver temperature;
+        concentration_solver concentration;
         bool analytical_solution;
         real solution_tolerance;
     };
