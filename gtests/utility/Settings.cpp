@@ -362,7 +362,7 @@ TEST(SettingsTest, boundaries) {
     EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[3].value, -10);
 }
 
-TEST(SettingsTest, advectionSolver) {
+TEST(SettingsTest, advectionSolverSemiLagrangian) {
     std::string xml = R"(
 <ARTSS>
 <solver description="AdvectionSolver" >
@@ -390,4 +390,80 @@ TEST(SettingsTest, advectionSolver) {
 
     EXPECT_FALSE(solver_parameters.solution.analytical_solution);
     EXPECT_DOUBLE_EQ(solver_parameters.solution.solution_tolerance, 1e-3);
+}
+
+namespace diffusion_solver {
+    TEST(SettingsTest, diffusionSolverJacobi) {
+        std::string xml = R"(
+<ARTSS>
+<solver description="DiffusionSolver" >
+    <diffusion type="Jacobi" field="u,v,w" >
+        <max_iter> 77 </max_iter>
+        <tol_res> 1e-07 </tol_res>
+        <w> 1 </w>
+    </diffusion>
+    <solution available="Yes">
+        <tol> 1e-4 </tol>
+    </solution>
+</solver>
+</ARTSS>)";
+        tinyxml2::XMLDocument doc;
+        doc.Parse(xml.c_str());
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::Jacobi);
+
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::U),
+                  solver_parameters.diffusion.fields.end());
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::V),
+                  solver_parameters.diffusion.fields.end());
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::W),
+                  solver_parameters.diffusion.fields.end());
+        auto jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(solver_parameters.diffusion.solver);
+        EXPECT_EQ(jacobi.max_iter, 77);
+        EXPECT_DOUBLE_EQ(jacobi.tol_res, 1e-7);
+        EXPECT_DOUBLE_EQ(jacobi.w, 1);
+
+        EXPECT_TRUE(solver_parameters.solution.analytical_solution);
+        EXPECT_DOUBLE_EQ(solver_parameters.solution.solution_tolerance, 1e-4);
+    }
+    TEST(SettingsTest, diffusionSolverColoredGaussSeidel) {
+        std::string xml = R"(
+<ARTSS>
+<solver description="DiffusionSolver" >
+    <diffusion type="ColoredGaussSeidel" field="u,v,w" >
+        <max_iter> 767 </max_iter>
+        <tol_res> 1e-01 </tol_res>
+        <w> 0.666 </w>
+    </diffusion>
+    <solution available="No"/>
+</solver>
+</ARTSS>)";
+        tinyxml2::XMLDocument doc;
+        doc.Parse(xml.c_str());
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::ColoredGaussSeidel);
+
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::U),
+                  solver_parameters.diffusion.fields.end());
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::V),
+                  solver_parameters.diffusion.fields.end());
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::W),
+                  solver_parameters.diffusion.fields.end());
+        auto colored_gauss_seidel = std::get<Settings::solver::diffusion_solvers::colored_gauss_seidel>(solver_parameters.diffusion.solver);
+        EXPECT_EQ(colored_gauss_seidel.max_iter, 767);
+        EXPECT_DOUBLE_EQ(colored_gauss_seidel.tol_res, 1e-1);
+        EXPECT_DOUBLE_EQ(colored_gauss_seidel.w, 0.666);
+    }
 }

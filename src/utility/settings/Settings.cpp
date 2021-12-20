@@ -406,13 +406,49 @@ namespace Settings {
             }
             return solver_advection;
         }
+        namespace diffusion_solvers {
+            colored_gauss_seidel parse_colored_gauss_seidel(const Map &values, const std::string &parent_context) {
+                std::string own_context = DiffusionMethods::ColoredGaussSeidel;
+                std::string context = create_context(parent_context, own_context);
+
+                colored_gauss_seidel colored_gauss_seidel{};
+                colored_gauss_seidel.w = get_required_real(values, "w", context);
+                colored_gauss_seidel.tol_res = get_required_real(values, "tol_res", context);
+                colored_gauss_seidel.max_iter = get_required_size_t(values, "max_iter", context);
+                return colored_gauss_seidel;
+            }
+            jacobi parse_jacobi(const Map &values, const std::string &parent_context) {
+                std::string own_context = DiffusionMethods::Jacobi;
+                std::string context = create_context(parent_context, own_context);
+
+                jacobi jacobi{};
+                jacobi.w = get_required_real(values, "w", context);
+                jacobi.tol_res = get_required_real(values, "tol_res", context);
+                jacobi.max_iter = get_required_size_t(values, "max_iter", context);
+                return jacobi;
+            }
+        }
         diffusion_solver parse_diffusion_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "diffusion";
             std::string context = create_context(parent_context, own_context);
             auto[subsection, values] = map_parameter_section(head, own_context);
 
             diffusion_solver solver_diffusion{};
-            //TODO diffusion
+            solver_diffusion.type = get_required_string(values, "type", context);
+            if (solver_diffusion.type == DiffusionMethods::Jacobi) {
+                solver_diffusion.solver = diffusion_solvers::parse_jacobi(values, context);
+            } else if (solver_diffusion.type == DiffusionMethods::ColoredGaussSeidel) {
+                solver_diffusion.solver = diffusion_solvers::parse_colored_gauss_seidel(values, context);
+            } else if (solver_diffusion.type == DiffusionMethods::Explicit) {
+                // TODO no values
+            } else {
+                throw config_error(fmt::format("{} has no parsing implementation.", solver_diffusion.type));
+            }
+
+            auto fields = Utility::split(get_required_string(values, "field", context), delimiter);
+            for (const std::string &string: fields) {
+                solver_diffusion.fields.emplace_back(Mapping::match_field(string));
+            }
             return solver_diffusion;
         }
         turbulence_solver parse_turbulence_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {

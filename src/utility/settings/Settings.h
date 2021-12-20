@@ -133,9 +133,25 @@ namespace Settings {
             std::string type;
             std::vector<FieldType> fields;
         };
+        namespace diffusion_solvers {
+            struct jacobi {
+                size_t max_iter;
+                real tol_res;
+                real w;
+            };
+            struct colored_gauss_seidel {
+                size_t max_iter;
+                real tol_res;
+                real w;
+            };
+            struct explicit_diffusion {
+                // TODO no values
+            };
+        }
         struct diffusion_solver {
             std::string type;
             std::vector<FieldType> fields;
+            std::variant<diffusion_solvers::jacobi, diffusion_solvers::colored_gauss_seidel,diffusion_solvers::explicit_diffusion> solver;
         };
         struct turbulence_solver {
             std::string type;
