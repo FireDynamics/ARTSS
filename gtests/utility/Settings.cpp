@@ -9,6 +9,8 @@
 
 #include "src/utility/settings/Settings.h"
 
+using namespace Settings::initial_conditions;
+
 TEST(SettingsTest, goodCase) {
     std::string xml = R"(
 <ARTSS>
@@ -150,22 +152,6 @@ TEST(SettingsTest, optionalVisualisationParameters) {
 TEST(SettingsTest, requiredInitialConditionsParameters) {
     std::string xml = R"(
 <ARTSS>
-    <initial_conditions usr_fct="Uniform" random="No">
-        <val> 10 </val>
-    </initial_conditions>
-</ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-            doc.RootElement());
-    EXPECT_FALSE(initial_conditions_parameters.random);
-    EXPECT_EQ(initial_conditions_parameters.usr_fct, "Uniform");
-    EXPECT_EQ(std::get<Settings::uniform>(initial_conditions_parameters.ic).value, 10);
-}
-
-TEST(SettingsTest, requiredInitialConditionsParameters2) {
-    std::string xml = R"(
-<ARTSS>
     <initial_conditions usr_fct="Uniform" random="Yes">
         <val> 1 </val>
         <test> 1.1 </test>
@@ -182,7 +168,7 @@ TEST(SettingsTest, requiredInitialConditionsParameters2) {
             doc.RootElement());
     EXPECT_TRUE(initial_conditions_parameters.random);
     EXPECT_EQ(initial_conditions_parameters.usr_fct, "Uniform");
-    EXPECT_EQ(std::get<Settings::uniform>(initial_conditions_parameters.ic).value, 1);
+    EXPECT_EQ(std::get<uniform>(initial_conditions_parameters.ic).value, 1);
     EXPECT_TRUE(initial_conditions_parameters.random_parameters.absolute);
     EXPECT_TRUE(initial_conditions_parameters.random_parameters.custom_seed);
     EXPECT_TRUE(initial_conditions_parameters.random_parameters.custom_steps);
@@ -190,6 +176,80 @@ TEST(SettingsTest, requiredInitialConditionsParameters2) {
     EXPECT_EQ(initial_conditions_parameters.random_parameters.seed, 10);
     EXPECT_EQ(initial_conditions_parameters.random_parameters.step_size, 0.1);
 }
+
+TEST(SettingsTest, uniform) {
+    std::string xml = R"(
+<ARTSS>
+    <initial_conditions usr_fct="Uniform" random="No">
+        <val> 10 </val>
+    </initial_conditions>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
+            doc.RootElement());
+    EXPECT_FALSE(initial_conditions_parameters.random);
+    EXPECT_EQ(initial_conditions_parameters.usr_fct, "Uniform");
+    EXPECT_EQ(std::get<uniform>(initial_conditions_parameters.ic).value, 10);
+}
+
+TEST(SettingsTest, hat) {
+    std::string xml = R"(
+<ARTSS>
+    <initial_conditions usr_fct="Hat"  random="No">
+        <x1> 0.5 </x1>
+        <x2> 1.0 </x2>
+        <y1> -0.5 </y1>
+        <y2> 1.1 </y2>
+        <z1> 0.05 </z1>
+        <z2> 10 </z2>
+        <val_in> 2.0 </val_in>
+        <val_out> 1.0 </val_out>
+    </initial_conditions>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
+            doc.RootElement());
+    auto h = std::get<hat>(initial_conditions_parameters.ic);
+    EXPECT_DOUBLE_EQ(h.start_coords[CoordinateAxis::X], 0.5);
+    EXPECT_DOUBLE_EQ(h.start_coords[CoordinateAxis::Y], -0.5);
+    EXPECT_DOUBLE_EQ(h.start_coords[CoordinateAxis::Z], 0.05);
+    EXPECT_DOUBLE_EQ(h.end_coords[CoordinateAxis::X], 1);
+    EXPECT_DOUBLE_EQ(h.end_coords[CoordinateAxis::Y], 1.1);
+    EXPECT_DOUBLE_EQ(h.end_coords[CoordinateAxis::Z], 10);
+    EXPECT_EQ(h.val_in, 2.);
+    EXPECT_EQ(h.val_out, 1);
+}
+
+TEST(SettingsTest, gaussBubble) {
+    std::string xml = R"(
+<ARTSS>
+    <initial_conditions usr_fct="GaussBubble"  random="No">  <!-- Gaussian function  -->
+        <u_lin> 0.05 </u_lin>        <!-- x-velocity in linear case  -->
+        <v_lin> 0.5 </v_lin>        <!-- y-velocity in linear case  -->
+        <w_lin> 0.25 </w_lin>       <!-- z-velocity in linear case  -->
+        <x_shift> 1.125 </x_shift>  <!-- x_shift of Gauss Bubble in domain  -->
+        <y_shift> 1.025 </y_shift>  <!-- y_shift of Gauss Bubble in domain  -->
+        <z_shift> 0.5 </z_shift>    <!-- z_shift of Gauss Bubble in domain  -->
+        <l> 0.03125 </l>            <!-- sigma in Gaussian -->
+    </initial_conditions>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
+            doc.RootElement());
+    auto gb = std::get<gauss_bubble>(initial_conditions_parameters.ic);
+    EXPECT_DOUBLE_EQ(gb.l, 0.03125);
+    EXPECT_DOUBLE_EQ(gb.velocity_lin[CoordinateAxis::X], 0.05);
+    EXPECT_DOUBLE_EQ(gb.velocity_lin[CoordinateAxis::Y], 0.5);
+    EXPECT_DOUBLE_EQ(gb.velocity_lin[CoordinateAxis::Z], 0.25);
+    EXPECT_DOUBLE_EQ(gb.shift[CoordinateAxis::X], 1.125);
+    EXPECT_DOUBLE_EQ(gb.shift[CoordinateAxis::Y], 1.025);
+    EXPECT_DOUBLE_EQ(gb.shift[CoordinateAxis::Z], 0.5);
+}
+
+
 
 TEST(SettingsTest, requiredObstaclesParameters) {
     std::string xml = R"(

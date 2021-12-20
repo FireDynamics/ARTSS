@@ -61,19 +61,25 @@ namespace Settings {
         std::string file;
         std::string level;
     };
-    struct uniform {
-        real value;
-    };
-    struct zero {};
-    struct gauss_bubble {
-        real u_lin;
-        real v_lin;
-        real w_lin;
-        real x_shift;
-        real y_shift;
-        real z_shift;
-        real l;
-    };
+    namespace initial_conditions {
+        struct uniform {
+            real value;
+        };
+        struct gauss_bubble {
+            Coordinate<real> velocity_lin;
+            Coordinate<real> shift;
+            real l;
+        };
+        struct exp_sinus_prod {
+            real l;
+        };
+        struct hat {
+            Coordinate<real> start_coords;
+            Coordinate<real> end_coords;
+            real val_in;
+            real val_out;
+        };
+    }
     struct random_parameters {
         bool absolute;
         bool custom_seed;
@@ -85,7 +91,10 @@ namespace Settings {
     struct initial_conditions_parameters {
         std::string usr_fct;
         bool random;
-        std::variant<uniform,zero,gauss_bubble> ic;
+        std::variant<initial_conditions::uniform,
+                     initial_conditions::gauss_bubble,
+                     initial_conditions::exp_sinus_prod,
+                     initial_conditions::hat> ic;
         struct random_parameters random_parameters;
     };
     struct boundary {

@@ -202,13 +202,29 @@ namespace Settings {
             gauss_bubble gauss_bubble{};
 
             gauss_bubble.l = get_required_real(values, "l", context);
-            gauss_bubble.u_lin = get_required_real(values, "u_lin", context);
-            gauss_bubble.v_lin = get_required_real(values, "v_lin", context);
-            gauss_bubble.w_lin = get_required_real(values, "w_lin", context);
-            gauss_bubble.x_shift = get_required_real(values, "x_shift", context);
-            gauss_bubble.y_shift = get_required_real(values, "y_shift", context);
-            gauss_bubble.z_shift = get_required_real(values, "z_shift", context);
+            gauss_bubble.velocity_lin[CoordinateAxis::X] = get_required_real(values, "u_lin", context);
+            gauss_bubble.velocity_lin[CoordinateAxis::Y] = get_required_real(values, "v_lin", context);
+            gauss_bubble.velocity_lin[CoordinateAxis::Z] = get_required_real(values, "w_lin", context);
+            gauss_bubble.shift[CoordinateAxis::X] = get_required_real(values, "x_shift", context);
+            gauss_bubble.shift[CoordinateAxis::Y] = get_required_real(values, "y_shift", context);
+            gauss_bubble.shift[CoordinateAxis::Z] = get_required_real(values, "z_shift", context);
             return gauss_bubble;
+        }
+
+        hat parse_hat_parameters(const Map &values, const std::string &parent_context) {
+            std::string own_context = FunctionNames::hat;
+            std::string context = create_context(parent_context, own_context);
+            hat hat{};
+
+            hat.start_coords[CoordinateAxis::X] = get_required_real(values, "x1", context);
+            hat.start_coords[CoordinateAxis::Y] = get_required_real(values, "y1", context);
+            hat.start_coords[CoordinateAxis::Z] = get_required_real(values, "z1", context);
+            hat.end_coords[CoordinateAxis::X] = get_required_real(values, "x2", context);
+            hat.end_coords[CoordinateAxis::Y] = get_required_real(values, "y2", context);
+            hat.end_coords[CoordinateAxis::Z] = get_required_real(values, "z2", context);
+            hat.val_out = get_required_real(values, "val_out", context);
+            hat.val_in = get_required_real(values, "val_in", context);
+            return hat;
         }
     }
 
@@ -225,6 +241,8 @@ namespace Settings {
             icp.ic = initial_conditions::parse_uniform_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::gauss_bubble) {
             icp.ic = initial_conditions::parse_gauss_bubble_parameters(values, context);
+        } else if (icp.usr_fct == FunctionNames::hat) {
+            icp.ic = initial_conditions::parse_hat_parameters(values, context);
         } else {
             throw config_error(fmt::format("{} has no parsing implementation.", icp.usr_fct));
         }
