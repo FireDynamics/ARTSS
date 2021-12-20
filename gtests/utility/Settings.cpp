@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "src/utility/settings/Settings.h"
+#include "src/solver/SolverSelection.h"
 
 using namespace Settings::initial_conditions;
 
@@ -359,4 +360,34 @@ TEST(SettingsTest, boundaries) {
     EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[1].value, 1);
     EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[2].value, 299.14);
     EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[3].value, -10);
+}
+
+TEST(SettingsTest, advectionSolver) {
+    std::string xml = R"(
+<ARTSS>
+<solver description="AdvectionSolver" >
+    <advection type="SemiLagrangian" field="u,v,w" />
+    <solution available="No"/>
+</solver>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+    EXPECT_EQ(solver_parameters.advection.type, AdvectionMethods::SemiLagrangian);
+
+    EXPECT_NE(std::find(solver_parameters.advection.fields.begin(),
+                        solver_parameters.advection.fields.end(),
+                        FieldType::U),
+              solver_parameters.advection.fields.end());
+    EXPECT_NE(std::find(solver_parameters.advection.fields.begin(),
+                        solver_parameters.advection.fields.end(),
+                        FieldType::V),
+              solver_parameters.advection.fields.end());
+    EXPECT_NE(std::find(solver_parameters.advection.fields.begin(),
+                        solver_parameters.advection.fields.end(),
+                        FieldType::W),
+              solver_parameters.advection.fields.end());
+
+    EXPECT_FALSE(solver_parameters.solution.analytical_solution);
+    EXPECT_DOUBLE_EQ(solver_parameters.solution.solution_tolerance, 1e-3);
 }

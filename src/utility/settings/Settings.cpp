@@ -11,6 +11,8 @@
 #include "../Utility.h"
 #include "../Mapping.h"
 #include "../../Functions.h"
+#include "src/interfaces/ISolver.h"
+#include "src/solver/SolverSelection.h"
 #include <fmt/format.h>
 #include <iostream>
 
@@ -383,15 +385,145 @@ namespace Settings {
         pp.kappa = get_optional_real(values, "kappa", 4.25e-5);
         return pp;
     }
+    namespace solver {
+        advection_solver parse_advection_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
+            std::string own_context = "advection";
+            std::string context = create_context(parent_context, own_context);
+            auto[subsection, values] = map_parameter_section(head, own_context);
+
+            advection_solver solver_advection{};
+            solver_advection.type = get_required_string(values, "type", context);
+            if (solver_advection.type == AdvectionMethods::SemiLagrangian) {
+                // TODO no values
+//                solver_advection.solver = ;
+            } else {
+                throw config_error(fmt::format("{} has no parsing implementation.", solver_advection.type));
+            }
+
+            auto fields = Utility::split(get_required_string(values, "field", context), delimiter);
+            for (const std::string &string: fields) {
+                solver_advection.fields.emplace_back(Mapping::match_field(string));
+            }
+            return solver_advection;
+        }
+        diffusion_solver parse_diffusion_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
+            std::string own_context = "diffusion";
+            std::string context = create_context(parent_context, own_context);
+            auto[subsection, values] = map_parameter_section(head, own_context);
+
+            diffusion_solver solver_diffusion{};
+            //TODO diffusion
+            return solver_diffusion;
+        }
+        turbulence_solver parse_turbulence_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
+            std::string own_context = "turbulence";
+            std::string context = create_context(parent_context, own_context);
+            auto[subsection, values] = map_parameter_section(head, own_context);
+
+            turbulence_solver solver_turbulence{};
+            //TODO turbulence
+            return solver_turbulence;
+        }
+        source_solver parse_source_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
+            std::string own_context = "source";
+            std::string context = create_context(parent_context, own_context);
+            auto[subsection, values] = map_parameter_section(head, own_context);
+
+            source_solver solver_source{};
+            //TODO source
+            return solver_source;
+        }
+        pressure_solver parse_pressure_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
+            std::string own_context = "pressure";
+            std::string context = create_context(parent_context, own_context);
+            auto[subsection, values] = map_parameter_section(head, own_context);
+
+            pressure_solver solver_pressure{};
+            //TODO pressure
+            return solver_pressure;
+        }
+        temperature_solver parse_temperature_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
+            std::string own_context = "temperature";
+            std::string context = create_context(parent_context, own_context);
+            auto[subsection, values] = map_parameter_section(head, own_context);
+
+            temperature_solver solver_temperature{};
+            //TODO temperature
+            return solver_temperature;
+        }
+        concentration_solver parse_concentration_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
+            std::string own_context = "concentration";
+            std::string context = create_context(parent_context, own_context);
+            auto[subsection, values] = map_parameter_section(head, own_context);
+
+            concentration_solver solver_concentration{};
+            //TODO concentration
+            return solver_concentration;
+        }
+        solution parse_solution(const tinyxml2::XMLElement *head, const std::string &parent_context) {
+            std::string own_context = "solution";
+            std::string context = create_context(parent_context, own_context);
+            auto[subsection, values] = map_parameter_section(head, own_context);
+
+            solution sol{};
+            sol.analytical_solution = get_required_bool(values, "available", context);
+            sol.solution_tolerance = get_optional_real(values, "tol", 1e-3);
+            return sol;
+        }
+    }
 
     solver_parameters parse_solver_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "solver";
-        auto[subsection, values] = map_parameter_section(root, context);
+        auto [subsection, values] = map_parameter_section(root, context);
         solver_parameters sp{};
 
         sp.description = get_required_string(values, "description", context);
 
+        auto solver_types = {SolverTypes::NSSolver,
+                             SolverTypes::NSTempSolver,
+                             SolverTypes::NSTempTurbSolver,
+                             SolverTypes::NSTempConSolver,
+                             SolverTypes::NSTempTurbConSolver,
+                             SolverTypes::NSTurbSolver};
+        if (std::find(solver_types.begin(), solver_types.end(), sp.description) != solver_types.end()) {
+            // navier stokes solver, requires advection, diffusion and pressure
+            sp.advection = solver::parse_advection_solver(root, context);
+            sp.diffusion = solver::parse_diffusion_solver(root, context);
+            sp.pressure = solver::parse_pressure_solver(root, context);
+            if (sp.description == SolverTypes::NSTempSolver ||
+                sp.description == SolverTypes::NSTempConSolver ||
+                sp.description == SolverTypes::NSTempTurbSolver ||
+                sp.description == SolverTypes::NSTempTurbConSolver)  {
+                // add temperature solver
+                sp.temperature = solver::parse_temperature_solver(root, context);
+                if (sp.description == SolverTypes::NSTempConSolver ||
+                    sp.description == SolverTypes::NSTempTurbConSolver) {
+                    // add concentration solver
+                    sp.concentration = solver::parse_concentration_solver(subsection, context);
+                }
+            }
 
+        }
+        if (sp.description == SolverTypes::AdvectionSolver || sp.description == SolverTypes::AdvectionDiffusionSolver) {
+            // add advection
+            sp.advection = solver::parse_advection_solver(subsection, context);
+        }
+        if (sp.description == SolverTypes::DiffusionSolver || sp.description == SolverTypes::AdvectionDiffusionSolver) {
+            // add diffusion
+            sp.diffusion = solver::parse_diffusion_solver(subsection, context);
+        }
+        if (sp.description == SolverTypes::PressureSolver) {
+            // add pressure
+            sp.pressure = solver::parse_pressure_solver(subsection, context);
+        }
+        if (sp.description == SolverTypes::DiffusionTurbSolver ||
+            sp.description == SolverTypes::NSTurbSolver ||
+            sp.description == SolverTypes::NSTempTurbSolver ||
+            sp.description == SolverTypes::NSTempTurbConSolver) {
+            // add turbulence
+            sp.turbulence = solver::parse_turbulence_solver(subsection, context);
+        }
+        sp.solution = solver::parse_solution(subsection, context);
         return sp;
     }
 

@@ -128,52 +128,57 @@ namespace Settings {
     struct adaption_parameters {
         bool enabled;
     };
-    struct advection_solver {
-        std::string type;
-        std::vector<FieldType> fields;
-    };
-    struct diffusion_solver {
-        std::string type;
-        std::vector<FieldType> fields;
-    };
-    struct turbulence_solver {
-        std::string type;
-    };
-    struct source_solver {
-        std::string type;
-        std::string force_fct;
-        CoordinateAxis direction;
-        bool use_init_values;
-    };
-    struct pressure_solver {
-        std::string type;
-        FieldType field;
-    };
-    struct temperature_solver {
-        advection_solver advection;
-        diffusion_solver diffusion;
-        bool has_turbulence;
-        real prandtl_number;
-        source_solver source;
-    };
-    struct concentration_solver {
-        advection_solver advection;
-        diffusion_solver diffusion;
-        bool has_turbulence;
-        real prandtl_number;
-        source_solver source;
-    };
+    namespace solver {
+        struct advection_solver {
+            std::string type;
+            std::vector<FieldType> fields;
+        };
+        struct diffusion_solver {
+            std::string type;
+            std::vector<FieldType> fields;
+        };
+        struct turbulence_solver {
+            std::string type;
+        };
+        struct source_solver {
+            std::string type;
+            std::string force_fct;
+            CoordinateAxis direction;
+            bool use_init_values;
+        };
+        struct pressure_solver {
+            std::string type;
+            FieldType field;
+        };
+        struct temperature_solver {
+            advection_solver advection;
+            diffusion_solver diffusion;
+            bool has_turbulence;
+            real prandtl_number;
+            source_solver source;
+        };
+        struct concentration_solver {
+            advection_solver advection;
+            diffusion_solver diffusion;
+            bool has_turbulence;
+            real prandtl_number;
+            source_solver source;
+        };
+        struct solution {
+            bool analytical_solution;
+            real solution_tolerance;
+        };
+    }
     struct solver_parameters {
         std::string description;
-        advection_solver advection;
-        diffusion_solver diffusion;
-        turbulence_solver turbulence;
-        source_solver source;
-        pressure_solver pressure;
-        temperature_solver temperature;
-        concentration_solver concentration;
-        bool analytical_solution;
-        real solution_tolerance;
+        solver::advection_solver advection;
+        solver::diffusion_solver diffusion;
+        solver::turbulence_solver turbulence;
+        solver::source_solver source;
+        solver::pressure_solver pressure;
+        solver::temperature_solver temperature;
+        solver::concentration_solver concentration;
+        solver::solution solution;
     };
     struct Settings_new {
         struct physical_parameters physical_parameters;
