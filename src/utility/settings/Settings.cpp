@@ -131,13 +131,13 @@ namespace Settings {
         std::string context = "visualisation";
         auto[subsection, values] = map_parameters(root, context);
         visualisation_parameters vp{};
-        vp.save_csv = get_optional_size_t(values, "save_csv", false);
+        vp.save_csv = get_optional_bool(values, "save_csv", false);
         if (vp.save_csv) {
             vp.csv_nth_plot = get_required_size_t(values, "csv_nth_plot", context);
         } else {
             vp.csv_nth_plot = get_optional_size_t(values, "csv_nth_plot", 0);
         }
-        vp.save_vtk = get_optional_size_t(values, "save_vtk", false);
+        vp.save_vtk = get_optional_bool(values, "save_vtk", false);
         if (vp.save_vtk) {
             vp.vtk_nth_plot = get_required_size_t(values, "vtk_nth_plot", context);
         } else {
@@ -172,22 +172,20 @@ namespace Settings {
     }
 
     namespace initial_conditions {
-        uniform parse_uniform_parameters(tinyxml2::XMLElement *root,
+        uniform parse_uniform_parameters(const Map &values,
                                          const std::string &parent_context) {
             std::string own_context = FunctionNames::uniform;
             std::string context = create_context(parent_context, own_context);
-            auto[subsection, values] = map_parameters(root, own_context);
             uniform uniform{};
 
             uniform.value = get_required_real(values, "val", context);
             return uniform;
         }
 
-        gauss_bubble parse_gauss_bubble_parameters(tinyxml2::XMLElement *root,
+        gauss_bubble parse_gauss_bubble_parameters(const Map &values,
                                                    const std::string &parent_context) {
             std::string own_context = FunctionNames::gauss_bubble;
             std::string context = create_context(parent_context, own_context);
-            auto[subsection, values] = map_parameters(root, own_context);
             gauss_bubble gauss_bubble{};
 
             gauss_bubble.l = get_required_real(values, "l", context);
@@ -207,13 +205,13 @@ namespace Settings {
         initial_conditions_parameters icp{};
 
         icp.random = get_required_bool(values, "random", context);
-        icp.random_parameters = parse_random_parameters(subsection, context, icp.random);
+        icp.random_parameters = parse_random_parameters(root, context, icp.random);
 
         icp.usr_fct = get_required_string(values, "usr_fct", context);
         if (icp.usr_fct == FunctionNames::uniform) {
-            icp.ic = initial_conditions::parse_uniform_parameters(subsection, context);
+            icp.ic = initial_conditions::parse_uniform_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::gauss_bubble) {
-            icp.ic = initial_conditions::parse_gauss_bubble_parameters(subsection, context);
+            icp.ic = initial_conditions::parse_gauss_bubble_parameters(values, context);
         } else {
             throw config_error(fmt::format("{} has no parsing implementation.", icp.usr_fct));
         }

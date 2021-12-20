@@ -73,7 +73,7 @@ TEST(SettingsTest, requiredAttributeMissing) {
 TEST(SettingsTest, requiredDomainParameters) {
     std::string xml = R"(
 <ARTSS>
-  <domain_parameters enable_computational_domain="Yes">
+  <domain_parameters enable_computational_domain="No">
     <X1> 1.0 </X1>
     <Y1> -12.0 </Y1>
     <Z1> -1.0 </Z1>
@@ -88,7 +88,7 @@ TEST(SettingsTest, requiredDomainParameters) {
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     Settings::domain_parameters domain_parameters = Settings::parse_domain_parameters(doc.RootElement());
-    EXPECT_EQ(domain_parameters.enable_computational_domain, 1.0);
+    EXPECT_FALSE(domain_parameters.enable_computational_domain);
     EXPECT_EQ(domain_parameters.start_coords_PD[CoordinateAxis::X], 1.0);
     EXPECT_EQ(domain_parameters.start_coords_PD[CoordinateAxis::Y], -12.0);
     EXPECT_EQ(domain_parameters.start_coords_PD[CoordinateAxis::Z], -1.0);
@@ -139,13 +139,14 @@ TEST(SettingsTest, optionalVisualisationParameters) {
     Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(doc.RootElement());
     EXPECT_FALSE(visualisation_parameters.save_csv);
     EXPECT_FALSE(visualisation_parameters.save_vtk);
-    EXPECT_EQ(visualisation_parameters.vtk_nth_plot, 1);
-    EXPECT_EQ(visualisation_parameters.csv_nth_plot, 1);
+    EXPECT_EQ(visualisation_parameters.vtk_nth_plot, 0);
+    EXPECT_EQ(visualisation_parameters.csv_nth_plot, 0);
 }
 TEST(SettingsTest, requiredInitialConditionsParameters) {
     std::string xml = R"(
 <ARTSS>
     <initial_conditions usr_fct="Uniform" random="No">
+        <val> 10 </val>
     </initial_conditions>
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
