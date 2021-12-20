@@ -53,10 +53,10 @@ public:
     static void expand_y_direction(long shift, bool start, size_t *arr_idx_expansion, size_t len_e);
     static void reduce_x_direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r);
     static void reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r);
-    static bool adapt_x_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
-    static bool adapt_x_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
-    static bool adapt_y_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
-    static bool adapt_y_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static bool adapt_x_direction(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static bool adapt_x_direction_serial(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static bool adapt_y_direction(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
+    static bool adapt_y_direction_serial(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce);
 
     void extractData(const std::string &filename, real height, real time);
     void extractData(const std::string &filename);

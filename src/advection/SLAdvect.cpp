@@ -10,15 +10,16 @@
 ///         stable semi-Lagrangian approach (backtrace and linear interpolation)
 // ***************************************************************************************
 
+#include "SLAdvect.h"
+
 #include <cmath>
 
 #ifdef _OPENACC
 #include <accelmath.h>
 #endif
 
-#include "SLAdvect.h"
-#include "../boundary/BoundaryController.h"
-#include "../Domain.h"
+#include "../domain/DomainController.h"
+#include "../domain/DomainData.h"
 
 // ***************************************************************************************
 /// \brief  solves advection \f$ \partial_t \phi_1 = - (u \cdot \nabla) \phi_0 \f$ via
@@ -33,20 +34,20 @@
 void SLAdvect::advect(Field &out, const Field &in,
                       const Field &u_vel, const Field &v_vel, const Field &w_vel,
                       bool sync) {
-    auto domain = Domain::getInstance();
-    auto boundary = BoundaryController::getInstance();
+    auto domain_data = DomainData::getInstance();
+    auto domain_controller = DomainController::getInstance();
 
-    auto bsize_i = boundary->get_size_inner_list();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
+    auto bsize_i = domain_controller->get_size_domain_inner_list_level_joined(0);
+    size_t *d_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
 #pragma acc data present(out, in, u_vel, v_vel, w_vel, d_inner_list[:bsize_i])
     {
-        const size_t Nx = domain->get_Nx();
-        const size_t Ny = domain->get_Ny();
+        const size_t Nx = domain_data->get_Nx();
+        const size_t Ny = domain_data->get_Ny();
 
-        const real dx = domain->get_dx();
-        const real dy = domain->get_dy();
-        const real dz = domain->get_dz();
+        const real dx = domain_data->get_dx();
+        const real dy = domain_data->get_dy();
+        const real dz = domain_data->get_dz();
 
         const real dt = m_settings.get_real("physical_parameters/dt");
 
@@ -59,12 +60,12 @@ void SLAdvect::advect(Field &out, const Field &in,
         const real epsilon_z = 1e-6; //dz / dt;
 
         // start indices for computational domain of inner cells
-        auto i_start = static_cast<long int> (domain->get_index_x1());
-        auto j_start = static_cast<long int> (domain->get_index_y1());
-        auto k_start = static_cast<long int> (domain->get_index_z1());
-        auto i_end = static_cast<long int> (domain->get_index_x2());
-        auto j_end = static_cast<long int> (domain->get_index_y2());
-        auto k_end = static_cast<long int> (domain->get_index_z2());
+        auto i_start = static_cast<long int> (domain_data->get_index_x1());
+        auto j_start = static_cast<long int> (domain_data->get_index_y1());
+        auto k_start = static_cast<long int> (domain_data->get_index_z1());
+        auto i_end = static_cast<long int> (domain_data->get_index_x2());
+        auto j_end = static_cast<long int> (domain_data->get_index_y2());
+        auto k_end = static_cast<long int> (domain_data->get_index_z2());
 
 #pragma acc loop independent
         for (size_t l = 0; l < bsize_i; ++l) {
@@ -160,7 +161,7 @@ void SLAdvect::advect(Field &out, const Field &in,
             auto tmp = s110 + t * (s111 - s110);  // row-major
             out[idx] = tmp;
         }
-        boundary->apply_boundary(out, sync);
+        domain_controller->apply_boundary(out, sync);
 
         if (sync) {
 #pragma acc wait

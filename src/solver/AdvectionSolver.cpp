@@ -4,14 +4,14 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "AdvectionSolver.h"
+
 #include <string>
 #include <vector>
 #include <algorithm>
 
-#include "AdvectionSolver.h"
-#include "../interfaces/IAdvection.h"
-#include "../Domain.h"
 #include "SolverSelection.h"
+#include "../domain/DomainData.h"
 
 AdvectionSolver::AdvectionSolver(
         Settings::Settings const &settings,
@@ -23,7 +23,7 @@ AdvectionSolver::AdvectionSolver(
     m_v_lin(FieldType::V, v_lin),
     m_w_lin(FieldType::W, w_lin) {
 #ifndef BENCHMARKING
-     m_logger = Utility::create_logger(settings, typeid(this).name());
+     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     std::string advectionType = m_settings.get("solver/advection/type");
     SolverSelection::SetAdvectionSolver(m_settings, &adv, m_settings.get("solver/advection/type"));
@@ -62,7 +62,7 @@ void AdvectionSolver::do_step(real, bool sync) {
     Field &v0 = m_field_controller->get_field_v0();
     Field &w0 = m_field_controller->get_field_w0();
 
-#pragma acc data present(u_lin, v_lin, w_lin, u, u0, v, v0, w, w0)
+#pragma acc data present(m_u_lin, m_v_lin, m_w_lin, u, u0, v, v0, w, w0)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING

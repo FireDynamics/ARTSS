@@ -7,15 +7,15 @@
 #ifndef ARTSS_SOLVER_DIFFUSIONTURBSOLVER_H_
 #define ARTSS_SOLVER_DIFFUSIONTURBSOLVER_H_
 
-#include "../Domain.h"
+#include "SolverSelection.h"
+#include "../domain/DomainData.h"
+#include "../field/FieldController.h"
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IDiffusion.h"
 #include "../interfaces/ITurbulence.h"
-#include "../field/FieldController.h"
-#include "SolverSelection.h"
-#include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
+#include "../utility/Utility.h"
 
 class DiffusionTurbSolver: public ISolver {
  public:

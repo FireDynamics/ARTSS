@@ -18,7 +18,7 @@ Solution::Solution(Settings::Settings const &settings, const std::string &initia
         m_T_analytical_solution(Field(FieldType::T)),
         m_has_analytical_solution(has_analytical_solution) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
 
     // set function pointer to chosen initial condition

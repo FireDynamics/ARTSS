@@ -79,17 +79,17 @@ void CSVWriter::csv_prepare_and_write(const std::string &filename, read_ptr u, r
 
 void CSVWriter::csv_write(const std::string &filename, return_ptr *vars, int size_vars, const std::vector<std::string> &var_names) {
 #ifndef BENCHMARKING
-    Domain *domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
 
-    int Nx = static_cast<int>(domain->get_Nx());
-    int Ny = static_cast<int>(domain->get_Ny());
-    int Nz = static_cast<int>(domain->get_Nz());
+    int Nx = static_cast<int>(domain_data->get_Nx());
+    int Ny = static_cast<int>(domain_data->get_Ny());
+    int Nz = static_cast<int>(domain_data->get_Nz());
 
-    int size = static_cast<int>(domain->get_size());
+    int size = static_cast<int>(domain_data->get_size());
 
-    real dx = domain->get_dx();
-    real dy = domain->get_dy();
-    real dz = domain->get_dz();
+    real dx = domain_data->get_dx();
+    real dy = domain_data->get_dy();
+    real dz = domain_data->get_dz();
 
     std::vector<std::string> coord_names = {"i", "j", "k", "index",
                                             "x-coords (m)", "y-coords (m)", "z-coords (m)"};
@@ -106,7 +106,7 @@ void CSVWriter::csv_write(const std::string &filename, return_ptr *vars, int siz
     std::ofstream output_file(filename, std::ofstream::binary);
 
     // var_names as column titles
-    output_file << fmt::format("{}", fmt::join(coord_names, delimiter));
+    output_file << fmt::format("{},", fmt::join(coord_names, delimiter));
     output_file << fmt::format("{}\n", fmt::join(var_names, delimiter));
 
     // write variables to csv

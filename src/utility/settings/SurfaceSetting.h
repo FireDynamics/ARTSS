@@ -8,8 +8,13 @@
 #ifndef ARTSS_UTILITY_SETTINGS_SURFACESETTING_H
 #define ARTSS_UTILITY_SETTINGS_SURFACESETTING_H
 
+#include <string>
+#include <vector>
+
+#include "BoundarySetting.h"
 #include "tinyxml2.h"
 #include "../GlobalMacrosTypes.h"
+#include "../../domain/PatchObject.h"
 
 #ifndef BENCHMARKING
 #include <spdlog/logger.h>
@@ -21,7 +26,8 @@ class SurfaceSetting {
  public:
     explicit SurfaceSetting(tinyxml2::XMLElement *xml_element);
 
-    real get_id() const { return id; }
+    std::string get_name() const { return name; }
+    std::string get_patch() const { return patch; }
     real get_sx1() const { return sx1; }
     real get_sx2() const { return sx2; }
     real get_sy1() const { return sy1; }
@@ -33,11 +39,16 @@ class SurfaceSetting {
     void print(spdlog::logger logger) const;
 #endif
 
+    std::vector<BoundarySetting> get_boundaries() const { return boundaries; }
+
  private:
-    int id;
+    std::string name;
+    std::string patch;
     real sx1, sx2;
     real sy1, sy2;
     real sz1, sz2;
+
+    std::vector<BoundarySetting> boundaries;
 };
 }
 

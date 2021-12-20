@@ -10,15 +10,13 @@
 #include <vector>
 #include <algorithm>
 
-#include "../pressure/VCycleMG.h"
-#include "../Domain.h"
 #include "SolverSelection.h"
-#include "../boundary/BoundaryData.h"
+#include "../domain/DomainData.h"
 
 NSTempSolver::NSTempSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = field_controller;
 
@@ -35,9 +33,7 @@ NSTempSolver::NSTempSolver(Settings::Settings const &settings, FieldController *
     SolverSelection::SetDiffusionSolver(m_settings, &dif_temp, m_settings.get("solver/temperature/diffusion/type"));
 
     // Pressure
-    SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"),
-                                       m_field_controller->get_field_p(),
-                                       m_field_controller->get_field_rhs());
+    SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"));
 
     // Source of velocity
     SolverSelection::SetSourceSolver(m_settings, &sou_vel, m_settings.get("solver/source/type"));
@@ -99,7 +95,7 @@ void NSTempSolver::do_step(real t, bool sync) {
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
                             w0, w_tmp, p, rhs, T, T0, T_tmp, \
-                            fx, fy, fz, S_T)
+                            f_x, f_y, f_z, S_T)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
@@ -229,21 +225,21 @@ void NSTempSolver::control() {
         // TODO Error Handling
     }
 
-    if (m_settings.get("solver/temperature/advection/field") != BoundaryData::get_field_type_name(FieldType::T)) {
+    if (m_settings.get("solver/temperature/advection/field") != Mapping::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error Handling
     }
-    if (m_settings.get("solver/temperature/diffusion/field") != BoundaryData::get_field_type_name(FieldType::T)) {
+    if (m_settings.get("solver/temperature/diffusion/field") != Mapping::get_field_type_name(FieldType::T)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error Handling
     }
-    if (m_settings.get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
+    if (m_settings.get("solver/pressure/field") != Mapping::get_field_type_name(FieldType::P)) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

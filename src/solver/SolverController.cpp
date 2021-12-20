@@ -4,6 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
 
+#include "SolverController.h"
+
 #include "AdvectionSolver.h"
 #include "AdvectionDiffusionSolver.h"
 #include "DiffusionSolver.h"
@@ -15,10 +17,9 @@
 #include "NSTempConSolver.h"
 #include "NSTempTurbConSolver.h"
 #include "PressureSolver.h"
-#include "SolverController.h"
 #include "SolverSelection.h"
-#include "../boundary/BoundaryController.h"
-#include "../Domain.h"
+#include "../domain/DomainController.h"
+#include "../domain/DomainData.h"
 #include "../Functions.h"
 #include "../source/GaussFunction.h"
 #include "../source/BuoyancyMMS.h"
@@ -31,7 +32,7 @@
 SolverController::SolverController(Settings::Settings const &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = new FieldController();
     std::string string_solver = m_settings.get("solver/description");
@@ -41,13 +42,10 @@ SolverController::SolverController(Settings::Settings const &settings) :
 #endif
     set_up_sources();
     set_up_fields(string_solver);
-    // TODO unclean, first updating device to apply boundary and then updating host to create temporary fields.
-    m_field_controller->update_device();
 #ifndef BENCHMARKING
     m_logger->debug("set up boundary");
 #endif
     m_field_controller->set_up_boundary();
-    m_field_controller->update_host();
     m_field_controller->update_data();
 
     source_velocity = nullptr;
@@ -64,10 +62,16 @@ SolverController::~SolverController() {
 }
 
 void SolverController::set_up_sources() {
+#ifndef BENCHMARKING
+    m_logger->debug("set up sources");
+#endif
     // source of temperature
     if (m_has_temperature) {
         // source
         std::string temp_type = m_settings.get("solver/temperature/source/type");
+#ifndef BENCHMARKING
+        m_logger->debug("create temperature type function {}", temp_type);
+#endif
         if (temp_type == SourceMethods::ExplicitEuler) {
             source_temperature = new ExplicitEulerSource(m_settings);
         } else {
@@ -79,6 +83,9 @@ void SolverController::set_up_sources() {
         }
         // temperature function
         std::string temp_fct = m_settings.get("solver/temperature/source/temp_fct");
+#ifndef BENCHMARKING
+        m_logger->debug("create temperature source function {}", temp_fct);
+#endif
         if (temp_fct == SourceMethods::GaussST) {
             real HRR = m_settings.get_real("solver/temperature/source/HRR");    // heat release rate in [kW]
             real cp = m_settings.get_real("solver/temperature/source/cp");        // specific heat capacity in [kJ/ kg K]
@@ -183,6 +190,9 @@ void SolverController::set_up_sources() {
 }
 
 void SolverController::init_solver(const std::string &string_solver) {
+#ifndef BENCHMARKING
+    m_logger->debug("initialise solver {}", string_solver);
+#endif
     if (string_solver == SolverTypes::AdvectionSolver) {
         m_solver = new AdvectionSolver(m_settings, m_field_controller);
     } else if (string_solver == SolverTypes::AdvectionDiffusionSolver) {
@@ -322,6 +332,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
     } else if (string_init_usr_fct == FunctionNames::sin_sin_sin) {
         if (string_solver == SolverTypes::PressureSolver) {
             // Pressure test case
+            m_field_controller->get_field_p().set_value(0.);
             real l = m_settings.get_real("initial_conditions/l");
             Functions::sin_sin_sin(m_field_controller->get_field_rhs(), l);
         }
@@ -464,7 +475,7 @@ void SolverController::set_up_fields(const std::string &string_solver) {
 
             int n_layers = m_settings.get_int("initial_conditions/n_layers");
             std::string const dir = m_settings.get("initial_conditions/dir");
-
+            CoordinateAxis axis = Mapping::match_axis(dir);
             real *borders = new real[n_layers + 1];
             real *values = new real[n_layers];
 
@@ -480,9 +491,8 @@ void SolverController::set_up_fields(const std::string &string_solver) {
                 values[l] = m_settings.get_real(val_out_l);
             }
 
-            Functions::layers(log_level, log_file,
-                    m_field_controller->get_field_T(),
-                    n_layers, dir, borders, values);
+            Functions::layers(m_field_controller->get_field_T(),
+                              n_layers, axis, borders, values);
 
             if (random) {
                 call_random(m_field_controller->get_field_T());
@@ -516,18 +526,18 @@ void SolverController::set_up_fields(const std::string &string_solver) {
     } else if (string_init_usr_fct == FunctionNames::jet) {
         std::string dir = m_settings.get("initial_conditions/dir");
         real value = m_settings.get_real("initial_conditions/value");
-        auto domain = Domain::getInstance();
+        auto domain_data = DomainData::getInstance();
         if (dir == "x") {
             real y1 = m_settings.get_real("initial_conditions/y1");
             real y2 = m_settings.get_real("initial_conditions/y2");
             real z1 = m_settings.get_real("initial_conditions/z1");
             real z2 = m_settings.get_real("initial_conditions/z2");
-            size_t index_x1 = domain->get_index_x1();
-            size_t index_x2 = domain->get_index_x2();
-            size_t index_y1 = Utility::get_index(y1, domain->get_dy(), domain->get_Y1());
-            size_t index_y2 = Utility::get_index(y2, domain->get_dy(), domain->get_Y1());
-            size_t index_z1 = Utility::get_index(z1, domain->get_dz(), domain->get_Z1());
-            size_t index_z2 = Utility::get_index(z2, domain->get_dz(), domain->get_Z1());
+            size_t index_x1 = domain_data->get_index_x1();
+            size_t index_x2 = domain_data->get_index_x2();
+            size_t index_y1 = Utility::get_index(y1, domain_data->get_dy(), domain_data->get_Y1());
+            size_t index_y2 = Utility::get_index(y2, domain_data->get_dy(), domain_data->get_Y1());
+            size_t index_z1 = Utility::get_index(z1, domain_data->get_dz(), domain_data->get_Z1());
+            size_t index_z2 = Utility::get_index(z2, domain_data->get_dz(), domain_data->get_Z1());
             Functions::jet(m_field_controller->get_field_u(),
                            index_x1, index_x2,
                            index_y1, index_y2,
@@ -541,12 +551,12 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             real x2 = m_settings.get_real("initial_conditions/x2");
             real z1 = m_settings.get_real("initial_conditions/z1");
             real z2 = m_settings.get_real("initial_conditions/z2");
-            size_t index_x1 = Utility::get_index(x1, domain->get_dx(), domain->get_X1());
-            size_t index_x2 = Utility::get_index(x2, domain->get_dx(), domain->get_X1());
-            size_t index_y1 = domain->get_index_y1();
-            size_t index_y2 = domain->get_index_y2();
-            size_t index_z1 = Utility::get_index(z1, domain->get_dz(), domain->get_Z1());
-            size_t index_z2 = Utility::get_index(z2, domain->get_dz(), domain->get_Z1());
+            size_t index_x1 = Utility::get_index(x1, domain_data->get_dx(), domain_data->get_X1());
+            size_t index_x2 = Utility::get_index(x2, domain_data->get_dx(), domain_data->get_X1());
+            size_t index_y1 = domain_data->get_index_y1();
+            size_t index_y2 = domain_data->get_index_y2();
+            size_t index_z1 = Utility::get_index(z1, domain_data->get_dz(), domain_data->get_Z1());
+            size_t index_z2 = Utility::get_index(z2, domain_data->get_dz(), domain_data->get_Z1());
             Functions::jet(m_field_controller->get_field_v(),
                            index_x1, index_x2,
                            index_y1, index_y2,
@@ -560,12 +570,12 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             real x2 = m_settings.get_real("initial_conditions/x2");
             real y1 = m_settings.get_real("initial_conditions/y1");
             real y2 = m_settings.get_real("initial_conditions/y2");
-            size_t index_x1 = Utility::get_index(x1, domain->get_dx(), domain->get_X1());
-            size_t index_x2 = Utility::get_index(x2, domain->get_dx(), domain->get_X1());
-            size_t index_y1 = Utility::get_index(y1, domain->get_dy(), domain->get_Y1());
-            size_t index_y2 = Utility::get_index(y2, domain->get_dy(), domain->get_Y1());
-            size_t index_z1 = domain->get_index_z1();
-            size_t index_z2 = domain->get_index_z2();
+            size_t index_x1 = Utility::get_index(x1, domain_data->get_dx(), domain_data->get_X1());
+            size_t index_x2 = Utility::get_index(x2, domain_data->get_dx(), domain_data->get_X1());
+            size_t index_y1 = Utility::get_index(y1, domain_data->get_dy(), domain_data->get_Y1());
+            size_t index_y2 = Utility::get_index(y2, domain_data->get_dy(), domain_data->get_Y1());
+            size_t index_z1 = domain_data->get_index_z1();
+            size_t index_z2 = domain_data->get_index_z2();
             Functions::jet(m_field_controller->get_field_w(),
                            index_x1, index_x2,
                            index_y1, index_y2,
@@ -583,13 +593,14 @@ void SolverController::set_up_fields(const std::string &string_solver) {
     }
 
     // Sight of boundaries
-    auto boundary = BoundaryController::getInstance();
-    size_t *inner_list = boundary->get_inner_list_level_joined();
-    size_t size_inner_list = boundary->get_size_inner_list();
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
-    Field sight = m_field_controller->get_field_sight();
-    for (size_t i = 0; i < size_inner_list; i++) {
-        size_t idx = inner_list[i];
+    Field &sight = m_field_controller->get_field_sight();
+    sight.update_host();
+    for (size_t i = 0; i < size_domain_inner_list; i++) {
+        size_t idx = domain_inner_list[i];
         sight[idx] = 0.;
     }
 }
@@ -638,7 +649,7 @@ void SolverController::temperature_source() {
 
 //======================================= Update data ==================================
 // ***************************************************************************************
-/// \brief  Updates time dependent parameters force source functions
+/// \brief  Updates time dependent parameters force source functions, once at initialisation
 // ***************************************************************************************
 void SolverController::force_source() {
     // Force
@@ -718,12 +729,6 @@ void SolverController::update_sources(real t_cur, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Update f(T) ...");
 #endif
-            if (!m_settings.get_bool("solver/source/use_init_values")) {
-                int ambient_temperature_value = m_settings.get_int("solver/source/ambient_temperature_value");
-                m_field_controller->get_field_T_ambient().set_value(ambient_temperature_value);
-            } else {
-                m_field_controller->get_field_T_ambient().copy_data(m_field_controller->get_field_T());
-            }
             momentum_source();
         } else {
 #ifndef BENCHMARKING
@@ -737,7 +742,6 @@ void SolverController::update_sources(real t_cur, bool sync) {
     // Temperature source
     if (m_has_temperature) {
         m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
-        std::string tempFct = m_settings.get("solver/temperature/source/temp_fct");
     }
 
     // Concentration source

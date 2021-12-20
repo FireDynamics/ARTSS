@@ -12,15 +12,15 @@
   <solver description="NSTempTurbSolver" >
     <advection type="SemiLagrangian" field="u,v,w">
     </advection>
-    <diffusion type="Explicit" field="u,v,w">
+    <diffusion type="Jacobi" field="u,v,w">
       <max_iter> 100 </max_iter>  <!-- max number of iterations -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
-      <w> 1 </w>  <!-- relaxation parameter -->
+      <w> 1 </w>                  <!-- relaxation parameter -->
     </diffusion>
     <turbulence type="ConstSmagorinsky">
       <Cs> 0.2 </Cs>
     </turbulence>
-    <source type = "ExplicitEuler" force_fct="Buoyancy" dir="y" use_init_values="No"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    <source type="ExplicitEuler" force_fct="Buoyancy" dir="y" use_init_values="No"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
       <ambient_temperature_value> 299.14 </ambient_temperature_value>
     </source>
     <pressure type="VCycleMG" field="p">
@@ -38,7 +38,7 @@
     <temperature>
       <advection type="SemiLagrangian" field="T">
       </advection>
-      <diffusion type="Explicit" field="T">
+      <diffusion type="Jacobi" field="T">
         <max_iter> 100 </max_iter>
         <tol_res> 1e-07 </tol_res>
         <w> 1 </w>
@@ -46,7 +46,7 @@
       <turbulence include="Yes">
         <Pr_T> 0.5 </Pr_T>
       </turbulence>
-      <source type = "ExplicitEuler" temp_fct="GaussST" dissipation="No" random="No">
+      <source type="ExplicitEuler" temp_fct="GaussST" dissipation="No" random="No">
         <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
         <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 0. </x0>
@@ -77,52 +77,53 @@
   <adaption dynamic="No" data_extraction="No"> </adaption>
 
   <boundaries>
-    <boundary field="u,v,w" patch="front,back,bottom,top,left,right" type="dirichlet" value="0.0" />        
+    <boundary field="u,v,w" patch="front,back,bottom,top,left,right" type="dirichlet" value="0.0" />
     <boundary field="p" patch="front,back,bottom,top,left,right" type="neumann" value="0.0" />
     <boundary field="T" patch="front,back,top,left,right" type="dirichlet" value="299.14" />
     <boundary field="T" patch="bottom" type="neumann" value="0.0" />
   </boundaries>
+
   <obstacles enabled="Yes">
     <obstacle name="left wall"> <!-- left wall -->
       <geometry ox1="-1.6625" ox2="-1.4" oy1="0." oy2="2.13" oz1="-1.4" oz2="1.4"/>
-      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0"/>
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="ceiling"> <!-- ceiling -->
       <geometry ox1="-1.6625" ox2="1.6625" oy1="2.13" oy2="2.3296875" oz1="-1.6625" oz2="1.6625"/>
-      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0"/>
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="back wall"> <!-- back wall -->
       <geometry ox1="-1.6625" ox2="1.6625" oy1="0." oy2="2.13" oz1="1.4" oz2="1.6625"/>
-      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0"/>
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="front wall"> <!-- front wall -->
       <geometry ox1="-1.6625" ox2="1.6625" oy1="0." oy2="2.13" oz1="-1.6625" oz2="-1.4"/>
-      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0"/>
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="right wall left from door"> <!-- right wall -->
       <geometry ox1="1.4" ox2="1.6625" oy1="0." oy2="2.13" oz1="-1.4" oz2="-0.4375"/>
-      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0"/>
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="right wall above door"> <!-- right wall -->
       <geometry ox1="1.4" ox2="1.6625" oy1="1.83" oy2="2.13" oz1="-0.4375" oz2="0.4375"/>
-      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0"/>
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
     <obstacle name="right wall right from door"> <!-- right wall -->
       <geometry ox1="1.4" ox2="1.6625" oy1="0." oy2="2.13" oz1="0.4375" oz2="1.4"/>
-      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+      <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0"/>
       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
     </obstacle>
   </obstacles>
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct = "Uniform" random = "Yes">
+  <initial_conditions usr_fct="Uniform" random="Yes">
     <val> 299.14 </val>
     <random absolute="Yes" custom_seed="Yes" custom_steps="Yes">
       <seed> 0 </seed>

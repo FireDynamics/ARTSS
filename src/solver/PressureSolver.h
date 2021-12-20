@@ -8,15 +8,13 @@
 #define ARTSS_SOLVER_PRESSURESOLVER_H_
 
 #include "SolverSelection.h"
-#include "../pressure/VCycleMG.h"
-#include "../Domain.h"
-#include "../boundary/BoundaryData.h"
+#include "../domain/DomainData.h"
+#include "../field/FieldController.h"
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IPressure.h"
-#include "../field/FieldController.h"
-#include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
+#include "../utility/Utility.h"
 
 class PressureSolver : public ISolver {
 public:

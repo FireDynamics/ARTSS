@@ -350,7 +350,7 @@ Settings_new parse_settings_from_file(const std::filesystem::path &path) {
 }
 
 
-Settings::Settings(std::string path) :
+Settings::Settings(const std::string &path) :
         filename(path) {
     tinyxml2::XMLDocument doc;
     doc.LoadFile(path.c_str());
@@ -368,7 +368,8 @@ Settings::Settings(std::string path) :
     }
 
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(*this, "XMLFile");
+    Utility::create_logger(sget("logging/level"), sget("logging/file"));  // create global logger
+    m_logger = Utility::create_logger("XMLFile");
     m_logger->debug("start the simulation of \"{}\"", path);
     print_config();
 #endif
@@ -413,41 +414,41 @@ void Settings::read_config(std::string prefix, tinyxml2::XMLElement *elem) {
 void Settings::print_config() const {
 #ifndef BENCHMARKING
     std::map<std::string, std::string> ordered(m_proxy.begin(), m_proxy.end());
-    for(auto i = ordered.begin(); i != ordered.end(); ++i) {
-        m_logger->debug("{} = \"{}\"", i->first, i->second);
+    for(auto &i : ordered) {
+        m_logger->debug(R"({} = "{}")", i.first, i.second);
     }
 
-    for(auto i : get_boundaries()) {
+    for(const auto &i : get_boundaries()) {
         i.print(*m_logger);
     }
 
-    for(auto i : get_obstacles()) {
+    for(const auto &i : get_obstacles()) {
         i.print(*m_logger);
     }
 
-    for(auto i : get_surfaces()) {
+    for(const auto &i : get_surfaces()) {
         i.print(*m_logger);
     }
 #endif
 }
 
-std::string Settings::sget(std::string path) const {
+std::string Settings::sget(const std::string &path) const {
     auto iter = m_proxy.find(path);
     return iter->second;
 }
 
-std::string Settings::get(std::string path) const {
+std::string Settings::get(const std::string &path) const {
     auto iter = m_proxy.find(path);
     if (iter == m_proxy.end()) {
 #ifndef BENCHMARKING
-        m_logger->error("didn't found \"{}\" in settings", path);
+        m_logger->error(R"(didn't found "{}" in settings)", path);
         print_config();
-        throw std::invalid_argument("\"" + path + "\" is an unkown setting");
+        throw std::invalid_argument("\"" + path + "\" is an unknown setting");
 #endif
     }
 
 #ifndef BENCHMARKING
-     m_logger->debug("reading: \"{}\" with value: \"{}\"", path, iter->second);
+     m_logger->debug(R"(reading: "{}" with value: "{}")", path, iter->second);
 #endif
 
     return iter->second;

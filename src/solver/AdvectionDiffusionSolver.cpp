@@ -4,20 +4,20 @@
 /// \author   Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "AdvectionDiffusionSolver.h"
+
 #include <string>
 #include <vector>
 #include <algorithm>
 
-#include "AdvectionDiffusionSolver.h"
-#include "../Domain.h"
 #include "SolverSelection.h"
-#include "../utility/Utility.h"
+#include "../domain/DomainData.h"
 
 
 AdvectionDiffusionSolver::AdvectionDiffusionSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(m_settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = field_controller;
 

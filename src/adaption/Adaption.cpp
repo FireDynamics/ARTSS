@@ -1,7 +1,7 @@
 /// \file       Adaption.cpp
 /// \brief      Controller class for adaption
 /// \date       Nov 29, 2018
-/// \author     My Linh Würzburger
+/// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 
@@ -15,15 +15,15 @@
 #include "Adaption.h"
 #include "Layers.h"
 #include "Vortex.h"
-#include "../Domain.h"
-#include "../boundary/BoundaryController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 
 Adaption::Adaption(Settings::Settings const &settings, FieldController *field_controller) {
     m_field_controller = field_controller;
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(Adaption).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    auto domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
     m_dynamic = settings.get_bool("adaption/dynamic");
     m_filename = settings.get_filename();
     m_filename.resize(m_filename.size() - 4);//remove .xml from filename
@@ -46,11 +46,11 @@ Adaption::Adaption(Settings::Settings const &settings, FieldController *field_co
             m_logger->critical("Type {} is not defined", init);
 #endif
             std::exit(1);
-            ///TODO Error Handling
+            //TODO Error Handling
         }
 
         m_dynamic_end = false;
-        m_minimal = static_cast<size_t> (std::pow(2, domain->get_levels()));
+        m_minimal = static_cast<size_t> (std::pow(2, domain_data->get_levels()));
         m_shift_x1 = 0;
         m_shift_x2 = 0;
         m_shift_y1 = 0;
@@ -74,7 +74,7 @@ void Adaption::run(real) {
         std::chrono::time_point<std::chrono::system_clock> start, end;
         start = std::chrono::system_clock::now();
 #endif
-        BoundaryController::getInstance()->update_lists();
+        DomainController::getInstance()->update_lists();
 #ifndef BENCHMARKING
         end = std::chrono::system_clock::now();
         if (m_has_time_measuring) {
@@ -94,13 +94,13 @@ void Adaption::run(real) {
 /// \param  time timestep
 // ***************************************************************************************
 void Adaption::extractData(const std::string &filename, real height, real time) {
-    auto domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
     size_t x_start = 0;
-    size_t x_end = domain->get_Nx();
-    auto y = static_cast<size_t>(std::round((height - domain->get_Y1()) / domain->get_dy()));
-    auto z = static_cast<size_t >(std::round(domain->get_Nz() / 2));
-    size_t Nx = domain->get_Nx();
-    size_t Ny = domain->get_Ny();
+    size_t x_end = domain_data->get_Nx();
+    auto y = static_cast<size_t>(std::round((height - domain_data->get_Y1()) / domain_data->get_dy()));
+    auto z = static_cast<size_t >(std::round(domain_data->get_Nz() / 2));
+    size_t Nx = domain_data->get_Nx();
+    size_t Ny = domain_data->get_Ny();
 
     real *data_temp = m_field_controller->get_field_T().data;
     real *data_tempA = m_field_controller->get_field_T_ambient().data;
@@ -129,12 +129,12 @@ void Adaption::extractData(const std::string &filename, real height, real time) 
 /// \param  filename  filename
 // ***************************************************************************************
 void Adaption::extractData(const std::string &filename) {
-    auto domain = Domain::getInstance();
-    size_t Nx = domain->get_Nx();
-    size_t Ny = domain->get_Ny();
+    auto domain_data = DomainData::getInstance();
+    size_t Nx = domain_data->get_Nx();
+    size_t Ny = domain_data->get_Ny();
     size_t x_end = Nx;
     size_t y_end = Ny;
-    size_t z_end = domain->get_Nz();
+    size_t z_end = domain_data->get_Nz();
 
     real *data_temp = m_field_controller->get_field_T().data;
     real *data_u = m_field_controller->get_field_u().data;
@@ -169,14 +169,16 @@ void Adaption::applyChanges() {
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
 #endif
-    auto domain = Domain::getInstance();
-    if (domain->resize(m_shift_x1, m_shift_x2, m_shift_y1, m_shift_y2, m_shift_z1, m_shift_z2)) {
-        if (domain->get_X1() == domain->get_x1() &&
-            domain->get_X2() == domain->get_x2() &&
-            domain->get_Y1() == domain->get_y1() &&
-            domain->get_Y2() == domain->get_y2() &&
-            domain->get_Z1() == domain->get_z1() &&
-            domain->get_Z2() == domain->get_z2()) {
+    auto domain_data = DomainData::getInstance();
+    auto shift_start = new Coordinate<long>(m_shift_x1, m_shift_y1, m_shift_z1);
+    auto shift_end = new Coordinate<long>(m_shift_x2, m_shift_y2, m_shift_z2);
+    if (domain_data->resize(*shift_start, *shift_end)) {
+        if (domain_data->get_X1() == domain_data->get_x1() &&
+            domain_data->get_X2() == domain_data->get_x2() &&
+            domain_data->get_Y1() == domain_data->get_y1() &&
+            domain_data->get_Y2() == domain_data->get_y2() &&
+            domain_data->get_Z1() == domain_data->get_z1() &&
+            domain_data->get_Z2() == domain_data->get_z2()) {
             m_dynamic_end = true;
         }
         func->apply_changes(&m_shift_x1, &m_shift_x2, &m_shift_y1, &m_shift_y2, &m_shift_z1, &m_shift_z2);
@@ -230,20 +232,20 @@ bool Adaption::isUpdateNecessary() {
 /// \param len_e  size of arr_idx_expansion
 // ***************************************************************************************
 void Adaption::expand_x_direction(long shift, bool start, size_t *arr_idx_expansion, size_t len_e __attribute__((unused))) {
-    auto domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
 #pragma acc data present(arr_idx_expansion[:len_e])
     {
-        size_t j_start = domain->get_index_y1();
-        size_t j_end = domain->get_index_y2() + 1;
+        size_t j_start = domain_data->get_index_y1();
+        size_t j_end = domain_data->get_index_y2() + 1;
 
-        size_t k_start = domain->get_index_z1();
-        size_t k_end = domain->get_index_z2() + 1;
+        size_t k_start = domain_data->get_index_z1();
+        size_t k_end = domain_data->get_index_z2() + 1;
 
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
         if (start) { // shift = negative
-            size_t i1 = domain->get_index_x1();
+            size_t i1 = domain_data->get_index_x1();
             shift *= (-1);
 #pragma acc parallel loop collapse(3) present(arr_idx_expansion[:len_e])
             for (size_t k = k_start; k < k_end; k++) {
@@ -256,7 +258,7 @@ void Adaption::expand_x_direction(long shift, bool start, size_t *arr_idx_expans
                 }
             }
         } else { // shift = positive
-            size_t i2 = domain->get_index_x2();
+            size_t i2 = domain_data->get_index_x2();
 #pragma acc parallel loop collapse(3) present(arr_idx_expansion[:len_e])
             for (size_t j = j_start; j < j_end; j++) {
                 for (size_t k = k_start; k < k_end; k++) {
@@ -280,19 +282,19 @@ void Adaption::expand_x_direction(long shift, bool start, size_t *arr_idx_expans
 /// \param len_e  size of arr_idx_expansion
 // ***************************************************************************************
 void Adaption::expand_y_direction(long shift, bool start, size_t *arr_idx_expansion, size_t len_e __attribute__((unused))) {
-    auto domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
 
 #pragma acc data present(arr_idx_expansion[:len_e])
     {
-        size_t i_start = domain->get_index_x1();
-        size_t i_end = domain->get_index_x2() + 1;
-        size_t k_start = domain->get_index_z1();
-        size_t k_end = domain->get_index_z2() + 1;
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        size_t i_start = domain_data->get_index_x1();
+        size_t i_end = domain_data->get_index_x2() + 1;
+        size_t k_start = domain_data->get_index_z1();
+        size_t k_end = domain_data->get_index_z2() + 1;
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
         if (start) { // shift = negative
-            size_t j1 = domain->get_index_y1();
+            size_t j1 = domain_data->get_index_y1();
             shift *= (-1);
 #pragma acc parallel loop collapse(3) present(arr_idx_expansion[:len_e])
             for (size_t k = k_start; k < k_end; k++) {
@@ -305,7 +307,7 @@ void Adaption::expand_y_direction(long shift, bool start, size_t *arr_idx_expans
                 }
             }
         } else { // shift = positive
-            size_t j2 = domain->get_index_y2();
+            size_t j2 = domain_data->get_index_y2();
 #pragma acc parallel loop collapse(3) present(arr_idx_expansion[:len_e])
             for (size_t k = k_start; k < k_end; k++) {
                 for (size_t i = i_start; i < i_end; i++) {
@@ -329,18 +331,18 @@ void Adaption::expand_y_direction(long shift, bool start, size_t *arr_idx_expans
 /// \param len_e  size of arr_idx_reduction
 // ***************************************************************************************
 void Adaption::reduce_x_direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r __attribute__((unused))) {
-    auto domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
 #pragma acc data present(arr_idx_reduction[:len_r])
     {
-        size_t j_start = domain->get_index_y1();
-        size_t j_end = domain->get_index_y2() + 1;
-        size_t k_start = domain->get_index_z1();
-        size_t k_end = domain->get_index_z2() + 1;
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        size_t j_start = domain_data->get_index_y1();
+        size_t j_end = domain_data->get_index_y2() + 1;
+        size_t k_start = domain_data->get_index_z1();
+        size_t k_end = domain_data->get_index_z2() + 1;
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
         if (start) { // shift = positive
-            size_t i1 = domain->get_index_x1();
+            size_t i1 = domain_data->get_index_x1();
 #pragma acc parallel loop collapse(3) present(arr_idx_reduction[:len_r])
             for (size_t k = k_start; k < k_end; k++) {
                 for (size_t j = j_start; j < j_end; j++) {
@@ -353,7 +355,7 @@ void Adaption::reduce_x_direction(long shift, bool start, size_t *arr_idx_reduct
             }
         } else { // shift = negative
             shift *= (-1);
-            size_t i2 = domain->get_index_x2();
+            size_t i2 = domain_data->get_index_x2();
 #pragma acc parallel loop collapse(3) present(arr_idx_reduction[:len_r])
             for (size_t k = k_start; k < k_end; k++) {
                 for (size_t j = j_start; j < j_end; j++) {
@@ -377,19 +379,19 @@ void Adaption::reduce_x_direction(long shift, bool start, size_t *arr_idx_reduct
 /// \param len_e  size of arr_idx_reduction
 // ***************************************************************************************
 void Adaption::reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduction, size_t len_r __attribute__((unused))) {
-    auto domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
 #pragma acc data present(arr_idx_reduction[:len_r])
     {
-        size_t i_start = domain->get_index_x1();
-        size_t i_end = domain->get_index_x2() + 2;
-        size_t k_start = domain->get_index_z1();
-        size_t k_end = domain->get_index_z2() + 2;
+        size_t i_start = domain_data->get_index_x1();
+        size_t i_end = domain_data->get_index_x2() + 2;
+        size_t k_start = domain_data->get_index_z1();
+        size_t k_end = domain_data->get_index_z2() + 2;
 
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
         if (start) { // shift = positive
-            size_t j1 = domain->get_index_y1();
+            size_t j1 = domain_data->get_index_y1();
 #pragma acc parallel loop collapse(3) present(arr_idx_reduction[:len_r])
             for (size_t k = k_start; k < k_end; k++) {
                 for (size_t i = i_start; i < i_end; i++) {
@@ -402,7 +404,7 @@ void Adaption::reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduct
             }
         } else { // shift = negative
             shift *= (-1);
-            size_t j2 = domain->get_index_y2();
+            size_t j2 = domain_data->get_index_y2();
 #pragma acc parallel loop collapse(3) present(arr_idx_reduction[:len_r])
             for (size_t k = k_start; k < k_end; k++) {
                 for (size_t i = i_start; i < i_end; i++) {
@@ -425,25 +427,25 @@ void Adaption::reduce_y_Direction(long shift, bool start, size_t *arr_idx_reduct
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_x_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
-    auto domain = Domain::getInstance();
-    size_t Nx = domain->get_Nx();
-    size_t Ny = domain->get_Ny();
+bool Adaption::adapt_x_direction_serial(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+    auto domain_data = DomainData::getInstance();
+    size_t Nx = domain_data->get_Nx();
+    size_t Ny = domain_data->get_Ny();
 
-    size_t i_start = domain->get_index_x1();
-    size_t i_end = domain->get_index_x2() + 1;
-    size_t j_start = domain->get_index_y1();
-    size_t j_end = domain->get_index_y2() + 1;
-    size_t k_start = domain->get_index_z1();
-    size_t k_end = domain->get_index_z2() + 1;
+    size_t i_start = domain_data->get_index_x1();
+    size_t i_end = domain_data->get_index_x2() + 1;
+    size_t j_start = domain_data->get_index_y1();
+    size_t j_end = domain_data->get_index_y2() + 1;
+    size_t k_start = domain_data->get_index_z1();
+    size_t k_end = domain_data->get_index_z2() + 1;
 
     //expansion - expand if there is at least one cell in the buffer area fulfills the condition
     ADTypes expansion_start = ADTypes::UNKNOWN;
-    if (domain->get_x1() == domain->get_X1()) {
+    if (domain_data->get_x1() == domain_data->get_X1()) {
         expansion_start = ADTypes::NO;
     }
     ADTypes expansion_end = ADTypes::UNKNOWN;
-    if (domain->get_x2() == domain->get_X2()) {
+    if (domain_data->get_x2() == domain_data->get_X2()) {
         expansion_end = ADTypes::NO;
     }
     ADTypes expansion = ADTypes::UNKNOWN;
@@ -455,7 +457,7 @@ bool Adaption::adapt_x_direction_serial(Settings::Settings const &settings, cons
     ADTypes reduction_start = ADTypes::NO;
     ADTypes reduction_end = ADTypes::NO;
     ADTypes reduction = ADTypes::NO;
-    if (reduce && domain->get_nx() > (minimal + no_buffer_cell) * 2) {
+    if (reduce && domain_data->get_nx() > (minimal + no_buffer_cell) * 2) {
         reduction_start = ADTypes::UNKNOWN;
         reduction_end = ADTypes::UNKNOWN;
         reduction = ADTypes::UNKNOWN;
@@ -504,7 +506,7 @@ bool Adaption::adapt_x_direction_serial(Settings::Settings const &settings, cons
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(typeid(Adaption).name());
         m_logger->error("Exception in x-Adaption: {} {} {} {}",
                         size_t(expansion_start),
                         size_t(reduction_start),
@@ -534,8 +536,8 @@ bool Adaption::adapt_x_direction_serial(Settings::Settings const &settings, cons
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_x_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
-    auto domain = Domain::getInstance();
+bool Adaption::adapt_x_direction(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+    auto domain_data = DomainData::getInstance();
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;
     size_t reduction_counter_start = 0;
@@ -543,21 +545,21 @@ bool Adaption::adapt_x_direction(Settings::Settings const &settings, const real 
 
     bool reduction_start = reduce;
     bool reduction_end = reduce;
-    if (reduce && domain->get_nx() > (minimal + no_buffer_cell) * 2) {
+    if (reduce && domain_data->get_nx() > (minimal + no_buffer_cell) * 2) {
         reduction_start = false;
         reduction_end = false;
     }
 #pragma acc data present(f) copy(expansion_counter_start, expansion_counter_end, reduction_counter_start, reduction_counter_end)
     {
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        size_t i_start = domain->get_index_x1();
-        size_t i_end = domain->get_index_x2() + 1;
-        size_t j_start = domain->get_index_y1();
-        size_t j_end = domain->get_index_y2() + 1;
-        size_t k_start = domain->get_index_z1();
-        size_t k_end = domain->get_index_z2() + 1;
+        size_t i_start = domain_data->get_index_x1();
+        size_t i_end = domain_data->get_index_x2() + 1;
+        size_t j_start = domain_data->get_index_y1();
+        size_t j_end = domain_data->get_index_y2() + 1;
+        size_t k_start = domain_data->get_index_z1();
+        size_t k_end = domain_data->get_index_z2() + 1;
 
         //expansion - expand if there is at least one cell in the buffer area fulfills the condition
         //reduction - reduce if all cells do not fulfil the condition any longer
@@ -594,7 +596,7 @@ bool Adaption::adapt_x_direction(Settings::Settings const &settings, const real 
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(typeid(Adaption).name());
         m_logger->error("Trying to reduce and expand at the same time (x): {},{} | {},{}",
                 expansion_counter_start,
                 reduction_counter_start,
@@ -630,25 +632,25 @@ bool Adaption::adapt_x_direction(Settings::Settings const &settings, const real 
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_y_direction_serial(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
-    auto domain = Domain::getInstance();
-    size_t Nx = domain->get_Nx();
-    size_t Ny = domain->get_Ny();
+bool Adaption::adapt_y_direction_serial(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+    auto domain_data = DomainData::getInstance();
+    size_t Nx = domain_data->get_Nx();
+    size_t Ny = domain_data->get_Ny();
 
-    size_t i_start = domain->get_index_x1();
-    size_t i_end = domain->get_index_x2() + 1;
-    size_t j_start = domain->get_index_y1();
-    size_t j_end = domain->get_index_y2() + 1;
-    size_t k_start = domain->get_index_z1();
-    size_t k_end = domain->get_index_z2() + 1;
+    size_t i_start = domain_data->get_index_x1();
+    size_t i_end = domain_data->get_index_x2() + 1;
+    size_t j_start = domain_data->get_index_y1();
+    size_t j_end = domain_data->get_index_y2() + 1;
+    size_t k_start = domain_data->get_index_z1();
+    size_t k_end = domain_data->get_index_z2() + 1;
 
     //expansion - expand if there is at least one cell in the buffer area fulfills the condition
     ADTypes expansion_start = ADTypes::UNKNOWN;
-    if (domain->get_y1() == domain->get_Y1()) {
+    if (domain_data->get_y1() == domain_data->get_Y1()) {
         expansion_start = ADTypes::NO;
     }
     ADTypes expansion_end = ADTypes::UNKNOWN;
-    if (domain->get_y2() == domain->get_Y2()) {
+    if (domain_data->get_y2() == domain_data->get_Y2()) {
         expansion_end = ADTypes::NO;
     }
     ADTypes expansion = ADTypes::UNKNOWN;
@@ -660,7 +662,7 @@ bool Adaption::adapt_y_direction_serial(Settings::Settings const &settings, cons
     ADTypes reduction_start = ADTypes::NO;
     ADTypes reduction_end = ADTypes::NO;
     ADTypes reduction = ADTypes::NO;
-    if (reduce && domain->get_nx() > (minimal + no_buffer_cell) * 2) {
+    if (reduce && domain_data->get_nx() > (minimal + no_buffer_cell) * 2) {
         reduction_start = ADTypes::UNKNOWN;
         reduction_end = ADTypes::UNKNOWN;
         reduction = ADTypes::UNKNOWN;
@@ -709,7 +711,7 @@ bool Adaption::adapt_y_direction_serial(Settings::Settings const &settings, cons
     if ((expansion_start == reduction_start && expansion_start == ADTypes::YES) ||
         (expansion_end == reduction_end && expansion_end == ADTypes::YES)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(typeid(Adaption).name());
         m_logger->error("Exception in y-Adaption: {} {} {} {}",
                         size_t(expansion_start),
                         size_t(reduction_start),
@@ -740,8 +742,8 @@ bool Adaption::adapt_y_direction_serial(Settings::Settings const &settings, cons
 /// \param  no_buffer_cell Buffersize
 /// \param  threshold precision of comparison
 // ***************************************************************************************
-bool Adaption::adapt_y_direction(Settings::Settings const &settings, const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
-    auto domain = Domain::getInstance();
+bool Adaption::adapt_y_direction(const real *f, real check_value, size_t no_buffer_cell, real threshold, long *p_shift_x1, long *p_shift_x2, size_t minimal, bool reduce) {
+    auto domain_data = DomainData::getInstance();
 
     size_t expansion_counter_start = 0;
     size_t expansion_counter_end = 0;
@@ -750,21 +752,21 @@ bool Adaption::adapt_y_direction(Settings::Settings const &settings, const real 
     //reduction - reduce if all cells do not fulfil the condition any longer
     bool reduction_start = reduce;
     bool reduction_end = reduce;
-    if (reduce && domain->get_ny() > (minimal + no_buffer_cell) * 2) {
+    if (reduce && domain_data->get_ny() > (minimal + no_buffer_cell) * 2) {
         reduction_start = false;
         reduction_end = false;
     }
 #pragma acc data present(f) copy(expansion_counter_start, expansion_counter_end, reduction_counter_start, reduction_counter_end)
     {
-        size_t Nx = domain->get_Nx();
-        size_t Ny = domain->get_Ny();
+        size_t Nx = domain_data->get_Nx();
+        size_t Ny = domain_data->get_Ny();
 
-        size_t i_start = domain->get_index_x1();
-        size_t i_end = domain->get_index_x2() + 1;
-        size_t j_start = domain->get_index_y1();
-        size_t j_end = domain->get_index_y2() + 1;
-        size_t k_start = domain->get_index_z1();
-        size_t k_end = domain->get_index_z2() + 1;
+        size_t i_start = domain_data->get_index_x1();
+        size_t i_end = domain_data->get_index_x2() + 1;
+        size_t j_start = domain_data->get_index_y1();
+        size_t j_end = domain_data->get_index_y2() + 1;
+        size_t k_start = domain_data->get_index_z1();
+        size_t k_end = domain_data->get_index_z2() + 1;
 
         //expansion - expand if there is at least one cell in the buffer area fulfills the condition
         //loop through lower side of cuboid in y direction
@@ -800,7 +802,7 @@ bool Adaption::adapt_y_direction(Settings::Settings const &settings, const real 
     if ((expansion_counter_start > 0 && reduction_counter_start == 0 && reduction_start) ||
         (expansion_counter_end > 0 && reduction_counter_end == 0 && reduction_end)) {
 #ifndef BENCHMARKING
-        auto m_logger = Utility::create_logger(settings, typeid(Adaption).name());
+        auto m_logger = Utility::create_logger(typeid(Adaption).name());
         m_logger->error(
             "Trying to reduce and expand at the same time (y): {}, {} | {}, {}",
             expansion_counter_start,

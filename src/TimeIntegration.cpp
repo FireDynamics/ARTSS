@@ -5,7 +5,7 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "TimeIntegration.h"
-#include "Domain.h"
+#include "domain/DomainData.h"
 
 // ==================================== Constructor ====================================
 // ***************************************************************************************
@@ -14,7 +14,7 @@
 // ***************************************************************************************
 TimeIntegration::TimeIntegration(Settings::Settings const &settings, SolverController *sc) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(settings, typeid(this).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
 
     m_dt = settings.get_real("physical_parameters/dt");
@@ -38,29 +38,12 @@ void TimeIntegration::run() {
     Field &u = m_field_controller->get_field_u();
     Field &v = m_field_controller->get_field_v();
     Field &w = m_field_controller->get_field_w();
-    Field &p = m_field_controller->get_field_p();
-    Field &rhs = m_field_controller->get_field_rhs();
-    Field &T = m_field_controller->get_field_T();
-    Field &C = m_field_controller->get_field_concentration();
-    Field &S_T = m_field_controller->get_field_source_T();
-    Field &S_C = m_field_controller->get_field_source_T();
-    Field &nu_t = m_field_controller->get_field_nu_t();
 
 #ifndef BENCHMARKING
-    u.update_host();
-    v.update_host();
-    w.update_host();
-    p.update_host();
-    rhs.update_host();
-    T.update_host();
-    C.update_host();
-    nu_t.update_host();
-    S_T.update_host();
-    S_C.update_host();
-#pragma acc wait
-
+    m_field_controller->update_host();
     m_analysis->analyse(m_field_controller, 0.);
     m_visual->visualise(*m_field_controller, 0.);
+    Visual::write_vtk_debug(*m_field_controller, "initial_steckler");
     m_logger->info("Start calculating and timing...");
 #else
     std::cout << "Start calculating and timing...\n" << std::endl;
@@ -92,19 +75,8 @@ void TimeIntegration::run() {
             // Calculate
             m_solver_controller->solver_do_step(t_cur, false);
 #ifndef BENCHMARKING
+            m_field_controller->update_host();
             // Visualize
-            u.update_host();
-            v.update_host();
-            w.update_host();
-            p.update_host();
-            rhs.update_host();
-            T.update_host();
-            C.update_host();
-            nu_t.update_host();
-            S_T.update_host();
-            S_C.update_host();
-#pragma acc wait
-
             m_solution->calc_analytical_solution(t_cur);
 
             m_visual->visualise(*m_field_controller, t_cur);
@@ -154,32 +126,15 @@ void TimeIntegration::run() {
         m_analysis->calc_RMS_error(Sum[0], Sum[1], Sum[2]);
 #endif
 
-#pragma acc wait
-    u.update_host();
-    v.update_host();
-    w.update_host();
-    p.update_host();
-    rhs.update_host();
-    T.update_host();
-    C.update_host();
-    nu_t.update_host();
-    S_T.update_host();
-    S_C.update_host();
-#pragma acc wait
     }
-
-#ifndef BENCHMARKING
-    m_logger->info("Done calculating and timing ...");
-#else
-    std::cout << "Done calculating and timing ..." << std::endl;
-#endif
-
     // stop timer
     end = std::chrono::system_clock::now();
     long ms = std::chrono::duration_cast < std::chrono::milliseconds > (end - start).count();
 
 #ifndef BENCHMARKING
+    m_logger->info("Done calculating and timing ...");
     m_logger->info("Global Time: {}ms", ms);
+    m_field_controller->update_host();
     if (m_adaption->is_data_extraction_endresult_enabled()) {
         m_adaption->extractData(m_adaption->get_endresult_name());
     }
@@ -190,6 +145,7 @@ void TimeIntegration::run() {
     delete m_solution;
     delete m_visual;
 #else
+    std::cout << "Done calculating and timing ..." << std::endl;
     std::cout << "Global Time: " << ms << "ms" << std::endl;
 #endif
     delete m_adaption;

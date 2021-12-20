@@ -5,9 +5,10 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "VTKWriter.h"
-#include "../Domain.h"
 #include "visit_writer.h"  //( https://wci.llnl.gov/codes/visit/ )
+#include "../domain/DomainData.h"
 
+int VTKWriter::vtk_counter = 0;
 static std::string ending = ".vtk";
 
 void VTKWriter::write_numerical_debug(const FieldController &field_controller, const std::string &filename) {
@@ -54,21 +55,19 @@ void VTKWriter::write_numerical_debug(const FieldController &field_controller, c
     VTKWriter::vtk_prepare_and_write_debug((filename + ending).c_str(), data,
                                            size_vars, var_names, centering, var_dims);
 
-    delete[] (*var_names);
-    delete[] (*data);
 }
 
 void VTKWriter::write_numerical(const FieldController &field_controller, const std::string &filename) {
-    auto u = field_controller.get_field_u_data();
-    auto v = field_controller.get_field_v_data();
-    auto w = field_controller.get_field_w_data();
-    auto p = field_controller.get_field_p_data();
-    auto div = field_controller.get_field_rhs_data();
-    auto T = field_controller.get_field_T_data();
-    auto C = field_controller.get_field_concentration_data();
-    auto sight = field_controller.get_field_sight_data();
-    auto nu_t = field_controller.get_field_nu_t_data();
-    auto source_T = field_controller.get_field_source_T_data();
+    return_ptr u = field_controller.get_field_u_data();
+    return_ptr v = field_controller.get_field_v_data();
+    return_ptr w = field_controller.get_field_w_data();
+    return_ptr p = field_controller.get_field_p_data();
+    return_ptr div = field_controller.get_field_rhs_data();
+    return_ptr T = field_controller.get_field_T_data();
+    return_ptr C = field_controller.get_field_concentration_data();
+    return_ptr sight = field_controller.get_field_sight_data();
+    return_ptr nu_t = field_controller.get_field_nu_t_data();
+    return_ptr source_T = field_controller.get_field_source_T_data();
     VTKWriter::vtk_prepare_and_write((filename + ending).c_str(),
                                      u, v, w,
                                      p,
@@ -115,20 +114,20 @@ void VTKWriter::vtk_prepare_and_write(const char *filename,
                                       read_ptr sight,
                                       read_ptr nu_t,
                                       read_ptr source_T) {
-    Domain *domain = Domain::getInstance();
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_Y1();
-    real Z1 = domain->get_Z1();
+    auto domain_data = DomainData::getInstance();
+    real X1 = domain_data->get_X1();
+    real Y1 = domain_data->get_Y1();
+    real Z1 = domain_data->get_Z1();
 
-    int Nx = static_cast<int>(domain->get_Nx());
-    int Ny = static_cast<int>(domain->get_Ny());
-    int Nz = static_cast<int>(domain->get_Nz());
+    int Nx = static_cast<int>(domain_data->get_Nx());
+    int Ny = static_cast<int>(domain_data->get_Ny());
+    int Nz = static_cast<int>(domain_data->get_Nz());
 
-    real dx = domain->get_dx();
-    real dy = domain->get_dy();
-    real dz = domain->get_dz();
+    real dx = domain_data->get_dx();
+    real dy = domain_data->get_dy();
+    real dz = domain_data->get_dz();
 
-    int size = static_cast<int>(domain->get_size());
+    int size = static_cast<int>(domain_data->get_size());
 
     // Initialise variables
     int size_vars = 13;  // Number of variables
@@ -270,20 +269,20 @@ void VTKWriter::vtk_prepare_and_write(const char *filename,
                                       read_ptr u, read_ptr v, read_ptr w,
                                       read_ptr p,
                                       read_ptr T) {
-    Domain *domain = Domain::getInstance();
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_Y1();
-    real Z1 = domain->get_Z1();
+    auto domain_data = DomainData::getInstance();
+    real X1 = domain_data->get_X1();
+    real Y1 = domain_data->get_Y1();
+    real Z1 = domain_data->get_Z1();
 
-    int Nx = static_cast<int>(domain->get_Nx());
-    int Ny = static_cast<int>(domain->get_Ny());
-    int Nz = static_cast<int>(domain->get_Nz());
+    int Nx = static_cast<int>(domain_data->get_Nx());
+    int Ny = static_cast<int>(domain_data->get_Ny());
+    int Nz = static_cast<int>(domain_data->get_Nz());
 
-    real dx = domain->get_dx();
-    real dy = domain->get_dy();
-    real dz = domain->get_dz();
+    real dx = domain_data->get_dx();
+    real dy = domain_data->get_dy();
+    real dz = domain_data->get_dz();
 
-    int size = static_cast<int>(domain->get_size());
+    int size = static_cast<int>(domain_data->get_size());
 
     // Initialise variables
     int size_vars = 8; // Number of variables
@@ -392,20 +391,20 @@ void VTKWriter::vtk_prepare_and_write(const char *filename,
 void VTKWriter::vtk_prepare_and_write_debug(const char *filename, read_ptr *data,
                                             int size_vars, const char * const *var_names,
                                             int *centering, int *var_dims) {
-    Domain *domain = Domain::getInstance();
-    real X1 = domain->get_X1();
-    real Y1 = domain->get_Y1();
-    real Z1 = domain->get_Z1();
+    auto domain_data = DomainData::getInstance();
+    real X1 = domain_data->get_X1();
+    real Y1 = domain_data->get_Y1();
+    real Z1 = domain_data->get_Z1();
 
-    int Nx = static_cast<int>(domain->get_Nx());
-    int Ny = static_cast<int>(domain->get_Ny());
-    int Nz = static_cast<int>(domain->get_Nz());
+    int Nx = static_cast<int>(domain_data->get_Nx());
+    int Ny = static_cast<int>(domain_data->get_Ny());
+    int Nz = static_cast<int>(domain_data->get_Nz());
 
-    real dx = domain->get_dx();
-    real dy = domain->get_dy();
-    real dz = domain->get_dz();
+    real dx = domain_data->get_dx();
+    real dy = domain_data->get_dy();
+    real dz = domain_data->get_dz();
 
-    int size = static_cast<int>(domain->get_size());
+    int size = static_cast<int>(domain_data->get_size());
 
     // Dimensions of the rectilinear array (+1 for zonal values)
     int dims[] = {Nx + 1, Ny + 1, Nz + 1};
@@ -459,6 +458,91 @@ void VTKWriter::vtk_prepare_and_write_debug(const char *filename, read_ptr *data
     // Use visit_writer to write data on mesh
     write_rectilinear_mesh(filename, 1, dims, x_coords, y_coords, z_coords, size_vars + 6, var_dims, centering, var_names, vars);
 
+
+    for (int i = 0; i < size_vars + 6; i++) {
+        delete[] write_out[i];
+    }
+    // Clean up
+    delete[] (x_coords);
+    delete[] (y_coords);
+    delete[] (z_coords);
+}
+
+void VTKWriter::write_field(const Field &field, const std::string &filename, const std::string &var_name) {
+    std::string fname = std::to_string(VTKWriter::vtk_counter++) + "_" + filename;
+    int size_vars = 1;
+    const char *var_names[] = {"x-coords", "y-coords", "z-coords",
+                               "index_i", "index_j", "index_k",
+                               var_name.c_str()};
+    auto domain_data = DomainData::getInstance();
+    real X1 = domain_data->get_X1();
+    real Y1 = domain_data->get_Y1();
+    real Z1 = domain_data->get_Z1();
+
+    int Nx = static_cast<int>(domain_data->get_Nx());
+    int Ny = static_cast<int>(domain_data->get_Ny());
+    int Nz = static_cast<int>(domain_data->get_Nz());
+
+    real dx = domain_data->get_dx();
+    real dy = domain_data->get_dy();
+    real dz = domain_data->get_dz();
+
+    int size = static_cast<int>(domain_data->get_size());
+
+    // Dimensions of the rectilinear array (+1 for zonal values)
+    int dims[] = {Nx + 1, Ny + 1, Nz + 1};
+
+    auto x_coords = new float[(Nx + 1)];
+    auto y_coords = new float[(Ny + 1)];
+    auto z_coords = new float[(Nz + 1)];
+
+    // Initialise grid
+    // faces of the grid cells
+    for (int i = 0; i < Nx + 1; i++) {
+        x_coords[i] = static_cast<float> (X1 + (i - 1) * dx);
+    }
+
+    for (int j = 0; j < Ny + 1; j++) {
+        y_coords[j] = static_cast<float> (Y1 + (j - 1) * dy);
+    }
+
+    for (int k = 0; k < Nz + 1; k++) {
+        z_coords[k] = static_cast<float> (Z1 + (k - 1) * dz);
+    }
+
+    float *write_out[size_vars + 6];
+    for (int i = 0; i < size_vars + 6; i++){
+        write_out[i] = new float[size];
+    }
+
+    // Cast variables to floats
+    for (int k = 0; k < Nz; k++) {
+        for (int j = 0; j < Ny; j++) {
+            for (int i = 0; i < Nx; i++) {
+                size_t index = IX(i, j, k, Nx, Ny);
+                write_out[0][index] = x_coords[i] + static_cast<float> (0.5 * dx);
+                write_out[1][index] = y_coords[j] + static_cast<float> (0.5 * dy);
+                write_out[2][index] = z_coords[k] + static_cast<float> (0.5 * dz);
+                write_out[3][index] = static_cast<float> (i);
+                write_out[4][index] = static_cast<float> (j);
+                write_out[5][index] = static_cast<float> (k);
+                write_out[6][index] = static_cast<float>(field.data[index]);
+            }
+        }
+    }
+    // Summarise pointers to variables in an array
+    float *vars[size_vars + 6];
+    for (int i = 0; i < size_vars + 6; i++){
+        vars[i] = static_cast<float *> (write_out[i]);
+    }
+    int var_dims[] = {1, 1, 1, 1, 1, 1, 1};
+    int centering[] = {0, 0, 0, 0, 0, 0, 0};
+    write_rectilinear_mesh(fname.c_str(), 1, dims, x_coords, y_coords, z_coords, size_vars + 6, var_dims, centering, var_names, vars);
+
+
+    for (int i = 0; i < size_vars + 6; i++) {
+        delete[] write_out[i];
+    }
     // Clean up
     delete[] (x_coords);
     delete[] (y_coords);
