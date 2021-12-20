@@ -245,7 +245,7 @@ namespace Settings {
         boundaries_parameters bp{};
 
         for (auto i = subsection->FirstChildElement(); i; i = subsection->NextSiblingElement()) {
-            if (subsection->Name() == std::string("boundary")) {
+            if (i->Name() == std::string("boundary")) {
                 bp.boundaries.emplace_back(parse_boundary(i, context));
             }
         }

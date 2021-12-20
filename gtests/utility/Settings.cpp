@@ -212,3 +212,29 @@ TEST(SettingsTest, requiredSurfacesParameters) {
     Settings::surfaces_parameters surfaces_parameters = Settings::parse_surfaces_parameters(doc.RootElement());
     EXPECT_FALSE(surfaces_parameters.enabled);
 }
+
+TEST(SettingsTest, boundaries) {
+    std::string xml = R"(
+<ARTSS>
+    <boundaries>
+        <boundary field="u,v,w" patch="front,back,bottom,top,left,right" type="dirichlet" value="0.0" />
+        <boundary field="p" patch="front,back,bottom,top,left,right" type="neumann" value="0.0" />
+        <boundary field="T" patch="front,back,top,left,right" type="dirichlet" value="299.14" />
+        <boundary field="T" patch="bottom" type="neumann" value="0.0" />
+    </boundaries>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::boundaries_parameters boundaries_parameters = Settings::parse_boundaries_parameters(doc.RootElement());
+    EXPECT_NE(std::find(boundaries_parameters.boundaries[0].field_type.begin(), boundaries_parameters.boundaries[0].field_type.end(), FieldType::U), boundaries_parameters.boundaries[0].field_type.end());
+    EXPECT_EQ(boundaries_parameters.boundaries[0].field_type[0], FieldType::U);
+    EXPECT_EQ(boundaries_parameters.boundaries[0].field_type[1], FieldType::V);
+    EXPECT_EQ(boundaries_parameters.boundaries[0].field_type[2], FieldType::W);
+
+
+    EXPECT_EQ(boundaries_parameters.boundaries[1].field_type[0], FieldType::P);
+
+    EXPECT_EQ(boundaries_parameters.boundaries[2].field_type[0], FieldType::T);
+
+    EXPECT_EQ(boundaries_parameters.boundaries[3].field_type[0], FieldType::T);
+}
