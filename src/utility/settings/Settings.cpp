@@ -16,7 +16,6 @@
 
 namespace Settings {
     static const std::string xml_true = "Yes";
-    static const std::string xml_false = "No";
     static const char delimiter = ',';
 
     return_xml_data map_parameters(const tinyxml2::XMLElement *head, const std::string &context) {
@@ -29,7 +28,9 @@ namespace Settings {
                     values[e->Name()] = e->Value();
                 }
                 for (auto e = i->FirstChildElement(); e; e = e->NextSiblingElement()) {
-                    values[e->Name()] = e->GetText();
+                    if (e->GetText()) {
+                        values[e->Name()] = e->GetText();
+                    }
                 }
                 break;
             }
@@ -167,6 +168,7 @@ namespace Settings {
             } else {
                 rp.step_size = get_optional_real(values, "step_size", 1);
             }
+            rp.range = get_required_real(values, "range", context);
         }
         return rp;
     }

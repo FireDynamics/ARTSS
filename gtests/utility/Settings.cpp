@@ -168,10 +168,11 @@ TEST(SettingsTest, requiredInitialConditionsParameters2) {
 <ARTSS>
     <initial_conditions usr_fct="Uniform" random="Yes">
         <val> 1 </val>
+        <test> 1.1 </test>
         <random absolute="Yes" custom_seed="Yes" custom_steps="Yes">
-          <seed> 0 </seed>
-          <step_size> 0.1 </step_size>
-          <range> 1 </range>
+            <seed> 10 </seed>
+            <step_size> 0.1 </step_size>
+            <range> 1 </range>
         </random>
     </initial_conditions>
 </ARTSS>)";
@@ -186,7 +187,7 @@ TEST(SettingsTest, requiredInitialConditionsParameters2) {
     EXPECT_TRUE(initial_conditions_parameters.random_parameters.custom_seed);
     EXPECT_TRUE(initial_conditions_parameters.random_parameters.custom_steps);
     EXPECT_EQ(initial_conditions_parameters.random_parameters.range, 1);
-    EXPECT_EQ(initial_conditions_parameters.random_parameters.seed, 0);
+    EXPECT_EQ(initial_conditions_parameters.random_parameters.seed, 10);
     EXPECT_EQ(initial_conditions_parameters.random_parameters.step_size, 0.1);
 }
 
