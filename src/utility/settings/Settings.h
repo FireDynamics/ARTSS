@@ -175,9 +175,20 @@ namespace Settings {
             std::string force_fct;
             std::variant<source_solvers::buoyancy,source_solvers::uniform> force_function;
         };
+        namespace pressure_solvers {
+            struct vcycle_mg {
+                size_t n_level;
+                size_t n_cycle;
+                size_t max_cycle;
+                size_t n_relax;
+                real tol_res;
+                struct diffusion_solver smoother;
+            };
+        }
         struct pressure_solver {
             std::string type;
             FieldType field;
+            struct pressure_solvers::vcycle_mg solver;
         };
         struct temperature_solver {
             advection_solver advection;

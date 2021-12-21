@@ -493,8 +493,9 @@ namespace diffusion_solver {
     }
 }
 
-TEST(SettingsTest, turbulenceSolver) {
-    std::string xml = R"(
+namespace turbulence_solvers {
+    TEST(SettingsTest, turbulenceSolverConstSmagorinsky) {
+        std::string xml = R"(
 <ARTSS>
 <solver description="DiffusionTurbSolver" >
     <diffusion type="Explicit" field="u,v,w" >
@@ -505,26 +506,111 @@ TEST(SettingsTest, turbulenceSolver) {
     <solution available="No"/>
 </solver>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        tinyxml2::XMLDocument doc;
+        doc.Parse(xml.c_str());
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
 
-    EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::Explicit);
+        EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::Explicit);
 
-    EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
-                        solver_parameters.diffusion.fields.end(),
-                        FieldType::U),
-              solver_parameters.diffusion.fields.end());
-    EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
-                        solver_parameters.diffusion.fields.end(),
-                        FieldType::V),
-              solver_parameters.diffusion.fields.end());
-    EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
-                        solver_parameters.diffusion.fields.end(),
-                        FieldType::W),
-              solver_parameters.diffusion.fields.end());
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::U),
+                  solver_parameters.diffusion.fields.end());
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::V),
+                  solver_parameters.diffusion.fields.end());
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::W),
+                  solver_parameters.diffusion.fields.end());
 
 
-    EXPECT_EQ(solver_parameters.turbulence.type, TurbulenceMethods::ConstSmagorinsky);
-    EXPECT_DOUBLE_EQ(solver_parameters.turbulence.solver.value().cs, 0.2);
+        EXPECT_EQ(solver_parameters.turbulence.type, TurbulenceMethods::ConstSmagorinsky);
+        EXPECT_DOUBLE_EQ(solver_parameters.turbulence.solver.value().cs, 0.2);
+    }
+    TEST(SettingsTest, turbulenceSolverDynamicSmagorinsky) {
+        std::string xml = R"(
+<ARTSS>
+<solver description="DiffusionTurbSolver" >
+    <diffusion type="Explicit" field="u,v,w" >
+    </diffusion>
+    <turbulence type="DynamicSmagorinsky">
+    </turbulence>
+    <solution available="No"/>
+</solver>
+</ARTSS>)";
+        tinyxml2::XMLDocument doc;
+        doc.Parse(xml.c_str());
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+
+        EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::Explicit);
+
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::U),
+                  solver_parameters.diffusion.fields.end());
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::V),
+                  solver_parameters.diffusion.fields.end());
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::W),
+                  solver_parameters.diffusion.fields.end());
+
+
+        EXPECT_EQ(solver_parameters.turbulence.type, TurbulenceMethods::DynamicSmagorinsky);
+    }
+}
+
+namespace pressure_solvers {
+    TEST(SettingsTest, pressureSolverVCycleMG) {
+        std::string xml = R"(
+<ARTSS>
+    <solver description="PressureSolver" >
+        <pressure type="VCycleMG" field="p">
+            <n_level> 5 </n_level>  <!-- number of restriction levels -->
+            <n_cycle> 2 </n_cycle> <!-- number of cycles -->
+            <max_cycle> 100 </max_cycle>  <!-- maximal number of cycles in first time step -->
+            <tol_res> 1e-10 </tol_res>  <!-- tolerance for residuum/ convergence -->
+            <n_relax> 4 </n_relax>  <!-- number of iterations -->
+            <diffusion type="Jacobi" field="p">
+                <max_iter> 100 </max_iter>  <!-- maximal number of iterations in solving at lowest level -->
+                <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
+                <w> 0.6666666667 </w>  <!-- relaxation parameter  -->
+            </diffusion>
+        </pressure>
+        <solution available="Yes">
+            <tol> 1e-03 </tol>  <!-- tolerance for further tests -->
+        </solution>
+    </solver>
+</ARTSS>)";
+        tinyxml2::XMLDocument doc;
+        doc.Parse(xml.c_str());
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+
+        EXPECT_EQ(solver_parameters.pressure.type, PressureMethods::VCycleMG);
+        EXPECT_EQ(solver_parameters.pressure.field, FieldType::P);
+        auto vcycle = solver_parameters.pressure.solver;
+        EXPECT_EQ(vcycle.n_level, 5);
+        EXPECT_EQ(vcycle.n_cycle, 2);
+        EXPECT_EQ(vcycle.max_cycle, 100);
+        EXPECT_EQ(vcycle.n_relax, 4);
+        EXPECT_DOUBLE_EQ(vcycle.tol_res, 1e-10);
+
+        EXPECT_EQ(vcycle.smoother.type, DiffusionMethods::Jacobi);
+
+        EXPECT_NE(std::find(vcycle.smoother.fields.begin(),
+                            vcycle.smoother.fields.end(),
+                            FieldType::P),
+                  vcycle.smoother.fields.end());
+        auto jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(vcycle.smoother.solver.value());
+        EXPECT_DOUBLE_EQ(jacobi.tol_res, 1e-7);
+        EXPECT_EQ(jacobi.max_iter, 100);
+        EXPECT_DOUBLE_EQ(jacobi.w, 0.6666666667);
+
+        EXPECT_TRUE(solver_parameters.solution.analytical_solution);
+        EXPECT_DOUBLE_EQ(solver_parameters.solution.solution_tolerance.value(), 1e-3);
+    }
 }

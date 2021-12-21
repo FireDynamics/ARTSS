@@ -396,7 +396,7 @@ namespace Settings {
             if (solver_advection.type == AdvectionMethods::SemiLagrangian) {
                 // no values
             } else {
-                throw config_error(fmt::format("{} has no parsing implementation.", solver_advection.type));
+                throw config_error(fmt::format("advection solver '{}' has no parsing implementation.", solver_advection.type));
             }
 
             auto fields = Utility::split(get_required_string(values, "field", context), delimiter);
@@ -441,7 +441,7 @@ namespace Settings {
             } else if (solver_diffusion.type == DiffusionMethods::Explicit) {
                 // no values
             } else {
-                throw config_error(fmt::format("{} has no parsing implementation.", solver_diffusion.type));
+                throw config_error(fmt::format("diffusion solver '{}' has no parsing implementation.", solver_diffusion.type));
             }
 
             auto fields = Utility::split(get_required_string(values, "field", context), delimiter);
@@ -472,7 +472,7 @@ namespace Settings {
             } else if (solver_turbulence.type == TurbulenceMethods::DynamicSmagorinsky) {
                 // no values
             } else {
-                throw config_error(fmt::format("{} has no parsing implementation.", solver_turbulence.type));
+                throw config_error(fmt::format("turbulence solver '{}' has no parsing implementation.", solver_turbulence.type));
             }
 
             return solver_turbulence;
@@ -521,9 +521,23 @@ namespace Settings {
             } else if (solver_source.type == SourceMethods::Uniform) {
                 solver_source.force_function = source_solvers::parse_uniform(values, context);
             } else {
-                throw config_error(fmt::format("{} has no parsing implementation.", solver_source.type));
+                throw config_error(fmt::format("source type '{}' has no parsing implementation.", solver_source.type));
             }
             return solver_source;
+        }
+        namespace pressure_solvers {
+            vcycle_mg parse_vcycle_mg(const Map &values, const tinyxml2::XMLElement *head, const std::string &parent_context) {
+                std::string own_context = "vcycle";
+                std::string context = create_context(parent_context, own_context);
+                vcycle_mg mg{};
+                mg.n_level = get_required_size_t(values, "n_level", context);
+                mg.n_cycle = get_required_size_t(values, "n_cycle", context);
+                mg.max_cycle = get_required_size_t(values, "max_cycle", context);
+                mg.n_relax = get_required_size_t(values, "n_relax", context);
+                mg.tol_res = get_required_real(values, "tol_res", context);
+                mg.smoother = parse_diffusion_solver(head, context);
+                return mg;
+            }
         }
         pressure_solver parse_pressure_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "pressure";
@@ -531,7 +545,13 @@ namespace Settings {
             auto[subsection, values] = map_parameter_section(head, own_context);
 
             pressure_solver solver_pressure{};
-            //TODO pressure
+            solver_pressure.type = get_required_string(values, "type", context);
+            solver_pressure.field = Mapping::match_field(get_required_string(values, "field", context));
+            if (solver_pressure.type == PressureMethods::VCycleMG) {
+                solver_pressure.solver = pressure_solvers::parse_vcycle_mg(values, subsection, context);
+            } else {
+                throw config_error(fmt::format("pressure solver '{}' has no parsing implementation.", solver_pressure.type));
+            }
             return solver_pressure;
         }
         temperature_solver parse_temperature_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
@@ -573,53 +593,61 @@ namespace Settings {
 
         sp.description = get_required_string(values, "description", context);
 
-        // TODO runter lesbar -> einfach abfragen und die entsprechenden parse funktionen aufrufen
-        auto solver_types = {SolverTypes::NSSolver,
-                             SolverTypes::NSTempSolver,
-                             SolverTypes::NSTempTurbSolver,
-                             SolverTypes::NSTempConSolver,
-                             SolverTypes::NSTempTurbConSolver,
-                             SolverTypes::NSTurbSolver};
-        if (std::find(solver_types.begin(), solver_types.end(), sp.description) != solver_types.end()) {
-            // navier stokes solver, requires advection, diffusion and pressure
-            sp.advection = solver::parse_advection_solver(root, context);
-            sp.diffusion = solver::parse_diffusion_solver(root, context);
-            sp.pressure = solver::parse_pressure_solver(root, context);
-            if (sp.description == SolverTypes::NSTempSolver ||
-                sp.description == SolverTypes::NSTempConSolver ||
-                sp.description == SolverTypes::NSTempTurbSolver ||
-                sp.description == SolverTypes::NSTempTurbConSolver)  {
-                // add temperature solver
-                sp.temperature = solver::parse_temperature_solver(root, context);
-                if (sp.description == SolverTypes::NSTempConSolver ||
-                    sp.description == SolverTypes::NSTempTurbConSolver) {
-                    // add concentration solver
-                    sp.concentration = solver::parse_concentration_solver(subsection, context);
-                }
-            }
-
-        }
-        if (sp.description == SolverTypes::AdvectionSolver || sp.description == SolverTypes::AdvectionDiffusionSolver) {
-            // add advection
+        if (sp.description == SolverTypes::AdvectionSolver) {
             sp.advection = solver::parse_advection_solver(subsection, context);
-        }
-        if (sp.description == SolverTypes::DiffusionSolver ||
-            sp.description == SolverTypes::AdvectionDiffusionSolver ||
-            sp.description == SolverTypes::DiffusionTurbSolver) {
-            // add diffusion
+        } else if (sp.description == SolverTypes::AdvectionDiffusionSolver) {
+            sp.advection = solver::parse_advection_solver(subsection, context);
             sp.diffusion = solver::parse_diffusion_solver(subsection, context);
-        }
-        if (sp.description == SolverTypes::PressureSolver) {
-            // add pressure
-            sp.pressure = solver::parse_pressure_solver(subsection, context);
-        }
-        if (sp.description == SolverTypes::DiffusionTurbSolver ||
-            sp.description == SolverTypes::NSTurbSolver ||
-            sp.description == SolverTypes::NSTempTurbSolver ||
-            sp.description == SolverTypes::NSTempTurbConSolver) {
-            // add turbulence
+        } else if (sp.description == SolverTypes::DiffusionSolver) {
+            sp.diffusion = solver::parse_diffusion_solver(subsection, context);
+        } else if (sp.description == SolverTypes::DiffusionTurbSolver) {
+            sp.diffusion = solver::parse_diffusion_solver(subsection, context);
             sp.turbulence = solver::parse_turbulence_solver(subsection, context);
+        } else if (sp.description == SolverTypes::NSSolver) {
+            sp.advection = solver::parse_advection_solver(subsection, context);
+            sp.diffusion = solver::parse_diffusion_solver(subsection, context);
+            sp.pressure = solver::parse_pressure_solver(subsection, context);
+            sp.source = solver::parse_source_solver(subsection, context);
+        } else if (sp.description == SolverTypes::NSTempSolver) {
+            sp.advection = solver::parse_advection_solver(subsection, context);
+            sp.diffusion = solver::parse_diffusion_solver(subsection, context);
+            sp.pressure = solver::parse_pressure_solver(subsection, context);
+            sp.temperature = solver::parse_temperature_solver(subsection, context);
+            sp.source = solver::parse_source_solver(subsection, context);
+        } else if (sp.description == SolverTypes::NSTempConSolver) {
+            sp.advection = solver::parse_advection_solver(subsection, context);
+            sp.diffusion = solver::parse_diffusion_solver(subsection, context);
+            sp.pressure = solver::parse_pressure_solver(subsection, context);
+            sp.temperature = solver::parse_temperature_solver(subsection, context);
+            sp.concentration = solver::parse_concentration_solver(subsection, context);
+            sp.source = solver::parse_source_solver(subsection, context);
+        } else if (sp.description == SolverTypes::NSTempTurbSolver) {
+            sp.advection = solver::parse_advection_solver(subsection, context);
+            sp.diffusion = solver::parse_diffusion_solver(subsection, context);
+            sp.pressure = solver::parse_pressure_solver(subsection, context);
+            sp.temperature = solver::parse_temperature_solver(subsection, context);
+            sp.turbulence = solver::parse_turbulence_solver(subsection, context);
+            sp.source = solver::parse_source_solver(subsection, context);
+        } else if (sp.description == SolverTypes::NSTempTurbConSolver) {
+            sp.advection = solver::parse_advection_solver(subsection, context);
+            sp.diffusion = solver::parse_diffusion_solver(subsection, context);
+            sp.pressure = solver::parse_pressure_solver(subsection, context);
+            sp.temperature = solver::parse_temperature_solver(subsection, context);
+            sp.turbulence = solver::parse_turbulence_solver(subsection, context);
+            sp.concentration = solver::parse_concentration_solver(subsection, context);
+            sp.source = solver::parse_source_solver(subsection, context);
+        } else if (sp.description == SolverTypes::NSTurbSolver) {
+            sp.advection = solver::parse_advection_solver(subsection, context);
+            sp.diffusion = solver::parse_diffusion_solver(subsection, context);
+            sp.pressure = solver::parse_pressure_solver(subsection, context);
+            sp.turbulence = solver::parse_turbulence_solver(subsection, context);
+            sp.source = solver::parse_source_solver(subsection, context);
+        } else if (sp.description == SolverTypes::PressureSolver) {
+            sp.pressure = solver::parse_pressure_solver(subsection, context);
+        } else {
+            throw config_error(fmt::format("solver '{}' has no parsing implementation.", sp.description));
         }
+
         sp.solution = solver::parse_solution(subsection, context);
         return sp;
     }
