@@ -125,12 +125,9 @@ void ColoredGaussSeidelDiffuse::diffuse(
 
 #pragma acc data present(out, b, EV)
     {
-        const size_t Nx = domain_data->get_Nx();
-        const size_t Ny = domain_data->get_Ny();
-
-        const real dx = domain_data->get_dx();
-        const real dy = domain_data->get_dy();
-        const real dz = domain_data->get_dz();
+        const real dx = domain_data->get_spacing(CoordinateAxis::X);
+        const real dy = domain_data->get_spacing(CoordinateAxis::Y);
+        const real dz = domain_data->get_spacing(CoordinateAxis::Z);
 
         const real reciprocal_dx = 1. / dx;
         const real reciprocal_dy = 1. / dy;
@@ -251,15 +248,15 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
         const std::vector<size_t> &odd,
         const std::vector<size_t> &even,
         bool) {
-
+    size_t level = out.get_level();
     auto domain_data = DomainData::getInstance();
     // local parameters for GPU
-    const size_t Nx = domain_data->get_Nx(out.get_level());
-    const size_t Ny = domain_data->get_Ny(out.get_level());
+    const size_t Nx = domain_data->get_number_of_cells(CoordinateAxis::X, level);
+    const size_t Ny = domain_data->get_number_of_cells(CoordinateAxis::Y, level);
 
-    const real dx = domain_data->get_dx(out.get_level());  // due to unnecessary parameter passing of *this
-    const real dy = domain_data->get_dy(out.get_level());
-    const real dz = domain_data->get_dz(out.get_level());
+    const real dx = domain_data->get_spacing(CoordinateAxis::X, level);  // due to unnecessary parameter passing of *this
+    const real dy = domain_data->get_spacing(CoordinateAxis::Y, level);
+    const real dz = domain_data->get_spacing(CoordinateAxis::Z, level);
 
     const real reciprocal_dx = 1. / dx;  // due to unnecessary parameter passing of *this
     const real reciprocal_dy = 1. / dy;

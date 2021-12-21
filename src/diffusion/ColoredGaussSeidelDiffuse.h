@@ -14,18 +14,16 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
 
-using cgs_list = std::tuple<std::vector<size_t>, std::vector<size_t>>;
-
 class ColoredGaussSeidelDiffuse: public IDiffusion {
  public:
     explicit ColoredGaussSeidelDiffuse(Settings::Settings const &settings);
 
     void diffuse(
             Field &out, const Field &in, const Field &b,
-            real D, bool sync = true) override;
+            real D, bool sync) override;
     void diffuse(
             Field &out, const Field &in, const Field &b,
-            real D, const Field &EV, bool sync = true) override;
+            real D, const Field &EV, bool sync) override;
 
     static void colored_gauss_seidel_step(
             Field &out, const Field &b,
