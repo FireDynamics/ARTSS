@@ -8,8 +8,10 @@
 #ifndef ARTSS_DIFFUSION_COLOREDGAUSSSEIDEL_H
 #define ARTSS_DIFFUSION_COLOREDGAUSSSEIDEL_H
 
-#include "../interfaces/IDiffusion.h"
+#include <vector>
+
 #include "../field/Field.h"
+#include "../interfaces/IDiffusion.h"
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
