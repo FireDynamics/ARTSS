@@ -52,7 +52,8 @@ namespace Settings {
     }
 
     size_t get_optional_size_t(const Map &map, const std::string &key, size_t default_value) {
-        if (auto iter = map.find(key); iter != map.end()) {
+        const auto iter = map.find(key);
+        if (iter != map.end()) {
             return std::stoi(iter->second);
         }
         return default_value;
@@ -68,7 +69,8 @@ namespace Settings {
     }
 
     real get_optional_real(const Map &map, const std::string &key, real default_value) {
-        if (auto iter = map.find(key); iter != map.end()) {
+        const auto iter = map.find(key);
+        if (iter != map.end()) {
             return std::stod(iter->second);
         }
         return default_value;
@@ -84,7 +86,8 @@ namespace Settings {
     }
 
     std::string get_optional_string(const Map &map, const std::string &key, std::string default_value) {
-        if (auto iter = map.find(key); iter != map.end()) {
+        const auto iter = map.find(key);
+        if (iter != map.end()) {
             return iter->second;
         }
         return default_value;
@@ -99,7 +102,8 @@ namespace Settings {
     }
 
     bool get_optional_bool(const Map &map, const std::string &key, const bool default_value) {
-        if (auto iter = map.find(key); iter != map.end()) {
+        const auto iter = map.find(key);
+        if (iter != map.end()) {
             return iter->second == xml_true;
         }
         return default_value;
