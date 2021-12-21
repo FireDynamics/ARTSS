@@ -146,8 +146,6 @@ TEST(SettingsTest, optionalVisualisationParameters) {
             doc.RootElement());
     EXPECT_FALSE(visualisation_parameters.save_csv);
     EXPECT_FALSE(visualisation_parameters.save_vtk);
-    EXPECT_EQ(visualisation_parameters.vtk_nth_plot, 0);
-    EXPECT_EQ(visualisation_parameters.csv_nth_plot, 0);
 }
 
 TEST(SettingsTest, requiredInitialConditionsParameters) {
@@ -169,13 +167,13 @@ TEST(SettingsTest, requiredInitialConditionsParameters) {
             doc.RootElement());
     EXPECT_TRUE(initial_conditions_parameters.random);
     EXPECT_EQ(initial_conditions_parameters.usr_fct, "Uniform");
-    EXPECT_EQ(std::get<uniform>(initial_conditions_parameters.ic).value, 1);
-    EXPECT_TRUE(initial_conditions_parameters.random_parameters.absolute);
-    EXPECT_TRUE(initial_conditions_parameters.random_parameters.custom_seed);
-    EXPECT_TRUE(initial_conditions_parameters.random_parameters.custom_steps);
-    EXPECT_EQ(initial_conditions_parameters.random_parameters.range, 1);
-    EXPECT_EQ(initial_conditions_parameters.random_parameters.seed, 10);
-    EXPECT_EQ(initial_conditions_parameters.random_parameters.step_size, 0.1);
+    EXPECT_EQ(std::get<uniform>(initial_conditions_parameters.ic.value()).value, 1);
+    EXPECT_TRUE(initial_conditions_parameters.random_parameters.value().absolute);
+    EXPECT_TRUE(initial_conditions_parameters.random_parameters.value().custom_seed);
+    EXPECT_TRUE(initial_conditions_parameters.random_parameters.value().custom_steps);
+    EXPECT_EQ(initial_conditions_parameters.random_parameters.value().range, 1);
+    EXPECT_EQ(initial_conditions_parameters.random_parameters.value().seed, 10);
+    EXPECT_EQ(initial_conditions_parameters.random_parameters.value().step_size, 0.1);
 }
 namespace initial_conditions {
     TEST(SettingsTest, uniform) {
@@ -191,7 +189,7 @@ namespace initial_conditions {
                 doc.RootElement());
         EXPECT_FALSE(initial_conditions_parameters.random);
         EXPECT_EQ(initial_conditions_parameters.usr_fct, "Uniform");
-        EXPECT_EQ(std::get<uniform>(initial_conditions_parameters.ic).value, 10);
+        EXPECT_EQ(std::get<uniform>(initial_conditions_parameters.ic.value()).value, 10);
     }
 
     TEST(SettingsTest, expSinusProd) {
@@ -205,7 +203,7 @@ namespace initial_conditions {
         doc.Parse(xml.c_str());
         Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
                 doc.RootElement());
-        auto esp = std::get<exp_sinus_prod>(initial_conditions_parameters.ic);
+        auto esp = std::get<exp_sinus_prod>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(esp.l, 111);
     }
     TEST(SettingsTest, hat) {
@@ -226,7 +224,7 @@ namespace initial_conditions {
         doc.Parse(xml.c_str());
         Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
                 doc.RootElement());
-        auto h = std::get<hat>(initial_conditions_parameters.ic);
+        auto h = std::get<hat>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(h.start_coords[CoordinateAxis::X], 0.5);
         EXPECT_DOUBLE_EQ(h.start_coords[CoordinateAxis::Y], -0.5);
         EXPECT_DOUBLE_EQ(h.start_coords[CoordinateAxis::Z], 0.05);
@@ -253,7 +251,7 @@ namespace initial_conditions {
         doc.Parse(xml.c_str());
         Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
                 doc.RootElement());
-        auto gb = std::get<gauss_bubble>(initial_conditions_parameters.ic);
+        auto gb = std::get<gauss_bubble>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(gb.l, 0.03125);
         EXPECT_DOUBLE_EQ(gb.velocity_lin[CoordinateAxis::X], 0.05);
         EXPECT_DOUBLE_EQ(gb.velocity_lin[CoordinateAxis::Y], 0.5);
@@ -389,7 +387,6 @@ TEST(SettingsTest, advectionSolverSemiLagrangian) {
               solver_parameters.advection.fields.end());
 
     EXPECT_FALSE(solver_parameters.solution.analytical_solution);
-    EXPECT_DOUBLE_EQ(solver_parameters.solution.solution_tolerance, 1e-3);
 }
 
 namespace diffusion_solver {
@@ -430,7 +427,7 @@ namespace diffusion_solver {
         EXPECT_DOUBLE_EQ(jacobi.w, 1);
 
         EXPECT_TRUE(solver_parameters.solution.analytical_solution);
-        EXPECT_DOUBLE_EQ(solver_parameters.solution.solution_tolerance, 1e-4);
+        EXPECT_DOUBLE_EQ(solver_parameters.solution.solution_tolerance.value(), 1e-4);
     }
     TEST(SettingsTest, diffusionSolverColoredGaussSeidel) {
         std::string xml = R"(

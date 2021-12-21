@@ -54,8 +54,8 @@ namespace Settings {
     struct visualisation_parameters {
         bool save_vtk;
         bool save_csv;
-        size_t vtk_nth_plot;
-        size_t csv_nth_plot;
+        std::optional<size_t> vtk_nth_plot;
+        std::optional<size_t> csv_nth_plot;
     };
     struct logging_parameters {
         std::string file;
@@ -91,11 +91,11 @@ namespace Settings {
     struct initial_conditions_parameters {
         std::string usr_fct;
         bool random;
-        std::variant<initial_conditions::uniform,
+        std::optional<std::variant<initial_conditions::uniform,
                      initial_conditions::gauss_bubble,
                      initial_conditions::exp_sinus_prod,
-                     initial_conditions::hat> ic;
-        struct random_parameters random_parameters;
+                     initial_conditions::hat>> ic;
+        std::optional<struct random_parameters> random_parameters;
     };
     struct boundary {
         std::vector<Patch> patch;
@@ -195,7 +195,7 @@ namespace Settings {
         };
         struct solution {
             bool analytical_solution;
-            real solution_tolerance;
+            std::optional<real> solution_tolerance;
         };
     }
     struct solver_parameters {

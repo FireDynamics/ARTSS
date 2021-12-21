@@ -149,17 +149,13 @@ namespace Settings {
         std::string context = "visualisation";
         auto[subsection, values] = map_parameter_section(root, context);
         visualisation_parameters vp{};
-        vp.save_csv = get_optional_bool(values, "save_csv", false);
+        vp.save_csv = get_required_bool(values, "save_csv", context);
         if (vp.save_csv) {
             vp.csv_nth_plot = get_required_size_t(values, "csv_nth_plot", context);
-        } else {
-            vp.csv_nth_plot = get_optional_size_t(values, "csv_nth_plot", 0);
         }
-        vp.save_vtk = get_optional_bool(values, "save_vtk", false);
+        vp.save_vtk = get_required_bool(values, "save_vtk", context);
         if (vp.save_vtk) {
             vp.vtk_nth_plot = get_required_size_t(values, "vtk_nth_plot", context);
-        } else {
-            vp.vtk_nth_plot = get_optional_size_t(values, "vtk_nth_plot", 0);
         }
         return vp;
     }
@@ -563,7 +559,9 @@ namespace Settings {
 
             solution sol{};
             sol.analytical_solution = get_required_bool(values, "available", context);
-            sol.solution_tolerance = get_optional_real(values, "tol", 1e-3);
+            if (sol.analytical_solution) {
+                sol.solution_tolerance = get_optional_real(values, "tol", 1e-3);
+            }
             return sol;
         }
     }
