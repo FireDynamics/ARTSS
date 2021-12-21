@@ -424,7 +424,7 @@ namespace diffusion_solver {
                             solver_parameters.diffusion.fields.end(),
                             FieldType::W),
                   solver_parameters.diffusion.fields.end());
-        auto jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(solver_parameters.diffusion.solver);
+        auto jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(solver_parameters.diffusion.solver.value());
         EXPECT_EQ(jacobi.max_iter, 77);
         EXPECT_DOUBLE_EQ(jacobi.tol_res, 1e-7);
         EXPECT_DOUBLE_EQ(jacobi.w, 1);
@@ -461,9 +461,73 @@ namespace diffusion_solver {
                             solver_parameters.diffusion.fields.end(),
                             FieldType::W),
                   solver_parameters.diffusion.fields.end());
-        auto colored_gauss_seidel = std::get<Settings::solver::diffusion_solvers::colored_gauss_seidel>(solver_parameters.diffusion.solver);
+        auto colored_gauss_seidel = std::get<Settings::solver::diffusion_solvers::colored_gauss_seidel>(solver_parameters.diffusion.solver.value());
         EXPECT_EQ(colored_gauss_seidel.max_iter, 767);
         EXPECT_DOUBLE_EQ(colored_gauss_seidel.tol_res, 1e-1);
         EXPECT_DOUBLE_EQ(colored_gauss_seidel.w, 0.666);
     }
+
+    TEST(SettingsTest, diffusionSolverExplicit) {
+        std::string xml = R"(
+<ARTSS>
+<solver description="DiffusionSolver" >
+    <diffusion type="Explicit" field="u,v,w" >
+    </diffusion>
+    <solution available="No"/>
+</solver>
+</ARTSS>)";
+        tinyxml2::XMLDocument doc;
+        doc.Parse(xml.c_str());
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::Explicit);
+
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::U),
+                  solver_parameters.diffusion.fields.end());
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::V),
+                  solver_parameters.diffusion.fields.end());
+        EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                            solver_parameters.diffusion.fields.end(),
+                            FieldType::W),
+                  solver_parameters.diffusion.fields.end());
+    }
+}
+
+TEST(SettingsTest, turbulenceSolver) {
+    std::string xml = R"(
+<ARTSS>
+<solver description="DiffusionTurbSolver" >
+    <diffusion type="Explicit" field="u,v,w" >
+    </diffusion>
+    <turbulence type="ConstSmagorinsky">
+        <Cs> 0.2 </Cs>
+    </turbulence>
+    <solution available="No"/>
+</solver>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+
+    EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::Explicit);
+
+    EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                        solver_parameters.diffusion.fields.end(),
+                        FieldType::U),
+              solver_parameters.diffusion.fields.end());
+    EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                        solver_parameters.diffusion.fields.end(),
+                        FieldType::V),
+              solver_parameters.diffusion.fields.end());
+    EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                        solver_parameters.diffusion.fields.end(),
+                        FieldType::W),
+              solver_parameters.diffusion.fields.end());
+
+
+    EXPECT_EQ(solver_parameters.turbulence.type, TurbulenceMethods::ConstSmagorinsky);
+    EXPECT_DOUBLE_EQ(solver_parameters.turbulence.solver.value().cs, 0.2);
 }

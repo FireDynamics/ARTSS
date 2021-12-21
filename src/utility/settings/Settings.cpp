@@ -255,10 +255,11 @@ namespace Settings {
             icp.ic = initial_conditions::parse_gauss_bubble_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::hat) {
             icp.ic = initial_conditions::parse_hat_parameters(values, context);
-        } else if (icp.usr_fct == FunctionNames::exp_sinus_sum) {
-            // TODO no values
         } else if (icp.usr_fct == FunctionNames::exp_sinus_prod) {
             icp.ic = initial_conditions::parse_exp_sinus_prod(values, context);
+        } else if (icp.usr_fct == FunctionNames::exp_sinus_sum) {
+            // no values
+            // TODO Kai
         } else {
             throw config_error(fmt::format("{} has no parsing implementation.", icp.usr_fct));
         }
@@ -394,8 +395,8 @@ namespace Settings {
             advection_solver solver_advection{};
             solver_advection.type = get_required_string(values, "type", context);
             if (solver_advection.type == AdvectionMethods::SemiLagrangian) {
-                // TODO no values
-//                solver_advection.solver = ;
+                // no values
+                // TODO Kai, einfach leer lassen? / leeres struct, gar nichts ?
             } else {
                 throw config_error(fmt::format("{} has no parsing implementation.", solver_advection.type));
             }
@@ -451,14 +452,63 @@ namespace Settings {
             }
             return solver_diffusion;
         }
+        namespace turbulence_solvers {
+            const_smagorinsky parse_const_smagorinsky(const Map &values, const std::string &parent_context) {
+                std::string own_context = "ConstSmagorinsky";
+                std::string context = create_context(parent_context, own_context);
+
+                const_smagorinsky cs{};
+                cs.cs = get_required_real(values, "Cs", context);
+                return cs;
+            }
+        }
         turbulence_solver parse_turbulence_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "turbulence";
             std::string context = create_context(parent_context, own_context);
             auto[subsection, values] = map_parameter_section(head, own_context);
 
             turbulence_solver solver_turbulence{};
-            //TODO turbulence
+            solver_turbulence.type = get_required_string(values, "type", context);
+            if (solver_turbulence.type == TurbulenceMethods::ConstSmagorinsky) {
+                solver_turbulence.solver = turbulence_solvers::parse_const_smagorinsky(values, context);
+            } else if (solver_turbulence.type == TurbulenceMethods::DynamicSmagorinsky) {
+                // no values
+            } else {
+                throw config_error(fmt::format("{} has no parsing implementation.", solver_turbulence.type));
+            }
+
             return solver_turbulence;
+        }
+        namespace source_solvers {
+            buoyancy parse_buoyancy(const Map &values, const std::string &parent_context) {
+                std::string own_context = SourceMethods::Buoyancy;
+                std::string context = create_context(parent_context, own_context);
+
+                buoyancy buoyancy{};
+                buoyancy.use_init_values = get_required_bool(values, "use_init_values", context);
+                if (!buoyancy.use_init_values) {
+                    buoyancy.ambient_temperature_value = get_required_real(values, "ambient_temperature_value", context);
+                }
+                auto fields = Utility::split(get_required_string(values, "field", context), delimiter);
+                for (const std::string &string: fields) {
+                    buoyancy.direction.emplace_back(Mapping::match_axis(string));
+                }
+                return buoyancy;
+            }
+            uniform parse_uniform(const Map &values, const std::string &parent_context) {
+                std::string own_context = SourceMethods::Uniform;
+                std::string context = create_context(parent_context, own_context);
+
+                uniform uniform{};
+                uniform.velocity_value[CoordinateAxis::X] = get_required_real(values, "val_x", context);
+                uniform.velocity_value[CoordinateAxis::Y] = get_required_real(values, "val_y", context);
+                uniform.velocity_value[CoordinateAxis::Z] = get_required_real(values, "val_z", context);
+                auto fields = Utility::split(get_required_string(values, "field", context), delimiter);
+                for (const std::string &string: fields) {
+                    uniform.direction.emplace_back(Mapping::match_axis(string));
+                }
+                return uniform;
+            }
         }
         source_solver parse_source_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "source";
@@ -466,7 +516,15 @@ namespace Settings {
             auto[subsection, values] = map_parameter_section(head, own_context);
 
             source_solver solver_source{};
-            //TODO source
+            solver_source.type = get_required_string(values, "type", context);
+            solver_source.force_fct = get_required_string(values, "force_fct", context);
+            if (solver_source.type == SourceMethods::Buoyancy) {
+                solver_source.force_function = source_solvers::parse_buoyancy(values, context);
+            } else if (solver_source.type == SourceMethods::Uniform) {
+                solver_source.force_function = source_solvers::parse_uniform(values, context);
+            } else {
+                throw config_error(fmt::format("{} has no parsing implementation.", solver_source.type));
+            }
             return solver_source;
         }
         pressure_solver parse_pressure_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
@@ -544,7 +602,9 @@ namespace Settings {
             // add advection
             sp.advection = solver::parse_advection_solver(subsection, context);
         }
-        if (sp.description == SolverTypes::DiffusionSolver || sp.description == SolverTypes::AdvectionDiffusionSolver) {
+        if (sp.description == SolverTypes::DiffusionSolver ||
+            sp.description == SolverTypes::AdvectionDiffusionSolver ||
+            sp.description == SolverTypes::DiffusionTurbSolver) {
             // add diffusion
             sp.diffusion = solver::parse_diffusion_solver(subsection, context);
         }

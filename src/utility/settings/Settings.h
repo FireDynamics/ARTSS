@@ -8,24 +8,24 @@
 #ifndef ARTSS_UTILITY_SETTINGS_H
 #define ARTSS_UTILITY_SETTINGS_H
 
-#include "tinyxml2.h"
-#include "BoundarySetting.h"
-#include "ObstacleSetting.h"
-#include "SurfaceSetting.h"
-#include "../GlobalMacrosTypes.h"
-#include "../../domain/Coordinate.h"
-
-#ifndef BENCHMARKING
-#include <spdlog/logger.h>
-#include <memory>
-#endif
-
 #include <map>
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <filesystem>
 #include <variant>
+
+#ifndef BENCHMARKING
+#include <spdlog/logger.h>
+#include <memory>
+#endif
+
+#include "tinyxml2.h"
+#include "BoundarySetting.h"
+#include "ObstacleSetting.h"
+#include "SurfaceSetting.h"
+#include "../GlobalMacrosTypes.h"
+#include "../../domain/Coordinate.h"
 
 using Map = std::map<std::string, std::string>;
 using return_xml_data = std::tuple<const tinyxml2::XMLElement*,Map>;
@@ -132,6 +132,7 @@ namespace Settings {
         struct advection_solver {
             std::string type;
             std::vector<FieldType> fields;
+            // TODO Kai fragen
         };
         namespace diffusion_solvers {
             struct jacobi {
@@ -144,23 +145,36 @@ namespace Settings {
                 real tol_res;
                 real w;
             };
-            struct explicit_diffusion {
-                // TODO no values
-            };
         }
         struct diffusion_solver {
             std::string type;
             std::vector<FieldType> fields;
-            std::variant<diffusion_solvers::jacobi, diffusion_solvers::colored_gauss_seidel,diffusion_solvers::explicit_diffusion> solver;
+            std::optional<std::variant<diffusion_solvers::jacobi, diffusion_solvers::colored_gauss_seidel>> solver;
         };
+        namespace turbulence_solvers {
+            struct const_smagorinsky {
+                real cs;
+            };
+        }
         struct turbulence_solver {
             std::string type;
+            std::optional<turbulence_solvers::const_smagorinsky> solver;
         };
+        namespace source_solvers {
+            struct buoyancy {
+                std::vector<CoordinateAxis> direction;
+                bool use_init_values;
+                std::optional<real> ambient_temperature_value;
+            };
+            struct uniform {
+                Coordinate<real> velocity_value;
+                std::vector<CoordinateAxis> direction;
+            };
+        }
         struct source_solver {
             std::string type;
             std::string force_fct;
-            CoordinateAxis direction;
-            bool use_init_values;
+            std::variant<source_solvers::buoyancy,source_solvers::uniform> force_function;
         };
         struct pressure_solver {
             std::string type;
