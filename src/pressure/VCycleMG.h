@@ -50,6 +50,8 @@ class VCycleMG: public IPressure{
      */
     void (VCycleMG::*m_smooth_function)(Field &, Field &, Field const &, const size_t, bool);
     void (VCycleMG::*m_solve_function)(Field &, Field &, Field const &, const size_t, bool);
+    std::vector<std::vector<size_t>> cgs_even_indices;
+    std::vector<std::vector<size_t>> cgs_odd_indices;
     size_t m_diffusion_max_iter;
     real m_diffusion_tol_res;
 

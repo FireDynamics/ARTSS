@@ -8,8 +8,10 @@
 #ifndef ARTSS_DIFFUSION_COLOREDGAUSSSEIDEL_H
 #define ARTSS_DIFFUSION_COLOREDGAUSSSEIDEL_H
 
-#include "../interfaces/IDiffusion.h"
+#include <vector>
+
 #include "../field/Field.h"
+#include "../interfaces/IDiffusion.h"
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
@@ -20,28 +22,35 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
 
     void diffuse(
             Field &out, const Field &in, const Field &b,
-            real D, bool sync = true) override;
+            real D, bool sync) override;
     void diffuse(
             Field &out, const Field &in, const Field &b,
-            real D, const Field &EV, bool sync = true) override;
+            real D, const Field &EV, bool sync) override;
 
     static void colored_gauss_seidel_step(
             Field &out, const Field &b,
             real alpha_x, real alpha_y, real alpha_z,
-            real beta, real dsign, real w, bool sync = true);
+            real beta, real dsign, real w,
+            const std::vector<size_t> &odd,
+            const std::vector<size_t> &even,
+            bool sync = true);
 
     static void colored_gauss_seidel_step(
             Field &out, const Field &b,
             real dsign, real w, real D,
-            const Field &EV, real dt, bool sync = true);  // turbulent version
+            const Field &EV, real dt,
+            const std::vector<size_t> &odd,
+            const std::vector<size_t> &even,
+            bool sync = true);  // turbulent version
 
     static void colored_gauss_seidel_stencil(
-            size_t i, size_t j, size_t k,
+            size_t index,
             real *out, const real *b,
             real alpha_x, real alpha_y, real alpha_z,
             real dsign, real beta, real w,
             size_t Nx, size_t Ny);
 
+    static void create_red_black_lists(size_t level, std::vector<size_t> &odd, std::vector<size_t> &even);
  private:
     Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
@@ -51,6 +60,9 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
     real m_w;
     size_t m_max_iter;
     real m_tol_res;
+
+    std::vector<size_t> even_indices;
+    std::vector<size_t> odd_indices;
 };
 
 #endif /* ARTSS_DIFFUSION_COLOREDGAUSSSEIDEL_H */
