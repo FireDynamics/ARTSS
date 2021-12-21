@@ -33,6 +33,11 @@ VCycleMG::VCycleMG(Settings::Settings const &settings) :
         m_diffusion_max_iter = m_settings.get_int("solver/pressure/diffusion/max_iter");
         m_smooth_function = &VCycleMG::call_smooth_colored_gauss_seidel;
         m_solve_function = &VCycleMG::call_solve_colored_gauss_seidel;
+        cgs_odd_indices.resize(m_levels + 1);
+        cgs_even_indices.resize(m_levels + 1);
+        for (size_t level = 0; level < m_levels + 1; level++) {
+            ColoredGaussSeidelDiffuse::create_red_black_lists(level, cgs_odd_indices[level], cgs_even_indices[level]);
+        }
     } else {
 #ifndef BENCHMARKING
         m_logger->critical("Diffusion method not yet implemented! Simulation stopped!");
@@ -600,7 +605,9 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
     {
         for (int i = 0; i < m_n_relax; i++) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
-                    out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
+                    out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w,
+                    cgs_odd_indices[level], cgs_even_indices[level],
+                    sync);
             domain_controller->apply_boundary(out, sync);
         }
     }
@@ -651,7 +658,9 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
         const size_t neighbour_k = Nx * Ny;
         while (res > tol_res && it < max_it) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
-                    out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
+                    out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w,
+                    cgs_odd_indices[level], cgs_even_indices[level],
+                    sync);
             domain_controller->apply_boundary(out, sync);
 
             sum = 0.;

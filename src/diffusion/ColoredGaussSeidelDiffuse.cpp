@@ -41,6 +41,7 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse(Settings::Settings const &s
 void ColoredGaussSeidelDiffuse::diffuse(
         Field &out, const Field &in, Field const &b,
         const real D, bool sync) {
+    out.copy_data(in);  // cgs only calculates on out
     auto domain_data = DomainData::getInstance();
     auto domain_controller = DomainController::getInstance();
 
@@ -50,7 +51,6 @@ void ColoredGaussSeidelDiffuse::diffuse(
 
 #pragma acc data present(out, b, in)
     {
-        out.copy_data(in);  // cgs only calculates on out
         const real dx = domain_data->get_spacing(CoordinateAxis::X);  // due to unnecessary parameter passing of *this
         const real dy = domain_data->get_spacing(CoordinateAxis::Y);
         const real dz = domain_data->get_spacing(CoordinateAxis::Z);
@@ -73,7 +73,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
         real res = 1.;
         while (res > m_tol_res && it < m_max_iter) {
             in.copy_data(out);  // necessary for calculation of residuum
-            colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
+            colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, odd_indices, even_indices, sync);
             domain_controller->apply_boundary(out, sync);
 
             sum = 0;
@@ -113,8 +113,9 @@ void ColoredGaussSeidelDiffuse::diffuse(
 /// \param  sync        synchronization boolean (true=sync (default), false=async)
 // ************************************************************************
 void ColoredGaussSeidelDiffuse::diffuse(
-        Field &out, const Field &, const Field &b,
+        Field &out, const Field &in, const Field &b,
         const real D, const Field &EV, bool sync) {
+    out.copy_data(in);  // cgs only calculates on out
     auto domain_data = DomainData::getInstance();
     auto domain_controller = DomainController::getInstance();
 
@@ -122,7 +123,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
 
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
-//#pragma acc data present(d_out[:bsize], d_b[:bsize], d_EV[:bsize])
+#pragma acc data present(out, b, EV)
     {
         const size_t Nx = domain_data->get_Nx();
         const size_t Ny = domain_data->get_Ny();
@@ -147,12 +148,13 @@ void ColoredGaussSeidelDiffuse::diffuse(
         const size_t neighbour_j = Nx;
         const size_t neighbour_k = Nx * Ny;
         while (res > m_tol_res && it < m_max_iter) {
-            colored_gauss_seidel_step(out, b, m_dsign, m_w, D, EV, dt, sync);
+            in.copy_data(out);  // necessary for calculation of residuum
+            colored_gauss_seidel_step(out, b, m_dsign, m_w, D, EV, dt, odd_indices, even_indices, sync);
             domain_controller->apply_boundary(out, sync);
 
             sum = 0;
 
-//#pragma acc parallel loop independent present(d_out[:bsize], d_b[:bsize], d_EV[:bsize], domain_inner_list[:size_domain_inner_list]) async
+#pragma acc parallel loop independent present(out, b, EV, domain_inner_list[:size_domain_inner_list]) async
             for (size_t j = 0; j < size_domain_inner_list; ++j) {
                 const size_t i = domain_inner_list[j];
                 alpha_x = (D + EV[i]) * dt * reciprocal_dx * reciprocal_dx;
@@ -160,21 +162,18 @@ void ColoredGaussSeidelDiffuse::diffuse(
                 alpha_z = (D + EV[i]) * dt * reciprocal_dz * reciprocal_dz;
                 reciprocal_beta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
 
-                res = (-alpha_x * (out[i + neighbour_i] + out[i - neighbour_i])
-                       - alpha_y * (out[i + neighbour_j] + out[i - neighbour_j])
-                       - alpha_z * (out[i + neighbour_k] + out[i - neighbour_k])
-                       + reciprocal_beta * out[i] - b[i]);
+                res = reciprocal_beta * (out[i] - in[i]);
                 sum += res * res;
             }
 
-//#pragma acc wait
+#pragma acc wait
             res = sqrt(sum);
             it++;
 
         } //end while
 
         if (sync) {
-//#pragma acc wait
+#pragma acc wait
         }
 
 #ifndef BENCHMARKING
@@ -202,7 +201,10 @@ void ColoredGaussSeidelDiffuse::diffuse(
 void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
         Field &out, const Field &b,
         const real alpha_x, const real alpha_y, const real alpha_z,
-        const real beta, const real dsign, const real w, bool) {
+        const real beta, const real dsign, const real w,
+        const std::vector<size_t> &odd,
+        const std::vector<size_t> &even,
+        bool) {
 
     auto domain_data = DomainData::getInstance();
     // local parameters for GPU
@@ -215,6 +217,7 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
 
 //#pragma acc kernels present(d_out[:bsize], d_b[:bsize]) async
     {
+
         // TODO: exclude obstacles!
         // red
 //#pragma acc loop independent collapse(3)
@@ -309,7 +312,10 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
         Field &out, const Field &b,
         const real dsign, const real w, const real D,
         const Field &EV,
-        const real dt, bool) {
+        const real dt,
+        const std::vector<size_t> &odd,
+        const std::vector<size_t> &even,
+        bool) {
 
     auto domain_data = DomainData::getInstance();
     // local parameters for GPU
@@ -523,4 +529,10 @@ void ColoredGaussSeidelDiffuse::create_red_black_lists(
             odd_indices.emplace_back(index);
         }
     }
+    size_t *odd __attribute__((unused)) = odd_indices.data();
+    size_t size_odd __attribute__((unused)) = odd_indices.size();
+    size_t *even __attribute__((unused)) = even_indices.data();
+    size_t size_even __attribute__((unused)) = even_indices.size();
+#pragma acc enter data create(odd[:size_odd])
+#pragma acc enter data create(even[:size_even])
 }

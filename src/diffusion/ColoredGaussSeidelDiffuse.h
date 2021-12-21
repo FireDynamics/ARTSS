@@ -30,12 +30,18 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
     static void colored_gauss_seidel_step(
             Field &out, const Field &b,
             real alpha_x, real alpha_y, real alpha_z,
-            real beta, real dsign, real w, bool sync = true);
+            real beta, real dsign, real w,
+            const std::vector<size_t> &odd,
+            const std::vector<size_t> &even,
+            bool sync = true);
 
     static void colored_gauss_seidel_step(
             Field &out, const Field &b,
             real dsign, real w, real D,
-            const Field &EV, real dt, bool sync = true);  // turbulent version
+            const Field &EV, real dt,
+            const std::vector<size_t> &odd,
+            const std::vector<size_t> &even,
+            bool sync = true);  // turbulent version
 
     static void colored_gauss_seidel_stencil(
             size_t i, size_t j, size_t k,
