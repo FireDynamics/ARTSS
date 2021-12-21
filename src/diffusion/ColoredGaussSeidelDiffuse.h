@@ -14,6 +14,8 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
 
+using cgs_list = std::tuple<std::vector<size_t>, std::vector<size_t>>;
+
 class ColoredGaussSeidelDiffuse: public IDiffusion {
  public:
     explicit ColoredGaussSeidelDiffuse(Settings::Settings const &settings);
@@ -42,8 +44,8 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
             real dsign, real beta, real w,
             size_t Nx, size_t Ny);
 
+    static void create_red_black_lists(size_t level, std::vector<size_t> &odd, std::vector<size_t> &even);
  private:
-    void create_red_black_lists();
     Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;

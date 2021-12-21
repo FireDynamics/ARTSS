@@ -24,7 +24,7 @@ ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse(Settings::Settings const &s
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    create_red_black_lists();
+    create_red_black_lists(0, odd_indices, even_indices);
 }
 
 
@@ -67,18 +67,13 @@ void ColoredGaussSeidelDiffuse::diffuse(
         const real reciprocal_beta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
         const real beta = 1. / reciprocal_beta;
 
-        const real dsign = m_dsign;
-        const real w = m_w;
-
         size_t it = 0;
-        const size_t max_it = m_max_iter;
-        const real tol_res = m_tol_res;
 
         real sum;
         real res = 1.;
-        while (res > tol_res && it < max_it) {
+        while (res > m_tol_res && it < m_max_iter) {
             in.copy_data(out);  // necessary for calculation of residuum
-            colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, dsign, w, sync);
+            colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
             domain_controller->apply_boundary(out, sync);
 
             sum = 0;
@@ -142,22 +137,17 @@ void ColoredGaussSeidelDiffuse::diffuse(
 
         real dt = m_settings.get_real("physical_parameters/dt");
 
-        real alpha_x, alpha_y, alpha_z, rbeta;  // calculated in colored_gauss_seidel_step!
-
-        const real dsign = m_dsign;
-        const real w = m_w;
+        real alpha_x, alpha_y, alpha_z, reciprocal_beta;  // calculated in colored_gauss_seidel_step!
 
         size_t it = 0;
-        const size_t max_it = m_max_iter;
-        const real tol_res = m_tol_res;
         real sum;
         real res = 1.;
 
         const size_t neighbour_i = 1;
         const size_t neighbour_j = Nx;
         const size_t neighbour_k = Nx * Ny;
-        while (res > tol_res && it < max_it) {
-            colored_gauss_seidel_step(out, b, dsign, w, D, EV, dt, sync);
+        while (res > m_tol_res && it < m_max_iter) {
+            colored_gauss_seidel_step(out, b, m_dsign, m_w, D, EV, dt, sync);
             domain_controller->apply_boundary(out, sync);
 
             sum = 0;
@@ -168,12 +158,12 @@ void ColoredGaussSeidelDiffuse::diffuse(
                 alpha_x = (D + EV[i]) * dt * reciprocal_dx * reciprocal_dx;
                 alpha_y = (D + EV[i]) * dt * reciprocal_dy * reciprocal_dy;
                 alpha_z = (D + EV[i]) * dt * reciprocal_dz * reciprocal_dz;
-                rbeta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
+                reciprocal_beta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
 
                 res = (-alpha_x * (out[i + neighbour_i] + out[i - neighbour_i])
                        - alpha_y * (out[i + neighbour_j] + out[i - neighbour_j])
                        - alpha_z * (out[i + neighbour_k] + out[i - neighbour_k])
-                       + rbeta * out[i] - b[i]);
+                       + reciprocal_beta * out[i] - b[i]);
                 sum += res * res;
             }
 
@@ -510,14 +500,18 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_stencil(
     *(out + IX(i, j, k, Nx, Ny)) = (1 - w) * r_out + w * out_h;
 }
 
-void ColoredGaussSeidelDiffuse::create_red_black_lists() {
+void ColoredGaussSeidelDiffuse::create_red_black_lists(
+        size_t level,
+        std::vector<size_t> &odd_indices,
+        std::vector<size_t> &even_indices) {
     auto domain_data = DomainData::getInstance();
-    size_t Nx = domain_data->get_number_of_cells(CoordinateAxis::X);
-    size_t Ny = domain_data->get_number_of_cells(CoordinateAxis::Y);
+    size_t Nx = domain_data->get_number_of_cells(CoordinateAxis::X, level);
+    size_t Ny = domain_data->get_number_of_cells(CoordinateAxis::Y, level);
     auto domain_controller = DomainController::getInstance();
-    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
-    for (size_t c = 0; c < size_domain_inner_list; c++) {
+    size_t start = domain_controller->get_domain_inner_list_level_joined_start(level);
+    size_t end = domain_controller->get_domain_inner_list_level_joined_end(level);
+    for (size_t c = start; c <= end; c++) {
         size_t index = domain_inner_list[c];
         size_t k = getCoordinateK(index, Nx, Ny);
         size_t j = getCoordinateJ(index, Nx, Ny, k);
