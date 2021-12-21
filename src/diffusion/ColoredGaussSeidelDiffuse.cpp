@@ -144,9 +144,6 @@ void ColoredGaussSeidelDiffuse::diffuse(
         real sum;
         real res = 1.;
 
-        const size_t neighbour_i = 1;
-        const size_t neighbour_j = Nx;
-        const size_t neighbour_k = Nx * Ny;
         while (res > m_tol_res && it < m_max_iter) {
             in.copy_data(out);  // necessary for calculation of residuum
             colored_gauss_seidel_step(out, b, m_dsign, m_w, D, EV, dt, odd_indices, even_indices, sync);
@@ -207,9 +204,10 @@ void ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
         bool) {
 
     auto domain_data = DomainData::getInstance();
+    size_t level = out.get_level();
     // local parameters for GPU
-    const size_t Nx = domain_data->get_number_of_cells(CoordinateAxis::X);
-    const size_t Ny = domain_data->get_number_of_cells(CoordinateAxis::Y);
+    const size_t Nx = domain_data->get_number_of_cells(CoordinateAxis::X, level);
+    const size_t Ny = domain_data->get_number_of_cells(CoordinateAxis::Y, level);
 
     auto d_out = out.data;
     auto d_b = b.data;

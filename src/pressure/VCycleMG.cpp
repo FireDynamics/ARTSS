@@ -30,7 +30,7 @@ VCycleMG::VCycleMG(Settings::Settings const &settings) :
         m_smooth_function = &VCycleMG::call_smooth_jacobi;
         m_solve_function = &VCycleMG::call_solve_jacobi;
     } else if (diffusion_type == DiffusionMethods::ColoredGaussSeidel) {
-        m_diffusion_max_iter = m_settings.get_int("solver/pressure/diffusion/max_iter");
+        m_diffusion_max_iter = m_settings.get_int("solver/pressure/diffusion/max_solve");
         m_smooth_function = &VCycleMG::call_smooth_colored_gauss_seidel;
         m_solve_function = &VCycleMG::call_solve_colored_gauss_seidel;
         cgs_odd_indices.resize(m_levels + 1);
