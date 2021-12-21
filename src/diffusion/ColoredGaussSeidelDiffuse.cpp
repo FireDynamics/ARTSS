@@ -46,7 +46,6 @@ void ColoredGaussSeidelDiffuse::diffuse(
     auto domain_controller = DomainController::getInstance();
 
     auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
-
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
 #pragma acc data present(out, b, in)
@@ -88,7 +87,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
 #pragma acc wait
             res = sqrt(sum);
             it++;
-        } //end while
+        }
 
         if (sync) {
 #pragma acc wait
@@ -98,7 +97,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
         m_logger->info("Number of iterations: {}", it);
         m_logger->info("Colored Gauss-Seidel ||res|| = {:.5e}", res);
 #endif
-    } //end data region
+    }
 }
 
 // ===================== Turbulent version ============================
@@ -163,8 +162,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
 #pragma acc wait
             res = sqrt(sum);
             it++;
-
-        } //end while
+        }
 
         if (sync) {
 #pragma acc wait
