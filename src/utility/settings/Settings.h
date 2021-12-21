@@ -101,7 +101,7 @@ namespace Settings {
         std::vector<Patch> patch;
         std::vector<FieldType> field_type;
         BoundaryCondition boundary_condition;
-        real value;
+        std::optional<real> value;
     };
     struct surface {
         Coordinate<real> start_coords;

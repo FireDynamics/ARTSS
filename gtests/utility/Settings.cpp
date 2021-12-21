@@ -273,6 +273,126 @@ TEST(SettingsTest, requiredObstaclesParameters) {
     EXPECT_FALSE(obstacles_parameters.enabled);
 }
 
+TEST(SettingsTest, obstacles) {
+    std::string xml = R"(
+<ARTSS>
+    <obstacles enabled="Yes">
+        <obstacle name="ceiling">
+            <geometry ox1="0" ox2="2.8" oy1="2.18" oy2="2.38" oz1="-1.4" oz2="1.4"/>
+            <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="-1.0" />
+            <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="-0.0" />
+        </obstacle>
+        <obstacle name="right wall left from door">
+            <geometry ox1="2.8" ox2="3.2" oy1="0." oy2="2.38" oz1="-1.4" oz2="-0.43"/>
+            <boundary field="u,v,p" patch="front,back,left,right,top,bottom" type="periodic" />
+            <boundary field="w,T" patch="front,back,left,right,top,bottom" type="dirichlet" value="10.0" />
+        </obstacle>
+    </obstacles>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::obstacles_parameters obstacles_parameters = Settings::parse_obstacles_parameters(doc.RootElement());
+    EXPECT_TRUE(obstacles_parameters.enabled);
+    EXPECT_EQ(obstacles_parameters.obstacles.size(), 2);
+
+    auto obstacle1 = obstacles_parameters.obstacles[0];
+    EXPECT_EQ(obstacle1.name, "ceiling");
+    EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::X], 0);
+    EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::Y], 2.18);
+    EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::Z], -1.4);
+    EXPECT_DOUBLE_EQ(obstacle1.end_coords[CoordinateAxis::X], 2.8);
+    EXPECT_DOUBLE_EQ(obstacle1.end_coords[CoordinateAxis::Y], 2.38);
+    EXPECT_DOUBLE_EQ(obstacle1.end_coords[CoordinateAxis::Z], 1.4);
+
+    EXPECT_EQ(obstacle1.boundaries.size(), 2);
+    auto o1_b1 = obstacle1.boundaries[0];
+    EXPECT_DOUBLE_EQ(o1_b1.value.value(), -1);
+    EXPECT_EQ(o1_b1.boundary_condition, BoundaryCondition::DIRICHLET);
+    EXPECT_NE(std::find(o1_b1.field_type.begin(),
+                        o1_b1.field_type.end(),
+                        FieldType::U),
+              o1_b1.field_type.end());
+    EXPECT_NE(std::find(o1_b1.field_type.begin(),
+                        o1_b1.field_type.end(),
+                        FieldType::V),
+              o1_b1.field_type.end());
+    EXPECT_NE(std::find(o1_b1.field_type.begin(),
+                        o1_b1.field_type.end(),
+                        FieldType::W),
+              o1_b1.field_type.end());
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+        EXPECT_NE(std::find(o1_b1.patch.begin(),
+                            o1_b1.patch.end(),
+                            patch),
+                  o1_b1.patch.end());
+    }
+    auto o1_b2 = obstacle1.boundaries[1];
+    EXPECT_DOUBLE_EQ(o1_b2.value.value(), 0);
+    EXPECT_EQ(o1_b2.boundary_condition, BoundaryCondition::NEUMANN);
+    EXPECT_NE(std::find(o1_b2.field_type.begin(),
+                        o1_b2.field_type.end(),
+                        FieldType::P),
+              o1_b2.field_type.end());
+    EXPECT_NE(std::find(o1_b2.field_type.begin(),
+                        o1_b2.field_type.end(),
+                        FieldType::T),
+              o1_b2.field_type.end());
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+        EXPECT_NE(std::find(o1_b2.patch.begin(),
+                            o1_b2.patch.end(),
+                            patch),
+                  o1_b2.patch.end());
+    }
+
+    auto obstacle2 = obstacles_parameters.obstacles[1];
+    EXPECT_EQ(obstacle2.name, "right wall left from door");
+    EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::X], 2.8);
+    EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::Y], 0);
+    EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::Z], -1.4);
+    EXPECT_DOUBLE_EQ(obstacle2.end_coords[CoordinateAxis::X], 3.2);
+    EXPECT_DOUBLE_EQ(obstacle2.end_coords[CoordinateAxis::Y], 2.38);
+    EXPECT_DOUBLE_EQ(obstacle2.end_coords[CoordinateAxis::Z], -0.43);
+
+    EXPECT_EQ(obstacle2.boundaries.size(), 2);
+    auto o2_b1 = obstacle2.boundaries[0];
+    EXPECT_EQ(o2_b1.boundary_condition, BoundaryCondition::PERIODIC);
+    EXPECT_NE(std::find(o2_b1.field_type.begin(),
+                        o2_b1.field_type.end(),
+                        FieldType::U),
+              o2_b1.field_type.end());
+    EXPECT_NE(std::find(o2_b1.field_type.begin(),
+                        o2_b1.field_type.end(),
+                        FieldType::V),
+              o2_b1.field_type.end());
+    EXPECT_NE(std::find(o2_b1.field_type.begin(),
+                        o2_b1.field_type.end(),
+                        FieldType::P),
+              o2_b1.field_type.end());
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+        EXPECT_NE(std::find(o2_b1.patch.begin(),
+                            o2_b1.patch.end(),
+                            patch),
+                  o2_b1.patch.end());
+    }
+    auto o2_b2 = obstacle2.boundaries[1];
+    EXPECT_DOUBLE_EQ(o2_b2.value.value(), 10);
+    EXPECT_EQ(o2_b2.boundary_condition, BoundaryCondition::DIRICHLET);
+    EXPECT_NE(std::find(o2_b2.field_type.begin(),
+                        o2_b2.field_type.end(),
+                        FieldType::W),
+              o2_b2.field_type.end());
+    EXPECT_NE(std::find(o2_b2.field_type.begin(),
+                        o2_b2.field_type.end(),
+                        FieldType::T),
+              o2_b2.field_type.end());
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+        EXPECT_NE(std::find(o2_b2.patch.begin(),
+                            o2_b2.patch.end(),
+                            patch),
+                  o2_b2.patch.end());
+    }
+}
+
 TEST(SettingsTest, requiredSurfacesParameters) {
     std::string xml = R"(
 <ARTSS>
@@ -291,13 +411,14 @@ TEST(SettingsTest, boundaries) {
         <boundary field="u,v,w" patch="front,back,bottom,top,left,right" type="dirichlet" value="0.0" />
         <boundary field="p" patch="front,back,bottom,top,left,right" type="neumann" value="1.0" />
         <boundary field="T" patch="front,back,top,left,right" type="dirichlet" value="299.14" />
-        <boundary field="T" patch="bottom" type="periodic" value="-10.0" />
+        <boundary field="T" patch="bottom" type="periodic" />
     </boundaries>
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     Settings::boundaries_parameters boundaries_parameters = Settings::parse_boundaries_parameters(doc.RootElement());
 
+    EXPECT_EQ(boundaries_parameters.boundaries.size(), 4);
     // field types
     EXPECT_NE(std::find(boundaries_parameters.boundaries[0].field_type.begin(),
                         boundaries_parameters.boundaries[0].field_type.end(),
@@ -354,10 +475,9 @@ TEST(SettingsTest, boundaries) {
     EXPECT_EQ(boundaries_parameters.boundaries[3].boundary_condition, BoundaryCondition::PERIODIC);
 
     // value
-    EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[0].value, 0);
-    EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[1].value, 1);
-    EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[2].value, 299.14);
-    EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[3].value, -10);
+    EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[0].value.value(), 0);
+    EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[1].value.value(), 1);
+    EXPECT_DOUBLE_EQ(boundaries_parameters.boundaries[2].value.value(), 299.14);
 }
 
 TEST(SettingsTest, advectionSolverSemiLagrangian) {
