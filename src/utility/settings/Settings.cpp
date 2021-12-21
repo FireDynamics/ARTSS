@@ -263,7 +263,6 @@ namespace Settings {
             icp.ic = initial_conditions::parse_exp_sinus_prod(values, context);
         } else if (icp.usr_fct == FunctionNames::exp_sinus_sum) {
             // no values
-            // TODO Kai
         } else {
             throw config_error(fmt::format("{} has no parsing implementation.", icp.usr_fct));
         }
@@ -400,7 +399,6 @@ namespace Settings {
             solver_advection.type = get_required_string(values, "type", context);
             if (solver_advection.type == AdvectionMethods::SemiLagrangian) {
                 // no values
-                // TODO Kai, einfach leer lassen? / leeres struct, gar nichts ?
             } else {
                 throw config_error(fmt::format("{} has no parsing implementation.", solver_advection.type));
             }
@@ -445,7 +443,7 @@ namespace Settings {
             } else if (solver_diffusion.type == DiffusionMethods::ColoredGaussSeidel) {
                 solver_diffusion.solver = diffusion_solvers::parse_colored_gauss_seidel(values, context);
             } else if (solver_diffusion.type == DiffusionMethods::Explicit) {
-                // TODO no values
+                // no values
             } else {
                 throw config_error(fmt::format("{} has no parsing implementation.", solver_diffusion.type));
             }
@@ -577,6 +575,7 @@ namespace Settings {
 
         sp.description = get_required_string(values, "description", context);
 
+        // TODO runter lesbar -> einfach abfragen und die entsprechenden parse funktionen aufrufen
         auto solver_types = {SolverTypes::NSSolver,
                              SolverTypes::NSTempSolver,
                              SolverTypes::NSTempTurbSolver,

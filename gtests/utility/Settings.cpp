@@ -23,8 +23,8 @@ TEST(SettingsTest, goodCase) {
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement());
-    EXPECT_EQ(physical_parameters.t_end, 1.0);
-    EXPECT_EQ(physical_parameters.dt, 0.1);
+    EXPECT_DOUBLE_EQ(physical_parameters.t_end, 1.0);
+    EXPECT_DOUBLE_EQ(physical_parameters.dt, 0.1);
 }
 
 TEST(SettingsTest, goodCaseOptional) {
@@ -39,9 +39,9 @@ TEST(SettingsTest, goodCaseOptional) {
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement());
-    EXPECT_EQ(physical_parameters.t_end, 1.0);
-    EXPECT_EQ(physical_parameters.dt, 0.1);
-    EXPECT_EQ(physical_parameters.beta, 0.3);
+    EXPECT_DOUBLE_EQ(physical_parameters.t_end, 1.0);
+    EXPECT_DOUBLE_EQ(physical_parameters.dt, 0.1);
+    EXPECT_DOUBLE_EQ(physical_parameters.beta, 0.3);
 }
 
 TEST(SettingsTest, unknownAttribute) {
@@ -56,11 +56,11 @@ TEST(SettingsTest, unknownAttribute) {
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement());
-    EXPECT_EQ(physical_parameters.t_end, 1.0);
-    EXPECT_EQ(physical_parameters.dt, 0.1);
-//TODO expect what?
+    EXPECT_DOUBLE_EQ(physical_parameters.t_end, 1.0);
+    EXPECT_DOUBLE_EQ(physical_parameters.dt, 0.1);
+//TODO maybe warning?
 }
-
+// TODO wrong casts -> string instead of numeral for example
 TEST(SettingsTest, requiredAttributeMissing) {
     std::string xml = R"(
 <ARTSS>

@@ -132,7 +132,6 @@ namespace Settings {
         struct advection_solver {
             std::string type;
             std::vector<FieldType> fields;
-            // TODO Kai fragen
         };
         namespace diffusion_solvers {
             struct jacobi {
