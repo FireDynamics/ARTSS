@@ -161,18 +161,17 @@ namespace Settings {
         };
         namespace source_solvers {
             struct buoyancy {
-                std::vector<CoordinateAxis> direction;
                 bool use_init_values;
                 std::optional<real> ambient_temperature_value;
             };
             struct uniform {
                 Coordinate<real> velocity_value;
-                std::vector<CoordinateAxis> direction;
             };
         }
         struct source_solver {
             std::string type;
             std::string force_fct;
+            std::vector<CoordinateAxis> direction;
             std::variant<source_solvers::buoyancy,source_solvers::uniform> force_function;
         };
         namespace pressure_solvers {

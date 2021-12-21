@@ -487,10 +487,6 @@ namespace Settings {
                 if (!buoyancy.use_init_values) {
                     buoyancy.ambient_temperature_value = get_required_real(values, "ambient_temperature_value", context);
                 }
-                auto fields = Utility::split(get_required_string(values, "field", context), delimiter);
-                for (const std::string &string: fields) {
-                    buoyancy.direction.emplace_back(Mapping::match_axis(string));
-                }
                 return buoyancy;
             }
             uniform parse_uniform(const Map &values, const std::string &parent_context) {
@@ -501,10 +497,6 @@ namespace Settings {
                 uniform.velocity_value[CoordinateAxis::X] = get_required_real(values, "val_x", context);
                 uniform.velocity_value[CoordinateAxis::Y] = get_required_real(values, "val_y", context);
                 uniform.velocity_value[CoordinateAxis::Z] = get_required_real(values, "val_z", context);
-                auto fields = Utility::split(get_required_string(values, "field", context), delimiter);
-                for (const std::string &string: fields) {
-                    uniform.direction.emplace_back(Mapping::match_axis(string));
-                }
                 return uniform;
             }
         }
@@ -516,12 +508,18 @@ namespace Settings {
             source_solver solver_source{};
             solver_source.type = get_required_string(values, "type", context);
             solver_source.force_fct = get_required_string(values, "force_fct", context);
-            if (solver_source.type == SourceMethods::Buoyancy) {
+            if (solver_source.force_fct == SourceMethods::Buoyancy) {
                 solver_source.force_function = source_solvers::parse_buoyancy(values, context);
-            } else if (solver_source.type == SourceMethods::Uniform) {
+            } else if (solver_source.force_fct == SourceMethods::Uniform) {
                 solver_source.force_function = source_solvers::parse_uniform(values, context);
+            } else if (solver_source.force_fct == SourceMethods::Zero) {
+                // do nothing
             } else {
                 throw config_error(fmt::format("source type '{}' has no parsing implementation.", solver_source.type));
+            }
+            auto fields = Utility::split(get_required_string(values, "dir", context), delimiter);
+            for (const std::string &string: fields) {
+                solver_source.direction.emplace_back(Mapping::match_axis(string));
             }
             return solver_source;
         }

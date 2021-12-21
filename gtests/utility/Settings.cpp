@@ -589,6 +589,7 @@ namespace pressure_solvers {
         tinyxml2::XMLDocument doc;
         doc.Parse(xml.c_str());
         Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        EXPECT_EQ(solver_parameters.description, SolverTypes::PressureSolver);
 
         EXPECT_EQ(solver_parameters.pressure.type, PressureMethods::VCycleMG);
         EXPECT_EQ(solver_parameters.pressure.field, FieldType::P);
@@ -613,4 +614,143 @@ namespace pressure_solvers {
         EXPECT_TRUE(solver_parameters.solution.analytical_solution);
         EXPECT_DOUBLE_EQ(solver_parameters.solution.solution_tolerance.value(), 1e-3);
     }
+}
+TEST(SettingsTest, NSSolverSourceZero) {
+    std::string xml = R"(
+<ARTSS>
+    <solver description="NSSolver" >
+        <advection type="SemiLagrangian" field="u,v,w">
+        </advection>
+        <diffusion type="Jacobi" field="u,v,w">
+            <max_iter> 77 </max_iter>
+            <tol_res> 1e-07 </tol_res>
+            <w> 1 </w>
+        </diffusion>
+        <source type="ExplicitEuler" force_fct="Zero" dir="xyz">
+        </source>
+        <pressure type="VCycleMG" field="p">
+            <n_level> 4 </n_level>
+            <n_cycle> 2 </n_cycle>
+            <max_cycle> 100 </max_cycle>
+            <tol_res> 1e-07 </tol_res>
+            <n_relax> 4 </n_relax>
+            <diffusion type="Jacobi" field="p">
+                <max_iter> 100 </max_iter>
+                <tol_res> 1e-03 </tol_res>
+                <w> 0.6666666667 </w>
+            </diffusion>
+        </pressure>
+        <solution available="Yes">
+            <tol> 1e-1 </tol>
+        </solution>
+    </solver>
+</ARTSS>)";
+
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+    EXPECT_EQ(solver_parameters.description, SolverTypes::NSSolver);
+
+    // advection
+    EXPECT_EQ(solver_parameters.advection.type, AdvectionMethods::SemiLagrangian);
+    EXPECT_NE(std::find(solver_parameters.advection.fields.begin(),
+                        solver_parameters.advection.fields.end(),
+                        FieldType::U),
+              solver_parameters.advection.fields.end());
+    EXPECT_NE(std::find(solver_parameters.advection.fields.begin(),
+                        solver_parameters.advection.fields.end(),
+                        FieldType::V),
+              solver_parameters.advection.fields.end());
+    EXPECT_NE(std::find(solver_parameters.advection.fields.begin(),
+                        solver_parameters.advection.fields.end(),
+                        FieldType::W),
+              solver_parameters.advection.fields.end());
+
+    // diffusion
+    EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::Jacobi);
+    EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                        solver_parameters.diffusion.fields.end(),
+                        FieldType::U),
+              solver_parameters.diffusion.fields.end());
+    EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                        solver_parameters.diffusion.fields.end(),
+                        FieldType::V),
+              solver_parameters.diffusion.fields.end());
+    EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
+                        solver_parameters.diffusion.fields.end(),
+                        FieldType::W),
+              solver_parameters.diffusion.fields.end());
+    auto diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(solver_parameters.diffusion.solver.value());
+    EXPECT_EQ(diffusion_jacobi.max_iter, 77);
+    EXPECT_DOUBLE_EQ(diffusion_jacobi.tol_res, 1e-7);
+    EXPECT_DOUBLE_EQ(diffusion_jacobi.w, 1);
+
+    // pressure
+    EXPECT_EQ(solver_parameters.pressure.type, PressureMethods::VCycleMG);
+    EXPECT_EQ(solver_parameters.pressure.field, FieldType::P);
+    auto vcycle = solver_parameters.pressure.solver;
+    EXPECT_EQ(vcycle.n_level, 4);
+    EXPECT_EQ(vcycle.n_cycle, 2);
+    EXPECT_EQ(vcycle.max_cycle, 100);
+    EXPECT_DOUBLE_EQ(vcycle.tol_res, 1e-7);
+    EXPECT_EQ(vcycle.n_relax, 4);
+
+    EXPECT_EQ(vcycle.smoother.type, DiffusionMethods::Jacobi);
+
+    EXPECT_NE(std::find(vcycle.smoother.fields.begin(),
+                        vcycle.smoother.fields.end(),
+                        FieldType::P),
+              vcycle.smoother.fields.end());
+    auto pressure_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(vcycle.smoother.solver.value());
+    EXPECT_DOUBLE_EQ(pressure_jacobi.tol_res, 1e-3);
+    EXPECT_EQ(pressure_jacobi.max_iter, 100);
+    EXPECT_DOUBLE_EQ(pressure_jacobi.w, 0.6666666667);
+
+    EXPECT_EQ(solver_parameters.source.type, SourceMethods::ExplicitEuler);
+    EXPECT_EQ(solver_parameters.source.force_fct, SourceMethods::Zero);
+
+    EXPECT_TRUE(solver_parameters.solution.analytical_solution);
+    EXPECT_DOUBLE_EQ(solver_parameters.solution.solution_tolerance.value(), 1e-1);
+}
+TEST(SettingsTest, NSSolverSourceBuoyancy) {
+    std::string xml = R"(
+<ARTSS>
+    <solver description="NSSolver" >
+        <advection type="SemiLagrangian" field="u,v,w">
+        </advection>
+        <diffusion type="Jacobi" field="u,v,w">
+            <max_iter> 77 </max_iter>
+            <tol_res> 1e-07 </tol_res>
+            <w> 1 </w>
+        </diffusion>
+        <source type="ExplicitEuler" force_fct="Buoyancy" dir="y" use_init_values="No">
+            <ambient_temperature_value> 299.14 </ambient_temperature_value>
+        </source>
+        <pressure type="VCycleMG" field="p">
+            <n_level> 4 </n_level>
+            <n_cycle> 2 </n_cycle>
+            <max_cycle> 100 </max_cycle>
+            <tol_res> 1e-07 </tol_res>
+            <n_relax> 4 </n_relax>
+            <diffusion type="Jacobi" field="p">
+                <max_iter> 100 </max_iter>
+                <tol_res> 1e-03 </tol_res>
+                <w> 0.6666666667 </w>
+            </diffusion>
+        </pressure>
+        <solution available="Yes">
+            <tol> 1e-1 </tol>
+        </solution>
+    </solver>
+</ARTSS>)";
+
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+    EXPECT_EQ(solver_parameters.description, SolverTypes::NSSolver);
+    EXPECT_EQ(solver_parameters.source.type, SourceMethods::ExplicitEuler);
+    EXPECT_EQ(solver_parameters.source.force_fct, SourceMethods::Buoyancy);
+    auto buoyancy = std::get<Settings::solver::source_solvers::buoyancy>(solver_parameters.source.force_function);
+    EXPECT_FALSE(buoyancy.use_init_values);
+    EXPECT_DOUBLE_EQ(buoyancy.ambient_temperature_value.value(), 299.14);
 }
