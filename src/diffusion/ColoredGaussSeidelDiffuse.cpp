@@ -77,7 +77,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
 
             sum = 0;
 
-#pragma acc parallel loop independent present(out, in, domain_inner_list[:size_domain_inner_list]) async
+#pragma acc parallel loop independent present(out, in, domain_inner_list[:size_domain_inner_list]) reduction(+:sum) async
             for (size_t j = 0; j < size_domain_inner_list; ++j) {
                 const size_t index = domain_inner_list[j];
                 res = reciprocal_beta * (out[index] - in[index]);
@@ -147,7 +147,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
 
             sum = 0;
 
-#pragma acc parallel loop independent present(out, b, EV, domain_inner_list[:size_domain_inner_list]) async
+#pragma acc parallel loop independent present(out, b, EV, domain_inner_list[:size_domain_inner_list]) reduction(+:sum) async
             for (size_t j = 0; j < size_domain_inner_list; ++j) {
                 const size_t i = domain_inner_list[j];
                 alpha_x = (D + EV[i]) * dt * reciprocal_dx * reciprocal_dx;

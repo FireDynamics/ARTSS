@@ -1,6 +1,6 @@
 ### author: Sebastian Leifeld
 
-FROM nvcr.io/nvidia/nvhpc:20.11-devel-cuda11.1-ubuntu20.04
+FROM nvcr.io/nvidia/nvhpc:21.11-devel-cuda_multi-ubuntu20.04
 
 RUN apt update
 RUN apt install -y make cmake
