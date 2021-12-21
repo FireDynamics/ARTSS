@@ -44,7 +44,7 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
             bool sync = true);  // turbulent version
 
     static void colored_gauss_seidel_stencil(
-            size_t i, size_t j, size_t k,
+            size_t index,
             real *out, const real *b,
             real alpha_x, real alpha_y, real alpha_z,
             real dsign, real beta, real w,
