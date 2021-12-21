@@ -21,10 +21,10 @@ namespace Settings {
     static const char delimiter = ',';
     Map map_parameter_line(const tinyxml2::XMLElement *line, const std::string &context) {
         Map values;
-        for (auto e = line->FirstAttribute(); e; e = e->Next()) {
+        for (const auto *e = line->FirstAttribute(); e; e = e->Next()) {
             values[e->Name()] = e->Value();
         }
-        for (auto e = line->FirstChildElement(); e; e = e->NextSiblingElement()) {
+        for (const auto *e = line->FirstChildElement(); e; e = e->NextSiblingElement()) {
             if (e->GetText()) {
                 values[e->Name()] = e->GetText();
             }
@@ -34,13 +34,13 @@ namespace Settings {
     return_xml_data map_parameter_section(const tinyxml2::XMLElement *head, const std::string &context) {
         Map values;
         const tinyxml2::XMLElement *subsection;
-        for (auto i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
+        for (const auto *i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
             if (i->Name() == context) {
                 subsection = i;
-                for (auto e = i->FirstAttribute(); e; e = e->Next()) {
+                for (const auto *e = i->FirstAttribute(); e; e = e->Next()) {
                     values[e->Name()] = e->Value();
                 }
-                for (auto e = i->FirstChildElement(); e; e = e->NextSiblingElement()) {
+                for (const auto *e = i->FirstChildElement(); e; e = e->NextSiblingElement()) {
                     if (e->GetText()) {
                         values[e->Name()] = e->GetText();
                     }
