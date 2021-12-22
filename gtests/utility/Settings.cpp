@@ -22,7 +22,7 @@ TEST(SettingsTest, goodCase) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement());
+    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement(), "None");
     EXPECT_DOUBLE_EQ(physical_parameters.t_end, 1.0);
     EXPECT_DOUBLE_EQ(physical_parameters.dt, 0.1);
 }
@@ -34,14 +34,16 @@ TEST(SettingsTest, goodCaseOptional) {
     <t_end> 1.0 </t_end>
     <dt> 0.1 </dt>
     <beta> 0.3 </beta>
+    <nu> 1 </nu>
   </physical_parameters>
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement());
+    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement(), SolverTypes::NSSolver);
     EXPECT_DOUBLE_EQ(physical_parameters.t_end, 1.0);
     EXPECT_DOUBLE_EQ(physical_parameters.dt, 0.1);
     EXPECT_DOUBLE_EQ(physical_parameters.beta, 0.3);
+    EXPECT_DOUBLE_EQ(physical_parameters.nu.value(), 1);
 }
 
 TEST(SettingsTest, unknownAttribute) {
@@ -55,7 +57,7 @@ TEST(SettingsTest, unknownAttribute) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement());
+    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement(), "None");
     EXPECT_DOUBLE_EQ(physical_parameters.t_end, 1.0);
     EXPECT_DOUBLE_EQ(physical_parameters.dt, 0.1);
 //TODO maybe warning?
@@ -70,7 +72,7 @@ TEST(SettingsTest, requiredAttributeMissing) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    EXPECT_THROW(Settings::parse_physical_parameters(doc.RootElement()), Settings::config_error);
+    EXPECT_THROW(Settings::parse_physical_parameters(doc.RootElement(), "None"), Settings::config_error);
 }
 
 TEST(SettingsTest, requiredDomainParameters) {

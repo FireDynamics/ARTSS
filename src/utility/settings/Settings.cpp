@@ -374,21 +374,36 @@ namespace Settings {
         return lp;
     }
 
-    physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root) {
+    physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root, const std::string &solver_description) {
         std::string context = "physical_parameters";
         auto[subsection, values] = map_parameter_section(root, context);
         physical_parameters pp{};
         pp.t_end = get_required_real(values, "t_end", context);
         pp.dt = get_required_real(values, "dt", context);
 
-        // TODO optional/required status dependent on solver description
-        pp.nu = get_optional_real(values, "nu", 3.1e-5);  // determine necessity
-        pp.beta = get_optional_real(values, "beta", 3.34e-3);  // determine necessity
-        pp.g = get_optional_real(values, "g", -9.81);  // determine necessity
-        // temperature
-        pp.kappa = get_optional_real(values, "kappa", 4.25e-5);
-        // concentration
-        pp.gamma = get_optional_real(values, "gamma", 0.01);
+        if (solver_description == SolverTypes::NSSolver ||
+            solver_description == SolverTypes::NSTempSolver ||
+            solver_description == SolverTypes::NSTurbSolver ||
+            solver_description == SolverTypes::NSTempTurbSolver ||
+            solver_description == SolverTypes::NSTempTurbConSolver ||
+            solver_description == SolverTypes::NSTempConSolver) {
+            // navier stokes
+            pp.nu = get_optional_real(values, "nu", 3.1e-5);
+        }
+        pp.beta = get_optional_real(values, "beta", 3.34e-3);  // for buoyancy
+        pp.g = get_optional_real(values, "g", -9.81);  // for buoyancy
+        if (solver_description == SolverTypes::NSTempSolver ||
+            solver_description == SolverTypes::NSTempTurbSolver ||
+            solver_description == SolverTypes::NSTempTurbConSolver ||
+            solver_description == SolverTypes::NSTempConSolver) {
+            // temperature
+            pp.kappa = get_required_real(values, "kappa", context);
+        }
+        if (solver_description == SolverTypes::NSTempTurbConSolver ||
+            solver_description == SolverTypes::NSTempConSolver) {
+            // concentration
+            pp.gamma = get_required_real(values, "gamma", context);
+        }
         return pp;
     }
     namespace solver {
@@ -720,8 +735,9 @@ namespace Settings {
         tinyxml2::XMLDocument doc;
         doc.Parse(file_content.c_str());
         tinyxml2::XMLElement *root = doc.RootElement();
-        return {parse_physical_parameters(root),
-                parse_solver_parameters(root),
+        auto solver_params = parse_solver_parameters(root);
+        return {parse_physical_parameters(root, solver_params.description),
+                solver_params,
                 parse_domain_parameters(root),
                 parse_adaption_parameters(root),
                 parse_boundaries_parameters(root),

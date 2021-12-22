@@ -46,11 +46,11 @@ namespace Settings {
     struct physical_parameters {
         real t_end;
         real dt;
-        real nu;
+        std::optional<real> nu;
         real beta;
         real g;
-        real kappa;  // thermal diffusion
-        real gamma;  // concentration diffusion
+        std::optional<real> kappa;  // thermal diffusion
+        std::optional<real> gamma;  // concentration diffusion
     };
     struct visualisation_parameters {
         bool save_vtk;
@@ -266,7 +266,7 @@ namespace Settings {
     visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root);
     logging_parameters parse_logging_parameters(const tinyxml2::XMLElement *root);
     domain_parameters parse_domain_parameters(const tinyxml2::XMLElement *root);
-    physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root);
+    physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root, const std::string &solver_description);
     Settings_new parse_settings(const std::string &file_content);
     Settings_new parse_settings_from_file(const std::filesystem::path &path);
 
