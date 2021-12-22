@@ -49,7 +49,8 @@ namespace Settings {
         real nu;
         real beta;
         real g;
-        real kappa;
+        real kappa;  // thermal diffusion
+        real gamma;  // concentration diffusion
     };
     struct visualisation_parameters {
         bool save_vtk;
@@ -213,12 +214,19 @@ namespace Settings {
             std::optional<real> prandtl_number;
             temperature_source source;
         };
+        struct concentration_source {
+            std::string type;
+            std::string con_fct;
+            bool random;
+            struct random_parameters random_parameters;
+            std::variant<sources::gauss> con_function;
+        };
         struct concentration_solver {
             advection_solver advection;
             diffusion_solver diffusion;
             bool has_turbulence;
-            real prandtl_number;
-            source_solver source;
+            std::optional<real> turbulent_schmidt_number;
+            concentration_source source;
         };
         struct solution {
             bool analytical_solution;

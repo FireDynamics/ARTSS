@@ -175,6 +175,7 @@ TEST(SettingsTest, requiredInitialConditionsParameters) {
     EXPECT_EQ(initial_conditions_parameters.random_parameters.value().seed, 10);
     EXPECT_EQ(initial_conditions_parameters.random_parameters.value().step_size, 0.1);
 }
+
 namespace initial_conditions {
     TEST(SettingsTest, uniform) {
         std::string xml = R"(
@@ -206,6 +207,7 @@ namespace initial_conditions {
         auto esp = std::get<exp_sinus_prod>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(esp.l, 111);
     }
+
     TEST(SettingsTest, hat) {
         std::string xml = R"(
 <ARTSS>
@@ -234,6 +236,7 @@ namespace initial_conditions {
         EXPECT_EQ(h.val_in, 2.);
         EXPECT_EQ(h.val_out, 1);
     }
+
     TEST(SettingsTest, gaussBubble) {
         std::string xml = R"(
 <ARTSS>
@@ -549,6 +552,7 @@ namespace diffusion_solver {
         EXPECT_TRUE(solver_parameters.solution.analytical_solution);
         EXPECT_DOUBLE_EQ(solver_parameters.solution.solution_tolerance.value(), 1e-4);
     }
+
     TEST(SettingsTest, diffusionSolverColoredGaussSeidel) {
         std::string xml = R"(
 <ARTSS>
@@ -649,6 +653,7 @@ namespace turbulence_solvers {
         EXPECT_EQ(solver_parameters.turbulence.type, TurbulenceMethods::ConstSmagorinsky);
         EXPECT_DOUBLE_EQ(solver_parameters.turbulence.solver.value().cs, 0.2);
     }
+
     TEST(SettingsTest, turbulenceSolverDynamicSmagorinsky) {
         std::string xml = R"(
 <ARTSS>
@@ -832,6 +837,7 @@ TEST(SettingsTest, NSSolverSourceZero) {
     EXPECT_TRUE(solver_parameters.solution.analytical_solution);
     EXPECT_DOUBLE_EQ(solver_parameters.solution.solution_tolerance.value(), 1e-1);
 }
+
 TEST(SettingsTest, NSSolverSourceBuoyancy) {
     std::string xml = R"(
 <ARTSS>
@@ -978,4 +984,178 @@ TEST(SettingsTest, temperature) {
     EXPECT_EQ(temp.source.random_parameters.seed, 30);
     EXPECT_EQ(temp.source.random_parameters.step_size, 0.3);
     EXPECT_EQ(temp.source.random_parameters.range, 3);
+}
+
+TEST(SettingsTest, concentration) {
+    std::string xml = R"(
+<ARTSS>
+    <solver description="NSTempConSolver" >
+        <advection type="SemiLagrangian" field="u,v,w">
+        </advection>
+        <diffusion type="Jacobi" field="u,v,w">
+            <max_iter> 77 </max_iter>
+            <tol_res> 1e-07 </tol_res>
+            <w> 1 </w>
+        </diffusion>
+        <source type="ExplicitEuler" force_fct="Buoyancy" dir="y" use_init_values="No">
+            <ambient_temperature_value> 299.14 </ambient_temperature_value>
+        </source>
+        <pressure type="VCycleMG" field="p">
+            <n_level> 4 </n_level>
+            <n_cycle> 2 </n_cycle>
+            <max_cycle> 100 </max_cycle>
+            <tol_res> 1e-07 </tol_res>
+            <n_relax> 4 </n_relax>
+            <diffusion type="Jacobi" field="p">
+                <max_iter> 100 </max_iter>
+                <tol_res> 1e-03 </tol_res>
+                <w> 0.6666666667 </w>
+            </diffusion>
+        </pressure>
+        <temperature>
+            <advection type="SemiLagrangian" field="T">
+            </advection>
+            <diffusion type="Jacobi" field="T">
+                <max_iter> 100 </max_iter>
+                <tol_res> 1e-07 </tol_res>
+                <w> 1 </w>
+            </diffusion>
+            <turbulence include="Yes">
+                <Pr_T> 0.5 </Pr_T>
+            </turbulence>
+            <source type="ExplicitEuler" temp_fct="Gauss" dissipation="No" random="Yes">
+                <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
+                <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
+                <x0> 1.4 </x0>
+                <y0> 0.02 </y0>
+                <z0> 0. </z0>
+                <sigma_x> 0.15 </sigma_x>
+                <sigma_y> 0.6 </sigma_y>
+                <sigma_z> 0.1 </sigma_z>
+                <tau> 5. </tau>
+                <random absolute="No" custom_seed="Yes" custom_steps="Yes">
+                    <seed> 30 </seed>
+                    <step_size> 0.3 </step_size>
+                    <range> 3 </range>
+                </random>
+            </source>
+        </temperature>
+        <concentration>
+            <advection type="SemiLagrangian" field="rho">
+            </advection>
+            <diffusion type="Jacobi" field="rho">
+                <max_iter> 101 </max_iter> 		<!-- max number of iterations -->
+                <tol_res> 1e-06 </tol_res> 		<!-- tolerance for residuum/ convergence -->
+                <w> 1.1 </w>				   		<!-- relaxation parameter -->
+            </diffusion>
+            <turbulence include="Yes">
+                <Sc_T> 0.1 </Sc_T>
+            </turbulence>
+            <source type="ExplicitEuler" con_fct="Gauss" random="Yes">
+                <HRR> 0.8. </HRR> 				<!-- Total heat release rate (in kW) -->
+                <cp> 13100. </cp> 				<!-- Heating value (in kJ/kg) -->
+                <x0> 0.  </x0>
+                <y0> -2.03125 </y0>
+                <z0> -1. </z0>
+                <sigma_x> 0.1875 </sigma_x>
+                <sigma_y> 0.1876 </sigma_y>
+                <sigma_z> 0.1877 </sigma_z>
+                <tau> 5.1 </tau>
+                <random absolute="No" custom_seed="Yes" custom_steps="Yes">
+                    <seed> 20 </seed>
+                    <step_size> 0.2 </step_size>
+                    <range> 2 </range>
+                </random>
+            </source>
+        </concentration>
+        <solution available="No">
+        </solution>
+    </solver>
+</ARTSS>)";
+
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+
+    EXPECT_EQ(solver_parameters.description, SolverTypes::NSTempConSolver);
+    auto temp = solver_parameters.temperature;
+    EXPECT_EQ(temp.advection.type, AdvectionMethods::SemiLagrangian);
+    EXPECT_NE(std::find(temp.advection.fields.begin(),
+                        temp.advection.fields.end(),
+                        FieldType::T),
+              temp.advection.fields.end());
+    EXPECT_EQ(temp.diffusion.type, DiffusionMethods::Jacobi);
+    EXPECT_NE(std::find(temp.diffusion.fields.begin(),
+                        temp.diffusion.fields.end(),
+                        FieldType::T),
+              temp.diffusion.fields.end());
+    auto diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(temp.diffusion.solver.value());
+    EXPECT_EQ(diffusion_jacobi.max_iter, 100);
+    EXPECT_DOUBLE_EQ(diffusion_jacobi.tol_res, 1e-7);
+    EXPECT_DOUBLE_EQ(diffusion_jacobi.w, 1);
+
+    EXPECT_TRUE(temp.has_turbulence);
+    EXPECT_DOUBLE_EQ(temp.prandtl_number.value(), 0.5);
+
+    EXPECT_EQ(temp.source.type, SourceMethods::ExplicitEuler);
+    EXPECT_FALSE(temp.source.dissipation);
+    EXPECT_EQ(temp.source.temp_fct, SourceMethods::Gauss);
+    auto gauss_temp = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
+    EXPECT_DOUBLE_EQ(gauss_temp.tau, 5);
+    EXPECT_DOUBLE_EQ(gauss_temp.heat_release_rate, 50.3);
+    EXPECT_DOUBLE_EQ(gauss_temp.heat_capacity, 1);
+    EXPECT_DOUBLE_EQ(gauss_temp.position[CoordinateAxis::X], 1.4);
+    EXPECT_DOUBLE_EQ(gauss_temp.position[CoordinateAxis::Y], 0.02);
+    EXPECT_DOUBLE_EQ(gauss_temp.position[CoordinateAxis::Z], 0);
+    EXPECT_DOUBLE_EQ(gauss_temp.dimension[CoordinateAxis::X], 0.15);
+    EXPECT_DOUBLE_EQ(gauss_temp.dimension[CoordinateAxis::Y], 0.6);
+    EXPECT_DOUBLE_EQ(gauss_temp.dimension[CoordinateAxis::Z], 0.1);
+
+    EXPECT_TRUE(temp.source.random);
+    EXPECT_TRUE(temp.source.random_parameters.custom_seed);
+    EXPECT_TRUE(temp.source.random_parameters.custom_steps);
+    EXPECT_FALSE(temp.source.random_parameters.absolute);
+    EXPECT_EQ(temp.source.random_parameters.seed, 30);
+    EXPECT_EQ(temp.source.random_parameters.step_size, 0.3);
+    EXPECT_EQ(temp.source.random_parameters.range, 3);
+
+    auto con = solver_parameters.concentration;
+    EXPECT_EQ(con.advection.type, AdvectionMethods::SemiLagrangian);
+    EXPECT_NE(std::find(con.advection.fields.begin(),
+                        con.advection.fields.end(),
+                        FieldType::RHO),
+              con.advection.fields.end());
+    EXPECT_EQ(con.diffusion.type, DiffusionMethods::Jacobi);
+    EXPECT_NE(std::find(con.diffusion.fields.begin(),
+                        con.diffusion.fields.end(),
+                        FieldType::RHO),
+              con.diffusion.fields.end());
+    auto con_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(con.diffusion.solver.value());
+    EXPECT_EQ(con_jacobi.max_iter, 101);
+    EXPECT_DOUBLE_EQ(con_jacobi.tol_res, 1e-6);
+    EXPECT_DOUBLE_EQ(con_jacobi.w, 1.1);
+
+    EXPECT_TRUE(con.has_turbulence);
+    EXPECT_DOUBLE_EQ(con.turbulent_schmidt_number.value(), 0.1);
+
+    EXPECT_EQ(con.source.type, SourceMethods::ExplicitEuler);
+    EXPECT_EQ(con.source.con_fct, SourceMethods::Gauss);
+    auto gauss_con = std::get<Settings::solver::sources::gauss>(con.source.con_function);
+    EXPECT_DOUBLE_EQ(gauss_con.tau, 5.1);
+    EXPECT_DOUBLE_EQ(gauss_con.heat_release_rate, 0.8);
+    EXPECT_DOUBLE_EQ(gauss_con.heat_capacity, 13100);
+    EXPECT_DOUBLE_EQ(gauss_con.position[CoordinateAxis::X], 0);
+    EXPECT_DOUBLE_EQ(gauss_con.position[CoordinateAxis::Y], -2.03125);
+    EXPECT_DOUBLE_EQ(gauss_con.position[CoordinateAxis::Z], -1);
+    EXPECT_DOUBLE_EQ(gauss_con.dimension[CoordinateAxis::X], 0.1875);
+    EXPECT_DOUBLE_EQ(gauss_con.dimension[CoordinateAxis::Y], 0.1876);
+    EXPECT_DOUBLE_EQ(gauss_con.dimension[CoordinateAxis::Z], 0.1877);
+
+    EXPECT_TRUE(con.source.random);
+    EXPECT_TRUE(con.source.random_parameters.custom_seed);
+    EXPECT_TRUE(con.source.random_parameters.custom_steps);
+    EXPECT_FALSE(con.source.random_parameters.absolute);
+    EXPECT_EQ(con.source.random_parameters.seed, 20);
+    EXPECT_EQ(con.source.random_parameters.step_size, 0.2);
+    EXPECT_EQ(con.source.random_parameters.range, 2);
 }

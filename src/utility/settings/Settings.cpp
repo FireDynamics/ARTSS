@@ -380,10 +380,15 @@ namespace Settings {
         physical_parameters pp{};
         pp.t_end = get_required_real(values, "t_end", context);
         pp.dt = get_required_real(values, "dt", context);
-        pp.nu = get_optional_real(values, "nu", 3.1e-5);
-        pp.beta = get_optional_real(values, "beta", 3.34e-3);
-        pp.g = get_optional_real(values, "g", -9.81);
+
+        // TODO optional/required status dependent on solver description
+        pp.nu = get_optional_real(values, "nu", 3.1e-5);  // determine necessity
+        pp.beta = get_optional_real(values, "beta", 3.34e-3);  // determine necessity
+        pp.g = get_optional_real(values, "g", -9.81);  // determine necessity
+        // temperature
         pp.kappa = get_optional_real(values, "kappa", 4.25e-5);
+        // concentration
+        pp.gamma = get_optional_real(values, "gamma", 0.01);
         return pp;
     }
     namespace solver {
@@ -606,7 +611,29 @@ namespace Settings {
             auto[subsection, values] = map_parameter_section(head, own_context);
 
             concentration_solver solver_concentration{};
-            //TODO concentration
+            solver_concentration.advection = parse_advection_solver(subsection, context);
+            solver_concentration.diffusion = parse_diffusion_solver(subsection, context);
+
+            std::string context_turb = "turbulence";
+            auto[subsection_turb, values_turb] = map_parameter_section(subsection, context_turb);
+            solver_concentration.has_turbulence = get_required_bool(values_turb, "include", create_context(context, context_turb));
+            if (solver_concentration.has_turbulence) {
+                solver_concentration.turbulent_schmidt_number = get_required_real(values_turb, "Sc_T", create_context(context, context_turb));
+            }
+
+            std::string context_source = "source";
+            auto[subsection_source, values_source] = map_parameter_section(subsection, context_source);
+            solver_concentration.source.type = get_required_string(values_source, "type", context_source);
+            solver_concentration.source.random = get_required_bool(values_source, "random", context_source);
+            if (solver_concentration.source.random) {
+                solver_concentration.source.random_parameters = parse_random_parameters(subsection_source, create_context(context, context_source));
+            }
+            solver_concentration.source.con_fct = get_required_string(values_source, "con_fct", context_source);
+            if (solver_concentration.source.con_fct == SourceMethods::Gauss) {
+                solver_concentration.source.con_function = sources::parse_gauss(values_source, context_source);
+            } else {
+                throw config_error(fmt::format("concentration source function '{}' has no parsing implementation.", solver_concentration.source.con_fct));
+            }
             return solver_concentration;
         }
         solution parse_solution(const tinyxml2::XMLElement *head, const std::string &parent_context) {
