@@ -15,7 +15,7 @@ class Cube: public ISourceFunction {
     Cube(real value,
             real x_start, real y_start, real z_start,
             real x_end, real y_end, real z_end);
-    ~Cube();
+    ~Cube() = default;
     void update_source(Field &out, real t_cur) override;
 
  private:

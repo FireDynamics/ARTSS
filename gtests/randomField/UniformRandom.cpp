@@ -329,3 +329,44 @@ TEST_F(UniformRandomFieldTest, negative_positive) {
     ASSERT_GE(counter_positive, size * 0.4);
     ASSERT_GE(counter_negative, size * 0.4);
 }
+
+TEST_F(UniformRandomFieldTest, numberComparison) {
+    int range = 10;
+    real step_size = 1;
+    std::vector<real> numbers = {1, 2, 5, 7, 2, 8, 1, 7, -2, 3, 3, -2, -1, -4, 8, -9, 10, -5, -2, 0, 6, 7, 1, 0, 1, -2};
+    size_t size = numbers.size();
+
+    UniformRandom noise_maker(range, step_size, 0);
+    Field a = noise_maker.random_field(size);
+    for (int i = 0; i < size; i++) {
+        EXPECT_DOUBLE_EQ(a[i], numbers[i]);
+    }
+
+}
+TEST_F(UniformRandomFieldTest, numberComparison2) {
+    real range = 0.1;
+    real step_size = 0.01;
+    std::vector<real> numbers = {0.01, 0.02, 0.05, 0.07, 0.02, 0.08, 0.01, 0.07, -0.02, 0.03, 0.03, -0.02, -0.01, -0.04, 0.08, -0.09, 0.010, -0.05, -0.02, 0.00, 0.06, 0.07, 0.01, 0.00, 0.01, -0.02};
+    size_t size = numbers.size();
+
+    UniformRandom noise_maker(range, step_size, 0);
+    Field a = noise_maker.random_field(size);
+    for (int i = 0; i < size; i++) {
+        EXPECT_DOUBLE_EQ(a[i], numbers[i]);
+    }
+}
+
+TEST_F(UniformRandomFieldTest, numberComparison3) {
+    real range = 0.1;
+    real step_size = 0.01;
+    std::vector<real> numbers = {1.01, 1.02, 1.05, 1.07, 1.02, 1.08, 1.01, 1.07, 0.98, 1.03, 1.03, 0.98, 0.99, 0.96, 1.08, 0.91, 1.1, 0.95, 0.98, 1, 1.06, 1.07, 1.01, 1, 1.01, 0.98};
+    size_t size = numbers.size();
+
+    UniformRandom noise_maker(range, step_size, 0);
+    Field a = noise_maker.random_field(size);
+    a += 1;
+
+    for (int i = 0; i < size; i++) {
+        EXPECT_DOUBLE_EQ(a[i], numbers[i]);
+    }
+}

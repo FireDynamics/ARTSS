@@ -132,7 +132,7 @@ void SolverController::set_up_sources() {
             }
 
             IRandomField *noise_maker = new UniformRandom(range, step_size, seed);
-            m_source_function_temperature->set_noise(noise_maker);
+            m_source_function_temperature->set_noise(noise_maker, absolute);
         }
     }
 
