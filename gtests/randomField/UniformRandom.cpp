@@ -346,12 +346,13 @@ TEST_F(UniformRandomFieldTest, numberComparison) {
 TEST_F(UniformRandomFieldTest, numberComparison2) {
     real range = 0.1;
     real step_size = 0.01;
-    std::vector<real> numbers = {0.01, 0.02, 0.05, 0.07, 0.02, 0.08, 0.01, 0.07, -0.02, 0.03, 0.03, -0.02, -0.01, -0.04, 0.08, -0.09, 0.010, -0.05, -0.02, 0.00, 0.06, 0.07, 0.01, 0.00, 0.01, -0.02};
+    std::vector<real> numbers = {0.01, 0.02, 0.05, 0.07, 0.02, 0.08, 0.01, 0.07, -0.02, 0.03, 0.03, -0.02, -0.01, -0.04, 0.08, -0.09, 0.1, -0.05, -0.02, 0.00, 0.06, 0.07, 0.01, 0.00, 0.01, -0.02};
     size_t size = numbers.size();
 
     UniformRandom noise_maker(range, step_size, 0);
     Field a = noise_maker.random_field(size);
     for (int i = 0; i < size; i++) {
+        std::cout  << a[i] << "|" << numbers[i] << " " << i << std::endl;
         EXPECT_DOUBLE_EQ(a[i], numbers[i]);
     }
 }
