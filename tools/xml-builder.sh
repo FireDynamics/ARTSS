@@ -594,10 +594,10 @@ else
       <source type=\"$TEMPSOURCETYPE\" temp_fct=\"$TEMPSOURCEFCT\" dissipation=\"No\" random=\"No\">
       </source>"
       fi
-      if [ \"$TEMPSOURCEFCT\" == \"GaussST\" ]
+      if [ \"$TEMPSOURCEFCT\" == \"Gauss\" ]
       then
         WRITETO="$WRITETO
-      <source type=\"$TEMPSOURCETYPE\" temp_fct=\"GaussST\" dissipation=\"No\" random=\"No\">
+      <source type=\"$TEMPSOURCETYPE\" temp_fct=\"Gauss\" dissipation=\"No\" random=\"No\">
         <HRR> $HRR </HRR>  <!-- total heat release rate (in kW) -->
         <cp> $CP </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> $GAUSSX0 </x0>
@@ -638,10 +638,10 @@ else
       WRITETO="$WRITETO
         <source type=\"$CONSOURCETYPE\" con_fct=\"Zero\">
         </source>"
-    elif [ $CONFORCEFCT == "GaussSC" ]
+    elif [ $CONFORCEFCT == "Gauss" ]
     then
       WRITETO="$WRITETO
-        <source type=\"$CONSOURCETYPE\" con_fct=\"GaussSC\" ramp_fct=\"RampTanh\">
+        <source type=\"$CONSOURCETYPE\" con_fct=\"Gauss\">
           <HRR> $HRR </HRR>  <!-- total heat release rate (in kW) -->
           <Hc> $HC </Hc>  <!-- Heating value (in kJ/kg) -->
           <Ys> $YS </Ys>  <!-- Soot yield -->
