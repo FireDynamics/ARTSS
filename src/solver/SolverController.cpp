@@ -733,7 +733,7 @@ void SolverController::update_sources(real t_cur, bool sync) {
             momentum_source();
         } else {
 #ifndef BENCHMARKING
-            m_logger->critical("Source function not yet implemented! Simulation stopped!");
+            m_logger->critical("Source function {} not yet implemented! Simulation stopped!");
 #endif
             std::exit(1);
             // TODO(issue 6) Error handling
