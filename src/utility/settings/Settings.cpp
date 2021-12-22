@@ -161,28 +161,25 @@ namespace Settings {
     }
 
     random_parameters parse_random_parameters(const tinyxml2::XMLElement *head,
-                                              const std::string &parent_context,
-                                              bool is_random) {
+                                              const std::string &parent_context) {
         std::string own_context = "random";
         std::string context = create_context(parent_context, own_context);
         auto[subsection, values] = map_parameter_section(head, own_context);
         random_parameters rp{};
-        if (is_random) {
-            rp.absolute = get_optional_bool(values, "absolute", false);
-            rp.custom_seed = get_required_bool(values, "custom_seed", context);
-            if (rp.custom_seed) {
-                rp.seed = get_required_size_t(values, "seed", context);
-            } else {
-                rp.seed = get_optional_size_t(values, "seed", 0);
-            }
-            rp.custom_steps = get_required_bool(values, "custom_steps", context);
-            if (rp.custom_steps) {
-                rp.step_size = get_required_real(values, "step_size", context);
-            } else {
-                rp.step_size = get_optional_real(values, "step_size", 1);
-            }
-            rp.range = get_required_real(values, "range", context);
+        rp.absolute = get_optional_bool(values, "absolute", false);
+        rp.custom_seed = get_required_bool(values, "custom_seed", context);
+        if (rp.custom_seed) {
+            rp.seed = get_required_size_t(values, "seed", context);
+        } else {
+            rp.seed = get_optional_size_t(values, "seed", 0);
         }
+        rp.custom_steps = get_required_bool(values, "custom_steps", context);
+        if (rp.custom_steps) {
+            rp.step_size = get_required_real(values, "step_size", context);
+        } else {
+            rp.step_size = get_optional_real(values, "step_size", 1);
+        }
+        rp.range = get_required_real(values, "range", context);
         return rp;
     }
 
@@ -246,7 +243,9 @@ namespace Settings {
         initial_conditions_parameters icp{};
 
         icp.random = get_required_bool(values, "random", context);
-        icp.random_parameters = parse_random_parameters(subsection, context, icp.random);
+        if (icp.random) {
+            icp.random_parameters = parse_random_parameters(subsection, context);
+        }
 
         icp.usr_fct = get_required_string(values, "usr_fct", context);
         if (icp.usr_fct == FunctionNames::uniform) {
@@ -561,6 +560,24 @@ namespace Settings {
 
             temperature_solver solver_temperature{};
             //TODO temperature
+            solver_temperature.advection = parse_advection_solver(subsection, context);
+            solver_temperature.diffusion = parse_diffusion_solver(subsection, context);
+
+            std::string context_turb = "turbulence";
+            auto[subsection_turb, values_turb] = map_parameter_section(subsection, context_turb);
+            solver_temperature.has_turbulence = get_required_bool(values_turb, "include", create_context(context, context_turb));
+            if (solver_temperature.has_turbulence) {
+                solver_temperature.prandtl_number = get_required_real(values_turb, "Pr_T", create_context(context, context_turb));
+            }
+
+            std::string context_source = "source";
+            auto[subsection_source, values_source] = map_parameter_section(subsection, context_source);
+            solver_temperature.source.type = get_required_string(values_source, "type", context_source);
+            solver_temperature.source.dissipation = get_required_bool(values_source, "dissipation", context_source);
+            solver_temperature.source.random = get_required_bool(values_source, "random", context_source);
+            if (solver_temperature.source.random) {
+                solver_temperature.source.random_parameters = parse_random_parameters(subsection_source, create_context(context, context_source));
+            }
             return solver_temperature;
         }
         concentration_solver parse_concentration_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {

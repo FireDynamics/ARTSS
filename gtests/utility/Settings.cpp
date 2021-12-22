@@ -874,3 +874,97 @@ TEST(SettingsTest, NSSolverSourceBuoyancy) {
     EXPECT_FALSE(buoyancy.use_init_values);
     EXPECT_DOUBLE_EQ(buoyancy.ambient_temperature_value.value(), 299.14);
 }
+
+TEST(SettingsTest, temperature) {
+    std::string xml = R"(
+<ARTSS>
+    <solver description="NSTempSolver" >
+        <advection type="SemiLagrangian" field="u,v,w">
+        </advection>
+        <diffusion type="Jacobi" field="u,v,w">
+            <max_iter> 77 </max_iter>
+            <tol_res> 1e-07 </tol_res>
+            <w> 1 </w>
+        </diffusion>
+        <source type="ExplicitEuler" force_fct="Buoyancy" dir="y" use_init_values="No">
+            <ambient_temperature_value> 299.14 </ambient_temperature_value>
+        </source>
+        <pressure type="VCycleMG" field="p">
+            <n_level> 4 </n_level>
+            <n_cycle> 2 </n_cycle>
+            <max_cycle> 100 </max_cycle>
+            <tol_res> 1e-07 </tol_res>
+            <n_relax> 4 </n_relax>
+            <diffusion type="Jacobi" field="p">
+                <max_iter> 100 </max_iter>
+                <tol_res> 1e-03 </tol_res>
+                <w> 0.6666666667 </w>
+            </diffusion>
+        </pressure>
+        <temperature>
+            <advection type="SemiLagrangian" field="T">
+            </advection>
+            <diffusion type="Jacobi" field="T">
+                <max_iter> 100 </max_iter>
+                <tol_res> 1e-07 </tol_res>
+                <w> 1 </w>
+            </diffusion>
+            <turbulence include="Yes">
+                <Pr_T> 0.5 </Pr_T>
+            </turbulence>
+            <source type="ExplicitEuler" temp_fct="GaussST" dissipation="No" random="Yes">
+                <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
+                <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
+                <x0> 1.4 </x0>
+                <y0> 0.02 </y0>
+                <z0> 0. </z0>
+                <sigma_x> 0.15 </sigma_x>
+                <sigma_y> 0.6 </sigma_y>
+                <sigma_z> 0.15 </sigma_z>
+                <tau> 5. </tau>
+                <random custom_seed="Yes" custom_steps="Yes">
+                    <seed> 30 </seed>
+                    <step_size> 0.3 </step_size>
+                    <range> 3 </range>
+                </random>
+            </source>
+        </temperature>
+        <solution available="No">
+        </solution>
+    </solver>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+
+    EXPECT_EQ(solver_parameters.description, SolverTypes::NSTempSolver);
+    auto temp = solver_parameters.temperature;
+    EXPECT_EQ(temp.advection.type, AdvectionMethods::SemiLagrangian);
+    EXPECT_NE(std::find(temp.advection.fields.begin(),
+                        temp.advection.fields.end(),
+                        FieldType::T),
+              temp.advection.fields.end());
+    EXPECT_EQ(temp.diffusion.type, DiffusionMethods::Jacobi);
+    EXPECT_NE(std::find(temp.diffusion.fields.begin(),
+                        temp.diffusion.fields.end(),
+                        FieldType::T),
+              temp.diffusion.fields.end());
+    auto diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(temp.diffusion.solver.value());
+    EXPECT_EQ(diffusion_jacobi.max_iter, 100);
+    EXPECT_DOUBLE_EQ(diffusion_jacobi.tol_res, 1e-7);
+    EXPECT_DOUBLE_EQ(diffusion_jacobi.w, 1);
+
+    EXPECT_TRUE(temp.has_turbulence);
+    EXPECT_DOUBLE_EQ(temp.prandtl_number.value(), 0.5);
+
+    EXPECT_EQ(temp.source.type, SourceMethods::ExplicitEuler);
+    EXPECT_FALSE(temp.source.dissipation);
+    EXPECT_EQ(temp.source.temp_fct, SourceMethods::GaussSC);
+    auto gauss = std::get<Settings::solver::temperature_sources::GaussST>(temp.source.temp_function);
+
+    EXPECT_TRUE(temp.source.random);
+    EXPECT_TRUE(temp.source.random_parameters.custom_seed);
+    EXPECT_TRUE(temp.source.random_parameters.custom_steps);
+    EXPECT_FALSE(temp.source.random_parameters.absolute);
+    EXPECT_EQ(temp.source.random_parameters.seed, 30);
+}

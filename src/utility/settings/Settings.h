@@ -189,12 +189,29 @@ namespace Settings {
             FieldType field;
             struct pressure_solvers::vcycle_mg solver;
         };
+        namespace temperature_sources {
+            struct GaussST {
+                real heat_release_rate;
+                real heat_capacity;
+                Coordinate<real> position;
+                Coordinate<real> dimension;
+                real tau;
+            };
+        }
+        struct temperature_source {
+            std::string type;
+            std::string temp_fct;
+            bool dissipation;
+            bool random;
+            struct random_parameters random_parameters;
+            std::variant<temperature_sources::GaussST> temp_function;
+        };
         struct temperature_solver {
             advection_solver advection;
             diffusion_solver diffusion;
             bool has_turbulence;
-            real prandtl_number;
-            source_solver source;
+            std::optional<real> prandtl_number;
+            temperature_source source;
         };
         struct concentration_solver {
             advection_solver advection;
@@ -231,7 +248,7 @@ namespace Settings {
         struct visualisation_parameters visualisation_parameters;
         struct logging_parameters logging_parameters;
     };
-    random_parameters parse_random_parameters(const tinyxml2::XMLElement *head, const std::string &parent_context, bool is_random);
+    random_parameters parse_random_parameters(const tinyxml2::XMLElement *head, const std::string &parent_context);
     solver_parameters parse_solver_parameters(const tinyxml2::XMLElement *root);
     surfaces_parameters parse_surfaces_parameters(const tinyxml2::XMLElement *root);
     obstacles_parameters parse_obstacles_parameters(const tinyxml2::XMLElement *root);
