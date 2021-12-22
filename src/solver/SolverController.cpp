@@ -118,6 +118,7 @@ void SolverController::set_up_sources() {
         bool has_noise = m_settings.get_bool("solver/temperature/source/random");
         if (has_noise) {
             real range = m_settings.get_real("solver/temperature/source/random/range");  // +- range of random numbers
+            bool absolute = m_settings.get_bool("solver/temperature/source/random/absolute");
             bool has_custom_seed = m_settings.get_bool("solver/temperature/source/random/custom_seed");
             bool has_custom_steps = m_settings.get_bool("solver/temperature/source/random/custom_steps");
 
