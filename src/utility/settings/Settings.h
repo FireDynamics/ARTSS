@@ -189,8 +189,8 @@ namespace Settings {
             FieldType field;
             struct pressure_solvers::vcycle_mg solver;
         };
-        namespace temperature_sources {
-            struct GaussST {
+        namespace sources {
+            struct gauss {
                 real heat_release_rate;
                 real heat_capacity;
                 Coordinate<real> position;
@@ -204,7 +204,7 @@ namespace Settings {
             bool dissipation;
             bool random;
             struct random_parameters random_parameters;
-            std::variant<temperature_sources::GaussST> temp_function;
+            std::variant<sources::gauss> temp_function;
         };
         struct temperature_solver {
             advection_solver advection;

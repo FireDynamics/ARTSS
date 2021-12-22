@@ -166,7 +166,7 @@ namespace Settings {
         std::string context = create_context(parent_context, own_context);
         auto[subsection, values] = map_parameter_section(head, own_context);
         random_parameters rp{};
-        rp.absolute = get_optional_bool(values, "absolute", false);
+        rp.absolute = get_required_bool(values, "absolute", context);
         rp.custom_seed = get_required_bool(values, "custom_seed", context);
         if (rp.custom_seed) {
             rp.seed = get_required_size_t(values, "seed", context);
@@ -553,13 +553,27 @@ namespace Settings {
             }
             return solver_pressure;
         }
+        namespace sources {
+            gauss parse_gauss(const Map &values, const std::string &parent_context) {
+                std::string context = create_context(parent_context, "GaussST");
+                gauss gauss{};
+                gauss.heat_release_rate = get_required_real(values, "HRR", context);
+                gauss.heat_capacity = get_required_real(values, "cp", context);
+                for (const auto axis : {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z}) {
+                    std::string axis_name = Utility::to_lower(Mapping::get_axis_name(axis));
+                    gauss.position[axis] = get_required_real(values, axis_name + "0", context);
+                    gauss.dimension[axis] = get_required_real(values, "sigma_" + axis_name, context);
+                }
+                gauss.tau = get_required_real(values, "tau", context);
+                return gauss;
+            }
+        }
         temperature_solver parse_temperature_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "temperature";
             std::string context = create_context(parent_context, own_context);
             auto[subsection, values] = map_parameter_section(head, own_context);
 
             temperature_solver solver_temperature{};
-            //TODO temperature
             solver_temperature.advection = parse_advection_solver(subsection, context);
             solver_temperature.diffusion = parse_diffusion_solver(subsection, context);
 
@@ -577,6 +591,12 @@ namespace Settings {
             solver_temperature.source.random = get_required_bool(values_source, "random", context_source);
             if (solver_temperature.source.random) {
                 solver_temperature.source.random_parameters = parse_random_parameters(subsection_source, create_context(context, context_source));
+            }
+            solver_temperature.source.temp_fct = get_required_string(values_source, "temp_fct", context_source);
+            if (solver_temperature.source.temp_fct == SourceMethods::Gauss) {
+                solver_temperature.source.temp_function = sources::parse_gauss(values_source, context_source);
+            } else {
+                throw config_error(fmt::format("temperature source function '{}' has no parsing implementation.", solver_temperature.source.temp_fct));
             }
             return solver_temperature;
         }

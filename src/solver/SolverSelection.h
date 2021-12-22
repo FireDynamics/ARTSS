@@ -35,8 +35,7 @@ struct SourceMethods {
     inline static const std::string BuoyancyST_MMS = "BuoyancyST_MMS";
     inline static const std::string Buoyancy = "Buoyancy";
     inline static const std::string Cube = "Cube";
-    inline static const std::string GaussST = "GaussST";
-    inline static const std::string GaussSC = "GaussSC";
+    inline static const std::string Gauss = "Gauss";
     inline static const std::string Uniform = "Uniform";
     inline static const std::string Zero = "Zero";
 };

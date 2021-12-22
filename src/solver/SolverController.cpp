@@ -86,7 +86,7 @@ void SolverController::set_up_sources() {
 #ifndef BENCHMARKING
         m_logger->debug("create temperature source function {}", temp_fct);
 #endif
-        if (temp_fct == SourceMethods::GaussST) {
+        if (temp_fct == SourceMethods::Gauss) {
             real HRR = m_settings.get_real("solver/temperature/source/HRR");    // heat release rate in [kW]
             real cp = m_settings.get_real("solver/temperature/source/cp");        // specific heat capacity in [kJ/ kg K]
             real x0 = m_settings.get_real("solver/temperature/source/x0");
@@ -150,7 +150,7 @@ void SolverController::set_up_sources() {
         }
         // concentration function
         std::string con_fct = m_settings.get("solver/concentration/source/con_fct");
-        if (con_fct == SourceMethods::GaussSC) {
+        if (con_fct == SourceMethods::Gauss) {
             // get parameters for Gauss function
             real HRR = m_settings.get_real("solver/concentration/source/HRR");       // heat release rate in [kW]
             real Hc = m_settings.get_real("solver/concentration/source/Hc");        // heating value in [kJ/kg]

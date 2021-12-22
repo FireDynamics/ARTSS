@@ -912,7 +912,7 @@ TEST(SettingsTest, temperature) {
             <turbulence include="Yes">
                 <Pr_T> 0.5 </Pr_T>
             </turbulence>
-            <source type="ExplicitEuler" temp_fct="GaussST" dissipation="No" random="Yes">
+            <source type="ExplicitEuler" temp_fct="Gauss" dissipation="No" random="Yes">
                 <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
                 <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
                 <x0> 1.4 </x0>
@@ -920,9 +920,9 @@ TEST(SettingsTest, temperature) {
                 <z0> 0. </z0>
                 <sigma_x> 0.15 </sigma_x>
                 <sigma_y> 0.6 </sigma_y>
-                <sigma_z> 0.15 </sigma_z>
+                <sigma_z> 0.1 </sigma_z>
                 <tau> 5. </tau>
-                <random custom_seed="Yes" custom_steps="Yes">
+                <random absolute="No" custom_seed="Yes" custom_steps="Yes">
                     <seed> 30 </seed>
                     <step_size> 0.3 </step_size>
                     <range> 3 </range>
@@ -959,12 +959,23 @@ TEST(SettingsTest, temperature) {
 
     EXPECT_EQ(temp.source.type, SourceMethods::ExplicitEuler);
     EXPECT_FALSE(temp.source.dissipation);
-    EXPECT_EQ(temp.source.temp_fct, SourceMethods::GaussSC);
-    auto gauss = std::get<Settings::solver::temperature_sources::GaussST>(temp.source.temp_function);
+    EXPECT_EQ(temp.source.temp_fct, SourceMethods::Gauss);
+    auto gauss = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
+    EXPECT_DOUBLE_EQ(gauss.tau, 5);
+    EXPECT_DOUBLE_EQ(gauss.heat_release_rate, 50.3);
+    EXPECT_DOUBLE_EQ(gauss.heat_capacity, 1);
+    EXPECT_DOUBLE_EQ(gauss.position[CoordinateAxis::X], 1.4);
+    EXPECT_DOUBLE_EQ(gauss.position[CoordinateAxis::Y], 0.02);
+    EXPECT_DOUBLE_EQ(gauss.position[CoordinateAxis::Z], 0);
+    EXPECT_DOUBLE_EQ(gauss.dimension[CoordinateAxis::X], 0.15);
+    EXPECT_DOUBLE_EQ(gauss.dimension[CoordinateAxis::Y], 0.6);
+    EXPECT_DOUBLE_EQ(gauss.dimension[CoordinateAxis::Z], 0.1);
 
     EXPECT_TRUE(temp.source.random);
     EXPECT_TRUE(temp.source.random_parameters.custom_seed);
     EXPECT_TRUE(temp.source.random_parameters.custom_steps);
     EXPECT_FALSE(temp.source.random_parameters.absolute);
     EXPECT_EQ(temp.source.random_parameters.seed, 30);
+    EXPECT_EQ(temp.source.random_parameters.step_size, 0.3);
+    EXPECT_EQ(temp.source.random_parameters.range, 3);
 }
