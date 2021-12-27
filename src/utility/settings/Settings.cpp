@@ -292,6 +292,14 @@ namespace Settings {
             layers.values.emplace_back(get_required_real(values, "value_" + std::to_string(layers.number_of_layers), context));
             return layers;
         }
+
+        sin_sin_sin parse_sin_sin_sin_parameters(const Map &values, const std::string &parent_context) {
+            std::string own_context = FunctionNames::sin_sin_sin;
+            std::string context = create_context(parent_context, own_context);
+            sin_sin_sin sin{};
+            sin.l = get_required_real(values, "l", context);
+            return sin;
+        }
     }
 
     initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root) {
@@ -323,6 +331,8 @@ namespace Settings {
             icp.ic = initial_conditions::parse_layers_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::mcdermott) {
             icp.ic = initial_conditions::parse_mc_dermott_parameters(values, context);
+        } else if (icp.usr_fct == FunctionNames::sin_sin_sin) {
+            icp.ic = initial_conditions::parse_sin_sin_sin_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::vortex) {
             icp.ic = initial_conditions::parse_vortex_parameters(values, context);
         } else {

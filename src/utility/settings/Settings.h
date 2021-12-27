@@ -100,6 +100,9 @@ namespace Settings {
             std::vector<real> borders;
             std::vector<real> values;
         };
+        struct sin_sin_sin {
+            real l;
+        };
     }
     struct random_parameters {
         bool absolute;
@@ -120,6 +123,7 @@ namespace Settings {
                      initial_conditions::hat,
                      initial_conditions::layers_temperature,
                      initial_conditions::mc_dermott,
+                     initial_conditions::sin_sin_sin,
                      initial_conditions::vortex>> ic;
         std::optional<struct random_parameters> random_parameters;
     };

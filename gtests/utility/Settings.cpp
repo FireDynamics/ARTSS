@@ -310,6 +310,20 @@ namespace initial_conditions {
         EXPECT_DOUBLE_EQ(params_layers.values[1], 304.04);
         EXPECT_DOUBLE_EQ(params_layers.values[2], 305.24);
     }
+    TEST(SettingsTest, SinSinSin) {
+        std::string xml = R"(
+<ARTSS>
+    <initial_conditions usr_fct="SinSinSin"  random="No">
+        <l> 1. </l>
+    </initial_conditions>
+</ARTSS>)";
+        tinyxml2::XMLDocument doc;
+        doc.Parse(xml.c_str());
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
+                doc.RootElement());
+        auto params_sin_sin_sin_mms = std::get<sin_sin_sin>(initial_conditions_parameters.ic.value());
+        EXPECT_DOUBLE_EQ(params_sin_sin_sin_mms.l, 1);
+    }
     TEST(SettingsTest, buoyancyMMMS) {
         std::string xml = R"(
 <ARTSS>
