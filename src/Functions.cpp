@@ -27,6 +27,7 @@ const std::string FunctionNames::exp_sinus_sum = "ExpSinusSum";
 const std::string FunctionNames::gauss_bubble = "GaussBubble";
 const std::string FunctionNames::hat = "Hat";
 const std::string FunctionNames::jet = "Jet";
+const std::string FunctionNames::layers = "LayersT";
 const std::string FunctionNames::mcdermott = "McDermott";
 const std::string FunctionNames::sin_sin_sin = "SinSinSin";
 const std::string FunctionNames::uniform = "Uniform";

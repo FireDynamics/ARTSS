@@ -92,6 +92,14 @@ namespace Settings {
         struct mc_dermott {
             real A;
         };
+        struct buoyancy_mms {
+            real rhoa;
+        };
+        struct layers_temperature {
+            size_t number_of_layers;
+            std::vector<real> borders;
+            std::vector<real> values;
+        };
     }
     struct random_parameters {
         bool absolute;
@@ -105,10 +113,12 @@ namespace Settings {
         std::string usr_fct;
         bool random;
         std::optional<std::variant<initial_conditions::uniform,
+                     initial_conditions::buoyancy_mms,
                      initial_conditions::drift,
                      initial_conditions::exp_sinus_prod,
                      initial_conditions::gauss_bubble,
                      initial_conditions::hat,
+                     initial_conditions::layers_temperature,
                      initial_conditions::mc_dermott,
                      initial_conditions::vortex>> ic;
         std::optional<struct random_parameters> random_parameters;

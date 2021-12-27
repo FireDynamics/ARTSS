@@ -286,6 +286,44 @@ namespace initial_conditions {
         EXPECT_DOUBLE_EQ(params_drift.velocity_lin[CoordinateAxis::Z], 0.25);
         EXPECT_DOUBLE_EQ(params_drift.pa, 0);
     }
+    TEST(SettingsTest, layersT) {
+        std::string xml = R"(
+<ARTSS>
+    <initial_conditions usr_fct="LayersT"  random="No">
+        <n_layers> 3 </n_layers>
+        <border_1> -1.8 </border_1>  <!-- at cell face -->
+        <border_2> -0.6 </border_2>  <!-- at cell face -->
+        <value_1> 303.64 </value_1>
+        <value_2> 304.04 </value_2>
+        <value_3> 305.24 </value_3>
+    </initial_conditions>
+</ARTSS>)";
+        tinyxml2::XMLDocument doc;
+        doc.Parse(xml.c_str());
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
+                doc.RootElement());
+        auto params_layers = std::get<layers_temperature>(initial_conditions_parameters.ic.value());
+        EXPECT_EQ(params_layers.number_of_layers, 3);
+        EXPECT_DOUBLE_EQ(params_layers.borders[0], -1.8);
+        EXPECT_DOUBLE_EQ(params_layers.borders[1], -0.6);
+        EXPECT_DOUBLE_EQ(params_layers.values[0], 303.64);
+        EXPECT_DOUBLE_EQ(params_layers.values[1], 304.04);
+        EXPECT_DOUBLE_EQ(params_layers.values[2], 305.24);
+    }
+    TEST(SettingsTest, buoyancyMMMS) {
+        std::string xml = R"(
+<ARTSS>
+    <initial_conditions usr_fct="BuoyancyMMS"  random="No">
+        <rhoa> 1. </rhoa>
+    </initial_conditions>
+</ARTSS>)";
+        tinyxml2::XMLDocument doc;
+        doc.Parse(xml.c_str());
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
+                doc.RootElement());
+        auto params_buoyancy_mms = std::get<buoyancy_mms>(initial_conditions_parameters.ic.value());
+        EXPECT_DOUBLE_EQ(params_buoyancy_mms.rhoa, 1);
+    }
     TEST(SettingsTest, vortex) {
         std::string xml = R"(
 <ARTSS>

@@ -246,6 +246,14 @@ namespace Settings {
             drift.pa = get_required_real(values, "pa", context);
             return drift;
         }
+        buoyancy_mms parse_buoyancy_mms_parameters(const Map &values, const std::string &parent_context) {
+            std::string own_context = FunctionNames::buoyancy_mms;
+            std::string context = create_context(parent_context, own_context);
+            buoyancy_mms buoyancy_mms{};
+
+            buoyancy_mms.rhoa = get_required_real(values, "rhoa", context);
+            return buoyancy_mms;
+        }
         vortex parse_vortex_parameters(const Map &values, const std::string &parent_context) {
             std::string own_context = FunctionNames::vortex;
             std::string context = create_context(parent_context, own_context);
@@ -266,6 +274,24 @@ namespace Settings {
             mc_dermott.A = get_required_real(values, "A", context);
             return mc_dermott;
         }
+        layers_temperature parse_layers_parameters(const Map &values, const std::string &parent_context) {
+            std::string own_context = FunctionNames::layers;
+            std::string context = create_context(parent_context, own_context);
+            layers_temperature layers{};
+
+            layers.number_of_layers = get_required_size_t(values, "n_layers", context);
+            if (layers.number_of_layers == 0) {
+                throw config_error(fmt::format("Numbers of layers has to be at least 1. Current value: {}", layers.number_of_layers));
+            }
+            layers.values.reserve(layers.number_of_layers);
+            layers.borders.reserve(layers.number_of_layers - 1);
+            for (size_t i = 1; i < layers.number_of_layers; i++) {
+                layers.values.emplace_back(get_required_real(values, "value_" + std::to_string(i), context));
+                layers.borders.emplace_back(get_required_real(values, "border_" + std::to_string(i), context));
+            }
+            layers.values.emplace_back(get_required_real(values, "value_" + std::to_string(layers.number_of_layers), context));
+            return layers;
+        }
     }
 
     initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root) {
@@ -281,6 +307,8 @@ namespace Settings {
         icp.usr_fct = get_required_string(values, "usr_fct", context);
         if (icp.usr_fct == FunctionNames::uniform) {
             icp.ic = initial_conditions::parse_uniform_parameters(values, context);
+        } else if (icp.usr_fct == FunctionNames::buoyancy_mms) {
+            icp.ic = initial_conditions::parse_buoyancy_mms_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::drift) {
             icp.ic = initial_conditions::parse_drift_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::gauss_bubble) {
@@ -291,6 +319,8 @@ namespace Settings {
             icp.ic = initial_conditions::parse_exp_sinus_prod(values, context);
         } else if (icp.usr_fct == FunctionNames::exp_sinus_sum) {
             // no values
+        } else if (icp.usr_fct == FunctionNames::layers) {
+            icp.ic = initial_conditions::parse_layers_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::mcdermott) {
             icp.ic = initial_conditions::parse_mc_dermott_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::vortex) {

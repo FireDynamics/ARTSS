@@ -23,6 +23,7 @@ struct FunctionNames{
     static const std::string gauss_bubble;
     static const std::string hat;
     static const std::string jet;
+    static const std::string layers;
     static const std::string mcdermott;
     static const std::string sin_sin_sin;
     static const std::string uniform;
