@@ -265,6 +265,28 @@ namespace initial_conditions {
         EXPECT_DOUBLE_EQ(gb.shift[CoordinateAxis::Y], 1.025);
         EXPECT_DOUBLE_EQ(gb.shift[CoordinateAxis::Z], 0.5);
     }
+    TEST(SettingsTest, vortex) {
+        std::string xml = R"(
+<ARTSS>
+    <initial_conditions usr_fct="Vortex"  random="No">
+        <u_lin> 0.05 </u_lin>
+        <v_lin> 0.5 </v_lin>
+        <w_lin> 0.25 </w_lin>
+        <pa> 0. </pa>
+        <rhoa> 1. </rhoa>
+    </initial_conditions>
+</ARTSS>)";
+        tinyxml2::XMLDocument doc;
+        doc.Parse(xml.c_str());
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
+                doc.RootElement());
+        auto params_vortex = std::get<vortex>(initial_conditions_parameters.ic.value());
+        EXPECT_DOUBLE_EQ(params_vortex.velocity_lin[CoordinateAxis::X], 0.05);
+        EXPECT_DOUBLE_EQ(params_vortex.velocity_lin[CoordinateAxis::Y], 0.5);
+        EXPECT_DOUBLE_EQ(params_vortex.velocity_lin[CoordinateAxis::Z], 0.25);
+        EXPECT_DOUBLE_EQ(params_vortex.rhoa, 1);
+        EXPECT_DOUBLE_EQ(params_vortex.pa, 0);
+    }
 }
 
 TEST(SettingsTest, requiredObstaclesParameters) {

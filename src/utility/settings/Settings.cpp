@@ -235,6 +235,18 @@ namespace Settings {
             hat.val_in = get_required_real(values, "val_in", context);
             return hat;
         }
+        vortex parse_vortex_parameters(const Map &values, const std::string &parent_context) {
+            std::string own_context = FunctionNames::vortex;
+            std::string context = create_context(parent_context, own_context);
+            vortex vortex{};
+
+            vortex.velocity_lin[CoordinateAxis::X] = get_required_real(values, "u_lin", context);
+            vortex.velocity_lin[CoordinateAxis::Y] = get_required_real(values, "v_lin", context);
+            vortex.velocity_lin[CoordinateAxis::Z] = get_required_real(values, "w_lin", context);
+            vortex.pa = get_required_real(values, "pa", context);
+            vortex.rhoa = get_required_real(values, "rhoa", context);
+            return vortex;
+        }
     }
 
     initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root) {
@@ -258,6 +270,8 @@ namespace Settings {
             icp.ic = initial_conditions::parse_exp_sinus_prod(values, context);
         } else if (icp.usr_fct == FunctionNames::exp_sinus_sum) {
             // no values
+        } else if (icp.usr_fct == FunctionNames::vortex) {
+            icp.ic = initial_conditions::parse_vortex_parameters(values, context);
         } else {
             throw config_error(fmt::format("{} has no parsing implementation.", icp.usr_fct));
         }

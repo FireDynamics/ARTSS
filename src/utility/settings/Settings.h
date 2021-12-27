@@ -80,6 +80,11 @@ namespace Settings {
             real val_in;
             real val_out;
         };
+        struct vortex {
+            Coordinate<real> velocity_lin;
+            real pa;
+            real rhoa;
+        };
     }
     struct random_parameters {
         bool absolute;
@@ -95,7 +100,8 @@ namespace Settings {
         std::optional<std::variant<initial_conditions::uniform,
                      initial_conditions::gauss_bubble,
                      initial_conditions::exp_sinus_prod,
-                     initial_conditions::hat>> ic;
+                     initial_conditions::hat,
+                     initial_conditions::vortex>> ic;
         std::optional<struct random_parameters> random_parameters;
     };
     struct boundary {
