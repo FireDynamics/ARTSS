@@ -235,6 +235,17 @@ namespace Settings {
             hat.val_in = get_required_real(values, "val_in", context);
             return hat;
         }
+        drift parse_drift_parameters(const Map &values, const std::string &parent_context) {
+            std::string own_context = FunctionNames::drift;
+            std::string context = create_context(parent_context, own_context);
+            drift drift{};
+
+            drift.velocity_lin[CoordinateAxis::X] = get_required_real(values, "u_lin", context);
+            drift.velocity_lin[CoordinateAxis::Y] = get_required_real(values, "v_lin", context);
+            drift.velocity_lin[CoordinateAxis::Z] = get_required_real(values, "w_lin", context);
+            drift.pa = get_required_real(values, "pa", context);
+            return drift;
+        }
         vortex parse_vortex_parameters(const Map &values, const std::string &parent_context) {
             std::string own_context = FunctionNames::vortex;
             std::string context = create_context(parent_context, own_context);
@@ -270,6 +281,8 @@ namespace Settings {
         icp.usr_fct = get_required_string(values, "usr_fct", context);
         if (icp.usr_fct == FunctionNames::uniform) {
             icp.ic = initial_conditions::parse_uniform_parameters(values, context);
+        } else if (icp.usr_fct == FunctionNames::drift) {
+            icp.ic = initial_conditions::parse_drift_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::gauss_bubble) {
             icp.ic = initial_conditions::parse_gauss_bubble_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::hat) {

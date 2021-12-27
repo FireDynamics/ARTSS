@@ -66,6 +66,10 @@ namespace Settings {
         struct uniform {
             real value;
         };
+        struct drift {
+            Coordinate<real> velocity_lin;
+            real pa;
+        };
         struct gauss_bubble {
             Coordinate<real> velocity_lin;
             Coordinate<real> shift;
@@ -101,8 +105,9 @@ namespace Settings {
         std::string usr_fct;
         bool random;
         std::optional<std::variant<initial_conditions::uniform,
-                     initial_conditions::gauss_bubble,
+                     initial_conditions::drift,
                      initial_conditions::exp_sinus_prod,
+                     initial_conditions::gauss_bubble,
                      initial_conditions::hat,
                      initial_conditions::mc_dermott,
                      initial_conditions::vortex>> ic;
