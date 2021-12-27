@@ -7,6 +7,7 @@
 #include "DomainController.h"
 #include <string>
 
+std::unique_ptr<DomainController> DomainController::single{};
 
 DomainController::DomainController(Settings::Settings const &settings) :
         m_settings(settings) {

@@ -8,6 +8,7 @@
 
 #include <string>
 
+std::unique_ptr<DomainData> DomainData::single{};  // Singleton
 DomainData::DomainData(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
@@ -202,7 +203,7 @@ void DomainData::control() {
         int minimum_amount_of_cells = static_cast<int>(std::pow(2, m_levels));
         for (size_t axis = 0; axis < number_of_axes; axis++) {
             size_t number_of_cells = get_number_of_inner_cells(CoordinateAxis(axis));
-            if (number_of_cells % minimum_amount_of_cells != 0) {
+            if (number_of_cells % minimum_amount_of_cells != 0 && number_of_cells > 1) {
                 std::string spacing_name = axis_names[axis];
                 std::transform(spacing_name.begin(), spacing_name.end(), spacing_name.begin(), ::tolower);
                 m_logger->warn("n{} ({}) has to be a multiple of 2^levels = {}. "
