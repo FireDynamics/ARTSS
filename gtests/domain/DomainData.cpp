@@ -73,7 +73,7 @@ TEST_F(DomainDataTest, constructorTest) {
     EXPECT_DOUBLE_EQ(0.05, domain_data->get_dz());
 
     EXPECT_EQ(0, domain_data->get_levels());
-    EXPECT_EQ(1320, domain_data->get_size());
+    EXPECT_EQ(2184, domain_data->get_size());
 }
 
 // test with computational domain but same values
@@ -97,6 +97,7 @@ TEST_F(DomainDataTest, constructor2Test) {
     settings.sset("domain_parameters/Y2", "1.2");
     settings.sset("domain_parameters/Z2", "0.3");
     settings.sset("solver/description", "non-solver");
+    DomainData::init(settings);
 
     auto domain_data = DomainData::getInstance();
 
@@ -136,8 +137,7 @@ TEST_F(DomainDataTest, constructor2Test) {
     EXPECT_DOUBLE_EQ(0.05, domain_data->get_dz());
 
     EXPECT_EQ(0, domain_data->get_levels());
-    EXPECT_EQ(1320, domain_data->get_size());
-    domain_data->reset();
+    EXPECT_EQ(2184, domain_data->get_size());
 }
 
 // test with computational domain values different from the physical domain
@@ -161,6 +161,7 @@ TEST_F(DomainDataTest, constructor3Test) {
     settings.sset("domain_parameters/Y2", "2.2");
     settings.sset("domain_parameters/Z2", "0.3");
     settings.sset("solver/description", "non-solver");
+    DomainData::init(settings);
 
     auto domain_data = DomainData::getInstance();
 
@@ -200,8 +201,7 @@ TEST_F(DomainDataTest, constructor3Test) {
     EXPECT_DOUBLE_EQ(0.005, domain_data->get_dz());
 
     EXPECT_EQ(0, domain_data->get_levels());
-    EXPECT_EQ(10560, domain_data->get_size());
-    domain_data->reset();
+    EXPECT_EQ(16016, domain_data->get_size());
 }
 
 TEST_F(DomainDataTest, goodCaseMultigridTest) {
@@ -219,6 +219,7 @@ TEST_F(DomainDataTest, goodCaseMultigridTest) {
     settings.sset("domain_parameters/Z2", "0.3");
     settings.sset("solver/description", "NSSolver");
     settings.sset("solver/pressure/n_level", "2");
+    DomainData::init(settings);
 
     auto domain_data = DomainData::getInstance();
 
@@ -268,6 +269,7 @@ TEST_F(DomainDataTest, badCaseMultigridTest) {
     settings.sset("domain_parameters/Z2", "0.3");
     settings.sset("solver/description", "NSSolver");
     settings.sset("solver/pressure/n_level", "2");
+    DomainData::init(settings);
 
     auto domain_data = DomainData::getInstance();
 
@@ -300,6 +302,7 @@ TEST_F(DomainDataTest, badCaseComputationlDomainTest) {
     settings.sset("domain_parameters/y2", "2.2");
     settings.sset("domain_parameters/z2", "0.3");
     settings.sset("solver/description", "non-solver");
+    DomainData::init(settings);
 
     auto domain_data = DomainData::getInstance();
 
@@ -341,5 +344,4 @@ TEST_F(DomainDataTest, badCaseComputationlDomainTest) {
     EXPECT_EQ(0, domain_data->get_levels());
 
     //TODO something has to happen, computational_domain > physical domain is not allowed
-    domain_data->reset();
 }
