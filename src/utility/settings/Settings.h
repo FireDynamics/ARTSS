@@ -301,6 +301,7 @@ namespace Settings {
 
 class Settings {
  public:
+     Settings();
      explicit Settings(const std::string& path);
      void print_config() const;
 

@@ -7,8 +7,6 @@
 #include "DomainController.h"
 #include <string>
 
-DomainController *DomainController::singleton = nullptr;  // Singleton
-
 
 DomainController::DomainController(Settings::Settings const &settings) :
         m_settings(settings) {
@@ -128,14 +126,6 @@ return_obstacle DomainController::parse_obstacle_parameter(const std::vector<Set
 
 DomainController::~DomainController() {
     delete m_multigrid;
-}
-
-
-DomainController *DomainController::getInstance(Settings::Settings const &settings) {
-    if (singleton == nullptr) {
-        singleton = new DomainController(settings);
-    }
-    return singleton;
 }
 
 // ================================= Printer =======================================================

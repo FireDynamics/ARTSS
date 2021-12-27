@@ -936,4 +936,8 @@ namespace Settings {
 
         return iter->second;
     }
+
+    Settings::Settings() {
+        m_logger = Utility::create_logger("Settings");
+    }
 }

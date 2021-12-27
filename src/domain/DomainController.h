@@ -8,6 +8,8 @@
 #define ARTSS_BOUNDARY_BOUNDARYCONTROLLER_H_
 
 #include <vector>
+#include <cstddef>
+
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Utility.h"
@@ -16,16 +18,18 @@
 #include "Multigrid.h"
 #include "Obstacle.h"
 #include "Surface.h"
+
 using return_surface = std::tuple<std::vector<Surface>, std::vector<BoundaryDataController>>;
 using return_obstacle = std::tuple<std::vector<Obstacle>, std::vector<BoundaryDataController>>;
 using return_xml_objects = std::tuple<BoundaryDataController, std::vector<Surface>, std::vector<BoundaryDataController>, std::vector<Obstacle>, std::vector<BoundaryDataController>>;
 
 class DomainController {
  public:
-    static DomainController* getInstance() { return singleton; }
-    static DomainController* getInstance(Settings::Settings const &settings);
-
+    explicit DomainController(Settings::Settings const &settings);
+    static DomainController *getInstance() { return single.get(); }
     ~DomainController();
+    static void init(Settings::Settings const &settings) { single = std::make_unique<DomainController>(settings); }
+    static void reset() { single.reset(); }
 
     void apply_boundary(Field &field, bool sync = true);
 
@@ -56,15 +60,14 @@ class DomainController {
         return m_multigrid->is_obstacle_cell(level, coords);
     }
 
- private:
-    explicit DomainController(Settings::Settings const &settings);
+private:
     size_t get_slice_size_domain_inner_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_domain_inner_cells_level_joined(level); }  // get size of domain inner list
 
     Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    static DomainController* singleton;
+    static std::unique_ptr<DomainController> single;
 
     Multigrid* m_multigrid;
 

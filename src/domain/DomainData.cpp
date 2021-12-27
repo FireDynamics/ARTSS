@@ -8,9 +8,6 @@
 
 #include <string>
 
-
-DomainData *DomainData::single = nullptr;  // Singleton
-
 DomainData::DomainData(Settings::Settings const &settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
@@ -64,13 +61,6 @@ void DomainData::calc_MG_values() {
             number_of_inner_cells[level][axis] = (number_of_inner_cells[level - 1][axis] == 1) ? 1 : static_cast<size_t> (std::round(number_of_inner_cells[level - 1][axis] / 2));
         }
     }
-}
-
-DomainData *DomainData::getInstance(Settings::Settings const &settings) {
-    if (single == nullptr) {
-        single = new DomainData(settings);
-    }
-    return single;
 }
 
 size_t DomainData::get_size(size_t level) const {

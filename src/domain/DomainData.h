@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_DOMAINDATA_H_
-#define ARTSS_DOMAINDATA_H_
+#ifndef ARTSS_DOMAIN_DOMAINDATA_H_
+#define ARTSS_DOMAIN_DOMAINDATA_H_
 
 #include <cmath>
 #ifdef _OPENACC
@@ -22,8 +22,9 @@ class DomainData {
  public:
     explicit DomainData(Settings::Settings const &settings);
     ~DomainData();
-    static DomainData *getInstance() { return single; }
-    static DomainData *getInstance(Settings::Settings const &settings);
+    static void init(Settings::Settings const &settings) { single = std::make_unique<DomainData>(settings); }
+    static void reset() { single.reset(); }
+    static DomainData *getInstance() { return single.get(); }
 
     // getter
     [[deprecated("Replaced by get_number_of_inner_cells")]]
@@ -149,7 +150,7 @@ class DomainData {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    static DomainData *single; // Singleton
+    static std::unique_ptr<DomainData> single;  // Singleton
     void calc_MG_values();
 
     static real calc_new_coord(real oldCoord, long shift, real cell_width);
@@ -171,4 +172,4 @@ class DomainData {
     void control();
 };
 
-#endif /* ARTSS_DOMAINDATA_H_ */
+#endif /* ARTSS_DOMAIN_DOMAINDATA_H_ */
