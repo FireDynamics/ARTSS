@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_BOUNDARY_SURFACE_H_
-#define ARTSS_BOUNDARY_SURFACE_H_
+#ifndef ARTSS_DOMAIN_SURFACE_H_
+#define ARTSS_DOMAIN_SURFACE_H_
 
 #include <vector>
 
@@ -69,4 +69,4 @@ private:
 };
 
 
-#endif /* ARTSS_BOUNDARY_SURFACE_H_ */
+#endif /* ARTSS_DOMAIN_SURFACE_H_ */
