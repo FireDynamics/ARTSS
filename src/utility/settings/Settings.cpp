@@ -938,6 +938,8 @@ namespace Settings {
     }
 
     Settings::Settings() {
+#ifndef BENCHMARKING
         m_logger = Utility::create_logger("Settings");
+#endif
     }
 }
