@@ -85,6 +85,9 @@ namespace Settings {
             real pa;
             real rhoa;
         };
+        struct mc_dermott {
+            real A;
+        };
     }
     struct random_parameters {
         bool absolute;
@@ -101,6 +104,7 @@ namespace Settings {
                      initial_conditions::gauss_bubble,
                      initial_conditions::exp_sinus_prod,
                      initial_conditions::hat,
+                     initial_conditions::mc_dermott,
                      initial_conditions::vortex>> ic;
         std::optional<struct random_parameters> random_parameters;
     };

@@ -265,6 +265,7 @@ namespace initial_conditions {
         EXPECT_DOUBLE_EQ(gb.shift[CoordinateAxis::Y], 1.025);
         EXPECT_DOUBLE_EQ(gb.shift[CoordinateAxis::Z], 0.5);
     }
+
     TEST(SettingsTest, vortex) {
         std::string xml = R"(
 <ARTSS>
@@ -286,6 +287,20 @@ namespace initial_conditions {
         EXPECT_DOUBLE_EQ(params_vortex.velocity_lin[CoordinateAxis::Z], 0.25);
         EXPECT_DOUBLE_EQ(params_vortex.rhoa, 1);
         EXPECT_DOUBLE_EQ(params_vortex.pa, 0);
+    }
+    TEST(SettingsTest, mcDermott) {
+        std::string xml = R"(
+<ARTSS>
+    <initial_conditions usr_fct="McDermott"  random="No">
+        <A> 2 </A>
+    </initial_conditions>
+</ARTSS>)";
+        tinyxml2::XMLDocument doc;
+        doc.Parse(xml.c_str());
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
+                doc.RootElement());
+        auto params_mc_dermott = std::get<mc_dermott>(initial_conditions_parameters.ic.value());
+        EXPECT_DOUBLE_EQ(params_mc_dermott.A, 2);
     }
 }
 

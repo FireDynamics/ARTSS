@@ -247,6 +247,14 @@ namespace Settings {
             vortex.rhoa = get_required_real(values, "rhoa", context);
             return vortex;
         }
+        mc_dermott parse_mc_dermott_parameters(const Map &values, const std::string &parent_context) {
+            std::string own_context = FunctionNames::mcdermott;
+            std::string context = create_context(parent_context, own_context);
+            mc_dermott mc_dermott{};
+
+            mc_dermott.A = get_required_real(values, "A", context);
+            return mc_dermott;
+        }
     }
 
     initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root) {
@@ -270,6 +278,8 @@ namespace Settings {
             icp.ic = initial_conditions::parse_exp_sinus_prod(values, context);
         } else if (icp.usr_fct == FunctionNames::exp_sinus_sum) {
             // no values
+        } else if (icp.usr_fct == FunctionNames::mcdermott) {
+            icp.ic = initial_conditions::parse_mc_dermott_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::vortex) {
             icp.ic = initial_conditions::parse_vortex_parameters(values, context);
         } else {
