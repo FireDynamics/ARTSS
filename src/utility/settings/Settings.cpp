@@ -433,7 +433,7 @@ namespace Settings {
         auto[subsection, values] = map_parameter_section(root, context);
         adaption_parameters ap{};
 
-        ap.enabled = get_required_bool(values, "enabled", context);
+        ap.enabled = get_required_bool(values, "dynamic", context);
         if (ap.enabled) {
             //TODO (issue 178) parse adaption parameters
             throw config_error(
