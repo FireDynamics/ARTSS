@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_COORDINATE_H_
-#define ARTSS_COORDINATE_H_
+#ifndef ARTSS_DOMAIN_COORDINATE_H_
+#define ARTSS_DOMAIN_COORDINATE_H_
 
 
 #include <cstdlib>
@@ -128,4 +128,4 @@ template <typename T> struct fmt::formatter<Coordinate<T>> {
 };
 #endif
 
-#endif /* ARTSS_COORDINATE_H_ */
+#endif /* ARTSS_DOMAIN_COORDINATE_H_ */
