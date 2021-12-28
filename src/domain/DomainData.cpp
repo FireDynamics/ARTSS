@@ -9,7 +9,8 @@
 #include <string>
 
 std::unique_ptr<DomainData> DomainData::single{};  // Singleton
-DomainData::DomainData(const Settings::Settings_new &settings) {
+DomainData::DomainData(const Settings::Settings_new &settings) :
+        m_physical_parameters(settings.physical_parameters) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif

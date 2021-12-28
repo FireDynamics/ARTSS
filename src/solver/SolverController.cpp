@@ -35,17 +35,17 @@ SolverController::SolverController(Settings::Settings const &settings, const Set
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = new FieldController();
-    std::string string_solver = m_settings_new.solver_parameters.description;
-    init_solver(string_solver);
+    init_solver(m_settings_new.solver_parameters);
 #ifndef BENCHMARKING
     m_logger->info("Start initialising....");
 #endif
     set_up_source(m_settings_new.solver_parameters.source);
-    set_up_fields(string_solver);
+    set_up_fields(m_settings_new.solver_parameters.description);
 #ifndef BENCHMARKING
     m_logger->debug("set up boundary");
 #endif
     m_field_controller->set_up_boundary();
+    update_sources(0, true);
     m_field_controller->update_data();
 
     source_velocity = nullptr;
@@ -80,41 +80,41 @@ void SolverController::set_up_source(const Settings::solver::source_solver &sour
     }
 }
 
-void SolverController::init_solver(const std::string &string_solver) {
+void SolverController::init_solver(const Settings::solver_parameters &solver_settings) {
 #ifndef BENCHMARKING
-    m_logger->debug("initialise solver {}", string_solver);
+    m_logger->debug("initialise solver {}", solver_settings.description);
 #endif
-    if (string_solver == SolverTypes::AdvectionSolver) {
+    if (solver_settings.description == SolverTypes::AdvectionSolver) {
         m_solver = new AdvectionSolver(m_settings, m_field_controller);
-    } else if (string_solver == SolverTypes::AdvectionDiffusionSolver) {
+    } else if (solver_settings.description == SolverTypes::AdvectionDiffusionSolver) {
         m_solver = new AdvectionDiffusionSolver(m_settings, m_field_controller);
-    } else if (string_solver == SolverTypes::DiffusionSolver) {
+    } else if (solver_settings.description == SolverTypes::DiffusionSolver) {
         m_solver = new DiffusionSolver(m_settings, m_field_controller);
-    } else if (string_solver == SolverTypes::DiffusionTurbSolver) {
+    } else if (solver_settings.description == SolverTypes::DiffusionTurbSolver) {
         m_solver = new DiffusionTurbSolver(m_settings, m_field_controller);
-    } else if (string_solver == SolverTypes::NSSolver) {
-        m_solver = new NSSolver(m_settings, m_field_controller);
+    } else if (solver_settings.description == SolverTypes::NSSolver) {
+        m_solver = new NSSolver(solver_settings, m_settings, m_field_controller);
         m_has_momentum_source = true;
-    } else if (string_solver == SolverTypes::NSTurbSolver) {
-        m_solver = new NSTurbSolver(m_settings, m_field_controller);
+    } else if (solver_settings.description == SolverTypes::NSTurbSolver) {
+        m_solver = new NSTurbSolver(solver_settings, m_settings, m_field_controller);
         m_has_momentum_source = true;
-    } else if (string_solver == SolverTypes::NSTempSolver) {
-        m_solver = new NSTempSolver(m_settings, m_field_controller);
+    } else if (solver_settings.description == SolverTypes::NSTempSolver) {
+        m_solver = new NSTempSolver(solver_settings, m_settings, m_field_controller);
         m_has_momentum_source = true;
-    } else if (string_solver == SolverTypes::NSTempTurbSolver) {
-        m_solver = new NSTempTurbSolver(m_settings, m_field_controller);
+    } else if (solver_settings.description == SolverTypes::NSTempTurbSolver) {
+        m_solver = new NSTempTurbSolver(solver_settings, m_settings, m_field_controller);
         m_has_momentum_source = true;
-    } else if (string_solver == SolverTypes::NSTempConSolver) {
-        m_solver = new NSTempConSolver(m_settings, m_field_controller);
+    } else if (solver_settings.description == SolverTypes::NSTempConSolver) {
+        m_solver = new NSTempConSolver(solver_settings, m_settings, m_field_controller);
         m_has_momentum_source = true;
-    } else if (string_solver == SolverTypes::NSTempTurbConSolver) {
-        m_solver = new NSTempTurbConSolver(m_settings, m_field_controller);
+    } else if (solver_settings.description == SolverTypes::NSTempTurbConSolver) {
+        m_solver = new NSTempTurbConSolver(solver_settings, m_settings, m_field_controller);
         m_has_momentum_source = true;
-    } else if (string_solver == SolverTypes::PressureSolver) {
-        m_solver = new PressureSolver(m_settings, m_field_controller);
+    } else if (solver_settings.description == SolverTypes::PressureSolver) {
+        m_solver = new PressureSolver(solver_settings, m_field_controller);
     } else {
 #ifndef BENCHMARKING
-        m_logger->error("Solver {} not yet implemented! Simulation stopped!", string_solver);
+        m_logger->error("Solver {} not yet implemented! Simulation stopped!", solver_settings.description);
 #else
         std::cout << "Solver not yet implemented! Simulation stopped!" << std::endl;
         std::flush(std::cout);

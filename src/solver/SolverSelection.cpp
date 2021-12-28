@@ -76,11 +76,10 @@ void SetDiffusionSolver(Settings::Settings const &settings,
 /// \param  pressure_solver Pointer to PressureSolver
 /// \param  pressure_type Name of PressureSolver
 // ***************************************************************************************
-void SetPressureSolver(Settings::Settings const &settings,
-                       IPressure **pressure_solver,
-                       const std::string &pressure_type) {
-    if (pressure_type == PressureMethods::VCycleMG) {
-        *pressure_solver = new VCycleMG(settings);
+void SetPressureSolver(const Settings::solver::pressure_solver &settings,
+                       IPressure **pressure_solver) {
+    if (settings.type == PressureMethods::VCycleMG) {
+        *pressure_solver = new VCycleMG(settings.solver);
     } else {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);

@@ -22,7 +22,7 @@
 
 class NSSolver : public ISolver {
  public:
-    NSSolver(Settings::Settings const &settings, FieldController *field_controller);
+    NSSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller);
     ~NSSolver();
 
     void do_step(real t, bool sync) override;
@@ -30,6 +30,7 @@ class NSSolver : public ISolver {
 
  private:
     Settings::Settings const &m_settings;
+    const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

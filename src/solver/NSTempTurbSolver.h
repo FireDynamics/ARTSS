@@ -22,7 +22,7 @@
 
 class NSTempTurbSolver : public ISolver {
  public:
-    NSTempTurbSolver(Settings::Settings const &settings, FieldController *fieldController);
+    NSTempTurbSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *fieldController);
     ~NSTempTurbSolver();
 
     void do_step(real t, bool sync) override;
@@ -30,6 +30,7 @@ class NSTempTurbSolver : public ISolver {
     void update_source(real) override;
  private:
     Settings::Settings const &m_settings;
+    const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

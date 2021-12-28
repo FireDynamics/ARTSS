@@ -24,9 +24,7 @@
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
       <n_relax> 4 </n_relax>  <!-- number of iterations -->
       <diffusion type="Jacobi" field="p">
-        <n_relax> 4 </n_relax>  <!-- number of iterations -->
         <max_iter> 5 </max_iter>  <!-- maximal number of iterations in solving at lowest level -->
-        <max_solve> 5 </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
         <w> 0.6666666667 </w>  <!-- relaxation parameter  -->
       </diffusion>

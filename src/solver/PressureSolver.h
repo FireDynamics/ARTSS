@@ -18,13 +18,13 @@
 
 class PressureSolver : public ISolver {
 public:
-    PressureSolver(Settings::Settings const &settings, FieldController *field_controller);
-    ~PressureSolver();
+    PressureSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller);
+    ~PressureSolver() override;
     void do_step(real t, bool sync) override;
     void update_source(real) override {};
 
 private:
-    Settings::Settings const &m_settings;
+    const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

@@ -140,6 +140,7 @@ class DomainData {
     size_t inline get_levels() const { return m_levels; }
 
     size_t get_size(size_t level = 0) const;
+    const Settings::physical_parameters& get_physical_parameters() const { return m_physical_parameters; }
 
     bool resize(const Coordinate<long>& shift_start, const Coordinate<long>& shift_end);
 
@@ -168,6 +169,8 @@ class DomainData {
     Coordinate<real> end_coords_PD;  // X2/Y2/Z2
 
     size_t m_levels = 0;
+
+    const struct Settings::physical_parameters m_physical_parameters;
 
     void control();
 };

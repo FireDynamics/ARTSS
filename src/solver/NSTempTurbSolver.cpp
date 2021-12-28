@@ -14,9 +14,10 @@
 #include "../domain/DomainController.h"
 #include "SolverSelection.h"
 
-NSTempTurbSolver::NSTempTurbSolver(Settings::Settings const &settings, FieldController *field_controller) :
+NSTempTurbSolver::NSTempTurbSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings),
-        m_field_controller(field_controller) {
+        m_field_controller(field_controller),
+        m_solver_settings(solver_settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("construct NSTempTurbSolver");
@@ -53,7 +54,7 @@ NSTempTurbSolver::NSTempTurbSolver(Settings::Settings const &settings, FieldCont
     m_logger->debug("set pressure solver");
 #endif
     // Pressure
-    SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"));
+    SolverSelection::SetPressureSolver(m_solver_settings.pressure, &pres);
 
 #ifndef BENCHMARKING
     m_logger->debug("set source solver vel");

@@ -29,7 +29,7 @@ class SolverController {
 
  private:
     void set_up_source(const Settings::solver::source_solver &source_settings);
-    void init_solver(const std::string& string_solver);
+    void init_solver(const Settings::solver_parameters &solver_settings);
     void set_up_fields(const std::string& string_solver);
     void call_random(Field &field);
 
@@ -50,6 +50,7 @@ class SolverController {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+
 };
 
 #endif /* ARTSS_SOLVER_SOLVERCONTROLLER_H_ */

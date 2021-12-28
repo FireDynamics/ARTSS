@@ -13,12 +13,13 @@
 #include "SolverSelection.h"
 #include "../domain/DomainData.h"
 
-NSTempTurbConSolver::NSTempTurbConSolver(Settings::Settings const &settings, FieldController *field_controller) :
-        m_settings(settings) {
+NSTempTurbConSolver::NSTempTurbConSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller) :
+        m_settings(settings),
+        m_field_controller(field_controller),
+        m_solver_settings(solver_settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_controller = field_controller;
 
     // Advection of velocity
     SolverSelection::SetAdvectionSolver(m_settings, &adv_vel, m_settings.get("solver/advection/type"));
@@ -42,7 +43,7 @@ NSTempTurbConSolver::NSTempTurbConSolver(Settings::Settings const &settings, Fie
     SolverSelection::SetDiffusionSolver(m_settings, &dif_con, m_settings.get("solver/concentration/diffusion/type"));
 
     // Pressure
-    SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"));
+    SolverSelection::SetPressureSolver(m_solver_settings.pressure, &pres);
 
     // Source of velocity
     SolverSelection::SetSourceSolver(m_settings, &sou_vel, m_settings.get("solver/source/type"));

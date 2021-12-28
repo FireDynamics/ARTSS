@@ -29,6 +29,7 @@ NU=0. #physical diffusion
 BETA=3.4e-3 #buoancy force
 G=-9.81 #gravitational constant
 KAPPA=4.2e-5 #thermal diffusion
+RHOA=1
 
 SOLVER=NSTempTurbSolver
 
@@ -284,6 +285,8 @@ ${YELLOW}--pressurediffusiontype${NC}  \tset pressure diffusion discretization m
 
 ${YELLOW}--prt${NC}           \tset turbulent Prandtl number Pr_T (default: $PRT)
 
+${YELLOW}--rhoa${NC}           \tset rhoa (default: $RHOA)
+
 ${YELLOW}--sigmax${NC}             \tset x-spread (FWHM) of Gaussian in case of volumetric heat source (default: $SIGMAX)
 ${YELLOW}--sigmay${NC}             \tset y-spread (FWHM) of Gaussian in case of volumetric heat source (default: $SIGMAY)
 ${YELLOW}--sigmaz${NC}             \tset z-spread (FWHM) of Gaussian in case of volumetric heat source (default: $SIGMAZ)
@@ -449,7 +452,8 @@ else
     then
     WRITETO="$WRITETO
     <beta> $BETA </beta>  <!-- thermal expansion coefficient -->
-    <g> $G </g>  <!-- gravitational constant -->"
+    <g> $G </g>  <!-- gravitational constant -->
+    <rhoa> $RHOA </rhoa>"
     fi
   fi
   if [ $NSTe -eq 0 -o $NSTC -eq 0 -o $NSTT -eq 0 -o $NSTTC -eq 0 ]
@@ -457,6 +461,7 @@ else
     WRITETO="$WRITETO
     <kappa> $KAPPA </kappa>  <!-- thermal diffusion -->"
   fi
+
   WRITETO="$WRITETO
   </physical_parameters>
 "
@@ -554,9 +559,9 @@ else
       <n_cycle> $NCYCLE </n_cycle> <!-- number of cycles -->
       <max_cycle> $MAXCYCLE </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
+      <n_relax> 4 </n_relax>  <!-- number of iterations -->
       <diffusion type=\"$PRESSUREDIFFUSIONTYPE\" field=\"p\">
-        <n_relax> 4 </n_relax>  <!-- number of iterations -->
-        <max_solve> $MAXSOLVE </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
+        <max_iter> $MAXSOLVE </max_iter>  <!-- maximal number of iterations in solving at lowest level -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
         <w> 0.6666666667 </w>  <!-- relaxation parameter  -->
       </diffusion>
@@ -1149,6 +1154,11 @@ do
       ;;
     --prt)
       PRT=$2
+      shift
+      shift
+      ;;
+    --rhoa)
+      RHOA=$2;
       shift
       shift
       ;;

@@ -39,7 +39,7 @@ return_xml_objects DomainController::read_XML() {
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing boundary parameter");
 #endif
-    //BoundaryDataController bdc_domain = parse_boundary_parameter(m_settings.get_boundaries());
+    //BoundaryDataController bdc_domain = parse_boundary_parameter(m_solver_settings.get_boundaries());
     auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(m_settings.get_obstacles());
     detect_neighbouring_obstacles(obstacles);
     auto [surfaces, bdc_surfaces] = parse_surface_parameter(m_settings.get_surfaces());

@@ -20,13 +20,14 @@
 
 class NSTempSolver : public ISolver {
 public:
-    NSTempSolver(Settings::Settings const &settings, FieldController *field_controller);
+    NSTempSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller);
     ~NSTempSolver();
 
     void do_step(real t, bool sync) override;
     void update_source(real) override;
  private:
     Settings::Settings const &m_settings;
+    const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

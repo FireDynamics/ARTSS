@@ -13,12 +13,13 @@
 #include "SolverSelection.h"
 #include "../domain/DomainData.h"
 
-NSSolver::NSSolver(Settings::Settings const &settings, FieldController *field_controller) :
-        m_settings(settings) {
+NSSolver::NSSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller) :
+        m_settings(settings),
+        m_field_controller(field_controller),
+        m_solver_settings(solver_settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_controller = field_controller;
 
     //Advection of velocity
     std::string advectionType = m_settings.get("solver/advection/type");
@@ -28,9 +29,7 @@ NSSolver::NSSolver(Settings::Settings const &settings, FieldController *field_co
     std::string diffusionType = m_settings.get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, diffusionType);
 
-    //Pressure
-    std::string pressureType = m_settings.get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(m_settings, &pres, pressureType);
+    SolverSelection::SetPressureSolver(m_solver_settings.pressure, &pres);
 
     //Source
     std::string sourceType = m_settings.get("solver/source/type");

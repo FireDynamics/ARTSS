@@ -7,14 +7,13 @@
 #include "PressureSolver.h"
 
 
-PressureSolver::PressureSolver(Settings::Settings const &settings, FieldController *field_controller) :
-        m_settings(settings) {
+PressureSolver::PressureSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller) :
+        m_solver_settings(solver_settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(PressureSolver).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = field_controller;
-    auto p_type = m_settings.get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(m_settings, &this->pres, p_type);
+    SolverSelection::SetPressureSolver(m_solver_settings.pressure, &this->pres);
     control();
 }
 
@@ -48,8 +47,7 @@ void PressureSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // *****************************************************************************
 void PressureSolver::control() {
-    auto p_field = m_settings.get("solver/pressure/field");
-    if (p_field != Mapping::get_field_type_name(FieldType::P)) {
+    if (m_solver_settings.pressure.field != FieldType::P) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

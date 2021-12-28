@@ -54,9 +54,8 @@ namespace SolverSelection {
                             IDiffusion **diffusion_solver,
                             const std::string& diffusion_type);
 
-    void SetPressureSolver(Settings::Settings const &settings,
-                           IPressure **pressure_solver,
-                           const std::string& pressure_type);
+    void SetPressureSolver(const Settings::solver::pressure_solver &settings,
+                           IPressure **pressure_solver);
 
     void SetSourceSolver(Settings::Settings const &settings,
                          ISource **source_solver,
