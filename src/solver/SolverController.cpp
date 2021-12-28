@@ -29,13 +29,13 @@
 #include "../randomField/UniformRandom.h"
 
 
-SolverController::SolverController(Settings::Settings const &settings) :
-        m_settings(settings) {
+SolverController::SolverController(Settings::Settings const &settings, const Settings::Settings_new &settings) :
+        m_settings(settings), m_settings_new(m_settings_new) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = new FieldController();
-    std::string string_solver = m_settings.get("solver/description");
+    std::string string_solver = m_settings_new.solver_parameters.description;
     init_solver(string_solver);
 #ifndef BENCHMARKING
     m_logger->info("Start initialising....");
@@ -288,7 +288,6 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbConSolver ||
             string_solver == SolverTypes::NSTempTurbSolver) {
             force_source();
-            temperature_source();
         }
     } else if (string_init_usr_fct == FunctionNames::exp_sinus_prod) {
         // Diffusion test case
@@ -359,7 +358,6 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver) {
             force_source();
-            temperature_source();
         }
     } else if (string_init_usr_fct == FunctionNames::vortex) {
         // NavierStokes test case: Vortex (no force, no temperature) 2D
@@ -385,7 +383,6 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver) {
             force_source();
-            temperature_source();
         }
     } else if (string_init_usr_fct == FunctionNames::vortex_y) {
         // NavierStokes test case: Vortex (no force, no temperature) 2D
@@ -412,7 +409,6 @@ void SolverController::set_up_fields(const std::string &string_solver) {
             string_solver == SolverTypes::NSTempTurbConSolver || \
             string_solver == SolverTypes::NSTempTurbSolver) {
             force_source();
-            temperature_source();
         }
     } else if (string_init_usr_fct == FunctionNames::beltrami) {
         // NavierStokes test case: Beltrami  (no force, no temperature) 3D
@@ -449,7 +445,6 @@ void SolverController::set_up_fields(const std::string &string_solver) {
                                     0., nu, beta, g, rhoa);
             m_field_controller->get_field_p().set_value(0.);
             force_source();
-            temperature_source();
         }
     } else if (string_init_usr_fct == FunctionNames::uniform) {
         // Uniform Temperature unequal to zero
@@ -463,7 +458,6 @@ void SolverController::set_up_fields(const std::string &string_solver) {
                 call_random(m_field_controller->get_field_T());
             }
             force_source();
-            temperature_source();
         }
     } else if (string_init_usr_fct == "LayersT") {
         if (string_solver == SolverTypes::NSTempSolver || \
@@ -498,7 +492,6 @@ void SolverController::set_up_fields(const std::string &string_solver) {
                 call_random(m_field_controller->get_field_T());
             }
             force_source();
-            temperature_source();
         }
     } else if (string_init_usr_fct == FunctionNames::zero) {
         // NavierStokes test case: Channel Flow (with uniform force in x-direction)
@@ -627,24 +620,6 @@ void SolverController::call_random(Field &field) {
     }
 
     Functions::random(field, range, is_absolute, seed, step_size);
-}
-
-//======================================= Update data ==================================
-// ***************************************************************************************
-/// \brief  Updates time dependent parameters temperature source functions
-// ***************************************************************************************
-void SolverController::temperature_source() {
-// Temperature source
-    if (m_settings.get("solver/temperature/source/temp_fct") == FunctionNames::buoyancy_st_mms) {
-        real g = m_settings.get_real("physical_parameters/g");  // 1;
-        real nu = m_settings.get_real("physical_parameters/nu");  // 1;
-        real beta = m_settings.get_real("physical_parameters/beta");
-        real kappa = m_settings.get_real("physical_parameters/kappa");
-        real rhoa = m_settings.get_real("initial_conditions/rhoa");
-
-        Functions::buoyancy_st_mms(m_field_controller->get_field_source_T(),
-                                   0., nu, beta, kappa, g, rhoa);
-    }
 }
 
 //======================================= Update data ==================================

@@ -20,7 +20,6 @@
 
 const std::string FunctionNames::beltrami = "Beltrami";
 const std::string FunctionNames::buoyancy_mms = "BuoyancyMMS";
-const std::string FunctionNames::buoyancy_st_mms = "BuoyancyST_MMS";
 const std::string FunctionNames::drift = "Drift";
 const std::string FunctionNames::exp_sinus_prod = "ExpSinusProd";
 const std::string FunctionNames::exp_sinus_sum = "ExpSinusSum";
@@ -295,46 +294,6 @@ void buoyancy_mms(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field 
         out_z[idx] = 0.;
         out_p[idx] = rhoa * rpi * c * exp(-t) * cos(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
         out_T[idx] = rhoa * rbeta * rg * 2 * c * exp(-t) * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-    }
-}
-
-// ========== NSTemp Test - MMS source term for temperature equation with buoyancy ========
-// ***************************************************************************************
-/// \brief  Source term for NSTemp Test - MMS with buoyant force
-/// \param  out force
-/// \param  t time
-// ***************************************************************************************
-void buoyancy_st_mms(Field &out, real t, real nu, real beta, real kappa, real g, real rhoa) {
-    auto domain_data = DomainData::getInstance();
-    size_t Nx = domain_data->get_Nx();
-    size_t Ny = domain_data->get_Ny();
-
-    real X1 = domain_data->get_X1();
-    real Y1 = domain_data->get_Y1();
-
-    real dx = domain_data->get_dx();
-    real dy = domain_data->get_dy();
-
-    real rbeta = 1. / beta;
-    real rg = 1. / g;
-    real c_nu = 2 * nu * M_PI * M_PI - 1;
-    real c_kappa = 2 * kappa * M_PI * M_PI - 1;
-
-    auto domain_controller = DomainController::getInstance();
-    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
-    size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
-
-    size_t coords_k, coords_i, coords_j;
-
-    // inner cells
-#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
-    for (size_t i = 0; i < size_domain_inner_list; i++) {
-        size_t idx = domain_inner_list[i];
-        coords_k = getCoordinateK(idx, Nx, Ny);
-        coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
-        coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-        out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t)
-                * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
     }
 }
 

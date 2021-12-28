@@ -51,6 +51,7 @@ namespace Settings {
         real g;
         std::optional<real> kappa;  // thermal diffusion
         std::optional<real> gamma;  // concentration diffusion
+        std::optional<real> rhoa;  // fluid density for buoyancy
     };
     struct visualisation_parameters {
         bool save_vtk;
@@ -92,9 +93,6 @@ namespace Settings {
         struct mc_dermott {
             real A;
         };
-        struct buoyancy_mms {
-            real rhoa;
-        };
         struct layers_temperature {
             size_t number_of_layers;
             std::vector<real> borders;
@@ -116,7 +114,6 @@ namespace Settings {
         std::string usr_fct;
         bool random;
         std::optional<std::variant<initial_conditions::uniform,
-                     initial_conditions::buoyancy_mms,
                      initial_conditions::drift,
                      initial_conditions::exp_sinus_prod,
                      initial_conditions::gauss_bubble,

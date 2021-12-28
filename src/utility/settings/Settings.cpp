@@ -250,15 +250,6 @@ namespace Settings {
             return drift;
         }
 
-        buoyancy_mms parse_buoyancy_mms_parameters(const Map &values, const std::string &parent_context) {
-            std::string own_context = FunctionNames::buoyancy_mms;
-            std::string context = create_context(parent_context, own_context);
-            buoyancy_mms buoyancy_mms{};
-
-            buoyancy_mms.rhoa = get_required_real(values, "rhoa", context);
-            return buoyancy_mms;
-        }
-
         vortex parse_vortex_parameters(const Map &values, const std::string &parent_context) {
             std::string own_context = FunctionNames::vortex;
             std::string context = create_context(parent_context, own_context);
@@ -324,8 +315,6 @@ namespace Settings {
         icp.usr_fct = get_required_string(values, "usr_fct", context);
         if (icp.usr_fct == FunctionNames::uniform) {
             icp.ic = initial_conditions::parse_uniform_parameters(values, context);
-        } else if (icp.usr_fct == FunctionNames::buoyancy_mms) {
-            icp.ic = initial_conditions::parse_buoyancy_mms_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::drift) {
             icp.ic = initial_conditions::parse_drift_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::gauss_bubble) {
@@ -478,6 +467,7 @@ namespace Settings {
             solver_description == SolverTypes::NSTempConSolver) {
             // navier stokes
             pp.nu = get_optional_real(values, "nu", 3.1e-5);
+            pp.rhoa = get_optional_real(values, "rhoa", 1);
         }
         pp.beta = get_optional_real(values, "beta", 3.34e-3);  // for buoyancy
         pp.g = get_optional_real(values, "g", -9.81);  // for buoyancy
@@ -682,7 +672,7 @@ namespace Settings {
 
         namespace sources {
             gauss parse_gauss(const Map &values, const std::string &parent_context) {
-                std::string context = create_context(parent_context, "GaussST");
+                std::string context = create_context(parent_context, SourceMethods::Gauss);
                 gauss gauss{};
                 gauss.heat_release_rate = get_required_real(values, "HRR", context);
                 gauss.heat_capacity = get_required_real(values, "cp", context);
@@ -732,7 +722,7 @@ namespace Settings {
             solver_temperature.source.temp_fct = get_required_string(values_source, "temp_fct", context_source);
             if (solver_temperature.source.temp_fct == SourceMethods::Gauss) {
                 solver_temperature.source.temp_function = sources::parse_gauss(values_source, context_source);
-            } else if (solver_temperature.source.temp_fct == SourceMethods::Zero) {
+            } else if (solver_temperature.source.temp_fct == SourceMethods::BuoyancyST_MMS || solver_temperature.source.temp_fct == SourceMethods::Zero) {
                 // do nothing
             } else {
                 throw config_error(fmt::format("temperature source function '{}' has no parsing implementation.",

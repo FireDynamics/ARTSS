@@ -372,20 +372,6 @@ namespace initial_conditions {
         auto params_sin_sin_sin_mms = std::get<sin_sin_sin>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(params_sin_sin_sin_mms.l, 1);
     }
-    TEST(SettingsTest, buoyancyMMMS) {
-        std::string xml = R"(
-<ARTSS>
-    <initial_conditions usr_fct="BuoyancyMMS"  random="No">
-        <rhoa> 1. </rhoa>
-    </initial_conditions>
-</ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-                doc.RootElement());
-        auto params_buoyancy_mms = std::get<buoyancy_mms>(initial_conditions_parameters.ic.value());
-        EXPECT_DOUBLE_EQ(params_buoyancy_mms.rhoa, 1);
-    }
     TEST(SettingsTest, vortex) {
         std::string xml = R"(
 <ARTSS>

@@ -19,7 +19,7 @@
 
 class SolverController {
  public:
-    explicit SolverController(Settings::Settings const &settings);
+    explicit SolverController(Settings::Settings const &settings, const Settings::Settings_new &settings_new);
     ~SolverController();
 
     void solver_do_step(real t, bool sync);
@@ -34,10 +34,10 @@ class SolverController {
     void call_random(Field &field);
 
     void force_source();
-    void temperature_source();
     void momentum_source();
 
     Settings::Settings const &m_settings;
+    const Settings::Settings_new &m_settings_new;
 
     FieldController *m_field_controller;
     ISolver *m_solver;

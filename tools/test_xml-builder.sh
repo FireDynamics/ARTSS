@@ -185,18 +185,19 @@ function create_testcases {
     NAMEVALUES[$INDEX]=NavierStokesTemp_BuoyancyMMS
     FPATHVALUES[$INDEX]=tests/navierStokesTemp/mms
     NAME=${NAMEVALUES[$INDEX]}
-    BUILDER[$INDEX]="./xml-builder.sh --nstemp --tend 1.0 --dt 0.005 --nu 0.05 --beta 1. --g -9.81 --kappa 0.05 --advectiontype SemiLagrangian --diffusiontype Jacobi --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --solavail Yes  --xstart -2. --xend 2. --ystart -2. --yend 2. --zstart -2. --zend 2. --nx 64 --ny 64 --nz 1 --forcefct Buoyancy --forcedir y --tempsourcefct BuoyancyST_MMS --vtkplots 20"
+    BUILDER[$INDEX]="./xml-builder.sh --nstemp --tend 1.0 --dt 0.005 --nu 0.05 --beta 1. --g -9.81 --kappa 0.05 --advectiontype SemiLagrangian --diffusiontype Jacobi --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --solavail Yes  --xstart -2. --xend 2. --ystart -2. --yend 2. --zstart -2. --zend 2. --nx 64 --ny 64 --nz 1 --forcefct Buoyancy --forcedir y --vtkplots 20"
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct=\"BuoyancyMMS\" random=\"No\">
+    echo "  <initial_conditions usr_fct=\"Zero\" random=\"No\">
     <rhoa> 1. </rhoa>
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     echo "    <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\" random=\"No\">
+      <rhoa> 1. </rhoa>
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
@@ -269,8 +270,9 @@ function create_testcases {
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\" random=\"No\">
-      </source>" > ${NAME}_$TSFILEVAL
+    echo "    <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\" random=\"No\">
+      <rhoa> 1. </rhoa>
+    </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
   if [ $NSTu -eq 1 ]
