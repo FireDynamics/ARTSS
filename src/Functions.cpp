@@ -231,26 +231,6 @@ void beltrami_bc_w(Field &out_x, real t, real a, real d, real nu) {
     }
 }
 
-// ===================================== Buoyancy Force ==================================
-// ***************************************************************************************
-/// \brief  Buoyancy Force
-/// \param  out   force
-/// \param  T   Temperature
-/// \param  T_ambient    Ambient temperature
-// ***************************************************************************************
-void buoyancy_force(Field &out, Field &T, Field &T_ambient, real beta, real g) {
-    auto domain_controller = DomainController::getInstance();
-    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
-    size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
-
-    // inner cells
-#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out, T, T_ambient) async
-    for (size_t i = 0; i < size_domain_inner_list; i++) {
-        size_t idx = domain_inner_list[i];
-        out[idx] = -beta * (T[idx] - T_ambient[idx]) * g;
-    }
-}
-
 // ================== NSTemp Test - MMS IC for u,v,w,p,T with buoyancy ===================
 // ***************************************************************************************
 /// \brief  Initial set up for NSTemp Test - MMS with buoyant force

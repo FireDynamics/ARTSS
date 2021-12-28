@@ -40,7 +40,7 @@ SolverController::SolverController(Settings::Settings const &settings, const Set
 #ifndef BENCHMARKING
     m_logger->info("Start initialising....");
 #endif
-    set_up_sources();
+    set_up_source(m_settings_new.solver_parameters.source);
     set_up_fields(string_solver);
 #ifndef BENCHMARKING
     m_logger->debug("set up boundary");
@@ -61,13 +61,13 @@ SolverController::~SolverController() {
     delete source_concentration;
 }
 
-void SolverController::set_up_sources() {
+void SolverController::set_up_source(const Settings::solver::source_solver &source_settings) {
 #ifndef BENCHMARKING
-    m_logger->debug("set up sources");
+    m_logger->debug("set up source");
 #endif
     // Source term for momentum
     if (m_has_momentum_source) {
-        std::string source_type = m_settings.get("solver/source/type");
+        std::string source_type = source_settings.type;
         if (source_type == SourceMethods::ExplicitEuler) {
             source_velocity = new ExplicitEulerSource(m_settings);
         } else {
@@ -514,30 +514,7 @@ void SolverController::force_source() {
         std::string dir = m_settings.get("solver/source/dir");
         if (!m_settings.get_bool("solver/source/use_init_values")) {
             real ambient_temperature_value = m_settings.get_real("solver/source/ambient_temperature_value");
-            //m_field_controller->get_field_T().set_value(ambient_temperature_value);
             m_field_controller->get_field_T_ambient().set_value(ambient_temperature_value);
-        }
-
-        real beta = m_settings.get_real("physical_parameters/beta");
-        real g = m_settings.get_real("physical_parameters/g");
-
-        if (dir.find('x') != std::string::npos) {
-            Functions::buoyancy_force(m_field_controller->get_field_force_x(),
-                                      m_field_controller->get_field_T(),
-                                      m_field_controller->get_field_T_ambient(),
-                                      beta, g);
-        }
-        if (dir.find('y') != std::string::npos) {
-            Functions::buoyancy_force(m_field_controller->get_field_force_y(),
-                                      m_field_controller->get_field_T(),
-                                      m_field_controller->get_field_T_ambient(),
-                                      beta, g);
-        }
-        if (dir.find('z') != std::string::npos) {
-            Functions::buoyancy_force(m_field_controller->get_field_force_z(),
-                                      m_field_controller->get_field_T(),
-                                      m_field_controller->get_field_T_ambient(),
-                                      beta, g);
         }
     }
 }
@@ -580,19 +557,11 @@ void SolverController::update_sources(real t_cur, bool sync) {
     // Momentum source
     if (m_has_momentum_source) {
         std::string forceFct = m_settings.get("solver/source/force_fct");
-        if (forceFct == SourceMethods::Zero || \
-            forceFct == SourceMethods::Uniform) {
-        } else if (forceFct == SourceMethods::Buoyancy) {
+        if (forceFct == SourceMethods::Buoyancy) {
 #ifndef BENCHMARKING
             m_logger->info("Update f(T) ...");
 #endif
             momentum_source();
-        } else {
-#ifndef BENCHMARKING
-            m_logger->critical("Source function not yet implemented! Simulation stopped!");
-#endif
-            std::exit(1);
-            // TODO(issue 6) Error handling
         }
     }
     m_solver->update_source(t_cur);

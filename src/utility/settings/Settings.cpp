@@ -722,7 +722,7 @@ namespace Settings {
             solver_temperature.source.temp_fct = get_required_string(values_source, "temp_fct", context_source);
             if (solver_temperature.source.temp_fct == SourceMethods::Gauss) {
                 solver_temperature.source.temp_function = sources::parse_gauss(values_source, context_source);
-            } else if (solver_temperature.source.temp_fct == SourceMethods::BuoyancyST_MMS || solver_temperature.source.temp_fct == SourceMethods::Zero) {
+            } else if (solver_temperature.source.temp_fct == SourceMethods::Buoyancy || solver_temperature.source.temp_fct == SourceMethods::Zero) {
                 // do nothing
             } else {
                 throw config_error(fmt::format("temperature source function '{}' has no parsing implementation.",

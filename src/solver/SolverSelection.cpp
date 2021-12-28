@@ -154,7 +154,7 @@ void SetTurbulenceSolver(Settings::Settings const &settings,
             real sigma_z = settings.get_real("solver/temperature/source/sigma_z");
             real tau = settings.get_real("solver/temperature/source/tau");
             *source_function = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
-        } else if (source_fct == SourceMethods::BuoyancyST_MMS) {
+        } else if (source_fct == SourceMethods::Buoyancy) {
             *source_function = new BuoyancyMMS(settings);
         } else if (source_fct == SourceMethods::Cube) {
             real x_start = settings.get_real("solver/temperature/source/x_start");

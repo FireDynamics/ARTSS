@@ -33,7 +33,6 @@ struct PressureMethods {
 
 struct SourceMethods {
     inline static const std::string ExplicitEuler = "ExplicitEuler";
-    inline static const std::string BuoyancyST_MMS = "BuoyancyST_MMS";
     inline static const std::string Buoyancy = "Buoyancy";
     inline static const std::string Cube = "Cube";
     inline static const std::string Gauss = "Gauss";

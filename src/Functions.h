@@ -40,7 +40,6 @@ namespace Functions {  // alphabetically ordered
   void beltrami_bc_u(Field &out_x, real t, real a, real d, real nu);
   void beltrami_bc_v(Field &out_x, real t, real a, real d, real nu);
   void beltrami_bc_w(Field &out_x, real t, real a, real d, real nu);
-  void buoyancy_force(Field &out, Field &T, Field &T_ambient, real beta, real g);
   void buoyancy_mms(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T,
           real t, real nu, real beta, real g, real rhoa);
   void buoyancy_st_mms(Field &out, real t, real nu, real beta, real kappa, real g, real rhoa);

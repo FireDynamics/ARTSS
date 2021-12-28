@@ -42,7 +42,7 @@
         <tol_res> 1e-07 </tol_res>
         <w> 1 </w>
       </diffusion>
-    <source type="ExplicitEuler" temp_fct="BuoyancyST_MMS" dissipation="No" random="No">
+    <source type="ExplicitEuler" temp_fct="Buoyancy" dissipation="No" random="No">
     </source>
     </temperature>
     <solution available="Yes">
