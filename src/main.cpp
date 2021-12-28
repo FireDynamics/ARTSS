@@ -30,8 +30,9 @@ int main(int argc, char **argv) {
     acc_init(dev_type);
 #endif
 
+    Settings::Settings_new settings_new = Settings::parse_settings_from_file(argv[1]);
     Settings::Settings settings(argv[1]);
-    DomainData::init(settings);
+    DomainData::init(settings_new);
     DomainController::init(settings);
 
     SolverController *sc = new SolverController(settings);

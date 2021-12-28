@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_DOMAIN_DOMAINDATA_H_
-#define ARTSS_DOMAIN_DOMAINDATA_H_
+#ifndef ARTSS_DOMAINDATA_H_
+#define ARTSS_DOMAINDATA_H_
 
 #include <cmath>
 #ifdef _OPENACC
@@ -20,9 +20,9 @@
 
 class DomainData {
  public:
-    explicit DomainData(Settings::Settings const &settings);
+    explicit DomainData(const Settings::Settings_new &settings);
     ~DomainData();
-    static void init(Settings::Settings const &settings) { single = std::make_unique<DomainData>(settings); }
+    static void init(const Settings::Settings_new &settings) { single = std::make_unique<DomainData>(settings); }
     static void reset() { single.reset(); }
     static DomainData *getInstance() { return single.get(); }
 
@@ -172,4 +172,4 @@ class DomainData {
     void control();
 };
 
-#endif /* ARTSS_DOMAIN_DOMAINDATA_H_ */
+#endif /* ARTSS_DOMAINDATA_H_ */

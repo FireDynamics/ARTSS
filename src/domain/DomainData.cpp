@@ -9,40 +9,24 @@
 #include <string>
 
 std::unique_ptr<DomainData> DomainData::single{};  // Singleton
-DomainData::DomainData(Settings::Settings const &settings) {
+DomainData::DomainData(const Settings::Settings_new &settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    auto solver = settings.get("solver/description");
+    auto solver = settings.solver_parameters.description;
     if (solver.find("NS") != std::string::npos || solver.find("Pressure") != std::string::npos) {
-        m_levels = settings.get_size_t("solver/pressure/n_level");
+        m_levels = settings.solver_parameters.pressure.solver.n_level;
     }
     number_of_inner_cells = new Coordinate<size_t>[m_levels + 1];
 
+    start_coords_PD.copy(settings.domain_parameters.start_coords_PD);
+    end_coords_PD.copy(settings.domain_parameters.end_coords_PD);
+    number_of_inner_cells[0].copy(settings.domain_parameters.number_of_inner_cells);
+
+    start_coords_CD.copy(settings.domain_parameters.start_coords_CD);
+    end_coords_CD.copy(settings.domain_parameters.end_coords_CD);
     for (size_t axis = 0; axis < number_of_axes; axis++) {
-        std::string axis_name = Mapping::get_axis_name(CoordinateAxis(axis));
-        start_coords_PD[axis] = settings.get_real("domain_parameters/" + axis_name + "1");
-        end_coords_PD[axis] = settings.get_real("domain_parameters/" + axis_name + "2");
         length_PD[axis] = fabs(end_coords_PD[axis] - start_coords_PD[axis]);
-
-        std::string axis_name_lower = axis_name;
-        std::transform(axis_name.begin(), axis_name.end(), axis_name_lower.begin(), ::tolower);
-        number_of_inner_cells[0][axis] = settings.get_size_t("domain_parameters/n" + axis_name_lower);
-    }
-
-    bool has_computational_domain = settings.get_bool("domain_parameters/enable_computational_domain");
-    if (has_computational_domain) {
-        real x1 = settings.get_real("domain_parameters/x1");
-        real x2 = settings.get_real("domain_parameters/x2");
-        real y1 = settings.get_real("domain_parameters/y1");
-        real y2 = settings.get_real("domain_parameters/y2");
-        real z1 = settings.get_real("domain_parameters/z1");
-        real z2 = settings.get_real("domain_parameters/z2");
-        start_coords_CD.set_coordinate(x1, y1, z1);
-        end_coords_CD.set_coordinate(x2, y2, z2);
-    } else {
-        start_coords_CD.copy(start_coords_PD);
-        end_coords_CD.copy(end_coords_PD);
     }
 
     calc_MG_values();
