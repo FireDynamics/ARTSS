@@ -65,9 +65,10 @@ namespace SolverSelection {
                              ITurbulence **turbulence_solver,
                              const std::string& turbulence_type);
 
-    void set_source_function(const Settings::Settings &settings,
-                             ISourceFunction **source_function,
-                             const std::string &source_fct);
+    void set_temperature_source_function(const Settings::solver::temperature_source &settings,
+                                         ISourceFunction **source_function);
+    void set_concentration_source_function(const Settings::solver::concentration_source &settings,
+                                          ISourceFunction **source_function);
 };
 
 #endif /* ARTSS_SOLVER_SOLVERSELECTION_H_ */

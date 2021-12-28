@@ -62,8 +62,8 @@ NSTempTurbConSolver::NSTempTurbConSolver(const Settings::solver_parameters &solv
     m_forceFct = m_settings.get("solver/source/force_fct");
     m_tempFct = m_settings.get("solver/temperature/source/temp_fct");
     m_conFct = m_settings.get("solver/concentration/source/con_fct");
-    SolverSelection::set_source_function(m_settings, &m_source_function_temperature, m_tempFct);
-    SolverSelection::set_source_function(m_settings, &m_source_function_concentration, m_conFct);
+    SolverSelection::set_temperature_source_function(m_solver_settings.temperature.source, &m_source_function_temperature);
+    SolverSelection::set_concentration_source_function(m_solver_settings.concentration.source, &m_source_function_concentration);
     control();
 }
 
@@ -223,7 +223,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Add dissipation ...");
 #endif
-            sou_temp->dissipate(m_settings, T, u, v, w, sync);
+            sou_temp->dissipate(T, u, v, w, sync);
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);
@@ -305,9 +305,9 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void NSTempTurbConSolver::control() {
-    auto fields = Utility::split(m_settings.get("solver/advection/field"), ',');
-    std::sort(fields.begin(), fields.end());
-    if (fields != std::vector<std::string>({"u", "v", "w"})) {
+    auto adv_fields = m_solver_settings.advection.fields;
+    std::sort(adv_fields.begin(), adv_fields.end());
+    if (adv_fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
@@ -315,44 +315,45 @@ void NSTempTurbConSolver::control() {
         // TODO Error handling
     }
 
-    auto diff_fields = Utility::split(m_settings.get("solver/diffusion/field"), ',');
+    auto diff_fields = m_solver_settings.diffusion.fields;
     std::sort(diff_fields.begin(), diff_fields.end());
-    if (diff_fields != std::vector<std::string>({"u", "v", "w"})) {
+    if (adv_fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/temperature/advection/field") != Mapping::get_field_type_name(FieldType::T)) {
+
+    if (m_solver_settings.temperature.advection.fields != std::vector<FieldType>{FieldType::T}) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/concentration/advection/field") != Mapping::get_field_type_name(FieldType::RHO)) {
+    if (m_solver_settings.temperature.diffusion.fields != std::vector<FieldType>{FieldType::T}) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/temperature/diffusion/field") != Mapping::get_field_type_name(FieldType::T)) {
+    if (m_solver_settings.concentration.advection.fields != std::vector<FieldType>{FieldType::RHO}) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/concentration/diffusion/field") != Mapping::get_field_type_name(FieldType::RHO)) {
+    if (m_solver_settings.concentration.diffusion.fields != std::vector<FieldType>{FieldType::RHO}) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/pressure/field") != Mapping::get_field_type_name(FieldType::P)) {
+    if (m_solver_settings.pressure.field != FieldType::P) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

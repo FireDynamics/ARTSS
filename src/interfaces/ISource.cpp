@@ -60,7 +60,6 @@ void ISource::buoyancy_force(
 /// \param  sync  synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void ISource::dissipate(
-        Settings::Settings const &settings,
         Field &out,
         const Field &in_u, const Field &in_v, const Field &in_w,
         bool sync) {
@@ -75,8 +74,8 @@ void ISource::dissipate(
     real reciprocal_dy = 1. / dy;
     real reciprocal_dz = 1. / dz;
 
-    real dt = settings.get_real("physical_parameters/dt");
-    real nu = settings.get_real("physical_parameters/nu");
+    real dt = domain_data->get_physical_parameters().dt;
+    real nu = domain_data->get_physical_parameters().nu.value();
 
     auto domain_controller = DomainController::getInstance();
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();

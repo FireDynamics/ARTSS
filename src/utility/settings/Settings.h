@@ -224,6 +224,11 @@ namespace Settings {
                 Coordinate<real> dimension;
                 real tau;
             };
+            struct cube {
+                Coordinate<real> coords_start;
+                Coordinate<real> coords_end;
+                real value;
+            };
         }
         struct temperature_source {
             std::string type;
@@ -231,7 +236,7 @@ namespace Settings {
             bool dissipation;
             bool random;
             struct random_parameters random_parameters;
-            std::variant<sources::gauss> temp_function;
+            std::variant<sources::gauss, sources::cube> temp_function;
         };
         struct temperature_solver {
             advection_solver advection;
@@ -245,7 +250,7 @@ namespace Settings {
             std::string con_fct;
             bool random;
             struct random_parameters random_parameters;
-            std::variant<sources::gauss> con_function;
+            std::variant<sources::gauss, sources::cube> con_function;
         };
         struct concentration_solver {
             advection_solver advection;

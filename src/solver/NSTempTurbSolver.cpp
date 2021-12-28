@@ -74,7 +74,7 @@ NSTempTurbSolver::NSTempTurbSolver(const Settings::solver_parameters &solver_set
     m_hasDissipation = m_settings.get_bool("solver/temperature/source/dissipation");
     m_forceFct = m_settings.get("solver/source/force_fct");
     m_tempFct = m_settings.get("solver/temperature/source/temp_fct");
-    SolverSelection::set_source_function(m_settings, &m_source_function_temperature, m_tempFct);
+    SolverSelection::set_temperature_source_function(m_solver_settings.temperature.source, &m_source_function_temperature);
     control();
 }
 
@@ -225,7 +225,7 @@ void NSTempTurbSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Add dissipation ...");
 #endif
-            sou_temp->dissipate(m_settings, T, u, v, w, sync);
+            sou_temp->dissipate(T, u, v, w, sync);
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);

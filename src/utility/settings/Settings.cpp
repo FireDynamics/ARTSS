@@ -684,6 +684,17 @@ namespace Settings {
                 gauss.tau = get_required_real(values, "tau", context);
                 return gauss;
             }
+            cube parse_cube(const Map &values, const std::string &parent_context) {
+                std::string context = create_context(parent_context, SourceMethods::Cube);
+                cube cube{};
+                for (const auto axis: {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z}) {
+                    std::string axis_name = Utility::to_lower(Mapping::get_axis_name(axis));
+                    cube.coords_start[axis] = get_required_real(values, axis_name + "_start", context);
+                    cube.coords_end[axis] = get_required_real(values, axis_name + "_end", context);
+                }
+                cube.value = get_required_real(values, "val", context);
+                return cube;
+            }
         }
 
         temperature_solver parse_temperature_solver(const tinyxml2::XMLElement *head, const std::string &parent_context,
@@ -722,6 +733,8 @@ namespace Settings {
             solver_temperature.source.temp_fct = get_required_string(values_source, "temp_fct", context_source);
             if (solver_temperature.source.temp_fct == SourceMethods::Gauss) {
                 solver_temperature.source.temp_function = sources::parse_gauss(values_source, context_source);
+            } else if (solver_temperature.source.temp_fct == SourceMethods::Cube) {
+                solver_temperature.source.temp_function = sources::parse_cube(values_source, context_source);
             } else if (solver_temperature.source.temp_fct == SourceMethods::Buoyancy || solver_temperature.source.temp_fct == SourceMethods::Zero) {
                 // do nothing
             } else {
@@ -769,6 +782,8 @@ namespace Settings {
             solver_concentration.source.con_fct = get_required_string(values_source, "con_fct", context_source);
             if (solver_concentration.source.con_fct == SourceMethods::Gauss) {
                 solver_concentration.source.con_function = sources::parse_gauss(values_source, context_source);
+            } else if (solver_concentration.source.con_fct == SourceMethods::Cube) {
+                solver_concentration.source.con_function = sources::parse_cube(values_source, context_source);
             } else {
                 throw config_error(fmt::format("concentration source function '{}' has no parsing implementation.",
                                                solver_concentration.source.con_fct));

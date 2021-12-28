@@ -9,6 +9,8 @@
 #ifndef ARTSS_SOLVER_NSTEMPCONSOLVER_H_
 #define ARTSS_SOLVER_NSTEMPCONSOLVER_H_
 
+#include <string>
+#include <vector>
 
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IAdvection.h"
@@ -50,14 +52,7 @@ private:
     ISourceFunction *m_source_function_concentration;
     ISourceFunction *m_source_function_temperature;
 
-    std::string m_dir_vel;
-
     void control();
-
-    std::string m_forceFct;
-    bool m_hasDissipation;
-    std::string m_tempFct;
-    std::string m_conFct;
 };
 
 #endif /* ARTSS_SOLVER_NSTEMPCONSOLVER_H_ */

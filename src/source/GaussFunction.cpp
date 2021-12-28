@@ -13,20 +13,9 @@
 #include "../domain/DomainData.h"
 #include "../domain/DomainController.h"
 
-GaussFunction::GaussFunction(
-        real HRR, real cp,
-        real x0, real y0, real z0,
-        real sigma_x, real sigma_y, real sigma_z, real tau) :
-    m_field_spatial_values(FieldType::RHO),
-    m_tau(tau),
-    m_HRR(HRR),
-    m_cp(cp),
-    m_x0(x0),
-    m_y0(y0),
-    m_z0(z0),
-    m_sigma_x(sigma_x),
-    m_sigma_y(sigma_y),
-    m_sigma_z(sigma_z) {
+GaussFunction::GaussFunction(const Settings::solver::sources::gauss &settings) :
+        m_field_spatial_values(FieldType::RHO),
+        m_settings(settings) {
     create_spatial_values();
 }
 
@@ -66,11 +55,11 @@ void GaussFunction::create_spatial_values() {
     real dy = domain_data->get_dy(level);
     real dz = domain_data->get_dz(level);
 
-    real sigma_x_2 = 2 * m_sigma_x * m_sigma_x;
+    real sigma_x_2 = 2 * m_settings.dimension[CoordinateAxis::X] * m_settings.dimension[CoordinateAxis::X];
     real r_sigma_x_2 = 1. / sigma_x_2;
-    real sigma_y_2 = 2 * m_sigma_y * m_sigma_y;
+    real sigma_y_2 = 2 * m_settings.dimension[CoordinateAxis::Y] * m_settings.dimension[CoordinateAxis::Y];
     real r_sigma_y_2 = 1. / sigma_y_2;
-    real sigma_z_2 = 2 * m_sigma_z * m_sigma_z;
+    real sigma_z_2 = 2 * m_settings.dimension[CoordinateAxis::Z] * m_settings.dimension[CoordinateAxis::Z];
     real r_sigma_z_2 = 1. / sigma_z_2;
 
     // set Gaussian to cells
@@ -88,15 +77,15 @@ void GaussFunction::create_spatial_values() {
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
 
-        auto x_i = xi(i, X1, dx) - m_x0;
-        auto y_j = yj(j, Y1, dy) - m_y0;
-        auto z_k = zk(k, Z1, dz) - m_z0;
+        auto x_i = xi(i, X1, dx) - m_settings.position[CoordinateAxis::X];
+        auto y_j = yj(j, Y1, dy) - m_settings.position[CoordinateAxis::Y];
+        auto z_k = zk(k, Z1, dz) - m_settings.position[CoordinateAxis::Z];
         real expr = std::exp(-(r_sigma_x_2 * (x_i * x_i) + r_sigma_y_2 * (y_j * y_j) + r_sigma_z_2 * (z_k * z_k)));
         V += expr * dx * dy * dz;
     }
 
-    HRRrV = m_HRR / V;       // in case of concentration Ys*HRR
-    real rcp = 1. / m_cp;    // to get [K/s] for energy equation (d_t T), rho:=1, otherwise *1/rho; in case of concentration 1/Hc to get kg/m^3s
+    HRRrV = m_settings.heat_release_rate / V;       // in case of concentration Ys*HRR
+    real rcp = 1. / m_settings.heat_capacity;    // to get [K/s] for energy equation (d_t T), rho:=1, otherwise *1/rho; in case of concentration 1/Hc to get kg/m^3s
 
     for (size_t l = 0; l < size_domain_list; ++l) {
         const size_t idx = domain_inner_list[l];
@@ -104,9 +93,9 @@ void GaussFunction::create_spatial_values() {
         size_t j = getCoordinateJ(idx, Nx, Ny, k);
         size_t i = getCoordinateI(idx, Nx, Ny, j, k);
 
-        auto x_i = (xi(i, X1, dx) - m_x0);
-        auto y_j = (yj(j, Y1, dy) - m_y0);
-        auto z_k = (zk(k, Z1, dz) - m_z0);
+        auto x_i = (xi(i, X1, dx) - m_settings.position[CoordinateAxis::X]);
+        auto y_j = (yj(j, Y1, dy) - m_settings.position[CoordinateAxis::Y]);
+        auto z_k = (zk(k, Z1, dz) - m_settings.position[CoordinateAxis::Z]);
         real expr = std::exp(-(r_sigma_x_2 * x_i * x_i + r_sigma_y_2 * y_j * y_j + r_sigma_z_2 * z_k * z_k));
         m_field_spatial_values[idx] = HRRrV * rcp * expr;
     }
@@ -119,5 +108,5 @@ void GaussFunction::create_spatial_values() {
 /// \param  t time
 // ***************************************************************************************
 real GaussFunction::get_time_value(real t_cur) {
-    return tanh(t_cur / m_tau);
+    return tanh(t_cur / m_settings.tau);
 }

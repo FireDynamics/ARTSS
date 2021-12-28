@@ -134,36 +134,34 @@ void SetTurbulenceSolver(Settings::Settings const &settings,
     }
 }
 
-    // usuable for concentration and temperature source
-    void set_source_function(const Settings::Settings &settings,
-                             ISourceFunction **source_function,
-                             const std::string &source_fct) {
+    void add_noise(Settings::random_parameters random_parameters, ISourceFunction **source_function) {
+        real range = random_parameters.range;  // +- range of random numbers
+        int seed = -1;
+        if (random_parameters.custom_seed) {
+            seed = static_cast<int>(random_parameters.seed);
+        }
+
+        real step_size = random_parameters.step_size;
+
+        IRandomField *noise_maker = new UniformRandom(range, step_size, seed);
+        (*source_function)->set_noise(noise_maker);
+    }
+
+    void set_temperature_source_function(const Settings::solver::temperature_source &settings,
+                             ISourceFunction **source_function) {
+        std::string source_fct = settings.temp_fct;
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);
         logger->debug("create source function {}", source_fct);
 #endif
         if (source_fct == SourceMethods::Gauss) {
-            real HRR = settings.get_real("solver/temperature/source/HRR");    // heat release rate in [kW]
-            real cp = settings.get_real("solver/temperature/source/cp");        // specific heat capacity in [kJ/ kg K]
-            real x0 = settings.get_real("solver/temperature/source/x0");
-            real y0 = settings.get_real("solver/temperature/source/y0");
-            real z0 = settings.get_real("solver/temperature/source/z0");
-            real sigma_x = settings.get_real("solver/temperature/source/sigma_x");
-            real sigma_y = settings.get_real("solver/temperature/source/sigma_y");
-            real sigma_z = settings.get_real("solver/temperature/source/sigma_z");
-            real tau = settings.get_real("solver/temperature/source/tau");
-            *source_function = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
+            auto gauss = std::get<Settings::solver::sources::gauss>(settings.temp_function);
+            *source_function = new GaussFunction(gauss);
         } else if (source_fct == SourceMethods::Buoyancy) {
-            *source_function = new BuoyancyMMS(settings);
+            *source_function = new BuoyancyMMS();
         } else if (source_fct == SourceMethods::Cube) {
-            real x_start = settings.get_real("solver/temperature/source/x_start");
-            real y_start = settings.get_real("solver/temperature/source/y_start");
-            real z_start = settings.get_real("solver/temperature/source/z_start");
-            real x_end = settings.get_real("solver/temperature/source/x_end");
-            real y_end = settings.get_real("solver/temperature/source/y_end");
-            real z_end = settings.get_real("solver/temperature/source/z_end");
-            real val = settings.get_real("solver/temperature/source/value");
-            *source_function = new Cube(val, x_start, y_start, z_start, x_end, y_end, z_end);
+            auto cube = std::get<Settings::solver::sources::cube>(settings.temp_function);
+            *source_function = new Cube(cube);
         } else if (source_fct == SourceMethods::Zero) {
             *source_function = new Zero();
         } else {
@@ -171,24 +169,35 @@ void SetTurbulenceSolver(Settings::Settings const &settings,
             logger->warn("Source method {} not yet implemented!", source_fct);
 #endif
         }
-        bool has_noise = settings.get_bool("solver/temperature/source/random");
-        if (has_noise) {
-            real range = settings.get_real("solver/temperature/source/random/range");  // +- range of random numbers
-            bool has_custom_seed = settings.get_bool("solver/temperature/source/random/custoseed");
-            bool has_custom_steps = settings.get_bool("solver/temperature/source/random/custosteps");
+        if (settings.random) {
+            add_noise(settings.random_parameters, source_function);
+        }
+    }
 
-            int seed = -1;
-            if (has_custom_seed) {
-                seed = settings.get_int("solver/temperature/source/random/seed");
-            }
-
-            real step_size = 1.0;
-            if (has_custom_steps) {
-                step_size = settings.get_real("solver/temperature/source/random/step_size");
-            }
-
-            IRandomField *noise_maker = new UniformRandom(range, step_size, seed);
-            (*source_function)->set_noise(noise_maker);
+    void set_concentration_source_function(const Settings::solver::concentration_source &settings,
+                                           ISourceFunction **source_function) {
+        std::string source_fct = settings.con_fct;
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger(class_name);
+        logger->debug("create source function {}", source_fct);
+#endif
+        if (source_fct == SourceMethods::Gauss) {
+            auto gauss = std::get<Settings::solver::sources::gauss>(settings.con_function);
+            *source_function = new GaussFunction(gauss);
+        } else if (source_fct == SourceMethods::Buoyancy) {
+            *source_function = new BuoyancyMMS();
+        } else if (source_fct == SourceMethods::Cube) {
+            auto cube = std::get<Settings::solver::sources::cube>(settings.con_function);
+            *source_function = new Cube(cube);
+        } else if (source_fct == SourceMethods::Zero) {
+            *source_function = new Zero();
+        } else {
+#ifndef BENCHMARKING
+            logger->warn("Source method {} not yet implemented!", source_fct);
+#endif
+        }
+        if (settings.random) {
+            add_noise(settings.random_parameters, source_function);
         }
     }
 }  // namespace SolverSelection

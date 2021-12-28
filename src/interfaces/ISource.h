@@ -25,8 +25,7 @@ class ISource {
                         Field &out,
                         const Field &in, const Field &in_a,
                         bool sync = true);
-    void dissipate(Settings::Settings const &settings,
-                   Field &out,
+    void dissipate(Field &out,
                    const Field &in_u, const Field &in_v, const Field &in_w,
                    bool sync = true);
 };
