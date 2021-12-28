@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_DOMAIN_BOUNDARYCONTROLLER_H_
-#define ARTSS_DOMAIN_BOUNDARYCONTROLLER_H_
+#ifndef ARTSS_DOMAIN_DOMAINCONTROLLER_H_
+#define ARTSS_DOMAIN_DOMAINCONTROLLER_H_
 
 #include <vector>
 #include "../field/Field.h"
@@ -80,5 +80,5 @@ class DomainController {
 
 };
 
-#endif /* ARTSS_DOMAIN_BOUNDARYCONTROLLER_H_ */
+#endif /* ARTSS_DOMAIN_DOMAINCONTROLLER_H_ */
 
