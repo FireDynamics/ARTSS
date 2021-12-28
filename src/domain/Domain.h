@@ -4,8 +4,8 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_BOUNDARY_DOMAIN_H_
-#define ARTSS_BOUNDARY_DOMAIN_H_
+#ifndef ARTSS_DOMAIN_DOMAIN_H_
+#define ARTSS_DOMAIN_DOMAIN_H_
 
 
 #include "Obstacle.h"
@@ -56,4 +56,4 @@ class Domain {
     void joined_list();
 };
 
-#endif /* ARTSS_BOUNDARY_DOMAIN_H_ */
+#endif /* ARTSS_DOMAIN_DOMAIN_H_ */

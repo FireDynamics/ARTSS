@@ -4,8 +4,8 @@
 /// \author     My Linh Würzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_BOUNDARY_BOUNDARYDATA_H_
-#define ARTSS_BOUNDARY_BOUNDARYDATA_H_
+#ifndef ARTSS_DOMAIN_BOUNDARYDATA_H_
+#define ARTSS_DOMAIN_BOUNDARYDATA_H_
 
 #include <string>
 #include <vector>
@@ -38,5 +38,5 @@ class BoundaryData {
 
     bool m_has_values = false;
 };
-#endif /* ARTSS_BOUNDARY_BOUNDARYDATA_H_ */
+#endif /* ARTSS_DOMAIN_BOUNDARYDATA_H_ */
 

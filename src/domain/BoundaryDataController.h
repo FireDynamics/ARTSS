@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_BOUNDARY_BOUNDARYDATACONTROLLER_H_
-#define ARTSS_BOUNDARY_BOUNDARYDATACONTROLLER_H_
+#ifndef ARTSS_DOMAIN_BOUNDARYDATACONTROLLER_H_
+#define ARTSS_DOMAIN_BOUNDARYDATACONTROLLER_H_
 
 #include <vector>
 
@@ -47,5 +47,5 @@ class BoundaryDataController {
     void add_boundary_data(const Settings::BoundarySetting& boundary);
 };
 
-#endif /* ARTSS_BOUNDARY_BOUNDARYDATACONTROLLER_H_ */
+#endif /* ARTSS_DOMAIN_BOUNDARYDATACONTROLLER_H_ */
 

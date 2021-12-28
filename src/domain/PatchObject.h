@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
 //
-#ifndef ARTSS_PATCHOBJECT_H_
-#define ARTSS_PATCHOBJECT_H_
+#ifndef ARTSS_DOMAIN_PATCHOBJECT_H_
+#define ARTSS_DOMAIN_PATCHOBJECT_H_
 
 #include <cstdlib>
 #include <string>
@@ -45,4 +45,4 @@ class PatchObject {
 };
 
 
-#endif /* ARTSS_PATCHOBJECT_H_ */
+#endif /* ARTSS_DOMAIN_PATCHOBJECT_H_ */

@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_BOUNDARY_OBSTACLE_H_
-#define ARTSS_BOUNDARY_OBSTACLE_H_
+#ifndef ARTSS_DOMAIN_OBSTACLE_H_
+#define ARTSS_DOMAIN_OBSTACLE_H_
 
 #include <cmath>
 #include <string>
@@ -98,4 +98,4 @@ private:
     static bool circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis coordinate_axis);
 };
 
-#endif /* ARTSS_BOUNDARY_OBSTACLE_H_ */
+#endif /* ARTSS_DOMAIN_OBSTACLE_H_ */
