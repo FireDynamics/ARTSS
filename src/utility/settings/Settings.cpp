@@ -135,11 +135,11 @@ namespace Settings {
             dp.end_coords_PD[axis] = get_required_real(values, axis_name + "2", context);
             dp.number_of_inner_cells[axis] = get_required_size_t(values, "n" + axis_name_low, context);
             if (dp.enable_computational_domain) {
-                dp.start_coords_PD[axis] = get_required_real(values, axis_name_low + "1", context);
-                dp.end_coords_PD[axis] = get_required_real(values, axis_name_low + "2", context);
+                dp.start_coords_CD[axis] = get_required_real(values, axis_name_low + "1", context);
+                dp.end_coords_CD[axis] = get_required_real(values, axis_name_low + "2", context);
             } else {
-                dp.start_coords_PD[axis] = dp.start_coords_PD[axis];
-                dp.end_coords_PD[axis] = dp.end_coords_PD[axis];
+                dp.start_coords_CD[axis] = dp.start_coords_PD[axis];
+                dp.end_coords_CD[axis] = dp.end_coords_PD[axis];
             }
         }
         return dp;

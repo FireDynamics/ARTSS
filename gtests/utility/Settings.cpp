@@ -100,6 +100,54 @@ TEST(SettingsTest, requiredDomainParameters) {
     EXPECT_EQ(domain_parameters.end_coords_PD[CoordinateAxis::X], 3.0);
     EXPECT_EQ(domain_parameters.end_coords_PD[CoordinateAxis::Y], -4.0);
     EXPECT_EQ(domain_parameters.end_coords_PD[CoordinateAxis::Z], 0);
+    EXPECT_EQ(domain_parameters.start_coords_CD[CoordinateAxis::X], 1.0);
+    EXPECT_EQ(domain_parameters.start_coords_CD[CoordinateAxis::Y], -12.0);
+    EXPECT_EQ(domain_parameters.start_coords_CD[CoordinateAxis::Z], -1.0);
+    EXPECT_EQ(domain_parameters.end_coords_CD[CoordinateAxis::X], 3.0);
+    EXPECT_EQ(domain_parameters.end_coords_CD[CoordinateAxis::Y], -4.0);
+    EXPECT_EQ(domain_parameters.end_coords_CD[CoordinateAxis::Z], 0);
+    EXPECT_EQ(domain_parameters.number_of_inner_cells[CoordinateAxis::X], 20);
+    EXPECT_EQ(domain_parameters.number_of_inner_cells[CoordinateAxis::Y], 21);
+    EXPECT_EQ(domain_parameters.number_of_inner_cells[CoordinateAxis::Z], 1);
+}
+
+TEST(SettingsTest, requiredDomainParameters2) {
+    std::string xml = R"(
+<ARTSS>
+  <domain_parameters enable_computational_domain="Yes">
+    <X1> 1.0 </X1>
+    <Y1> -12.0 </Y1>
+    <Z1> -1.0 </Z1>
+    <X2> 3.0 </X2>
+    <Y2> -4.0 </Y2>
+    <Z2> 0 </Z2>
+    <x1> 1.1 </x1>
+    <y1> -11.9 </y1>
+    <z1> -0.9 </z1>
+    <x2> 2.9 </x2>
+    <y2> -4.1 </y2>
+    <z2> -0.1 </z2>
+    <nx> 20 </nx>
+    <ny> 21 </ny>
+    <nz> 1 </nz>
+  </domain_parameters>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::domain_parameters domain_parameters = Settings::parse_domain_parameters(doc.RootElement());
+    EXPECT_TRUE(domain_parameters.enable_computational_domain);
+    EXPECT_EQ(domain_parameters.start_coords_CD[CoordinateAxis::X], 1.1);
+    EXPECT_EQ(domain_parameters.start_coords_CD[CoordinateAxis::Y], -11.9);
+    EXPECT_EQ(domain_parameters.start_coords_CD[CoordinateAxis::Z], -0.9);
+    EXPECT_EQ(domain_parameters.end_coords_CD[CoordinateAxis::X], 2.9);
+    EXPECT_EQ(domain_parameters.end_coords_CD[CoordinateAxis::Y], -4.1);
+    EXPECT_EQ(domain_parameters.end_coords_CD[CoordinateAxis::Z], -0.1);
+    EXPECT_EQ(domain_parameters.start_coords_PD[CoordinateAxis::X], 1.0);
+    EXPECT_EQ(domain_parameters.start_coords_PD[CoordinateAxis::Y], -12.0);
+    EXPECT_EQ(domain_parameters.start_coords_PD[CoordinateAxis::Z], -1.0);
+    EXPECT_EQ(domain_parameters.end_coords_PD[CoordinateAxis::X], 3.0);
+    EXPECT_EQ(domain_parameters.end_coords_PD[CoordinateAxis::Y], -4.0);
+    EXPECT_EQ(domain_parameters.end_coords_PD[CoordinateAxis::Z], 0);
     EXPECT_EQ(domain_parameters.number_of_inner_cells[CoordinateAxis::X], 20);
     EXPECT_EQ(domain_parameters.number_of_inner_cells[CoordinateAxis::Y], 21);
     EXPECT_EQ(domain_parameters.number_of_inner_cells[CoordinateAxis::Z], 1);
