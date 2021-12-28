@@ -24,8 +24,10 @@
       <n_cycle> 2 </n_cycle> <!-- number of cycles -->
       <max_cycle> 100 </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
+      <n_relax> 4 </n_relax>  <!-- number of iterations -->
       <diffusion type="Jacobi" field="p">
         <n_relax> 4 </n_relax>  <!-- number of iterations -->
+        <max_iter> 100 </max_iter>  <!-- maximal number of iterations in solving at lowest level -->
         <max_solve> 100 </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
         <w> 0.6666666667 </w>  <!-- relaxation parameter  -->
