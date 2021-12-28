@@ -344,6 +344,8 @@ namespace Settings {
             icp.ic = initial_conditions::parse_sin_sin_sin_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::vortex) {
             icp.ic = initial_conditions::parse_vortex_parameters(values, context);
+        } else if (icp.usr_fct == FunctionNames::zero) {
+            // do nothing
         } else {
             throw config_error(fmt::format("{} has no parsing implementation.", icp.usr_fct));
         }
