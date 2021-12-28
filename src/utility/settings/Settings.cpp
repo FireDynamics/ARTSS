@@ -713,6 +713,8 @@ namespace Settings {
                     solver_temperature.prandtl_number = get_required_real(values_turb, "Pr_T",
                                                                           create_context(context, context_turb));
                 }
+            } else {
+                solver_temperature.has_turbulence = false;
             }
 
             std::string context_source = "source";
@@ -759,9 +761,11 @@ namespace Settings {
                             get_required_real(values_turb, "Sc_T",
                                               create_context(context, context_turb));
                 }
+            } else {
+                solver_concentration.has_turbulence = false;
             }
 
-            std::string context_source = "source";
+    std::string context_source = "source";
             auto[subsection_source, values_source] = map_parameter_section(subsection, context_source);
             solver_concentration.source.type = get_required_string(values_source, "type", context_source);
             solver_concentration.source.random = get_required_bool(values_source, "random", context_source);
