@@ -7,6 +7,7 @@
     <beta> 1. </beta>  <!-- thermal expansion coefficient -->
     <g> -9.81 </g>  <!-- gravitational constant -->
     <kappa> 0.05 </kappa>  <!-- thermal diffusion -->
+    <rhoa> 1. </rhoa>
   </physical_parameters>
 
   <solver description="NSTempTurbSolver" >
@@ -78,8 +79,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct="BuoyancyMMS"  random="No">
-    <rhoa> 1. </rhoa>
+  <initial_conditions usr_fct="Zero"  random="No">
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">

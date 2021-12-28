@@ -75,7 +75,6 @@
   <surfaces enabled="No"/>
 
   <initial_conditions usr_fct="Zero" random="No">
-    <rhoa> 1. </rhoa>
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">

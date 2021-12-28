@@ -41,17 +41,12 @@ class SolverController {
 
     FieldController *m_field_controller;
     ISolver *m_solver;
-    ISourceFunction *m_source_function_concentration;
-    ISourceFunction *m_source_function_temperature;
 
     ISource *source_temperature;
     ISource *source_velocity;
     ISource *source_concentration;
 
-    bool m_has_temperature = false;
     bool m_has_momentum_source = false;
-    bool m_has_turbulence = false;
-    bool m_has_concentration = false;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

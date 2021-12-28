@@ -26,6 +26,7 @@ class NSSolver : public ISolver {
     ~NSSolver();
 
     void do_step(real t, bool sync) override;
+    void update_source(real) override {};
 
  private:
     Settings::Settings const &m_settings;

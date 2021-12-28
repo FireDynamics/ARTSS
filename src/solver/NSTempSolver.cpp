@@ -12,6 +12,11 @@
 
 #include "SolverSelection.h"
 #include "../domain/DomainData.h"
+#include "../source/GaussFunction.h"
+#include "../source/BuoyancyMMS.h"
+#include "../source/Cube.h"
+#include "../source/Zero.h"
+#include "../randomField/UniformRandom.h"
 
 NSTempSolver::NSTempSolver(Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings) {
@@ -47,6 +52,10 @@ NSTempSolver::NSTempSolver(Settings::Settings const &settings, FieldController *
     m_has_dissipation = m_settings.get_bool("solver/temperature/source/dissipation");
     m_forceFct = settings.get("solver/source/force_fct");
     m_tempFct = settings.get("solver/temperature/source/temp_fct");
+
+    // temperature function
+    std::string temp_fct = m_settings.get("solver/temperature/source/temp_fct");
+    SolverSelection::set_source_function(m_settings, &m_source_function_temperature, temp_fct);
     control();
 }
 
@@ -246,4 +255,8 @@ void NSTempSolver::control() {
         // TODO Error Handling
         std::exit(1);
     }
+}
+
+void NSTempSolver::update_source(real t_cur) {
+    m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
 }

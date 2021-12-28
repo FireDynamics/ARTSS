@@ -73,6 +73,7 @@ NSTempTurbSolver::NSTempTurbSolver(Settings::Settings const &settings, FieldCont
     m_hasDissipation = m_settings.get_bool("solver/temperature/source/dissipation");
     m_forceFct = m_settings.get("solver/source/force_fct");
     m_tempFct = m_settings.get("solver/temperature/source/temp_fct");
+    SolverSelection::set_source_function(m_settings, &m_source_function_temperature, m_tempFct);
     control();
 }
 
@@ -296,4 +297,8 @@ void NSTempTurbSolver::control() {
         std::exit(1);
         // TODO Error handling
     }
+}
+
+void NSTempTurbSolver::update_source(real t_cur) {
+    m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
 }

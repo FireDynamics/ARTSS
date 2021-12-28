@@ -20,6 +20,7 @@ class DiffusionSolver: public ISolver {
     ~DiffusionSolver();
 
     void do_step(real t, bool sync) override;
+    void update_source(real) override {};
 
  private:
     Settings::Settings const &m_settings;

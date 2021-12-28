@@ -36,7 +36,7 @@ void BuoyancyMMS::set_up() {
     real beta = m_settings.get_real("physical_parameters/beta");
     real kappa = m_settings.get_real("physical_parameters/kappa");
     real g = m_settings.get_real("physical_parameters/g");
-    real rhoa = m_settings.get_real("initial_conditions/rhoa");
+    real rhoa = m_settings.get_real("physical_parameters/rhoa");
     real rbeta = 1. / beta;
     real rg = 1. / g;
     real c_nu = 2 * nu * M_PI * M_PI - 1;

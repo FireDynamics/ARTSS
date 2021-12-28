@@ -16,6 +16,7 @@
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
+#include "../interfaces/ISourceFunction.h"
 
 class NSTempSolver : public ISolver {
 public:
@@ -23,7 +24,7 @@ public:
     ~NSTempSolver();
 
     void do_step(real t, bool sync) override;
-
+    void update_source(real) override;
  private:
     Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
@@ -39,6 +40,7 @@ public:
     ISource *sou_vel;
     ISource *sou_temp;
 
+    ISourceFunction *m_source_function_temperature;
     std::string m_dir_vel;
 
     void control();

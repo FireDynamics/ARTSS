@@ -19,6 +19,7 @@
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
+#include "../interfaces/ISourceFunction.h"
 
 class NSTempConSolver: public ISolver {
  public:
@@ -26,6 +27,7 @@ class NSTempConSolver: public ISolver {
     ~NSTempConSolver() override;
 
     void do_step(real t, bool sync) override;
+    void update_source(real) override;
 
 private:
     Settings::Settings const &m_settings;
@@ -44,6 +46,8 @@ private:
     ISource *sou_con;
 
     FieldController *m_field_controller;
+    ISourceFunction *m_source_function_concentration;
+    ISourceFunction *m_source_function_temperature;
 
     std::string m_dir_vel;
 

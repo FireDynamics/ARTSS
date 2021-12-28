@@ -21,6 +21,7 @@ public:
     PressureSolver(Settings::Settings const &settings, FieldController *field_controller);
     ~PressureSolver();
     void do_step(real t, bool sync) override;
+    void update_source(real) override {};
 
 private:
     Settings::Settings const &m_settings;

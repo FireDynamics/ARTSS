@@ -58,6 +58,9 @@ NSTempConSolver::NSTempConSolver(Settings::Settings const &settings, FieldContro
     m_forceFct = m_settings.get("solver/source/force_fct");
     m_tempFct = m_settings.get("solver/temperature/source/temp_fct");
     m_conFct = m_settings.get("solver/concentration/source/con_fct");
+
+    SolverSelection::set_source_function(m_settings, &m_source_function_temperature, m_tempFct);
+    SolverSelection::set_source_function(m_settings, &m_source_function_concentration, m_conFct);
     control();
 }
 
@@ -303,4 +306,9 @@ void NSTempConSolver::control() {
         std::exit(1);
         // TODO Error handling
     }
+}
+
+void NSTempConSolver::update_source(real t_cur) {
+    m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
+    m_source_function_concentration->update_source(m_field_controller->get_field_source_concentration(), t_cur);
 }

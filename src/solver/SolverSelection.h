@@ -15,6 +15,7 @@
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
+#include "../interfaces/ISourceFunction.h"
 
 struct AdvectionMethods {
     inline static const std::string SemiLagrangian = "SemiLagrangian";
@@ -65,6 +66,10 @@ namespace SolverSelection {
     void SetTurbulenceSolver(Settings::Settings const &settings,
                              ITurbulence **turbulence_solver,
                              const std::string& turbulence_type);
+
+    void set_source_function(const Settings::Settings &settings,
+                             ISourceFunction **source_function,
+                             const std::string &source_fct);
 };
 
 #endif /* ARTSS_SOLVER_SOLVERSELECTION_H_ */

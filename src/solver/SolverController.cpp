@@ -29,8 +29,8 @@
 #include "../randomField/UniformRandom.h"
 
 
-SolverController::SolverController(Settings::Settings const &settings, const Settings::Settings_new &settings) :
-        m_settings(settings), m_settings_new(m_settings_new) {
+SolverController::SolverController(Settings::Settings const &settings, const Settings::Settings_new &settings_new) :
+        m_settings(settings), m_settings_new(settings_new) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -65,115 +65,6 @@ void SolverController::set_up_sources() {
 #ifndef BENCHMARKING
     m_logger->debug("set up sources");
 #endif
-    // source of temperature
-    if (m_has_temperature) {
-        // source
-        std::string temp_type = m_settings.get("solver/temperature/source/type");
-#ifndef BENCHMARKING
-        m_logger->debug("create temperature type function {}", temp_type);
-#endif
-        if (temp_type == SourceMethods::ExplicitEuler) {
-            source_temperature = new ExplicitEulerSource(m_settings);
-        } else {
-#ifndef BENCHMARKING
-            m_logger->critical("Source type {} not yet implemented! Simulation stopped!", temp_type);
-#endif
-            std::exit(1);
-            // TODO Error handling
-        }
-        // temperature function
-        std::string temp_fct = m_settings.get("solver/temperature/source/temp_fct");
-#ifndef BENCHMARKING
-        m_logger->debug("create temperature source function {}", temp_fct);
-#endif
-        if (temp_fct == SourceMethods::Gauss) {
-            real HRR = m_settings.get_real("solver/temperature/source/HRR");    // heat release rate in [kW]
-            real cp = m_settings.get_real("solver/temperature/source/cp");        // specific heat capacity in [kJ/ kg K]
-            real x0 = m_settings.get_real("solver/temperature/source/x0");
-            real y0 = m_settings.get_real("solver/temperature/source/y0");
-            real z0 = m_settings.get_real("solver/temperature/source/z0");
-            real sigma_x = m_settings.get_real("solver/temperature/source/sigma_x");
-            real sigma_y = m_settings.get_real("solver/temperature/source/sigma_y");
-            real sigma_z = m_settings.get_real("solver/temperature/source/sigma_z");
-            real tau = m_settings.get_real("solver/temperature/source/tau");
-            m_source_function_temperature = new GaussFunction(HRR, cp, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
-        } else if (temp_fct == SourceMethods::BuoyancyST_MMS) {
-            m_source_function_temperature = new BuoyancyMMS(m_settings);
-        } else if (temp_fct == SourceMethods::Cube) {
-            real x_start = m_settings.get_real("solver/temperature/source/x_start");
-            real y_start = m_settings.get_real("solver/temperature/source/y_start");
-            real z_start = m_settings.get_real("solver/temperature/source/z_start");
-            real x_end = m_settings.get_real("solver/temperature/source/x_end");
-            real y_end = m_settings.get_real("solver/temperature/source/y_end");
-            real z_end = m_settings.get_real("solver/temperature/source/z_end");
-            real val = m_settings.get_real("solver/temperature/source/value");
-            m_source_function_temperature = new Cube(val, x_start, y_start, z_start, x_end, y_end, z_end);
-        } else if (temp_fct == SourceMethods::Zero) {
-            m_source_function_temperature = new Zero();
-        } else {
-#ifndef BENCHMARKING
-            m_logger->warn("Source method {} not yet implemented!", temp_fct);
-#endif
-        }
-        bool has_noise = m_settings.get_bool("solver/temperature/source/random");
-        if (has_noise) {
-            real range = m_settings.get_real("solver/temperature/source/random/range");  // +- range of random numbers
-            bool has_custom_seed = m_settings.get_bool("solver/temperature/source/random/custom_seed");
-            bool has_custom_steps = m_settings.get_bool("solver/temperature/source/random/custom_steps");
-
-            int seed = -1;
-            if (has_custom_seed) {
-                seed = m_settings.get_int("solver/temperature/source/random/seed");
-            }
-
-            real step_size = 1.0;
-            if (has_custom_steps) {
-                step_size = m_settings.get_real("solver/temperature/source/random/step_size");
-            }
-
-            IRandomField *noise_maker = new UniformRandom(range, step_size, seed);
-            m_source_function_temperature->set_noise(noise_maker);
-        }
-    }
-
-    if (m_has_concentration) {
-        // Source of concentration
-        std::string con_type = m_settings.get("solver/concentration/source/type");
-        if (con_type == SourceMethods::ExplicitEuler) {
-            source_concentration = new ExplicitEulerSource(m_settings);
-        } else {
-#ifndef BENCHMARKING
-            m_logger->critical("Source type {} not yet implemented! Simulation stopped!", con_type);
-#endif
-            std::exit(1);
-            // TODO Error handling
-        }
-        // concentration function
-        std::string con_fct = m_settings.get("solver/concentration/source/con_fct");
-        if (con_fct == SourceMethods::Gauss) {
-            // get parameters for Gauss function
-            real HRR = m_settings.get_real("solver/concentration/source/HRR");       // heat release rate in [kW]
-            real Hc = m_settings.get_real("solver/concentration/source/Hc");        // heating value in [kJ/kg]
-            real Ys = m_settings.get_real("solver/concentration/source/Ys");        // soot yield in [g/g]
-            real YsHRR = Ys * HRR;
-            real x0 = m_settings.get_real("solver/concentration/source/x0");
-            real y0 = m_settings.get_real("solver/concentration/source/y0");
-            real z0 = m_settings.get_real("solver/concentration/source/z0");
-            real sigma_x = m_settings.get_real("solver/concentration/source/sigma_x");
-            real sigma_y = m_settings.get_real("solver/concentration/source/sigma_y");
-            real sigma_z = m_settings.get_real("solver/concentration/source/sigma_z");
-            real tau = m_settings.get_real("solver/concentration/source/tau");
-
-            m_source_function_concentration = new GaussFunction(YsHRR, Hc, x0, y0, z0, sigma_x, sigma_y, sigma_z, tau);
-        } else if (con_fct == SourceMethods::Zero) {
-            m_source_function_temperature = new Zero();
-        } else {
-#ifndef BENCHMARKING
-            m_logger->warn("Source method {} not yet implemented!", con_fct);
-#endif
-        }
-    }
-
     // Source term for momentum
     if (m_has_momentum_source) {
         std::string source_type = m_settings.get("solver/source/type");
@@ -207,27 +98,18 @@ void SolverController::init_solver(const std::string &string_solver) {
     } else if (string_solver == SolverTypes::NSTurbSolver) {
         m_solver = new NSTurbSolver(m_settings, m_field_controller);
         m_has_momentum_source = true;
-        m_has_turbulence = true;
     } else if (string_solver == SolverTypes::NSTempSolver) {
         m_solver = new NSTempSolver(m_settings, m_field_controller);
         m_has_momentum_source = true;
-        m_has_temperature = true;
     } else if (string_solver == SolverTypes::NSTempTurbSolver) {
         m_solver = new NSTempTurbSolver(m_settings, m_field_controller);
         m_has_momentum_source = true;
-        m_has_temperature = true;
-        m_has_turbulence = true;
     } else if (string_solver == SolverTypes::NSTempConSolver) {
         m_solver = new NSTempConSolver(m_settings, m_field_controller);
         m_has_momentum_source = true;
-        m_has_temperature = true;
-        m_has_concentration = true;
     } else if (string_solver == SolverTypes::NSTempTurbConSolver) {
         m_solver = new NSTempTurbConSolver(m_settings, m_field_controller);
         m_has_momentum_source = true;
-        m_has_temperature = true;
-        m_has_concentration = true;
-        m_has_turbulence = true;
     } else if (string_solver == SolverTypes::PressureSolver) {
         m_solver = new PressureSolver(m_settings, m_field_controller);
     } else {
@@ -713,16 +595,7 @@ void SolverController::update_sources(real t_cur, bool sync) {
             // TODO(issue 6) Error handling
         }
     }
-
-    // Temperature source
-    if (m_has_temperature) {
-        m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
-    }
-
-    // Concentration source
-    if (m_has_concentration) {
-        m_source_function_concentration->update_source(m_field_controller->get_field_source_concentration(), t_cur);
-    }
+    m_solver->update_source(t_cur);
     if (sync) {
 #pragma acc wait
     }

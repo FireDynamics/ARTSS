@@ -18,6 +18,7 @@
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
+#include "../interfaces/ISourceFunction.h"
 
 class NSTempTurbConSolver : public ISolver {
  public:
@@ -26,6 +27,7 @@ class NSTempTurbConSolver : public ISolver {
 
     void do_step(real t, bool sync) override;
 
+    void update_source(real) override;
  private:
     Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
@@ -44,6 +46,8 @@ class NSTempTurbConSolver : public ISolver {
     ISource *sou_temp;
     ISource *sou_con;
     ITurbulence *mu_tub;
+    ISourceFunction *m_source_function_concentration;
+    ISourceFunction *m_source_function_temperature;
 
     std::string m_dir_vel;
 
