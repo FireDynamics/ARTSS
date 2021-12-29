@@ -177,7 +177,7 @@ function create_testcases {
     <w_lin> 0. </w_lin>  <!-- z-velocity in linear case  -->
     <pa> 0. </pa>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type=\"ExplicitEuler\" temp_fct=\"Zero\" dissipation=\"No\" random=\"No\">
+    echo "    <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Zero\" dissipation=\"No\" random=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
 
@@ -195,7 +195,7 @@ function create_testcases {
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "    <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\" random=\"No\">
+    echo "    <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Buoyancy\" dissipation=\"No\" random=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
@@ -267,7 +267,7 @@ function create_testcases {
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "    <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\" random=\"No\">
+    echo "    <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Buoyancy\" dissipation=\"No\" random=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
