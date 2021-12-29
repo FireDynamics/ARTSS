@@ -13,8 +13,7 @@
 #include "SolverSelection.h"
 #include "../domain/DomainData.h"
 
-NSSolver::NSSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller) :
-        m_settings(settings),
+NSSolver::NSSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller) :
         m_solver_settings(solver_settings),
         m_field_controller(field_controller) {
 #ifndef BENCHMARKING
@@ -22,7 +21,6 @@ NSSolver::NSSolver(const Settings::solver_parameters &solver_settings, Settings:
 #endif
 
     //Advection of velocity
-    std::string advectionType = m_settings.get("solver/advection/type");
     SolverSelection::set_advection_solver(m_solver_settings.advection, &adv_vel);
 
     //Diffusion of velocity
@@ -32,8 +30,7 @@ NSSolver::NSSolver(const Settings::solver_parameters &solver_settings, Settings:
 
     //Source
     SolverSelection::set_source_solver(m_solver_settings.source.type, &sou_vel, m_solver_settings.source.direction);
-
-    m_sourceFct = m_settings.get("solver/source/force_fct");
+    m_add_source = m_solver_settings.source.force_fct != SourceMethods::Zero;
     control();
 }
 
@@ -66,7 +63,7 @@ void NSSolver::do_step(real t, bool sync) {
     Field &f_y = m_field_controller->get_field_force_y();
     Field &f_z = m_field_controller->get_field_force_z();
 
-    real nu = m_settings.get_real("physical_parameters/nu");
+    real nu = DomainData::getInstance()->get_physical_parameters().nu.value();
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, rhs, f_x, f_y, f_z)
     {
@@ -96,7 +93,7 @@ void NSSolver::do_step(real t, bool sync) {
         }
 
 // 3. Add force
-        if (m_sourceFct != SourceMethods::Zero) {
+        if (m_add_source) {
 #ifndef BENCHMARKING
             m_logger->info("Add source ...");
 #endif
@@ -131,9 +128,9 @@ void NSSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void NSSolver::control() {
-    auto fields = Utility::split(m_settings.get("solver/advection/field"), ',');
-    std::sort(fields.begin(), fields.end());
-    if (fields != std::vector<std::string>({"u", "v", "w"})) {
+    auto fields_adv = m_solver_settings.advection.fields;
+    std::sort(fields_adv.begin(), fields_adv.end());
+    if (fields_adv != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
@@ -141,9 +138,9 @@ void NSSolver::control() {
         // TODO Error Handling
     }
 
-    auto diff_fields = Utility::split(m_settings.get("solver/diffusion/field"), ',');
-    std::sort(diff_fields.begin(), diff_fields.end());
-    if (diff_fields != std::vector<std::string>({"u", "v", "w"})) {
+    auto fields_dif = m_solver_settings.diffusion.fields;
+    std::sort(fields_dif.begin(), fields_dif.end());
+    if (fields_dif != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
@@ -151,7 +148,7 @@ void NSSolver::control() {
         // TODO Error Handling
     }
 
-    if (m_settings.get("solver/pressure/field") != Mapping::get_field_type_name(FieldType::P)) {
+    if (m_solver_settings.pressure.field != FieldType::P) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

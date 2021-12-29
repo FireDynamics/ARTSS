@@ -51,7 +51,7 @@ void AdvectionDiffusionSolver::do_step(real, bool sync) {
     Field &v_tmp = m_field_controller->get_field_v_tmp();
     Field &w_tmp = m_field_controller->get_field_w_tmp();
 
-    auto nu = DomainData::getInstance()->get_physical_parameters().nu.value();
+    real nu = DomainData::getInstance()->get_physical_parameters().nu.value();
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp)
     {
