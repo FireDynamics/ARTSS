@@ -458,7 +458,10 @@ namespace Settings {
         physical_parameters pp{};
         pp.t_end = get_required_real(values, "t_end", context);
         pp.dt = get_required_real(values, "dt", context);
-
+        if (solver_description != SolverTypes::AdvectionSolver &&
+            solver_description != SolverTypes::PressureSolver) {
+            pp.nu = get_required_real(values, "nu", context);
+        }
         if (solver_description == SolverTypes::NSSolver ||
             solver_description == SolverTypes::NSTempSolver ||
             solver_description == SolverTypes::NSTurbSolver ||
@@ -466,7 +469,6 @@ namespace Settings {
             solver_description == SolverTypes::NSTempTurbConSolver ||
             solver_description == SolverTypes::NSTempConSolver) {
             // navier stokes
-            pp.nu = get_optional_real(values, "nu", 3.1e-5);
             pp.rhoa = get_optional_real(values, "rhoa", 1);
         }
         pp.beta = get_optional_real(values, "beta", 3.34e-3);  // for buoyancy
