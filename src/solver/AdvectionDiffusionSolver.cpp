@@ -24,7 +24,7 @@ AdvectionDiffusionSolver::AdvectionDiffusionSolver(const Settings::solver_parame
     SolverSelection::set_advection_solver(m_solver_settings.advection, &adv);
 
     std::string diffusionType = m_settings.get("solver/diffusion/type");
-    SolverSelection::SetDiffusionSolver(m_settings, &this->dif, diffusionType);
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif);
 
     control();
 }

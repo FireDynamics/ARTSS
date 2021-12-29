@@ -50,15 +50,16 @@ void set_advection_solver(const Settings::solver::advection_solver &settings,
 /// \param  diffusion_solver Pointer to DiffusionSolver
 /// \param  diffusion_type Name of DiffusionSolver
 // ***************************************************************************************
-void SetDiffusionSolver(Settings::Settings const &settings,
-                        IDiffusion **diffusion_solver,
-                        const std::string& diffusion_type) {
-    if (diffusion_type == DiffusionMethods::Jacobi) {
-        *diffusion_solver = new JacobiDiffuse(settings);
-    } else if (diffusion_type == DiffusionMethods::ColoredGaussSeidel) {
-        *diffusion_solver = new ColoredGaussSeidelDiffuse(settings);
-    } else if (diffusion_type == DiffusionMethods::Explicit) {
-        *diffusion_solver = new ExplicitDiffuse(settings);
+void set_diffusion_solver(const Settings::solver::diffusion_solver &settings,
+                          IDiffusion **diffusion_solver) {
+    if (settings.type == DiffusionMethods::Jacobi) {
+        auto jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(settings.solver.value());
+        *diffusion_solver = new JacobiDiffuse(jacobi);
+    } else if (settings.type == DiffusionMethods::ColoredGaussSeidel) {
+        auto cgs = std::get<Settings::solver::diffusion_solvers::colored_gauss_seidel>(settings.solver.value());
+        *diffusion_solver = new ColoredGaussSeidelDiffuse(cgs);
+    } else if (settings.type == DiffusionMethods::Explicit) {
+        *diffusion_solver = new ExplicitDiffuse();
     } else {
 #ifndef BENCHMARKING
         auto logger = Utility::create_logger(class_name);
@@ -75,8 +76,8 @@ void SetDiffusionSolver(Settings::Settings const &settings,
 /// \param  pressure_solver Pointer to PressureSolver
 /// \param  pressure_type Name of PressureSolver
 // ***************************************************************************************
-void SetPressureSolver(const Settings::solver::pressure_solver &settings,
-                       IPressure **pressure_solver) {
+void set_pressure_solver(const Settings::solver::pressure_solver &settings,
+                         IPressure **pressure_solver) {
     if (settings.type == PressureMethods::VCycleMG) {
         *pressure_solver = new VCycleMG(settings.solver);
     } else {

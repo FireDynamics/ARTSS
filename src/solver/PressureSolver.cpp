@@ -13,7 +13,7 @@ PressureSolver::PressureSolver(const Settings::solver_parameters &solver_setting
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = field_controller;
-    SolverSelection::SetPressureSolver(m_solver_settings.pressure, &this->pres);
+    SolverSelection::set_pressure_solver(m_solver_settings.pressure, &this->pres);
     control();
 }
 

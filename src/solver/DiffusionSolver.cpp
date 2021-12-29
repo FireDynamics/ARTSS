@@ -13,15 +13,15 @@
 #include "../domain/DomainData.h"
 #include "SolverSelection.h"
 
-DiffusionSolver::DiffusionSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller) :
-        m_solver_settings(solver_settings), m_settings(settings)  {
+DiffusionSolver::DiffusionSolver(const Settings::solver_parameters &solver_settings,
+                                 FieldController *field_controller) :
+        m_solver_settings(solver_settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = field_controller;
 
-    std::string diffusionType = m_settings.get("solver/diffusion/type");
-    SolverSelection::SetDiffusionSolver(m_settings, &this->dif, diffusionType);
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif);
 
     control();
 }
@@ -53,7 +53,7 @@ void DiffusionSolver::do_step(real, bool sync) {
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp)
     {
-        real nu = m_settings.get_real("physical_parameters/nu");
+        real nu = DomainData::getInstance()->get_physical_parameters().nu.value();
         dif->diffuse(u, u0, u_tmp, nu, sync);
         dif->diffuse(v, v0, v_tmp, nu, sync);
         dif->diffuse(w, w0, w_tmp, nu, sync);
@@ -65,9 +65,9 @@ void DiffusionSolver::do_step(real, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void DiffusionSolver::control() {
-    auto fields = Utility::split(m_settings.get("solver/diffusion/field"), ',');
+    auto fields = m_solver_settings.diffusion.fields;
     std::sort(fields.begin(), fields.end());
-    if (fields != std::vector<std::string>({"u", "v", "w"})) {
+    if (fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

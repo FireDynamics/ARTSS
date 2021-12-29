@@ -20,7 +20,7 @@ DiffusionTurbSolver::DiffusionTurbSolver(const Settings::solver_parameters &solv
 
     //Diffusion
     std::string diffusionType = m_settings.get("solver/diffusion/type");
-    SolverSelection::SetDiffusionSolver(m_settings, &this->dif, diffusionType);
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif);
 
     // Turbulent viscosity
     std::string turbluenceType = m_settings.get("solver/turbulence/type");

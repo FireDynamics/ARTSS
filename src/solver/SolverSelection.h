@@ -46,15 +46,14 @@ struct TurbulenceMethods {
 };
 
 namespace SolverSelection {
-    void set_advection_solver(Settings::solver::advection_solver const &settings,
+    void set_advection_solver(const Settings::solver::advection_solver &settings,
                               IAdvection **advection_solver);
 
-    void SetDiffusionSolver(Settings::Settings const &settings,
-                            IDiffusion **diffusion_solver,
-                            const std::string& diffusion_type);
+    void set_diffusion_solver(const Settings::solver::diffusion_solver &settings,
+                            IDiffusion **diffusion_solver);
 
-    void SetPressureSolver(const Settings::solver::pressure_solver &settings,
-                           IPressure **pressure_solver);
+    void set_pressure_solver(const Settings::solver::pressure_solver &settings,
+                             IPressure **pressure_solver);
 
     void set_source_solver(const std::string &source_type,
                            ISource **source_solver,

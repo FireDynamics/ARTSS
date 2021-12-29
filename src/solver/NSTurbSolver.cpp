@@ -15,8 +15,8 @@
 
 NSTurbSolver::NSTurbSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings),
-        m_field_controller(field_controller),
-        m_solver_settings(solver_settings) {
+        m_solver_settings(solver_settings),
+        m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -25,13 +25,13 @@ NSTurbSolver::NSTurbSolver(const Settings::solver_parameters &solver_settings, S
     SolverSelection::set_advection_solver(m_solver_settings.advection, &adv_vel);
 
     // Diffusion of velocity
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_vel);
 
     // Turbulent viscosity
     SolverSelection::SetTurbulenceSolver(m_settings, &mu_tub, m_settings.get("solver/turbulence/type"));
 
     //Pressure
-    SolverSelection::SetPressureSolver(m_solver_settings.pressure, &pres);
+    SolverSelection::set_pressure_solver(m_solver_settings.pressure, &pres);
 
     // Source
     SolverSelection::set_source_solver(m_solver_settings.source.type, &sou_vel, m_solver_settings.source.direction);

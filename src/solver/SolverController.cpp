@@ -57,7 +57,7 @@ void SolverController::init_solver(const Settings::solver_parameters &solver_set
     } else if (solver_settings.description == SolverTypes::AdvectionDiffusionSolver) {
         m_solver = new AdvectionDiffusionSolver(solver_settings, m_settings, m_field_controller);
     } else if (solver_settings.description == SolverTypes::DiffusionSolver) {
-        m_solver = new DiffusionSolver(solver_settings, m_settings, m_field_controller);
+        m_solver = new DiffusionSolver(solver_settings, m_field_controller);
     } else if (solver_settings.description == SolverTypes::DiffusionTurbSolver) {
         m_solver = new DiffusionTurbSolver(solver_settings, m_settings, m_field_controller);
     } else if (solver_settings.description == SolverTypes::NSSolver) {

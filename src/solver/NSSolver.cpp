@@ -15,8 +15,8 @@
 
 NSSolver::NSSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller) :
         m_settings(settings),
-        m_field_controller(field_controller),
-        m_solver_settings(solver_settings) {
+        m_solver_settings(solver_settings),
+        m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -26,10 +26,9 @@ NSSolver::NSSolver(const Settings::solver_parameters &solver_settings, Settings:
     SolverSelection::set_advection_solver(m_solver_settings.advection, &adv_vel);
 
     //Diffusion of velocity
-    std::string diffusionType = m_settings.get("solver/diffusion/type");
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, diffusionType);
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_vel);
 
-    SolverSelection::SetPressureSolver(m_solver_settings.pressure, &pres);
+    SolverSelection::set_pressure_solver(m_solver_settings.pressure, &pres);
 
     //Source
     SolverSelection::set_source_solver(m_solver_settings.source.type, &sou_vel, m_solver_settings.source.direction);

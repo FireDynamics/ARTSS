@@ -36,7 +36,7 @@ NSTempTurbSolver::NSTempTurbSolver(const Settings::solver_parameters &solver_set
     m_logger->debug("set diffusion solver");
 #endif
     // Diffusion of velocity
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_vel);
 
 #ifndef BENCHMARKING
     m_logger->debug("set turbulence solver");
@@ -48,13 +48,13 @@ NSTempTurbSolver::NSTempTurbSolver(const Settings::solver_parameters &solver_set
     m_logger->debug("set diffusion solver");
 #endif
     // Diffusion of temperature
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_temp, m_settings.get("solver/temperature/diffusion/type"));
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_temp);
 
 #ifndef BENCHMARKING
     m_logger->debug("set pressure solver");
 #endif
     // Pressure
-    SolverSelection::SetPressureSolver(m_solver_settings.pressure, &pres);
+    SolverSelection::set_pressure_solver(m_solver_settings.pressure, &pres);
 
 #ifndef BENCHMARKING
     m_logger->debug("set source solver vel");

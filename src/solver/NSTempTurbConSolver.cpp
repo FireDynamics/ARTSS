@@ -31,19 +31,19 @@ NSTempTurbConSolver::NSTempTurbConSolver(const Settings::solver_parameters &solv
     SolverSelection::set_advection_solver(m_solver_settings.concentration.advection, &adv_temp);
 
     // Diffusion of velocity
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_vel);
 
     // Turbulent viscosity for velocity diffusion
     SolverSelection::SetTurbulenceSolver(m_settings, &mu_tub, m_settings.get("solver/turbulence/type"));
 
     // Diffusion of temperature
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_temp, m_settings.get("solver/temperature/diffusion/type"));
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_temp);
 
     // Diffusion for concentration
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_con, m_settings.get("solver/concentration/diffusion/type"));
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_con);
 
     // Pressure
-    SolverSelection::SetPressureSolver(m_solver_settings.pressure, &pres);
+    SolverSelection::set_pressure_solver(m_solver_settings.pressure, &pres);
 
     // Source of velocity
     SolverSelection::set_source_solver(m_solver_settings.source.type, &sou_vel, m_solver_settings.source.direction);

@@ -16,7 +16,7 @@
 
 class DiffusionSolver: public ISolver {
  public:
-    DiffusionSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller);
+    DiffusionSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller);
     ~DiffusionSolver() override;
 
     void do_step(real t, bool sync) override;
@@ -24,7 +24,6 @@ class DiffusionSolver: public ISolver {
 
  private:
     const Settings::solver_parameters &m_solver_settings;
-    Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
