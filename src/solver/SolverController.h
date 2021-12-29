@@ -28,7 +28,6 @@ class SolverController {
     FieldController *get_field_controller() { return m_field_controller; }
 
  private:
-    void set_up_source(const Settings::solver::source_solver &source_settings);
     void init_solver(const Settings::solver_parameters &solver_settings);
     void set_up_fields(const std::string& string_solver);
     void call_random(Field &field);
@@ -41,10 +40,6 @@ class SolverController {
 
     FieldController *m_field_controller;
     ISolver *m_solver;
-
-    ISource *source_temperature;
-    ISource *source_velocity;
-    ISource *source_concentration;
 
     bool m_has_momentum_source = false;
 #ifndef BENCHMARKING

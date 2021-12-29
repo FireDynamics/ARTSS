@@ -57,9 +57,9 @@ namespace SolverSelection {
     void SetPressureSolver(const Settings::solver::pressure_solver &settings,
                            IPressure **pressure_solver);
 
-    void SetSourceSolver(Settings::Settings const &settings,
-                         ISource **source_solver,
-                         const std::string& source_type);
+    void set_source_solver(const std::string &source_type,
+                           ISource **source_solver,
+                           const std::vector<CoordinateAxis> &dir);
 
     void SetTurbulenceSolver(Settings::Settings const &settings,
                              ITurbulence **turbulence_solver,

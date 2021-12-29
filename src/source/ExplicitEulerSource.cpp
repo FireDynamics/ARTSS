@@ -7,20 +7,8 @@
 #include "ExplicitEulerSource.h"
 #include "../domain/DomainController.h"
 
-ExplicitEulerSource::ExplicitEulerSource(Settings::Settings const &settings) :
-        m_settings(settings) {
-    m_dir_vel = settings.get("solver/source/dir");
-
-    if (m_dir_vel.find('x') == std::string::npos &&
-        m_dir_vel.find('y') == std::string::npos &&
-        m_dir_vel.find('z') == std::string::npos) {
-#ifndef BENCHMARKING
-        m_logger = Utility::create_logger(typeid(ExplicitEulerSource).name());
-        m_logger->error("unknown direction -> exit");
-#endif
-        std::exit(1);
-        // TODO(issue 6) Error handling
-    }
+ExplicitEulerSource::ExplicitEulerSource(const std::vector<CoordinateAxis> &dir) :
+        m_dir(dir) {
 }
 
 //==================================== Add Source ======================================
@@ -38,8 +26,8 @@ void ExplicitEulerSource::add_source(
         Field &out_x, Field &out_y, Field &out_z,
         const Field &s_x, const Field &s_y, const Field &s_z,
         bool sync) {
-    real dt = m_settings.get_real("physical_parameters/dt");
-    auto dir = m_dir_vel;
+    real dt = DomainData::getInstance()->get_physical_parameters().dt;
+    auto dir = m_dir;
 
     auto domain_controller = DomainController::getInstance();
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
@@ -49,7 +37,7 @@ void ExplicitEulerSource::add_source(
     {
         // check directions of source
         // x - direction
-        if (dir.find('x') != std::string::npos) {
+        if (std::find(dir.begin(), dir.end(), CoordinateAxis::X) != dir.end()) {
 #pragma acc parallel loop independent present(out_x, s_x, domain_inner_list[:size_domain_inner_list]) async
             for (size_t j = 0; j < size_domain_inner_list; ++j) {
                 const size_t i = domain_inner_list[j];
@@ -60,7 +48,7 @@ void ExplicitEulerSource::add_source(
         } // end x- direction
 
         // y - direction
-        if (dir.find('y') != std::string::npos) {
+        if (std::find(dir.begin(), dir.end(), CoordinateAxis::Y) != dir.end()) {
 #pragma acc parallel loop independent present(out_y, s_y, domain_inner_list[:size_domain_inner_list]) async
             for (size_t j = 0; j < size_domain_inner_list; ++j) {
                 const size_t i = domain_inner_list[j];
@@ -71,7 +59,7 @@ void ExplicitEulerSource::add_source(
         } // end y- direction
 
         // z - direction
-        if (dir.find('z') != std::string::npos) {
+        if (std::find(dir.begin(), dir.end(), CoordinateAxis::Z) != dir.end()) {
 #pragma acc parallel loop independent present(out_z, s_z, domain_inner_list[:size_domain_inner_list]) async
             for (size_t j = 0; j < size_domain_inner_list; ++j) {
                 const size_t i = domain_inner_list[j];
@@ -97,7 +85,7 @@ void ExplicitEulerSource::add_source(Field &out, Field const &s, bool sync) {
     auto domain_controller = DomainController::getInstance();
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
     auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
-    real dt = m_settings.get_real("physical_parameters/dt");
+    real dt = DomainData::getInstance()->get_physical_parameters().dt;
 
 #pragma acc data present(out, s)
     {

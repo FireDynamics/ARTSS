@@ -723,6 +723,10 @@ namespace Settings {
             std::string context_source = "source";
             auto[subsection_source, values_source] = map_parameter_section(subsection, context_source);
             solver_temperature.source.type = get_required_string(values_source, "type", context_source);
+            auto fields = Utility::split(get_required_string(values, "dir", context), delimiter);
+            for (const std::string &string: fields) {
+                solver_temperature.source.dir.emplace_back(Mapping::match_axis(string));
+            }
             solver_temperature.source.dissipation = get_required_bool(values_source, "dissipation", context_source);
             solver_temperature.source.random = get_required_bool(values_source, "random", context_source);
             if (solver_temperature.source.random) {
@@ -773,6 +777,10 @@ namespace Settings {
     std::string context_source = "source";
             auto[subsection_source, values_source] = map_parameter_section(subsection, context_source);
             solver_concentration.source.type = get_required_string(values_source, "type", context_source);
+            auto fields = Utility::split(get_required_string(values, "dir", context), delimiter);
+            for (const std::string &string: fields) {
+                solver_concentration.source.dir.emplace_back(Mapping::match_axis(string));
+            }
             solver_concentration.source.random = get_required_bool(values_source, "random", context_source);
             if (solver_concentration.source.random) {
                 solver_concentration.source.random_parameters = parse_random_parameters(subsection_source,

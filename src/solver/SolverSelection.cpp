@@ -90,27 +90,6 @@ void SetPressureSolver(const Settings::solver::pressure_solver &settings,
     }
 }
 
-// =================== Set source solver ==================
-// ***************************************************************************************
-/// \brief  Sets the source solver
-/// \param  source_solver Pointer to SourceSolver
-/// \param  source_type Name of SourceSolver
-// ***************************************************************************************
-void SetSourceSolver(Settings::Settings const &settings,
-                     ISource **source_solver,
-                     const std::string& source_type) {
-    if (source_type == SourceMethods::ExplicitEuler) {
-        *source_solver = new ExplicitEulerSource(settings);
-    } else {
-#ifndef BENCHMARKING
-        auto logger = Utility::create_logger(class_name);
-        logger->error("Source method {} not yet implemented! Simulation stopped!", source_type);
-#endif
-        std::exit(1);
-        // TODO Error handling
-    }
-}
-
 // =================== Set turbulence solver ==================
 // ***************************************************************************************
 /// \brief  Sets the turbulence solver
@@ -198,6 +177,26 @@ void SetTurbulenceSolver(Settings::Settings const &settings,
         }
         if (settings.random) {
             add_noise(settings.random_parameters, source_function);
+        }
+    }
+
+
+    // =================== Set source solver ==================
+    // ***************************************************************************************
+    /// \brief  Sets the source solver
+    /// \param  source_solver Pointer to SourceSolver
+    /// \param  source_type Name of SourceSolver
+    // ***************************************************************************************
+    void set_source_solver(const std::string &source_type, ISource **source_solver, const std::vector<CoordinateAxis> &dir) {
+        if (source_type == SourceMethods::ExplicitEuler) {
+            *source_solver = new ExplicitEulerSource(dir);
+        } else {
+#ifndef BENCHMARKING
+            auto logger = Utility::create_logger(class_name);
+            logger->error("Source method {} not yet implemented! Simulation stopped!", source_type);
+#endif
+            std::exit(1);
+            // TODO Error handling
         }
     }
 }  // namespace SolverSelection

@@ -34,7 +34,7 @@ NSTurbSolver::NSTurbSolver(const Settings::solver_parameters &solver_settings, S
     SolverSelection::SetPressureSolver(m_solver_settings.pressure, &pres);
 
     // Source
-    SolverSelection::SetSourceSolver(m_settings, &sou_vel, m_settings.get("solver/source/type"));
+    SolverSelection::set_source_solver(m_solver_settings.source.type, &sou_vel, m_solver_settings.source.direction);
 
     m_force_function = m_settings.get("solver/source/force_fct");
     control();

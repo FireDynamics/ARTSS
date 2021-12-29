@@ -232,6 +232,7 @@ namespace Settings {
         }
         struct temperature_source {
             std::string type;
+            std::vector<CoordinateAxis> dir;
             std::string temp_fct;
             bool dissipation;
             bool random;
@@ -247,6 +248,7 @@ namespace Settings {
         };
         struct concentration_source {
             std::string type;
+            std::vector<CoordinateAxis> dir;
             std::string con_fct;
             bool random;
             struct random_parameters random_parameters;

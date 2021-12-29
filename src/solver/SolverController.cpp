@@ -21,12 +21,6 @@
 #include "../domain/DomainController.h"
 #include "../domain/DomainData.h"
 #include "../Functions.h"
-#include "../source/GaussFunction.h"
-#include "../source/BuoyancyMMS.h"
-#include "../source/Cube.h"
-#include "../source/ExplicitEulerSource.h"
-#include "../source/Zero.h"
-#include "../randomField/UniformRandom.h"
 
 
 SolverController::SolverController(Settings::Settings const &settings, const Settings::Settings_new &settings_new) :
@@ -39,7 +33,6 @@ SolverController::SolverController(Settings::Settings const &settings, const Set
 #ifndef BENCHMARKING
     m_logger->info("Start initialising....");
 #endif
-    set_up_source(m_settings_new.solver_parameters.source);
     set_up_fields(m_settings_new.solver_parameters.description);
 #ifndef BENCHMARKING
     m_logger->debug("set up boundary");
@@ -47,37 +40,11 @@ SolverController::SolverController(Settings::Settings const &settings, const Set
     m_field_controller->set_up_boundary();
     update_sources(0, true);
     m_field_controller->update_data();
-
-    source_velocity = nullptr;
-    source_temperature = nullptr;
-    source_concentration = nullptr;
 }
 
 SolverController::~SolverController() {
     delete m_field_controller;
     delete m_solver;
-    delete source_velocity;
-    delete source_temperature;
-    delete source_concentration;
-}
-
-void SolverController::set_up_source(const Settings::solver::source_solver &source_settings) {
-#ifndef BENCHMARKING
-    m_logger->debug("set up source");
-#endif
-    // Source term for momentum
-    if (m_has_momentum_source) {
-        std::string source_type = source_settings.type;
-        if (source_type == SourceMethods::ExplicitEuler) {
-            source_velocity = new ExplicitEulerSource(m_settings);
-        } else {
-#ifndef BENCHMARKING
-            m_logger->critical("Source function {} not yet implemented! Simulation stopped!", source_type);
-#endif
-            std::exit(1);
-            // TODO(issue 6) Error handling
-        }
-    }
 }
 
 void SolverController::init_solver(const Settings::solver_parameters &solver_settings) {
@@ -527,22 +494,22 @@ void SolverController::momentum_source() {
     // Momentum source
     std::string dir_vel = m_settings.get("solver/source/dir");
     if (dir_vel.find('x') != std::string::npos) {
-        source_velocity->buoyancy_force(m_settings,
-                                        m_field_controller->get_field_force_x(),
-                                        m_field_controller->get_field_T(),
-                                        m_field_controller->get_field_T_ambient());
+        ISource::buoyancy_force(m_settings,
+                                m_field_controller->get_field_force_x(),
+                                m_field_controller->get_field_T(),
+                                m_field_controller->get_field_T_ambient());
     }
     if (dir_vel.find('y') != std::string::npos) {
-        source_velocity->buoyancy_force(m_settings,
-                                        m_field_controller->get_field_force_y(),
-                                        m_field_controller->get_field_T(),
-                                        m_field_controller->get_field_T_ambient());
+        ISource::buoyancy_force(m_settings,
+                                m_field_controller->get_field_force_y(),
+                                m_field_controller->get_field_T(),
+                                m_field_controller->get_field_T_ambient());
     }
     if (dir_vel.find('z') != std::string::npos) {
-        source_velocity->buoyancy_force(m_settings,
-                                        m_field_controller->get_field_force_z(),
-                                        m_field_controller->get_field_T(),
-                                        m_field_controller->get_field_T_ambient());
+        ISource::buoyancy_force(m_settings,
+                                m_field_controller->get_field_force_z(),
+                                m_field_controller->get_field_T(),
+                                m_field_controller->get_field_T_ambient());
     }
 }
 

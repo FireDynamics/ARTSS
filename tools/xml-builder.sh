@@ -596,7 +596,7 @@ else
       if [ "$TEMPSOURCEFCT" == "Zero" ]
       then
         WRITETO="$WRITETO
-      <source type=\"$TEMPSOURCETYPE\" temp_fct=\"$TEMPSOURCEFCT\" dissipation=\"No\" random=\"No\">
+      <source type=\"$TEMPSOURCETYPE\" dir=\"$FORECEDIR\" temp_fct=\"$TEMPSOURCEFCT\" dissipation=\"No\" random=\"No\">
       </source>"
       fi
       if [ \"$TEMPSOURCEFCT\" == \"Gauss\" ]

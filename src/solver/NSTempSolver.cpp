@@ -42,10 +42,10 @@ NSTempSolver::NSTempSolver(const Settings::solver_parameters &solver_settings, S
     SolverSelection::SetPressureSolver(m_solver_settings.pressure, &pres);
 
     // Source of velocity
-    SolverSelection::SetSourceSolver(m_settings, &sou_vel, m_settings.get("solver/source/type"));
+    SolverSelection::set_source_solver(m_solver_settings.source.type, &sou_vel, m_solver_settings.source.direction);
 
     // Source of temperature
-    SolverSelection::SetSourceSolver(m_settings, &sou_temp, m_settings.get("solver/temperature/source/type"));
+    SolverSelection::set_source_solver(m_solver_settings.temperature.source.type, &sou_temp, m_solver_settings.temperature.source.dir);
 
     // Constants
     m_dir_vel = m_settings.get("solver/source/dir");

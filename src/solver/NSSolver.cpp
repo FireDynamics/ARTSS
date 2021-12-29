@@ -32,8 +32,7 @@ NSSolver::NSSolver(const Settings::solver_parameters &solver_settings, Settings:
     SolverSelection::SetPressureSolver(m_solver_settings.pressure, &pres);
 
     //Source
-    std::string sourceType = m_settings.get("solver/source/type");
-    SolverSelection::SetSourceSolver(m_settings, &sou, sourceType);
+    SolverSelection::set_source_solver(m_solver_settings.source.type, &sou_vel, m_solver_settings.source.direction);
 
     m_sourceFct = m_settings.get("solver/source/force_fct");
     control();
@@ -43,7 +42,7 @@ NSSolver::~NSSolver() {
     delete adv_vel;
     delete dif_vel;
     delete pres;
-    delete sou;
+    delete sou_vel;
 }
 
 //========================================== do_step ======================================
@@ -102,7 +101,7 @@ void NSSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
             m_logger->info("Add source ...");
 #endif
-            sou->add_source(u, v, w, f_x, f_y, f_z, sync);
+            sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
             // Couple data
             FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }

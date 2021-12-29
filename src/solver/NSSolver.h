@@ -39,7 +39,7 @@ class NSSolver : public ISolver {
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
     IPressure *pres;
-    ISource *sou;
+    ISource *sou_vel;
 
     void control();
 
