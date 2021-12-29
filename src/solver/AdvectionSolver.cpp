@@ -17,15 +17,15 @@ AdvectionSolver::AdvectionSolver(
         const Settings::solver_parameters &settings,
         FieldController *field_controller,
         real u_lin, real v_lin, real w_lin) :
-    m_settings(settings),
-    m_field_controller(field_controller),
-    m_u_lin(FieldType::U, u_lin),
-    m_v_lin(FieldType::V, v_lin),
-    m_w_lin(FieldType::W, w_lin) {
+        m_solver_settings(settings),
+        m_field_controller(field_controller),
+        m_u_lin(FieldType::U, u_lin),
+        m_v_lin(FieldType::V, v_lin),
+        m_w_lin(FieldType::W, w_lin) {
 #ifndef BENCHMARKING
      m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    SolverSelection::set_advection_solver(m_settings.advection, &adv);
+    SolverSelection::set_advection_solver(m_solver_settings.advection, &adv);
 
     m_u_lin.copyin();
     m_v_lin.copyin();
@@ -79,7 +79,7 @@ void AdvectionSolver::do_step(real, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void AdvectionSolver::control() {
-    auto fields = m_settings.advection.fields;
+    auto fields = m_solver_settings.advection.fields;
     std::sort(fields.begin(), fields.end());
 
     if (fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
