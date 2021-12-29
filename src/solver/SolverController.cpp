@@ -55,25 +55,25 @@ void SolverController::init_solver(const Settings::solver_parameters &solver_set
         auto ic = std::get<Settings::initial_conditions::gauss_bubble>(m_settings_new.initial_conditions_parameters.ic.value());
         m_solver = new AdvectionSolver(solver_settings, m_field_controller, ic.velocity_lin);
     } else if (solver_settings.description == SolverTypes::AdvectionDiffusionSolver) {
-        m_solver = new AdvectionDiffusionSolver(solver_settings, m_settings, m_field_controller);
+        m_solver = new AdvectionDiffusionSolver(solver_settings, m_field_controller);
     } else if (solver_settings.description == SolverTypes::DiffusionSolver) {
         m_solver = new DiffusionSolver(solver_settings, m_field_controller);
     } else if (solver_settings.description == SolverTypes::DiffusionTurbSolver) {
         m_solver = new DiffusionTurbSolver(solver_settings, m_settings, m_field_controller);
     } else if (solver_settings.description == SolverTypes::NSSolver) {
-        m_solver = new NSSolver(solver_settings, m_settings, m_field_controller);
+        m_solver = new NSSolver(solver_settings, m_field_controller);
         m_has_momentum_source = true;
     } else if (solver_settings.description == SolverTypes::NSTurbSolver) {
         m_solver = new NSTurbSolver(solver_settings, m_settings, m_field_controller);
         m_has_momentum_source = true;
     } else if (solver_settings.description == SolverTypes::NSTempSolver) {
-        m_solver = new NSTempSolver(solver_settings, m_settings, m_field_controller);
+        m_solver = new NSTempSolver(solver_settings, m_field_controller);
         m_has_momentum_source = true;
     } else if (solver_settings.description == SolverTypes::NSTempTurbSolver) {
         m_solver = new NSTempTurbSolver(solver_settings, m_settings, m_field_controller);
         m_has_momentum_source = true;
     } else if (solver_settings.description == SolverTypes::NSTempConSolver) {
-        m_solver = new NSTempConSolver(solver_settings, m_settings, m_field_controller);
+        m_solver = new NSTempConSolver(solver_settings, m_field_controller);
         m_has_momentum_source = true;
     } else if (solver_settings.description == SolverTypes::NSTempTurbConSolver) {
         m_solver = new NSTempTurbConSolver(solver_settings, m_settings, m_field_controller);
