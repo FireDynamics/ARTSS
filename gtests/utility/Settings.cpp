@@ -1117,7 +1117,7 @@ TEST(SettingsTest, temperature) {
             <turbulence include="Yes">
                 <Pr_T> 0.5 </Pr_T>
             </turbulence>
-            <source type="ExplicitEuler" temp_fct="Gauss" dissipation="No" random="Yes">
+            <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="Yes">
                 <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
                 <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
                 <x0> 1.4 </x0>
@@ -1166,6 +1166,10 @@ TEST(SettingsTest, temperature) {
     EXPECT_DOUBLE_EQ(temp.prandtl_number.value(), 0.5);
 
     EXPECT_EQ(temp.source.type, SourceMethods::ExplicitEuler);
+    EXPECT_NE(std::find(temp.source.dir.begin(),
+                        temp.source.dir.end(),
+                        CoordinateAxis::Y),
+              temp.source.dir.end());
     EXPECT_FALSE(temp.source.dissipation);
     EXPECT_EQ(temp.source.temp_fct, SourceMethods::Gauss);
     auto gauss = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
@@ -1222,7 +1226,7 @@ TEST(SettingsTest, temperatureWithoutTurbulence) {
                 <tol_res> 1e-07 </tol_res>
                 <w> 1 </w>
             </diffusion>
-            <source type="ExplicitEuler" temp_fct="Gauss" dissipation="No" random="Yes">
+            <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="Yes">
                 <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
                 <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
                 <x0> 1.4 </x0>
@@ -1267,6 +1271,10 @@ TEST(SettingsTest, temperatureWithoutTurbulence) {
     EXPECT_FALSE(temp.has_turbulence);
 
     EXPECT_EQ(temp.source.type, SourceMethods::ExplicitEuler);
+    EXPECT_NE(std::find(temp.source.dir.begin(),
+                        temp.source.dir.end(),
+                        CoordinateAxis::Y),
+              temp.source.dir.end());
     EXPECT_FALSE(temp.source.dissipation);
     EXPECT_EQ(temp.source.temp_fct, SourceMethods::Gauss);
     auto gauss = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
@@ -1329,7 +1337,7 @@ TEST(SettingsTest, concentration) {
             <turbulence include="Yes">
                 <Pr_T> 0.5 </Pr_T>
             </turbulence>
-            <source type="ExplicitEuler" temp_fct="Gauss" dissipation="No" random="Yes">
+            <source type="ExplicitEuler" dir="x,y" temp_fct="Gauss" dissipation="No" random="Yes">
                 <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
                 <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
                 <x0> 1.4 </x0>
@@ -1357,7 +1365,7 @@ TEST(SettingsTest, concentration) {
             <turbulence include="Yes">
                 <Sc_T> 0.1 </Sc_T>
             </turbulence>
-            <source type="ExplicitEuler" con_fct="Gauss" random="Yes">
+            <source type="ExplicitEuler" dir="y,x" con_fct="Gauss" random="Yes">
                 <HRR> 0.8. </HRR> 				<!-- Total heat release rate (in kW) -->
                 <cp> 13100. </cp> 				<!-- Heating value (in kJ/kg) -->
                 <x0> 0.  </x0>
@@ -1404,6 +1412,14 @@ TEST(SettingsTest, concentration) {
     EXPECT_DOUBLE_EQ(temp.prandtl_number.value(), 0.5);
 
     EXPECT_EQ(temp.source.type, SourceMethods::ExplicitEuler);
+    EXPECT_NE(std::find(temp.source.dir.begin(),
+                        temp.source.dir.end(),
+                        CoordinateAxis::X),
+              temp.source.dir.end());
+    EXPECT_NE(std::find(temp.source.dir.begin(),
+                        temp.source.dir.end(),
+                        CoordinateAxis::Y),
+              temp.source.dir.end());
     EXPECT_FALSE(temp.source.dissipation);
     EXPECT_EQ(temp.source.temp_fct, SourceMethods::Gauss);
     auto gauss_temp = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
@@ -1448,6 +1464,14 @@ TEST(SettingsTest, concentration) {
     EXPECT_DOUBLE_EQ(con.turbulent_schmidt_number.value(), 0.1);
 
     EXPECT_EQ(con.source.type, SourceMethods::ExplicitEuler);
+    EXPECT_NE(std::find(con.source.dir.begin(),
+                        con.source.dir.end(),
+                        CoordinateAxis::X),
+              con.source.dir.end());
+    EXPECT_NE(std::find(con.source.dir.begin(),
+                        con.source.dir.end(),
+                        CoordinateAxis::Y),
+              con.source.dir.end());
     EXPECT_EQ(con.source.con_fct, SourceMethods::Gauss);
     auto gauss_con = std::get<Settings::solver::sources::gauss>(con.source.con_function);
     EXPECT_DOUBLE_EQ(gauss_con.tau, 5.1);
@@ -1502,7 +1526,7 @@ TEST(SettingsTest, concentrationWithoutTurb) {
                 <tol_res> 1e-07 </tol_res>
                 <w> 1 </w>
             </diffusion>
-            <source type="ExplicitEuler" temp_fct="Gauss" dissipation="No" random="Yes">
+            <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="Yes">
                 <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
                 <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
                 <x0> 1.4 </x0>
@@ -1527,7 +1551,7 @@ TEST(SettingsTest, concentrationWithoutTurb) {
                 <tol_res> 1e-06 </tol_res> 		<!-- tolerance for residuum/ convergence -->
                 <w> 1.1 </w>				   		<!-- relaxation parameter -->
             </diffusion>
-            <source type="ExplicitEuler" con_fct="Gauss" random="Yes">
+            <source type="ExplicitEuler" dir="y" con_fct="Gauss" random="Yes">
                 <HRR> 0.8. </HRR> 				<!-- Total heat release rate (in kW) -->
                 <cp> 13100. </cp> 				<!-- Heating value (in kJ/kg) -->
                 <x0> 0.  </x0>
@@ -1573,6 +1597,10 @@ TEST(SettingsTest, concentrationWithoutTurb) {
     EXPECT_FALSE(temp.has_turbulence);
 
     EXPECT_EQ(temp.source.type, SourceMethods::ExplicitEuler);
+    EXPECT_NE(std::find(temp.source.dir.begin(),
+                        temp.source.dir.end(),
+                        CoordinateAxis::Y),
+              temp.source.dir.end());
     EXPECT_FALSE(temp.source.dissipation);
     EXPECT_EQ(temp.source.temp_fct, SourceMethods::Gauss);
     auto gauss_temp = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
@@ -1613,6 +1641,10 @@ TEST(SettingsTest, concentrationWithoutTurb) {
     EXPECT_FALSE(con.has_turbulence);
 
     EXPECT_EQ(con.source.type, SourceMethods::ExplicitEuler);
+    EXPECT_NE(std::find(con.source.dir.begin(),
+                        con.source.dir.end(),
+                        CoordinateAxis::Y),
+              con.source.dir.end());
     EXPECT_EQ(con.source.con_fct, SourceMethods::Gauss);
     auto gauss_con = std::get<Settings::solver::sources::gauss>(con.source.con_function);
     EXPECT_DOUBLE_EQ(gauss_con.tau, 5.1);

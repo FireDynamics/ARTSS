@@ -723,7 +723,7 @@ namespace Settings {
             std::string context_source = "source";
             auto[subsection_source, values_source] = map_parameter_section(subsection, context_source);
             solver_temperature.source.type = get_required_string(values_source, "type", context_source);
-            auto fields = Utility::split(get_required_string(values, "dir", context), delimiter);
+            auto fields = Utility::split(get_required_string(values_source, "dir", context_source), delimiter);
             for (const std::string &string: fields) {
                 solver_temperature.source.dir.emplace_back(Mapping::match_axis(string));
             }
@@ -777,7 +777,7 @@ namespace Settings {
     std::string context_source = "source";
             auto[subsection_source, values_source] = map_parameter_section(subsection, context_source);
             solver_concentration.source.type = get_required_string(values_source, "type", context_source);
-            auto fields = Utility::split(get_required_string(values, "dir", context), delimiter);
+            auto fields = Utility::split(get_required_string(values_source, "dir", context_source), delimiter);
             for (const std::string &string: fields) {
                 solver_concentration.source.dir.emplace_back(Mapping::match_axis(string));
             }
