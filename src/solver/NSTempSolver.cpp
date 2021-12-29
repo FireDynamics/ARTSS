@@ -27,10 +27,10 @@ NSTempSolver::NSTempSolver(const Settings::solver_parameters &solver_settings, S
 #endif
 
     // Advection of velocity
-    SolverSelection::SetAdvectionSolver(m_settings, &adv_vel, m_settings.get("solver/advection/type"));
+    SolverSelection::set_advection_solver(m_solver_settings.advection, &adv_vel);
 
     // Advection of temperature
-    SolverSelection::SetAdvectionSolver(m_settings, &adv_temp, m_settings.get("solver/temperature/advection/type"));
+    SolverSelection::set_advection_solver(m_solver_settings.temperature.advection, &adv_temp);
 
     // Diffusion of velocity
     SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));

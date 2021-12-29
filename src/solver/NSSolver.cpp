@@ -23,7 +23,7 @@ NSSolver::NSSolver(const Settings::solver_parameters &solver_settings, Settings:
 
     //Advection of velocity
     std::string advectionType = m_settings.get("solver/advection/type");
-    SolverSelection::SetAdvectionSolver(m_settings, &adv_vel, advectionType);
+    SolverSelection::set_advection_solver(m_solver_settings.advection, &adv_vel);
 
     //Diffusion of velocity
     std::string diffusionType = m_settings.get("solver/diffusion/type");

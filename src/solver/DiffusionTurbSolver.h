@@ -19,13 +19,14 @@
 
 class DiffusionTurbSolver: public ISolver {
  public:
-    explicit DiffusionTurbSolver(Settings::Settings const &settings, FieldController *field_controller);
-    ~DiffusionTurbSolver();
+    explicit DiffusionTurbSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller);
+    ~DiffusionTurbSolver() override;
 
     void do_step(real t, bool sync) override;
     void update_source(real) override {};
 
  private:
+    const Settings::solver_parameters &m_solver_settings;
     Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;

@@ -24,13 +24,13 @@ NSTempTurbSolver::NSTempTurbSolver(const Settings::solver_parameters &solver_set
     m_logger->debug("set advection solver");
 #endif
     // Advection of velocity
-    SolverSelection::SetAdvectionSolver(m_settings, &adv_vel, m_settings.get("solver/advection/type"));
+    SolverSelection::set_advection_solver(m_solver_settings.advection, &adv_vel);
 
 #ifndef BENCHMARKING
     m_logger->debug("set advection solver");
 #endif
     // Advection of temperature
-    SolverSelection::SetAdvectionSolver(m_settings, &adv_temp, m_settings.get("solver/temperature/advection/type"));
+    SolverSelection::set_advection_solver(m_solver_settings.temperature.advection, &adv_temp);
 
 #ifndef BENCHMARKING
     m_logger->debug("set diffusion solver");

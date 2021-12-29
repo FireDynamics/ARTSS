@@ -1,4 +1,4 @@
-/// \file     AdvectionDiffusionSolver.h
+/// \file     AdvectionDiffusionSolver.cpp
 /// \brief    Defines the steps to solve the advection and diffusion equation
 /// \date     May 20, 2016
 /// \author   Severt
@@ -14,15 +14,14 @@
 #include "../domain/DomainData.h"
 
 
-AdvectionDiffusionSolver::AdvectionDiffusionSolver(Settings::Settings const &settings, FieldController *field_controller) :
-        m_settings(settings) {
+AdvectionDiffusionSolver::AdvectionDiffusionSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller) :
+        m_settings(settings), m_solver_settings(solver_settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = field_controller;
 
-    std::string advectionType = m_settings.get("solver/advection/type");
-    SolverSelection::SetAdvectionSolver(m_settings, &this->adv, advectionType);
+    SolverSelection::set_advection_solver(m_solver_settings.advection, &adv);
 
     std::string diffusionType = m_settings.get("solver/diffusion/type");
     SolverSelection::SetDiffusionSolver(m_settings, &this->dif, diffusionType);

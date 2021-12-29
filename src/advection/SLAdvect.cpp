@@ -49,7 +49,7 @@ void SLAdvect::advect(Field &out, const Field &in,
         const real dy = domain_data->get_dy();
         const real dz = domain_data->get_dz();
 
-        const real dt = m_settings.get_real("physical_parameters/dt");
+        const real dt = domain_data->get_physical_parameters().dt;
 
         const real dtx = dt / dx;
         const real dty = dt / dy;

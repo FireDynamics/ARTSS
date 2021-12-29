@@ -52,13 +52,14 @@ void SolverController::init_solver(const Settings::solver_parameters &solver_set
     m_logger->debug("initialise solver {}", solver_settings.description);
 #endif
     if (solver_settings.description == SolverTypes::AdvectionSolver) {
-        m_solver = new AdvectionSolver(m_settings, m_field_controller);
+        auto ic = std::get<Settings::initial_conditions::gauss_bubble>(m_settings_new.initial_conditions_parameters.ic.value());
+        m_solver = new AdvectionSolver(solver_settings, m_field_controller, ic.velocity_lin);
     } else if (solver_settings.description == SolverTypes::AdvectionDiffusionSolver) {
-        m_solver = new AdvectionDiffusionSolver(m_settings, m_field_controller);
+        m_solver = new AdvectionDiffusionSolver(solver_settings, m_settings, m_field_controller);
     } else if (solver_settings.description == SolverTypes::DiffusionSolver) {
-        m_solver = new DiffusionSolver(m_settings, m_field_controller);
+        m_solver = new DiffusionSolver(solver_settings, m_settings, m_field_controller);
     } else if (solver_settings.description == SolverTypes::DiffusionTurbSolver) {
-        m_solver = new DiffusionTurbSolver(m_settings, m_field_controller);
+        m_solver = new DiffusionTurbSolver(solver_settings, m_settings, m_field_controller);
     } else if (solver_settings.description == SolverTypes::NSSolver) {
         m_solver = new NSSolver(solver_settings, m_settings, m_field_controller);
         m_has_momentum_source = true;

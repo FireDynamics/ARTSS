@@ -13,8 +13,8 @@
 #include "../domain/DomainData.h"
 #include "SolverSelection.h"
 
-DiffusionSolver::DiffusionSolver(Settings::Settings const &settings, FieldController *field_controller) :
-        m_settings(settings) {
+DiffusionSolver::DiffusionSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller) :
+        m_solver_settings(solver_settings), m_settings(settings)  {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif

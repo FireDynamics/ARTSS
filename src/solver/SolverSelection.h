@@ -46,9 +46,8 @@ struct TurbulenceMethods {
 };
 
 namespace SolverSelection {
-    void SetAdvectionSolver(Settings::Settings const &settings,
-                            IAdvection **advection_solver,
-                            const std::string& advection_type);
+    void set_advection_solver(Settings::solver::advection_solver const &settings,
+                              IAdvection **advection_solver);
 
     void SetDiffusionSolver(Settings::Settings const &settings,
                             IDiffusion **diffusion_solver,

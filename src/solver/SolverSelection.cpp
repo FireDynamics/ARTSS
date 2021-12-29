@@ -28,12 +28,11 @@ static const std::string class_name = "SolverSelection";
 // ***************************************************************************************
 /// \brief  Sets the advection solver
 /// \param  advection_solver Pointer to AdvectionSolver
-/// \param  advection_type Name of AdvcetionSolver
+/// \param  advection_type Name of AdvectionSolver
 // ***************************************************************************************
-void SetAdvectionSolver(Settings::Settings const &settings,
-                        IAdvection **advection_solver,
-                        const std::string& advection_type) {
-    if (advection_type == AdvectionMethods::SemiLagrangian) {
+void set_advection_solver(const Settings::solver::advection_solver &settings,
+                        IAdvection **advection_solver) {
+    if (settings.type == AdvectionMethods::SemiLagrangian) {
         *advection_solver = new SLAdvect(settings);
     } else {
 #ifndef BENCHMARKING
