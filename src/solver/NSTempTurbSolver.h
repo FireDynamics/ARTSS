@@ -22,14 +22,13 @@
 
 class NSTempTurbSolver : public ISolver {
  public:
-    NSTempTurbSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *fieldController);
-    ~NSTempTurbSolver();
+    NSTempTurbSolver(const Settings::solver_parameters &solver_settings, FieldController *fieldController);
+    ~NSTempTurbSolver() override;
 
     void do_step(real t, bool sync) override;
 
     void update_source(real) override;
  private:
-    Settings::Settings const &m_settings;
     const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
@@ -46,14 +45,10 @@ class NSTempTurbSolver : public ISolver {
     ITurbulence *mu_tub;
     ISourceFunction *m_source_function_temperature;
 
-    std::string m_dir_vel;
-
     void control();
 
-    bool m_hasTurbulence;
-    bool m_hasDissipation;
-    std::string m_forceFct;
-    std::string m_tempFct;
+    bool m_add_source;
+    bool m_add_temp_source;
 };
 
 #endif /* ARTSS_SOLVER_NSTEMPTURBSOLVER_H_ */

@@ -19,14 +19,13 @@
 
 class NSTurbSolver : public ISolver {
  public:
-    NSTurbSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &setings, FieldController *field_controller);
-    ~NSTurbSolver();
+    NSTurbSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller);
+    ~NSTurbSolver() override;
 
     void do_step(real t, bool sync) override;
     void update_source(real) override {};
 
  private:
-    Settings::Settings const &m_settings;
     const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
@@ -42,7 +41,7 @@ class NSTurbSolver : public ISolver {
 
     void control();
 
-    std::string m_force_function;
+    bool m_add_source;
 };
 
 #endif /* ARTSS_SOLVER_NSTURBSOLVER_H_ */

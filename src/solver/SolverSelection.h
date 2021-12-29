@@ -59,9 +59,8 @@ namespace SolverSelection {
                            ISource **source_solver,
                            const std::vector<CoordinateAxis> &dir);
 
-    void SetTurbulenceSolver(Settings::Settings const &settings,
-                             ITurbulence **turbulence_solver,
-                             const std::string& turbulence_type);
+    void set_turbulence_solver(const Settings::solver::turbulence_solver &settings,
+                               ITurbulence **turbulence_solver);
 
     void set_temperature_source_function(const Settings::solver::temperature_source &settings,
                                          ISourceFunction **source_function);

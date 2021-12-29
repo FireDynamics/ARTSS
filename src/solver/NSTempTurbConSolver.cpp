@@ -6,17 +6,15 @@
 
 #include "NSTempTurbConSolver.h"
 
-#include <string>
 #include <vector>
 #include <algorithm>
 
 #include "SolverSelection.h"
 #include "../domain/DomainData.h"
 
-NSTempTurbConSolver::NSTempTurbConSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller) :
-        m_settings(settings),
-        m_field_controller(field_controller),
-        m_solver_settings(solver_settings) {
+NSTempTurbConSolver::NSTempTurbConSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller) :
+        m_solver_settings(solver_settings),
+        m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -34,7 +32,7 @@ NSTempTurbConSolver::NSTempTurbConSolver(const Settings::solver_parameters &solv
     SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_vel);
 
     // Turbulent viscosity for velocity diffusion
-    SolverSelection::SetTurbulenceSolver(m_settings, &mu_tub, m_settings.get("solver/turbulence/type"));
+    SolverSelection::set_turbulence_solver(m_solver_settings.turbulence, &mu_tub);
 
     // Diffusion of temperature
     SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_temp);
@@ -54,14 +52,6 @@ NSTempTurbConSolver::NSTempTurbConSolver(const Settings::solver_parameters &solv
     // Source of concentration
     SolverSelection::set_source_solver(m_solver_settings.concentration.source.type, &sou_con, m_solver_settings.concentration.source.dir);
 
-    // Constants
-    m_dir_vel = m_settings.get("solver/source/dir");
-    m_has_turbulence_temperature = m_settings.get_bool("solver/temperature/turbulence/include");
-    m_has_turbulence_concentration = m_settings.get_bool("solver/concentration/turbulence/include");
-    m_has_dissipation = m_settings.get_bool("solver/temperature/source/dissipation");
-    m_forceFct = m_settings.get("solver/source/force_fct");
-    m_tempFct = m_settings.get("solver/temperature/source/temp_fct");
-    m_conFct = m_settings.get("solver/concentration/source/con_fct");
     SolverSelection::set_temperature_source_function(m_solver_settings.temperature.source, &m_source_function_temperature);
     SolverSelection::set_concentration_source_function(m_solver_settings.concentration.source, &m_source_function_concentration);
     control();
@@ -114,6 +104,11 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
     Field &kappa_t = m_field_controller->get_field_kappa();  // kappa_t - Eddy thermal diffusivity
     Field &gamma_t = m_field_controller->get_field_gamma();  // gamma_t - Eddy mass diffsusivity
 
+    auto domain_data = DomainData::getInstance();
+    const real nu = domain_data->get_physical_parameters().nu.value();
+    const real kappa = domain_data->get_physical_parameters().kappa.value();
+    const real gamma = domain_data->get_physical_parameters().gamma.value();
+
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
                          w0, w_tmp, p, rhs, T, T0, T_tmp, \
                          C, C0, C_tmp, f_x, f_y, f_z, S_T, S_C, \
@@ -139,8 +134,6 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        const real nu = m_settings.get_real("physical_parameters/nu");
-
         dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
         dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
@@ -149,7 +142,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 3. Add force
-        if (m_forceFct != SourceMethods::Zero) {
+        if (m_add_source) {
 #ifndef BENCHMARKING
             m_logger->info("Add momentum source ...");
 #endif
@@ -185,9 +178,8 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
         // Solve diffusion equation
         // turbulence
-        real kappa = m_settings.get_real("physical_parameters/kappa");
-        if (m_has_turbulence_temperature) {
-            real Pr_T = m_settings.get_real("solver/temperature/turbulence/Pr_T");
+        if (m_solver_settings.temperature.has_turbulence) {
+            real Pr_T = m_solver_settings.temperature.prandtl_number.value();
             real rPr_T = 1. / Pr_T;
 
             size_t bsize = kappa_t.get_size();
@@ -218,7 +210,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
         }
 
         // Add dissipation
-        if (m_has_dissipation) {
+        if (m_solver_settings.temperature.source.dissipation) {
 
 #ifndef BENCHMARKING
             m_logger->info("Add dissipation ...");
@@ -227,7 +219,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);
-        } else if (m_tempFct != SourceMethods::Zero) {  // Add source
+        } else if (m_add_temp_source) {  // Add source
 #ifndef BENCHMARKING
             m_logger->info("Add temperature source ...");
 #endif
@@ -250,9 +242,8 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
         // Solve diffusion equation
         // turbulence
-        real gamma = m_settings.get_real("solver/concentration/diffusion/gamma");
-        if (m_has_turbulence_concentration) {
-            real Sc_T = m_settings.get_real("solver/concentration/turbulence/Sc_T");
+        if (m_solver_settings.concentration.has_turbulence) {
+            real Sc_T = m_solver_settings.concentration.turbulent_schmidt_number.value();
             real rSc_T = 1. / Sc_T;
 
             size_t bsize = gamma_t.get_size();
@@ -282,7 +273,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
         }
 
         // Add source
-        if (m_conFct != SourceMethods::Zero) {
+        if (m_solver_settings.concentration.has_turbulence) {
 #ifndef BENCHMARKING
             m_logger->info("Add concentration source ...");
 #endif
