@@ -14,8 +14,7 @@
 #include "SolverSelection.h"
 #include "../domain/DomainData.h"
 
-NSTempConSolver::NSTempConSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller) :
-        m_settings(settings),
+NSTempConSolver::NSTempConSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller) :
         m_solver_settings(solver_settings),
         m_field_controller(field_controller) {
 #ifndef BENCHMARKING
@@ -256,7 +255,7 @@ void NSTempConSolver::control() {
 
     auto diff_fields = m_solver_settings.diffusion.fields;
     std::sort(diff_fields.begin(), diff_fields.end());
-    if (adv_fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
+    if (diff_fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
