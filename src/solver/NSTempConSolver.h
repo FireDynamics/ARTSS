@@ -51,6 +51,9 @@ private:
     ISourceFunction *m_source_function_concentration;
     ISourceFunction *m_source_function_temperature;
 
+    bool m_add_source;
+    bool m_add_temp_source;
+    bool m_add_con_source;
     void control();
 };
 

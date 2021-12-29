@@ -20,8 +20,6 @@ NSTempConSolver::NSTempConSolver(const Settings::solver_parameters &solver_setti
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_controller = field_controller;
-
     // Advection of velocity
     SolverSelection::set_advection_solver(m_solver_settings.advection, &adv_vel);
 
@@ -54,6 +52,10 @@ NSTempConSolver::NSTempConSolver(const Settings::solver_parameters &solver_setti
 
     SolverSelection::set_temperature_source_function(m_solver_settings.temperature.source, &m_source_function_temperature);
     SolverSelection::set_concentration_source_function(m_solver_settings.concentration.source, &m_source_function_concentration);
+
+    m_add_source = m_solver_settings.source.force_fct != SourceMethods::Zero;
+    m_add_temp_source = m_solver_settings.temperature.source.temp_fct != SourceMethods::Zero;
+    m_add_con_source = m_solver_settings.concentration.source.con_fct != SourceMethods::Zero;
     control();
 }
 
@@ -132,7 +134,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
         }
 
 // 3. Add force
-        if (m_solver_settings.source.force_fct != SourceMethods::Zero) {
+        if (m_add_source) {
 #ifndef BENCHMARKING
             m_logger->info("Add momentum source ...");
 #endif
@@ -188,7 +190,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
         }
 
         // Add source
-        if (m_solver_settings.temperature.source.temp_fct != SourceMethods::Zero) {
+        if (m_add_temp_source) {
 #ifndef BENCHMARKING
             m_logger->info("Add temperature source ...");
 #endif
@@ -220,7 +222,7 @@ void NSTempConSolver::do_step(real t, bool sync) {
         }
 
         // Add source
-        if (m_solver_settings.concentration.source.con_fct != SourceMethods::Zero) {
+        if (m_add_con_source) {
 #ifndef BENCHMARKING
             m_logger->info("Add concentration source ...");
 #endif

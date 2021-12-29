@@ -20,13 +20,12 @@
 
 class NSTempSolver : public ISolver {
 public:
-    NSTempSolver(const Settings::solver_parameters &solver_settings, Settings::Settings const &settings, FieldController *field_controller);
-    ~NSTempSolver();
+    NSTempSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller);
+    ~NSTempSolver() override;
 
     void do_step(real t, bool sync) override;
     void update_source(real) override;
  private:
-    Settings::Settings const &m_settings;
     const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
@@ -42,13 +41,11 @@ public:
     ISource *sou_temp;
 
     ISourceFunction *m_source_function_temperature;
-    std::string m_dir_vel;
 
     void control();
 
-    std::string m_forceFct;
-    bool m_has_dissipation;
-    std::string m_tempFct;
+    bool m_add_source;
+    bool m_add_temp_source;
 };
 
 #endif /* ARTSS_SOLVER_NSTEMPSOLVER_H_ */
