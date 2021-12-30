@@ -18,8 +18,8 @@
 
 Visual::Visual(const Settings::visualisation_parameters &settings, const Solution &solution, const std::string &filename) :
         m_settings(settings),
-        m_solution(solution),
         m_filename(filename),
+        m_solution(solution),
         m_has_analytical_solution(m_solution.has_analytical_solution()) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
@@ -35,12 +35,11 @@ void Visual::visualise(const FieldController &field_controller, real t) {
     real t_end = domain_data->get_physical_parameters().t_end;
 
     int n = static_cast<int> (std::round(t / dt));
-    real vtk_plot = static_cast<real>(m_settings.vtk_nth_plot.value());
-    real csv_plot = static_cast<real>(m_settings.csv_nth_plot.value());
 
     std::string filename_numerical = create_filename(m_filename, n, false);
     std::string filename_analytical = create_filename(m_filename, n, true);
     if (m_settings.save_vtk) {
+        real vtk_plot = static_cast<real>(m_settings.vtk_nth_plot.value());
         if (fmod(n, vtk_plot) == 0 || t >= t_end) {
             VTKWriter::write_numerical(field_controller, filename_numerical);
             if (m_has_analytical_solution) {
@@ -50,6 +49,7 @@ void Visual::visualise(const FieldController &field_controller, real t) {
     }
 
     if (m_settings.save_csv) {
+        real csv_plot = static_cast<real>(m_settings.csv_nth_plot.value());
         if (fmod(n, csv_plot) == 0 || t >= t_end) {
             CSVWriter::write_numerical(field_controller, filename_numerical);
             if (m_has_analytical_solution) {
