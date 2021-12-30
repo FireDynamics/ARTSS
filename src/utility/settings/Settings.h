@@ -146,7 +146,9 @@ namespace Settings {
     struct surface {
         Coordinate<real> start_coords;
         Coordinate<real> end_coords;
-        struct boundary boundary_parameters;
+        std::string name;
+        Patch patch;
+        std::vector<struct boundary> boundaries;
     };
     struct surfaces_parameters {
         bool enabled;

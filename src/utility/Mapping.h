@@ -68,7 +68,6 @@ namespace Mapping {
     std::string get_boundary_condition_name(BoundaryCondition bc);
     //std::string get_boundary_condition_name(size_t bc) { return get_boundary_condition_name(BoundaryCondition(bc)); };
     BoundaryCondition match_boundary_condition(const std::string &string);
-};
-
+}
 
 #endif /* ARTSS_MAPPING_H_ */

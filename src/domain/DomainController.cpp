@@ -9,8 +9,8 @@
 
 std::unique_ptr<DomainController> DomainController::single{};
 
-DomainController::DomainController(Settings::Settings const &settings, const Settings::Settings_new &settings_new) :
-        m_settings_new(settings_new), m_settings(settings) {
+DomainController::DomainController(const Settings::Settings_new &settings_new) :
+        m_settings_new(settings_new) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -40,7 +40,7 @@ return_xml_objects DomainController::read_XML() {
 #endif
     auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(m_settings_new.obstacles_parameters);
     detect_neighbouring_obstacles(obstacles);
-    auto [surfaces, bdc_surfaces] = parse_surface_parameter(m_settings.get_surfaces());
+    auto [surfaces, bdc_surfaces] = parse_surface_parameter(m_settings_new.surfaces_parameters);
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing XML");
 #endif
@@ -52,29 +52,20 @@ return_xml_objects DomainController::read_XML() {
 /// \brief  parses surfaces from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-return_surface DomainController::parse_surface_parameter(const std::vector<Settings::SurfaceSetting> &surface_setting) {
+return_surface DomainController::parse_surface_parameter(const Settings::surfaces_parameters &surface_settings) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing surface parameter");
 #endif
     // SURFACES
     // TODO(issue 5): surfaces
-    m_has_surfaces = m_settings.get_bool("surfaces/enabled");
     std::vector<Surface> surfaces;
     std::vector<BoundaryDataController> bdc_surfaces;
-    if (m_has_surfaces) {
-        surfaces.reserve(surfaces.size());
-        bdc_surfaces.reserve(surfaces.size());
-        for (const auto &surface: surface_setting) {
-            std::string name = surface.get_name();
-            Patch patch = Mapping::match_patch(surface.get_patch());
-            real sx1 = surface.get_sx1();
-            real sx2 = surface.get_sx2();
-            real sy1 = surface.get_sy1();
-            real sy2 = surface.get_sy2();
-            real sz1 = surface.get_sz1();
-            real sz2 = surface.get_sz2();
-            surfaces.emplace_back(sx1, sx2, sy1, sy2, sz1, sz2, name, patch);
-            bdc_surfaces.emplace_back(surface.get_boundaries());
+    if (surface_settings.enabled) {
+        surfaces.reserve(surface_settings.surfaces.size());
+        bdc_surfaces.reserve(surface_settings.surfaces.size());
+        for (const auto &surface: surface_settings.surfaces) {
+            surfaces.emplace_back(surface.start_coords, surface.end_coords, surface.name, surface.patch);
+            bdc_surfaces.emplace_back(surface.boundaries);
         }
     }
 #ifndef BENCHMARKING

@@ -443,6 +443,53 @@ namespace Settings {
         return op;
     }
 
+    boundary parse_surface_boundary(const tinyxml2::XMLElement *head, const std::string &parent_context) {
+        std::string own_context = "boundary";
+        std::string context = create_context(parent_context, own_context);
+        auto values = map_parameter_line(head);
+        boundary boundary{};
+
+        boundary.boundary_condition = Mapping::match_boundary_condition(get_required_string(values, "type", context));
+        if (boundary.boundary_condition != BoundaryCondition::PERIODIC) {
+            boundary.value = get_required_real(values, "value", context);
+        }
+        auto fields = Utility::split(get_required_string(values, "field", context), delimiter);
+        for (const std::string &string: fields) {
+            boundary.field_type.emplace_back(Mapping::match_field(string));
+        }
+        return boundary;
+    }
+
+    surface parse_surface(const tinyxml2::XMLElement *head, const std::string &parent_context) {
+        std::string own_context = "surface";
+        std::string context = create_context(parent_context, own_context);
+        auto values = map_parameter_line(head);
+
+        surface surface{};
+        surface.name = get_required_string(values, "name", context);
+        surface.patch = Mapping::match_patch(get_required_string(values, "patch", context));
+
+        std::string context_geometry = create_context(context, fmt::format("geometry ({})", surface.name));
+        auto[head_geometry, values_geometry] = map_parameter_section(head, "geometry");
+        std::vector<CoordinateAxis> axes = {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z};
+        CoordinateAxis coord_axis = Mapping::to_axis(surface.patch);
+        auto tmp = std::remove(axes.begin(), axes.end(), coord_axis);
+        for (auto it = axes.begin(); it != tmp; ++it) {
+            auto axis = *it;
+            std::string axis_name = Utility::to_lower(Mapping::get_axis_name(axis));
+            surface.start_coords[axis] = get_required_real(values_geometry, "s" + axis_name + "1", context);
+            surface.end_coords[axis] = get_required_real(values_geometry, "s" + axis_name + "2", context);
+        }
+
+        std::string context_boundaries = create_context(context, fmt::format("boundaries ({})", surface.name));
+        for (const auto *i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
+            if (i->Name() == std::string("boundary")) {
+                surface.boundaries.emplace_back(parse_surface_boundary(i, context_boundaries));
+                surface.boundaries.back().patch.emplace_back(surface.patch);
+            }
+        }
+        return surface;
+    }
     surfaces_parameters parse_surfaces_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "surfaces";
         auto[subsection, values] = map_parameter_section(root, context);
@@ -450,9 +497,11 @@ namespace Settings {
 
         sp.enabled = get_required_bool(values, "enabled", context);
         if (sp.enabled) {
-            throw config_error(
-                    fmt::format("handling of surfaces are not fully implemented yet. Please check issue #5."));
+            for (const auto *i = subsection->FirstChildElement(); i; i = i->NextSiblingElement()) {
+                sp.surfaces.emplace_back(parse_surface(i, context));
+            }
         }
+        sp.surfaces.shrink_to_fit();
         return sp;
     }
 

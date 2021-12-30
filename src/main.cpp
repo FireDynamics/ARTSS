@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
         Settings::Settings_new settings_new = Settings::parse_settings_from_file(argv[1]);
         Settings::Settings settings(argv[1]);
         DomainData::init(settings_new);
-        DomainController::init(settings, settings_new);
+        DomainController::init(settings_new);
 
         SolverController *sc = new SolverController(settings_new);
 

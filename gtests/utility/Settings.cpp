@@ -552,6 +552,84 @@ TEST(SettingsTest, requiredSurfacesParameters) {
     EXPECT_FALSE(surfaces_parameters.enabled);
 }
 
+TEST(SettingsTest, requiredSurfacesParameters2) {
+    std::string xml = R"(
+<ARTSS>
+    <surfaces enabled="Yes">
+        <surface name="back" patch="back">
+            <geometry sx1="1.0" sx2="1.5" sy1="-0.3" sy2="0.3" sz1="0.1" sz2="0.2"/>
+            <boundary field="u" type="dirichlet" value="7"/>
+            <boundary field="v,w" type="dirichlet" value="0"/>
+        </surface>
+        <surface name="front" patch="front">
+            <geometry sx1="2.0" sx2="2.5" sy1="-1.3" sy2="1.3"/>
+            <boundary field="u" type="dirichlet" value="0.7"/>
+            <boundary field="v,w" type="dirichlet" value="0.1"/>
+        </surface>
+    </surfaces>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::surfaces_parameters surfaces_parameters = Settings::parse_surfaces_parameters(doc.RootElement());
+    EXPECT_TRUE(surfaces_parameters.enabled);
+
+    auto s_back = surfaces_parameters.surfaces[0];
+    EXPECT_EQ(s_back.name, "back");
+    EXPECT_DOUBLE_EQ(1, s_back.start_coords[CoordinateAxis::X]);
+    EXPECT_DOUBLE_EQ(-0.3, s_back.start_coords[CoordinateAxis::Y]);
+    EXPECT_DOUBLE_EQ(0, s_back.start_coords[CoordinateAxis::Z]);
+
+    EXPECT_DOUBLE_EQ(1.5, s_back.end_coords[CoordinateAxis::X]);
+    EXPECT_DOUBLE_EQ(0.3, s_back.end_coords[CoordinateAxis::Y]);
+    EXPECT_DOUBLE_EQ(0, s_back.end_coords[CoordinateAxis::Z]);
+    EXPECT_EQ(Patch::BACK, s_back.patch);
+    EXPECT_NE(std::find(s_back.boundaries[0].field_type.begin(),
+                        s_back.boundaries[0].field_type.end(),
+                        FieldType::U),
+              s_back.boundaries[0].field_type.end());
+    EXPECT_EQ(BoundaryCondition::DIRICHLET, s_back.boundaries[0].boundary_condition);
+    EXPECT_DOUBLE_EQ(7, s_back.boundaries[0].value.value());
+
+    EXPECT_NE(std::find(s_back.boundaries[1].field_type.begin(),
+                        s_back.boundaries[1].field_type.end(),
+                        FieldType::V),
+              s_back.boundaries[1].field_type.end());
+    EXPECT_NE(std::find(s_back.boundaries[1].field_type.begin(),
+                        s_back.boundaries[1].field_type.end(),
+                        FieldType::W),
+              s_back.boundaries[1].field_type.end());
+    EXPECT_EQ(BoundaryCondition::DIRICHLET, s_back.boundaries[1].boundary_condition);
+    EXPECT_DOUBLE_EQ(0, s_back.boundaries[1].value.value());
+
+    auto s_front = surfaces_parameters.surfaces[1];
+    EXPECT_EQ(s_front.name, "front");
+    EXPECT_DOUBLE_EQ(2, s_front.start_coords[CoordinateAxis::X]);
+    EXPECT_DOUBLE_EQ(-1.3, s_front.start_coords[CoordinateAxis::Y]);
+    EXPECT_DOUBLE_EQ(0, s_front.start_coords[CoordinateAxis::Z]);
+
+    EXPECT_DOUBLE_EQ(2.5, s_front.end_coords[CoordinateAxis::X]);
+    EXPECT_DOUBLE_EQ(1.3, s_front.end_coords[CoordinateAxis::Y]);
+    EXPECT_DOUBLE_EQ(0, s_front.end_coords[CoordinateAxis::Z]);
+    EXPECT_EQ(Patch::FRONT, s_front.patch);
+    EXPECT_NE(std::find(s_front.boundaries[0].field_type.begin(),
+                        s_front.boundaries[0].field_type.end(),
+                        FieldType::U),
+              s_front.boundaries[0].field_type.end());
+    EXPECT_EQ(BoundaryCondition::DIRICHLET, s_front.boundaries[0].boundary_condition);
+    EXPECT_DOUBLE_EQ(0.7, s_front.boundaries[0].value.value());
+
+    EXPECT_NE(std::find(s_front.boundaries[1].field_type.begin(),
+                        s_front.boundaries[1].field_type.end(),
+                        FieldType::V),
+              s_front.boundaries[1].field_type.end());
+    EXPECT_NE(std::find(s_front.boundaries[1].field_type.begin(),
+                        s_front.boundaries[1].field_type.end(),
+                        FieldType::W),
+              s_front.boundaries[1].field_type.end());
+    EXPECT_EQ(BoundaryCondition::DIRICHLET, s_front.boundaries[1].boundary_condition);
+    EXPECT_DOUBLE_EQ(0.1, s_front.boundaries[1].value.value());
+}
+
 TEST(SettingsTest, boundaries) {
     std::string xml = R"(
 <ARTSS>
