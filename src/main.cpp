@@ -32,7 +32,9 @@ int main(int argc, char **argv) {
 #endif
 
         Settings::Settings_new settings_new = Settings::parse_settings_from_file(argv[1]);
-        Settings::Settings settings(argv[1]);
+#ifndef BENCHMARKING
+        Utility::create_logger(settings_new.logging_parameters.level, settings_new.logging_parameters.file);  // create global logger
+#endif
         DomainData::init(settings_new);
         DomainController::init(settings_new);
 
