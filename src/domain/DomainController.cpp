@@ -109,38 +109,6 @@ return_obstacle DomainController::parse_obstacle_parameter(const Settings::obsta
 #endif
     return {obstacles, bdc_obstacles};
 }
-return_obstacle DomainController::parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting> &obstacle_setting) {
-#ifndef BENCHMARKING
-    m_logger->debug("start parsing obstacle parameter");
-#endif
-// OBSTACLES
-    m_has_obstacles = m_settings.get_bool("obstacles/enabled");
-    std::vector<Obstacle> obstacles;
-    std::vector<BoundaryDataController> bdc_obstacles;
-    if (m_has_obstacles) {
-        obstacles.reserve(obstacle_setting.size());
-        bdc_obstacles.reserve(obstacle_setting.size());
-        for (const Settings::ObstacleSetting &obstacle: obstacle_setting) {
-            std::string name = obstacle.get_name();
-#ifndef BENCHMARKING
-            m_logger->debug("read obstacle '{}'", name);
-#endif
-            real ox1 = obstacle.get_ox1();
-            real ox2 = obstacle.get_ox2();
-            real oy1 = obstacle.get_oy1();
-            real oy2 = obstacle.get_oy2();
-            real oz1 = obstacle.get_oz1();
-            real oz2 = obstacle.get_oz2();
-
-            obstacles.emplace_back(ox1, ox2, oy1, oy2, oz1, oz2, name);
-            bdc_obstacles.emplace_back(obstacle.get_boundaries());
-        }
-    }
-#ifndef BENCHMARKING
-    m_logger->debug("finished parsing obstacle parameter");
-#endif
-    return {obstacles, bdc_obstacles};
-}
 
 DomainController::~DomainController() {
     delete m_multigrid;
