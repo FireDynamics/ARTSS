@@ -9,8 +9,8 @@
 
 std::unique_ptr<DomainController> DomainController::single{};
 
-DomainController::DomainController(Settings::Settings const &settings) :
-        m_settings(settings) {
+DomainController::DomainController(Settings::Settings const &settings, const Settings::Settings_new &settings_new) :
+        m_settings_new(settings_new), m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -92,6 +92,25 @@ return_surface DomainController::parse_surface_parameter(const std::vector<Setti
 /// \brief  parses obstacles from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
+return_obstacle DomainController::parse_obstacle_parameter(const Settings::obstacles_parameters &obstacle_settings) {
+#ifndef BENCHMARKING
+    m_logger->debug("start parsing obstacle parameter");
+#endif
+    std::vector<Obstacle> obstacles;
+    std::vector<BoundaryDataController> bdc_obstacles;
+    if (obstacle_settings.enabled) {
+       obstacles.reserve(obstacle_settings.obstacles.size());
+       bdc_obstacles.reserve(obstacle_settings.obstacles.size());
+       for (const Settings::obstacle &o: obstacle_settings.obstacles) {
+           obstacles.emplace_back(o.start_coords, o.end_coords, o.name);
+           bdc_obstacles.emplace_back(o.boundaries);
+       }
+    }
+#ifndef BENCHMARKING
+    m_logger->debug("finished parsing obstacle parameter");
+#endif
+    return {obstacles, bdc_obstacles};
+}
 return_obstacle DomainController::parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting> &obstacle_setting) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing obstacle parameter");

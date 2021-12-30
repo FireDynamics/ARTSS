@@ -9,7 +9,6 @@
 #include <utility>
 #include <vector>
 
-
 Obstacle::Obstacle(real x1, real x2,
                    real y1, real y2,
                    real z1, real z2,
@@ -41,6 +40,23 @@ Obstacle::Obstacle(real x1, real x2,
     size_t k2 = get_matching_index(z2, dz, Z1);
     m_end.set_coordinate(i2, j2, k2);
 
+    init();
+}
+
+Obstacle::Obstacle(const Coordinate<real> &coords_start,
+                   const Coordinate<real> &coords_end,
+                   const std::string &name) :
+        m_name(name),
+        m_level(0),
+        m_size_boundary() {
+#ifndef BENCHMARKING
+    m_logger = Utility::create_logger(typeid(this).name());
+#endif
+    auto domain_data = DomainData::getInstance();
+    for (CoordinateAxis axis: {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z}) {
+        m_start[axis] = get_matching_index(coords_start[axis], domain_data->get_spacing(axis), domain_data->get_start_coord_PD(axis)) + 1;  // plus 1 for ghost cell
+        m_end[axis] = get_matching_index(coords_end[axis], domain_data->get_spacing(axis), domain_data->get_start_coord_PD(axis));
+    }
     init();
 }
 

@@ -25,10 +25,10 @@ using return_xml_objects = std::tuple<BoundaryDataController, std::vector<Surfac
 
 class DomainController {
  public:
-    explicit DomainController(Settings::Settings const &settings);
+    explicit DomainController(Settings::Settings const &settings, const Settings::Settings_new &settings_new);
     static DomainController *getInstance() { return single.get(); }
     ~DomainController();
-    static void init(Settings::Settings const &settings) { single = std::make_unique<DomainController>(settings); }
+    static void init(Settings::Settings const &settings, const Settings::Settings_new &settings_new) { single = std::make_unique<DomainController>(settings, settings_new); }
     static void reset() { single.reset(); }
 
     void apply_boundary(Field &field, bool sync = true);
@@ -63,6 +63,7 @@ class DomainController {
 private:
     size_t get_slice_size_domain_inner_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_domain_inner_cells_level_joined(level); }  // get size of domain inner list
 
+    const Settings::Settings_new &m_settings_new;
     Settings::Settings const &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
@@ -76,6 +77,7 @@ private:
 
     return_xml_objects read_XML();
     return_obstacle parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting>& obstacle_setting);
+    return_obstacle parse_obstacle_parameter(const Settings::obstacles_parameters &obstacle_setting);
     return_surface parse_surface_parameter(const std::vector<Settings::SurfaceSetting>& surface_setting);
 
     void detect_neighbouring_obstacles(std::vector<Obstacle> &obstacle_list);

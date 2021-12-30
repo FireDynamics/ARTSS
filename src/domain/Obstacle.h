@@ -25,6 +25,9 @@ class Obstacle {
              real y1, real y2,
              real z1, real z2,
              const std::string &name);
+    Obstacle(const Coordinate<real> &coords_start,
+             const Coordinate<real> &coords_end,
+             const std::string &name);
     Obstacle(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
              size_t level,
              const std::string &name);
