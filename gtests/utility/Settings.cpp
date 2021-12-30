@@ -22,7 +22,7 @@ TEST(SettingsTest, goodCase) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement(), "None");
+    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement(), SolverTypes::AdvectionSolver);
     EXPECT_DOUBLE_EQ(physical_parameters.t_end, 1.0);
     EXPECT_DOUBLE_EQ(physical_parameters.dt, 0.1);
 }
@@ -52,6 +52,7 @@ TEST(SettingsTest, unknownAttribute) {
   <physical_parameters>
     <t_end> 1.0 </t_end>
     <dt> 0.1 </dt>
+    <nu> 0.315 </nu>
     <bs> 1 </bs>
   </physical_parameters>
 </ARTSS>)";
