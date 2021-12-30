@@ -12,7 +12,7 @@
 /// \brief  Constructor
 /// \param  solver_controller class representative for solver
 // ***************************************************************************************
-TimeIntegration::TimeIntegration(const Settings::Settings_new &settings_new, Settings::Settings const &settings, SolverController *sc) :
+TimeIntegration::TimeIntegration(const Settings::Settings_new &settings_new, SolverController *sc) :
         m_settings_new(settings_new), m_solver_controller(sc) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
@@ -27,10 +27,8 @@ TimeIntegration::TimeIntegration(const Settings::Settings_new &settings_new, Set
 
     m_adaption = new Adaption(m_settings_new.adaption_parameters, m_field_controller, m_settings_new.filename);
 #ifndef BENCHMARKING
-    std::string initial_condition = settings.get("initial_conditions/usr_fct");
-    bool has_analytical_solution = settings.get_bool("solver/solution/available");
     m_solution = new Solution(m_settings_new.initial_conditions_parameters, m_settings_new.solver_parameters.solution);
-    m_analysis = new Analysis(m_settings_new.solver_parameters.solution, *m_solution, has_analytical_solution);
+    m_analysis = new Analysis(m_settings_new.solver_parameters.solution, *m_solution);
     m_visual = new Visual(m_settings_new.visualisation_parameters, *m_solution, m_settings_new.filename);
 #endif
 }

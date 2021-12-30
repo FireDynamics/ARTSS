@@ -15,7 +15,7 @@
 
 class Analysis {
  public:
-    Analysis(const Settings::solver::solution &solution_settings, Solution &solution, bool has_analytical_solution);
+    Analysis(const Settings::solver::solution &solution_settings, Solution &solution);
 
     void analyse(FieldController *solver, real t);
 

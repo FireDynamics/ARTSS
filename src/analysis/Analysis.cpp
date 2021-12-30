@@ -13,7 +13,7 @@
 #include "../domain/DomainData.h"
 #include "../utility/Utility.h"
 
-Analysis::Analysis(const Settings::solver::solution &solution_settings, Solution &solution, bool has_analytical_solution) :
+Analysis::Analysis(const Settings::solver::solution &solution_settings, Solution &solution) :
         m_solution_settings(solution_settings),
         m_solution(solution) {
 #ifndef BENCHMARKING

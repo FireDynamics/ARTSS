@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 
         // Integrate over time and solve numerically
         // Time integration
-        TimeIntegration ti(settings_new, settings, sc);
+        TimeIntegration ti(settings_new, sc);
         ti.run();
 
         // Clean up
