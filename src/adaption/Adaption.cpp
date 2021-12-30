@@ -23,8 +23,8 @@ const std::string AdaptionClass::layers = "Layers";
 
 Adaption::Adaption(const Settings::adaption_parameters &settings, FieldController *field_controller,
                    const std::string &filename) :
-        m_filename(filename),
         m_settings(settings),
+        m_filename(filename),
         m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());

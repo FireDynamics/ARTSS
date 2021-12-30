@@ -958,7 +958,7 @@ namespace Settings {
         return sp;
     }
 
-    Settings_new parse_settings(const std::string &filename, const std::string &file_content) {
+    Settings parse_settings(const std::string &filename, const std::string &file_content) {
         tinyxml2::XMLDocument doc;
         doc.Parse(file_content.c_str());
         tinyxml2::XMLElement *root = doc.RootElement();
@@ -976,7 +976,7 @@ namespace Settings {
                 parse_logging_parameters(root)};
     }
 
-    Settings_new parse_settings_from_file(const std::filesystem::path &path) {
+    Settings parse_settings_from_file(const std::filesystem::path &path) {
         std::ifstream in(path);
         std::stringstream sstr;
         sstr << in.rdbuf();

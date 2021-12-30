@@ -30,7 +30,7 @@ TEST_F(DomainDataTest, constructorTest) {
     domain_parameters.end_coords_CD.copy(domain_parameters.end_coords_PD);
     Settings::solver_parameters solver_parameters{};
     solver_parameters.description = SolverTypes::AdvectionSolver;
-    Settings::Settings_new settings{};
+    Settings::Settings settings{};
     settings.solver_parameters = solver_parameters;
     settings.domain_parameters = domain_parameters;
     // config
@@ -88,7 +88,7 @@ TEST_F(DomainDataTest, constructor2Test) {
     domain_parameters.end_coords_CD.copy(domain_parameters.end_coords_PD);
     Settings::solver_parameters solver_parameters{};
     solver_parameters.description = SolverTypes::AdvectionSolver;
-    Settings::Settings_new settings{};
+    Settings::Settings settings{};
     settings.solver_parameters = solver_parameters;
     settings.domain_parameters = domain_parameters;
     // config
@@ -147,7 +147,7 @@ TEST_F(DomainDataTest, constructor3Test) {
     domain_parameters.end_coords_PD.set_coordinate(1.5, 2.2, 0.3);
     Settings::solver_parameters solver_parameters{};
     solver_parameters.description = SolverTypes::AdvectionSolver;
-    Settings::Settings_new settings{};
+    Settings::Settings settings{};
     settings.solver_parameters = solver_parameters;
     settings.domain_parameters = domain_parameters;
     // config
@@ -205,7 +205,7 @@ TEST_F(DomainDataTest, goodCaseMultigridTest) {
     Settings::solver_parameters solver_parameters{};
     solver_parameters.description = SolverTypes::NSSolver;
     solver_parameters.pressure.solver.n_level = 2;
-    Settings::Settings_new settings{};
+    Settings::Settings settings{};
     settings.solver_parameters = solver_parameters;
     settings.domain_parameters = domain_parameters;
     // config
@@ -267,7 +267,7 @@ TEST_F(DomainDataTest, badCaseMultigridTest) {
     Settings::solver_parameters solver_parameters{};
     solver_parameters.description = SolverTypes::NSSolver;
     solver_parameters.pressure.solver.n_level = 2;
-    Settings::Settings_new settings{};
+    Settings::Settings settings{};
     settings.solver_parameters = solver_parameters;
     settings.domain_parameters = domain_parameters;
     // config

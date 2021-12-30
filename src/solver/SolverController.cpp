@@ -23,17 +23,17 @@
 #include "../Functions.h"
 
 
-SolverController::SolverController(const Settings::Settings_new &settings_new) :
-        m_settings_new(settings_new) {
+SolverController::SolverController(const Settings::Settings &settings) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = new FieldController();
-    init_solver(m_settings_new.solver_parameters);
+    init_solver(m_settings.solver_parameters);
 #ifndef BENCHMARKING
     m_logger->info("Start initialising....");
 #endif
-    set_up_fields(m_settings_new.solver_parameters.description, m_settings_new.initial_conditions_parameters);
+    set_up_fields(m_settings.solver_parameters.description, m_settings.initial_conditions_parameters);
 #ifndef BENCHMARKING
     m_logger->debug("set up boundary");
 #endif
@@ -52,7 +52,7 @@ void SolverController::init_solver(const Settings::solver_parameters &solver_set
     m_logger->debug("initialise solver {}", solver_settings.description);
 #endif
     if (solver_settings.description == SolverTypes::AdvectionSolver) {
-        auto ic = std::get<Settings::initial_conditions::gauss_bubble>(m_settings_new.initial_conditions_parameters.ic.value());
+        auto ic = std::get<Settings::initial_conditions::gauss_bubble>(m_settings.initial_conditions_parameters.ic.value());
         m_solver = new AdvectionSolver(solver_settings, m_field_controller, ic.velocity_lin);
     } else if (solver_settings.description == SolverTypes::AdvectionDiffusionSolver) {
         m_solver = new AdvectionDiffusionSolver(solver_settings, m_field_controller);
@@ -220,15 +220,15 @@ void SolverController::set_up_fields(const std::string &string_solver, const Set
 // ***************************************************************************************
 void SolverController::force_source() {
     // Force
-    std::string force_fct = m_settings_new.solver_parameters.source.force_fct;
+    std::string force_fct = m_settings.solver_parameters.source.force_fct;
     if (force_fct == SourceMethods::Buoyancy) {
-        auto buoyancy = std::get<Settings::solver::source_solvers::buoyancy>(m_settings_new.solver_parameters.source.force_function);
+        auto buoyancy = std::get<Settings::solver::source_solvers::buoyancy>(m_settings.solver_parameters.source.force_function);
         if (!buoyancy.use_init_values) {
             m_field_controller->get_field_T_ambient().set_value(buoyancy.ambient_temperature_value.value());
         }
     } else if (force_fct == SourceMethods::Uniform) {
-        auto uniform = std::get<Settings::solver::source_solvers::uniform>(m_settings_new.solver_parameters.source.force_function);
-        std::vector<CoordinateAxis> dir = m_settings_new.solver_parameters.source.direction;
+        auto uniform = std::get<Settings::solver::source_solvers::uniform>(m_settings.solver_parameters.source.force_function);
+        std::vector<CoordinateAxis> dir = m_settings.solver_parameters.source.direction;
         bool force_x = std::find(dir.begin(), dir.end(), CoordinateAxis::X) != dir.end();
         if (force_x) {
             Settings::initial_conditions::uniform uni{uniform.velocity_value[CoordinateAxis::X]};
@@ -254,7 +254,7 @@ void SolverController::force_source() {
 // ***************************************************************************************
 void SolverController::momentum_source() {
     // Momentum source
-    std::vector<CoordinateAxis> dir = m_settings_new.solver_parameters.source.direction;
+    std::vector<CoordinateAxis> dir = m_settings.solver_parameters.source.direction;
     bool force_x = std::find(dir.begin(), dir.end(), CoordinateAxis::X) != dir.end();
     if (force_x) {
         ISource::buoyancy_force(m_field_controller->get_field_force_x(),
@@ -285,7 +285,7 @@ void SolverController::momentum_source() {
 void SolverController::update_sources(real t_cur, bool sync) {
     // Momentum source
     if (m_has_momentum_source) {
-        if (m_settings_new.solver_parameters.source.force_fct == SourceMethods::Buoyancy) {
+        if (m_settings.solver_parameters.source.force_fct == SourceMethods::Buoyancy) {
 #ifndef BENCHMARKING
             m_logger->info("Update f(T) ...");
 #endif

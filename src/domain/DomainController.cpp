@@ -9,8 +9,8 @@
 
 std::unique_ptr<DomainController> DomainController::single{};
 
-DomainController::DomainController(const Settings::Settings_new &settings_new) :
-        m_settings_new(settings_new) {
+DomainController::DomainController(const Settings::Settings &settings) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -34,13 +34,13 @@ return_xml_objects DomainController::read_XML() {
     m_logger->debug("start parsing XML");
     m_logger->debug("start parsing boundary parameter");
 #endif
-   BoundaryDataController bdc_domain(m_settings_new.boundary_parameters.boundaries);
+   BoundaryDataController bdc_domain(m_settings.boundary_parameters.boundaries);
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing boundary parameter");
 #endif
-    auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(m_settings_new.obstacles_parameters);
+    auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(m_settings.obstacles_parameters);
     detect_neighbouring_obstacles(obstacles);
-    auto [surfaces, bdc_surfaces] = parse_surface_parameter(m_settings_new.surfaces_parameters);
+    auto [surfaces, bdc_surfaces] = parse_surface_parameter(m_settings.surfaces_parameters);
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing XML");
 #endif

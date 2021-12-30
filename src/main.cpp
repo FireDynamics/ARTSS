@@ -31,15 +31,15 @@ int main(int argc, char **argv) {
         acc_init(dev_type);
 #endif
 
-        Settings::Settings_new settings_new = Settings::parse_settings_from_file(argv[1]);
-        DomainData::init(settings_new);
-        DomainController::init(settings_new);
+        Settings::Settings settings = Settings::parse_settings_from_file(argv[1]);
+        DomainData::init(settings);
+        DomainController::init(settings);
 
-        SolverController *sc = new SolverController(settings_new);
+        SolverController *sc = new SolverController(settings);
 
         // Integrate over time and solve numerically
         // Time integration
-        TimeIntegration ti(settings_new, sc);
+        TimeIntegration ti(settings, sc);
         ti.run();
 
         // Clean up

@@ -20,9 +20,9 @@
 
 class DomainData {
  public:
-    explicit DomainData(const Settings::Settings_new &settings);
+    explicit DomainData(const Settings::Settings &settings);
     ~DomainData();
-    static void init(const Settings::Settings_new &settings) { single = std::make_unique<DomainData>(settings); }
+    static void init(const Settings::Settings &settings) { single = std::make_unique<DomainData>(settings); }
     static void reset() { single.reset(); }
     static DomainData *getInstance() { return single.get(); }
 

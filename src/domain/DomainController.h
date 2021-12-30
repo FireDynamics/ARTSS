@@ -25,10 +25,10 @@ using return_xml_objects = std::tuple<BoundaryDataController, std::vector<Surfac
 
 class DomainController {
  public:
-    explicit DomainController(const Settings::Settings_new &settings_new);
+    explicit DomainController(const Settings::Settings &settings);
     static DomainController *getInstance() { return single.get(); }
     ~DomainController();
-    static void init(const Settings::Settings_new &settings_new) { single = std::make_unique<DomainController>(settings_new); }
+    static void init(const Settings::Settings &settings) { single = std::make_unique<DomainController>(settings); }
     static void reset() { single.reset(); }
 
     void apply_boundary(Field &field, bool sync = true);
@@ -63,7 +63,7 @@ class DomainController {
 private:
     size_t get_slice_size_domain_inner_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_domain_inner_cells_level_joined(level); }  // get size of domain inner list
 
-    const Settings::Settings_new &m_settings_new;
+    const Settings::Settings &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

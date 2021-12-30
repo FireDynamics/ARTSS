@@ -314,7 +314,7 @@ namespace Settings {
         solver::concentration_solver concentration;
         solver::solution solution;
     };
-    struct Settings_new {
+    struct Settings {
         std::string filename;
         struct physical_parameters physical_parameters;
         struct solver_parameters solver_parameters;
@@ -338,7 +338,7 @@ namespace Settings {
     logging_parameters parse_logging_parameters(const tinyxml2::XMLElement *root);
     domain_parameters parse_domain_parameters(const tinyxml2::XMLElement *root);
     physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root, const std::string &solver_description);
-    Settings_new parse_settings(const std::string &filename, const std::string &file_content);
-    Settings_new parse_settings_from_file(const std::filesystem::path &path);
+    Settings parse_settings(const std::string &filename, const std::string &file_content);
+    Settings parse_settings_from_file(const std::filesystem::path &path);
 }
 #endif

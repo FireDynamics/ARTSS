@@ -12,8 +12,8 @@
 /// \brief  Constructor
 /// \param  solver_controller class representative for solver
 // ***************************************************************************************
-TimeIntegration::TimeIntegration(const Settings::Settings_new &settings_new, SolverController *sc) :
-        m_settings_new(settings_new), m_solver_controller(sc) {
+TimeIntegration::TimeIntegration(const Settings::Settings &settings, SolverController *sc) :
+        m_settings(settings), m_solver_controller(sc) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -25,11 +25,11 @@ TimeIntegration::TimeIntegration(const Settings::Settings_new &settings_new, Sol
 
     m_field_controller = m_solver_controller->get_field_controller();
 
-    m_adaption = new Adaption(m_settings_new.adaption_parameters, m_field_controller, m_settings_new.filename);
+    m_adaption = new Adaption(m_settings.adaption_parameters, m_field_controller, m_settings.filename);
 #ifndef BENCHMARKING
-    m_solution = new Solution(m_settings_new.initial_conditions_parameters, m_settings_new.solver_parameters.solution);
-    m_analysis = new Analysis(m_settings_new.solver_parameters.solution, *m_solution);
-    m_visual = new Visual(m_settings_new.visualisation_parameters, *m_solution, m_settings_new.filename);
+    m_solution = new Solution(m_settings.initial_conditions_parameters, m_settings.solver_parameters.solution);
+    m_analysis = new Analysis(m_settings.solver_parameters.solution, *m_solution);
+    m_visual = new Visual(m_settings.visualisation_parameters, *m_solution, m_settings.filename);
 #endif
 }
 
