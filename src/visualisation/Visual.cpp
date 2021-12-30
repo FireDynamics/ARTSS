@@ -16,10 +16,11 @@
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
-Visual::Visual(const Settings::visualisation_parameters &settings, const Solution &solution, bool has_analytical_solution) :
+Visual::Visual(const Settings::visualisation_parameters &settings, const Solution &solution, const std::string &filename) :
         m_settings(settings),
         m_solution(solution),
-        m_has_analytical_solution(has_analytical_solution) {
+        m_filename(filename),
+        m_has_analytical_solution(m_solution.has_analytical_solution()) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -37,8 +38,8 @@ void Visual::visualise(const FieldController &field_controller, real t) {
     real vtk_plot = static_cast<real>(m_settings.vtk_nth_plot.value());
     real csv_plot = static_cast<real>(m_settings.csv_nth_plot.value());
 
-    std::string filename_numerical = create_filename(m_settings.filename, n, false);
-    std::string filename_analytical = create_filename(m_settings.filename, n, true);
+    std::string filename_numerical = create_filename(m_filename, n, false);
+    std::string filename_analytical = create_filename(m_filename, n, true);
     if (m_settings.save_vtk) {
         if (fmod(n, vtk_plot) == 0 || t >= t_end) {
             VTKWriter::write_numerical(field_controller, filename_numerical);

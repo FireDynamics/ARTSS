@@ -7,25 +7,18 @@
 #include "Vortex.h"
 #include "../domain/DomainData.h"
 
-Vortex::Vortex(Settings::Settings const &settings, FieldController *field_controller) :
+Vortex::Vortex(const Settings::adaption_classes::vortex &settings, FieldController *field_controller) :
         m_settings(settings),
         m_u(field_controller->get_field_u()),
         m_v(field_controller->get_field_v()),
         m_w(field_controller->get_field_w()) {
     auto domain_data = DomainData::getInstance();
-    m_u_lin = m_settings.get_real("initial_conditions/u_lin");
-    m_v_lin = m_settings.get_real("initial_conditions/v_lin");
-    m_w_lin = m_settings.get_real("initial_conditions/w_lin");
     m_minimal = static_cast<size_t> (std::pow(2, domain_data->get_levels()));
-    m_reduction = m_settings.get_bool("adaption/class/reduction/enabled");
-    if (m_reduction) {
-        std::string dir = (m_settings.get("adaption/class/reduction/dir"));
-        if (dir.find('x') != std::string::npos) m_x_side = true;
-        if (dir.find('y') != std::string::npos) m_y_side = true;
-        if (dir.find('z') != std::string::npos) m_z_side = true;
+    if (m_settings.reduction) {
+        m_x_side = std::find(m_settings.dir.begin(), m_settings.dir.end(), CoordinateAxis::X) != m_settings.dir.end();
+        m_y_side = std::find(m_settings.dir.begin(), m_settings.dir.end(), CoordinateAxis::Y) != m_settings.dir.end();
+        m_z_side = std::find(m_settings.dir.begin(), m_settings.dir.end(), CoordinateAxis::Z) != m_settings.dir.end();
     }
-    m_buffer = m_settings.get_int("adaption/class/buffer");
-    m_threshold = m_u_lin * m_settings.get_real("adaption/class/threshold");
 }
 
 // ==================================== Has reduction ===============================
@@ -34,7 +27,7 @@ Vortex::Vortex(Settings::Settings const &settings, FieldController *field_contro
 /// \return bool true if yes false if no
 // ***************************************************************************************
 bool Vortex::has_reduction() {
-    return m_reduction;
+    return m_settings.reduction;
 }
 
 // ==================================== Update ====================================
@@ -57,9 +50,9 @@ bool Vortex::update(
     *p_shift_z1 = 0;
     *p_shift_z2 = 0;
 
-    adaption = Adaption::adapt_x_direction(d_u, m_u_lin, m_buffer, m_threshold, p_shift_x1, p_shift_x2, m_minimal, m_reduction) || adaption;
+    adaption = Adaption::adapt_x_direction(d_u, m_settings.velocity[CoordinateAxis::X], m_settings.buffer, m_settings.threshold, p_shift_x1, p_shift_x2, m_minimal, m_settings.reduction) || adaption;
     if (m_y_side)
-        adaption = Adaption::adapt_y_direction(d_v, m_v_lin, m_buffer, m_threshold, p_shift_y1, p_shift_y2, m_minimal, m_reduction) || adaption;
+        adaption = Adaption::adapt_y_direction(d_v, m_settings.velocity[CoordinateAxis::Y], m_settings.buffer, m_settings.threshold, p_shift_y1, p_shift_y2, m_minimal, m_settings.reduction) || adaption;
 
     *p_shift_x1 *= m_minimal;
     *p_shift_x2 *= m_minimal;
@@ -210,8 +203,8 @@ void Vortex::Drift_dynamic(const size_t *arr_idx, size_t arr_idx_size) {
 
 #pragma acc parallel loop independent present(data_x[:arr_idx_size], data_z[:arr_idx_size], data_y[:arr_idx_size], arr_idx[:arr_idx_size])
     for (size_t idx = 0; idx < arr_idx_size; idx++) {
-        *(data_x + *(arr_idx + idx)) = m_u_lin;
-        *(data_y + *(arr_idx + idx)) = m_v_lin;
-        *(data_z + *(arr_idx + idx)) = m_w_lin;
+        *(data_x + *(arr_idx + idx)) = m_settings.velocity[CoordinateAxis::X];
+        *(data_y + *(arr_idx + idx)) = m_settings.velocity[CoordinateAxis::Y];
+        *(data_z + *(arr_idx + idx)) = m_settings.velocity[CoordinateAxis::Z];
     }
 }

@@ -58,7 +58,6 @@ namespace Settings {
         bool save_csv;
         std::optional<size_t> vtk_nth_plot;
         std::optional<size_t> csv_nth_plot;
-        std::string filename;
     };
     struct logging_parameters {
         std::string file;
@@ -166,8 +165,33 @@ namespace Settings {
         bool enabled;
         std::vector<struct obstacle> obstacles;
     };
+    namespace adaption_classes {
+        struct layers {
+            size_t number_of_buffer_cells;
+            real check_value;
+            size_t time_step;
+            size_t expansion_size;
+        };
+        struct vortex {
+            Coordinate<real> velocity;
+            bool reduction;
+            std::vector<CoordinateAxis> dir;
+            size_t buffer;
+            size_t threshold;
+        };
+        struct data_extraction {
+            bool has_time_measuring;
+            bool has_data_extraction_endresult;
+            bool has_data_extraction_after;
+            bool has_data_extraction_before;
+        };
+    }
     struct adaption_parameters {
         bool enabled;
+        std::optional<std::string> class_name;
+        std::optional<std::variant<adaption_classes::layers, adaption_classes::vortex>> adaption_class;
+        bool has_data_extraction;
+        std::optional<adaption_classes::data_extraction> data_extraction;
     };
     namespace solver {
         struct advection_solver {
@@ -292,6 +316,7 @@ namespace Settings {
         solver::solution solution;
     };
     struct Settings_new {
+        std::string filename;
         struct physical_parameters physical_parameters;
         struct solver_parameters solver_parameters;
         struct domain_parameters domain_parameters;
@@ -310,7 +335,7 @@ namespace Settings {
     adaption_parameters parse_adaption_parameters(const tinyxml2::XMLElement *root);
     boundaries_parameters parse_boundaries_parameters(const tinyxml2::XMLElement *root);
     initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root);
-    visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root, const std::string &filename);
+    visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root);
     logging_parameters parse_logging_parameters(const tinyxml2::XMLElement *root);
     domain_parameters parse_domain_parameters(const tinyxml2::XMLElement *root);
     physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root, const std::string &solver_description);

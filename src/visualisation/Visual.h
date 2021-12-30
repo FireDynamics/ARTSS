@@ -15,7 +15,7 @@
 
 class Visual {
 public:
-    Visual(const Settings::visualisation_parameters &settings, const Solution &solution, bool has_analytical_solution);
+    Visual(const Settings::visualisation_parameters &settings, const Solution &solution, const std::string &filename);
 
     void visualise(const FieldController &field_controller, real t);
 
@@ -28,6 +28,7 @@ public:
 private:
     const Settings::visualisation_parameters &m_settings;
 
+    const std::string &m_filename;
     const Solution &m_solution;
 
     static std::string create_filename(const std::string &filename, int counter, bool analytical);

@@ -147,7 +147,7 @@ namespace Settings {
         return dp;
     }
 
-    visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root, const std::string &filename) {
+    visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "visualisation";
         auto[subsection, values] = map_parameter_section(root, context);
         visualisation_parameters vp{};
@@ -159,7 +159,6 @@ namespace Settings {
         if (vp.save_vtk) {
             vp.vtk_nth_plot = get_required_size_t(values, "vtk_nth_plot", context);
         }
-        vp.filename = filename;
         return vp;
     }
 
@@ -915,7 +914,8 @@ namespace Settings {
         doc.Parse(file_content.c_str());
         tinyxml2::XMLElement *root = doc.RootElement();
         auto solver_params = parse_solver_parameters(root);
-        return {parse_physical_parameters(root, solver_params.description),
+        return {filename,
+                parse_physical_parameters(root, solver_params.description),
                 solver_params,
                 parse_domain_parameters(root),
                 parse_adaption_parameters(root),
@@ -923,7 +923,7 @@ namespace Settings {
                 parse_obstacles_parameters(root),
                 parse_surfaces_parameters(root),
                 parse_initial_conditions_parameters(root),
-                parse_visualisation_parameters(root, filename),
+                parse_visualisation_parameters(root),
                 parse_logging_parameters(root)};
     }
 

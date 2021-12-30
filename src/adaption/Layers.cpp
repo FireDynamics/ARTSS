@@ -11,7 +11,8 @@
 #include "Adaption.h"
 #include "../domain/DomainData.h"
 
-Layers::Layers(Settings::Settings const &settings, FieldController *field_controller) :
+Layers::Layers(const Settings::adaption_classes::layers &settings, FieldController *field_controller) :
+        m_settings(settings),
         m_T(field_controller->get_field_T()),
         m_Ta(field_controller->get_field_T_ambient()),
         m_Nu(field_controller->get_field_nu_t()),
@@ -20,11 +21,6 @@ Layers::Layers(Settings::Settings const &settings, FieldController *field_contro
     auto domain = DomainData::getInstance();
     m_minimal = static_cast<size_t> (std::pow(2, domain->get_levels()));
     m_timecounter = 0;
-
-    m_no_buffer_cells = settings.get_size_t("adaption/class/buffer");
-    m_check_value = settings.get_real("adaption/class/check_value");
-    m_timestep = settings.get_size_t("adaption/class/timestep");
-    m_expansion_size = settings.get_size_t("adaption/class/expansion_size");
 }
 
 
@@ -38,7 +34,7 @@ bool Layers::update(
         long *p_shift_y1, long *p_shift_y2,
         long *p_shift_z1, long *p_shift_z2) {
     m_timecounter++;
-    if (m_timecounter < m_timestep) {
+    if (m_timecounter < m_settings.time_step) {
         return false;
     } else {
         m_timecounter = 0;
@@ -64,7 +60,7 @@ bool Layers::update(
     m_z2 = domain_data->get_z2();
     m_nz = domain_data->get_nz();
 
-    adaptXDirection(m_check_value, m_no_buffer_cells, p_shift_x1, p_shift_x2);
+    adaptXDirection(m_settings.check_value, m_settings.number_of_buffer_cells, p_shift_x1, p_shift_x2);
     //TODO z-direction
 
     size_t adaption = *p_shift_x1 + *p_shift_x2 + *p_shift_z1 + *p_shift_z2;
@@ -103,7 +99,7 @@ bool Layers::update(
 /// \return  site_t (calculated) expansion size
 // ********************************************************************************
 size_t Layers::getExpansionSize() {
-    return m_expansion_size;
+    return m_settings.expansion_size;
 }
 
 // ==================================== Set x values ====================================

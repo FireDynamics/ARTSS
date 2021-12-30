@@ -18,6 +18,7 @@ class Solution {
     Solution(const Settings::initial_conditions_parameters &ic_parameters, const Settings::solver::solution &solution_parameters);
 
     void calc_analytical_solution(real t);
+    bool has_analytical_solution() const { return m_solution_settings.analytical_solution; }
 
     // Getter
     return_ptr get_return_ptr_data_u() const { return m_u_analytical_solution.data; }
