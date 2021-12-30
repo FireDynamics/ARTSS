@@ -390,10 +390,10 @@ namespace Settings {
         return boundary;
     }
 
-    boundaries_parameters parse_boundaries_parameters(const tinyxml2::XMLElement *root) {
+    boundary_parameters parse_boundaries_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "boundaries";
         auto[subsection, values] = map_parameter_section(root, context);
-        boundaries_parameters bp{};
+        boundary_parameters bp{};
 
         for (auto i = subsection->FirstChildElement(); i; i = i->NextSiblingElement()) {
             if (i->Name() == std::string("boundary")) {

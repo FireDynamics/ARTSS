@@ -152,7 +152,7 @@ namespace Settings {
         bool enabled;
         std::vector<struct surface> surfaces;
     };
-    struct boundaries_parameters {
+    struct boundary_parameters {
         std::vector<struct boundary> boundaries;
     };
     struct obstacle {
@@ -321,7 +321,7 @@ namespace Settings {
         struct solver_parameters solver_parameters;
         struct domain_parameters domain_parameters;
         struct adaption_parameters adaption_parameters;
-        struct boundaries_parameters boundaries_parameters;
+        struct boundary_parameters boundary_parameters;
         struct obstacles_parameters obstacles_parameters;
         struct surfaces_parameters surfaces_parameters;
         struct initial_conditions_parameters initial_conditions_parameters;
@@ -333,7 +333,7 @@ namespace Settings {
     surfaces_parameters parse_surfaces_parameters(const tinyxml2::XMLElement *root);
     obstacles_parameters parse_obstacles_parameters(const tinyxml2::XMLElement *root);
     adaption_parameters parse_adaption_parameters(const tinyxml2::XMLElement *root);
-    boundaries_parameters parse_boundaries_parameters(const tinyxml2::XMLElement *root);
+    boundary_parameters parse_boundaries_parameters(const tinyxml2::XMLElement *root);
     initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root);
     visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root);
     logging_parameters parse_logging_parameters(const tinyxml2::XMLElement *root);

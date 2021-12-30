@@ -564,7 +564,7 @@ TEST(SettingsTest, boundaries) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::boundaries_parameters boundaries_parameters = Settings::parse_boundaries_parameters(doc.RootElement());
+    Settings::boundary_parameters boundaries_parameters = Settings::parse_boundaries_parameters(doc.RootElement());
 
     EXPECT_EQ(boundaries_parameters.boundaries.size(), 4);
     // field types

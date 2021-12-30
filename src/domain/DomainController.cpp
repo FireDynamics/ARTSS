@@ -35,7 +35,7 @@ return_xml_objects DomainController::read_XML() {
     m_logger->debug("start parsing boundary parameter");
 #endif
     // TODO (cvm)
-   BoundaryDataController bdc_domain(m_settings.get_boundaries());
+   BoundaryDataController bdc_domain(m_settings_new.boundary_parameters.boundaries);
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing boundary parameter");
 #endif
