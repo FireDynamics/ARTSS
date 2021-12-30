@@ -34,13 +34,11 @@ return_xml_objects DomainController::read_XML() {
     m_logger->debug("start parsing XML");
     m_logger->debug("start parsing boundary parameter");
 #endif
-    // TODO (cvm)
    BoundaryDataController bdc_domain(m_settings_new.boundary_parameters.boundaries);
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing boundary parameter");
 #endif
-    //BoundaryDataController bdc_domain = parse_boundary_parameter(m_solver_settings.get_boundaries());
-    auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(m_settings.get_obstacles());
+    auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(m_settings_new.obstacles_parameters);
     detect_neighbouring_obstacles(obstacles);
     auto [surfaces, bdc_surfaces] = parse_surface_parameter(m_settings.get_surfaces());
 #ifndef BENCHMARKING
