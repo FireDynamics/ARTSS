@@ -86,7 +86,7 @@ std::shared_ptr<spdlog::logger> create_logger(const std::string &logger_name) {
     auto logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
     logger->sinks()[0]->set_level(sinks[0]->level());
     logger->sinks()[1]->set_level(sinks[1]->level());
-    logger->set_level(sinks[0]->level());
+    logger->set_level(spdlog::level::trace);
     return logger;
 }
 

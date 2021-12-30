@@ -19,8 +19,6 @@
 
 class BoundaryDataController {
  public:
-    explicit BoundaryDataController(const std::vector<Settings::BoundarySetting> &boundary);
-
     explicit BoundaryDataController(const std::vector<Settings::boundary> &boundary);
 
     ~BoundaryDataController() = default;
@@ -47,7 +45,6 @@ class BoundaryDataController {
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
 
-    void add_boundary_data(const Settings::BoundarySetting& boundary);
     void add_boundary_data(const Settings::boundary &boundary);
 };
 
