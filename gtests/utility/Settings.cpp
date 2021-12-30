@@ -177,12 +177,12 @@ TEST(SettingsTest, requiredVisualisationParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(
-            doc.RootElement());
+    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(doc.RootElement(), "UnitTest.xml");
     EXPECT_TRUE(visualisation_parameters.save_csv);
     EXPECT_TRUE(visualisation_parameters.save_vtk);
     EXPECT_EQ(visualisation_parameters.vtk_nth_plot, 10);
     EXPECT_EQ(visualisation_parameters.csv_nth_plot, 21);
+    EXPECT_EQ("UnitTest.xml", visualisation_parameters.filename);
 }
 
 TEST(SettingsTest, optionalVisualisationParameters) {
@@ -194,9 +194,10 @@ TEST(SettingsTest, optionalVisualisationParameters) {
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(
-            doc.RootElement());
+            doc.RootElement(), "UnitTest.xml");
     EXPECT_FALSE(visualisation_parameters.save_csv);
     EXPECT_FALSE(visualisation_parameters.save_vtk);
+    EXPECT_EQ("UnitTest.xml", visualisation_parameters.filename);
 }
 
 TEST(SettingsTest, requiredInitialConditionsParameters) {

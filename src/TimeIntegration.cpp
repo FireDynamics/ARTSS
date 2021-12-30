@@ -18,8 +18,9 @@ TimeIntegration::TimeIntegration(const Settings::Settings_new &settings_new, Set
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
 
-    m_dt = settings.get_real("physical_parameters/dt");
-    m_t_end = settings.get_real("physical_parameters/t_end");
+    auto domain_data = DomainData::getInstance();
+    m_dt = domain_data->get_physical_parameters().dt;
+    m_t_end = domain_data->get_physical_parameters().t_end;
     m_t_cur = m_dt;        // since t=0 already handled in setup
 
     m_field_controller = m_solver_controller->get_field_controller();
@@ -30,7 +31,7 @@ TimeIntegration::TimeIntegration(const Settings::Settings_new &settings_new, Set
     bool has_analytical_solution = settings.get_bool("solver/solution/available");
     m_solution = new Solution(m_settings_new.initial_conditions_parameters, m_settings_new.solver_parameters.solution);
     m_analysis = new Analysis(m_settings_new.solver_parameters.solution, *m_solution, has_analytical_solution);
-    m_visual = new Visual(settings, *m_solution, has_analytical_solution);
+    m_visual = new Visual(m_settings_new.visualisation_parameters, *m_solution, has_analytical_solution);
 #endif
 }
 

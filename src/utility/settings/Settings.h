@@ -58,6 +58,7 @@ namespace Settings {
         bool save_csv;
         std::optional<size_t> vtk_nth_plot;
         std::optional<size_t> csv_nth_plot;
+        std::string filename;
     };
     struct logging_parameters {
         std::string file;
@@ -309,11 +310,11 @@ namespace Settings {
     adaption_parameters parse_adaption_parameters(const tinyxml2::XMLElement *root);
     boundaries_parameters parse_boundaries_parameters(const tinyxml2::XMLElement *root);
     initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root);
-    visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root);
+    visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root, const std::string &filename);
     logging_parameters parse_logging_parameters(const tinyxml2::XMLElement *root);
     domain_parameters parse_domain_parameters(const tinyxml2::XMLElement *root);
     physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root, const std::string &solver_description);
-    Settings_new parse_settings(const std::string &file_content);
+    Settings_new parse_settings(const std::string &filename, const std::string &file_content);
     Settings_new parse_settings_from_file(const std::filesystem::path &path);
 
 class Settings {

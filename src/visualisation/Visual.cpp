@@ -16,39 +16,31 @@
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
-Visual::Visual(Settings::Settings const &settings, Solution const &solution, bool has_analytical_solution) :
+Visual::Visual(const Settings::visualisation_parameters &settings, const Solution &solution, bool has_analytical_solution) :
         m_settings(settings),
         m_solution(solution),
         m_has_analytical_solution(has_analytical_solution) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_filename = Utility::remove_extension(settings.get_filename());
-
-    m_save_csv = m_settings.get_bool("visualisation/save_csv");
-    m_save_vtk = m_settings.get_bool("visualisation/save_vtk");
-
-    if (m_save_csv) {
-        m_csv_plots = settings.get_int("visualisation/csv_nth_plot");
-    }
-    if (m_save_vtk) {
-        m_vtk_plots = settings.get_int("visualisation/vtk_nth_plot");
-    }
 }
 
 void Visual::visualise(const FieldController &field_controller, real t) {
 #ifndef BENCHMARKING
     m_logger->info("Visualise ...");
 #endif
-    real dt = m_settings.get_real("physical_parameters/dt");
-    real t_end = m_settings.get_real("physical_parameters/t_end");
+    auto domain_data = DomainData::getInstance();
+    real dt = domain_data->get_physical_parameters().dt;
+    real t_end = domain_data->get_physical_parameters().t_end;
 
     int n = static_cast<int> (std::round(t / dt));
+    real vtk_plot = static_cast<real>(m_settings.vtk_nth_plot.value());
+    real csv_plot = static_cast<real>(m_settings.csv_nth_plot.value());
 
-    std::string filename_numerical = create_filename(m_filename, n, false);
-    std::string filename_analytical = create_filename(m_filename, n, true);
-    if (m_save_vtk) {
-        if (fmod(n, m_vtk_plots) == 0 || t >= t_end) {
+    std::string filename_numerical = create_filename(m_settings.filename, n, false);
+    std::string filename_analytical = create_filename(m_settings.filename, n, true);
+    if (m_settings.save_vtk) {
+        if (fmod(n, vtk_plot) == 0 || t >= t_end) {
             VTKWriter::write_numerical(field_controller, filename_numerical);
             if (m_has_analytical_solution) {
                 VTKWriter::write_analytical(m_solution, filename_analytical);
@@ -56,8 +48,8 @@ void Visual::visualise(const FieldController &field_controller, real t) {
         }
     }
 
-    if (m_save_csv) {
-        if (fmod(n, m_csv_plots) == 0 || t >= t_end) {
+    if (m_settings.save_csv) {
+        if (fmod(n, csv_plot) == 0 || t >= t_end) {
             CSVWriter::write_numerical(field_controller, filename_numerical);
             if (m_has_analytical_solution) {
                 CSVWriter::write_analytical(m_solution, filename_analytical);
