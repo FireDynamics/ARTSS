@@ -19,7 +19,7 @@
 
 class SolverController {
  public:
-    explicit SolverController(Settings::Settings const &settings, const Settings::Settings_new &settings_new);
+    explicit SolverController(const Settings::Settings_new &settings_new);
     ~SolverController();
 
     void solver_do_step(real t, bool sync);
@@ -29,13 +29,11 @@ class SolverController {
 
  private:
     void init_solver(const Settings::solver_parameters &solver_settings);
-    void set_up_fields(const std::string& string_solver);
-    void call_random(Field &field);
+    void set_up_fields(const std::string &solver_description, const Settings::initial_conditions_parameters &ic_settings);
 
     void force_source();
     void momentum_source();
 
-    Settings::Settings const &m_settings;
     const Settings::Settings_new &m_settings_new;
 
     FieldController *m_field_controller;

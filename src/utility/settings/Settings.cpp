@@ -272,6 +272,31 @@ namespace Settings {
             return mc_dermott;
         }
 
+        jet parse_jet_parameters(const Map &values, const std::string &parent_context) {
+            std::string own_context = FunctionNames::jet;
+            std::string context = create_context(parent_context, own_context);
+            jet jet{};
+
+            jet.dir = Mapping::match_axis(get_required_string(values, "dir", context));
+            if (jet.dir == CoordinateAxis::X) {
+                jet.start_coords[CoordinateAxis::Y] = get_required_real(values, "y1", context);
+                jet.start_coords[CoordinateAxis::Z] = get_required_real(values, "z1", context);
+                jet.end_coords[CoordinateAxis::Y] = get_required_real(values, "y2", context);
+                jet.end_coords[CoordinateAxis::Z] = get_required_real(values, "z2", context);
+            } else if (jet.dir == CoordinateAxis::Y) {
+                jet.start_coords[CoordinateAxis::X] = get_required_real(values, "x1", context);
+                jet.start_coords[CoordinateAxis::Z] = get_required_real(values, "z1", context);
+                jet.end_coords[CoordinateAxis::X] = get_required_real(values, "x2", context);
+                jet.end_coords[CoordinateAxis::Z] = get_required_real(values, "z2", context);
+            } else {
+                jet.start_coords[CoordinateAxis::X] = get_required_real(values, "x1", context);
+                jet.start_coords[CoordinateAxis::Y] = get_required_real(values, "y1", context);
+                jet.end_coords[CoordinateAxis::X] = get_required_real(values, "x2", context);
+                jet.end_coords[CoordinateAxis::Y] = get_required_real(values, "y2", context);
+            }
+            jet.value = get_required_real(values, "value", context);
+            return jet;
+        }
         layers_temperature parse_layers_parameters(const Map &values, const std::string &parent_context) {
             std::string own_context = FunctionNames::layers;
             std::string context = create_context(parent_context, own_context);
@@ -282,6 +307,7 @@ namespace Settings {
                 throw config_error(fmt::format("Numbers of layers has to be at least 1. Current value: {}",
                                                layers.number_of_layers));
             }
+            layers.dir = Mapping::match_axis(get_required_string(values, "dir", context));
             layers.values.reserve(layers.number_of_layers);
             layers.borders.reserve(layers.number_of_layers - 1);
             for (size_t i = 1; i < layers.number_of_layers; i++) {
@@ -325,6 +351,8 @@ namespace Settings {
             icp.ic = initial_conditions::parse_exp_sinus_prod(values, context);
         } else if (icp.usr_fct == FunctionNames::exp_sinus_sum) {
             // no values
+        } else if (icp.usr_fct == FunctionNames::jet) {
+            icp.ic = initial_conditions::parse_jet_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::layers) {
             icp.ic = initial_conditions::parse_layers_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::mcdermott) {

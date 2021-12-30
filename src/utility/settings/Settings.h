@@ -85,6 +85,12 @@ namespace Settings {
             real val_in;
             real val_out;
         };
+        struct jet {
+            Coordinate<real> start_coords;
+            Coordinate<real> end_coords;
+            real value;
+            CoordinateAxis dir;
+        };
         struct vortex {
             Coordinate<real> velocity_lin;
             real pa;
@@ -97,9 +103,14 @@ namespace Settings {
             size_t number_of_layers;
             std::vector<real> borders;
             std::vector<real> values;
+            CoordinateAxis dir;
         };
         struct sin_sin_sin {
             real l;
+        };
+        struct beltrami {
+            real a;
+            real d;
         };
     }
     struct random_parameters {
@@ -114,10 +125,12 @@ namespace Settings {
         std::string usr_fct;
         bool random;
         std::optional<std::variant<initial_conditions::uniform,
+                     initial_conditions::beltrami,
                      initial_conditions::drift,
                      initial_conditions::exp_sinus_prod,
                      initial_conditions::gauss_bubble,
                      initial_conditions::hat,
+                     initial_conditions::jet,
                      initial_conditions::layers_temperature,
                      initial_conditions::mc_dermott,
                      initial_conditions::sin_sin_sin,

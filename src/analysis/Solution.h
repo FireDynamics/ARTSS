@@ -15,7 +15,8 @@
 
 class Solution {
  public:
-    explicit Solution(Settings::Settings const &settings, const std::string &initial_condition, bool has_analytical_solution);
+    Solution(const Settings::initial_conditions_parameters &ic_parameters, const Settings::solver::solution &solution_parameters);
+
     void calc_analytical_solution(real t);
 
     // Getter
@@ -26,7 +27,6 @@ class Solution {
     return_ptr get_return_ptr_data_T() const { return m_T_analytical_solution.data; }
 
  private:
-    Settings::Settings const &m_settings;
     void gauss_bubble(real t);
     void exp_sinus_prod(real t);
     void exp_sinus_sum(real t);
@@ -39,6 +39,8 @@ class Solution {
     void buoyancy_mms(real t);
     void zero(real t);
 
+    const Settings::initial_conditions_parameters &m_ic_settings;
+    const Settings::solver::solution &m_solution_settings;
     Field m_u_analytical_solution;
     Field m_v_analytical_solution;
     Field m_w_analytical_solution;
@@ -47,7 +49,6 @@ class Solution {
     void (Solution::*m_init_function)(const real);
 
     real m_current_time_step = -1;
-    bool m_has_analytical_solution;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

@@ -36,11 +36,11 @@ int main(int argc, char **argv) {
         DomainData::init(settings_new);
         DomainController::init(settings);
 
-        SolverController *sc = new SolverController(settings, settings_new);
+        SolverController *sc = new SolverController(settings_new);
 
         // Integrate over time and solve numerically
         // Time integration
-        TimeIntegration ti(settings, sc);
+        TimeIntegration ti(settings_new, settings, sc);
         ti.run();
 
         // Clean up

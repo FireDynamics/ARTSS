@@ -21,8 +21,7 @@ class ISource {
             bool sync) = 0;
     virtual void add_source(Field &out, Field const &S, bool sync) = 0;
 
-    static void buoyancy_force(Settings::Settings const &settings,
-                               Field &out,
+    static void buoyancy_force(Field &out,
                                const Field &in, const Field &in_a,
                                bool sync = true);
     void dissipate(Field &out,
