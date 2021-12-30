@@ -338,7 +338,7 @@ namespace initial_conditions {
     TEST(SettingsTest, layersT) {
         std::string xml = R"(
 <ARTSS>
-    <initial_conditions usr_fct="LayersT"  random="No">
+    <initial_conditions usr_fct="LayersT" dir="y" random="No">
         <n_layers> 3 </n_layers>
         <border_1> -1.8 </border_1>  <!-- at cell face -->
         <border_2> -0.6 </border_2>  <!-- at cell face -->
