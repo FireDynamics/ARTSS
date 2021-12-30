@@ -13,17 +13,12 @@
 #include "../domain/DomainData.h"
 #include "../utility/Utility.h"
 
-Analysis::Analysis(Settings::Settings const &settings, Solution &solution, bool has_analytical_solution) :
-        m_settings(settings),
-        m_has_analytic_solution(has_analytical_solution),
+Analysis::Analysis(const Settings::solver::solution &solution_settings, Solution &solution, bool has_analytical_solution) :
+        m_solution_settings(solution_settings),
         m_solution(solution) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
-#endif
-    if (m_has_analytic_solution) {
-        m_tol = m_settings.get_real("solver/solution/tol");
-    } else {
-#ifndef BENCHMARKING
+    if (m_solution_settings.analytical_solution) {
         m_logger->info("No analytical solution available!");
 #endif
     }
@@ -36,7 +31,7 @@ Analysis::Analysis(Settings::Settings const &settings, Solution &solution, bool 
 /// \param  t     current time
 // ***************************************************************************************
 void Analysis::analyse(FieldController *field_controller, real t) {
-    if (!m_has_analytic_solution) {
+    if (!m_solution_settings.analytical_solution) {
         return;
     }
     m_solution.calc_analytical_solution(t);
@@ -94,7 +89,7 @@ bool Analysis::compare_solutions(read_ptr num, read_ptr ana, FieldType type, rea
     real res = calc_absolute_spatial_error(num, ana);
     //real res = calc_relative_spatial_error(num, ana);
 
-    if (res <= m_tol) {
+    if (res <= m_solution_settings.solution_tolerance.value()) {
 #ifndef BENCHMARKING
         m_logger->info("{} PASSED Test at time {} with error e = {}",
                        Mapping::get_field_type_name(type), t, res);
@@ -223,7 +218,7 @@ void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t,
     //std::nth_element(inner_list.begin(), inner_list.begin() + inner_list.size()/2, inner_list.end());
     //size_t ix = inner_list[inner_list.size()/2];
 
-    if (m_has_analytic_solution) {
+    if (m_solution_settings.analytical_solution) {
         m_solution.calc_analytical_solution(t);
 
         // local variables and parameters
@@ -252,11 +247,12 @@ void Analysis::calc_L2_norm_mid_point(FieldController *field_controller, real t,
 /// \param  sum     pointer to sum for (u,p,T results)
 // ***************************************************************************************
 void Analysis::calc_RMS_error(real sum_u, real sum_p, real sum_T) {
-    if (!m_has_analytic_solution) {
+    if (!m_solution_settings.analytical_solution) {
         return;
     }
-    real dt = m_settings.get_real("physical_parameters/dt");
-    real t_end = m_settings.get_real("physical_parameters/t_end");
+    auto domain_data = DomainData::getInstance();
+    real dt = domain_data->get_physical_parameters().dt;
+    real t_end = domain_data->get_physical_parameters().t_end;
     auto Nt = static_cast<size_t>(std::round(t_end / dt));
     real rNt = 1. / static_cast<real>(Nt);
 
@@ -292,7 +288,7 @@ bool Analysis::check_time_step_VN(const real dt) {
     auto domain_data = DomainData::getInstance();
 
     // local variables and parameters
-    real nu = m_settings.get_real("physical_parameters/nu");
+    real nu = domain_data->get_physical_parameters().nu.value();
 
     real dx = domain_data->get_dx();
     real dy = domain_data->get_dy();

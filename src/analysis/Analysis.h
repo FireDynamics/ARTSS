@@ -15,7 +15,7 @@
 
 class Analysis {
  public:
-    Analysis(Settings::Settings const &settings, Solution &solution, bool has_analytical_solution);
+    Analysis(const Settings::solver::solution &solution_settings, Solution &solution, bool has_analytical_solution);
 
     void analyse(FieldController *solver, real t);
 
@@ -28,8 +28,7 @@ class Analysis {
     void save_variables_in_file(FieldController *field_controller);
 
  private:
-    Settings::Settings const &m_settings;
-    real m_tol = 1e-7;
+    const Settings::solver::solution &m_solution_settings;
 
     bool compare_solutions(read_ptr num, read_ptr ana, FieldType type, real t);
 
@@ -39,7 +38,6 @@ class Analysis {
     static void write_file(const Field &field, const std::string& filename);
     static void write_obstacles(const Field &field, const std::string &filename);
 
-    bool m_has_analytic_solution = false;
     Solution &m_solution;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;

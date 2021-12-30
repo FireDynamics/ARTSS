@@ -29,7 +29,7 @@ TimeIntegration::TimeIntegration(const Settings::Settings_new &settings_new, Set
     std::string initial_condition = settings.get("initial_conditions/usr_fct");
     bool has_analytical_solution = settings.get_bool("solver/solution/available");
     m_solution = new Solution(m_settings_new.initial_conditions_parameters, m_settings_new.solver_parameters.solution);
-    m_analysis = new Analysis(settings, *m_solution, has_analytical_solution);
+    m_analysis = new Analysis(m_settings_new.solver_parameters.solution, *m_solution, has_analytical_solution);
     m_visual = new Visual(settings, *m_solution, has_analytical_solution);
 #endif
 }
