@@ -20,8 +20,8 @@ Analysis::Analysis(const Settings::solver::solution &solution_settings, Solution
     m_logger = Utility::create_logger(typeid(this).name());
     if (m_solution_settings.analytical_solution) {
         m_logger->info("No analytical solution available!");
-#endif
     }
+#endif
 }
 
 // ================================ Start analysis =============================
