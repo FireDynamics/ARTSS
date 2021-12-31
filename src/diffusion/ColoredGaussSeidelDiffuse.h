@@ -18,7 +18,7 @@
 
 class ColoredGaussSeidelDiffuse: public IDiffusion {
  public:
-    explicit ColoredGaussSeidelDiffuse(Settings::Settings const &settings);
+    explicit ColoredGaussSeidelDiffuse(const Settings::solver::diffusion_solvers::colored_gauss_seidel &settings);
 
     void diffuse(
             Field &out, const Field &in, const Field &b,
@@ -52,14 +52,11 @@ class ColoredGaussSeidelDiffuse: public IDiffusion {
 
     static void create_red_black_lists(size_t level, std::vector<size_t> &odd, std::vector<size_t> &even);
  private:
-    Settings::Settings const &m_settings;
+    const Settings::solver::diffusion_solvers::colored_gauss_seidel &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     real m_dsign;
-    real m_w;
-    size_t m_max_iter;
-    real m_tol_res;
 
     std::vector<size_t> even_indices;
     std::vector<size_t> odd_indices;

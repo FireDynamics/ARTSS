@@ -21,9 +21,8 @@
 
 class Obstacle {
  public:
-    Obstacle(real x1, real x2,
-             real y1, real y2,
-             real z1, real z2,
+    Obstacle(const Coordinate<real> &coords_start,
+             const Coordinate<real> &coords_end,
              const std::string &name);
     Obstacle(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
              size_t level,

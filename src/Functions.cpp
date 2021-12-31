@@ -20,13 +20,13 @@
 
 const std::string FunctionNames::beltrami = "Beltrami";
 const std::string FunctionNames::buoyancy_mms = "BuoyancyMMS";
-const std::string FunctionNames::buoyancy_st_mms = "BuoyancyST_MMS";
 const std::string FunctionNames::drift = "Drift";
 const std::string FunctionNames::exp_sinus_prod = "ExpSinusProd";
 const std::string FunctionNames::exp_sinus_sum = "ExpSinusSum";
 const std::string FunctionNames::gauss_bubble = "GaussBubble";
 const std::string FunctionNames::hat = "Hat";
 const std::string FunctionNames::jet = "Jet";
+const std::string FunctionNames::layers = "LayersT";
 const std::string FunctionNames::mcdermott = "McDermott";
 const std::string FunctionNames::sin_sin_sin = "SinSinSin";
 const std::string FunctionNames::uniform = "Uniform";
@@ -46,7 +46,7 @@ namespace Functions {
 /// \param  out_p  pressure
 /// \param  t time
 // ***************************************************************************************
-void beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, real a, real d, real nu) {
+void beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, const Settings::initial_conditions::beltrami &beltrami) {
     auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
@@ -64,6 +64,9 @@ void beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, re
     size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
     size_t coords_i, coords_j, coords_k;
 
+    const real a = beltrami.a;
+    const real d = beltrami.d;
+    const real nu = domain_data->get_physical_parameters().nu.value();
     // inner cells
 #pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x, out_y, out_z, out_p) async
     for (size_t i = 0; i < size_domain_inner_list; i++) {
@@ -231,26 +234,6 @@ void beltrami_bc_w(Field &out_x, real t, real a, real d, real nu) {
     }
 }
 
-// ===================================== Buoyancy Force ==================================
-// ***************************************************************************************
-/// \brief  Buoyancy Force
-/// \param  out   force
-/// \param  T   Temperature
-/// \param  T_ambient    Ambient temperature
-// ***************************************************************************************
-void buoyancy_force(Field &out, Field &T, Field &T_ambient, real beta, real g) {
-    auto domain_controller = DomainController::getInstance();
-    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
-    size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
-
-    // inner cells
-#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out, T, T_ambient) async
-    for (size_t i = 0; i < size_domain_inner_list; i++) {
-        size_t idx = domain_inner_list[i];
-        out[idx] = -beta * (T[idx] - T_ambient[idx]) * g;
-    }
-}
-
 // ================== NSTemp Test - MMS IC for u,v,w,p,T with buoyancy ===================
 // ***************************************************************************************
 /// \brief  Initial set up for NSTemp Test - MMS with buoyant force
@@ -261,7 +244,7 @@ void buoyancy_force(Field &out, Field &T, Field &T_ambient, real beta, real g) {
 /// \param  out_T  temperature
 /// \param  t   time
 // ***************************************************************************************
-void buoyancy_mms(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t, real nu, real beta, real g, real rhoa) {
+void buoyancy_mms(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t) {
     auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
@@ -272,6 +255,10 @@ void buoyancy_mms(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field 
     real dx = domain_data->get_dx();
     real dy = domain_data->get_dy();
 
+    const real nu = domain_data->get_physical_parameters().nu.value();
+    const real beta = domain_data->get_physical_parameters().beta;
+    const real g = domain_data->get_physical_parameters().g;
+    const real rhoa = domain_data->get_physical_parameters().rhoa.value();
     real rbeta = 1. / beta;
     real rg = 1. / g;
     real c = 2 * nu * M_PI * M_PI - 1;
@@ -297,46 +284,6 @@ void buoyancy_mms(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field 
     }
 }
 
-// ========== NSTemp Test - MMS source term for temperature equation with buoyancy ========
-// ***************************************************************************************
-/// \brief  Source term for NSTemp Test - MMS with buoyant force
-/// \param  out force
-/// \param  t time
-// ***************************************************************************************
-void buoyancy_st_mms(Field &out, real t, real nu, real beta, real kappa, real g, real rhoa) {
-    auto domain_data = DomainData::getInstance();
-    size_t Nx = domain_data->get_Nx();
-    size_t Ny = domain_data->get_Ny();
-
-    real X1 = domain_data->get_X1();
-    real Y1 = domain_data->get_Y1();
-
-    real dx = domain_data->get_dx();
-    real dy = domain_data->get_dy();
-
-    real rbeta = 1. / beta;
-    real rg = 1. / g;
-    real c_nu = 2 * nu * M_PI * M_PI - 1;
-    real c_kappa = 2 * kappa * M_PI * M_PI - 1;
-
-    auto domain_controller = DomainController::getInstance();
-    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
-    size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
-
-    size_t coords_k, coords_i, coords_j;
-
-    // inner cells
-#pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
-    for (size_t i = 0; i < size_domain_inner_list; i++) {
-        size_t idx = domain_inner_list[i];
-        coords_k = getCoordinateK(idx, Nx, Ny);
-        coords_j = getCoordinateJ(idx, Nx, Ny, coords_k);
-        coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
-        out[idx] = rhoa * rbeta * rg * 2 * c_nu * c_kappa * exp(-t)
-                * sin(M_PI * (xi(coords_i, X1, dx) + yj(coords_j, Y1, dy)));
-    }
-}
-
 // ===================================== NS Test - IC for u,v,w,p ========================
 // ***************************************************************************************
 /// \brief  Initial set up for NS Test - Flow around cube or Channel flow with Drift
@@ -345,11 +292,15 @@ void buoyancy_st_mms(Field &out, real t, real nu, real beta, real kappa, real g,
 /// \param  out_z  z-velocity
 /// \param  out_p  pressure
 // ***************************************************************************************
-void drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real w_lin, real pa) {
+void drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p, const Settings::initial_conditions::drift &drift) {
     auto domain_controller = DomainController::getInstance();
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
     size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
+    const real u_lin = drift.velocity_lin[CoordinateAxis::X];
+    const real v_lin = drift.velocity_lin[CoordinateAxis::Y];
+    const real w_lin = drift.velocity_lin[CoordinateAxis::Z];
+    const real pa = drift.pa;
     // inner cells
 #pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x, out_y, out_z, out_p) async
     for (size_t i = 0; i < size_domain_inner_list; i++) {
@@ -368,8 +319,9 @@ void drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, r
 /// \param  out velocity
 /// \param  t   time
 // ***************************************************************************************
-void exp_sinus_prod(Field &out, real t, real nu, real l) {
+void exp_sinus_prod(Field &out, real t, const Settings::initial_conditions::exp_sinus_prod &esp) {
     auto domain_data = DomainData::getInstance();
+    const real nu = domain_data->get_physical_parameters().nu.value();
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
 
@@ -382,7 +334,7 @@ void exp_sinus_prod(Field &out, real t, real nu, real l) {
     real dz = domain_data->get_dz();
 
     real A = 1.0;
-
+    const real l = esp.l;
     real kpinu = 3 * l * l * M_PI * M_PI * nu;
 
     auto domain_controller = DomainController::getInstance();
@@ -412,8 +364,9 @@ void exp_sinus_prod(Field &out, real t, real nu, real l) {
 /// \param  out_z  z-velocity
 /// \param  t   time
 // ***************************************************************************************
-void exp_sinus_sum(Field &out_x, Field &out_y, Field &out_z, real t, real nu) {
+void exp_sinus_sum(Field &out_x, Field &out_y, Field &out_z, real t) {
     auto domain_data = DomainData::getInstance();
+    const real nu = domain_data->get_physical_parameters().nu.value();
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
     size_t Nz = domain_data->get_Nz();
@@ -471,7 +424,7 @@ void exp_sinus_sum(Field &out_x, Field &out_y, Field &out_z, real t, real nu) {
 /// \brief  Initial set up for Diffusion Test (c*sin*sin*sin)
 /// \param  out velocity
 // ***************************************************************************************
-void fac_sin_sin_sin(Field &out, real l) {
+void fac_sin_sin_sin(Field &out, const Settings::initial_conditions::sin_sin_sin &sin_sin_sin) {
     auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
@@ -484,6 +437,7 @@ void fac_sin_sin_sin(Field &out, real l) {
     real dy = domain_data->get_dy();
     real dz = domain_data->get_dz();
 
+    const real l = sin_sin_sin.l;
     real dkpi = 3 * l * l * M_PI * M_PI;
     real rdkpi = 1. / dkpi;
 
@@ -512,10 +466,7 @@ void fac_sin_sin_sin(Field &out, real l) {
 /// \param  out velocity
 /// \param  t time
 // ***************************************************************************************
-void gauss_bubble(Field &out, real t,
-        real u_lin, real v_lin, real w_lin,
-        real x_shift, real y_shift, real z_shift,
-        real l) {
+void gauss_bubble(Field &out, real t, const Settings::initial_conditions::gauss_bubble &gauss_bubble) {
     auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
@@ -533,6 +484,13 @@ void gauss_bubble(Field &out, real t,
     size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
     size_t coords_i, coords_j, coords_k;
 
+    const real u_lin = gauss_bubble.velocity_lin[CoordinateAxis::X];
+    const real v_lin = gauss_bubble.velocity_lin[CoordinateAxis::Y];
+    const real w_lin = gauss_bubble.velocity_lin[CoordinateAxis::Z];
+    const real x_shift = gauss_bubble.shift[CoordinateAxis::X];
+    const real y_shift = gauss_bubble.shift[CoordinateAxis::Y];
+    const real z_shift = gauss_bubble.shift[CoordinateAxis::Z];
+    const real l = gauss_bubble.l;
     // inner cells
 #pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
     for (size_t i = 0; i < size_domain_inner_list; i++) {
@@ -558,12 +516,15 @@ void gauss_bubble(Field &out, real t,
 /// \brief  Initial set up as layers throughout the domain
 /// \param  out temperature
 // ***************************************************************************************
-void layers(Field &out, int n_layers, const CoordinateAxis axis, real *borders, const real *values) {
+void layers(Field &out, const Settings::initial_conditions::layers_temperature &layers) {
     auto domain_data = DomainData::getInstance();
 
+    std::vector<real> borders;
+    borders.resize(layers.number_of_layers + 1);
+    std::copy(layers.borders.begin(), layers.borders.end(), borders.begin());
     // layer border
-    borders[0] = domain_data->get_start_coord_CD(axis);
-    borders[n_layers] = domain_data->get_end_coord_CD(axis);
+    borders[0] = domain_data->get_start_coord_CD(layers.dir);
+    borders[layers.number_of_layers] = domain_data->get_end_coord_CD(layers.dir);
 
     // set values into layers
     size_t Nx = domain_data->get_Nx();
@@ -584,10 +545,10 @@ void layers(Field &out, int n_layers, const CoordinateAxis axis, real *borders, 
     real x, y, z;
 
     //TODO highly inefficient
-    if (axis == X) {
-        for (int l = 0; l < n_layers; ++l) {
+    if (layers.dir == X) {
+        for (int l = 0; l < layers.number_of_layers; ++l) {
             // inner cells
-#pragma acc parallel loop independent present(domain_data_list[:size_domain_inner_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_inner_list], out) copyin(borders[:layers.number_of_layers+1], layers.values[:layers.number_of_layers]) async
             for (size_t i = 0; i < size_domain_inner_list; i++) {
                 size_t idx = domain_data_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
@@ -595,13 +556,13 @@ void layers(Field &out, int n_layers, const CoordinateAxis axis, real *borders, 
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
                 x = xi(coords_i, X1, dx) - 0.5 * dx;
                 if (borders[l] <= x && x <= borders[l + 1]) {
-                    out[idx] = values[l];
+                    out[idx] = layers.values[l];
                 }
             }
         }
-    } else if (axis == Y) {
-        for (int l = 0; l < n_layers; ++l) {
-#pragma acc parallel loop independent present(domain_data_list[:size_domain_inner_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
+    } else if (layers.dir == Y) {
+        for (int l = 0; l < layers.number_of_layers; ++l) {
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_inner_list], out) copyin(borders[:layers.number_of_layers+1], layers.values[:layers.number_of_layers]) async
             for (size_t i = 0; i < size_domain_inner_list; i++) {
                 size_t idx = domain_data_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
@@ -609,13 +570,13 @@ void layers(Field &out, int n_layers, const CoordinateAxis axis, real *borders, 
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
                 y = yj(coords_j, Y1, dy) - 0.5 * dy;
                 if (borders[l] <= y && y <= borders[l + 1]) {
-                    out[idx] = values[l];
+                    out[idx] = layers.values[l];
                 }
             }
         }
-    } else if (axis == Z) {
-        for (int l = 0; l < n_layers; ++l) {
-#pragma acc parallel loop independent present(domain_data_list[:size_domain_inner_list], out) copyin(borders[:n_layers+1], values[:n_layers]) async
+    } else if (layers.dir == Z) {
+        for (int l = 0; l < layers.number_of_layers; ++l) {
+#pragma acc parallel loop independent present(domain_data_list[:size_domain_inner_list], out) copyin(borders[:layers.number_of_layers+1], layers.values[:layers.number_of_layers]) async
             for (size_t i = 0; i < size_domain_inner_list; i++) {
                 size_t idx = domain_data_list[i];
                 coords_k = getCoordinateK(idx, Nx, Ny);
@@ -623,7 +584,7 @@ void layers(Field &out, int n_layers, const CoordinateAxis axis, real *borders, 
                 coords_i = getCoordinateI(idx, Nx, Ny, coords_j, coords_k);
                 z = zk(coords_k, Z1, dz) - 0.5 * dz;
                 if (borders[l] <= z && z <= borders[l + 1]) {
-                    out[idx] = values[l];
+                    out[idx] = layers.values[l];
                 }
             }
         }
@@ -636,11 +597,7 @@ void layers(Field &out, int n_layers, const CoordinateAxis axis, real *borders, 
 /// \brief  Initial set up for Diffusion Test
 /// \param  out velocity
 // ***************************************************************************************
-void hat(Field &out,
-        real start_x, real end_x,
-        real start_y, real end_y,
-        real start_z, real end_z,
-        real val_in, real val_out) {
+void hat(Field &out, const Settings::initial_conditions::hat &hat) {
     auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
@@ -658,6 +615,14 @@ void hat(Field &out,
     size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
     size_t coords_i, coords_j, coords_k;
 
+    const real start_x = hat.start_coords[CoordinateAxis::X];
+    const real start_y = hat.start_coords[CoordinateAxis::Y];
+    const real start_z = hat.start_coords[CoordinateAxis::Z];
+    const real end_x = hat.end_coords[CoordinateAxis::X];
+    const real end_y = hat.end_coords[CoordinateAxis::Y];
+    const real end_z = hat.end_coords[CoordinateAxis::Z];
+    const real val_in = hat.val_in;
+    const real val_out = hat.val_out;
     // inner cells
 #pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
     for (size_t i = 0; i < size_domain_inner_list; i++) {
@@ -688,23 +653,30 @@ void hat(Field &out,
 /// \param index_z2 ending index in z-direction
 /// \param value velocity value to be set
 // *************************************************************************************************
-void jet(
-        Field &out,
-        const size_t index_x1, const size_t index_x2,
-        const size_t index_y1, const size_t index_y2,
-        const size_t index_z1, const size_t index_z2,
-        real value) {
+void jet(Field &out, const Settings::initial_conditions::jet &jet) {
     auto domain_data = DomainData::getInstance();
 
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
+    Coordinate<size_t> start;
+    for (size_t axis = 0; axis <= number_of_axes; axis++) {
+        auto c_axis = CoordinateAxis(axis);
+        start[axis]  = Utility::get_index(jet.start_coords[axis], domain_data->get_spacing(c_axis), domain_data->get_start_coord_PD(c_axis));
+    }
+    start[jet.dir] = domain_data->get_start_index_CD(jet.dir);
+    Coordinate<size_t> end;
+    for (size_t axis = 0; axis <= number_of_axes; axis++) {
+        auto c_axis = CoordinateAxis(axis);
+        end[axis]  = Utility::get_index(jet.end_coords[axis], domain_data->get_spacing(c_axis), domain_data->get_end_coord_PD(c_axis));
+    }
+    end[jet.dir] = domain_data->get_end_index_CD(jet.dir);
 
 #pragma acc parallel loop independent present(out) async
-    for (size_t i = index_x1; i <= index_x2; i++) {
-        for (size_t j = index_y1; j <= index_y2; j++) {
-            for (size_t k = index_z1; k <= index_z2; k++) {
+    for (size_t i = start[CoordinateAxis::X]; i <= end[CoordinateAxis::X]; i++) {
+        for (size_t j = start[CoordinateAxis::Y]; j <= end[CoordinateAxis::Y]; j++) {
+            for (size_t k = start[CoordinateAxis::Z]; k <= end[CoordinateAxis::Z]; k++) {
                 size_t index = IX(i, j, k, Nx, Ny);
-                out[index] = value;
+                out[index] = jet.value;
             }
         }
     }
@@ -719,7 +691,7 @@ void jet(
 /// \param  out_p  pressure
 /// \param  t   time
 // ***************************************************************************************
-void mcdermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, real nu, real A) {
+void mcdermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, const Settings::initial_conditions::mc_dermott &mc_dermott) {
     auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
@@ -734,6 +706,8 @@ void mcdermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, r
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
     size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
     size_t coords_k, coords_i, coords_j;
+    const real A = mc_dermott.A;
+    const real nu = domain_data->get_physical_parameters().nu.value();
 
     // inner cells
 #pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out_x, out_y, out_z, out_p) async
@@ -759,15 +733,15 @@ void mcdermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, r
 /// \param  seed         custom seed if given, else seed <= 0
 /// \param  step_size    interval steps of random numbers
 // ***************************************************************************************
-void random(Field &out, real range, bool is_absolute, int seed, real step_size) {
+void random(Field &out, const Settings::random_parameters &random_params) {
     auto domain_controller = DomainController::getInstance();
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
     size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     std::mt19937 mt;
-    int steps = static_cast<int>(range / step_size);
-    if (seed > 0) {
-        mt = std::mt19937(seed);
+    int steps = static_cast<int>(random_params.range / random_params.step_size);
+    if (random_params.seed > 0) {
+        mt = std::mt19937(random_params.seed);
     } else {
         std::random_device rd;
         mt = std::mt19937(rd());
@@ -779,8 +753,8 @@ void random(Field &out, real range, bool is_absolute, int seed, real step_size) 
     for (size_t i = 0; i < size_domain_inner_list; i++) {
         size_t idx = domain_inner_list[i];
         // generate secret number between -range and range:
-        double no = dist(mt) * step_size;
-        if (is_absolute) {
+        double no = dist(mt) * random_params.step_size;
+        if (random_params.absolute) {
             out[idx] += (no);
         } else {
             out[idx] *= (1 + no);
@@ -794,7 +768,7 @@ void random(Field &out, real range, bool is_absolute, int seed, real step_size) 
 /// \brief  Initial set up for Pressure Test (sin*sin*sin)
 /// \param  out   pressure
 // ***************************************************************************************
-void sin_sin_sin(Field &out, real l) {
+void sin_sin_sin(Field &out, const Settings::initial_conditions::sin_sin_sin &sin_sin_sin) {
     auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
@@ -811,6 +785,7 @@ void sin_sin_sin(Field &out, real l) {
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
     size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
     size_t coords_i, coords_j, coords_k;
+    const real l = sin_sin_sin.l;
 
     // inner cells
 #pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
@@ -832,12 +807,13 @@ void sin_sin_sin(Field &out, real l) {
 /// \param  out   force
 /// \param  val   value of uniform distribution
 // ***************************************************************************************
-void uniform(Field &out, real val) {
+void uniform(Field &out, const Settings::initial_conditions::uniform &uniform) {
     auto domain_controller = DomainController::getInstance();
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
     size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     // inner cells
+    real val = uniform.value;
 #pragma acc parallel loop independent present(domain_inner_list[:size_domain_inner_list], out) async
     for (size_t i = 0; i < size_domain_inner_list; i++) {
         size_t idx = domain_inner_list[i];
@@ -853,7 +829,7 @@ void uniform(Field &out, real val) {
 /// \param  out_z    z-velocity
 /// \param  out_p    pressure
 // ***************************************************************************************
-void vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real pa, real rhoa) {
+void vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p, const Settings::initial_conditions::vortex &vortex) {
     auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
@@ -864,6 +840,11 @@ void vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, 
     real dx = domain_data->get_dx();
     real dy = domain_data->get_dy();
 
+    const real u_lin = vortex.velocity_lin[CoordinateAxis::X];
+    const real w_lin = vortex.velocity_lin[CoordinateAxis::Y];
+    const real v_lin = vortex.velocity_lin[CoordinateAxis::Z];
+    const real rhoa = vortex.rhoa;
+    const real pa = vortex.pa;
 
     real L = domain_data->get_lx();
     real R_c = L / 20.;
@@ -899,7 +880,7 @@ void vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, 
     }
 }
 
-void vortex_y(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin, real v_lin, real pa, real rhoa) {
+void vortex_y(Field &out_x, Field &out_y, Field &out_z, Field &out_p, const Settings::initial_conditions::vortex &vortex) {
     auto domain_data = DomainData::getInstance();
     size_t Nx = domain_data->get_Nx();
     size_t Ny = domain_data->get_Ny();
@@ -909,6 +890,12 @@ void vortex_y(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real u_lin
 
     real dx = domain_data->get_dx();
     real dy = domain_data->get_dy();
+
+    const real u_lin = vortex.velocity_lin[CoordinateAxis::X];
+    const real w_lin = vortex.velocity_lin[CoordinateAxis::Y];
+    const real v_lin = vortex.velocity_lin[CoordinateAxis::Z];
+    const real rhoa = vortex.rhoa;
+    const real pa = vortex.pa;
 
     real L = domain_data->get_ly();
     real R_c = L / 20.;

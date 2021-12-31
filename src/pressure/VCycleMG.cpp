@@ -14,28 +14,30 @@
 #include "../solver/SolverSelection.h"
 
 
-VCycleMG::VCycleMG(Settings::Settings const &settings) :
-        m_settings(settings),
-        m_levels(DomainData::getInstance()->get_levels()),
-        m_n_cycle(settings.get_int("solver/pressure/n_cycle")),
-        m_n_relax(settings.get_int("solver/pressure/diffusion/n_relax")),
-        m_w(settings.get_real("solver/pressure/diffusion/w")) {
+VCycleMG::VCycleMG(const Settings::solver::pressure_solvers::vcycle_mg &settings) :
+        m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("construct VCycleMG");
 #endif
-    std::string diffusion_type = m_settings.get("solver/pressure/diffusion/type");
+    std::string diffusion_type = m_settings.smoother.type;
     if (diffusion_type == DiffusionMethods::Jacobi) {
-        m_diffusion_max_iter = m_settings.get_int("solver/pressure/diffusion/max_solve");
+        auto jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(m_settings.smoother.solver.value());
+        m_diffusion_max_iter = jacobi.max_iter;
+        m_diffusion_tol_res = jacobi.tol_res;
+        m_diffusion_w = jacobi.w;
         m_smooth_function = &VCycleMG::call_smooth_jacobi;
         m_solve_function = &VCycleMG::call_solve_jacobi;
     } else if (diffusion_type == DiffusionMethods::ColoredGaussSeidel) {
-        m_diffusion_max_iter = m_settings.get_int("solver/pressure/diffusion/max_solve");
+        auto cgs = std::get<Settings::solver::diffusion_solvers::colored_gauss_seidel>(m_settings.smoother.solver.value());
+        m_diffusion_max_iter = cgs.max_iter;
+        m_diffusion_tol_res = cgs.tol_res;
+        m_diffusion_w = cgs.w;
         m_smooth_function = &VCycleMG::call_smooth_colored_gauss_seidel;
         m_solve_function = &VCycleMG::call_solve_colored_gauss_seidel;
-        cgs_odd_indices.resize(m_levels + 1);
-        cgs_even_indices.resize(m_levels + 1);
-        for (size_t level = 0; level < m_levels + 1; level++) {
+        cgs_odd_indices.resize(m_settings.n_level + 1);
+        cgs_even_indices.resize(m_settings.n_level + 1);
+        for (size_t level = 0; level < m_settings.n_level + 1; level++) {
             ColoredGaussSeidelDiffuse::create_red_black_lists(level, cgs_odd_indices[level], cgs_even_indices[level]);
         }
     } else {
@@ -44,13 +46,12 @@ VCycleMG::VCycleMG(Settings::Settings const &settings) :
 #endif
         // TODO(issue 6) Error handling
     }
-    m_diffusion_tol_res = m_settings.get_real("solver/pressure/diffusion/tol_res");
 
-    m_residuum0 = new Field *[m_levels];
-    m_residuum1 = new Field *[m_levels + 1];
-    m_error0 = new Field *[m_levels];
-    m_error1 = new Field *[m_levels + 1];
-    m_mg_temporal_solution = new Field *[m_levels + 1];
+    m_residuum0 = new Field *[m_settings.n_level];
+    m_residuum1 = new Field *[m_settings.n_level + 1];
+    m_error0 = new Field *[m_settings.n_level];
+    m_error1 = new Field *[m_settings.n_level + 1];
+    m_mg_temporal_solution = new Field *[m_settings.n_level + 1];
 
     // copies of out and b to prevent aliasing
     // residuum
@@ -69,7 +70,7 @@ VCycleMG::VCycleMG(Settings::Settings const &settings) :
     m_mg_temporal_solution[0] = out_tmp;
 
     // building fields for level + sending to GPU
-    for (size_t level = 0; level < m_levels; ++level) {
+    for (size_t level = 0; level < m_settings.n_level; ++level) {
         // build m_residuum0
         auto *r0 = new Field(FieldType::P, 0.0, level);
         r0->copyin();
@@ -98,11 +99,11 @@ VCycleMG::VCycleMG(Settings::Settings const &settings) :
 }
 
 VCycleMG::~VCycleMG() {
-    for (size_t i = 0; i < m_levels; i++) {
+    for (size_t i = 0; i < m_settings.n_level; i++) {
         delete m_residuum0[i];
         delete m_error0[i];
     }
-    for (size_t i = 0; i < m_levels + 1; i++) {
+    for (size_t i = 0; i < m_settings.n_level + 1; i++) {
         delete m_residuum1[i];
         delete m_error1[i];
         delete m_mg_temporal_solution[i];
@@ -142,17 +143,17 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
     UpdateInput(out, b, sync);  // Update first
 
     auto domain_data = DomainData::getInstance();
-    real dt = m_settings.get_real("physical_parameters/dt");
+    real dt = domain_data->get_physical_parameters().dt;
     const auto Nt = static_cast<size_t>(std::round(t / dt));
     size_t act_cycles = 0;
 
     if (Nt == 1) {  // solve more accurately, in first time step
-        const size_t max_cycles = m_settings.get_int("solver/pressure/max_cycle");
-        const size_t max_relaxs = m_settings.get_int("solver/pressure/diffusion/max_solve");
-        size_t set_relax = m_n_relax;
+        const size_t max_cycles = m_settings.max_cycle;
+        const size_t max_relaxs = m_diffusion_max_iter;
+        size_t set_relax = m_settings.n_relax;
         real r = 10000.;
         real sum;
-        const real tol_res = m_settings.get_real("solver/pressure/tol_res");
+        const real tol_res = m_settings.tol_res;
 
         const size_t Nx = domain_data->get_Nx();
         const size_t Ny = domain_data->get_Ny();
@@ -175,7 +176,7 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
         while (r > tol_res &&
                act_cycles < max_cycles &&
                set_relax < max_relaxs) {
-            for (int i = 0; i < m_n_cycle; i++) {
+            for (int i = 0; i < m_settings.n_cycle; i++) {
                 VCycleMultigrid(out, sync);
                 act_cycles++;
             }
@@ -192,10 +193,10 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
             }
 #pragma acc wait
             r = sqrt(sum);
-            set_relax += m_n_relax;
+            set_relax += m_settings.n_relax;
         }
     } else {  // Nt > 1
-        for (int i = 0; i < m_n_cycle; i++) {
+        for (int i = 0; i < m_settings.n_cycle; i++) {
             VCycleMultigrid(out, sync);
         }
     }
@@ -214,18 +215,18 @@ void VCycleMG::pressure(Field &out, Field const &b, real t, bool sync) {
 void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
     auto domain_controller = DomainController::getInstance();
     //===================== No refinement, when max_level = 0 =========//
-    if (m_levels == 0) {
+    if (m_settings.n_level == 0) {
         Field *field_mg_temporal_level = m_mg_temporal_solution[0];
         Field *field_residuum1_level = m_residuum1[0];  // b
 #pragma acc data present(out, field_mg_temporal_level, field_residuum1_level)
         {
-            Solve(out, *field_mg_temporal_level, *field_residuum1_level, m_levels, sync);
+            Solve(out, *field_mg_temporal_level, *field_residuum1_level, m_settings.n_level, sync);
         }
         return;
     }
 
     m_error1[0]->copy_data(out);
-    for (size_t level = 0; level < m_levels; ++level) {
+    for (size_t level = 0; level < m_settings.n_level; ++level) {
         Field *field_residuum0_level = *(m_residuum0 + level);
         Field *field_error1_level = *(m_error1 + level);
         Field *field_error1_level_plus_1 = *(m_error1 + level + 1);
@@ -251,7 +252,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
     }
 
     out.copy_data(*(m_error0[0]));
-    for (size_t level = m_levels; level > 0; --level) {
+    for (size_t level = m_settings.n_level; level > 0; --level) {
         Field *field_error0_level_minus_1 = *(m_error0 + level - 1);
         Field *field_error1_level = *(m_error1 + level);
         Field *field_error1_level_minus_1 = *(m_error1 + level - 1);
@@ -269,7 +270,7 @@ void VCycleMG::VCycleMultigrid(Field &out, bool sync) {
             // correct
             *field_error1_level_minus_1 += *field_error0_level_minus_1;
 
-            if (level == m_levels) {
+            if (level == m_settings.n_level) {
                 Solve(*field_error1_level_minus_1, *field_mg_temporal_solution_level_minus_1,
                       *field_residuum1_level_minus_1, level - 1, sync);
             } else {
@@ -551,7 +552,7 @@ void VCycleMG::Prolongate(Field &out, Field const &in, const size_t level, bool 
 
 //==================================== Smooth ==================================
 // *****************************************************************************
-/// \brief  Solves Ax = b on the lowest level (m_levels - 1) using a diffusion method
+/// \brief  Solves Ax = b on the lowest level (m_solver_settings.n_level - 1) using a diffusion method
 /// \param  out         output field (in size of input )
 /// \param  tmp         temporary field for JacobiStep
 /// \param  b           right hand side
@@ -603,9 +604,9 @@ void VCycleMG::call_smooth_colored_gauss_seidel(Field &out, Field &tmp, Field co
 
 #pragma acc data present(out, b)
     {
-        for (int i = 0; i < m_n_relax; i++) {
+        for (int i = 0; i < m_settings.n_relax; i++) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
-                    out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w,
+                    out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_diffusion_w,
                     cgs_odd_indices[level], cgs_even_indices[level],
                     sync);
             domain_controller->apply_boundary(out, sync);
@@ -658,7 +659,7 @@ void VCycleMG::call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field con
         const size_t neighbour_k = Nx * Ny;
         while (res > tol_res && it < max_it) {
             ColoredGaussSeidelDiffuse::colored_gauss_seidel_step(
-                    out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w,
+                    out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_diffusion_w,
                     cgs_odd_indices[level], cgs_even_indices[level],
                     sync);
             domain_controller->apply_boundary(out, sync);
@@ -708,8 +709,8 @@ void VCycleMG::call_smooth_jacobi(Field &out, Field &tmp, Field const &b, const 
     {
         tmp.copy_data(out);
         size_t it = 0;
-        for (int i = 0; i < m_n_relax; i++) {
-            JacobiDiffuse::JacobiStep(level, out, tmp, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
+        for (int i = 0; i < m_settings.n_relax; i++) {
+            JacobiDiffuse::JacobiStep(level, out, tmp, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_diffusion_w, sync);
             domain_controller->apply_boundary(out, sync);
             Field::swap(tmp, out);
             it++;
@@ -768,7 +769,7 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
         const size_t neighbour_j = Nx;
         const size_t neighbour_k = Nx * Ny;
         while (res > m_diffusion_tol_res && it < m_diffusion_max_iter) {
-            JacobiDiffuse::JacobiStep(level, out, tmp, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, sync);
+            JacobiDiffuse::JacobiStep(level, out, tmp, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_diffusion_w, sync);
             domain_controller->apply_boundary(out, sync);
 
             sum = 0.;

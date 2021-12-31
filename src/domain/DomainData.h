@@ -20,10 +20,17 @@
 
 class DomainData {
  public:
-    explicit DomainData(Settings::Settings const &settings);
+    explicit DomainData(const Settings::physical_parameters &physical_params,
+                        const Settings::domain_parameters &domain_params,
+                        size_t multigrid_level);
     ~DomainData();
-    static DomainData *getInstance() { return single; }
-    static DomainData *getInstance(Settings::Settings const &settings);
+    static void init(const Settings::physical_parameters &physical_params,
+                     const Settings::domain_parameters &domain_params,
+                     size_t multigrid_level) {
+        single = std::make_unique<DomainData>(physical_params, domain_params, multigrid_level);
+    }
+    static void reset() { single.reset(); }
+    static DomainData *getInstance() { return single.get(); }
 
     // getter
     [[deprecated("Replaced by get_number_of_inner_cells")]]
@@ -139,6 +146,7 @@ class DomainData {
     size_t inline get_levels() const { return m_levels; }
 
     size_t get_size(size_t level = 0) const;
+    const Settings::physical_parameters& get_physical_parameters() const { return m_physical_parameters; }
 
     bool resize(const Coordinate<long>& shift_start, const Coordinate<long>& shift_end);
 
@@ -149,7 +157,7 @@ class DomainData {
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    static DomainData *single; // Singleton
+    static std::unique_ptr<DomainData> single;  // Singleton
     void calc_MG_values();
 
     static real calc_new_coord(real oldCoord, long shift, real cell_width);
@@ -167,6 +175,8 @@ class DomainData {
     Coordinate<real> end_coords_PD;  // X2/Y2/Z2
 
     size_t m_levels = 0;
+
+    const struct Settings::physical_parameters m_physical_parameters;
 
     void control();
 };

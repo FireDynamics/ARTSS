@@ -177,7 +177,7 @@ function create_testcases {
     <w_lin> 0. </w_lin>  <!-- z-velocity in linear case  -->
     <pa> 0. </pa>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type=\"ExplicitEuler\" temp_fct=\"Zero\" dissipation=\"No\" random=\"No\">
+    echo "    <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Zero\" dissipation=\"No\" random=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
 
@@ -185,18 +185,17 @@ function create_testcases {
     NAMEVALUES[$INDEX]=NavierStokesTemp_BuoyancyMMS
     FPATHVALUES[$INDEX]=tests/navierStokesTemp/mms
     NAME=${NAMEVALUES[$INDEX]}
-    BUILDER[$INDEX]="./xml-builder.sh --nstemp --tend 1.0 --dt 0.005 --nu 0.05 --beta 1. --g -9.81 --kappa 0.05 --advectiontype SemiLagrangian --diffusiontype Jacobi --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --solavail Yes  --xstart -2. --xend 2. --ystart -2. --yend 2. --zstart -2. --zend 2. --nx 64 --ny 64 --nz 1 --forcefct Buoyancy --forcedir y --tempsourcefct BuoyancyST_MMS --vtkplots 20"
+    BUILDER[$INDEX]="./xml-builder.sh --nstemp --tend 1.0 --dt 0.005 --nu 0.05 --beta 1. --g -9.81 --kappa 0.05 --advectiontype SemiLagrangian --diffusiontype Jacobi --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --solavail Yes  --xstart -2. --xend 2. --ystart -2. --yend 2. --zstart -2. --zend 2. --nx 64 --ny 64 --nz 1 --forcefct Buoyancy --forcedir y --vtkplots 20 --rhoa 1"
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct=\"BuoyancyMMS\" random=\"No\">
-    <rhoa> 1. </rhoa>
+    echo "  <initial_conditions usr_fct=\"Zero\" random=\"No\">
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "    <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\" random=\"No\">
+    echo "    <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Buoyancy\" dissipation=\"No\" random=\"No\">
     </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
@@ -228,7 +227,7 @@ function create_testcases {
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" dissipation=\"No\" random=\"No\">
+    echo "      <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Gauss\" dissipation=\"No\" random=\"No\">
         <HRR> 25000. </HRR>     <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 30. </x0>
@@ -258,19 +257,18 @@ function create_testcases {
     NAMEVALUES[$INDEX]=NavierStokesTempTurb_BuoyancyMMS
     FPATHVALUES[$INDEX]=tests/navierStokesTempTurb/mms
     NAME=${NAMEVALUES[$INDEX]}
-    BUILDER[$INDEX]="./xml-builder.sh --nstempturb --tend 1.0 --dt 0.005 --nu 0.05 --beta 1. --g -9.81 --kappa 0.05 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --prt 0.9 --solavail No  --xstart -2. --xend 2. --ystart -2. --yend 2. --zstart -2. --zend 2. --nx 64 --ny 64 --nz 1 --vtkplots 20"
+    BUILDER[$INDEX]="./xml-builder.sh --nstempturb --tend 1.0 --dt 0.005 --nu 0.05 --beta 1. --g -9.81 --kappa 0.05 --advectiontype SemiLagrangian --diffusiontype Jacobi --turbulencetype ConstSmagorinsky --cs 0.2 --pressuretype VCycleMG --nlevel 4 --ncycle 2 --pressurediffusiontype Jacobi --tempadvtype SemiLagrangian --tempdifftype Jacobi --prt 0.9 --solavail No  --xstart -2. --xend 2. --ystart -2. --yend 2. --zstart -2. --zend 2. --nx 64 --ny 64 --nz 1 --vtkplots 20 --rhoa 1"
     echo "  <boundaries>
     <boundary field=\"u,v,w\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"p\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
     <boundary field=\"T\" patch=\"front,back,left,right,bottom,top\" type=\"periodic\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct=\"BuoyancyMMS\"  random=\"No\">
-    <rhoa> 1. </rhoa>
+    echo "  <initial_conditions usr_fct=\"Zero\"  random=\"No\">
   </initial_conditions>" > ${NAME}_$IFILEVAL
     echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type=\"ExplicitEuler\" temp_fct=\"BuoyancyST_MMS\" dissipation=\"No\" random=\"No\">
-      </source>" > ${NAME}_$TSFILEVAL
+    echo "    <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Buoyancy\" dissipation=\"No\" random=\"No\">
+    </source>" > ${NAME}_$TSFILEVAL
     ((INDEX++))
   fi
   if [ $NSTu -eq 1 ]
@@ -380,7 +378,7 @@ function create_testcases {
     echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"No\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
       <ambient_temperature_value> 300 </ambient_temperature_value>
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type=\"ExplicitEuler\" temp_fct=\"GaussST\" dissipation=\"No\" random=\"No\">
+    echo "      <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Gauss\" dissipation=\"No\" random=\"No\">
         <HRR> 2500. </HRR>      <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 0. </x0>
@@ -416,7 +414,7 @@ function create_testcases {
     echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"No\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
       <ambient_temperature_value> 299.14 </ambient_temperature_value>
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type = \"ExplicitEuler\" temp_fct=\"GaussST\" dissipation=\"No\" random=\"No\">
+    echo "      <source type = \"ExplicitEuler\" dir=\"y\" temp_fct=\"Gauss\" dissipation=\"No\" random=\"No\">
         <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
         <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 0. </x0>
@@ -742,6 +740,9 @@ if ${YELLOW}--generate${NC} and ${YELLOW}--verbose${NC} are selected, temporary 
       if [ -f $DOFILE ]; then rm $DOFILE; fi
       if [ -f $AFILE ]; then rm $AFILE; fi
       rm $BFILE $IFILE
+      if [ -f Format_${XMLNAME} ]; then rm Format_${XMLNAME}; fi
+      if [ -f $EXAMPLE ]; then rm $EXAMPLE; fi
+      if [ -f $GENERATED ]; then rm $GENERATED; fi
     fi
     rm {1,2}{,_format}.xml
     if [ $CLEAN -eq 1 ]

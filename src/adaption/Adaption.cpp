@@ -18,29 +18,34 @@
 #include "../domain/DomainData.h"
 #include "../domain/DomainController.h"
 
-Adaption::Adaption(Settings::Settings const &settings, FieldController *field_controller) {
-    m_field_controller = field_controller;
+const std::string AdaptionClass::vortex = "Vortex";
+const std::string AdaptionClass::layers = "Layers";
+
+Adaption::Adaption(const Settings::adaption_parameters &settings, FieldController *field_controller,
+                   const std::string &filename) :
+        m_settings(settings),
+        m_filename(filename),
+        m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto domain_data = DomainData::getInstance();
-    m_dynamic = settings.get_bool("adaption/dynamic");
-    m_filename = settings.get_filename();
     m_filename.resize(m_filename.size() - 4);//remove .xml from filename
-    m_has_data_extraction = settings.get_bool("adaption/data_extraction");
-    if (m_has_data_extraction) {
-        m_has_data_extraction_before = settings.get_bool("adaption/data_extraction/before/enabled");
-        m_has_data_extraction_after = settings.get_bool("adaption/data_extraction/after/enabled");
-        m_has_data_extraction_endresult = settings.get_bool("adaption/data_extraction/endresult/enabled");
-        m_has_time_measuring = settings.get_bool("adaption/data_extraction/time_measuring/enabled");
-        //m_has_write_runtime = (settings.get("adaption/data_extraction/runtime/enabled") == "Yes");
+    if (m_settings.has_data_extraction) {
+        m_has_data_extraction_before = m_settings.data_extraction.value().has_data_extraction_before;
+        m_has_data_extraction_after = m_settings.data_extraction.value().has_data_extraction_after;
+        m_has_data_extraction_endresult = m_settings.data_extraction.value().has_data_extraction_endresult;
+        m_has_time_measuring = m_settings.data_extraction.value().has_time_measuring;
+        //m_has_write_runtime = ;
     }
-    if (m_dynamic) {
-        std::string init = settings.get("adaption/class/name");
-        if (init == "Layers") {
-            func = new Layers(settings, m_field_controller);
-        } else if (init == "Vortex" || init == "VortexY") {
-            func = new Vortex(settings, m_field_controller);
+    if (m_settings.enabled) {
+        auto init = m_settings.class_name.value();
+        if (init == AdaptionClass::layers) {
+            auto layers = std::get<Settings::adaption_classes::layers>(settings.adaption_class.value());
+            func = new Layers(layers, m_field_controller);
+        } else if (init == AdaptionClass::vortex) {
+            auto vortex = std::get<Settings::adaption_classes::vortex>(settings.adaption_class.value());
+            func = new Vortex(vortex, m_field_controller);
         } else {
 #ifndef BENCHMARKING
             m_logger->critical("Type {} is not defined", init);
@@ -66,7 +71,7 @@ Adaption::Adaption(Settings::Settings const &settings, FieldController *field_co
 /// \param  t_cur current timestep
 // ***************************************************************************************
 void Adaption::run(real) {
-    if (m_dynamic && isUpdateNecessary()) {
+    if (m_settings.enabled && isUpdateNecessary()) {
         applyChanges();
 #ifndef BENCHMARKING
         std::ofstream file;

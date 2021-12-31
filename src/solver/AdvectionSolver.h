@@ -17,16 +17,20 @@
 class AdvectionSolver : public ISolver {
  public:
     AdvectionSolver(
-        Settings::Settings const &settings,
+        const Settings::solver_parameters &settings,
         FieldController *field_controller,
         real u_lin, real v_lin, real w_lin);
-    AdvectionSolver(Settings::Settings const &settings, FieldController *field_controller);
-    ~AdvectionSolver();
+    AdvectionSolver(
+            const Settings::solver_parameters &settings,
+            FieldController *field_controller,
+            const Coordinate<real> &velocity_lin);
+    ~AdvectionSolver() override;
 
     void do_step(real t, bool sync) override;
+    void update_source(real) override {};
 
  private:
-    Settings::Settings const &m_settings;
+    const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

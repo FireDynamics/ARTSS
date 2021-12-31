@@ -22,13 +22,14 @@
 
 class NSSolver : public ISolver {
  public:
-    NSSolver(Settings::Settings const &settings, FieldController *field_controller);
-    ~NSSolver();
+    NSSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller);
+    ~NSSolver() override;
 
     void do_step(real t, bool sync) override;
+    void update_source(real) override {};
 
  private:
-    Settings::Settings const &m_settings;
+    const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -37,11 +38,11 @@ class NSSolver : public ISolver {
     IAdvection *adv_vel;
     IDiffusion *dif_vel;
     IPressure *pres;
-    ISource *sou;
+    ISource *sou_vel;
+
+    bool m_add_source;
 
     void control();
-
-    std::string m_sourceFct;
 };
 
 #endif /* ARTSS_SOLVER_NSSOLVER_H_ */
