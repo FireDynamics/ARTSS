@@ -32,6 +32,7 @@ enum Patch : int {
     FRONT = 4,
     BACK = 5
 };
+inline static const std::vector<Patch> all_patches = {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK};
 
 inline static const std::vector<std::string> field_type_names = {"rho", "u", "v", "w", "p", "T", "nu"};
 constexpr size_t number_of_field_types = 7;

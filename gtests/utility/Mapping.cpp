@@ -58,7 +58,7 @@ TEST(MappingTest, matchCoordinate) {
     EXPECT_EQ(Z, Mapping::match_axis("z"));
 }
 
-TEST(MappingTest, getName) {
+TEST(MappingTest, getAxisName) {
     EXPECT_EQ("X", Mapping::get_axis_name(X));
     EXPECT_EQ("Y", Mapping::get_axis_name(Y));
     EXPECT_EQ("Z", Mapping::get_axis_name(Z));
@@ -107,4 +107,22 @@ TEST(MappingTest, getFieldTypeName) {
     ASSERT_STRCASEEQ("T", T.c_str());
 
 //    ASSERT_EXIT((Mapping::get_field_type_name(FieldType::UNKNOWN_FIELD),exit(0)),::testing::KilledBySignal(SIGEV_SIGNAL),".*");
+}
+
+TEST(MappingTest, toAxis) {
+    EXPECT_EQ(CoordinateAxis::X, Mapping::to_axis(Patch::LEFT));
+    EXPECT_EQ(CoordinateAxis::X, Mapping::to_axis(Patch::RIGHT));
+    EXPECT_EQ(CoordinateAxis::Y, Mapping::to_axis(Patch::BOTTOM));
+    EXPECT_EQ(CoordinateAxis::Y, Mapping::to_axis(Patch::TOP));
+    EXPECT_EQ(CoordinateAxis::Z, Mapping::to_axis(Patch::FRONT));
+    EXPECT_EQ(CoordinateAxis::Z, Mapping::to_axis(Patch::BACK));
+}
+
+TEST(MappingTest, toPatch) {
+    EXPECT_EQ(Patch::LEFT, Mapping::to_patch(CoordinateAxis::X, true));
+    EXPECT_EQ(Patch::RIGHT, Mapping::to_patch(CoordinateAxis::X, false));
+    EXPECT_EQ(Patch::BOTTOM, Mapping::to_patch(CoordinateAxis::Y, true));
+    EXPECT_EQ(Patch::TOP, Mapping::to_patch(CoordinateAxis::Y, false));
+    EXPECT_EQ(Patch::FRONT, Mapping::to_patch(CoordinateAxis::Z, true));
+    EXPECT_EQ(Patch::BACK, Mapping::to_patch(CoordinateAxis::Z, false));
 }
