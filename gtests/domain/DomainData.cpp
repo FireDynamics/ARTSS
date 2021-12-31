@@ -28,13 +28,8 @@ TEST_F(DomainDataTest, constructorTest) {
     domain_parameters.end_coords_PD.set_coordinate(1, 1.2, 0.3);
     domain_parameters.start_coords_CD.copy(domain_parameters.start_coords_PD);
     domain_parameters.end_coords_CD.copy(domain_parameters.end_coords_PD);
-    Settings::solver_parameters solver_parameters{};
-    solver_parameters.description = SolverTypes::AdvectionSolver;
-    Settings::Settings settings{};
-    settings.solver_parameters = solver_parameters;
-    settings.domain_parameters = domain_parameters;
     // config
-    DomainData::init(settings);
+    DomainData::init({}, domain_parameters, 0);
 
     auto domain_data = DomainData::getInstance();
 
@@ -86,13 +81,8 @@ TEST_F(DomainDataTest, constructor2Test) {
     domain_parameters.end_coords_PD.set_coordinate(1, 1.2, 0.3);
     domain_parameters.start_coords_CD.copy(domain_parameters.start_coords_PD);
     domain_parameters.end_coords_CD.copy(domain_parameters.end_coords_PD);
-    Settings::solver_parameters solver_parameters{};
-    solver_parameters.description = SolverTypes::AdvectionSolver;
-    Settings::Settings settings{};
-    settings.solver_parameters = solver_parameters;
-    settings.domain_parameters = domain_parameters;
     // config
-    DomainData::init(settings);
+    DomainData::init({}, domain_parameters, 0);
 
     auto domain_data = DomainData::getInstance();
 
@@ -145,13 +135,7 @@ TEST_F(DomainDataTest, constructor3Test) {
     domain_parameters.end_coords_CD.set_coordinate(0.75, 0.6, 0.1);
     domain_parameters.start_coords_PD.set_coordinate(-0.5, -2.2, -0.9);
     domain_parameters.end_coords_PD.set_coordinate(1.5, 2.2, 0.3);
-    Settings::solver_parameters solver_parameters{};
-    solver_parameters.description = SolverTypes::AdvectionSolver;
-    Settings::Settings settings{};
-    settings.solver_parameters = solver_parameters;
-    settings.domain_parameters = domain_parameters;
-    // config
-    DomainData::init(settings);
+    DomainData::init({}, domain_parameters, 0);
 
     auto domain_data = DomainData::getInstance();
 
@@ -202,15 +186,7 @@ TEST_F(DomainDataTest, goodCaseMultigridTest) {
     domain_parameters.end_coords_PD.set_coordinate(1.2, -0.2, 0.3);
     domain_parameters.start_coords_CD.copy(domain_parameters.start_coords_PD);
     domain_parameters.end_coords_CD.copy(domain_parameters.end_coords_PD);
-    Settings::solver_parameters solver_parameters{};
-    solver_parameters.description = SolverTypes::NSSolver;
-    solver_parameters.pressure.solver.n_level = 2;
-    Settings::Settings settings{};
-    settings.solver_parameters = solver_parameters;
-    settings.domain_parameters = domain_parameters;
-    // config
-    DomainData::init(settings);
-
+    DomainData::init({}, domain_parameters, 2);
     auto domain_data = DomainData::getInstance();
 
     EXPECT_EQ(24, domain_data->get_number_of_inner_cells(CoordinateAxis::X, 0));
@@ -264,14 +240,7 @@ TEST_F(DomainDataTest, badCaseMultigridTest) {
     domain_parameters.end_coords_PD.set_coordinate(1, 1.2, 0.3);
     domain_parameters.start_coords_CD.copy(domain_parameters.start_coords_PD);
     domain_parameters.end_coords_CD.copy(domain_parameters.end_coords_PD);
-    Settings::solver_parameters solver_parameters{};
-    solver_parameters.description = SolverTypes::NSSolver;
-    solver_parameters.pressure.solver.n_level = 2;
-    Settings::Settings settings{};
-    settings.solver_parameters = solver_parameters;
-    settings.domain_parameters = domain_parameters;
-    // config
-    DomainData::init(settings);
+    DomainData::init({}, domain_parameters, 2);
     auto domain_data = DomainData::getInstance();
 
     EXPECT_DOUBLE_EQ(0.1, domain_data->get_spacing(CoordinateAxis::X));

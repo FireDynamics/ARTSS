@@ -32,7 +32,13 @@ int main(int argc, char **argv) {
 #endif
 
         Settings::Settings settings = Settings::parse_settings_from_file(argv[1]);
-        DomainData::init(settings);
+        size_t multigrid_level = 0;
+
+        auto solver = settings.solver_parameters.description;
+        if (solver.find("NS") != std::string::npos || solver == SolverTypes::PressureSolver) {
+            multigrid_level = settings.solver_parameters.pressure.solver.n_level;
+        }
+        DomainData::init(settings.physical_parameters, settings.domain_parameters, multigrid_level);
         DomainController::init(settings);
 
         SolverController *sc = new SolverController(settings);

@@ -9,23 +9,22 @@
 #include <string>
 
 std::unique_ptr<DomainData> DomainData::single{};  // Singleton
-DomainData::DomainData(const Settings::Settings &settings) :
-        m_physical_parameters(settings.physical_parameters) {
+DomainData::DomainData(const Settings::physical_parameters &physical_params,
+                       const Settings::domain_parameters &domain_params,
+                       size_t multigrid_level) :
+        m_physical_parameters(physical_params),
+        m_levels(multigrid_level) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    auto solver = settings.solver_parameters.description;
-    if (solver.find("NS") != std::string::npos || solver.find("Pressure") != std::string::npos) {
-        m_levels = settings.solver_parameters.pressure.solver.n_level;
-    }
     number_of_inner_cells = new Coordinate<size_t>[m_levels + 1];
 
-    start_coords_PD.copy(settings.domain_parameters.start_coords_PD);
-    end_coords_PD.copy(settings.domain_parameters.end_coords_PD);
-    number_of_inner_cells[0].copy(settings.domain_parameters.number_of_inner_cells);
+    start_coords_PD.copy(domain_params.start_coords_PD);
+    end_coords_PD.copy(domain_params.end_coords_PD);
+    number_of_inner_cells[0].copy(domain_params.number_of_inner_cells);
 
-    start_coords_CD.copy(settings.domain_parameters.start_coords_CD);
-    end_coords_CD.copy(settings.domain_parameters.end_coords_CD);
+    start_coords_CD.copy(domain_params.start_coords_CD);
+    end_coords_CD.copy(domain_params.end_coords_CD);
     for (size_t axis = 0; axis < number_of_axes; axis++) {
         length_PD[axis] = fabs(end_coords_PD[axis] - start_coords_PD[axis]);
     }

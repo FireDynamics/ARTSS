@@ -20,9 +20,15 @@
 
 class DomainData {
  public:
-    explicit DomainData(const Settings::Settings &settings);
+    explicit DomainData(const Settings::physical_parameters &physical_params,
+                        const Settings::domain_parameters &domain_params,
+                        size_t multigrid_level);
     ~DomainData();
-    static void init(const Settings::Settings &settings) { single = std::make_unique<DomainData>(settings); }
+    static void init(const Settings::physical_parameters &physical_params,
+                     const Settings::domain_parameters &domain_params,
+                     size_t multigrid_level) {
+        single = std::make_unique<DomainData>(physical_params, domain_params, multigrid_level);
+    }
     static void reset() { single.reset(); }
     static DomainData *getInstance() { return single.get(); }
 
