@@ -42,6 +42,38 @@ TEST(DomainTest, sizes) {
     delete[] obstacle_list;
 }
 
+TEST(DomainTest, sizesLevelOne) {
+    Settings::domain_parameters domain_params {};
+    domain_params.start_coords_PD.set_coordinate(0, 0, 0);
+    domain_params.start_coords_CD.copy(domain_params.start_coords_PD);
+    domain_params.end_coords_PD.set_coordinate(5, 10, 15);
+    domain_params.end_coords_CD.copy(domain_params.end_coords_PD);
+    domain_params.enable_computational_domain = false;
+    domain_params.number_of_inner_cells.set_coordinate(8, 12, 4);
+    DomainData::init({}, domain_params, 1);
+
+    size_t size_obstacle_list = 0;
+    auto obstacle_list = new size_t[size_obstacle_list];
+    auto surface_list = new size_t*[number_of_patches];
+    PatchObject size_surface_list;
+    size_t level = 1;
+    Domain domain(obstacle_list, size_obstacle_list, surface_list, size_surface_list, level);
+
+    PatchObject *sizes = domain.get_size_boundary_list();
+    PatchObject boundary_sizes(*sizes);
+    EXPECT_EQ(32, boundary_sizes[Patch::LEFT]);
+    EXPECT_EQ(32, boundary_sizes[Patch::RIGHT]);
+    EXPECT_EQ(24, boundary_sizes[Patch::BOTTOM]);
+    EXPECT_EQ(24, boundary_sizes[Patch::TOP]);
+    EXPECT_EQ(48, boundary_sizes[Patch::FRONT]);
+    EXPECT_EQ(48, boundary_sizes[Patch::BACK]);
+    EXPECT_EQ(208, boundary_sizes.get_sum());
+    EXPECT_EQ(192, domain.get_size_domain_list());
+    EXPECT_EQ(48, domain.get_size_inner_list());
+    delete[] surface_list;
+    delete[] obstacle_list;
+}
+
 TEST(DomainTest, sizesWithObstacle) {
     Settings::domain_parameters domain_params {};
     domain_params.start_coords_PD.set_coordinate(0, 0, 0);
