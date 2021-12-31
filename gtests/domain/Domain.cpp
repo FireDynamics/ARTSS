@@ -183,4 +183,52 @@ TEST(DomainTest, order) {
             EXPECT_GT(boundary_list[i], boundary_list[i - 1]);
         }
     }
+
+    auto domain_list = domain.get_domain_list();
+    for (size_t i = 1; i < domain.get_size_domain_list(); i++) {
+        EXPECT_GT(domain_list[i], domain_list[i - 1]);
+    }
+}
+
+TEST(DomainTest, indexTestPhysicalDomain) {
+    Settings::domain_parameters domain_params{};
+    domain_params.start_coords_PD.set_coordinate(0, 0, 0);
+    domain_params.start_coords_CD.copy(domain_params.start_coords_PD);
+    domain_params.end_coords_PD.set_coordinate(5, 10, 15);
+    domain_params.end_coords_CD.copy(domain_params.end_coords_PD);
+    domain_params.enable_computational_domain = false;
+    domain_params.number_of_inner_cells.set_coordinate(5, 20, 10);
+    DomainData::init({}, domain_params, 0);
+
+    size_t size_obstacle_list = 0;
+    auto obstacle_list = new size_t[size_obstacle_list];
+    auto surface_list = new size_t *[number_of_patches];
+    PatchObject size_surface_list;
+    size_t level = 0;
+    Domain domain(obstacle_list, size_obstacle_list, surface_list, size_surface_list, level);
+
+    auto inner_list = domain.get_inner_list();
+
+
+    auto boundary_lists = domain.get_boundary_list();
+    auto boundary_sizes = domain.get_size_boundary_list();
+    EXPECT_EQ(boundary_lists[Patch::LEFT][0], 0);
+    EXPECT_EQ(boundary_lists[Patch::BOTTOM][0], 0);
+    EXPECT_EQ(boundary_lists[Patch::FRONT][0], 0);
+    EXPECT_EQ(boundary_lists[Patch::RIGHT][0], 6);
+    EXPECT_EQ(boundary_lists[Patch::TOP][0], 147);
+    EXPECT_EQ(boundary_lists[Patch::BACK][0], 1694);
+
+    EXPECT_EQ(boundary_lists[Patch::LEFT][(*boundary_sizes)[Patch::LEFT] - 1], 1841);
+    EXPECT_EQ(boundary_lists[Patch::BOTTOM][(*boundary_sizes)[Patch::BOTTOM] - 1], 1700);
+    EXPECT_EQ(boundary_lists[Patch::FRONT][(*boundary_sizes)[Patch::FRONT] - 1], 153);
+    EXPECT_EQ(boundary_lists[Patch::RIGHT][(*boundary_sizes)[Patch::RIGHT] - 1], 1847);
+    EXPECT_EQ(boundary_lists[Patch::TOP][(*boundary_sizes)[Patch::TOP] - 1], 1847);
+    EXPECT_EQ(boundary_lists[Patch::BACK][(*boundary_sizes)[Patch::BACK] - 1], 1847);
+
+
+    auto domain_list = domain.get_domain_list();
+    size_t size_domain = domain.get_size_domain_list();
+    EXPECT_EQ(0, domain_list[0]);
+    EXPECT_EQ(size_domain - 1, domain_list[size_domain - 1]);
 }

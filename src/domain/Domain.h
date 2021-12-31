@@ -30,7 +30,6 @@ class Domain {
     PatchObject * get_size_boundary_list() { return &m_size_boundary; }
 
     void update_lists(size_t *obstacle_list, size_t size_obstacle_list, size_t **surface_list, PatchObject &size_surface_list);
-    void control(size_t size_obstacle_list, PatchObject &size_surface_list);
 
  private:
 #ifndef BENCHMARKING

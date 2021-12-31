@@ -155,14 +155,6 @@ void Multigrid::control() {
             control_message += "For Level " + std::to_string(level) + "\nsize control\n" + message;
         }
     }
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        Domain &domain = m_MG_domain_object_list[level];
-        PatchObject sum_surfaces;
-        for (size_t patch = 0; patch < number_of_patches; patch++) {
-            sum_surfaces.add_value(patch, m_jl_surface_list_patch_divided[patch]->get_slice_size(level));
-        }
-        domain.control(m_jl_obstacle_list.get_slice_size(level), sum_surfaces);
-    }
     {
         size_t bsize_inner = 0;
         for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
