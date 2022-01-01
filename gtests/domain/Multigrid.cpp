@@ -37,20 +37,61 @@ TEST_F(MultigridTest, sizes) {
 
     Multigrid multigrid(surfaces, bdc_surfaces, obstacles, bdc_obstacles, bdc_domain, level);
 
+    // domain cells
     EXPECT_EQ(840, multigrid.get_slice_size_domain_cells(0));
-    EXPECT_EQ(384, multigrid.get_slice_size_domain_inner_cells_level_joined(0));
-
     EXPECT_EQ(192, multigrid.get_slice_size_domain_cells(1));
-    EXPECT_EQ(48, multigrid.get_slice_size_domain_inner_cells_level_joined(1));
-
     EXPECT_EQ(60, multigrid.get_slice_size_domain_cells(2));
-    EXPECT_EQ(6, multigrid.get_slice_size_domain_inner_cells_level_joined(2));
-
     EXPECT_EQ(1092, multigrid.get_size_domain_cells());
+
+    // domain inner cells
+    EXPECT_EQ(384, multigrid.get_slice_size_domain_inner_cells_level_joined(0));
+    EXPECT_EQ(48, multigrid.get_slice_size_domain_inner_cells_level_joined(1));
+    EXPECT_EQ(6, multigrid.get_slice_size_domain_inner_cells_level_joined(2));
     EXPECT_EQ(438, multigrid.get_size_domain_inner_cells_level_joined());
 
+    // obstacle cells
     EXPECT_EQ(0, multigrid.get_slice_size_obstacle_cells(0));
     EXPECT_EQ(0, multigrid.get_slice_size_obstacle_cells(1));
     EXPECT_EQ(0, multigrid.get_slice_size_obstacle_cells(2));
     EXPECT_EQ(0, multigrid.get_size_obstacle_cells());
+}
+
+TEST_F(MultigridTest, indices) {
+    std::vector<Surface> surfaces;
+    std::vector<BoundaryDataController> bdc_surfaces;
+    std::vector<Obstacle> obstacles;
+    std::vector<BoundaryDataController> bdc_obstacles;
+    BoundaryDataController bdc_domain({});
+    const size_t level = 2;
+    Multigrid multigrid(surfaces, bdc_surfaces, obstacles, bdc_obstacles, bdc_domain, level);
+
+    // obstacle cells
+    EXPECT_EQ(0, multigrid.get_start_index_obstacle_cells_level_joined(0));
+    EXPECT_EQ(0, multigrid.get_end_index_obstacle_cells_level_joined(0));
+
+    EXPECT_EQ(0, multigrid.get_start_index_obstacle_cells_level_joined(1));
+    EXPECT_EQ(0, multigrid.get_end_index_obstacle_cells_level_joined(1));
+
+    EXPECT_EQ(0, multigrid.get_start_index_obstacle_cells_level_joined(2));
+    EXPECT_EQ(0, multigrid.get_end_index_obstacle_cells_level_joined(2));
+
+    // domain cells
+    EXPECT_EQ(0, multigrid.get_start_index_domain_cells_level_joined(0));
+    EXPECT_EQ(839, multigrid.get_end_index_domain_cells_level_joined(0));
+
+    EXPECT_EQ(840, multigrid.get_start_index_domain_cells_level_joined(1));
+    EXPECT_EQ(1031, multigrid.get_end_index_domain_cells_level_joined(1));
+
+    EXPECT_EQ(1032, multigrid.get_start_index_domain_cells_level_joined(2));
+    EXPECT_EQ(1091, multigrid.get_end_index_domain_cells_level_joined(2));
+
+    // domain inner cells
+    EXPECT_EQ(0, multigrid.get_start_index_domain_inner_cells_level_joined(0));
+    EXPECT_EQ(383, multigrid.get_end_index_domain_inner_cells_level_joined(0));
+
+    EXPECT_EQ(384, multigrid.get_start_index_domain_inner_cells_level_joined(1));
+    EXPECT_EQ(431, multigrid.get_end_index_domain_inner_cells_level_joined(1));
+
+    EXPECT_EQ(432, multigrid.get_start_index_domain_inner_cells_level_joined(2));
+    EXPECT_EQ(437, multigrid.get_end_index_domain_inner_cells_level_joined(2));
 }
