@@ -36,7 +36,7 @@ class Adaption {
 public:
     explicit Adaption(const Settings::adaption_parameters &settings, FieldController *field_controller, const std::string &filename);
 
-    bool inline is_data_extraction_enabled() { return m_settings.has_data_extraction; };
+    bool is_data_extraction_enabled() const { return m_settings.has_data_extraction; };
     bool inline is_data_extraction_before_enabled() { return m_has_data_extraction_before; }
     bool inline is_data_extraction_after_enabled() { return m_has_data_extraction_after; }
     bool inline is_data_extraction_endresult_enabled() { return m_has_data_extraction_endresult; }
