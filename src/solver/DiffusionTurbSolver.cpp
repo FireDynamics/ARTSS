@@ -4,27 +4,23 @@
 /// \author     Suryanarayana Maddu
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#include <string>
 #include <vector>
 #include <algorithm>
 
 #include "DiffusionTurbSolver.h"
 
 
-DiffusionTurbSolver::DiffusionTurbSolver(Settings::Settings const &settings, FieldController *field_controller) :
-        m_settings(settings) {
+DiffusionTurbSolver::DiffusionTurbSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller) :
+        m_solver_settings(solver_settings), m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_controller = field_controller;
 
     //Diffusion
-    std::string diffusionType = m_settings.get("solver/diffusion/type");
-    SolverSelection::SetDiffusionSolver(m_settings, &this->dif, diffusionType);
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif);
 
     // Turbulent viscosity
-    std::string turbluenceType = m_settings.get("solver/turbulence/type");
-    SolverSelection::SetTurbulenceSolver(m_settings, &this->mu_tub, turbluenceType);
+    SolverSelection::set_turbulence_solver(m_solver_settings.turbulence, &mu_tub);
     control();
 }
 
@@ -53,7 +49,8 @@ void DiffusionTurbSolver::do_step(real, bool sync) {
     Field &w_tmp = m_field_controller->get_field_w_tmp();
     Field &nu_t = m_field_controller->get_field_nu_t();  // Eddy Viscosity
 
-    real nu = m_settings.get_real("physical_parameters/nu");
+    auto domain_data = DomainData::getInstance();
+    real nu = domain_data->get_physical_parameters().nu.value();
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, nu_t)
     {
@@ -75,9 +72,9 @@ void DiffusionTurbSolver::do_step(real, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void DiffusionTurbSolver::control() {
-    auto fields = Utility::split(m_settings.get("solver/diffusion/field"), ',');
-    std::sort(fields.begin(), fields.end());
-    if (fields != std::vector<std::string>({"u", "v", "w"})) {
+    auto diff_fields = m_solver_settings.diffusion.fields;
+    std::sort(diff_fields.begin(), diff_fields.end());
+    if (diff_fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

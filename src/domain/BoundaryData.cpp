@@ -24,8 +24,12 @@ void BoundaryData::print() const {
     for (size_t i = 0; i < number_of_patches; i++) {
         std::string p = Mapping::get_patch_name(Patch(i));
         std::string bc = Mapping::get_boundary_condition_name(m_boundary_conditions[i]);
-        real val = m_values[i];
-        m_logger->info("\t Patch {} with {} {}", p, bc, val);
+        if (m_boundary_conditions[i] != BoundaryCondition::PERIODIC) {
+            real val = m_values[i].value();
+            m_logger->info("\t Patch {} with {} {}", p, bc, val);
+        } else {
+            m_logger->info("\t Patch {} with {}", p, bc);
+        }
     }
 #endif
 }
@@ -39,7 +43,7 @@ void BoundaryData::print() const {
 // *************************************************************************************************
 void BoundaryData::add_boundary_condition(
         Patch const &patch,
-        real value,
+        std::optional<real> value,
         BoundaryCondition const &boundary_condition) {
     m_has_values = true;
     m_values[patch] = value;

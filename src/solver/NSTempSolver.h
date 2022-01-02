@@ -16,16 +16,17 @@
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
+#include "../interfaces/ISourceFunction.h"
 
 class NSTempSolver : public ISolver {
 public:
-    NSTempSolver(Settings::Settings const &settings, FieldController *field_controller);
-    ~NSTempSolver();
+    NSTempSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller);
+    ~NSTempSolver() override;
 
     void do_step(real t, bool sync) override;
-
+    void update_source(real) override;
  private:
-    Settings::Settings const &m_settings;
+    const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -39,13 +40,12 @@ public:
     ISource *sou_vel;
     ISource *sou_temp;
 
-    std::string m_dir_vel;
+    ISourceFunction *m_source_function_temperature;
 
     void control();
 
-    std::string m_forceFct;
-    bool m_has_dissipation;
-    std::string m_tempFct;
+    bool m_add_source;
+    bool m_add_temp_source;
 };
 
 #endif /* ARTSS_SOLVER_NSTEMPSOLVER_H_ */

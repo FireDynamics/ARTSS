@@ -7,9 +7,8 @@
 #include "Surface.h"
 
 
-Surface::Surface(real x1, real x2,
-                 real y1, real y2,
-                 real z1, real z2,
+Surface::Surface(const Coordinate<real> &coords_start,
+                 const Coordinate<real> &coords_end,
                  const std::string &name,
                  Patch patch) :
         m_patch(patch),
@@ -20,16 +19,27 @@ Surface::Surface(real x1, real x2,
     m_logger->debug("################ SURFACE ################");
 #endif
     auto domain_data = DomainData::getInstance();
-    Coordinate<real> tmp_start(x1, y1, z1);
-    Coordinate<real> tmp_end(x2, y2, z2);
-    for (size_t axis = 0; axis < number_of_axes; axis++) {
-        auto coord_axis = CoordinateAxis(axis);
-        m_start[axis] = get_matching_index(tmp_start[axis],
-                                           domain_data->get_spacing(coord_axis, m_level),
-                                           domain_data->get_start_coord_PD(coord_axis)) + 1;
-        m_end[axis] = get_matching_index(tmp_end[axis],
-                                         domain_data->get_spacing(coord_axis, m_level),
-                                         domain_data->get_start_coord_PD(coord_axis));
+    std::vector<CoordinateAxis> axes = {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z};
+    CoordinateAxis coord_axis = Mapping::to_axis(patch);
+    std::remove(axes.begin(), axes.end(), coord_axis);
+    for (CoordinateAxis axis : axes) {
+        m_start[axis] = get_matching_index(coords_start[axis],
+                                           domain_data->get_spacing(axis, m_level),
+                                           domain_data->get_start_coord_PD(axis)) + 1;
+        m_end[axis] = get_matching_index(coords_end[axis],
+                                         domain_data->get_spacing(axis, m_level),
+                                         domain_data->get_start_coord_PD(axis));
+    }
+    // TODO issue 86 replace surface index of computational domain with index of physical domain
+    // set index according to their patch.
+    // e.g. for patch LEFT, set coordinate X of start and end to the index of the domain boundary,
+    // which is no different from the ghost cells of the computational domain
+    if (m_patch % 2 == 0) {
+        m_start[coord_axis] = domain_data->get_start_index_CD(coord_axis) - 1;
+        m_end[coord_axis] = domain_data->get_start_index_CD(coord_axis) - 1;
+    } else {
+        m_end[coord_axis] = domain_data->get_end_index_CD(coord_axis) + 1;
+        m_end[coord_axis] = domain_data->get_end_index_CD(coord_axis) + 1;
     }
 
 #ifndef BENCHMARKING
@@ -42,13 +52,13 @@ Surface::Surface(real x1, real x2,
 #endif
 }
 
-Surface::Surface(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
+Surface::Surface(Coordinate<size_t> &index_start, Coordinate<size_t> &index_end,
                  size_t level,
                  const std::string &name,
                  Patch patch) :
         m_patch(patch),
         m_name(name),
-        m_start(coords_start), m_end(coords_end),
+        m_start(index_start), m_end(index_end),
         m_level(level) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());

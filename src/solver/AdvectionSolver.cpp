@@ -14,19 +14,18 @@
 #include "../domain/DomainData.h"
 
 AdvectionSolver::AdvectionSolver(
-        Settings::Settings const &settings,
+        const Settings::solver_parameters &settings,
         FieldController *field_controller,
         real u_lin, real v_lin, real w_lin) :
-    m_settings(settings),
-    m_field_controller(field_controller),
-    m_u_lin(FieldType::U, u_lin),
-    m_v_lin(FieldType::V, v_lin),
-    m_w_lin(FieldType::W, w_lin) {
+        m_solver_settings(settings),
+        m_field_controller(field_controller),
+        m_u_lin(FieldType::U, u_lin),
+        m_v_lin(FieldType::V, v_lin),
+        m_w_lin(FieldType::W, w_lin) {
 #ifndef BENCHMARKING
      m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    std::string advectionType = m_settings.get("solver/advection/type");
-    SolverSelection::SetAdvectionSolver(m_settings, &adv, m_settings.get("solver/advection/type"));
+    SolverSelection::set_advection_solver(m_solver_settings.advection, &adv);
 
     m_u_lin.copyin();
     m_v_lin.copyin();
@@ -35,13 +34,14 @@ AdvectionSolver::AdvectionSolver(
     control();
 }
 
-AdvectionSolver::AdvectionSolver(Settings::Settings const &settings, FieldController *field_controller) :
-    AdvectionSolver(
-            settings,
-            field_controller,
-            settings.get_real("initial_conditions/u_lin"),
-            settings.get_real("initial_conditions/v_lin"),
-            settings.get_real("initial_conditions/w_lin")) {
+AdvectionSolver::AdvectionSolver(const Settings::solver_parameters &settings,
+                                 FieldController *field_controller,
+                                 const Coordinate<real> &velocity_lin) :
+        AdvectionSolver(settings,
+                        field_controller,
+                        velocity_lin[CoordinateAxis::X],
+                        velocity_lin[CoordinateAxis::Y],
+                        velocity_lin[CoordinateAxis::Z]) {
 }
 
 AdvectionSolver::~AdvectionSolver() {
@@ -79,10 +79,10 @@ void AdvectionSolver::do_step(real, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void AdvectionSolver::control() {
-    auto fields = Utility::split(m_settings.get("solver/advection/field"), ',');
+    auto fields = m_solver_settings.advection.fields;
     std::sort(fields.begin(), fields.end());
 
-    if (fields != std::vector<std::string>({"u", "v", "w"})) {
+    if (fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif

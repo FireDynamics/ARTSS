@@ -15,7 +15,7 @@
 
 class ExplicitEulerSource : public ISource {
  public:
-    explicit ExplicitEulerSource(Settings::Settings const &settings);
+    explicit ExplicitEulerSource(const std::vector<CoordinateAxis> &dir);
 
     void add_source(Field &out_x, Field &out_y, Field &out_z,
                     const Field &S_x, const Field &S_y, const Field &S_z,
@@ -23,7 +23,7 @@ class ExplicitEulerSource : public ISource {
     void add_source(Field &out, const Field &S, bool sync) override;
 
  private:
-    Settings::Settings const &m_settings;
+    const std::vector<CoordinateAxis> &m_dir;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

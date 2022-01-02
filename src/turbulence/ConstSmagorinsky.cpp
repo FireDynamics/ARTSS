@@ -15,11 +15,8 @@
 #include "../domain/DomainData.h"
 #include "../domain/DomainController.h"
 
-ConstSmagorinsky::ConstSmagorinsky(Settings::Settings const &settings) {
-    // Cs value of 0.1 is found to yield the best results for wide range of flows
-    // reference from Ansys Fluent Subgrid Scale models
-    m_Cs = settings.get_real("solver/turbulence/Cs");
-}
+// Cs value of 0.1 is found to yield the best results for wide range of flows
+// reference from Ansys Fluent Subgrid Scale models
 
 //============================ Calculate turbulent viscosity =======================================
 // *************************************************************************************************
@@ -51,7 +48,7 @@ void ConstSmagorinsky::calc_turbulent_viscosity(
         const real delta_s = cbrt(dx * dy * dz);  // implicit filter
         real S_bar;
         real S11, S22, S33, S12, S13, S23;
-        real Cs = m_Cs;
+        real Cs = m_settings.cs;
 
         auto domain_controller = DomainController::getInstance();
         size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();

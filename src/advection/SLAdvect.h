@@ -15,14 +15,12 @@
 
 class SLAdvect : public IAdvection {
  public:
-    explicit SLAdvect(Settings::Settings const &settings) : m_settings(settings) {}
-
+    SLAdvect() = default;
     ~SLAdvect() override = default;
 
     void advect(Field &out, const Field &in, const Field &u_vel, const Field &v_vel, const Field &w_vel, bool sync) override;
 
  private:
-    Settings::Settings const m_settings;
 };
 
 #endif /* ARTSS_ADVECTION_SLADVECT_H_ */

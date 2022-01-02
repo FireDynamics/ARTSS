@@ -14,9 +14,7 @@
 #include "../domain/DomainData.h"
 #include "../domain/DomainController.h"
 
-DynamicSmagorinsky::DynamicSmagorinsky(Settings::Settings const &settings) :
-    m_settings(settings),
-
+DynamicSmagorinsky::DynamicSmagorinsky() :
     u_f(FieldType::U),
     v_f(FieldType::U),
     w_f(FieldType::U),
@@ -179,7 +177,7 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
     const size_t Nx = domain_data->get_Nx();
     const size_t Ny = domain_data->get_Ny();
 
-    const real nu = m_settings.get_real("physical_parameters/nu");
+    const real nu = domain_data->get_physical_parameters().nu.value();
 
     const real dx = domain_data->get_dx();
     const real dy = domain_data->get_dy();
