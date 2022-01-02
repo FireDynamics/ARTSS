@@ -82,8 +82,8 @@
     <boundary field="p" patch="front,back,bottom,top,left,right" type="neumann" value="0.0" />
     <boundary field="T" patch="front,back,top,left,right" type="dirichlet" value="299.14" />
     <boundary field="T" patch="bottom" type="neumann" value="0.0" />
-
   </boundaries>
+
   <obstacles enabled="Yes">
     <obstacle name="left wall"> <!-- left wall -->
       <geometry ox1="-1.6625" ox2="-1.4" oy1="0." oy2="2.18" oz1="-1.4" oz2="1.4"/>
