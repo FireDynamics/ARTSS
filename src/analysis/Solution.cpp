@@ -25,30 +25,30 @@ Solution::Solution(const Settings::initial_conditions_parameters &ic_parameters,
     // set function pointer to chosen initial condition
     std::string initial_condition = m_ic_settings.usr_fct;
     if (initial_condition == FunctionNames::gauss_bubble) {
-        m_init_function = [this](real t){this->gauss_bubble(t);};
+        m_init_function = &Solution::gauss_bubble;
     } else if (initial_condition == FunctionNames::exp_sinus_prod) {
-        m_init_function = [this](real t){this->exp_sinus_prod(t);};
+        m_init_function = &Solution::exp_sinus_prod;
     } else if (initial_condition == FunctionNames::exp_sinus_sum) {
-        m_init_function = [this](real t){this->exp_sinus_sum(t);};
+        m_init_function = &Solution::exp_sinus_sum;
     } else if (initial_condition == FunctionNames::hat) {
-        m_init_function = [this](real t){this->hat(t);};
+        m_init_function = &Solution::hat;
     } else if (initial_condition == FunctionNames::sin_sin_sin) {
-        m_init_function = [this](real t){this->sin_sin_sin(t);};
+        m_init_function = &Solution::sin_sin_sin;
     } else if (initial_condition == FunctionNames::mcdermott) {
-        m_init_function = [this](real t){this->mcDermott(t);};
+        m_init_function = &Solution::mcDermott;
     } else if (initial_condition == FunctionNames::vortex) {
-        m_init_function = [this](real t){this->vortex(t);};
+        m_init_function = &Solution::vortex;
     } else if (initial_condition == FunctionNames::vortex_y) {
-        m_init_function = [this](real t){this->vortex_y(t);};
+        m_init_function = &Solution::vortex_y;
     } else if (initial_condition == FunctionNames::beltrami) {
-        m_init_function = [this](real t){this->beltrami(t);};
+        m_init_function = &Solution::beltrami;
     } else if (initial_condition == FunctionNames::buoyancy_mms) {
-        m_init_function = [this](real t){this->buoyancy_mms(t);};
+        m_init_function = &Solution::buoyancy_mms;
     } else {
 #ifndef BENCHMARKING
         m_logger->info("Analytical solution set to zero!");
 #endif
-        m_init_function = [this](real t){this->zero(t);};
+        m_init_function = &Solution::zero;
 
         m_u_analytical_solution.set_value(0);
         m_v_analytical_solution.set_value(0);
@@ -160,5 +160,5 @@ void Solution::calc_analytical_solution(const real t) {
     }
 
     m_current_time_step = t;
-    m_init_function(m_current_time_step);
+    (*this.*m_init_function)(t);
 }
