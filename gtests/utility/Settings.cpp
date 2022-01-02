@@ -61,7 +61,7 @@ TEST(SettingsTest, unknownAttribute) {
     Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement(), "None");
     EXPECT_DOUBLE_EQ(physical_parameters.t_end, 1.0);
     EXPECT_DOUBLE_EQ(physical_parameters.dt, 0.1);
-//TODO maybe warning?
+    // TODO maybe warning?
 }
 // TODO wrong casts -> string instead of numeral for example
 TEST(SettingsTest, requiredAttributeMissing) {
@@ -334,6 +334,7 @@ namespace initial_conditions {
         EXPECT_DOUBLE_EQ(params_drift.velocity_lin[CoordinateAxis::Z], 0.25);
         EXPECT_DOUBLE_EQ(params_drift.pa, 0);
     }
+
     TEST(SettingsTest, layersT) {
         std::string xml = R"(
 <ARTSS>
@@ -358,6 +359,7 @@ namespace initial_conditions {
         EXPECT_DOUBLE_EQ(params_layers.values[1], 304.04);
         EXPECT_DOUBLE_EQ(params_layers.values[2], 305.24);
     }
+
     TEST(SettingsTest, SinSinSin) {
         std::string xml = R"(
 <ARTSS>
@@ -372,6 +374,7 @@ namespace initial_conditions {
         auto params_sin_sin_sin_mms = std::get<sin_sin_sin>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(params_sin_sin_sin_mms.l, 1);
     }
+
     TEST(SettingsTest, vortex) {
         std::string xml = R"(
 <ARTSS>
@@ -394,6 +397,7 @@ namespace initial_conditions {
         EXPECT_DOUBLE_EQ(params_vortex.rhoa, 1);
         EXPECT_DOUBLE_EQ(params_vortex.pa, 0);
     }
+
     TEST(SettingsTest, mcDermott) {
         std::string xml = R"(
 <ARTSS>
@@ -468,7 +472,7 @@ TEST(SettingsTest, obstacles) {
                         o1_b1.field_type.end(),
                         FieldType::W),
               o1_b1.field_type.end());
-    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+    for (Patch patch : {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
         EXPECT_NE(std::find(o1_b1.patch.begin(),
                             o1_b1.patch.end(),
                             patch),
@@ -485,7 +489,7 @@ TEST(SettingsTest, obstacles) {
                         o1_b2.field_type.end(),
                         FieldType::T),
               o1_b2.field_type.end());
-    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+    for (Patch patch : {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
         EXPECT_NE(std::find(o1_b2.patch.begin(),
                             o1_b2.patch.end(),
                             patch),
@@ -516,7 +520,7 @@ TEST(SettingsTest, obstacles) {
                         o2_b1.field_type.end(),
                         FieldType::P),
               o2_b1.field_type.end());
-    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+    for (Patch patch : {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
         EXPECT_NE(std::find(o2_b1.patch.begin(),
                             o2_b1.patch.end(),
                             patch),
@@ -533,7 +537,7 @@ TEST(SettingsTest, obstacles) {
                         o2_b2.field_type.end(),
                         FieldType::T),
               o2_b2.field_type.end());
-    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+    for (Patch patch : {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
         EXPECT_NE(std::find(o2_b2.patch.begin(),
                             o2_b2.patch.end(),
                             patch),
@@ -683,7 +687,7 @@ TEST(SettingsTest, boundaries) {
                             patch),
                   boundaries_parameters.boundaries[1].patch.end());
     }
-    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+    for (Patch patch : {Patch::LEFT, Patch::RIGHT, Patch::TOP, Patch::FRONT, Patch::BACK}) {
         EXPECT_NE(std::find(boundaries_parameters.boundaries[2].patch.begin(),
                             boundaries_parameters.boundaries[2].patch.end(),
                             patch),
@@ -1109,6 +1113,7 @@ namespace source_solvers {
                             CoordinateAxis::Y),
                   solver_parameters.source.direction.end());
     }
+
     TEST(SettingsTest, NSSolverSourceUniform) {
         std::string xml = R"(
 <ARTSS>
@@ -1570,6 +1575,7 @@ TEST(SettingsTest, concentration) {
     EXPECT_EQ(con.source.random_parameters.step_size, 0.2);
     EXPECT_EQ(con.source.random_parameters.range, 2);
 }
+
 TEST(SettingsTest, concentrationWithoutTurb) {
     std::string xml = R"(
 <ARTSS>
