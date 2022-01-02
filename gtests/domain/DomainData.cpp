@@ -248,5 +248,5 @@ TEST_F(DomainDataTest, badCaseMultigridTest) {
     EXPECT_DOUBLE_EQ(0.05, domain_data->get_spacing(CoordinateAxis::Z));
 
     EXPECT_EQ(2, domain_data->get_levels());
-    //TODO currently only warnings
+    // TODO currently only warnings
 }

@@ -76,6 +76,6 @@
     <vtk_nth_plot> 10 </vtk_nth_plot>
   </visualisation>
 
-  <logging file="output_test_navierstokesturb_flowaroundcube.log" level="info">
+  <logging file="output_flow_around_cube.log" level="info">
   </logging>
 </ARTSS>
