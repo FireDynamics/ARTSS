@@ -25,6 +25,7 @@ Solution::Solution(const Settings::initial_conditions_parameters &ic_parameters,
     // set function pointer to chosen initial condition
     std::string initial_condition = m_ic_settings.usr_fct;
     if (initial_condition == FunctionNames::gauss_bubble) {
+        m_init_function2 = [this](real t){this->gauss_bubble(t);};
         m_init_function = &Solution::gauss_bubble;
     } else if (initial_condition == FunctionNames::exp_sinus_prod) {
         m_init_function = &Solution::exp_sinus_prod;
