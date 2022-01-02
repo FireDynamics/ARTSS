@@ -22,7 +22,7 @@ Surface::Surface(const Coordinate<real> &coords_start,
     std::vector<CoordinateAxis> axes = {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z};
     CoordinateAxis coord_axis = Mapping::to_axis(patch);
     std::remove(axes.begin(), axes.end(), coord_axis);
-    for (CoordinateAxis axis: axes) {
+    for (CoordinateAxis axis : axes) {
         m_start[axis] = get_matching_index(coords_start[axis],
                                            domain_data->get_spacing(axis, m_level),
                                            domain_data->get_start_coord_PD(axis)) + 1;
