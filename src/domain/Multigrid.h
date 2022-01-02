@@ -4,8 +4,8 @@
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
-#ifndef ARTSS_BOUNDARY_MULTIGRID_H_
-#define ARTSS_BOUNDARY_MULTIGRID_H_
+#ifndef ARTSS_DOMAIN_MULTIGRID_H_
+#define ARTSS_DOMAIN_MULTIGRID_H_
 
 #include "Domain.h"
 #include "BoundaryDataController.h"
@@ -100,5 +100,5 @@ private:
 
 };
 
-#endif /* ARTSS_BOUNDARY_MULTIGRID_H_*/
+#endif /* ARTSS_DOMAIN_MULTIGRID_H_*/
 
