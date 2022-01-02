@@ -15,12 +15,9 @@
 
 
 // ========================== Constructor =================================
-ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse(Settings::Settings const &settings) :
+ColoredGaussSeidelDiffuse::ColoredGaussSeidelDiffuse(const Settings::solver::diffusion_solvers::colored_gauss_seidel &settings) :
         m_settings(settings),
-        m_dsign(1),
-        m_w(m_settings.get_real("solver/diffusion/w")),
-        m_max_iter(m_settings.get_size_t("solver/diffusion/max_iter")),
-        m_tol_res(m_settings.get_real("solver/diffusion/tol_res")) {
+        m_dsign(1) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -58,7 +55,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
         const real reciprocal_dy = 1. / dy;
         const real reciprocal_dz = 1. / dz;
 
-        const real dt = m_settings.get_real("physical_parameters/dt");
+        const real dt = domain_data->get_physical_parameters().dt;
         const real alpha_x = D * dt * reciprocal_dx * reciprocal_dx;  // due to better pgi handling of scalars (instead of arrays)
         const real alpha_y = D * dt * reciprocal_dy * reciprocal_dy;
         const real alpha_z = D * dt * reciprocal_dz * reciprocal_dz;
@@ -70,9 +67,9 @@ void ColoredGaussSeidelDiffuse::diffuse(
 
         real sum;
         real res = 1.;
-        while (res > m_tol_res && it < m_max_iter) {
+        while (res > m_settings.tol_res && it < m_settings.max_iter) {
             in.copy_data(out);  // necessary for calculation of residuum
-            colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_w, odd_indices, even_indices, sync);
+            colored_gauss_seidel_step(out, b, alpha_x, alpha_y, alpha_z, beta, m_dsign, m_settings.w, odd_indices, even_indices, sync);
             domain_controller->apply_boundary(out, sync);
 
             sum = 0;
@@ -132,7 +129,7 @@ void ColoredGaussSeidelDiffuse::diffuse(
         const real reciprocal_dy = 1. / dy;
         const real reciprocal_dz = 1. / dz;
 
-        real dt = m_settings.get_real("physical_parameters/dt");
+        const real dt = domain_data->get_physical_parameters().dt;
 
         real alpha_x, alpha_y, alpha_z, reciprocal_beta;  // calculated in colored_gauss_seidel_step!
 
@@ -140,9 +137,9 @@ void ColoredGaussSeidelDiffuse::diffuse(
         real sum;
         real res = 1.;
 
-        while (res > m_tol_res && it < m_max_iter) {
+        while (res > m_settings.tol_res && it < m_settings.max_iter) {
             in.copy_data(out);  // necessary for calculation of residuum
-            colored_gauss_seidel_step(out, b, m_dsign, m_w, D, EV, dt, odd_indices, even_indices, sync);
+            colored_gauss_seidel_step(out, b, m_dsign, m_settings.w, D, EV, dt, odd_indices, even_indices, sync);
             domain_controller->apply_boundary(out, sync);
 
             sum = 0;

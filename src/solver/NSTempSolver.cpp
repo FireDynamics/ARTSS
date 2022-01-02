@@ -13,40 +13,38 @@
 #include "SolverSelection.h"
 #include "../domain/DomainData.h"
 
-NSTempSolver::NSTempSolver(Settings::Settings const &settings, FieldController *field_controller) :
-        m_settings(settings) {
+NSTempSolver::NSTempSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller) :
+        m_solver_settings(solver_settings),
+        m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_controller = field_controller;
 
     // Advection of velocity
-    SolverSelection::SetAdvectionSolver(m_settings, &adv_vel, m_settings.get("solver/advection/type"));
+    SolverSelection::set_advection_solver(m_solver_settings.advection, &adv_vel);
 
     // Advection of temperature
-    SolverSelection::SetAdvectionSolver(m_settings, &adv_temp, m_settings.get("solver/temperature/advection/type"));
+    SolverSelection::set_advection_solver(m_solver_settings.temperature.advection, &adv_temp);
 
     // Diffusion of velocity
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_vel);
 
     // Diffusion of temperature
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_temp, m_settings.get("solver/temperature/diffusion/type"));
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_temp);
 
     // Pressure
-    SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"));
+    SolverSelection::set_pressure_solver(m_solver_settings.pressure, &pres);
 
     // Source of velocity
-    SolverSelection::SetSourceSolver(m_settings, &sou_vel, m_settings.get("solver/source/type"));
+    SolverSelection::set_source_solver(m_solver_settings.source.type, &sou_vel, m_solver_settings.source.direction);
 
     // Source of temperature
-    SolverSelection::SetSourceSolver(m_settings, &sou_temp, m_settings.get("solver/temperature/source/type"));
+    SolverSelection::set_source_solver(m_solver_settings.temperature.source.type, &sou_temp, m_solver_settings.temperature.source.dir);
 
-    // Constants
-    m_dir_vel = m_settings.get("solver/source/dir");
-
-    m_has_dissipation = m_settings.get_bool("solver/temperature/source/dissipation");
-    m_forceFct = settings.get("solver/source/force_fct");
-    m_tempFct = settings.get("solver/temperature/source/temp_fct");
+    // temperature function
+    SolverSelection::set_temperature_source_function(m_solver_settings.temperature.source, &m_source_function_temperature);
+    m_add_source = m_solver_settings.source.force_fct != SourceMethods::Zero;
+    m_add_temp_source = m_solver_settings.temperature.source.temp_fct != SourceMethods::Zero;
     control();
 }
 
@@ -88,10 +86,9 @@ void NSTempSolver::do_step(real t, bool sync) {
     Field &f_z = m_field_controller->get_field_force_z();
     Field &S_T = m_field_controller->get_field_source_T();
 
-    auto nu = m_settings.get_real("physical_parameters/nu");
-    auto kappa = m_settings.get_real("physical_parameters/kappa");
-
-    auto dir_vel = m_dir_vel;
+    auto domain_data = DomainData::getInstance();
+    real nu = domain_data->get_physical_parameters().nu.value();
+    real kappa = domain_data->get_physical_parameters().kappa.value();
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
                             w0, w_tmp, p, rhs, T, T0, T_tmp, \
@@ -123,7 +120,7 @@ void NSTempSolver::do_step(real t, bool sync) {
         }
 
 // 3. Add force
-        if (m_forceFct != SourceMethods::Zero) {
+        if (m_add_source) {
 #ifndef BENCHMARKING
             m_logger->info("Add momentum source ...");
 #endif
@@ -169,19 +166,19 @@ void NSTempSolver::do_step(real t, bool sync) {
         }
 
         // Add dissipation
-        if (m_has_dissipation) {
+        if (m_solver_settings.temperature.source.dissipation) {
 
 #ifndef BENCHMARKING
             m_logger->info("Add dissipation ...");
 #endif
-            sou_temp->dissipate(m_settings, T, u, v, w, sync);
+            sou_temp->dissipate(T, u, v, w, sync);
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);
         }
 
         // Add source
-        if (m_tempFct != SourceMethods::Zero) {
+        if (m_add_temp_source) {
 
 #ifndef BENCHMARKING
             m_logger->info("Add temperature source ...");
@@ -205,9 +202,9 @@ void NSTempSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void NSTempSolver::control() {
-    auto fields = Utility::split(m_settings.get("solver/advection/field"), ',');
-    std::sort(fields.begin(), fields.end());
-    if (fields != std::vector<std::string>({"u", "v", "w"})) {
+    auto adv_fields = m_solver_settings.advection.fields;
+    std::sort(adv_fields.begin(), adv_fields.end());
+    if (adv_fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
@@ -215,9 +212,9 @@ void NSTempSolver::control() {
         // TODO Error Handling
     }
 
-    auto diff_fields = Utility::split(m_settings.get("solver/advection/field"), ',');
+    auto diff_fields = m_solver_settings.diffusion.fields;
     std::sort(diff_fields.begin(), diff_fields.end());
-    if (diff_fields != std::vector<std::string>({"u", "v", "w"})) {
+    if (diff_fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
@@ -225,25 +222,29 @@ void NSTempSolver::control() {
         // TODO Error Handling
     }
 
-    if (m_settings.get("solver/temperature/advection/field") != Mapping::get_field_type_name(FieldType::T)) {
+    if (m_solver_settings.temperature.advection.fields != std::vector<FieldType>{FieldType::T}) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error Handling
     }
-    if (m_settings.get("solver/temperature/diffusion/field") != Mapping::get_field_type_name(FieldType::T)) {
+    if (m_solver_settings.temperature.diffusion.fields != std::vector<FieldType>{FieldType::T}) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error Handling
     }
-    if (m_settings.get("solver/pressure/field") != Mapping::get_field_type_name(FieldType::P)) {
+    if (m_solver_settings.pressure.field != FieldType::P) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         // TODO Error Handling
         std::exit(1);
     }
+}
+
+void NSTempSolver::update_source(real t_cur) {
+    m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
 }

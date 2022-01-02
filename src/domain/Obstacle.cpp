@@ -10,40 +10,22 @@
 #include <vector>
 
 
-Obstacle::Obstacle(real x1, real x2,
-                   real y1, real y2,
-                   real z1, real z2,
+Obstacle::Obstacle(const Coordinate<real> &coords_start,
+                   const Coordinate<real> &coords_end,
                    const std::string &name) :
         m_name(name),
-        m_start(), m_end(),
         m_level(0),
         m_size_boundary() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     auto domain_data = DomainData::getInstance();
-
-    real dx = domain_data->get_dx();
-    real dy = domain_data->get_dy();
-    real dz = domain_data->get_dz();
-
-    real X1 = domain_data->get_X1();
-    real Y1 = domain_data->get_Y1();
-    real Z1 = domain_data->get_Z1();
-
-    size_t i1 = get_matching_index(x1, dx, X1) + 1;  // plus 1 for ghost cell
-    size_t j1 = get_matching_index(y1, dy, Y1) + 1;
-    size_t k1 = get_matching_index(z1, dz, Z1) + 1;
-    m_start.set_coordinate(i1, j1, k1);
-
-    size_t i2 = get_matching_index(x2, dx, X1);
-    size_t j2 = get_matching_index(y2, dy, Y1);
-    size_t k2 = get_matching_index(z2, dz, Z1);
-    m_end.set_coordinate(i2, j2, k2);
-
+    for (CoordinateAxis axis: {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z}) {
+        m_start[axis] = get_matching_index(coords_start[axis], domain_data->get_spacing(axis), domain_data->get_start_coord_PD(axis)) + 1;  // plus 1 for ghost cell
+        m_end[axis] = get_matching_index(coords_end[axis], domain_data->get_spacing(axis), domain_data->get_start_coord_PD(axis));
+    }
     init();
 }
-
 
 Obstacle::Obstacle(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
                    size_t level,

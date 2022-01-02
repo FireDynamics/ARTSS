@@ -46,7 +46,7 @@
         <turbulence include = "Yes">
           <Pr_T> 0.5 </Pr_T>
         </turbulence>
-        <source type = "ExplicitEuler" temp_fct = "GaussST" ramp_fct = "RampTanh" dissipation = "No">
+        <source type = "ExplicitEuler" temp_fct = "Gauss" ramp_fct = "RampTanh" dissipation = "No">
           <HRR> 25000. </HRR>             <!-- Total heat release rate (in kW) -->
           <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
           <x0> 36.  </x0>

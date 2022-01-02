@@ -15,6 +15,7 @@
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
+#include "../interfaces/ISourceFunction.h"
 
 struct AdvectionMethods {
     inline static const std::string SemiLagrangian = "SemiLagrangian";
@@ -32,11 +33,9 @@ struct PressureMethods {
 
 struct SourceMethods {
     inline static const std::string ExplicitEuler = "ExplicitEuler";
-    inline static const std::string BuoyancyST_MMS = "BuoyancyST_MMS";
     inline static const std::string Buoyancy = "Buoyancy";
     inline static const std::string Cube = "Cube";
-    inline static const std::string GaussST = "GaussST";
-    inline static const std::string GaussSC = "GaussSC";
+    inline static const std::string Gauss = "Gauss";
     inline static const std::string Uniform = "Uniform";
     inline static const std::string Zero = "Zero";
 };
@@ -47,25 +46,26 @@ struct TurbulenceMethods {
 };
 
 namespace SolverSelection {
-    void SetAdvectionSolver(Settings::Settings const &settings,
-                            IAdvection **advection_solver,
-                            const std::string& advection_type);
+    void set_advection_solver(const Settings::solver::advection_solver &settings,
+                              IAdvection **advection_solver);
 
-    void SetDiffusionSolver(Settings::Settings const &settings,
-                            IDiffusion **diffusion_solver,
-                            const std::string& diffusion_type);
+    void set_diffusion_solver(const Settings::solver::diffusion_solver &settings,
+                            IDiffusion **diffusion_solver);
 
-    void SetPressureSolver(Settings::Settings const &settings,
-                           IPressure **pressure_solver,
-                           const std::string& pressure_type);
+    void set_pressure_solver(const Settings::solver::pressure_solver &settings,
+                             IPressure **pressure_solver);
 
-    void SetSourceSolver(Settings::Settings const &settings,
-                         ISource **source_solver,
-                         const std::string& source_type);
+    void set_source_solver(const std::string &source_type,
+                           ISource **source_solver,
+                           const std::vector<CoordinateAxis> &dir);
 
-    void SetTurbulenceSolver(Settings::Settings const &settings,
-                             ITurbulence **turbulence_solver,
-                             const std::string& turbulence_type);
+    void set_turbulence_solver(const Settings::solver::turbulence_solver &settings,
+                               ITurbulence **turbulence_solver);
+
+    void set_temperature_source_function(const Settings::solver::temperature_source &settings,
+                                         ISourceFunction **source_function);
+    void set_concentration_source_function(const Settings::solver::concentration_source &settings,
+                                          ISourceFunction **source_function);
 };
 
 #endif /* ARTSS_SOLVER_SOLVERSELECTION_H_ */

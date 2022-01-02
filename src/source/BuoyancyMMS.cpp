@@ -8,8 +8,7 @@
 #include "../domain/DomainController.h"
 #include "../domain/DomainData.h"
 
-BuoyancyMMS::BuoyancyMMS(Settings::Settings const &settings) :
-        m_settings(settings),
+BuoyancyMMS::BuoyancyMMS() :
         m_source_field(FieldType::RHO) {
     set_up();
 }
@@ -32,11 +31,11 @@ void BuoyancyMMS::set_up() {
     real dx = domain_data->get_dx();
     real dy = domain_data->get_dy();
 
-    real nu = m_settings.get_real("physical_parameters/nu");
-    real beta = m_settings.get_real("physical_parameters/beta");
-    real kappa = m_settings.get_real("physical_parameters/kappa");
-    real g = m_settings.get_real("physical_parameters/g");
-    real rhoa = m_settings.get_real("initial_conditions/rhoa");
+    real nu = domain_data->get_physical_parameters().nu.value();
+    real beta = domain_data->get_physical_parameters().beta;
+    real kappa = domain_data->get_physical_parameters().kappa.value();
+    real g = domain_data->get_physical_parameters().g;
+    real rhoa = domain_data->get_physical_parameters().rhoa.value();
     real rbeta = 1. / beta;
     real rg = 1. / g;
     real c_nu = 2 * nu * M_PI * M_PI - 1;

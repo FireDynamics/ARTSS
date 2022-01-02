@@ -12,7 +12,8 @@
 #include "../boundaryCondition/ObstacleBoundary.h"
 #include "../boundaryCondition/SurfaceBoundary.h"
 
-BoundaryDataController::BoundaryDataController(const std::vector<Settings::BoundarySetting> &boundary) {
+
+BoundaryDataController::BoundaryDataController(const std::vector<Settings::boundary> &boundary) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -31,16 +32,10 @@ BoundaryDataController::BoundaryDataController(const std::vector<Settings::Bound
 /// \brief  Parses boundary data of XML tree to boundary data object
 /// \param  xml_element Pointer to XML element
 // *************************************************************************************************
-void BoundaryDataController::add_boundary_data(const Settings::BoundarySetting &boundary) {
-    BoundaryCondition bc = Mapping::match_boundary_condition(boundary.get_type());
-    real value = boundary.get_value();
-
-    for (const auto &f : Utility::split(boundary.get_field(), ',')) {
-        FieldType field_type = Mapping::match_field(f);
-
-        for (const auto &p : Utility::split(boundary.get_patch(), ',')) {
-            Patch patch = Mapping::match_patch(p);
-            m_boundary_data[field_type].add_boundary_condition(patch, value, bc);
+void BoundaryDataController::add_boundary_data(const Settings::boundary &boundary) {
+    for (const auto &field_type : boundary.field_type) {
+        for (const auto &patch : boundary.patch) {
+            m_boundary_data[field_type].add_boundary_condition(patch, boundary.value, boundary.boundary_condition);
         }
     }
 }

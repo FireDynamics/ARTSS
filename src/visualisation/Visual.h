@@ -15,7 +15,7 @@
 
 class Visual {
 public:
-    Visual(Settings::Settings const &settings, Solution const &solution, bool has_analytical_solution);
+    Visual(const Settings::visualisation_parameters &settings, const Solution &solution, const std::string &filename);
 
     void visualise(const FieldController &field_controller, real t);
 
@@ -26,14 +26,10 @@ public:
     static void write_vtk_debug(FieldController &field_controller, const std::string& filename);
 
 private:
-    Settings::Settings const &m_settings;
+    const Settings::visualisation_parameters &m_settings;
 
-    std::string m_filename;
+    const std::string &m_filename;
     const Solution &m_solution;
-    bool m_save_csv = false;
-    int m_csv_plots = 0;
-    bool m_save_vtk = false;
-    int m_vtk_plots = 0;
 
     static std::string create_filename(const std::string &filename, int counter, bool analytical);
 

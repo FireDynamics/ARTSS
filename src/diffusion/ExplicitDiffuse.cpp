@@ -52,7 +52,7 @@ void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bo
     const size_t Nx = domain_data->get_Nx();  // due to unnecessary parameter passing of *this
     const size_t Ny = domain_data->get_Ny();
 
-    const real dt = m_settings.get_real("physical_parameters/dt");
+    const real dt = domain_data->get_physical_parameters().dt;
 
     auto domain_controller = DomainController::getInstance();
 
@@ -88,7 +88,7 @@ void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Fi
     const size_t Nx = domain_data->get_Nx();  // due to unnecessary parameter passing of *this
     const size_t Ny = domain_data->get_Ny();
 
-    const real dt = m_settings.get_real("physical_parameters/dt");
+    const real dt = domain_data->get_physical_parameters().dt;
 
     auto domain_controller = DomainController::getInstance();
 

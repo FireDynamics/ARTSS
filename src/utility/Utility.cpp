@@ -44,6 +44,16 @@ size_t get_index(real physical_coordinate, real spacing, real start_coordinate) 
     return std::round((-start_coordinate + physical_coordinate) / spacing) + 1;
 }
 
+std::string to_upper(std::string string) {
+    std::transform(string.begin(), string.end(), string.begin(), ::toupper);
+    return string;
+}
+
+std::string to_lower(std::string string) {
+    std::transform(string.begin(), string.end(), string.begin(), ::tolower);
+    return string;
+}
+
 // ================================= Split string at character =====================================
 // *************************************************************************************************
 /// \brief  Splits a string at a defined char
@@ -76,7 +86,7 @@ std::shared_ptr<spdlog::logger> create_logger(const std::string &logger_name) {
     auto logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
     logger->sinks()[0]->set_level(sinks[0]->level());
     logger->sinks()[1]->set_level(sinks[1]->level());
-    logger->set_level(sinks[0]->level());
+    logger->set_level(spdlog::level::trace);
     return logger;
 }
 

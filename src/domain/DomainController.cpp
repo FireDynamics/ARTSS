@@ -7,10 +7,9 @@
 #include "DomainController.h"
 #include <string>
 
-DomainController *DomainController::singleton = nullptr;  // Singleton
+std::unique_ptr<DomainController> DomainController::single{};
 
-
-DomainController::DomainController(Settings::Settings const &settings) :
+DomainController::DomainController(const Settings::Settings &settings) :
         m_settings(settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
@@ -35,15 +34,13 @@ return_xml_objects DomainController::read_XML() {
     m_logger->debug("start parsing XML");
     m_logger->debug("start parsing boundary parameter");
 #endif
-    // TODO (cvm)
-   BoundaryDataController bdc_domain(m_settings.get_boundaries());
+   BoundaryDataController bdc_domain(m_settings.boundary_parameters.boundaries);
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing boundary parameter");
 #endif
-    //BoundaryDataController bdc_domain = parse_boundary_parameter(m_settings.get_boundaries());
-    auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(m_settings.get_obstacles());
+    auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(m_settings.obstacles_parameters);
     detect_neighbouring_obstacles(obstacles);
-    auto [surfaces, bdc_surfaces] = parse_surface_parameter(m_settings.get_surfaces());
+    auto [surfaces, bdc_surfaces] = parse_surface_parameter(m_settings.surfaces_parameters);
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing XML");
 #endif
@@ -55,29 +52,20 @@ return_xml_objects DomainController::read_XML() {
 /// \brief  parses surfaces from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-return_surface DomainController::parse_surface_parameter(const std::vector<Settings::SurfaceSetting> &surface_setting) {
+return_surface DomainController::parse_surface_parameter(const Settings::surfaces_parameters &surface_settings) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing surface parameter");
 #endif
     // SURFACES
     // TODO(issue 5): surfaces
-    m_has_surfaces = m_settings.get_bool("surfaces/enabled");
     std::vector<Surface> surfaces;
     std::vector<BoundaryDataController> bdc_surfaces;
-    if (m_has_surfaces) {
-        surfaces.reserve(surfaces.size());
-        bdc_surfaces.reserve(surfaces.size());
-        for (const auto &surface: surface_setting) {
-            std::string name = surface.get_name();
-            Patch patch = Mapping::match_patch(surface.get_patch());
-            real sx1 = surface.get_sx1();
-            real sx2 = surface.get_sx2();
-            real sy1 = surface.get_sy1();
-            real sy2 = surface.get_sy2();
-            real sz1 = surface.get_sz1();
-            real sz2 = surface.get_sz2();
-            surfaces.emplace_back(sx1, sx2, sy1, sy2, sz1, sz2, name, patch);
-            bdc_surfaces.emplace_back(surface.get_boundaries());
+    if (surface_settings.enabled) {
+        surfaces.reserve(surface_settings.surfaces.size());
+        bdc_surfaces.reserve(surface_settings.surfaces.size());
+        for (const auto &surface: surface_settings.surfaces) {
+            surfaces.emplace_back(surface.start_coords, surface.end_coords, surface.name, surface.patch);
+            bdc_surfaces.emplace_back(surface.boundaries);
         }
     }
 #ifndef BENCHMARKING
@@ -93,32 +81,19 @@ return_surface DomainController::parse_surface_parameter(const std::vector<Setti
 /// \brief  parses obstacles from XML file
 /// \param  xmlParameter pointer to XMLElement to start with
 // *************************************************************************************************
-return_obstacle DomainController::parse_obstacle_parameter(const std::vector<Settings::ObstacleSetting> &obstacle_setting) {
+return_obstacle DomainController::parse_obstacle_parameter(const Settings::obstacles_parameters &obstacle_settings) {
 #ifndef BENCHMARKING
     m_logger->debug("start parsing obstacle parameter");
 #endif
-// OBSTACLES
-    m_has_obstacles = m_settings.get_bool("obstacles/enabled");
     std::vector<Obstacle> obstacles;
     std::vector<BoundaryDataController> bdc_obstacles;
-    if (m_has_obstacles) {
-        obstacles.reserve(obstacle_setting.size());
-        bdc_obstacles.reserve(obstacle_setting.size());
-        for (const Settings::ObstacleSetting &obstacle: obstacle_setting) {
-            std::string name = obstacle.get_name();
-#ifndef BENCHMARKING
-            m_logger->debug("read obstacle '{}'", name);
-#endif
-            real ox1 = obstacle.get_ox1();
-            real ox2 = obstacle.get_ox2();
-            real oy1 = obstacle.get_oy1();
-            real oy2 = obstacle.get_oy2();
-            real oz1 = obstacle.get_oz1();
-            real oz2 = obstacle.get_oz2();
-
-            obstacles.emplace_back(ox1, ox2, oy1, oy2, oz1, oz2, name);
-            bdc_obstacles.emplace_back(obstacle.get_boundaries());
-        }
+    if (obstacle_settings.enabled) {
+       obstacles.reserve(obstacle_settings.obstacles.size());
+       bdc_obstacles.reserve(obstacle_settings.obstacles.size());
+       for (const Settings::obstacle &o: obstacle_settings.obstacles) {
+           obstacles.emplace_back(o.start_coords, o.end_coords, o.name);
+           bdc_obstacles.emplace_back(o.boundaries);
+       }
     }
 #ifndef BENCHMARKING
     m_logger->debug("finished parsing obstacle parameter");
@@ -128,14 +103,6 @@ return_obstacle DomainController::parse_obstacle_parameter(const std::vector<Set
 
 DomainController::~DomainController() {
     delete m_multigrid;
-}
-
-
-DomainController *DomainController::getInstance(Settings::Settings const &settings) {
-    if (singleton == nullptr) {
-        singleton = new DomainController(settings);
-    }
-    return singleton;
 }
 
 // ================================= Printer =======================================================

@@ -14,13 +14,11 @@
 
 class BuoyancyMMS: public ISourceFunction {
  public:
-    explicit BuoyancyMMS(Settings::Settings const &settings);
-    ~BuoyancyMMS();
+    BuoyancyMMS();
+    ~BuoyancyMMS() = default;
     void update_source(Field &out, real t_cur) override;
  private:
     void set_up();
-
-    Settings::Settings const &m_settings;
     Field m_source_field;
 };
 
