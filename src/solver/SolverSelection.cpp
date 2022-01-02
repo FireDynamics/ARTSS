@@ -33,7 +33,7 @@ namespace SolverSelection {
     void set_advection_solver(const Settings::solver::advection_solver &settings,
                               IAdvection **advection_solver) {
         if (settings.type == AdvectionMethods::SemiLagrangian) {
-            *advection_solver = new SLAdvect(settings);
+            *advection_solver = new SLAdvect();
         } else {
 #ifndef BENCHMARKING
             auto logger = Utility::create_logger(class_name);
