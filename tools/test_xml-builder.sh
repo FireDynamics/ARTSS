@@ -475,7 +475,7 @@ function create_testcases {
     <boundary field=\"T\" patch=\"front,back,top,left,right\" type=\"dirichlet\" value=\"299.14\" />
     <boundary field=\"T\" patch=\"bottom\" type=\"neumann\" value=\"0.0\" />
   </boundaries>" > ${NAME}_$BFILEVAL
-    echo "  <initial_conditions usr_fct = \"Uniform\" random = \"Yes\">
+    echo "  <initial_conditions usr_fct=\"Uniform\" random=\"Yes\">
     <val> 299.14 </val>
     <random absolute=\"Yes\" custom_seed=\"Yes\" custom_steps=\"Yes\">
       <seed> 0 </seed>
@@ -483,10 +483,10 @@ function create_testcases {
       <range> 1 </range>
     </random>
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "    <source type = \"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"No\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"No\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
       <ambient_temperature_value> 299.14 </ambient_temperature_value>
     </source>" > ${NAME}_$SFILEVAL
-    echo "      <source type = \"ExplicitEuler\" dir=\"y\" temp_fct=\"Gauss\" dissipation=\"No\" random=\"No\">
+    echo "      <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Gauss\" dissipation=\"No\" random=\"No\">
         <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
         <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 0. </x0>
