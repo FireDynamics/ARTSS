@@ -11,16 +11,11 @@
 
 #include "../domain/DomainController.h"
 
-JacobiDiffuse::JacobiDiffuse(Settings::Settings const &settings) :
-        m_settings(settings) {
+JacobiDiffuse::JacobiDiffuse(const Settings::solver::diffusion_solvers::jacobi &settings) :
+        m_settings(settings), m_dsign(1) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_dsign = 1.;
-    m_w = settings.get_real("solver/diffusion/w");
-
-    m_max_iter = settings.get_size_t("solver/diffusion/max_iter");
-    m_tol_res = settings.get_real("solver/diffusion/tol_res");
 }
 
 // ============================ Diffuse =====================================
@@ -50,7 +45,7 @@ void JacobiDiffuse::diffuse(Field &out, const Field &in, const Field &b,
         const real dy = domain_data->get_dy();
         const real dz = domain_data->get_dz();
 
-        const real dt = m_settings.get_real("physical_parameters/dt");
+        const real dt = domain_data->get_physical_parameters().dt;
 
         const real reciprocal_dx = 1. / dx;  // due to unnecessary parameter passing of *this
         const real reciprocal_dy = 1. / dy;
@@ -63,16 +58,13 @@ void JacobiDiffuse::diffuse(Field &out, const Field &in, const Field &b,
         const real reciprocal_beta = (1. + 2. * (alpha_x + alpha_y + alpha_z));
 
         const real dsign = m_dsign;
-        const real w = m_w;
 
         size_t it = 0;
-        const size_t max_it = m_max_iter;
-        const real tol_res = m_tol_res;
         real sum;
         real res = 1.;
 
-        while (res > tol_res && it < max_it) {
-            JacobiStep(out, in, b, alpha_x, alpha_y, alpha_z, reciprocal_beta, dsign, w, sync);
+        while (res > m_settings.tol_res && it < m_settings.max_iter) {
+            JacobiStep(out, in, b, alpha_x, alpha_y, alpha_z, reciprocal_beta, dsign, m_settings.w, sync);
             domain_controller->apply_boundary(out, sync);
 
             sum = 0.;
@@ -151,21 +143,18 @@ void JacobiDiffuse::diffuse(
         const real reciprocal_dy = 1. / dy;
         const real reciprocal_dz = 1. / dz;
 
-        const real dt = m_settings.get_real("physical_parameters/dt");
+        const real dt = domain_data->get_physical_parameters().dt;
 
         real alpha_x, alpha_y, alpha_z, reciprocal_beta;  // calculated in JacobiStep!
 
         const real dsign = m_dsign;
-        const real w = m_w;
 
         size_t it = 0;
-        const size_t max_it = m_max_iter;
-        const real tol_res = m_tol_res;
         real sum;
         real res = 1.;
 
-        while (res > tol_res && it < max_it) {
-            JacobiStep(out, in, b, dsign, w, D, EV, dt, sync);
+        while (res > m_settings.tol_res && it < m_settings.max_iter) {
+            JacobiStep(out, in, b, dsign, m_settings.w, D, EV, dt, sync);
             domain_controller->apply_boundary(out, sync);
 
             sum = 0.;

@@ -12,17 +12,14 @@
 
 class Cube: public ISourceFunction {
  public:
-    Cube(real value,
-            real x_start, real y_start, real z_start,
-            real x_end, real y_end, real z_end);
+    explicit Cube(const Settings::solver::sources::cube &cube);
     ~Cube() = default;
     void update_source(Field &out, real t_cur) override;
 
  private:
+    const Settings::solver::sources::cube m_settings;
     Field m_source_field;
-    void set_up(real value,
-            real x_start, real y_start, real z_start,
-            real x_end, real y_end, real z_end);
+    void set_up();
 };
 
 

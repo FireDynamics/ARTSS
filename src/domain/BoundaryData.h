@@ -22,10 +22,10 @@ class BoundaryData {
     void print() const;
 
     void add_boundary_condition(Patch const &patches,
-                                real value,
+                                std::optional<real> value,
                                 BoundaryCondition const &boundary_condition);
     BoundaryCondition get_boundary_condition(Patch p) const { return m_boundary_conditions[p]; }
-    real get_value(Patch p) const { return m_values[p];}
+    real get_value(Patch p) const { return m_values[p].value(); }
 
     bool is_empty() const { return !m_has_values; }
 
@@ -34,7 +34,7 @@ class BoundaryData {
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     std::vector<BoundaryCondition> m_boundary_conditions;
-    std::vector<real> m_values;
+    std::vector<std::optional<real>> m_values;
 
     bool m_has_values = false;
 };

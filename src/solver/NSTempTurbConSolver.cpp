@@ -6,61 +6,54 @@
 
 #include "NSTempTurbConSolver.h"
 
-#include <string>
 #include <vector>
 #include <algorithm>
 
 #include "SolverSelection.h"
 #include "../domain/DomainData.h"
 
-NSTempTurbConSolver::NSTempTurbConSolver(Settings::Settings const &settings, FieldController *field_controller) :
-        m_settings(settings) {
+NSTempTurbConSolver::NSTempTurbConSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller) :
+        m_solver_settings(solver_settings),
+        m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_controller = field_controller;
 
     // Advection of velocity
-    SolverSelection::SetAdvectionSolver(m_settings, &adv_vel, m_settings.get("solver/advection/type"));
+    SolverSelection::set_advection_solver(m_solver_settings.advection, &adv_vel);
 
     // Advection of temperature
-    SolverSelection::SetAdvectionSolver(m_settings, &adv_temp, m_settings.get("solver/temperature/advection/type"));
+    SolverSelection::set_advection_solver(m_solver_settings.temperature.advection, &adv_temp);
 
     // Advection of concentration
-    SolverSelection::SetAdvectionSolver(m_settings, &adv_con, m_settings.get("solver/concentration/advection/type"));
+    SolverSelection::set_advection_solver(m_solver_settings.concentration.advection, &adv_temp);
 
     // Diffusion of velocity
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_vel, m_settings.get("solver/diffusion/type"));
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_vel);
 
     // Turbulent viscosity for velocity diffusion
-    SolverSelection::SetTurbulenceSolver(m_settings, &mu_tub, m_settings.get("solver/turbulence/type"));
+    SolverSelection::set_turbulence_solver(m_solver_settings.turbulence, &mu_tub);
 
     // Diffusion of temperature
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_temp, m_settings.get("solver/temperature/diffusion/type"));
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_temp);
 
     // Diffusion for concentration
-    SolverSelection::SetDiffusionSolver(m_settings, &dif_con, m_settings.get("solver/concentration/diffusion/type"));
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_con);
 
     // Pressure
-    SolverSelection::SetPressureSolver(m_settings, &pres, m_settings.get("solver/pressure/type"));
+    SolverSelection::set_pressure_solver(m_solver_settings.pressure, &pres);
 
     // Source of velocity
-    SolverSelection::SetSourceSolver(m_settings, &sou_vel, m_settings.get("solver/source/type"));
+    SolverSelection::set_source_solver(m_solver_settings.source.type, &sou_vel, m_solver_settings.source.direction);
 
     // Source of temperature
-    SolverSelection::SetSourceSolver(m_settings, &sou_temp, m_settings.get("solver/temperature/source/type"));
+    SolverSelection::set_source_solver(m_solver_settings.temperature.source.type, &sou_temp, m_solver_settings.temperature.source.dir);
 
     // Source of concentration
-    SolverSelection::SetSourceSolver(m_settings, &sou_con, m_settings.get("solver/concentration/source/type"));
+    SolverSelection::set_source_solver(m_solver_settings.concentration.source.type, &sou_con, m_solver_settings.concentration.source.dir);
 
-    // Constants
-    m_dir_vel = m_settings.get("solver/source/dir");
-    m_has_turbulence_temperature = m_settings.get_bool("solver/temperature/turbulence/include");
-    m_has_turbulence_concentration = m_settings.get_bool("solver/concentration/turbulence/include");
-    m_has_dissipation = m_settings.get_bool("solver/temperature/source/dissipation");
-    m_forceFct = m_settings.get("solver/source/force_fct");
-    m_tempFct = m_settings.get("solver/temperature/source/temp_fct");
-    m_conFct = m_settings.get("solver/concentration/source/con_fct");
+    SolverSelection::set_temperature_source_function(m_solver_settings.temperature.source, &m_source_function_temperature);
+    SolverSelection::set_concentration_source_function(m_solver_settings.concentration.source, &m_source_function_concentration);
     control();
 }
 
@@ -111,6 +104,11 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
     Field &kappa_t = m_field_controller->get_field_kappa();  // kappa_t - Eddy thermal diffusivity
     Field &gamma_t = m_field_controller->get_field_gamma();  // gamma_t - Eddy mass diffsusivity
 
+    auto domain_data = DomainData::getInstance();
+    const real nu = domain_data->get_physical_parameters().nu.value();
+    const real kappa = domain_data->get_physical_parameters().kappa.value();
+    const real gamma = domain_data->get_physical_parameters().gamma.value();
+
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, \
                          w0, w_tmp, p, rhs, T, T0, T_tmp, \
                          C, C0, C_tmp, f_x, f_y, f_z, S_T, S_C, \
@@ -136,8 +134,6 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 #ifndef BENCHMARKING
         m_logger->info("Diffuse ...");
 #endif
-        const real nu = m_settings.get_real("physical_parameters/nu");
-
         dif_vel->diffuse(u, u0, u_tmp, nu, nu_t, sync);
         dif_vel->diffuse(v, v0, v_tmp, nu, nu_t, sync);
         dif_vel->diffuse(w, w0, w_tmp, nu, nu_t, sync);
@@ -146,7 +142,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
         FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
 
 // 3. Add force
-        if (m_forceFct != SourceMethods::Zero) {
+        if (m_add_source) {
 #ifndef BENCHMARKING
             m_logger->info("Add momentum source ...");
 #endif
@@ -182,9 +178,8 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
         // Solve diffusion equation
         // turbulence
-        real kappa = m_settings.get_real("physical_parameters/kappa");
-        if (m_has_turbulence_temperature) {
-            real Pr_T = m_settings.get_real("solver/temperature/turbulence/Pr_T");
+        if (m_solver_settings.temperature.has_turbulence) {
+            real Pr_T = m_solver_settings.temperature.prandtl_number.value();
             real rPr_T = 1. / Pr_T;
 
             size_t bsize = kappa_t.get_size();
@@ -215,16 +210,16 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
         }
 
         // Add dissipation
-        if (m_has_dissipation) {
+        if (m_solver_settings.temperature.source.dissipation) {
 
 #ifndef BENCHMARKING
             m_logger->info("Add dissipation ...");
 #endif
-            sou_temp->dissipate(m_settings, T, u, v, w, sync);
+            sou_temp->dissipate(T, u, v, w, sync);
 
             // Couple temperature
             FieldController::couple_scalar(T, T0, T_tmp, sync);
-        } else if (m_tempFct != SourceMethods::Zero) {  // Add source
+        } else if (m_add_temp_source) {  // Add source
 #ifndef BENCHMARKING
             m_logger->info("Add temperature source ...");
 #endif
@@ -247,9 +242,8 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 
         // Solve diffusion equation
         // turbulence
-        real gamma = m_settings.get_real("solver/concentration/diffusion/gamma");
-        if (m_has_turbulence_concentration) {
-            real Sc_T = m_settings.get_real("solver/concentration/turbulence/Sc_T");
+        if (m_solver_settings.concentration.has_turbulence) {
+            real Sc_T = m_solver_settings.concentration.turbulent_schmidt_number.value();
             real rSc_T = 1. / Sc_T;
 
             size_t bsize = gamma_t.get_size();
@@ -279,7 +273,7 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
         }
 
         // Add source
-        if (m_conFct != SourceMethods::Zero) {
+        if (m_solver_settings.concentration.has_turbulence) {
 #ifndef BENCHMARKING
             m_logger->info("Add concentration source ...");
 #endif
@@ -302,9 +296,9 @@ void NSTempTurbConSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void NSTempTurbConSolver::control() {
-    auto fields = Utility::split(m_settings.get("solver/advection/field"), ',');
-    std::sort(fields.begin(), fields.end());
-    if (fields != std::vector<std::string>({"u", "v", "w"})) {
+    auto adv_fields = m_solver_settings.advection.fields;
+    std::sort(adv_fields.begin(), adv_fields.end());
+    if (adv_fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
@@ -312,48 +306,54 @@ void NSTempTurbConSolver::control() {
         // TODO Error handling
     }
 
-    auto diff_fields = Utility::split(m_settings.get("solver/diffusion/field"), ',');
+    auto diff_fields = m_solver_settings.diffusion.fields;
     std::sort(diff_fields.begin(), diff_fields.end());
-    if (diff_fields != std::vector<std::string>({"u", "v", "w"})) {
+    if (adv_fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/temperature/advection/field") != Mapping::get_field_type_name(FieldType::T)) {
+
+    if (m_solver_settings.temperature.advection.fields != std::vector<FieldType>{FieldType::T}) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/concentration/advection/field") != Mapping::get_field_type_name(FieldType::RHO)) {
+    if (m_solver_settings.temperature.diffusion.fields != std::vector<FieldType>{FieldType::T}) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/temperature/diffusion/field") != Mapping::get_field_type_name(FieldType::T)) {
+    if (m_solver_settings.concentration.advection.fields != std::vector<FieldType>{FieldType::RHO}) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/concentration/diffusion/field") != Mapping::get_field_type_name(FieldType::RHO)) {
+    if (m_solver_settings.concentration.diffusion.fields != std::vector<FieldType>{FieldType::RHO}) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (m_settings.get("solver/pressure/field") != Mapping::get_field_type_name(FieldType::P)) {
+    if (m_solver_settings.pressure.field != FieldType::P) {
 #ifndef BENCHMARKING
         m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
+}
+
+void NSTempTurbConSolver::update_source(real t_cur) {
+    m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
+    m_source_function_concentration->update_source(m_field_controller->get_field_source_concentration(), t_cur);
 }

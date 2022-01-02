@@ -16,7 +16,7 @@
 
 class VCycleMG: public IPressure{
  public:
-    VCycleMG(Settings::Settings const &settings);
+    VCycleMG(const Settings::solver::pressure_solvers::vcycle_mg &settings);
     ~VCycleMG() override;
 
     void pressure(Field &out, Field const &b, real t, bool sync) override;
@@ -35,10 +35,7 @@ class VCycleMG: public IPressure{
     void call_solve_colored_gauss_seidel(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
     void call_solve_jacobi(Field &out, Field &tmp, Field const &b, size_t level, bool sync);
 
-    Settings::Settings const &m_settings;
-    const size_t m_levels;
-    const int m_n_cycle;
-    const int m_n_relax;
+    const Settings::solver::pressure_solvers::vcycle_mg &m_settings;
 
     /**
      * difference between smooth and solve function:
@@ -52,11 +49,11 @@ class VCycleMG: public IPressure{
     void (VCycleMG::*m_solve_function)(Field &, Field &, Field const &, const size_t, bool);
     std::vector<std::vector<size_t>> cgs_even_indices;
     std::vector<std::vector<size_t>> cgs_odd_indices;
-    size_t m_diffusion_max_iter;
-    real m_diffusion_tol_res;
 
     const real m_dsign = -1;
-    const real m_w;
+    size_t m_diffusion_max_iter;
+    real m_diffusion_tol_res;
+    real m_diffusion_w;
 
     /**
      * size: 0 .. m_levels

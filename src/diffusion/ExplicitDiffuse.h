@@ -15,7 +15,7 @@
 
 class ExplicitDiffuse : public IDiffusion {
 public:
-    explicit ExplicitDiffuse(Settings::Settings const &settings) : m_settings(settings) {}
+    ExplicitDiffuse() = default;
 
     void diffuse(
             Field &out, const Field &in, const Field &b,
@@ -29,8 +29,6 @@ public:
     void ExplicitStep(Field &out, const Field &in,
                       real D, const Field &EV, bool sync = true);
 
-private:
-    Settings::Settings const &m_settings;
 };
 
 #endif /* ARTSS_DIFFUSION_EXPLICITDIFFUSE_H_ */

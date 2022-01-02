@@ -16,34 +16,44 @@
 #endif
 
 int main(int argc, char **argv) {
-    // Initialisation
-    // Parameters
-    std::string XML_filename;
-    if (argc <= 1) {
-        std::cerr << "XML file missing" << std::endl;
-        std::exit(1);
-    }
+    try {
+        // Initialisation
+        // Parameters
+        std::string XML_filename;
+        if (argc <= 1) {
+            std::cerr << "XML file missing" << std::endl;
+            std::exit(1);
+        }
 
 #ifdef _OPENACC
-    // Initialise GPU
-    acc_device_t dev_type = acc_get_device_type();
-    acc_init(dev_type);
+        // Initialise GPU
+        acc_device_t dev_type = acc_get_device_type();
+        acc_init(dev_type);
 #endif
 
-    Settings::Settings settings(argv[1]);
-    auto domain_data = DomainData::getInstance(settings);
-    auto domain_controller = DomainController::getInstance(settings);
+        Settings::Settings settings = Settings::parse_settings_from_file(argv[1]);
+        size_t multigrid_level = 0;
 
-    SolverController *sc = new SolverController(settings);
+        auto solver = settings.solver_parameters.description;
+        if (solver.find("NS") != std::string::npos || solver == SolverTypes::PressureSolver) {
+            multigrid_level = settings.solver_parameters.pressure.solver.n_level;
+        }
+        DomainData::init(settings.physical_parameters, settings.domain_parameters, multigrid_level);
+        DomainController::init(settings);
 
-    // Integrate over time and solve numerically
-    // Time integration
-    TimeIntegration ti(settings, sc);
-    ti.run();
+        SolverController *sc = new SolverController(settings);
 
-    // Clean up
-    delete sc;
-    delete domain_data;
-    delete domain_controller;
+        // Integrate over time and solve numerically
+        // Time integration
+        TimeIntegration ti(settings, sc);
+        ti.run();
+
+        // Clean up
+        delete sc;
+    } catch (const std::exception &ex) {
+        std::cerr << ex.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Unknown exception encountered" << std::endl;
+    }
     return 0;
 }

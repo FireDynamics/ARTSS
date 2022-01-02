@@ -6,6 +6,7 @@
     <nu> 2.44139e-05 </nu>  <!-- kinematic viscosity -->
     <beta> 3.28e-3 </beta>  <!-- thermal expansion coefficient -->
     <g> -9.81 </g>  <!-- gravitational constant -->
+    <rhoa> 1 </rhoa>
     <kappa> 3.31e-5 </kappa>  <!-- thermal diffusion -->
   </physical_parameters>
 
@@ -27,9 +28,9 @@
       <n_cycle> 2 </n_cycle> <!-- number of cycles -->
       <max_cycle> 100 </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
+      <n_relax> 4 </n_relax>  <!-- number of iterations -->
       <diffusion type="Jacobi" field="p">
-        <n_relax> 4 </n_relax>  <!-- number of iterations -->
-        <max_solve> 100 </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
+        <max_iter> 100 </max_iter>  <!-- maximal number of iterations in solving at lowest level -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
         <w> 0.6666666667 </w>  <!-- relaxation parameter  -->
       </diffusion>
@@ -45,7 +46,7 @@
       <turbulence include="Yes">
         <Pr_T> 0.5 </Pr_T>
       </turbulence>
-      <source type="ExplicitEuler" temp_fct="GaussST" dissipation="No" random="No">
+      <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="No">
         <HRR> 25000. </HRR>     <!-- Total heat release rate (in kW) -->
         <cp> 1.023415823 </cp>  <!-- specific heat capacity (in kJ/kgK)-->
         <x0> 30. </x0>

@@ -16,7 +16,7 @@
 
 class JacobiDiffuse : public IDiffusion {
  public:
-    explicit JacobiDiffuse(Settings::Settings const &settings);
+    explicit JacobiDiffuse(const Settings::solver::diffusion_solvers::jacobi &settings);
 
     void diffuse(
             Field &out, const Field &in, const Field &b,
@@ -39,14 +39,11 @@ class JacobiDiffuse : public IDiffusion {
             const Field &EV, real dt, bool sync = true);  // turbulent version
 
  private:
-    Settings::Settings const &m_settings;
+    const Settings::solver::diffusion_solvers::jacobi &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
     real m_dsign;
-    real m_w;
-    size_t m_max_iter;
-    real m_tol_res;
 };
 
 #endif /* ARTSS_DIFFUSION_JACOBIDIFFUSE_H_ */

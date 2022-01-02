@@ -20,12 +20,15 @@
 
 class Surface {
  public:
+    Surface(const Coordinate<real> &coords_start, const Coordinate<real> &coords_end,
+            const std::string &name,
+            Patch patch);
     Surface(real x1, real x2,
             real y1, real y2,
             real z1, real z2,
             const std::string &name,
             Patch patch);
-    Surface(Coordinate<size_t> &coords_start, Coordinate<size_t> &coords_end,
+    Surface(Coordinate<size_t> &index_start, Coordinate<size_t> &index_end,
             size_t level,
             const std::string &name,
             Patch patch);
