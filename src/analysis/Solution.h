@@ -47,7 +47,7 @@ class Solution {
     Field m_w_analytical_solution;
     Field m_p_analytical_solution;
     Field m_T_analytical_solution;
-    void (Solution::*m_init_function)(const real);
+    std::function<void(const real)> m_init_function;
 
     real m_current_time_step = -1;
 #ifndef BENCHMARKING
