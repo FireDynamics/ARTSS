@@ -21,11 +21,11 @@ TEST(DomainTest, sizes) {
     DomainData::init({}, domain_params, 0);
 
     size_t size_obstacle_list = 0;
-    auto obstacle_list = new size_t[size_obstacle_list];
-    auto surface_list = new size_t*[number_of_patches];
+    std::vector<size_t> obstacle_list(0);
+    std::vector<size_t*> surface_list(number_of_patches);
     PatchObject size_surface_list;
     size_t level = 0;
-    Domain domain(obstacle_list, size_obstacle_list, surface_list, size_surface_list, level);
+    Domain domain(obstacle_list.data(), obstacle_list.size(), surface_list.data(), size_surface_list, level);
 
     PatchObject *sizes = domain.get_size_boundary_list();
     PatchObject boundary_sizes(*sizes);
@@ -38,8 +38,6 @@ TEST(DomainTest, sizes) {
     EXPECT_EQ(1004, boundary_sizes.get_sum());
     EXPECT_EQ(1848, domain.get_size_domain_list());
     EXPECT_EQ(1000, domain.get_size_inner_list());
-    delete[] surface_list;
-    delete[] obstacle_list;
 }
 
 TEST(DomainTest, sizesLevelOne) {
@@ -165,7 +163,7 @@ TEST(DomainTest, sizesWithSurfaceAndObstacle) {
     PatchObject size_surface_list;
     size_surface_list[Patch::LEFT] = 3;
     size_surface_list[Patch::FRONT] = 1;
-    auto surface_list = new size_t*[number_of_patches];
+    std::vector<size_t*> surface_list(number_of_patches);
     for (size_t p = 0; p < number_of_patches; p++) {
         surface_list[p] = new size_t[size_surface_list[p]];
     }
@@ -174,7 +172,7 @@ TEST(DomainTest, sizesWithSurfaceAndObstacle) {
     surface_list[Patch::LEFT][2] = 630;
     surface_list[Patch::FRONT][0] = 33;
     size_t level = 0;
-    Domain domain(obstacle_list, size_obstacle_list, surface_list, size_surface_list, level);
+    Domain domain(obstacle_list, size_obstacle_list, surface_list.data(), size_surface_list, level);
 
     PatchObject *sizes = domain.get_size_boundary_list();
     PatchObject boundary_sizes(*sizes);
@@ -187,7 +185,9 @@ TEST(DomainTest, sizesWithSurfaceAndObstacle) {
     EXPECT_EQ(1000, boundary_sizes.get_sum());
     EXPECT_EQ(1835, domain.get_size_domain_list());
     EXPECT_EQ(991, domain.get_size_inner_list());
-    delete[] surface_list;
+    for (size_t p = 0; p < number_of_patches; p++) {
+        delete[] surface_list[p];
+    }
 }
 
 TEST(DomainTest, order) {
