@@ -15,7 +15,7 @@
 
 class GaussFunction: public ISourceFunction {
  public:
-    GaussFunction(const Settings::solver::sources::gauss &settings);
+    explicit GaussFunction(const Settings::solver::sources::gauss &settings);
     ~GaussFunction() = default;
 
     void update_source(Field &out, real t_cur) override;
