@@ -292,17 +292,17 @@ function create_testcases {
     echo "    <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"No\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
       <ambient_temperature_value> 299.14 </ambient_temperature_value>
     </source>" > ${NAME}_$SFILEVAL
-    echo "    <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Gauss\" dissipation=\"No\" random=\"No\">
-      <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
-      <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
-      <x0> 0. </x0>
-      <y0> 0.016640625 </y0>
-      <z0> 0. </z0>
-      <sigma_x> 0.25 </sigma_x>
-      <sigma_y> 0.6 </sigma_y>
-      <sigma_z> 0.25 </sigma_z>
-      <tau> 5. </tau>
-    </source>" > ${NAME}_$TSFILEVAL
+    echo "      <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Gauss\" dissipation=\"No\" random=\"No\">
+        <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
+        <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
+        <x0> 0. </x0>
+        <y0> 0.016640625 </y0>
+        <z0> 0. </z0>
+        <sigma_x> 0.25 </sigma_x>
+        <sigma_y> 0.6 </sigma_y>
+        <sigma_z> 0.25 </sigma_z>
+        <tau> 5. </tau>
+      </source>" > ${NAME}_$TSFILEVAL
     echo "  <obstacles enabled=\"Yes\">
     <obstacle name=\"left wall\"> <!-- left wall -->
       <geometry ox1=\"-1.6625\" ox2=\"-1.4\" oy1=\"0.\" oy2=\"2.18\" oz1=\"-1.4\" oz2=\"1.4\"/>
@@ -339,7 +339,6 @@ function create_testcases {
       <boundary field=\"u,v,w\" patch=\"front,back,left,right,top,bottom\" type=\"dirichlet\" value=\"0.0\"/>
       <boundary field=\"p,T\" patch=\"front,back,left,right,top,bottom\" type=\"neumann\" value=\"0.0\" />
     </obstacle>
-
   </obstacles>" > ${NAME}_${DOFILEVAL}
     ((INDEX++))
   fi

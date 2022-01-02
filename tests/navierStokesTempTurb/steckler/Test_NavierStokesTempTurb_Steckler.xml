@@ -47,17 +47,17 @@
       <turbulence include="Yes">
         <Pr_T> 0.5 </Pr_T>
       </turbulence>
-    <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="No">
-      <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
-      <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
-      <x0> 0. </x0>
-      <y0> 0.016640625 </y0>
-      <z0> 0. </z0>
-      <sigma_x> 0.25 </sigma_x>
-      <sigma_y> 0.6 </sigma_y>
-      <sigma_z> 0.25 </sigma_z>
-      <tau> 5. </tau>
-    </source>
+      <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="No">
+        <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
+        <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
+        <x0> 0. </x0>
+        <y0> 0.016640625 </y0>
+        <z0> 0. </z0>
+        <sigma_x> 0.25 </sigma_x>
+        <sigma_y> 0.6 </sigma_y>
+        <sigma_z> 0.25 </sigma_z>
+        <tau> 5. </tau>
+      </source>
     </temperature>
     <solution available="No">
     </solution>
@@ -78,12 +78,12 @@
   <adaption dynamic="No" data_extraction="No"> </adaption>
 
   <boundaries>
-    <boundary field="u,v,w" patch="front,back,bottom,top,left,right" type="dirichlet" value="0.0"     />
+    <boundary field="u,v,w" patch="front,back,bottom,top,left,right" type="dirichlet" value="0.0" />
     <boundary field="p" patch="front,back,bottom,top,left,right" type="neumann" value="0.0" />
     <boundary field="T" patch="front,back,top,left,right" type="dirichlet" value="299.14" />
     <boundary field="T" patch="bottom" type="neumann" value="0.0" />
-
   </boundaries>
+
   <obstacles enabled="Yes">
     <obstacle name="left wall"> <!-- left wall -->
       <geometry ox1="-1.6625" ox2="-1.4" oy1="0." oy2="2.18" oz1="-1.4" oz2="1.4"/>
