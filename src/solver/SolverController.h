@@ -27,7 +27,6 @@ class SolverController {
 
     FieldController *get_field_controller() { return m_field_controller; }
 
-    ISourceFunction* get_temperature_source_function() { return m_source_function_temperature; }
  private:
     void init_solver(const Settings::solver_parameters &solver_settings);
     void set_up_fields(const std::string &solver_description, const Settings::initial_conditions_parameters &ic_settings);
