@@ -9,25 +9,26 @@
 
 #include "../interfaces/IDiffusion.h"
 #include "../field/Field.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
+
 
 class ExplicitDiffuse : public IDiffusion {
 public:
-    ExplicitDiffuse();
+    ExplicitDiffuse() = default;
 
     void diffuse(
-            Field &out, Field &in,
-            Field const &b, real const D, bool sync) override;
+            Field &out, const Field &in, const Field &b,
+            real D, bool sync) override;
     void diffuse(
-            Field &out, Field &in,
-            Field const &b, real const D, Field const &EV, bool sync) override;  // turbulent version
+            Field &out, const Field &in, const Field &b,
+            real D, const Field &EV, bool sync) override;  // turbulent version
 
-    void ExplicitStep(Field &out, Field const &in,
-            real const D, bool sync = true);
-    void ExplicitStep(Field &out, Field const &in,
-            real const D, Field const &EV, bool sync = true);
+    void ExplicitStep(Field &out, const Field &in,
+                      real D, bool sync = true);
+    void ExplicitStep(Field &out, const Field &in,
+                      real D, const Field &EV, bool sync = true);
 
-private:
-    real m_dt;
 };
 
 #endif /* ARTSS_DIFFUSION_EXPLICITDIFFUSE_H_ */

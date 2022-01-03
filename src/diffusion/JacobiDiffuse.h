@@ -8,44 +8,42 @@
 #ifndef ARTSS_DIFFUSION_JACOBIDIFFUSE_H_
 #define ARTSS_DIFFUSION_JACOBIDIFFUSE_H_
 
-#include <memory>
 #include "../interfaces/IDiffusion.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class JacobiDiffuse : public IDiffusion {
  public:
-    JacobiDiffuse();
+    explicit JacobiDiffuse(const Settings::solver::diffusion_solvers::jacobi &settings);
 
     void diffuse(
-            Field &out, Field &in, Field const &b,
-            real const D, bool sync) override;
+            Field &out, const Field &in, const Field &b,
+            real D, bool sync) override;
     void diffuse(
-            Field &out, Field &in, Field const &b,
-            real const D, Field const &EV, bool sync) override;  // turbulent version
+            Field &out, const Field &in, const Field &b,
+            real D, const Field &EV, bool sync) override;  // turbulent version
 
     static void JacobiStep(
-            Field &out, Field const &in, Field const &b,
-            real const alphaX, real const alphaY, real const alphaZ,
-            real const beta, real const dsign, real const w, bool sync = true);
+            Field &out, const Field &in, const Field &b,
+            real alphaX, real alphaY, real alphaZ,
+            real beta, real dsign, real w, bool sync = true);
     static void JacobiStep(
-            size_t level, Field &out, Field const &in, Field const &b,
-            real const alphaX, real const alphaY, real const alphaZ,
-            real const beta, real const dsign, real const w, bool sync = true);  // Multigrid version
+            size_t level, Field &out, const Field &in, const Field &b,
+            real alphaX, real alphaY, real alphaZ,
+            real beta, real dsign, real w, bool sync = true);  // Multigrid version
     static void JacobiStep(
-            Field &out, Field const &in, Field const &b,
-            real const dsign, real const w, real const D,
-            Field const &EV, real dt, bool sync = true);  // turbulent version
+            Field &out, const Field &in, const Field &b,
+            real dsign, real w, real D,
+            const Field &EV, real dt, bool sync = true);  // turbulent version
 
  private:
+    const Settings::solver::diffusion_solvers::jacobi &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    real m_dt;
     real m_dsign;
-    real m_w;
-    size_t m_max_iter;
-    real m_tol_res;
 };
 
 #endif /* ARTSS_DIFFUSION_JACOBIDIFFUSE_H_ */

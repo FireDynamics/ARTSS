@@ -7,14 +7,13 @@
 #include "PressureSolver.h"
 
 
-PressureSolver::PressureSolver(FieldController *field_controller) {
+PressureSolver::PressureSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller) :
+        m_solver_settings(solver_settings) {
 #ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(PressureSolver).name());
+    m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = field_controller;
-    auto params = Parameters::getInstance();
-    auto p_type = params->get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(&this->pres, p_type, m_field_controller->field_p, m_field_controller->field_rhs);
+    SolverSelection::set_pressure_solver(m_solver_settings.pressure, &this->pres);
     control();
 }
 
@@ -48,14 +47,11 @@ void PressureSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // *****************************************************************************
 void PressureSolver::control() {
-    auto params = Parameters::getInstance();
-    auto p_field = params->get("solver/pressure/field");
-    if (p_field != BoundaryData::get_field_type_name(FieldType::P)) {
+    if (m_solver_settings.pressure.field != FieldType::P) {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(typeid(PressureSolver).name());
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
-        // TODO Error handling
+        // TODO(issue 6) Error handling
     }
 }

@@ -4,9 +4,8 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Domain.h"
+#include "src/domain/DomainData.h"
 #include "src/field/Field.h"
-#include "src/utility/Parameters.h"
 #include "src/utility/GlobalMacrosTypes.h"
 
 

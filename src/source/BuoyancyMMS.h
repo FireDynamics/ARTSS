@@ -8,12 +8,14 @@
 #define ARTSS_SOURCE_BUOYANCYMMS_H_
 
 
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 #include "../interfaces/ISourceFunction.h"
 
 class BuoyancyMMS: public ISourceFunction {
  public:
     BuoyancyMMS();
-    ~BuoyancyMMS();
+    ~BuoyancyMMS() = default;
     void update_source(Field &out, real t_cur) override;
  private:
     void set_up();

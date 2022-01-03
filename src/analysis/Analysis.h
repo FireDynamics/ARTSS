@@ -7,13 +7,15 @@
 #ifndef ARTSS_ANALYSIS_ANALYSIS_H_
 #define ARTSS_ANALYSIS_ANALYSIS_H_
 
-#include "../utility/GlobalMacrosTypes.h"
 #include "Solution.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
+#include "../field/Field.h"
 #include "../field/FieldController.h"
 
 class Analysis {
  public:
-    explicit Analysis(Solution *solution);
+    Analysis(const Settings::solver::solution &solution_settings, Solution &solution);
 
     void analyse(FieldController *solver, real t);
 
@@ -23,24 +25,20 @@ class Analysis {
 
     bool check_time_step_VN(real dt);
 
-    void save_variables_in_file(FieldController *solv);
+    void save_variables_in_file(FieldController *field_controller);
 
  private:
-    real m_tol = 1e-7;
+    const Settings::solver::solution &m_solution_settings;
 
     bool compare_solutions(read_ptr num, read_ptr ana, FieldType type, real t);
 
     real calc_absolute_spatial_error(read_ptr num, read_ptr ana);
     real calc_relative_spatial_error(read_ptr num, read_ptr ana);
 
-    static void write_file(
-            const real *field, const std::string& filename,
-            size_t *inner_list, size_t size_inner_list,
-            size_t *boundary_list, size_t size_boundary_list,
-            size_t *obstacle_list, size_t size_obstacle_list);
+    static void write_file(const Field &field, const std::string& filename);
+    static void write_obstacles(const Field &field, const std::string &filename);
 
-    bool has_analytic_solution = false;
-    Solution *m_solution;
+    Solution &m_solution;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

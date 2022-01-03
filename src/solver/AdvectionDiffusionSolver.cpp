@@ -1,30 +1,28 @@
-/// \file     AdvectionDiffusionSolver.h
+/// \file     AdvectionDiffusionSolver.cpp
 /// \brief    Defines the steps to solve the advection and diffusion equation
 /// \date     May 20, 2016
 /// \author   Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "AdvectionDiffusionSolver.h"
-#include "../utility/Parameters.h"
-#include "../Domain.h"
+
+#include <string>
+#include <vector>
+#include <algorithm>
+
 #include "SolverSelection.h"
-#include "../utility/Utility.h"
+#include "../domain/DomainData.h"
 
 
-AdvectionDiffusionSolver::AdvectionDiffusionSolver(FieldController *field_controller) {
+AdvectionDiffusionSolver::AdvectionDiffusionSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller) :
+        m_solver_settings(solver_settings), m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_controller = field_controller;
 
-    auto params = Parameters::getInstance();
-    std::string advectionType = params->get("solver/advection/type");
-    SolverSelection::SetAdvectionSolver(&this->adv, advectionType);
+    SolverSelection::set_advection_solver(m_solver_settings.advection, &adv);
 
-    std::string diffusionType = params->get("solver/diffusion/type");
-    SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
-
-    m_nu = params->get_real("physical_parameters/nu");
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif);
 
     control();
 }
@@ -53,7 +51,7 @@ void AdvectionDiffusionSolver::do_step(real, bool sync) {
     Field &v_tmp = m_field_controller->get_field_v_tmp();
     Field &w_tmp = m_field_controller->get_field_w_tmp();
 
-    auto nu = m_nu;
+    real nu = DomainData::getInstance()->get_physical_parameters().nu.value();
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp)
     {
@@ -90,21 +88,21 @@ void AdvectionDiffusionSolver::do_step(real, bool sync) {
 /// \brief  Checks if field specified correctly
 // ************************************************************************
 void AdvectionDiffusionSolver::control() {
-    auto params = Parameters::getInstance();
+    auto fields_adv = m_solver_settings.advection.fields;
+    std::sort(fields_adv.begin(), fields_adv.end());
+    if (fields_adv != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(typeid(AdvectionDiffusionSolver).name());
-#endif
-
-    if (params->get("solver/advection/field") != "u,v,w") {
-#ifndef BENCHMARKING
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling
     }
-    if (params->get("solver/diffusion/field") != "u,v,w") {
+
+    auto fields_dif = m_solver_settings.diffusion.fields;
+    std::sort(fields_dif.begin(), fields_dif.end());
+    if (fields_dif != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error handling

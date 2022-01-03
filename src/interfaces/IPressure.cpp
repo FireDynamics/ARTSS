@@ -5,9 +5,8 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "IPressure.h"
-#include "../utility/Parameters.h"
-#include "../Domain.h"
-#include "../boundary/BoundaryController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 
 //======================================== Divergence ====================================
 // ***************************************************************************************
@@ -20,48 +19,88 @@
 // ***************************************************************************************
 void IPressure::divergence(
         Field &out,
-        Field const &in_x, Field const &in_y, Field const &in_z, bool sync) {
-    auto domain = Domain::getInstance();
+        const Field &in_x, const Field &in_y, const Field &in_z, bool sync) {
+    auto domain_data = DomainData::getInstance();
 
-    auto Nx = domain->get_Nx(out.get_level());
-    auto Ny = domain->get_Ny(out.get_level());
-    auto dx = domain->get_dx(out.get_level());
-    auto dy = domain->get_dy(out.get_level());
-    auto dz = domain->get_dz(out.get_level());
-    auto rdx = 1. / dx;
-    auto rdy = 1. / dy;
-    auto rdz = 1. / dz;
+    auto Nx = domain_data->get_Nx();
+    auto Ny = domain_data->get_Ny();
 
-    auto boundary = BoundaryController::getInstance();
+    auto dx = domain_data->get_dx();
+    auto dy = domain_data->get_dy();
+    auto dz = domain_data->get_dz();
+    auto reciprocal_dx = 1. / dx;
+    auto reciprocal_dy = 1. / dy;
+    auto reciprocal_dz = 1. / dz;
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    size_t *d_bList = boundary->get_boundary_list_level_joined();
+    auto domain_controller = DomainController::getInstance();
 
-    auto bsize_i = boundary->get_size_inner_list();
-    auto bsize_b = boundary->get_size_boundary_list();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
+
+    // start indices for computational domain_data minus 1 for ghost cells
+    size_t x1 = domain_data->get_index_x1() - 1;
+    size_t y1 = domain_data->get_index_y1() - 1;
+    size_t z1 = domain_data->get_index_z1() - 1;
+
+    // end indices for computational domain_data plus 1 for ghost cells
+    size_t x2 = domain_data->get_index_x2() + 1;
+    size_t y2 = domain_data->get_index_y2() + 1;
+    size_t z2 = domain_data->get_index_z2() + 1;
+
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
     size_t neighbour_k = Nx * Ny;
-#pragma acc data present(d_inner_list[:bsize_i], d_bList[:bsize_b])
-#pragma acc data present(out, inx, iny, inz)
+#pragma acc data present(domain_inner_list[:size_domain_inner_list])
+#pragma acc data present(out, in_x, in_y, in_z)
     {
 #pragma acc kernels async
 #pragma acc loop independent
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_inner_list[j];
-            real value_in_x = 0.5 * rdx * (in_x[i + neighbour_i] - in_x[i - neighbour_i]) ;
-            real value_in_y = 0.5 * rdy * (in_y[i + neighbour_j] - in_y[i - neighbour_j]) ;
-            real value_in_z = 0.5 * rdz * (in_z[i + neighbour_k] - in_z[i - neighbour_k]) ;
+        for (size_t j = 0; j < size_domain_inner_list; ++j) {
+            const size_t i = domain_inner_list[j];
+            real value_in_x = 0.5 * reciprocal_dx * (in_x[i + neighbour_i] - in_x[i - neighbour_i]) ;
+            real value_in_y = 0.5 * reciprocal_dy * (in_y[i + neighbour_j] - in_y[i - neighbour_j]) ;
+            real value_in_z = 0.5 * reciprocal_dz * (in_z[i + neighbour_k] - in_z[i - neighbour_k]) ;
             out[i] = value_in_x + value_in_y + value_in_z;
         }
 
 // boundaries
 #pragma acc kernels async
 #pragma acc loop independent
-        for (size_t j = 0; j < bsize_b; ++j) {
-            const size_t i = d_bList[j];
-            out[i] = 0.;
+        for (size_t j = y1; j <= y2; ++j) {
+            for (size_t i = x1; i <= x2; ++i) {
+                size_t idx = IX(i, j, z1, Nx, Ny);
+                out[idx] = 0;
+            }
+        }
+        // left, right, bottom, top
+        for (size_t k = z1 + 1; k < z2; ++k) {
+            // bottom stride
+            for (size_t i = x1; i <= x2; ++i) {
+                size_t idx = IX(i, y1, k, Nx, Ny);
+                out[idx] = 0;
+            }
+            // cell on the left and on the right
+            for (size_t j = y1 + 1; j < y2; ++j) {
+                size_t idx = IX(x1, j, k, Nx, Ny);
+                out[idx] = 0;
+
+                idx = IX(x2, j, k, Nx, Ny);
+                out[idx] = 0;
+            }
+            // top stride
+            for (size_t i = x1; i <= x2; ++i) {
+                size_t idx = IX(i, y2, k, Nx, Ny);
+                out[idx] = 0;
+            }
+        }
+        // back
+        for (size_t j = y1; j <= y2; ++j) {
+            for (size_t i = x1; i <= x2; ++i) {
+                size_t idx = IX(i, j, z2, Nx, Ny);
+                out[idx] = 0;
+            }
         }
 
         if (sync) {
@@ -85,50 +124,46 @@ void IPressure::divergence(
 // ***************************************************************************************
 void IPressure::projection(
         Field &out_u, Field &out_v, Field &out_w,
-        Field const &in_u, Field const &in_v, Field const &in_w,
-        Field const &in_p, bool sync) {
-    auto domain = Domain::getInstance();
+        const Field &in_u, const Field &in_v, const Field &in_w,
+        const Field &in_p, bool sync) {
+    auto domain_data = DomainData::getInstance();
     // local variables and parameters for GPU
-    auto Nx = domain->get_Nx(out_u.get_level());
-    auto Ny = domain->get_Ny(out_u.get_level());
+    auto Nx = domain_data->get_Nx();
+    auto Ny = domain_data->get_Ny();
 
-    auto dx = domain->get_dx(out_u.get_level());
-    auto dy = domain->get_dy(out_u.get_level());
-    auto dz = domain->get_dz(out_u.get_level());
+    auto dx = domain_data->get_dx();
+    auto dy = domain_data->get_dy();
+    auto dz = domain_data->get_dz();
 
-    auto rdx = 1. / dx;
-    auto rdy = 1. / dy;
-    auto rdz = 1. / dz;
+    auto reciprocal_dx = 1. / dx;
+    auto reciprocal_dy = 1. / dy;
+    auto reciprocal_dz = 1. / dz;
 
-    auto type_u = out_u.get_type();
-    auto type_v = out_v.get_type();
-    auto type_w = out_w.get_type();
+    auto domain_controller = DomainController::getInstance();
 
-    auto boundary = BoundaryController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-
-    auto bsize_i = boundary->get_size_inner_list();
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     size_t neighbour_i = 1;
     size_t neighbour_j = Nx;
     size_t neighbour_k = Nx * Ny;
-#pragma acc data present(d_inner_list[:bsize_i])
-#pragma acc data present(outu, outv, outw, inu, inv, inw, inp)
+#pragma acc data present(domain_inner_list[:size_domain_inner_list])
+#pragma acc data present(out_u, out_v, out_w, in_u, in_v, in_w, in_p)
     {
 #pragma acc kernels async
 #pragma acc loop independent
-        for (size_t j = 0; j < bsize_i; ++j) {
-            const size_t i = d_inner_list[j];
-            out_u[i] = in_u[i] - 0.5 * rdx * (in_p[i + neighbour_i] - in_p[i - neighbour_i]);
-            out_v[i] = in_v[i] - 0.5 * rdy * (in_p[i + neighbour_j] - in_p[i - neighbour_j]);
-            out_w[i] = in_w[i] - 0.5 * rdz * (in_p[i + neighbour_k] - in_p[i - neighbour_k]);
+        for (size_t j = 0; j < size_domain_inner_list; ++j) {
+            const size_t i = domain_inner_list[j];
+            out_u[i] = in_u[i] - 0.5 * reciprocal_dx * (in_p[i + neighbour_i] - in_p[i - neighbour_i]);
+            out_v[i] = in_v[i] - 0.5 * reciprocal_dy * (in_p[i + neighbour_j] - in_p[i - neighbour_j]);
+            out_w[i] = in_w[i] - 0.5 * reciprocal_dz * (in_p[i + neighbour_k] - in_p[i - neighbour_k]);
         }
 
-        //boundaries
-        boundary->apply_boundary(out_u.data, type_u, false);
-        boundary->apply_boundary(out_v.data, type_v, false);
-        boundary->apply_boundary(out_w.data, type_w, false);
+        // boundaries
+        domain_controller->apply_boundary(out_u, false);
+        domain_controller->apply_boundary(out_v, false);
+        domain_controller->apply_boundary(out_w, false);
 
         if (sync) {
 #pragma acc wait

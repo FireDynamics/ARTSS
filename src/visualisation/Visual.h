@@ -10,34 +10,33 @@
 #include "../analysis/Solution.h"
 #include "../interfaces/ISolver.h"
 #include "../field/FieldController.h"
+#include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
 
 class Visual {
 public:
-    explicit Visual(const Solution &solution);
+    Visual(const Settings::visualisation_parameters &settings, const Solution &solution, const std::string &filename);
 
     void visualise(const FieldController &field_controller, real t);
 
     static void initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
 
-    static void write_csv(const FieldController &field_controller, std::string filename);
-    static void write_vtk(const FieldController &field_controller, std::string filename);
-    static void write_vtk_debug(const FieldController &field_controller, std::string filename);
+    static void write_csv(FieldController &field_controller, const std::string& filename);
+    static void write_vtk(FieldController &field_controller, const std::string& filename);
+    static void write_vtk_debug(FieldController &field_controller, const std::string& filename);
 
 private:
-    static std::string remove_extension(const std::string &filename);
+    const Settings::visualisation_parameters &m_settings;
 
-    std::string m_filename;
+    const std::string &m_filename;
     const Solution &m_solution;
-    bool m_save_csv = false;
-    int m_csv_plots = 0;
-    bool m_save_vtk = false;
-    int m_vtk_plots = 0;
-    real m_dt;
-    real m_t_end;
 
-    static std::string create_filename(std::string filename, int counter, bool analytical);
+    static std::string create_filename(const std::string &filename, int counter, bool analytical);
 
     bool m_has_analytical_solution = false;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_VISUALISATION_VISUAL_H_ */

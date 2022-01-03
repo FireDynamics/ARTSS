@@ -32,6 +32,7 @@ class ISolver {
  public:
     virtual ~ISolver() = default;
     virtual void do_step(real t, bool sync) = 0;
+    virtual void update_source(real t) = 0;
 };
 
 #endif /* ARTSS_INTERFACES_ISOLVER_H_ */

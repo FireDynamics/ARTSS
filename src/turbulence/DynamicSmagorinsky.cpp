@@ -11,9 +11,8 @@
 #endif
 
 #include "DynamicSmagorinsky.h"
-#include "../utility/Parameters.h"
-#include "../Domain.h"
-#include "../boundary/BoundaryController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 
 DynamicSmagorinsky::DynamicSmagorinsky() :
     u_f(FieldType::U),
@@ -86,8 +85,6 @@ DynamicSmagorinsky::DynamicSmagorinsky() :
     S_bar(FieldType::U),
     S_bar_f(FieldType::U),
     Cs(FieldType::U) {
-    auto params = Parameters::getInstance();
-    m_nu = params->get_real("physical_parameters/nu");
 
     // Variables related to Dynamic Smagorinsky
     u_f.copyin();
@@ -172,17 +169,19 @@ DynamicSmagorinsky::DynamicSmagorinsky() :
 /// \param  in_w          input pointer of z-velocity
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void DynamicSmagorinsky::CalcTurbViscosity(
+void DynamicSmagorinsky::calc_turbulent_viscosity(
         Field &ev,
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx();
-    const size_t Ny = domain->get_Ny();
+    const size_t Nx = domain_data->get_Nx();
+    const size_t Ny = domain_data->get_Ny();
 
-    const real dx = domain->get_dx();
-    const real dy = domain->get_dy();
-    const real dz = domain->get_dz();
+    const real nu = domain_data->get_physical_parameters().nu.value();
+
+    const real dx = domain_data->get_dx();
+    const real dy = domain_data->get_dy();
+    const real dz = domain_data->get_dz();
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -192,18 +191,15 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 
     const real delta_s = cbrt(dx * dy * dz);
 
-    real num = 0;
-    real den = 0;
-    real sum = 0;
 
-    auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
-// Velocity filter
-    ExplicitFiltering(u_f, in_u, sync);
-    ExplicitFiltering(v_f, in_v, sync);
-    ExplicitFiltering(w_f, in_w, sync);
+    // Velocity filter
+    explicit_filtering(u_f, in_u, sync);
+    explicit_filtering(v_f, in_v, sync);
+    explicit_filtering(w_f, in_w, sync);
 
 #pragma acc parallel loop independent present(u_f, v_f, w_f, \
                         uu, vv, ww, \
@@ -211,9 +207,9 @@ void DynamicSmagorinsky::CalcTurbViscosity(
                         u_f, v_f, w_f, \
                         uf_uf, vf_vf, wf_wf, \
                         uf_vf, uf_wf, vf_wf, \
-                        d_inner_list[:bsize_i]) async
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
+                        domain_inner_list[:size_domain_inner_list]) async
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
         // product of velocities
         uu[i] = u_f[i] * u_f[i];
         vv[i] = v_f[i] * v_f[i];
@@ -235,13 +231,13 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 #pragma acc wait
     }
 
-// calculation  of the filter of velocity products
-    ExplicitFiltering(uu_f, uu, sync);
-    ExplicitFiltering(vv_f, vv, sync);
-    ExplicitFiltering(ww_f, ww, sync);
-    ExplicitFiltering(uv_f, uv, sync);
-    ExplicitFiltering(vw_f, vw, sync);
-    ExplicitFiltering(ww_f, ww, sync);
+    // calculation  of the filter of velocity products
+    explicit_filtering(uu_f, uu, sync);
+    explicit_filtering(vv_f, vv, sync);
+    explicit_filtering(ww_f, ww, sync);
+    explicit_filtering(uv_f, uv, sync);
+    explicit_filtering(vw_f, vw, sync);
+    explicit_filtering(ww_f, ww, sync);
 
 #pragma acc parallel loop independent present(  L11, L22, L33, L12, L13, L23, \
                         S11, S22, S33, S12, S13, S23, \
@@ -252,9 +248,9 @@ void DynamicSmagorinsky::CalcTurbViscosity(
                         uf_uf, vf_vf, wf_wf, \
                         uf_vf, uf_wf, vf_wf, \
                         u_f, v_f, w_f, \
-                        d_inner_list[:bsize_i]) async
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
+                        domain_inner_list[:size_domain_inner_list]) async
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
 
         // Leonard stress
         L11[i] = uu_f[i] - uf_uf[i];
@@ -300,21 +296,23 @@ void DynamicSmagorinsky::CalcTurbViscosity(
     }
 
     // filtering the strain tensor
-    ExplicitFiltering(S11_f, S11, sync);
-    ExplicitFiltering(S22_f, S22, sync);
-    ExplicitFiltering(S33_f, S33, sync);
-    ExplicitFiltering(S12_f, S12, sync);
-    ExplicitFiltering(S13_f, S13, sync);
-    ExplicitFiltering(S23_f, S23, sync);
+    explicit_filtering(S11_f, S11, sync);
+    explicit_filtering(S22_f, S22, sync);
+    explicit_filtering(S33_f, S33, sync);
+    explicit_filtering(S12_f, S12, sync);
+    explicit_filtering(S13_f, S13, sync);
+    explicit_filtering(S23_f, S23, sync);
 
     // filtering the product of strain tensor modulus and strain tensor
-    ExplicitFiltering(P11_f, P11, sync);
-    ExplicitFiltering(P22_f, P22, sync);
-    ExplicitFiltering(P33_f, P33, sync);
-    ExplicitFiltering(P12_f, P12, sync);
-    ExplicitFiltering(P13_f, P13, sync);
-    ExplicitFiltering(P23_f, P23, sync);
+    explicit_filtering(P11_f, P11, sync);
+    explicit_filtering(P22_f, P22, sync);
+    explicit_filtering(P33_f, P33, sync);
+    explicit_filtering(P12_f, P12, sync);
+    explicit_filtering(P13_f, P13, sync);
+    explicit_filtering(P23_f, P23, sync);
 
+    real num;
+    real den;
 #pragma acc parallel loop independent present(  S_bar_f, S11_f, S22_f, S33_f, \
                         S12_f, S13_f, S23_f, \
                         M11, M22, M33, \
@@ -324,9 +322,9 @@ void DynamicSmagorinsky::CalcTurbViscosity(
                         L11, L22, L33, \
                         L12, L13, L23, \
                         Cs, \
-                        d_inner_list[:bsize_i]) async
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
+                        domain_inner_list[:size_domain_inner_list]) async
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
         // modulus of filtered strain tensor
         S_bar_f[i] = sqrt(2. * (S11_f[i] * S11_f[i]
                              +  S22_f[i] * S22_f[i]
@@ -360,9 +358,10 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 #pragma acc wait
     }
 
+    real sum;
     // local averaging of the coefficients
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
         sum = 0;
         for (size_t l = 0; l < 3; l++) {
             for (size_t m = 0; m < 3; m++) {
@@ -376,9 +375,9 @@ void DynamicSmagorinsky::CalcTurbViscosity(
     }
 
     // negative coefficients are allowed unless they don't make the effective viscosity zero. In our case d_ev is very small to do that
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
-        if ((ev[i] + m_nu) < 0) {
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
+        if ((ev[i] + nu) < 0) {
             ev[i] = 0;
         }
     }
@@ -391,25 +390,25 @@ void DynamicSmagorinsky::CalcTurbViscosity(
 /// \param  in            input pointer
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
-void DynamicSmagorinsky::ExplicitFiltering(Field &out, Field const &in, bool sync) {
-    auto domain = Domain::getInstance();
+void DynamicSmagorinsky::explicit_filtering(Field &out, Field const &in, bool sync) {
+    auto domain_data = DomainData::getInstance();
 
-    const size_t Nx = domain->get_Nx(out.get_level());
-    const size_t Ny = domain->get_Ny(out.get_level());
-    real sum = 0;
+    const size_t Nx = domain_data->get_Nx();
+    const size_t Ny = domain_data->get_Ny();
 
-    //Implement a discrete filter by trapezoidal or simpsons rule.
-    real a[3] = {1. / 4., 1. / 2., 1. / 4.};  //trapezoidal weights
-    //real a[3] = {1./6.,1./3.,1./6.};  //simpsons weights
+    // Implement a discrete filter by trapezoidal or simpsons rule.
+    real a[3] = {1. / 4., 1. / 2., 1. / 4.};  // trapezoidal weights
+    // real a[3] = {1./6.,1./3.,1./6.};  // simpsons weights
 
-    //Construction by product combination for trapezoidal
-    auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    // Construction by product combination for trapezoidal
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
-#pragma acc parallel loop independent present(out, in, a[:3], d_inner_list[:bsize_i]) async
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
+    real sum;
+#pragma acc parallel loop independent present(out, in, a[:3], domain_inner_list[:size_domain_inner_list]) async
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
         sum = 0;
 #pragma acc loop independent collapse(3)
         for (size_t l = 0; l < 3; l++) {

@@ -7,72 +7,70 @@
 #ifndef ARTSS_FUNCTIONS_H_
 #define ARTSS_FUNCTIONS_H_
 
-#include "field/Field.h"
-#include "Domain.h"
 #include <string>
 
+#include "domain/DomainData.h"
+#include "field/Field.h"
+#include "utility/settings/Settings.h"
+
 struct FunctionNames{
-    static const std::string Beltrami;
-    static const std::string BuoyancyMMS;
-    static const std::string BuoyancyST_MMS;
-    static const std::string Drift;
-    static const std::string ExpSinusProd;
-    static const std::string ExpSinusSum;
-    static const std::string GaussBubble;
-    static const std::string Hat;
-    static const std::string Jet;
-    static const std::string McDermott;
-    static const std::string RandomC;
-    static const std::string SinSinSin;
-    static const std::string Uniform;
-    static const std::string Vortex;
-    static const std::string VortexY;
-    static const std::string Zero;
+    static const std::string beltrami;
+    static const std::string buoyancy_mms;
+    static const std::string buoyancy_st_mms;
+    static const std::string drift;
+    static const std::string exp_sinus_prod;
+    static const std::string exp_sinus_sum;
+    static const std::string gauss_bubble;
+    static const std::string hat;
+    static const std::string jet;
+    static const std::string layers;
+    static const std::string mcdermott;
+    static const std::string sin_sin_sin;
+    static const std::string uniform;
+    static const std::string vortex;
+    static const std::string vortex_y;
+    static const std::string zero;
 };
 
 namespace Functions {  // alphabetically ordered
 
-  void Beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t);
-  void BeltramiBC_p(Field &out_x);
-  void BeltramiBC_u(Field &out_x, real t);
-  void BeltramiBC_v(Field &out_x, real t);
-  void BeltramiBC_w(Field &out_x, real t);
-  void BuoyancyForce(Field &out, Field &T, Field &T_ambient);
-  void BuoyancyMMS(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t);
-  void BuoyancyST_MMS(Field &out, real t);
+  void beltrami(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+                real t, const Settings::initial_conditions::beltrami &beltrami);
+  void beltrami_bc_p(Field &out_x, real a);
+  void beltrami_bc_u(Field &out_x, real t, real a, real d);
+  void beltrami_bc_v(Field &out_x, real t, real a, real d);
+  void beltrami_bc_w(Field &out_x, real t, real a, real d);
+  void buoyancy_mms(Field &out_x, Field &out_y, Field &out_z, Field &out_p, Field &out_T, real t);
+  void buoyancy_st_mms(Field &out, real t, real beta, real kappa, real g, real rhoa);
 
-  void Drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
+  void drift(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+             const Settings::initial_conditions::drift &drift);
 
-  void ExpSinusProd(Field &out, real t);
-  void ExpSinusSum(Field &out_x, Field &out_y, Field &out_z, real t);
+  void exp_sinus_prod(Field &out, real t, const Settings::initial_conditions::exp_sinus_prod &exp_sinus_prod);
+  void exp_sinus_sum(Field &out_x, Field &out_y, Field &out_z, real t);
 
-  void FacSinSinSin(Field &out);
+  void fac_sin_sin_sin(Field &out, const Settings::initial_conditions::sin_sin_sin &sin_sin_sin);
 
-  void GaussBubble(Field &out, real t);
+  void gauss_bubble(Field &out, real t, const Settings::initial_conditions::gauss_bubble &gauss_bubble);
 
-  void Hat(Field &out);
+  void hat(Field &out, const Settings::initial_conditions::hat &hat);
 
-  void Jet(
-          Field &out,
-          size_t index_x1, size_t index_x2,
-          size_t index_y1, size_t index_y2,
-          size_t index_z1, size_t index_z2,
-          real value);
+  void jet(Field &out, const Settings::initial_conditions::jet &jet);
 
-  void Layers(Field &out);
+  void layers(Field &out, const Settings::initial_conditions::layers_temperature &layers);
 
-  void McDermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t);
+  void mcdermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p,
+          real t, const Settings::initial_conditions::mc_dermott &mc_dermott);
 
-  void Random(Field &out, real range, bool is_absolute, int seed, real step_size);
+  void random(Field &out, const Settings::random_parameters &random_params);
 
-  void SinSinSin(Field &out);
+  void sin_sin_sin(Field &out, const Settings::initial_conditions::sin_sin_sin &sin_sin_sin);
 
-  void Uniform(Field &out, real val);
+  void uniform(Field &out, const Settings::initial_conditions::uniform &uniform);
 
-  void Vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
-  void VortexY(Field &out_x, Field &out_y, Field &out_z, Field &out_p);
+  void vortex(Field &out_x, Field &out_y, Field &out_z, Field &out_p, const Settings::initial_conditions::vortex &vortex);
 
-  void Zero(Field &field, size_t *arr_idx, size_t arr_idx_size);
+  void vortex_y(Field &out_x, Field &out_y, Field &out_z, Field &out_p, const Settings::initial_conditions::vortex &vortex);
 };
 
 #endif /* ARTSS_FUNCTIONS_H_ */
