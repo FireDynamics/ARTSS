@@ -60,13 +60,15 @@ void BuoyancyMMS::set_up() {
 void BuoyancyMMS::update_source(Field &out, real t_cur) {
     out.copy_data(m_source_field);
     out *= exp(-t_cur);
-    if (m_absolute) {
-        out *= m_noise_maker->random_field(out.get_size());
-    } else {
-        auto noise = m_noise_maker->random_field(out.get_size());
-        noise += 1;
-        if (m_has_noise) {
-            out *= noise;
+    if (m_has_noise) {
+        if (m_absolute) {
+            out *= m_noise_maker->random_field(out.get_size());
+        } else {
+            auto noise = m_noise_maker->random_field(out.get_size());
+            noise += 1;
+            if (m_has_noise) {
+                out *= noise;
+            }
         }
     }
 }
