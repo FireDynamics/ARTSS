@@ -52,7 +52,7 @@ void SolverController::init_solver(const Settings::solver_parameters &solver_set
     m_logger->debug("initialise solver {}", solver_settings.description);
 #endif
     if (solver_settings.description == SolverTypes::AdvectionSolver) {
-        auto ic = std::get<Settings::initial_conditions::gauss_bubble>(m_settings.initial_conditions_parameters.ic.value());
+        const auto &ic = std::get<Settings::initial_conditions::gauss_bubble>(m_settings.initial_conditions_parameters.ic.value());
         m_solver = new AdvectionSolver(solver_settings, m_field_controller, ic.velocity_lin);
     } else if (solver_settings.description == SolverTypes::AdvectionDiffusionSolver) {
         m_solver = new AdvectionDiffusionSolver(solver_settings, m_field_controller);
@@ -95,12 +95,12 @@ void SolverController::init_solver(const Settings::solver_parameters &solver_set
 void SolverController::set_up_fields(const std::string &string_solver, const Settings::initial_conditions_parameters &ic_settings) {
     std::string string_init_usr_fct = ic_settings.usr_fct;
     if (string_init_usr_fct == FunctionNames::gauss_bubble) {
-        auto gauss_bubble = std::get<Settings::initial_conditions::gauss_bubble>(ic_settings.ic.value());
+        const auto &gauss_bubble = std::get<Settings::initial_conditions::gauss_bubble>(ic_settings.ic.value());
         Functions::gauss_bubble(m_field_controller->get_field_u(), 0., gauss_bubble);
         Functions::gauss_bubble(m_field_controller->get_field_v(), 0., gauss_bubble);
         Functions::gauss_bubble(m_field_controller->get_field_w(), 0., gauss_bubble);
     } else if (string_init_usr_fct == FunctionNames::drift) {
-        auto drift = std::get<Settings::initial_conditions::drift>(ic_settings.ic.value());
+        const auto &drift = std::get<Settings::initial_conditions::drift>(ic_settings.ic.value());
         Functions::drift(m_field_controller->get_field_u(),
                          m_field_controller->get_field_v(),
                          m_field_controller->get_field_w(),
@@ -108,12 +108,12 @@ void SolverController::set_up_fields(const std::string &string_solver, const Set
                          drift);
     } else if (string_init_usr_fct == FunctionNames::exp_sinus_prod) {
         // Diffusion test case
-        auto exp_sinus_prod = std::get<Settings::initial_conditions::exp_sinus_prod>(ic_settings.ic.value());
+        const auto &exp_sinus_prod = std::get<Settings::initial_conditions::exp_sinus_prod>(ic_settings.ic.value());
         Functions::exp_sinus_prod(m_field_controller->get_field_u(), 0., exp_sinus_prod);
         Functions::exp_sinus_prod(m_field_controller->get_field_v(), 0., exp_sinus_prod);
         Functions::exp_sinus_prod(m_field_controller->get_field_w(), 0., exp_sinus_prod);
     } else if (string_init_usr_fct == FunctionNames::hat) {
-        auto hat = std::get<Settings::initial_conditions::hat>(ic_settings.ic.value());
+        const auto &hat = std::get<Settings::initial_conditions::hat>(ic_settings.ic.value());
         Functions::hat(m_field_controller->get_field_u(), hat);
         Functions::hat(m_field_controller->get_field_v(), hat);
         Functions::hat(m_field_controller->get_field_w(), hat);
@@ -125,12 +125,12 @@ void SolverController::set_up_fields(const std::string &string_solver, const Set
                                  0.);
     } else if (string_init_usr_fct == FunctionNames::sin_sin_sin) {
         // Pressure test case
-        auto sin_sin_sin = std::get<Settings::initial_conditions::sin_sin_sin>(ic_settings.ic.value());
+        const auto &sin_sin_sin = std::get<Settings::initial_conditions::sin_sin_sin>(ic_settings.ic.value());
         m_field_controller->get_field_p().set_value(0.);
         Functions::sin_sin_sin(m_field_controller->get_field_rhs(), sin_sin_sin);
     } else if (string_init_usr_fct == FunctionNames::mcdermott) {
         // NavierStokes test case: McDermott (no force, no temperature) 2D
-        auto mc_dermott = std::get<Settings::initial_conditions::mc_dermott>(ic_settings.ic.value());
+        const auto &mc_dermott = std::get<Settings::initial_conditions::mc_dermott>(ic_settings.ic.value());
         Functions::mcdermott(m_field_controller->get_field_u(),
                              m_field_controller->get_field_v(),
                              m_field_controller->get_field_w(),
@@ -139,7 +139,7 @@ void SolverController::set_up_fields(const std::string &string_solver, const Set
         m_field_controller->get_field_p().set_value(0.);
     } else if (string_init_usr_fct == FunctionNames::vortex) {
         // NavierStokes test case: Vortex (no force, no temperature) 2D
-        auto vortex = std::get<Settings::initial_conditions::vortex>(ic_settings.ic.value());
+        const auto &vortex = std::get<Settings::initial_conditions::vortex>(ic_settings.ic.value());
         Functions::vortex(m_field_controller->get_field_u(),
                           m_field_controller->get_field_v(),
                           m_field_controller->get_field_w(),
@@ -148,7 +148,7 @@ void SolverController::set_up_fields(const std::string &string_solver, const Set
         m_field_controller->get_field_p().set_value(0.);
     } else if (string_init_usr_fct == FunctionNames::vortex_y) {
         // NavierStokes test case: Vortex (no force, no temperature) 2D
-        auto vortex = std::get<Settings::initial_conditions::vortex>(ic_settings.ic.value());
+        const auto &vortex = std::get<Settings::initial_conditions::vortex>(ic_settings.ic.value());
         Functions::vortex_y(m_field_controller->get_field_u(),
                             m_field_controller->get_field_v(),
                             m_field_controller->get_field_w(),
@@ -156,7 +156,7 @@ void SolverController::set_up_fields(const std::string &string_solver, const Set
                             vortex);
     } else if (string_init_usr_fct == FunctionNames::beltrami) {
         // NavierStokes test case: Beltrami  (no force, no temperature) 3D
-        auto beltrami = std::get<Settings::initial_conditions::beltrami>(ic_settings.ic.value());
+        const auto &beltrami = std::get<Settings::initial_conditions::beltrami>(ic_settings.ic.value());
 
         Functions::beltrami(m_field_controller->get_field_u(),
                             m_field_controller->get_field_v(),
@@ -166,13 +166,13 @@ void SolverController::set_up_fields(const std::string &string_solver, const Set
         // m_field_controller->field_p->set_value(0.);
     } else if (string_init_usr_fct == FunctionNames::uniform) {
         // Uniform Temperature unequal to zero
-        auto uniform = std::get<Settings::initial_conditions::uniform>(ic_settings.ic.value());
+        const auto &uniform = std::get<Settings::initial_conditions::uniform>(ic_settings.ic.value());
         Functions::uniform(m_field_controller->get_field_T(), uniform);
         if (ic_settings.random) {
             Functions::random(m_field_controller->get_field_T(), ic_settings.random_parameters.value());
         }
     } else if (string_init_usr_fct == "LayersT") {
-        auto layers = std::get<Settings::initial_conditions::layers_temperature>(ic_settings.ic.value());
+        const auto &layers = std::get<Settings::initial_conditions::layers_temperature>(ic_settings.ic.value());
         Functions::layers(m_field_controller->get_field_T(), layers);
 
         if (ic_settings.random) {
@@ -183,7 +183,7 @@ void SolverController::set_up_fields(const std::string &string_solver, const Set
             m_logger->info("Initial values all set to zero!");
 #endif
     } else if (string_init_usr_fct == FunctionNames::jet) {
-        auto jet = std::get<Settings::initial_conditions::jet>(ic_settings.ic.value());
+        const auto &jet = std::get<Settings::initial_conditions::jet>(ic_settings.ic.value());
         Functions::jet(m_field_controller->get_field_u(), jet);
         if (ic_settings.random) {
             Functions::random(m_field_controller->get_field_u(), ic_settings.random_parameters.value());
@@ -222,12 +222,12 @@ void SolverController::force_source() {
     // Force
     std::string force_fct = m_settings.solver_parameters.source.force_fct;
     if (force_fct == SourceMethods::Buoyancy) {
-        auto buoyancy = std::get<Settings::solver::source_solvers::buoyancy>(m_settings.solver_parameters.source.force_function);
+        const auto &buoyancy = std::get<Settings::solver::source_solvers::buoyancy>(m_settings.solver_parameters.source.force_function);
         if (!buoyancy.use_init_values) {
             m_field_controller->get_field_T_ambient().set_value(buoyancy.ambient_temperature_value.value());
         }
     } else if (force_fct == SourceMethods::Uniform) {
-        auto uniform = std::get<Settings::solver::source_solvers::uniform>(m_settings.solver_parameters.source.force_function);
+        const auto &uniform = std::get<Settings::solver::source_solvers::uniform>(m_settings.solver_parameters.source.force_function);
         std::vector<CoordinateAxis> dir = m_settings.solver_parameters.source.direction;
         bool force_x = std::find(dir.begin(), dir.end(), CoordinateAxis::X) != dir.end();
         if (force_x) {
