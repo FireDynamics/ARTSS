@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-
+#ifdef ASSIMILATION
 void server() {
     bool simulation_is_running = true;
     MPI_Status status;
@@ -171,3 +171,4 @@ void server() {
     // close the server before exiting the program.
     tcp_server.close_socket();
 }
+#endif

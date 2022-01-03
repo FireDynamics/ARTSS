@@ -26,19 +26,6 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
 #endif
     m_field_IO_handler = new FieldIO();
     m_parameter_handler = new ParameterReader();
-    /*
-    if (init == AssimilationMethods::None) {
-        m_func = new Zero();
-    } else if (init == AssimilationMethods::HRRChanger) {
-        m_func = new HRRChanger(m_solver_controller.get_temperature_source_function());
-    } else {
-#ifndef BENCHMARKING
-        m_logger->critical("Data Assimilation class {} is not defined", init);
-#endif
-        std::exit(1);
-        // TODO Error Handling
-    }
-     */
 }
 
 void DataAssimilation::initiate_rollback() {
