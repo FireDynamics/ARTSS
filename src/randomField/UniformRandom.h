@@ -17,7 +17,7 @@ class UniformRandom: public IRandomField {
         init_dist();
     }
 
-    UniformRandom(real range, real step_size, int seed) :
+    UniformRandom(real range, real step_size, size_t seed) :
         m_seed(seed),
         m_steps(static_cast<int>(range / step_size)),
         m_step_size(step_size) {
@@ -34,7 +34,7 @@ class UniformRandom: public IRandomField {
          m_dist = std::uniform_int_distribution<int>(-m_steps, m_steps);
      }
 
-     const int m_seed;
+     const size_t m_seed;
      const int m_steps;
      const real m_step_size;
      std::mt19937 m_mt;

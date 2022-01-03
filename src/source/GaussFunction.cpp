@@ -23,14 +23,15 @@ void GaussFunction::update_source(Field &out, real t_cur) {
     auto time_val = get_time_value(t_cur);
     out.copy_data(m_field_spatial_values);
     out *= time_val;
-
-    if (m_absolute) {
-        out *= m_noise_maker->random_field(out.get_size());
-    } else {
-        auto noise = m_noise_maker->random_field(out.get_size());
-        noise += 1;
-        if (m_has_noise) {
-            out *= noise;
+    if (m_has_noise) {
+        if (m_absolute) {
+            out *= m_noise_maker->random_field(out.get_size());
+        } else {
+            auto noise = m_noise_maker->random_field(out.get_size());
+            noise += 1;
+            if (m_has_noise) {
+                out *= noise;
+            }
         }
     }
 }
