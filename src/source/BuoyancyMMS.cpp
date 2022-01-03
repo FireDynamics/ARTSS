@@ -61,11 +61,3 @@ void BuoyancyMMS::update_source(Field &out, real t_cur) {
     out.copy_data(m_source_field);
     out *= exp(-t_cur);
 }
-
-void BuoyancyMMS::read_header_part(std::string &header) {
-
-}
-
-std::string BuoyancyMMS::write_header_part() {
-    return std::string();
-}

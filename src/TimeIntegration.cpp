@@ -8,7 +8,7 @@
 #include "TimeIntegration.h"
 #include "domain/DomainData.h"
 #ifdef ASSIMILATION
-#include "mpi.h"
+#include <mpi.h>
 #endif
 
 // ==================================== Constructor ====================================

@@ -5,11 +5,9 @@
 /// \copyright <2015-2021> Forschungszentrum Juelich. All rights reserved
 
 #include "DataAssimilation.h"
-#include "../utility/Parameters.h"
-#include "../Domain.h"
+#include "../domain/DomainData.h"
 #include "../TCP/TCPServer.h"
 #include "mpi.h"
-#include "HRRChanger.h"
 
 DataAssimilation::DataAssimilation(const SolverController &solver_controller,
                                    const FieldController &field_controller) :
@@ -24,8 +22,7 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    Parameters *params = Parameters::getInstance();
-    m_assimilated = (params->get("data_assimilation/enabled") == "Yes");
+    //m_assimilated = (params->get("data_assimilation/enabled") == "Yes");
 }
 
 void DataAssimilation::initiate_rollback() {

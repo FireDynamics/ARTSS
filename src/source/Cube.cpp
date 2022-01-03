@@ -60,11 +60,3 @@ void Cube::set_up() {
     }
     m_source_field.update_dev();
 }
-
-void Cube::read_header_part(std::string &header) {
-
-}
-
-std::string Cube::write_header_part() {
-    return std::string();
-}

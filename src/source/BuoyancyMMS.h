@@ -18,8 +18,6 @@ class BuoyancyMMS: public ISourceFunction {
     ~BuoyancyMMS() = default;
     void update_source(Field &out, real t_cur) override;
  private:
-    void read_header_part(std::string &header) override;
-    std::string write_header_part() override;
     void set_up();
     Field m_source_field;
 };

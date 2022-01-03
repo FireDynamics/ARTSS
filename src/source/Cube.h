@@ -15,8 +15,6 @@ class Cube: public ISourceFunction {
     explicit Cube(const Settings::solver::sources::cube &cube);
     ~Cube() = default;
     void update_source(Field &out, real t_cur) override;
-    void read_header_part(std::string &header) override;
-    std::string write_header_part() override;
 
  private:
     const Settings::solver::sources::cube m_settings;

@@ -21,9 +21,6 @@ class GaussFunction: public ISourceFunction {
 
     void update_source(Field &out, real t_cur) override;
 
-    void read_header_part(std::string &header) override;
-    std::string write_header_part() override;
-
  private:
     real get_time_value(real t_cur);
     void create_spatial_values();

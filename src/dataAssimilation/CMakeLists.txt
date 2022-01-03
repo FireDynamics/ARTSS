@@ -4,7 +4,4 @@ target_sources(artss
         ${CMAKE_CURRENT_LIST_DIR}/DataAssimilation.h
         ${CMAKE_CURRENT_LIST_DIR}/FieldIO.cpp
         ${CMAKE_CURRENT_LIST_DIR}/FieldIO.h
-        ${CMAKE_CURRENT_LIST_DIR}/HRRChanger.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/HRRChanger.h
-        ${CMAKE_CURRENT_LIST_DIR}/Zero.h
         )

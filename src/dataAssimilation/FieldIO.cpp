@@ -11,18 +11,16 @@
 #include <iomanip>
 
 #include <fmt/format.h>
-#include "../Domain.h"
+#include <fstream>
+#include "../domain/DomainData.h"
 #include "DataAssimilation.h"
-#include "Zero.h"
-#include "HRRChanger.h"
 
 
 FieldIO::FieldIO(const SolverController &solver_controller): m_solver_controller(solver_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    Parameters *params = Parameters::getInstance();
-    std::string init = params->get("data_assimilation/class_name");
+    /*
     if (init == AssimilationMethods::None) {
         m_func = new Zero();
     } else if (init == AssimilationMethods::HRRChanger) {
@@ -34,27 +32,16 @@ FieldIO::FieldIO(const SolverController &solver_controller): m_solver_controller
         std::exit(1);
         // TODO Error Handling
     }
+     */
 
-    std::string dt = Parameters::getInstance()->get("physical_parameters/dt");
-    m_dt = std::stod(dt);
-    std::string t_end = Parameters::getInstance()->get("physical_parameters/t_end");
+    auto domain_data = DomainData::getInstance();
+    m_dt = domain_data->get_physical_parameters().dt;
+    real t_end = domain_data->get_physical_parameters().t_end;
 
-    //std::vector<std::string> t_end_parts = Utility::split(Utility::trim(t_end), '.');
-    //std::vector<std::string> dt_parts = Utility::split(Utility::trim(dt), '.');
-
-    int decimal_number_digits;
-    int whole_number_digits;
-    Utility::calculate_whole_and_decimal_digits(t_end, dt, &decimal_number_digits, &whole_number_digits);
-
-    m_length_time_stamp = decimal_number_digits + whole_number_digits + 1;
-    m_format = "{:0" + std::to_string(m_length_time_stamp) + "." + std::to_string(decimal_number_digits) + "f}";
-
-    size_t n = static_cast<size_t>(std::stod(t_end) / m_dt) + 1;
+    size_t n = static_cast<size_t>(t_end / m_dt) + 1;
     m_positions = new long[n];
 
     std::string header = create_header();
-    std::string header_extra = m_func->add_header_data();
-    header += header_extra +  "\n";
     m_positions[0] = static_cast<long>(header.length()) + 1;
 
     std::ofstream output_file(m_filename, std::ios_base::out);
@@ -100,7 +87,7 @@ void FieldIO::write(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T
     output_file.seekp(m_pos_time_step, std::ios_base::beg);
     output_file.write(fmt::format(m_format, t_cur).c_str(), m_length_time_stamp);
 
-    output_file.seekp(m_pos_header_extra, std::ios_base::beg);
+    output_file.seekp(m_pos_header, std::ios_base::beg);
     std::string header_extra = m_func->update_header_data();
     output_file.write(header_extra.c_str(), static_cast<long>(header_extra.length()));
 
@@ -186,10 +173,10 @@ std::string FieldIO::create_header() {
     auto end = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
-    auto domain = Domain::getInstance();
-    auto Nx = domain->get_Nx();
-    auto Ny = domain->get_Ny();
-    auto Nz = domain->get_Nz();
+    auto domain_data = DomainData::getInstance();
+    auto Nx = domain_data->get_Nx();
+    auto Ny = domain_data->get_Ny();
+    auto Nz = domain_data->get_Nz();
 
     std::string string_t_cur_text = "Current time step;";
     m_pos_time_step = static_cast<long>(string_t_cur_text.length());
@@ -197,7 +184,6 @@ std::string FieldIO::create_header() {
     header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
     header.append(fmt::format("###DATE;{}", std::ctime(&end_time)));
-    header.append(fmt::format("###XML;{}\n", Parameters::getInstance()->get_filename()));
     return header;
 }
 

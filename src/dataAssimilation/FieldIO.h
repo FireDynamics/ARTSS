@@ -27,14 +27,12 @@ class FieldIO {
     long *m_positions;
     std::string m_filename = "visualisation.dat";
     real m_dt;
-    std::string m_format;
+    std::string m_format = ".5e";
 
     IDataAssimilationWriter *m_func;
-    SolverController m_solver_controller;
-
+    const SolverController &m_solver_controller;
     long m_pos_time_step;
-    long m_pos_header_extra;
-    long m_pos_body_extra;
+    long m_pos_header;
     int m_length_time_stamp;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
