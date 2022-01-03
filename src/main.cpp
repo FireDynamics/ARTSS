@@ -19,6 +19,11 @@
 #include "TCP/TCPServer.h"
 #define PORT 7777
 void server();
+class tcp_server_error : std::runtime_error { ;
+public:
+    explicit tcp_server_error(const std::string &message) : std::runtime_error(message) {}
+    explicit tcp_server_error(const char *message) : std::runtime_error(message) {};
+};
 #endif
 
 int main(int argc, char **argv) {
@@ -148,8 +153,7 @@ void server() {
         // BINDING FAILED:
         logger->critical("Binding failed - {} : {}", error_code, error_message);
         // binding wasn't possible, therefore exit ARTSS because something's wrong with the environment
-        std::exit(1);
-        // TODO Error Handling
+        throw tcp_server_error(fmt::format("Binding failed. {} : {}", error_code, error_message));
     });
 
     // Start Listening the server.
@@ -158,8 +162,7 @@ void server() {
         // LISTENING FAILED:
         logger->critical("Listening failed - {} : {}", error_code, error_message);
         // listening not possible, therefore exit ARTSS because TCP Server cannot be used
-        std::exit(1);
-        // TODO Error Handling
+        throw tcp_server_error(fmt::format("listening failed {} : {}", error_code, error_message));
     });
     logger->debug("completed configuration of TCP server");
 
