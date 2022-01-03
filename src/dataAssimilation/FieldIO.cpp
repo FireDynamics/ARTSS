@@ -15,7 +15,7 @@
 #include "../domain/DomainData.h"
 
 
-FieldIO::FieldIO(const SolverController &solver_controller): m_solver_controller(solver_controller) {
+FieldIO::FieldIO() {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -160,9 +160,9 @@ std::string FieldIO::create_header() {
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
     auto domain_data = DomainData::getInstance();
-    auto Nx = domain_data->get_Nx();
-    auto Ny = domain_data->get_Ny();
-    auto Nz = domain_data->get_Nz();
+    size_t Nx = domain_data->get_number_of_cells(CoordinateAxis::X);
+    size_t Ny = domain_data->get_number_of_cells(CoordinateAxis::Y);
+    size_t Nz = domain_data->get_number_of_cells(CoordinateAxis::Z);
 
     std::string string_t_cur_text = "Current time step;";
     m_pos_time_step = static_cast<long>(string_t_cur_text.length());

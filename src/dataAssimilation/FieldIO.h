@@ -15,7 +15,7 @@
 
 class FieldIO {
  public:
-    explicit FieldIO(const SolverController &solver_controller);
+    FieldIO();
     void write(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
     void read(std::string &file_name, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
     void set_filename(std::string &filename) { m_filename = filename; }
@@ -30,7 +30,6 @@ class FieldIO {
     std::string m_format = ".5e";
 
     IDataAssimilationWriter *m_func;
-    const SolverController &m_solver_controller;
     long m_pos_time_step;
     long m_pos_header;
     int m_length_time_stamp;
