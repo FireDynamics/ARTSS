@@ -8,6 +8,8 @@
 #ifndef ARTSS_ANALYSIS_SOLUTION_H_
 #define ARTSS_ANALYSIS_SOLUTION_H_
 
+#include <functional>
+
 #include "../field/Field.h"
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
