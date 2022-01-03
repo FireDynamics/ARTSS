@@ -958,6 +958,18 @@ namespace Settings {
         return sp;
     }
 
+    assimilation_parameters parse_assimilation_parameters(const tinyxml2::XMLElement *root) {
+        std::string context = "data_assimilation";
+        auto[subsection, values] = map_parameter_section(root, context);
+        assimilation_parameters ap{};
+        ap.enabled = get_required_bool(values, "enabled", context);
+
+        if (ap.enabled) {
+            // TODO classes / other parameters
+        }
+        return ap;
+    }
+
     Settings parse_settings(const std::string &filename, const std::string &file_content) {
         tinyxml2::XMLDocument doc;
         doc.Parse(file_content.c_str());
@@ -971,6 +983,7 @@ namespace Settings {
                 parse_boundaries_parameters(root),
                 parse_obstacles_parameters(root),
                 parse_surfaces_parameters(root),
+                parse_assimilation_parameters(root),
                 parse_initial_conditions_parameters(root),
                 parse_visualisation_parameters(root),
                 parse_logging_parameters(root)};

@@ -314,6 +314,9 @@ namespace Settings {
         solver::concentration_solver concentration;
         solver::solution solution;
     };
+    struct assimilation_parameters {
+        bool enabled;
+    };
     struct Settings {
         std::string filename;
         struct physical_parameters physical_parameters;
@@ -323,6 +326,7 @@ namespace Settings {
         struct boundary_parameters boundary_parameters;
         struct obstacles_parameters obstacles_parameters;
         struct surfaces_parameters surfaces_parameters;
+        struct assimilation_parameters assimilation_parameters;
         struct initial_conditions_parameters initial_conditions_parameters;
         struct visualisation_parameters visualisation_parameters;
         struct logging_parameters logging_parameters;

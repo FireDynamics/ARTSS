@@ -10,7 +10,9 @@
 #include "mpi.h"
 
 DataAssimilation::DataAssimilation(const SolverController &solver_controller,
-                                   const FieldController &field_controller) :
+                                   FieldController *field_controller,
+                                   const Settings::assimilation_parameters &settings) :
+        m_settings(settings),
         m_field_controller(field_controller),
         m_solver_controller(solver_controller),
         m_new_field_u(Field(FieldType::U)),
@@ -22,28 +24,41 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    //m_assimilated = (params->get("data_assimilation/enabled") == "Yes");
+    m_field_IO_handler = new FieldIO(m_solver_controller);
+    /*
+    if (init == AssimilationMethods::None) {
+        m_func = new Zero();
+    } else if (init == AssimilationMethods::HRRChanger) {
+        m_func = new HRRChanger(m_solver_controller.get_temperature_source_function());
+    } else {
+#ifndef BENCHMARKING
+        m_logger->critical("Data Assimilation class {} is not defined", init);
+#endif
+        std::exit(1);
+        // TODO Error Handling
+    }
+     */
 }
 
 void DataAssimilation::initiate_rollback() {
-    m_field_controller.replace_data(m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T, m_new_field_C);
+    m_field_controller->replace_data(m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T, m_new_field_C);
 }
 void DataAssimilation::read_new_data(std::string &file_name) {
 #ifndef BENCHMARKING
     m_logger->debug("read new data from {}", file_name);
 #endif
-    m_reader->read(file_name, m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T, m_new_field_C);
+    m_field_IO_handler->read(file_name, m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T, m_new_field_C);
 }
 
 void DataAssimilation::save_data(real t_cur) {
-    Field &u = m_field_controller.get_field_u();
-    Field &v = m_field_controller.get_field_v();
-    Field &w = m_field_controller.get_field_w();
-    Field &p = m_field_controller.get_field_w();
-    Field &T = m_field_controller.get_field_T();
-    Field &C = m_field_controller.get_field_concentration();
+    Field &u = m_field_controller->get_field_u();
+    Field &v = m_field_controller->get_field_v();
+    Field &w = m_field_controller->get_field_w();
+    Field &p = m_field_controller->get_field_w();
+    Field &T = m_field_controller->get_field_T();
+    Field &C = m_field_controller->get_field_concentration();
 
-    m_reader->write(t_cur, u, v, w, p, T, C);
+    m_field_IO_handler->write(t_cur, u, v, w, p, T, C);
 }
 
 real DataAssimilation::get_new_time_value() const {

@@ -21,7 +21,9 @@ struct AssimilationMethods {
 
 class DataAssimilation {
  public:
-    DataAssimilation(const SolverController &solver_controller, const FieldController &field_controller);
+    DataAssimilation(const SolverController &solver_controller,
+                     FieldController *field_controller,
+                     const Settings::assimilation_parameters &settings);
     void save_data(real t_cur);
 
     bool requires_rollback();
@@ -33,11 +35,11 @@ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    FieldController m_field_controller;
-    SolverController m_solver_controller;
-    bool m_assimilated = false;
+    const Settings::assimilation_parameters &m_settings;
+    FieldController *m_field_controller;
+    const SolverController &m_solver_controller;
 
-    FieldIO *m_reader;
+    FieldIO *m_field_IO_handler;
 
     real m_t_cur = -1;
 

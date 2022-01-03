@@ -13,26 +13,12 @@
 #include <fmt/format.h>
 #include <fstream>
 #include "../domain/DomainData.h"
-#include "DataAssimilation.h"
 
 
 FieldIO::FieldIO(const SolverController &solver_controller): m_solver_controller(solver_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    /*
-    if (init == AssimilationMethods::None) {
-        m_func = new Zero();
-    } else if (init == AssimilationMethods::HRRChanger) {
-        m_func = new HRRChanger(m_solver_controller.get_temperature_source_function());
-    } else {
-#ifndef BENCHMARKING
-        m_logger->critical("Data Assimilation class {} is not defined", init);
-#endif
-        std::exit(1);
-        // TODO Error Handling
-    }
-     */
 
     auto domain_data = DomainData::getInstance();
     m_dt = domain_data->get_physical_parameters().dt;
