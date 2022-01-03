@@ -51,6 +51,7 @@ Other:
   ${YELLOW}--cudaversion${NC}                     \t set CUDA Version
   ${YELLOW}--cc${NC}
   ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (35|50|60|62|70|72|75|80)
+  ${YELLOW}-checkout${NC}                         \t set libraries in external folder to a specific version (spdlog v1.9.2, fmt 8.0.1, googletest release-1.8.1)
    ${YELLOW}-d${NC}
    ${YELLOW}--debugmode${NC}                      \t set debug flag for build type (default: ${BUILDTYPE})
 
@@ -74,6 +75,7 @@ DOCKERHOST=docker-$(hostname)
 DOCKERRUNCPU=0
 PROCS=-1
 MPI=0
+CHECKOUT=0
 while [[ $# -gt 0 ]]
 do
   key="$1"
@@ -86,6 +88,10 @@ do
     --cc|--computecompatibility)
       GPU_CC="cc$2"
       shift
+      shift
+      ;;
+    --checkout)
+      CHECKOUT=1
       shift
       ;;
     -d|--debug|--debugmode)
@@ -189,24 +195,34 @@ do
   esac
 done
 
+if [ $CHECKOUT -eq 1 ]
+then
+  cd external/fmt || exit
+  git checkout 8.0.1
+  cd ../spdlog || exit
+  git checkout v1.9.2
+  cd ../googletest || exit
+  git checkout release-1.8.1
+  cd ../..
+fi
 if [ $DOCKERBUILD -eq 1 ]
 then
-  cd docker
+  cd docker || exit
   docker build -t artss_docker --no-cache .
   cd ..
 fi
 
 if [ $DOCKERRUN -eq 1 ]
 then
-  docker run --gpus all -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker bash
+  docker run --gpus all -it --rm --hostname=${DOCKERHOST} -v "$(pwd)":/host_pwd -w /host_pwd artss_docker bash
 fi
 
 if [ $DOCKERRUNCPU -eq 1 ]
 then
-  docker run -it --rm --hostname=${DOCKERHOST} -v $(pwd):/host_pwd -w /host_pwd artss_docker bash # /bin/bash -c "./compile.sh"
+  docker run -it --rm --hostname=${DOCKERHOST} -v "$(pwd)":/host_pwd -w /host_pwd artss_docker bash # /bin/bash -c "./compile.sh"
 fi
 
-if [ $DOCKERRUN -eq 1 -o $DOCKERRUNCPU -eq 1 -o $DOCKERBUILD -eq 1 ]
+if [[ $DOCKERRUN -eq 1 || $DOCKERRUNCPU -eq 1 || $DOCKERBUILD -eq 1 ]]
 then
   exit
 fi
@@ -214,8 +230,8 @@ fi
 if [[ $JURECA -eq 0 && $P100 -eq 0 ]]
 then
   HOSTNAME=$(hostname)
-  if [[ $HOSTNAME = jrl* ]]; then JURECA=0; fi
-  if [ "$HOSTNAME" = "ias7139" ]; then P100=0; fi
+  if [[ $HOSTNAME = jrl* ]]; then JURECA=1; fi
+  if [ "$HOSTNAME" = "ias7139" ]; then P100=1; fi
 fi
 
 if [ "$COMPILE" = "" ]
@@ -230,12 +246,12 @@ fi
 if [ $JURECA -eq 1 ]
 then
   module load CMake
-  module load PGI/19.10-GCC-8.3.0
-  module load CUDA/10.1.105
+  module load NVHPC/20.9-GCC-9.3.0
+  module load CUDA/11.0
   export CUDA_LIB=${CUDA_ROOT}/lib64/
   export CUDA_INC=${CUDA_ROOT}/include/
-  CUDA_VERSION=10.1
-  GPU_CC=cc35
+  CUDA_VERSION=11.0
+  GPU_CC=cc80
   GPU=0
 fi
 

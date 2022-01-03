@@ -11,11 +11,14 @@
 #include "../field/Field.h"
 #include "../utility/Utility.h"
 #include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class Solution {
  public:
-    explicit Solution(const std::string &initial_condition, bool has_analytical_solution);
+    Solution(const Settings::initial_conditions_parameters &ic_parameters, const Settings::solver::solution &solution_parameters);
+
     void calc_analytical_solution(real t);
+    bool has_analytical_solution() const { return m_solution_settings.analytical_solution; }
 
     // Getter
     return_ptr get_return_ptr_data_u() const { return m_u_analytical_solution.data; }
@@ -37,6 +40,8 @@ class Solution {
     void buoyancy_mms(real t);
     void zero(real t);
 
+    const Settings::initial_conditions_parameters &m_ic_settings;
+    const Settings::solver::solution &m_solution_settings;
     Field m_u_analytical_solution;
     Field m_v_analytical_solution;
     Field m_w_analytical_solution;
@@ -45,7 +50,6 @@ class Solution {
     void (Solution::*m_init_function)(const real);
 
     real m_current_time_step = -1;
-    bool m_has_analytical_solution;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif

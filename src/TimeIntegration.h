@@ -12,6 +12,7 @@
 #include "interfaces/ISolver.h"
 #include "interfaces/ISource.h"
 #include "utility/GlobalMacrosTypes.h"
+#include "utility/settings/Settings.h"
 #include "solver/SolverController.h"
 #include "adaption/Adaption.h"
 #ifdef ASSIMILATION
@@ -30,10 +31,11 @@
 
 class TimeIntegration {
  public:
-    explicit TimeIntegration(SolverController *sc);
+    TimeIntegration(const Settings::Settings &settings, SolverController *sc);
     void run();
 
  private:
+    const Settings::Settings &m_settings;
     real m_dt;
     real m_t_end;
     real m_t_cur;

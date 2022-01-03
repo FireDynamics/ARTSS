@@ -5,21 +5,24 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "DiffusionSolver.h"
-#include "../interfaces/IDiffusion.h"
-#include "../utility/Parameters.h"
-#include "../Domain.h"
+
+#include <string>
+#include <vector>
+#include <algorithm>
+
+#include "../domain/DomainData.h"
 #include "SolverSelection.h"
 
-DiffusionSolver::DiffusionSolver(FieldController *field_controller) {
+DiffusionSolver::DiffusionSolver(const Settings::solver_parameters &solver_settings,
+                                 FieldController *field_controller) :
+        m_solver_settings(solver_settings) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_controller = field_controller;
-    auto params = Parameters::getInstance();
-    std::string diffusionType = params->get("solver/diffusion/type");
-    SolverSelection::SetDiffusionSolver(&this->dif, diffusionType);
 
-    m_nu = params->get_real("physical_parameters/nu");
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif);
+
     control();
 }
 
@@ -50,9 +53,10 @@ void DiffusionSolver::do_step(real, bool sync) {
 
 #pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp)
     {
-        dif->diffuse(u, u0, u_tmp, m_nu, sync);
-        dif->diffuse(v, v0, v_tmp, m_nu, sync);
-        dif->diffuse(w, w0, w_tmp, m_nu, sync);
+        real nu = DomainData::getInstance()->get_physical_parameters().nu.value();
+        dif->diffuse(u, u0, u_tmp, nu, sync);
+        dif->diffuse(v, v0, v_tmp, nu, sync);
+        dif->diffuse(w, w0, w_tmp, nu, sync);
     }
 }
 
@@ -61,11 +65,11 @@ void DiffusionSolver::do_step(real, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void DiffusionSolver::control() {
-    auto params = Parameters::getInstance();
-    if (params->get("solver/diffusion/field") != "u,v,w") {
+    auto fields = m_solver_settings.diffusion.fields;
+    std::sort(fields.begin(), fields.end());
+    if (fields != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
-        auto logger = Utility::create_logger(typeid(DiffusionSolver).name());
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         //TODO Error handling

@@ -7,7 +7,7 @@
 #ifndef ARTSS_INTERFACES_ISOURCEFUNCTION_H
 #define ARTSS_INTERFACES_ISOURCEFUNCTION_H
 
-#include "./IRandomField.h"
+#include "IRandomField.h"
 #include "../field/Field.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include <string>

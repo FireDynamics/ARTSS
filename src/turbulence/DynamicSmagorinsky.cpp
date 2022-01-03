@@ -11,9 +11,8 @@
 #endif
 
 #include "DynamicSmagorinsky.h"
-#include "../utility/Parameters.h"
-#include "../Domain.h"
-#include "../boundary/BoundaryController.h"
+#include "../domain/DomainData.h"
+#include "../domain/DomainController.h"
 
 DynamicSmagorinsky::DynamicSmagorinsky() :
     u_f(FieldType::U),
@@ -86,8 +85,6 @@ DynamicSmagorinsky::DynamicSmagorinsky() :
     S_bar(FieldType::U),
     S_bar_f(FieldType::U),
     Cs(FieldType::U) {
-    auto params = Parameters::getInstance();
-    m_nu = params->get_real("physical_parameters/nu");
 
     // Variables related to Dynamic Smagorinsky
     u_f.copyin();
@@ -175,14 +172,16 @@ DynamicSmagorinsky::DynamicSmagorinsky() :
 void DynamicSmagorinsky::calc_turbulent_viscosity(
         Field &ev,
         Field const &in_u, Field const &in_v, Field const &in_w, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx();
-    const size_t Ny = domain->get_Ny();
+    const size_t Nx = domain_data->get_Nx();
+    const size_t Ny = domain_data->get_Ny();
 
-    const real dx = domain->get_dx();
-    const real dy = domain->get_dy();
-    const real dz = domain->get_dz();
+    const real nu = domain_data->get_physical_parameters().nu.value();
+
+    const real dx = domain_data->get_dx();
+    const real dy = domain_data->get_dy();
+    const real dz = domain_data->get_dz();
 
     const real rdx = 1. / dx;
     const real rdy = 1. / dy;
@@ -193,9 +192,9 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
     const real delta_s = cbrt(dx * dy * dz);
 
 
-    auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     // Velocity filter
     explicit_filtering(u_f, in_u, sync);
@@ -208,9 +207,9 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
                         u_f, v_f, w_f, \
                         uf_uf, vf_vf, wf_wf, \
                         uf_vf, uf_wf, vf_wf, \
-                        d_inner_list[:bsize_i]) async
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
+                        domain_inner_list[:size_domain_inner_list]) async
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
         // product of velocities
         uu[i] = u_f[i] * u_f[i];
         vv[i] = v_f[i] * v_f[i];
@@ -249,9 +248,9 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
                         uf_uf, vf_vf, wf_wf, \
                         uf_vf, uf_wf, vf_wf, \
                         u_f, v_f, w_f, \
-                        d_inner_list[:bsize_i]) async
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
+                        domain_inner_list[:size_domain_inner_list]) async
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
 
         // Leonard stress
         L11[i] = uu_f[i] - uf_uf[i];
@@ -323,9 +322,9 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
                         L11, L22, L33, \
                         L12, L13, L23, \
                         Cs, \
-                        d_inner_list[:bsize_i]) async
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
+                        domain_inner_list[:size_domain_inner_list]) async
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
         // modulus of filtered strain tensor
         S_bar_f[i] = sqrt(2. * (S11_f[i] * S11_f[i]
                              +  S22_f[i] * S22_f[i]
@@ -361,8 +360,8 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
 
     real sum;
     // local averaging of the coefficients
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
         sum = 0;
         for (size_t l = 0; l < 3; l++) {
             for (size_t m = 0; m < 3; m++) {
@@ -376,9 +375,9 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
     }
 
     // negative coefficients are allowed unless they don't make the effective viscosity zero. In our case d_ev is very small to do that
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
-        if ((ev[i] + m_nu) < 0) {
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
+        if ((ev[i] + nu) < 0) {
             ev[i] = 0;
         }
     }
@@ -392,24 +391,24 @@ void DynamicSmagorinsky::calc_turbulent_viscosity(
 /// \param  sync          synchronization boolean (true=sync (default), false=async)
 // ***************************************************************************************
 void DynamicSmagorinsky::explicit_filtering(Field &out, Field const &in, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
 
-    const size_t Nx = domain->get_Nx(out.get_level());
-    const size_t Ny = domain->get_Ny(out.get_level());
+    const size_t Nx = domain_data->get_Nx();
+    const size_t Ny = domain_data->get_Ny();
 
     // Implement a discrete filter by trapezoidal or simpsons rule.
     real a[3] = {1. / 4., 1. / 2., 1. / 4.};  // trapezoidal weights
     // real a[3] = {1./6.,1./3.,1./6.};  // simpsons weights
 
     // Construction by product combination for trapezoidal
-    auto boundary = BoundaryController::getInstance();
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    auto domain_controller = DomainController::getInstance();
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     real sum;
-#pragma acc parallel loop independent present(out, in, a[:3], d_inner_list[:bsize_i]) async
-    for (size_t j = 0; j < bsize_i; ++j) {
-        const size_t i = d_inner_list[j];
+#pragma acc parallel loop independent present(out, in, a[:3], domain_inner_list[:size_domain_inner_list]) async
+    for (size_t j = 0; j < size_domain_inner_list; ++j) {
+        const size_t i = domain_inner_list[j];
         sum = 0;
 #pragma acc loop independent collapse(3)
         for (size_t l = 0; l < 3; l++) {

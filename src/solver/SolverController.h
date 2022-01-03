@@ -3,20 +3,23 @@
 /// \date       Aug 11, 2020
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2020> Forschungszentrum Juelich All rights reserved.
-//
+
 #ifndef ARTSS_SOLVER_SOLVERCONTROLLER_H_
 #define ARTSS_SOLVER_SOLVERCONTROLLER_H_
 
 #include <string>
+
 #include "../interfaces/ISolver.h"
 #include "../interfaces/ISource.h"
 #include "../interfaces/ISourceFunction.h"
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
+#include "../utility/settings/Settings.h"
+
 
 class SolverController {
  public:
-    SolverController();
+    explicit SolverController(const Settings::Settings &settings);
     ~SolverController();
 
     void solver_do_step(real t, bool sync);
@@ -26,31 +29,22 @@ class SolverController {
 
     ISourceFunction* get_temperature_source_function() { return m_source_function_temperature; }
  private:
-    void set_up_sources();
-    void init_solver(const std::string& string_solver);
-    void set_up_fields(const std::string& string_solver);
-    void call_random(Field &field);
+    void init_solver(const Settings::solver_parameters &solver_settings);
+    void set_up_fields(const std::string &solver_description, const Settings::initial_conditions_parameters &ic_settings);
 
     void force_source();
-    void temperature_source();
     void momentum_source();
+
+    const Settings::Settings &m_settings;
 
     FieldController *m_field_controller;
     ISolver *m_solver;
-    ISourceFunction *m_source_function_concentration;
-    ISourceFunction *m_source_function_temperature;
 
-    ISource *source_temperature;
-    ISource *source_velocity;
-    ISource *source_concentration;
-
-    bool m_has_temperature = false;
     bool m_has_momentum_source = false;
-    bool m_has_turbulence = false;
-    bool m_has_concentration = false;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
+
 };
 
 #endif /* ARTSS_SOLVER_SOLVERCONTROLLER_H_ */
