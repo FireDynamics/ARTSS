@@ -13,6 +13,7 @@
 #include "../utility/Utility.h"
 #include "FieldIO.h"
 #include "../solver/SolverController.h"
+#include "ParameterReader.h"
 
 struct AssimilationMethods {
     inline static const std::string None = "default";
@@ -40,6 +41,7 @@ private:
     const SolverController &m_solver_controller;
 
     FieldIO *m_field_IO_handler;
+    ParameterReader *m_parameter_handler;
 
     real m_t_cur = -1;
 

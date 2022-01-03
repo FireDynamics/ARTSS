@@ -21,10 +21,9 @@ FieldIO::FieldIO() {
 #endif
 
     auto domain_data = DomainData::getInstance();
-    m_dt = domain_data->get_physical_parameters().dt;
     real t_end = domain_data->get_physical_parameters().t_end;
 
-    size_t n = static_cast<size_t>(t_end / m_dt) + 1;
+    size_t n = static_cast<size_t>(t_end / domain_data->get_physical_parameters().dt) + 1;
     m_positions = new long[n];
 
     std::string header = create_header();
@@ -47,7 +46,7 @@ FieldIO::FieldIO() {
 /// \param  T       data of field T to be written out
 /// \param  C       data of field C to be written out
 // *************************************************************************************************
-void FieldIO::write(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
+void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     std::string output = fmt::format(m_format + "\n", t_cur);
     Field fields[] = {u, v, w, p, T, C};
     size_t size = u.get_size();
@@ -57,7 +56,7 @@ void FieldIO::write(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T
         }
         output.append(fmt::format(("{}\n"), f[size - 1]));
     }
-    size_t n = static_cast<size_t>(t_cur / m_dt) - 1;
+    size_t n = static_cast<size_t>(t_cur / DomainData::getInstance()->get_physical_parameters().dt) - 1;
     long length = static_cast<long>(output.length());
     m_positions[n + 1] = m_positions[n] + length;
 
@@ -66,16 +65,9 @@ void FieldIO::write(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T
     output_file.seekp(m_positions[n], std::ios_base::beg);
     output_file.write(output.c_str(), length);
 
-    std::string body_extra = m_func->update_body_data();
-    output_file.write(body_extra.c_str(), static_cast<long>(body_extra.length()));
-
     // overwrite current time step
     output_file.seekp(m_pos_time_step, std::ios_base::beg);
     output_file.write(fmt::format(m_format, t_cur).c_str(), m_length_time_stamp);
-
-    output_file.seekp(m_pos_header, std::ios_base::beg);
-    std::string header_extra = m_func->update_header_data();
-    output_file.write(header_extra.c_str(), static_cast<long>(header_extra.length()));
 
     output_file.close();
 }
@@ -91,9 +83,9 @@ void FieldIO::write(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T
 /// \param  T       field T to store the read data
 /// \param  C       field C to store the read data
 // *************************************************************************************************
-void FieldIO::read(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
+void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     std::ifstream input_file(m_filename, std::ifstream::binary);
-    size_t n = static_cast<size_t>(t_cur / m_dt) - 1;
+    size_t n = static_cast<size_t>(t_cur / DomainData::getInstance()->get_physical_parameters().dt) - 1;
     long pos = m_positions[n];
     std::string line;
     input_file.seekg(pos);
@@ -121,7 +113,7 @@ void FieldIO::read(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T,
 /// \param  T           field T to store the read data
 /// \param  C           field C to store the read data
 // *************************************************************************************************
-void FieldIO::read(std::string &file_name, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
+void FieldIO::read_fields(std::string &file_name, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     std::ifstream input_file(file_name, std::ifstream::binary);
     if (input_file.is_open()) {
         std::string string_time_step;
@@ -166,7 +158,7 @@ std::string FieldIO::create_header() {
 
     std::string string_t_cur_text = "Current time step;";
     m_pos_time_step = static_cast<long>(string_t_cur_text.length());
-    std::string header = fmt::format(string_t_cur_text + m_format + ";dt;{}\n", 0.0, m_dt);
+    std::string header = fmt::format(string_t_cur_text + m_format + ";dt;{}\n", 0.0, DomainData::getInstance()->get_physical_parameters().dt);
     header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
     header.append(fmt::format("###DATE;{}", std::ctime(&end_time)));

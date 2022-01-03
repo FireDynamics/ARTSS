@@ -24,7 +24,8 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_IO_handler = new FieldIO(m_solver_controller);
+    m_field_IO_handler = new FieldIO();
+    m_parameter_handler = new ParameterReader();
     /*
     if (init == AssimilationMethods::None) {
         m_func = new Zero();
@@ -47,7 +48,7 @@ void DataAssimilation::read_new_data(std::string &file_name) {
 #ifndef BENCHMARKING
     m_logger->debug("read new data from {}", file_name);
 #endif
-    m_field_IO_handler->read(file_name, m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T, m_new_field_C);
+    m_field_IO_handler->read_fields(file_name, m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T, m_new_field_C);
 }
 
 void DataAssimilation::save_data(real t_cur) {
@@ -58,7 +59,7 @@ void DataAssimilation::save_data(real t_cur) {
     Field &T = m_field_controller->get_field_T();
     Field &C = m_field_controller->get_field_concentration();
 
-    m_field_IO_handler->write(t_cur, u, v, w, p, T, C);
+    m_field_IO_handler->write_fields(t_cur, u, v, w, p, T, C);
 }
 
 real DataAssimilation::get_new_time_value() const {
