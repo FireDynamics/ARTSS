@@ -254,7 +254,7 @@ namespace initial_conditions {
         doc.Parse(xml.c_str());
         Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
                 doc.RootElement());
-        auto esp = std::get<exp_sinus_prod>(initial_conditions_parameters.ic.value());
+        const auto &esp = std::get<exp_sinus_prod>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(esp.l, 111);
     }
 
@@ -276,7 +276,7 @@ namespace initial_conditions {
         doc.Parse(xml.c_str());
         Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
                 doc.RootElement());
-        auto h = std::get<hat>(initial_conditions_parameters.ic.value());
+        const auto &h = std::get<hat>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(h.start_coords[CoordinateAxis::X], 0.5);
         EXPECT_DOUBLE_EQ(h.start_coords[CoordinateAxis::Y], -0.5);
         EXPECT_DOUBLE_EQ(h.start_coords[CoordinateAxis::Z], 0.05);
@@ -304,7 +304,7 @@ namespace initial_conditions {
         doc.Parse(xml.c_str());
         Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
                 doc.RootElement());
-        auto gb = std::get<gauss_bubble>(initial_conditions_parameters.ic.value());
+        const auto &gb = std::get<gauss_bubble>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(gb.l, 0.03125);
         EXPECT_DOUBLE_EQ(gb.velocity_lin[CoordinateAxis::X], 0.05);
         EXPECT_DOUBLE_EQ(gb.velocity_lin[CoordinateAxis::Y], 0.5);
@@ -328,7 +328,7 @@ namespace initial_conditions {
         doc.Parse(xml.c_str());
         Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
                 doc.RootElement());
-        auto params_drift = std::get<drift>(initial_conditions_parameters.ic.value());
+        const auto &params_drift = std::get<drift>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(params_drift.velocity_lin[CoordinateAxis::X], 0.05);
         EXPECT_DOUBLE_EQ(params_drift.velocity_lin[CoordinateAxis::Y], 0.5);
         EXPECT_DOUBLE_EQ(params_drift.velocity_lin[CoordinateAxis::Z], 0.25);
@@ -351,7 +351,7 @@ namespace initial_conditions {
         doc.Parse(xml.c_str());
         Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
                 doc.RootElement());
-        auto params_layers = std::get<layers_temperature>(initial_conditions_parameters.ic.value());
+        const auto &params_layers = std::get<layers_temperature>(initial_conditions_parameters.ic.value());
         EXPECT_EQ(params_layers.number_of_layers, 3);
         EXPECT_DOUBLE_EQ(params_layers.borders[0], -1.8);
         EXPECT_DOUBLE_EQ(params_layers.borders[1], -0.6);
@@ -371,7 +371,7 @@ namespace initial_conditions {
         doc.Parse(xml.c_str());
         Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
                 doc.RootElement());
-        auto params_sin_sin_sin_mms = std::get<sin_sin_sin>(initial_conditions_parameters.ic.value());
+        const auto &params_sin_sin_sin_mms = std::get<sin_sin_sin>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(params_sin_sin_sin_mms.l, 1);
     }
 
@@ -390,7 +390,7 @@ namespace initial_conditions {
         doc.Parse(xml.c_str());
         Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
                 doc.RootElement());
-        auto params_vortex = std::get<vortex>(initial_conditions_parameters.ic.value());
+        const auto &params_vortex = std::get<vortex>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(params_vortex.velocity_lin[CoordinateAxis::X], 0.05);
         EXPECT_DOUBLE_EQ(params_vortex.velocity_lin[CoordinateAxis::Y], 0.5);
         EXPECT_DOUBLE_EQ(params_vortex.velocity_lin[CoordinateAxis::Z], 0.25);
@@ -409,7 +409,7 @@ namespace initial_conditions {
         doc.Parse(xml.c_str());
         Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
                 doc.RootElement());
-        auto params_mc_dermott = std::get<mc_dermott>(initial_conditions_parameters.ic.value());
+        const auto &params_mc_dermott = std::get<mc_dermott>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(params_mc_dermott.A, 2);
     }
 }
@@ -447,7 +447,7 @@ TEST(SettingsTest, obstacles) {
     EXPECT_TRUE(obstacles_parameters.enabled);
     EXPECT_EQ(obstacles_parameters.obstacles.size(), 2);
 
-    auto obstacle1 = obstacles_parameters.obstacles[0];
+    const auto &obstacle1 = obstacles_parameters.obstacles[0];
     EXPECT_EQ(obstacle1.name, "ceiling");
     EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::X], 0);
     EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::Y], 2.18);
@@ -457,7 +457,7 @@ TEST(SettingsTest, obstacles) {
     EXPECT_DOUBLE_EQ(obstacle1.end_coords[CoordinateAxis::Z], 1.4);
 
     EXPECT_EQ(obstacle1.boundaries.size(), 2);
-    auto o1_b1 = obstacle1.boundaries[0];
+    const auto &o1_b1 = obstacle1.boundaries[0];
     EXPECT_DOUBLE_EQ(o1_b1.value.value(), -1);
     EXPECT_EQ(o1_b1.boundary_condition, BoundaryCondition::DIRICHLET);
     EXPECT_NE(std::find(o1_b1.field_type.begin(),
@@ -478,7 +478,7 @@ TEST(SettingsTest, obstacles) {
                             patch),
                   o1_b1.patch.end());
     }
-    auto o1_b2 = obstacle1.boundaries[1];
+    const auto &o1_b2 = obstacle1.boundaries[1];
     EXPECT_DOUBLE_EQ(o1_b2.value.value(), 0);
     EXPECT_EQ(o1_b2.boundary_condition, BoundaryCondition::NEUMANN);
     EXPECT_NE(std::find(o1_b2.field_type.begin(),
@@ -496,7 +496,7 @@ TEST(SettingsTest, obstacles) {
                   o1_b2.patch.end());
     }
 
-    auto obstacle2 = obstacles_parameters.obstacles[1];
+    const auto &obstacle2 = obstacles_parameters.obstacles[1];
     EXPECT_EQ(obstacle2.name, "right wall left from door");
     EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::X], 2.8);
     EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::Y], 0);
@@ -506,7 +506,7 @@ TEST(SettingsTest, obstacles) {
     EXPECT_DOUBLE_EQ(obstacle2.end_coords[CoordinateAxis::Z], -0.43);
 
     EXPECT_EQ(obstacle2.boundaries.size(), 2);
-    auto o2_b1 = obstacle2.boundaries[0];
+    const auto &o2_b1 = obstacle2.boundaries[0];
     EXPECT_EQ(o2_b1.boundary_condition, BoundaryCondition::PERIODIC);
     EXPECT_NE(std::find(o2_b1.field_type.begin(),
                         o2_b1.field_type.end(),
@@ -526,7 +526,7 @@ TEST(SettingsTest, obstacles) {
                             patch),
                   o2_b1.patch.end());
     }
-    auto o2_b2 = obstacle2.boundaries[1];
+    const auto &o2_b2 = obstacle2.boundaries[1];
     EXPECT_DOUBLE_EQ(o2_b2.value.value(), 10);
     EXPECT_EQ(o2_b2.boundary_condition, BoundaryCondition::DIRICHLET);
     EXPECT_NE(std::find(o2_b2.field_type.begin(),
@@ -577,7 +577,7 @@ TEST(SettingsTest, requiredSurfacesParameters2) {
     Settings::surfaces_parameters surfaces_parameters = Settings::parse_surfaces_parameters(doc.RootElement());
     EXPECT_TRUE(surfaces_parameters.enabled);
 
-    auto s_back = surfaces_parameters.surfaces[0];
+    const auto &s_back = surfaces_parameters.surfaces[0];
     EXPECT_EQ(s_back.name, "back");
     EXPECT_DOUBLE_EQ(1, s_back.start_coords[CoordinateAxis::X]);
     EXPECT_DOUBLE_EQ(-0.3, s_back.start_coords[CoordinateAxis::Y]);
@@ -605,7 +605,7 @@ TEST(SettingsTest, requiredSurfacesParameters2) {
     EXPECT_EQ(BoundaryCondition::DIRICHLET, s_back.boundaries[1].boundary_condition);
     EXPECT_DOUBLE_EQ(0, s_back.boundaries[1].value.value());
 
-    auto s_front = surfaces_parameters.surfaces[1];
+    const auto &s_front = surfaces_parameters.surfaces[1];
     EXPECT_EQ(s_front.name, "front");
     EXPECT_DOUBLE_EQ(2, s_front.start_coords[CoordinateAxis::X]);
     EXPECT_DOUBLE_EQ(-1.3, s_front.start_coords[CoordinateAxis::Y]);
@@ -677,7 +677,7 @@ TEST(SettingsTest, boundaries) {
 
     // patches
     for (size_t p = 0; p < number_of_patches; p++) {
-        auto patch = Patch(p);
+        const auto patch = Patch(p);
         EXPECT_NE(std::find(boundaries_parameters.boundaries[0].patch.begin(),
                             boundaries_parameters.boundaries[0].patch.end(),
                             patch),
@@ -771,7 +771,7 @@ namespace diffusion_solver {
                             solver_parameters.diffusion.fields.end(),
                             FieldType::W),
                   solver_parameters.diffusion.fields.end());
-        auto jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(solver_parameters.diffusion.solver.value());
+        const auto &jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(solver_parameters.diffusion.solver.value());
         EXPECT_EQ(jacobi.max_iter, 77);
         EXPECT_DOUBLE_EQ(jacobi.tol_res, 1e-7);
         EXPECT_DOUBLE_EQ(jacobi.w, 1);
@@ -809,7 +809,7 @@ namespace diffusion_solver {
                             solver_parameters.diffusion.fields.end(),
                             FieldType::W),
                   solver_parameters.diffusion.fields.end());
-        auto colored_gauss_seidel = std::get<Settings::solver::diffusion_solvers::colored_gauss_seidel>(solver_parameters.diffusion.solver.value());
+        const auto &colored_gauss_seidel = std::get<Settings::solver::diffusion_solvers::colored_gauss_seidel>(solver_parameters.diffusion.solver.value());
         EXPECT_EQ(colored_gauss_seidel.max_iter, 767);
         EXPECT_DOUBLE_EQ(colored_gauss_seidel.tol_res, 1e-1);
         EXPECT_DOUBLE_EQ(colored_gauss_seidel.w, 0.666);
@@ -945,7 +945,7 @@ namespace pressure_solvers {
 
         EXPECT_EQ(solver_parameters.pressure.type, PressureMethods::VCycleMG);
         EXPECT_EQ(solver_parameters.pressure.field, FieldType::P);
-        auto vcycle = solver_parameters.pressure.solver;
+        const auto &vcycle = solver_parameters.pressure.solver;
         EXPECT_EQ(vcycle.n_level, 5);
         EXPECT_EQ(vcycle.n_cycle, 2);
         EXPECT_EQ(vcycle.max_cycle, 100);
@@ -958,7 +958,7 @@ namespace pressure_solvers {
                             vcycle.smoother.fields.end(),
                             FieldType::P),
                   vcycle.smoother.fields.end());
-        auto jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(vcycle.smoother.solver.value());
+        const auto &jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(vcycle.smoother.solver.value());
         EXPECT_DOUBLE_EQ(jacobi.tol_res, 1e-7);
         EXPECT_EQ(jacobi.max_iter, 100);
         EXPECT_DOUBLE_EQ(jacobi.w, 0.6666666667);
@@ -1033,7 +1033,7 @@ namespace source_solvers {
                             solver_parameters.diffusion.fields.end(),
                             FieldType::W),
                   solver_parameters.diffusion.fields.end());
-        auto diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(
+        const auto &diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(
                 solver_parameters.diffusion.solver.value());
         EXPECT_EQ(diffusion_jacobi.max_iter, 77);
         EXPECT_DOUBLE_EQ(diffusion_jacobi.tol_res, 1e-7);
@@ -1042,7 +1042,7 @@ namespace source_solvers {
         // pressure
         EXPECT_EQ(solver_parameters.pressure.type, PressureMethods::VCycleMG);
         EXPECT_EQ(solver_parameters.pressure.field, FieldType::P);
-        auto vcycle = solver_parameters.pressure.solver;
+        const auto &vcycle = solver_parameters.pressure.solver;
         EXPECT_EQ(vcycle.n_level, 4);
         EXPECT_EQ(vcycle.n_cycle, 2);
         EXPECT_EQ(vcycle.max_cycle, 100);
@@ -1055,7 +1055,7 @@ namespace source_solvers {
                             vcycle.smoother.fields.end(),
                             FieldType::P),
                   vcycle.smoother.fields.end());
-        auto pressure_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(vcycle.smoother.solver.value());
+        const auto &pressure_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(vcycle.smoother.solver.value());
         EXPECT_DOUBLE_EQ(pressure_jacobi.tol_res, 1e-3);
         EXPECT_EQ(pressure_jacobi.max_iter, 100);
         EXPECT_DOUBLE_EQ(pressure_jacobi.w, 0.6666666667);
@@ -1105,7 +1105,7 @@ namespace source_solvers {
         EXPECT_EQ(solver_parameters.description, SolverTypes::NSSolver);
         EXPECT_EQ(solver_parameters.source.type, SourceMethods::ExplicitEuler);
         EXPECT_EQ(solver_parameters.source.force_fct, SourceMethods::Buoyancy);
-        auto buoyancy = std::get<Settings::solver::source_solvers::buoyancy>(solver_parameters.source.force_function);
+        const auto &buoyancy = std::get<Settings::solver::source_solvers::buoyancy>(solver_parameters.source.force_function);
         EXPECT_FALSE(buoyancy.use_init_values);
         EXPECT_DOUBLE_EQ(buoyancy.ambient_temperature_value.value(), 299.14);
         EXPECT_NE(std::find(solver_parameters.source.direction.begin(),
@@ -1154,7 +1154,7 @@ namespace source_solvers {
         EXPECT_EQ(solver_parameters.description, SolverTypes::NSSolver);
         EXPECT_EQ(solver_parameters.source.type, SourceMethods::ExplicitEuler);
         EXPECT_EQ(solver_parameters.source.force_fct, SourceMethods::Uniform);
-        auto uniform = std::get<Settings::solver::source_solvers::uniform>(solver_parameters.source.force_function);
+        const auto &uniform = std::get<Settings::solver::source_solvers::uniform>(solver_parameters.source.force_function);
         EXPECT_DOUBLE_EQ(uniform.velocity_value[CoordinateAxis::X], 1);
         EXPECT_DOUBLE_EQ(uniform.velocity_value[CoordinateAxis::Y], 1.1);
         EXPECT_DOUBLE_EQ(uniform.velocity_value[CoordinateAxis::Z], 1.2);
@@ -1226,7 +1226,7 @@ TEST(SettingsTest, temperature) {
     Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
 
     EXPECT_EQ(solver_parameters.description, SolverTypes::NSTempTurbSolver);
-    auto temp = solver_parameters.temperature;
+    const auto &temp = solver_parameters.temperature;
     EXPECT_EQ(temp.advection.type, AdvectionMethods::SemiLagrangian);
     EXPECT_NE(std::find(temp.advection.fields.begin(),
                         temp.advection.fields.end(),
@@ -1237,7 +1237,7 @@ TEST(SettingsTest, temperature) {
                         temp.diffusion.fields.end(),
                         FieldType::T),
               temp.diffusion.fields.end());
-    auto diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(temp.diffusion.solver.value());
+    const auto &diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(temp.diffusion.solver.value());
     EXPECT_EQ(diffusion_jacobi.max_iter, 100);
     EXPECT_DOUBLE_EQ(diffusion_jacobi.tol_res, 1e-7);
     EXPECT_DOUBLE_EQ(diffusion_jacobi.w, 1);
@@ -1255,7 +1255,7 @@ TEST(SettingsTest, temperature) {
               temp.source.dir.end());
     EXPECT_FALSE(temp.source.dissipation);
     EXPECT_EQ(temp.source.temp_fct, SourceMethods::Gauss);
-    auto gauss = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
+    const auto &gauss = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
     EXPECT_DOUBLE_EQ(gauss.tau, 5);
     EXPECT_DOUBLE_EQ(gauss.heat_release_rate, 50.3);
     EXPECT_DOUBLE_EQ(gauss.heat_capacity, 1);
@@ -1335,7 +1335,7 @@ TEST(SettingsTest, temperatureWithoutTurbulence) {
     Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
 
     EXPECT_EQ(solver_parameters.description, SolverTypes::NSTempSolver);
-    auto temp = solver_parameters.temperature;
+    const auto &temp = solver_parameters.temperature;
     EXPECT_EQ(temp.advection.type, AdvectionMethods::SemiLagrangian);
     EXPECT_NE(std::find(temp.advection.fields.begin(),
                         temp.advection.fields.end(),
@@ -1346,7 +1346,7 @@ TEST(SettingsTest, temperatureWithoutTurbulence) {
                         temp.diffusion.fields.end(),
                         FieldType::T),
               temp.diffusion.fields.end());
-    auto diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(temp.diffusion.solver.value());
+    const auto &diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(temp.diffusion.solver.value());
     EXPECT_EQ(diffusion_jacobi.max_iter, 100);
     EXPECT_DOUBLE_EQ(diffusion_jacobi.tol_res, 1e-7);
     EXPECT_DOUBLE_EQ(diffusion_jacobi.w, 1);
@@ -1360,7 +1360,7 @@ TEST(SettingsTest, temperatureWithoutTurbulence) {
               temp.source.dir.end());
     EXPECT_FALSE(temp.source.dissipation);
     EXPECT_EQ(temp.source.temp_fct, SourceMethods::Gauss);
-    auto gauss = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
+    const auto &gauss = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
     EXPECT_DOUBLE_EQ(gauss.tau, 5);
     EXPECT_DOUBLE_EQ(gauss.heat_release_rate, 50.3);
     EXPECT_DOUBLE_EQ(gauss.heat_capacity, 1);
@@ -1475,7 +1475,7 @@ TEST(SettingsTest, concentration) {
     Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
 
     EXPECT_EQ(solver_parameters.description, SolverTypes::NSTempTurbConSolver);
-    auto temp = solver_parameters.temperature;
+    const auto &temp = solver_parameters.temperature;
     EXPECT_EQ(temp.advection.type, AdvectionMethods::SemiLagrangian);
     EXPECT_NE(std::find(temp.advection.fields.begin(),
                         temp.advection.fields.end(),
@@ -1486,7 +1486,7 @@ TEST(SettingsTest, concentration) {
                         temp.diffusion.fields.end(),
                         FieldType::T),
               temp.diffusion.fields.end());
-    auto diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(temp.diffusion.solver.value());
+    const auto &diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(temp.diffusion.solver.value());
     EXPECT_EQ(diffusion_jacobi.max_iter, 100);
     EXPECT_DOUBLE_EQ(diffusion_jacobi.tol_res, 1e-7);
     EXPECT_DOUBLE_EQ(diffusion_jacobi.w, 1);
@@ -1505,7 +1505,7 @@ TEST(SettingsTest, concentration) {
               temp.source.dir.end());
     EXPECT_FALSE(temp.source.dissipation);
     EXPECT_EQ(temp.source.temp_fct, SourceMethods::Gauss);
-    auto gauss_temp = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
+    const auto &gauss_temp = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
     EXPECT_DOUBLE_EQ(gauss_temp.tau, 5);
     EXPECT_DOUBLE_EQ(gauss_temp.heat_release_rate, 50.3);
     EXPECT_DOUBLE_EQ(gauss_temp.heat_capacity, 1);
@@ -1524,7 +1524,7 @@ TEST(SettingsTest, concentration) {
     EXPECT_EQ(temp.source.random_parameters.step_size, 0.3);
     EXPECT_EQ(temp.source.random_parameters.range, 3);
 
-    auto con = solver_parameters.concentration;
+    const auto &con = solver_parameters.concentration;
     EXPECT_EQ(con.advection.type, AdvectionMethods::SemiLagrangian);
     EXPECT_NE(std::find(con.advection.fields.begin(),
                         con.advection.fields.end(),
@@ -1535,7 +1535,7 @@ TEST(SettingsTest, concentration) {
                         con.diffusion.fields.end(),
                         FieldType::RHO),
               con.diffusion.fields.end());
-    auto con_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(con.diffusion.solver.value());
+    const auto &con_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(con.diffusion.solver.value());
     EXPECT_EQ(con_jacobi.max_iter, 101);
     EXPECT_DOUBLE_EQ(con_jacobi.tol_res, 1e-6);
     EXPECT_DOUBLE_EQ(con_jacobi.w, 1.1);
@@ -1556,7 +1556,7 @@ TEST(SettingsTest, concentration) {
                         CoordinateAxis::Y),
               con.source.dir.end());
     EXPECT_EQ(con.source.con_fct, SourceMethods::Gauss);
-    auto gauss_con = std::get<Settings::solver::sources::gauss>(con.source.con_function);
+    const auto &gauss_con = std::get<Settings::solver::sources::gauss>(con.source.con_function);
     EXPECT_DOUBLE_EQ(gauss_con.tau, 5.1);
     EXPECT_DOUBLE_EQ(gauss_con.heat_release_rate, 0.8);
     EXPECT_DOUBLE_EQ(gauss_con.heat_capacity, 13100);
@@ -1662,7 +1662,7 @@ TEST(SettingsTest, concentrationWithoutTurb) {
     Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
 
     EXPECT_EQ(solver_parameters.description, SolverTypes::NSTempConSolver);
-    auto temp = solver_parameters.temperature;
+    const auto &temp = solver_parameters.temperature;
     EXPECT_EQ(temp.advection.type, AdvectionMethods::SemiLagrangian);
     EXPECT_NE(std::find(temp.advection.fields.begin(),
                         temp.advection.fields.end(),
@@ -1673,7 +1673,7 @@ TEST(SettingsTest, concentrationWithoutTurb) {
                         temp.diffusion.fields.end(),
                         FieldType::T),
               temp.diffusion.fields.end());
-    auto diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(temp.diffusion.solver.value());
+    const auto &diffusion_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(temp.diffusion.solver.value());
     EXPECT_EQ(diffusion_jacobi.max_iter, 100);
     EXPECT_DOUBLE_EQ(diffusion_jacobi.tol_res, 1e-7);
     EXPECT_DOUBLE_EQ(diffusion_jacobi.w, 1);
@@ -1687,7 +1687,7 @@ TEST(SettingsTest, concentrationWithoutTurb) {
               temp.source.dir.end());
     EXPECT_FALSE(temp.source.dissipation);
     EXPECT_EQ(temp.source.temp_fct, SourceMethods::Gauss);
-    auto gauss_temp = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
+    const auto &gauss_temp = std::get<Settings::solver::sources::gauss>(temp.source.temp_function);
     EXPECT_DOUBLE_EQ(gauss_temp.tau, 5);
     EXPECT_DOUBLE_EQ(gauss_temp.heat_release_rate, 50.3);
     EXPECT_DOUBLE_EQ(gauss_temp.heat_capacity, 1);
@@ -1706,7 +1706,7 @@ TEST(SettingsTest, concentrationWithoutTurb) {
     EXPECT_EQ(temp.source.random_parameters.step_size, 0.3);
     EXPECT_EQ(temp.source.random_parameters.range, 3);
 
-    auto con = solver_parameters.concentration;
+    const auto &con = solver_parameters.concentration;
     EXPECT_EQ(con.advection.type, AdvectionMethods::SemiLagrangian);
     EXPECT_NE(std::find(con.advection.fields.begin(),
                         con.advection.fields.end(),
@@ -1717,7 +1717,7 @@ TEST(SettingsTest, concentrationWithoutTurb) {
                         con.diffusion.fields.end(),
                         FieldType::RHO),
               con.diffusion.fields.end());
-    auto con_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(con.diffusion.solver.value());
+    const auto &con_jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(con.diffusion.solver.value());
     EXPECT_EQ(con_jacobi.max_iter, 101);
     EXPECT_DOUBLE_EQ(con_jacobi.tol_res, 1e-6);
     EXPECT_DOUBLE_EQ(con_jacobi.w, 1.1);
@@ -1730,7 +1730,7 @@ TEST(SettingsTest, concentrationWithoutTurb) {
                         CoordinateAxis::Y),
               con.source.dir.end());
     EXPECT_EQ(con.source.con_fct, SourceMethods::Gauss);
-    auto gauss_con = std::get<Settings::solver::sources::gauss>(con.source.con_function);
+    const auto &gauss_con = std::get<Settings::solver::sources::gauss>(con.source.con_function);
     EXPECT_DOUBLE_EQ(gauss_con.tau, 5.1);
     EXPECT_DOUBLE_EQ(gauss_con.heat_release_rate, 0.8);
     EXPECT_DOUBLE_EQ(gauss_con.heat_capacity, 13100);

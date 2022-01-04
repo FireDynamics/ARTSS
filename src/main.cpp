@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
 #endif
             size_t multigrid_level = 0;
 
-            auto solver = settings.solver_parameters.description;
+            const auto &solver = settings.solver_parameters.description;
             if (solver.find("NS") != std::string::npos || solver == SolverTypes::PressureSolver) {
                 multigrid_level = settings.solver_parameters.pressure.solver.n_level;
             }
