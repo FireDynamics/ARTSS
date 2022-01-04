@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
         Settings::Settings settings = Settings::parse_settings_from_file(argv[1]);
         size_t multigrid_level = 0;
 
-        auto solver = settings.solver_parameters.description;
+        const auto &solver = settings.solver_parameters.description;
         if (solver.find("NS") != std::string::npos || solver == SolverTypes::PressureSolver) {
             multigrid_level = settings.solver_parameters.pressure.solver.n_level;
         }
