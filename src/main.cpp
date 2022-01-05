@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
         if (num_procs < 2 && comm_rank == 0) {
             // TODO Error Handling
-            std::cout << "Data assimilation has to be run with at least 2 processes, "
+            std::cout << "Data data_assimilation has to be run with at least 2 processes, "
                          "currently available: " << num_procs << " processes" << std::endl;
             std::exit(1);
         }

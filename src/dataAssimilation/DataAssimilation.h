@@ -4,8 +4,8 @@
 /// \author    My Linh Wuerzburger
 /// \copyright <2015-2021> Forschungszentrum Juelich. All rights reserved
 
-#ifndef ARTSS_SRC_DATAASSIMILATION_DATAASSIMILATION_H
-#define ARTSS_SRC_DATAASSIMILATION_DATAASSIMILATION_H
+#ifndef ARTSS_DATAASSIMILATION_DATAASSIMILATION_H
+#define ARTSS_DATAASSIMILATION_DATAASSIMILATION_H
 
 
 #include <string>
@@ -14,17 +14,18 @@
 #include "FieldIO.h"
 #include "../solver/SolverController.h"
 #include "ParameterReader.h"
+#include "../interfaces/IParameterReader.h"
 
 struct AssimilationMethods {
-    inline static const std::string None = "default";
-    inline static const std::string HRRChanger = "HRRChanger";
+    inline static const std::string standard = "default";
+    inline static const std::string temperature_source = "temperature_source";
 };
 
 class DataAssimilation {
  public:
     DataAssimilation(const SolverController &solver_controller,
                      FieldController *field_controller,
-                     const Settings::assimilation_parameters &settings);
+                     const Settings::data_assimilation_parameters &settings);
     void save_data(real t_cur);
 
     bool requires_rollback();
@@ -36,12 +37,12 @@ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    const Settings::assimilation_parameters &m_settings;
+    const Settings::data_assimilation_parameters &m_settings;
     FieldController *m_field_controller;
     const SolverController &m_solver_controller;
 
     FieldIO *m_field_IO_handler;
-    ParameterReader *m_parameter_handler;
+    IParameterReader *m_parameter_handler;
 
     real m_t_cur = -1;
 
@@ -53,4 +54,4 @@ private:
 };
 
 
-#endif /* ARTSS_SRC_DATAASSIMILATION_DATAASSIMILATION_H */
+#endif /* ARTSS_DATAASSIMILATION_DATAASSIMILATION_H */

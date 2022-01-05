@@ -134,7 +134,7 @@ void FieldIO::read_fields(std::string &file_name, Field &u, Field &v, Field &w, 
         }
     } else {
 #ifndef BENCHMARKING
-        m_logger->warn("File {} not found, skipping assimilation", file_name);
+        m_logger->warn("File {} not found, skipping data_assimilation", file_name);
 #endif
     }
 }

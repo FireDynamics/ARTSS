@@ -314,8 +314,15 @@ namespace Settings {
         solver::concentration_solver concentration;
         solver::solution solution;
     };
-    struct assimilation_parameters {
+    namespace data_assimilation {
+        struct field_change {
+            std::vector<FieldType> fields;
+            std::string filename;
+        };
+    }
+    struct data_assimilation_parameters {
         bool enabled;
+        std::string class_name;
     };
     struct Settings {
         std::string filename;
@@ -326,7 +333,7 @@ namespace Settings {
         struct boundary_parameters boundary_parameters;
         struct obstacles_parameters obstacles_parameters;
         struct surfaces_parameters surfaces_parameters;
-        struct assimilation_parameters assimilation_parameters;
+        struct data_assimilation_parameters assimilation_parameters;
         struct initial_conditions_parameters initial_conditions_parameters;
         struct visualisation_parameters visualisation_parameters;
         struct logging_parameters logging_parameters;

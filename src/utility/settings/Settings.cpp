@@ -958,10 +958,10 @@ namespace Settings {
         return sp;
     }
 
-    assimilation_parameters parse_assimilation_parameters(const tinyxml2::XMLElement *root) {
+    data_assimilation_parameters parse_assimilation_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "data_assimilation";
         auto[subsection, values] = map_parameter_section(root, context);
-        assimilation_parameters ap{};
+        data_assimilation_parameters ap{};
         ap.enabled = get_required_bool(values, "enabled", context);
 
         if (ap.enabled) {

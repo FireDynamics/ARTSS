@@ -8,10 +8,11 @@
 #include "../domain/DomainData.h"
 #include "../TCP/TCPServer.h"
 #include "mpi.h"
+#include "TemperatureSourceChanger.h"
 
 DataAssimilation::DataAssimilation(const SolverController &solver_controller,
                                    FieldController *field_controller,
-                                   const Settings::assimilation_parameters &settings) :
+                                   const Settings::data_assimilation_parameters &settings) :
         m_settings(settings),
         m_field_controller(field_controller),
         m_solver_controller(solver_controller),
@@ -20,22 +21,29 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
         m_new_field_w(Field(FieldType::W)),
         m_new_field_p(Field(FieldType::P)),
         m_new_field_T(Field(FieldType::T)),
-        m_new_field_C(Field(FieldType::RHO)){
+        m_new_field_C(Field(FieldType::RHO)) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_IO_handler = new FieldIO();
-    m_parameter_handler = new ParameterReader();
+    if (m_settings.class_name == AssimilationMethods::standard) {
+        m_parameter_handler = new ParameterReader();
+    } else if (m_settings.class_name == AssimilationMethods::temperature_source) {
+        m_parameter_handler = new TemperatureSourceChanger();
+    }
 }
 
 void DataAssimilation::initiate_rollback() {
-    m_field_controller->replace_data(m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T, m_new_field_C);
+    m_field_controller->replace_data(m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T,
+                                     m_new_field_C);
 }
+
 void DataAssimilation::read_new_data(std::string &file_name) {
 #ifndef BENCHMARKING
     m_logger->debug("read new data from {}", file_name);
 #endif
-    m_field_IO_handler->read_fields(file_name, m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T, m_new_field_C);
+    m_field_IO_handler->read_fields(file_name, m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p,
+                                    m_new_field_T, m_new_field_C);
 }
 
 void DataAssimilation::save_data(real t_cur) {
@@ -54,7 +62,7 @@ real DataAssimilation::get_new_time_value() const {
 }
 
 void DataAssimilation::config_rollback(const char *msg) {
-    std::vector<std::string> splitted_string = Utility::split(msg, '|');
+    std::vector<std::string> splitted_string = Utility::split(msg, ',');
     m_t_cur = std::stod(splitted_string[0]);
 #ifndef BENCHMARKING
     m_logger->debug("set new time value to {}", m_t_cur);
