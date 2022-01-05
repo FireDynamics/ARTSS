@@ -8,11 +8,14 @@
 #define ARTSS_DATAASSIMILATION_PARAMETERREADER_H
 
 #include "../interfaces/IParameterReader.h"
+#include "../utility/settings/Settings.h"
 
 class ParameterReader : public IParameterReader {
 public:
     ParameterReader() = default;
     ~ParameterReader() = default;
+
+    Settings::data_assimilation::changes read_config(const std::string &filename);
 };
 
 

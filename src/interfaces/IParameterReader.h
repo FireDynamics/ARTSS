@@ -8,6 +8,7 @@
 #define ARTSS_INTERFACES_IPARAMETERREADER_H
 
 #include <string>
+#include "../utility/settings/Settings.h"
 
 class IParameterReader {
 public:
