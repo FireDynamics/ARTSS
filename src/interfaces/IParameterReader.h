@@ -10,7 +10,8 @@
 #include <string>
 
 class IParameterReader {
-    virtual std::string read_config(const std::string &filename) = 0;
+public:
+    virtual Settings::data_assimilation::changes read_config(const std::string &filename) = 0;
 };
 
 #endif /* ARTSS_INTERFACES_IPARAMETERREADER_H */

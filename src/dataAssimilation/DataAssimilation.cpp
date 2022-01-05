@@ -38,14 +38,6 @@ void DataAssimilation::initiate_rollback() {
                                      m_new_field_C);
 }
 
-void DataAssimilation::read_new_data(std::string &file_name) {
-#ifndef BENCHMARKING
-    m_logger->debug("read new data from {}", file_name);
-#endif
-    m_field_IO_handler->read_fields(file_name, m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p,
-                                    m_new_field_T, m_new_field_C);
-}
-
 void DataAssimilation::save_data(real t_cur) {
     Field &u = m_field_controller->get_field_u();
     Field &v = m_field_controller->get_field_v();
@@ -63,11 +55,14 @@ real DataAssimilation::get_new_time_value() const {
 
 void DataAssimilation::config_rollback(const char *msg) {
     std::vector<std::string> splitted_string = Utility::split(msg, ',');
-    m_t_cur = std::stod(splitted_string[0]);
+    const auto &changes = m_parameter_handler->read_config(splitted_string[0]);
+    m_t_cur = changes.t_cur;
 #ifndef BENCHMARKING
     m_logger->debug("set new time value to {}", m_t_cur);
+    m_logger->debug("read new data from {}", splitted_string[1]);
 #endif
-    read_new_data(splitted_string[1]);
+    m_field_IO_handler->read_fields(splitted_string[1], m_t_cur, changes.fields, m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p,
+                                    m_new_field_T, m_new_field_C);
 }
 
 bool DataAssimilation::requires_rollback() {

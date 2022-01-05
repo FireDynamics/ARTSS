@@ -16,12 +16,13 @@ class FieldIO {
  public:
     FieldIO();
     void write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
-    void read_fields(std::string &file_name, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
     void set_filename(std::string &filename) { m_filename = filename; }
-    void read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
+    void read_fields(const std::string &file_name, real t_cur, std::vector<FieldType> fields, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
 
  private:
     std::string create_header();
+    void read_fields(const std::string &file_name, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
+    void read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
 
     long *m_positions;
     std::string m_filename = "visualisation.dat";

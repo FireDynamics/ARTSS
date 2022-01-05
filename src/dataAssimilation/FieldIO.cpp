@@ -113,7 +113,7 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
 /// \param  T           field T to store the read data
 /// \param  C           field C to store the read data
 // *************************************************************************************************
-void FieldIO::read_fields(std::string &file_name, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
+void FieldIO::read_fields(const std::string &file_name, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     std::ifstream input_file(file_name, std::ifstream::binary);
     if (input_file.is_open()) {
         std::string string_time_step;
@@ -163,5 +163,20 @@ std::string FieldIO::create_header() {
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
     header.append(fmt::format("###DATE;{}", std::ctime(&end_time)));
     return header;
+}
+
+void FieldIO::read_fields(const std::string &file_name,
+                          const real t_cur,
+                          std::vector<FieldType> fields,
+                          Field &u, Field &v, Field &w,
+                          Field &p, Field &T, Field &C) {
+
+    if (!fields.empty()) {
+        // TODO read onl the provided files
+        read_fields(file_name, u, v, w, p, T, C);
+    } else {
+        read_fields(t_cur, u, v, w, p, T, C);
+    }
+
 }
 

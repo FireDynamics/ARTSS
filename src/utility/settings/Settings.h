@@ -315,9 +315,10 @@ namespace Settings {
         solver::solution solution;
     };
     namespace data_assimilation {
-        struct field_change {
+        struct changes {
             std::vector<FieldType> fields;
             std::string filename;
+            real t_cur;
         };
     }
     struct data_assimilation_parameters {
