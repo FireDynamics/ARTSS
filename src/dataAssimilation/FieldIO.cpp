@@ -50,7 +50,7 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
     std::string output = fmt::format(m_format + "\n", t_cur);
     Field fields[] = {u, v, w, p, T, C};
     size_t size = u.get_size();
-    for (Field &f: fields){
+    for (Field &f: fields) {
         for (size_t i = 0; i < size - 1; i++) {
             output.append(fmt::format(("{};"), f[i]));
         }
@@ -158,7 +158,8 @@ std::string FieldIO::create_header() {
 
     std::string string_t_cur_text = "Current time step;";
     m_pos_time_step = static_cast<long>(string_t_cur_text.length());
-    std::string header = fmt::format(string_t_cur_text + m_format + ";dt;{}\n", 0.0, DomainData::getInstance()->get_physical_parameters().dt);
+    std::string header = fmt::format(string_t_cur_text + m_format + ";dt;{}\n", 0.0,
+                                     DomainData::getInstance()->get_physical_parameters().dt);
     header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
     header.append(fmt::format("###DATE;{}", std::ctime(&end_time)));
@@ -167,12 +168,13 @@ std::string FieldIO::create_header() {
 
 void FieldIO::read_fields(const std::string &file_name,
                           const real t_cur,
-                          std::vector<FieldType> fields,
+                          const Settings::data_assimilation::field_changes &field_changes,
                           Field &u, Field &v, Field &w,
                           Field &p, Field &T, Field &C) {
 
-    if (!fields.empty()) {
-        // TODO read onl the provided files
+    if (field_changes.u_changed || field_changes.v_changed || field_changes.w_changed ||
+        field_changes.p_changed || field_changes.T_changed || field_changes.C_changed) {
+        // TODO read only the provided files
         read_fields(file_name, u, v, w, p, T, C);
     } else {
         read_fields(t_cur, u, v, w, p, T, C);

@@ -11,13 +11,13 @@
 
 class TemperatureSourceChanger : public IParameterReader {
 public:
-    TemperatureSourceChanger(SolverController *solver_controller,
+    TemperatureSourceChanger(const SolverController &solver_controller,
                              const Settings::solver::temperature_source &temperature_source) :
                              m_solver_controller(solver_controller),
                              m_temperature_source(temperature_source) {};
-    std::vector<FieldType> read_config(const std::string &filename) override;
+    Settings::data_assimilation::field_changes read_config(const std::string &filename) override;
 private:
-    SolverController *m_solver_controller;
+    const SolverController &m_solver_controller;
     const Settings::solver::temperature_source &m_temperature_source;
 };
 

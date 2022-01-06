@@ -6,7 +6,8 @@
 
 #include "ParameterReader.h"
 
-std::vector<FieldType> ParameterReader::read_config(const std::string &filename) {
-    std::vector<FieldType> fields;
-    return fields;
+Settings::data_assimilation::field_changes ParameterReader::read_config(const std::string &filename) {
+    auto file_content = Settings::parse_settings_from_file(filename);
+    auto root = Settings::parse_file_content(file_content);
+    return Settings::parse_field_changes(root, "field_changes");
 }

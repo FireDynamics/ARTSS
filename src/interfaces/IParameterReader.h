@@ -12,7 +12,7 @@
 
 class IParameterReader {
 public:
-    virtual std::vector<FieldType> read_config(const std::string &filename) = 0;
+    virtual Settings::data_assimilation::field_changes read_config(const std::string &filename) = 0;
 };
 
 #endif /* ARTSS_INTERFACES_IPARAMETERREADER_H */

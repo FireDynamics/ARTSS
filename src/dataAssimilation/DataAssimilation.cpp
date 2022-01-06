@@ -60,11 +60,11 @@ void DataAssimilation::config_rollback(const char *msg) {
     m_logger->debug("set new time value to {}", m_t_cur);
     m_logger->debug("read config data from {}", splitted_string[1]);
 #endif
-    auto fields = m_parameter_handler->read_config(splitted_string[1]);
+    auto field_changes = m_parameter_handler->read_config(splitted_string[1]);
 #ifndef BENCHMARKING
     m_logger->debug("read field data from {}", splitted_string[2]);
 #endif
-    m_field_IO_handler->read_fields(splitted_string[2], m_t_cur, fields,
+    m_field_IO_handler->read_fields(splitted_string[2], m_t_cur, field_changes,
                                     m_new_field_u, m_new_field_v, m_new_field_w,
                                     m_new_field_p, m_new_field_T, m_new_field_C);
 }

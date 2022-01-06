@@ -17,7 +17,10 @@ class FieldIO {
     FieldIO();
     void write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
     void set_filename(std::string &filename) { m_filename = filename; }
-    void read_fields(const std::string &file_name, real t_cur, std::vector<FieldType> fields, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
+    void read_fields(const std::string &file_name, real t_cur,
+                     const Settings::data_assimilation::field_changes &field_changes,
+                     Field &u, Field &v, Field &w,
+                     Field &p, Field &T, Field &C);
 
  private:
     std::string create_header();
