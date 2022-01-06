@@ -315,10 +315,13 @@ namespace Settings {
         solver::solution solution;
     };
     namespace data_assimilation {
-        struct changes {
-            std::vector<FieldType> fields;
-            std::string filename;
-            real t_cur;
+        struct field_changes {
+            bool u_changed;
+            bool v_changed;
+            bool w_changed;
+            bool p_changed;
+            bool T_changed;
+            bool C_changed;
         };
     }
     struct data_assimilation_parameters {
@@ -340,6 +343,7 @@ namespace Settings {
         struct logging_parameters logging_parameters;
     };
     random_parameters parse_random_parameters(const tinyxml2::XMLElement *head, const std::string &parent_context);
+    solver::temperature_source parse_temperature_source(const tinyxml2::XMLElement *head, const std::string &parent_context);
     solver_parameters parse_solver_parameters(const tinyxml2::XMLElement *root);
     surfaces_parameters parse_surfaces_parameters(const tinyxml2::XMLElement *root);
     obstacles_parameters parse_obstacles_parameters(const tinyxml2::XMLElement *root);
@@ -350,7 +354,9 @@ namespace Settings {
     logging_parameters parse_logging_parameters(const tinyxml2::XMLElement *root);
     domain_parameters parse_domain_parameters(const tinyxml2::XMLElement *root);
     physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root, const std::string &solver_description);
-    Settings parse_settings(const std::string &filename, const std::string &file_content);
-    Settings parse_settings_from_file(const std::filesystem::path &path);
+    tinyxml2::XMLElement* parse_file_content(const std::string &file_content);
+    Settings parse_settings(const std::filesystem::path &path);
+    std::string parse_settings_from_file(const std::filesystem::path &path);
+    data_assimilation::field_changes parse_field_changes(const tinyxml2::XMLElement *head, const std::string &parent_context);
 }
 #endif

@@ -20,9 +20,8 @@ TEST(SettingsTest, goodCase) {
     <dt> 0.1 </dt>
   </physical_parameters>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement(), SolverTypes::AdvectionSolver);
+    auto root = Settings::parse_file_content(xml);
+    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(root, SolverTypes::AdvectionSolver);
     EXPECT_DOUBLE_EQ(physical_parameters.t_end, 1.0);
     EXPECT_DOUBLE_EQ(physical_parameters.dt, 0.1);
 }
@@ -37,9 +36,8 @@ TEST(SettingsTest, goodCaseOptional) {
     <nu> 1 </nu>
   </physical_parameters>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement(), SolverTypes::NSSolver);
+    auto root = Settings::parse_file_content(xml);
+    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(root, SolverTypes::NSSolver);
     EXPECT_DOUBLE_EQ(physical_parameters.t_end, 1.0);
     EXPECT_DOUBLE_EQ(physical_parameters.dt, 0.1);
     EXPECT_DOUBLE_EQ(physical_parameters.beta, 0.3);
@@ -56,9 +54,8 @@ TEST(SettingsTest, unknownAttribute) {
     <bs> 1 </bs>
   </physical_parameters>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(doc.RootElement(), "None");
+    auto root = Settings::parse_file_content(xml);
+    Settings::physical_parameters physical_parameters = Settings::parse_physical_parameters(root, "None");
     EXPECT_DOUBLE_EQ(physical_parameters.t_end, 1.0);
     EXPECT_DOUBLE_EQ(physical_parameters.dt, 0.1);
     // TODO maybe warning?
@@ -71,9 +68,8 @@ TEST(SettingsTest, requiredAttributeMissing) {
     <t_end> 1.0 </t_end>
   </physical_parameters>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    EXPECT_THROW(Settings::parse_physical_parameters(doc.RootElement(), "None"), Settings::config_error);
+    auto root = Settings::parse_file_content(xml);
+    EXPECT_THROW(Settings::parse_physical_parameters(root, "None"), Settings::config_error);
 }
 
 TEST(SettingsTest, requiredDomainParameters) {
@@ -91,9 +87,8 @@ TEST(SettingsTest, requiredDomainParameters) {
     <nz> 1 </nz>
   </domain_parameters>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::domain_parameters domain_parameters = Settings::parse_domain_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::domain_parameters domain_parameters = Settings::parse_domain_parameters(root);
     EXPECT_FALSE(domain_parameters.enable_computational_domain);
     EXPECT_EQ(domain_parameters.start_coords_PD[CoordinateAxis::X], 1.0);
     EXPECT_EQ(domain_parameters.start_coords_PD[CoordinateAxis::Y], -12.0);
@@ -133,9 +128,8 @@ TEST(SettingsTest, requiredDomainParameters2) {
     <nz> 1 </nz>
   </domain_parameters>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::domain_parameters domain_parameters = Settings::parse_domain_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::domain_parameters domain_parameters = Settings::parse_domain_parameters(root);
     EXPECT_TRUE(domain_parameters.enable_computational_domain);
     EXPECT_EQ(domain_parameters.start_coords_CD[CoordinateAxis::X], 1.1);
     EXPECT_EQ(domain_parameters.start_coords_CD[CoordinateAxis::Y], -11.9);
@@ -160,9 +154,8 @@ TEST(SettingsTest, requiredLoggingParameters) {
     <logging file="tmp.log" level="debug">
     </logging>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::logging_parameters logging_parameters = Settings::parse_logging_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::logging_parameters logging_parameters = Settings::parse_logging_parameters(root);
     EXPECT_EQ(logging_parameters.file, "tmp.log");
     EXPECT_EQ(logging_parameters.level, "debug");
 }
@@ -175,9 +168,8 @@ TEST(SettingsTest, requiredVisualisationParameters) {
         <csv_nth_plot> 21 </csv_nth_plot>
     </visualisation>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(root);
     EXPECT_TRUE(visualisation_parameters.save_csv);
     EXPECT_TRUE(visualisation_parameters.save_vtk);
     EXPECT_EQ(visualisation_parameters.vtk_nth_plot, 10);
@@ -190,10 +182,8 @@ TEST(SettingsTest, optionalVisualisationParameters) {
     <visualisation save_vtk="No" save_csv="No">
     </visualisation>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(
-            doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::visualisation_parameters visualisation_parameters = Settings::parse_visualisation_parameters(root);
     EXPECT_FALSE(visualisation_parameters.save_csv);
     EXPECT_FALSE(visualisation_parameters.save_vtk);
 }
@@ -211,10 +201,8 @@ TEST(SettingsTest, requiredInitialConditionsParameters) {
         </random>
     </initial_conditions>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-            doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(root);
     EXPECT_TRUE(initial_conditions_parameters.random);
     EXPECT_EQ(initial_conditions_parameters.usr_fct, "Uniform");
     EXPECT_EQ(std::get<uniform>(initial_conditions_parameters.ic.value()).value, 1);
@@ -234,10 +222,8 @@ namespace initial_conditions {
         <val> 10 </val>
     </initial_conditions>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-                doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(root);
         EXPECT_FALSE(initial_conditions_parameters.random);
         EXPECT_EQ(initial_conditions_parameters.usr_fct, "Uniform");
         EXPECT_EQ(std::get<uniform>(initial_conditions_parameters.ic.value()).value, 10);
@@ -250,10 +236,8 @@ namespace initial_conditions {
         <l> 111.0 </l>
     </initial_conditions>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-                doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(root);
         const auto &esp = std::get<exp_sinus_prod>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(esp.l, 111);
     }
@@ -272,10 +256,8 @@ namespace initial_conditions {
         <val_out> 1.0 </val_out>
     </initial_conditions>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-                doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(root);
         const auto &h = std::get<hat>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(h.start_coords[CoordinateAxis::X], 0.5);
         EXPECT_DOUBLE_EQ(h.start_coords[CoordinateAxis::Y], -0.5);
@@ -300,10 +282,8 @@ namespace initial_conditions {
         <l> 0.03125 </l>            <!-- sigma in Gaussian -->
     </initial_conditions>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-                doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(root);
         const auto &gb = std::get<gauss_bubble>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(gb.l, 0.03125);
         EXPECT_DOUBLE_EQ(gb.velocity_lin[CoordinateAxis::X], 0.05);
@@ -324,10 +304,8 @@ namespace initial_conditions {
         <pa> 0. </pa>
     </initial_conditions>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-                doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(root);
         const auto &params_drift = std::get<drift>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(params_drift.velocity_lin[CoordinateAxis::X], 0.05);
         EXPECT_DOUBLE_EQ(params_drift.velocity_lin[CoordinateAxis::Y], 0.5);
@@ -347,10 +325,8 @@ namespace initial_conditions {
         <value_3> 305.24 </value_3>
     </initial_conditions>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-                doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(root);
         const auto &params_layers = std::get<layers_temperature>(initial_conditions_parameters.ic.value());
         EXPECT_EQ(params_layers.number_of_layers, 3);
         EXPECT_DOUBLE_EQ(params_layers.borders[0], -1.8);
@@ -367,10 +343,8 @@ namespace initial_conditions {
         <l> 1. </l>
     </initial_conditions>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-                doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(root);
         const auto &params_sin_sin_sin_mms = std::get<sin_sin_sin>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(params_sin_sin_sin_mms.l, 1);
     }
@@ -386,10 +360,8 @@ namespace initial_conditions {
         <rhoa> 1. </rhoa>
     </initial_conditions>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-                doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(root);
         const auto &params_vortex = std::get<vortex>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(params_vortex.velocity_lin[CoordinateAxis::X], 0.05);
         EXPECT_DOUBLE_EQ(params_vortex.velocity_lin[CoordinateAxis::Y], 0.5);
@@ -405,10 +377,8 @@ namespace initial_conditions {
         <A> 2 </A>
     </initial_conditions>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(
-                doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::initial_conditions_parameters initial_conditions_parameters = Settings::parse_initial_conditions_parameters(root);
         const auto &params_mc_dermott = std::get<mc_dermott>(initial_conditions_parameters.ic.value());
         EXPECT_DOUBLE_EQ(params_mc_dermott.A, 2);
     }
@@ -419,9 +389,8 @@ TEST(SettingsTest, requiredObstaclesParameters) {
 <ARTSS>
     <obstacles enabled="No" />
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::obstacles_parameters obstacles_parameters = Settings::parse_obstacles_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::obstacles_parameters obstacles_parameters = Settings::parse_obstacles_parameters(root);
     EXPECT_FALSE(obstacles_parameters.enabled);
 }
 
@@ -441,9 +410,8 @@ TEST(SettingsTest, obstacles) {
         </obstacle>
     </obstacles>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::obstacles_parameters obstacles_parameters = Settings::parse_obstacles_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::obstacles_parameters obstacles_parameters = Settings::parse_obstacles_parameters(root);
     EXPECT_TRUE(obstacles_parameters.enabled);
     EXPECT_EQ(obstacles_parameters.obstacles.size(), 2);
 
@@ -550,9 +518,8 @@ TEST(SettingsTest, requiredSurfacesParameters) {
 <ARTSS>
     <surfaces enabled="No" />
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::surfaces_parameters surfaces_parameters = Settings::parse_surfaces_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::surfaces_parameters surfaces_parameters = Settings::parse_surfaces_parameters(root);
     EXPECT_FALSE(surfaces_parameters.enabled);
 }
 
@@ -572,9 +539,8 @@ TEST(SettingsTest, requiredSurfacesParameters2) {
         </surface>
     </surfaces>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::surfaces_parameters surfaces_parameters = Settings::parse_surfaces_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::surfaces_parameters surfaces_parameters = Settings::parse_surfaces_parameters(root);
     EXPECT_TRUE(surfaces_parameters.enabled);
 
     const auto &s_back = surfaces_parameters.surfaces[0];
@@ -644,9 +610,8 @@ TEST(SettingsTest, boundaries) {
         <boundary field="T" patch="bottom" type="periodic" />
     </boundaries>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::boundary_parameters boundaries_parameters = Settings::parse_boundaries_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::boundary_parameters boundaries_parameters = Settings::parse_boundaries_parameters(root);
 
     EXPECT_EQ(boundaries_parameters.boundaries.size(), 4);
     // field types
@@ -718,9 +683,8 @@ TEST(SettingsTest, advectionSolverSemiLagrangian) {
     <solution available="No"/>
 </solver>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
     EXPECT_EQ(solver_parameters.advection.type, AdvectionMethods::SemiLagrangian);
 
     EXPECT_NE(std::find(solver_parameters.advection.fields.begin(),
@@ -754,9 +718,8 @@ namespace diffusion_solver {
     </solution>
 </solver>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
         EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::Jacobi);
 
         EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
@@ -792,9 +755,8 @@ namespace diffusion_solver {
     <solution available="No"/>
 </solver>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
         EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::ColoredGaussSeidel);
 
         EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
@@ -824,9 +786,8 @@ namespace diffusion_solver {
     <solution available="No"/>
 </solver>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
         EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::Explicit);
 
         EXPECT_NE(std::find(solver_parameters.diffusion.fields.begin(),
@@ -857,9 +818,8 @@ namespace turbulence_solvers {
     <solution available="No"/>
 </solver>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
 
         EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::Explicit);
 
@@ -892,9 +852,8 @@ namespace turbulence_solvers {
     <solution available="No"/>
 </solver>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
 
         EXPECT_EQ(solver_parameters.diffusion.type, DiffusionMethods::Explicit);
 
@@ -938,9 +897,8 @@ namespace pressure_solvers {
         </solution>
     </solver>
 </ARTSS>)";
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
         EXPECT_EQ(solver_parameters.description, SolverTypes::PressureSolver);
 
         EXPECT_EQ(solver_parameters.pressure.type, PressureMethods::VCycleMG);
@@ -999,9 +957,8 @@ namespace source_solvers {
     </solver>
 </ARTSS>)";
 
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
         EXPECT_EQ(solver_parameters.description, SolverTypes::NSSolver);
 
         // advection
@@ -1099,9 +1056,8 @@ namespace source_solvers {
     </solver>
 </ARTSS>)";
 
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
         EXPECT_EQ(solver_parameters.description, SolverTypes::NSSolver);
         EXPECT_EQ(solver_parameters.source.type, SourceMethods::ExplicitEuler);
         EXPECT_EQ(solver_parameters.source.force_fct, SourceMethods::Buoyancy);
@@ -1148,9 +1104,8 @@ namespace source_solvers {
     </solver>
 </ARTSS>)";
 
-        tinyxml2::XMLDocument doc;
-        doc.Parse(xml.c_str());
-        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+        auto root = Settings::parse_file_content(xml);
+        Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
         EXPECT_EQ(solver_parameters.description, SolverTypes::NSSolver);
         EXPECT_EQ(solver_parameters.source.type, SourceMethods::ExplicitEuler);
         EXPECT_EQ(solver_parameters.source.force_fct, SourceMethods::Uniform);
@@ -1221,9 +1176,8 @@ TEST(SettingsTest, temperature) {
         </solution>
     </solver>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
 
     EXPECT_EQ(solver_parameters.description, SolverTypes::NSTempTurbSolver);
     const auto &temp = solver_parameters.temperature;
@@ -1330,9 +1284,8 @@ TEST(SettingsTest, temperatureWithoutTurbulence) {
         </solution>
     </solver>
 </ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
 
     EXPECT_EQ(solver_parameters.description, SolverTypes::NSTempSolver);
     const auto &temp = solver_parameters.temperature;
@@ -1470,9 +1423,8 @@ TEST(SettingsTest, concentration) {
     </solver>
 </ARTSS>)";
 
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
 
     EXPECT_EQ(solver_parameters.description, SolverTypes::NSTempTurbConSolver);
     const auto &temp = solver_parameters.temperature;
@@ -1657,9 +1609,8 @@ TEST(SettingsTest, concentrationWithoutTurb) {
     </solver>
 </ARTSS>)";
 
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(doc.RootElement());
+    auto root = Settings::parse_file_content(xml);
+    Settings::solver_parameters solver_parameters = Settings::parse_solver_parameters(root);
 
     EXPECT_EQ(solver_parameters.description, SolverTypes::NSTempConSolver);
     const auto &temp = solver_parameters.temperature;

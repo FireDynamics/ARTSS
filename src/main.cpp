@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
             acc_init(dev_type);
 #endif
 
-            Settings::Settings settings = Settings::parse_settings_from_file(argv[1]);
+            Settings::Settings settings = Settings::parse_settings(argv[1]);
 #ifdef ASSIMILATION
             MPI_Request request;
             MPI_Isend(settings.logging_parameters.level.c_str(),

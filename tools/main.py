@@ -4,8 +4,8 @@ from ARTSS import XML, Domain
 from data_assimilation import FieldReader
 
 
-def create_message(config_file_name: str, field_file_name: str) -> bin:
-    string_msg = config_file_name + ',' + field_file_name
+def create_message(t_cur: float, config_file_name: str, field_file_name: str) -> bin:
+    string_msg = t_cur + ',' +config_file_name + ',' + field_file_name
     return string_msg.encode('utf-8')
 
 
@@ -41,4 +41,4 @@ if __name__ == '__main__':
 
         client = TCP_client.TCPClient()
         client.connect()
-        client.send_message(create_message(config_file_name, field_file_name))
+        client.send_message(create_message(t_cur, config_file_name, field_file_name))

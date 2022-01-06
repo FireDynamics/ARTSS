@@ -15,7 +15,7 @@ public:
     ParameterReader() = default;
     ~ParameterReader() = default;
 
-    Settings::data_assimilation::changes read_config(const std::string &filename);
+    std::vector<FieldType> read_config(const std::string &filename) override;
 };
 
 

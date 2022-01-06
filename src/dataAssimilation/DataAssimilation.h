@@ -25,7 +25,7 @@ class DataAssimilation {
  public:
     DataAssimilation(const SolverController &solver_controller,
                      FieldController *field_controller,
-                     const Settings::data_assimilation_parameters &settings);
+                     const Settings::Settings &settings);
     void save_data(real t_cur);
 
     bool requires_rollback();
@@ -37,7 +37,7 @@ private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    const Settings::data_assimilation_parameters &m_settings;
+    const Settings::Settings &m_settings;
     FieldController *m_field_controller;
     const SolverController &m_solver_controller;
 

@@ -12,7 +12,7 @@
 
 DataAssimilation::DataAssimilation(const SolverController &solver_controller,
                                    FieldController *field_controller,
-                                   const Settings::data_assimilation_parameters &settings) :
+                                   const Settings::Settings &settings) :
         m_settings(settings),
         m_field_controller(field_controller),
         m_solver_controller(solver_controller),
@@ -26,10 +26,10 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     m_field_IO_handler = new FieldIO();
-    if (m_settings.class_name == AssimilationMethods::standard) {
+    if (m_settings.assimilation_parameters.class_name == AssimilationMethods::standard) {
         m_parameter_handler = new ParameterReader();
-    } else if (m_settings.class_name == AssimilationMethods::temperature_source) {
-        m_parameter_handler = new TemperatureSourceChanger();
+    } else if (m_settings.assimilation_parameters.class_name == AssimilationMethods::temperature_source) {
+        m_parameter_handler = new TemperatureSourceChanger(m_solver_controller, m_settings.solver_parameters.temperature.source);
     }
 }
 
@@ -55,14 +55,18 @@ real DataAssimilation::get_new_time_value() const {
 
 void DataAssimilation::config_rollback(const char *msg) {
     std::vector<std::string> splitted_string = Utility::split(msg, ',');
-    const auto &changes = m_parameter_handler->read_config(splitted_string[0]);
-    m_t_cur = changes.t_cur;
+    m_t_cur = std::stod(splitted_string[0]);
 #ifndef BENCHMARKING
     m_logger->debug("set new time value to {}", m_t_cur);
-    m_logger->debug("read new data from {}", splitted_string[1]);
+    m_logger->debug("read config data from {}", splitted_string[1]);
 #endif
-    m_field_IO_handler->read_fields(splitted_string[1], m_t_cur, changes.fields, m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p,
-                                    m_new_field_T, m_new_field_C);
+    auto fields = m_parameter_handler->read_config(splitted_string[1]);
+#ifndef BENCHMARKING
+    m_logger->debug("read field data from {}", splitted_string[2]);
+#endif
+    m_field_IO_handler->read_fields(splitted_string[2], m_t_cur, fields,
+                                    m_new_field_u, m_new_field_v, m_new_field_w,
+                                    m_new_field_p, m_new_field_T, m_new_field_C);
 }
 
 bool DataAssimilation::requires_rollback() {
