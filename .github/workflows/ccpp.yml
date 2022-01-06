@@ -72,6 +72,18 @@ jobs:
           git submodule update --init
           ./compile.sh --docker-build
           docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker ./compile.sh --jobs 4 --sb
+
+  build-data-assimilation-serial:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: compile
+      run: |
+        git submodule update --init
+        ./compile.sh --jobs 4 --mpi --checkout
+        
           
   cmake-tests:
     
