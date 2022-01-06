@@ -31,7 +31,7 @@ TimeIntegration::TimeIntegration(const Settings::Settings &settings, SolverContr
 
     m_adaption = new Adaption(m_settings.adaption_parameters, m_field_controller, m_settings.filename);
 #ifdef ASSIMILATION
-    m_data_assimilation = new DataAssimilation(*m_solver_controller, m_field_controller, m_settings.assimilation_parameters);
+    m_data_assimilation = new DataAssimilation(*m_solver_controller, m_field_controller, m_settings);
 #endif
 #ifndef BENCHMARKING
     m_solution = new Solution(m_settings.initial_conditions_parameters, m_settings.solver_parameters.solution);
