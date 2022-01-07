@@ -8,6 +8,7 @@
 
 Settings::data_assimilation::field_changes ParameterReader::read_config(const std::string &filename) {
     auto file_content = Settings::parse_settings_from_file(filename);
-    auto root = Settings::parse_file_content(file_content);
-    return Settings::parse_field_changes(root, "field_changes");
+    tinyxml2::XMLDocument doc;
+    doc.Parse(file_content.c_str());
+    return Settings::parse_field_changes(doc.RootElement(), "field_changes");
 }

@@ -27,6 +27,7 @@ class SolverController {
 
     FieldController *get_field_controller() { return m_field_controller; }
 
+    ISolver *m_solver;
  private:
     void init_solver(const Settings::solver_parameters &solver_settings);
     void set_up_fields(const std::string &solver_description, const Settings::initial_conditions_parameters &ic_settings);
@@ -37,7 +38,6 @@ class SolverController {
     const Settings::Settings &m_settings;
 
     FieldController *m_field_controller;
-    ISolver *m_solver;
 
     bool m_has_momentum_source = false;
 #ifndef BENCHMARKING
