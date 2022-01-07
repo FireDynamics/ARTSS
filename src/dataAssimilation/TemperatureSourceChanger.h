@@ -1,6 +1,8 @@
-//
-// Created by linh on 05.01.22.
-//
+/// \file       TemperatureSourceChanger.h
+/// \brief      Class for changing temperatur source
+/// \date       Jan 05, 2021
+/// \author     My Linh Wuerzburger
+/// \copyright  <2015-2022> Forschungszentrum Juelich All rights reserved.
 
 #ifndef ARTSS_DATAASSIMILATION_TEMPERATURESOURCECHANGER_H
 #define ARTSS_DATAASSIMILATION_TEMPERATURESOURCECHANGER_H

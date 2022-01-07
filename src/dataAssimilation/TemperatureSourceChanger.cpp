@@ -1,6 +1,8 @@
-//
-// Created by linh on 05.01.22.
-//
+/// \file       TemperatureSourceChanger.cpp
+/// \brief      Class for changing temperatur source
+/// \date       Jan 05, 2021
+/// \author     My Linh Wuerzburger
+/// \copyright  <2015-2022> Forschungszentrum Juelich All rights reserved.
 
 #include "TemperatureSourceChanger.h"
 

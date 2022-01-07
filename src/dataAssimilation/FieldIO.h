@@ -1,5 +1,5 @@
 /// \file       FieldIO.h
-/// \brief      
+/// \brief      Class for reading/writing the raw data of the fields u, v, w, p, T, C
 /// \date       Apr 18, 2021
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2021> Forschungszentrum Juelich All rights reserved.
