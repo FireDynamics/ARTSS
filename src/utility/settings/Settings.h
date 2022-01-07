@@ -276,6 +276,7 @@ namespace Settings {
             struct random_parameters random_parameters;
             std::variant<sources::gauss, sources::cube> temp_function;
         };
+        temperature_source parse_temperature_source(const tinyxml2::XMLElement *head, const std::string &parent_context);
         struct temperature_solver {
             advection_solver advection;
             diffusion_solver diffusion;
@@ -343,7 +344,6 @@ namespace Settings {
         struct logging_parameters logging_parameters;
     };
     random_parameters parse_random_parameters(const tinyxml2::XMLElement *head, const std::string &parent_context);
-    solver::temperature_source parse_temperature_source(const tinyxml2::XMLElement *head, const std::string &parent_context);
     solver_parameters parse_solver_parameters(const tinyxml2::XMLElement *root);
     surfaces_parameters parse_surfaces_parameters(const tinyxml2::XMLElement *root);
     obstacles_parameters parse_obstacles_parameters(const tinyxml2::XMLElement *root);
