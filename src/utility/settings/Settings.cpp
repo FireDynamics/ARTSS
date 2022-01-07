@@ -526,8 +526,8 @@ namespace Settings {
         return lp;
     }
 
-    physical_parameters
-    parse_physical_parameters(const tinyxml2::XMLElement *root, const std::string &solver_description) {
+    physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root,
+                                                  const std::string &solver_description) {
         std::string context = "physical_parameters";
         auto[subsection, values] = map_parameter_section(root, context);
         physical_parameters pp{};
@@ -973,7 +973,10 @@ namespace Settings {
         return ap;
     }
 
-    Settings parse_settings(const std::string &filename, tinyxml2::XMLElement *root) {
+    Settings parse_settings(const std::string &filename, const std::string &file_content) {
+        tinyxml2::XMLDocument doc;
+        doc.Parse(file_content.c_str());
+        tinyxml2::XMLElement *root = doc.RootElement();
         auto solver_params = parse_solver_parameters(root);
         return {filename,
                 parse_physical_parameters(root, solver_params.description),
@@ -996,16 +999,9 @@ namespace Settings {
         return sstr.str();
     }
 
-    tinyxml2::XMLElement* parse_file_content(const std::string &file_content) {
-        tinyxml2::XMLDocument doc;
-        doc.Parse(file_content.c_str());
-        return doc.RootElement();
-    }
-
     Settings parse_settings(const std::filesystem::path &path) {
         std::string file_content = parse_settings_from_file(path);
-        auto root = parse_file_content(file_content);
-        auto settings = parse_settings(path.filename(), root);
+        auto settings = parse_settings(path.filename(), file_content);
 #ifndef BENCHMARKING
         Utility::create_logger(settings.logging_parameters.level, settings.logging_parameters.file);  // create global logger
         auto logger = Utility::create_logger("XML File");

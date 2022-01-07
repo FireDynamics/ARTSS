@@ -34,6 +34,8 @@ class FieldIO {
     long m_pos_time_step;
     int m_length_time_stamp;
     std::shared_ptr<spdlog::logger> m_logger;
+
+    void read_field(std::ifstream &file_stream, Field &field);
 };
 
 

@@ -166,19 +166,72 @@ std::string FieldIO::create_header() {
     return header;
 }
 
+void FieldIO::read_field(std::ifstream &file_stream, Field &field) {
+    std::string line;
+    getline(file_stream, line);
+    std::vector<std::string> splitted_string = Utility::split(line, ';');
+    size_t counter = 0;
+    for (const std::string &part: splitted_string) {
+        field.data[counter] = std::stod(part);
+        counter++;
+    }
+}
+
 void FieldIO::read_fields(const std::string &file_name,
                           const real t_cur,
                           const Settings::data_assimilation::field_changes &field_changes,
                           Field &u, Field &v, Field &w,
                           Field &p, Field &T, Field &C) {
+    std::ifstream file_changes(file_name, std::ifstream::binary);
+    std::ifstream file_original(m_filename, std::ifstream::binary);
+    size_t n = static_cast<size_t>(t_cur / DomainData::getInstance()->get_physical_parameters().dt) - 1;
+    long pos = m_positions[n];
 
-    if (field_changes.u_changed || field_changes.v_changed || field_changes.w_changed ||
-        field_changes.p_changed || field_changes.T_changed || field_changes.C_changed) {
-        // TODO read only the provided files
-        read_fields(file_name, u, v, w, p, T, C);
+    if (file_changes.is_open()) {
+        if (field_changes.u_changed) {
+            file_original.seekg(0);
+            read_field(file_changes, u);
+        } else {
+            file_original.seekg(pos + 0);
+            read_field(file_original, u);
+        }
+        if (field_changes.v_changed) {
+            file_original.seekg(1);
+            read_field(file_changes, v);
+        } else {
+            file_original.seekg(pos + 1);
+            read_field(file_original, v);
+        }
+        if (field_changes.w_changed) {
+            file_original.seekg(2);
+            read_field(file_changes, w);
+        } else {
+            file_original.seekg(pos + 2);
+            read_field(file_original, w);
+        }
+        if (field_changes.p_changed) {
+            file_original.seekg(3);
+            read_field(file_changes, p);
+        } else {
+            file_original.seekg(pos + 3);
+            read_field(file_original, p);
+        }
+        if (field_changes.T_changed) {
+            file_original.seekg(4);
+            read_field(file_changes, T);
+        } else {
+            file_original.seekg(pos + 4);
+            read_field(file_original, T);
+        }
+        if (field_changes.C_changed) {
+            file_original.seekg(5);
+            read_field(file_changes, C);
+        } else {
+            file_original.seekg(pos + 5);
+            read_field(file_original, C);
+        }
     } else {
         read_fields(t_cur, u, v, w, p, T, C);
     }
-
 }
 

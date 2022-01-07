@@ -354,7 +354,7 @@ namespace Settings {
     logging_parameters parse_logging_parameters(const tinyxml2::XMLElement *root);
     domain_parameters parse_domain_parameters(const tinyxml2::XMLElement *root);
     physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root, const std::string &solver_description);
-    tinyxml2::XMLElement* parse_file_content(const std::string &file_content);
+    tinyxml2::XMLDocument parse_file_content(const std::string &file_content);
     Settings parse_settings(const std::filesystem::path &path);
     std::string parse_settings_from_file(const std::filesystem::path &path);
     data_assimilation::field_changes parse_field_changes(const tinyxml2::XMLElement *head, const std::string &parent_context);
