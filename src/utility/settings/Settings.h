@@ -348,6 +348,7 @@ namespace Settings {
     surfaces_parameters parse_surfaces_parameters(const tinyxml2::XMLElement *root);
     obstacles_parameters parse_obstacles_parameters(const tinyxml2::XMLElement *root);
     adaption_parameters parse_adaption_parameters(const tinyxml2::XMLElement *root);
+    data_assimilation_parameters parse_assimilation_parameters(const tinyxml2::XMLElement *root);
     boundary_parameters parse_boundaries_parameters(const tinyxml2::XMLElement *root);
     initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root);
     visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root);

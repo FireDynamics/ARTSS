@@ -1749,3 +1749,58 @@ TEST(SettingsTest, concentrationWithoutTurb) {
     EXPECT_EQ(con.source.random_parameters.step_size, 0.2);
     EXPECT_EQ(con.source.random_parameters.range, 2);
 }
+
+TEST(SettingsTest, assimilation) {
+    std::string xml = R"(
+<ARTSS>
+    <data_assimilation enabled="No" />
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::data_assimilation_parameters da = Settings::parse_assimilation_parameters(doc.RootElement());
+    EXPECT_FALSE(da.enabled);
+}
+
+TEST(SettingsTest, assimilation2) {
+    std::string xml = R"(
+<ARTSS>
+    <data_assimilation enabled="Yes" class_name="TemperatureSource"/>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::data_assimilation_parameters da = Settings::parse_assimilation_parameters(doc.RootElement());
+    EXPECT_TRUE(da.enabled);
+    EXPECT_EQ("TemperatureSource", da.class_name);
+}
+
+TEST(SettingsTest, assimilationHeatSourceChanges) {
+    std::string xml = R"(
+<ARTSS>
+    <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No"/>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::data_assimilation::field_changes field_changes = Settings::parse_field_changes(doc.RootElement(), "temperature_source");
+    EXPECT_FALSE(field_changes.u_changed);
+    EXPECT_FALSE(field_changes.v_changed);
+    EXPECT_FALSE(field_changes.w_changed);
+    EXPECT_FALSE(field_changes.p_changed);
+    EXPECT_TRUE(field_changes.T_changed);
+    EXPECT_FALSE(field_changes.C_changed);
+}
+
+TEST(SettingsTest, assimilationFieldChanges) {
+    std::string xml = R"(
+<ARTSS>
+    <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No"/>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::data_assimilation::field_changes field_changes = Settings::parse_field_changes(doc.RootElement(), "temperature_source");
+    EXPECT_FALSE(field_changes.u_changed);
+    EXPECT_FALSE(field_changes.v_changed);
+    EXPECT_FALSE(field_changes.w_changed);
+    EXPECT_FALSE(field_changes.p_changed);
+    EXPECT_TRUE(field_changes.T_changed);
+    EXPECT_FALSE(field_changes.C_changed);
+}

@@ -25,7 +25,6 @@ class XML:
     def write_config(config_file_name: str, fields: list, t_cur: float):
         # TODO write config file. format:
         # <ARTSS>
-        #   <t_cur> t_cur> </t_cur>
         #   <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No"/>
         # </ARTSS>
 

@@ -1012,8 +1012,16 @@ namespace Settings {
 
     data_assimilation::field_changes parse_field_changes(const tinyxml2::XMLElement *head,
                                                          const std::string &parent_context) {
+        std::string own_context = "fields_changed";
+        std::string context = create_context(parent_context, own_context);
+        auto[subsection, values] = map_parameter_section(head, own_context);
         data_assimilation::field_changes field_changes{};
-        // TODO
+        field_changes.u_changed = get_required_bool(values, "u", context);
+        field_changes.v_changed = get_required_bool(values, "v", context);
+        field_changes.w_changed = get_required_bool(values, "w", context);
+        field_changes.p_changed = get_required_bool(values, "p", context);
+        field_changes.T_changed = get_required_bool(values, "T", context);
+        field_changes.C_changed = get_required_bool(values, "concentration", context);
         return field_changes;
     }
 

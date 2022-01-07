@@ -18,7 +18,7 @@
 
 struct AssimilationMethods {
     inline static const std::string standard = "default";
-    inline static const std::string temperature_source = "temperature_source";
+    inline static const std::string temperature_source = "TemperatureSource";
 };
 
 class DataAssimilation {
