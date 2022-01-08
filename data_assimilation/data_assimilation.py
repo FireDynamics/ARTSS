@@ -19,32 +19,24 @@ class FieldReader:
         self.read_header()
         self.create_header()
 
-    def create_header(self):
-        domain = f'###DOMAIN;{self.grid_resolution["Nx"]};{self.grid_resolution["Ny"]};{self.grid_resolution["Nz"]}'
-        fields = f'###FIELDS'
-        for f in self.fields:
-            fields += f';{f}'
-        date = f'###DATE;{datetime.now()}'
-        self.header = domain + '\n' + fields + '\n' + date
-
     def read_header(self):
-        file = open(self.file_name, 'r')
+        fname = open(self.file_name, 'r')
         # first line
-        line = file.readline()
+        line = fname.readline()
         self.dt = float(line.split(';')[3])
         # second line
-        line = file.readline().split(';')[1:]
+        line = fname.readline().split(';')[1:]
         self.grid_resolution = {'Nx': int(line[0]), 'Ny': int(line[1]), 'Nz': int(line[2])}
         # third line
-        line = file.readline().strip()
+        line = fname.readline().strip()
         self.fields = line.split(';')[1:]
         # fourth line
-        line = file.readline().strip()
+        line = fname.readline().strip()
         self.date = datetime.strptime(line.split(';')[1], '%a %b %d %H:%M:%S %Y')
         # fifth line
-        line = file.readline().strip()
+        line = fname.readline().strip()
         self.xml_file_name = line.split(';')[1]
-        file.close()
+        fname.close()
 
     def print_header(self):
         print(f'dt: {self.dt}')

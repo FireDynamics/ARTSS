@@ -47,7 +47,7 @@ FieldIO::FieldIO() {
 /// \param  C       data of field C to be written out
 // *************************************************************************************************
 void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
-    std::string output = fmt::format(m_format + "\n", t_cur);
+    std::string output = fmt::format("{:.5e}\n", t_cur);
     Field fields[] = {u, v, w, p, T, C};
     size_t size = u.get_size();
     for (Field &f: fields) {
@@ -67,7 +67,7 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
 
     // overwrite current time step
     output_file.seekp(m_pos_time_step, std::ios_base::beg);
-    output_file.write(fmt::format(m_format, t_cur).c_str(), m_length_time_stamp);
+    output_file.write(fmt::format("{:.5e}", t_cur).c_str(), 11);
 
     output_file.close();
 }
@@ -120,9 +120,11 @@ std::string FieldIO::create_header() {
     size_t Nz = domain_data->get_number_of_cells(CoordinateAxis::Z);
 
     std::string string_t_cur_text = "Current time step;";
+    m_logger->info("create header");
     m_pos_time_step = static_cast<long>(string_t_cur_text.length());
-    std::string header = fmt::format(string_t_cur_text + m_format + ";dt;{}\n", 0.0,
+    std::string header = fmt::format(string_t_cur_text + "{:.5e};dt;{}\n", 0,
                                      DomainData::getInstance()->get_physical_parameters().dt);
+    m_logger->info("passed");
     header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
     header.append(fmt::format("###DATE;{}", std::ctime(&end_time)));

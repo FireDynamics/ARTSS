@@ -4,8 +4,8 @@ from ARTSS import XML, Domain
 from data_assimilation import FieldReader
 
 
-def create_message(t_cur: float, config_file_name: str, field_file_name: str) -> bin:
-    string_msg = t_cur + ',' +config_file_name + ',' + field_file_name
+def create_message(t_cur: float, config_file_name: str) -> bin:
+    string_msg = t_cur + ',' +config_file_name
     return string_msg.encode('utf-8')
 
 

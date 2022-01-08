@@ -28,10 +28,8 @@ class FieldIO {
 
     long *m_positions;
     std::string m_filename = "visualisation.dat";
-    std::string m_format = ".5e";
 
     long m_pos_time_step;
-    int m_length_time_stamp;
     std::shared_ptr<spdlog::logger> m_logger;
 
     void read_field(std::ifstream &file_stream, Field &field);
