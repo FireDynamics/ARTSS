@@ -18,12 +18,12 @@
 
 Visual::Visual(const Settings::visualisation_parameters &settings, const Solution &solution, const std::string &filename) :
         m_settings(settings),
-        m_filename(filename),
         m_solution(solution),
         m_has_analytical_solution(m_solution.has_analytical_solution()) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
+    m_filename = Utility::remove_extension(filename);
 }
 
 void Visual::visualise(const FieldController &field_controller, real t) {

@@ -28,7 +28,7 @@ public:
 private:
     const Settings::visualisation_parameters &m_settings;
 
-    const std::string &m_filename;
+    std::string m_filename;
     const Solution &m_solution;
 
     static std::string create_filename(const std::string &filename, int counter, bool analytical);

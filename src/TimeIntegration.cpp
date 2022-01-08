@@ -49,7 +49,6 @@ void TimeIntegration::run() {
     m_field_controller->update_host();
     m_analysis->analyse(m_field_controller, 0.);
     m_visual->visualise(*m_field_controller, 0.);
-    Visual::write_vtk_debug(*m_field_controller, "initial_steckler");
     m_logger->info("Start calculating and timing...");
 #else
     std::cout << "Start calculating and timing...\n" << std::endl;
