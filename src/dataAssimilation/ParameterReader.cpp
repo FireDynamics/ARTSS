@@ -11,11 +11,11 @@ ParameterReader::ParameterReader() {
 }
 
 Settings::data_assimilation::field_changes ParameterReader::read_config(const std::string &filename) {
-    m_logger->info("parse file to string");
+    m_logger->debug("parse file to string");
     auto file_content = Settings::parse_settings_from_file(filename);
-    m_logger->info("parse document to XMLTree");
+    m_logger->debug("parse document to XMLTree");
     tinyxml2::XMLDocument doc;
     doc.Parse(file_content.c_str());
-    m_logger->info("parse field changes");
+    m_logger->debug("parse field changes");
     return Settings::parse_field_changes(doc.RootElement(), "field_changes");
 }

@@ -62,7 +62,7 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
 
     std::fstream output_file(m_filename);
     // write field at position dependent on time step
-    m_logger->info("times: {:>10d} write to: {:>20d}", n, m_positions[n]);
+    m_logger->debug("times: {:>10d} write to: {:>20d}", n, m_positions[n]);
     output_file.seekp(m_positions[n], std::ios_base::beg);
     output_file.write(output.c_str(), length);
 
@@ -85,22 +85,22 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
 /// \param  C       field C to store the read data
 // *************************************************************************************************
 void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
-    m_logger->info("read original data");
+    m_logger->debug("read original data");
     std::ifstream input_file(m_filename, std::ifstream::binary);
     size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
     long pos = m_positions[n];
-    m_logger->info("times: {:>10d} read from: {:>20d}", n, m_positions[n]);
+    m_logger->debug("times: {:>10d} read from: {:>20d}", n, m_positions[n]);
     std::string line;
     input_file.seekg(pos);
 
     getline(input_file, line);
-    m_logger->info("read time step {}", line);
+    m_logger->debug("read time step {}", line);
 
     // u
     getline(input_file, line);
     std::vector<std::string> divided_string = Utility::split(line, ';');
-    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(u.get_type()), divided_string.size(), u.get_size());
-    m_logger->info("first index has value {}", divided_string[0]);
+    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(u.get_type()), divided_string.size(), u.get_size());
+    m_logger->debug("first index has value {}", divided_string[0]);
     size_t counter = 0;
     for (const std::string &part: divided_string) {
         u.data[counter] = std::stod(part);
@@ -109,8 +109,8 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
     // v
     getline(input_file, line);
     divided_string = Utility::split(line, ';');
-    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(v.get_type()), divided_string.size(), v.get_size());
-    m_logger->info("first index has value {}", divided_string[0]);
+    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(v.get_type()), divided_string.size(), v.get_size());
+    m_logger->debug("first index has value {}", divided_string[0]);
     counter = 0;
     for (const std::string &part: divided_string) {
         v.data[counter] = std::stod(part);
@@ -119,8 +119,8 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
     // w
     getline(input_file, line);
     divided_string = Utility::split(line, ';');
-    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(w.get_type()), divided_string.size(), w.get_size());
-    m_logger->info("first index has value {}", divided_string[0]);
+    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(w.get_type()), divided_string.size(), w.get_size());
+    m_logger->debug("first index has value {}", divided_string[0]);
     counter = 0;
     for (const std::string &part: divided_string) {
         w.data[counter] = std::stod(part);
@@ -129,8 +129,8 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
     // p
     getline(input_file, line);
     divided_string = Utility::split(line, ';');
-    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(p.get_type()), divided_string.size(), p.get_size());
-    m_logger->info("first index has value {}", divided_string[0]);
+    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(p.get_type()), divided_string.size(), p.get_size());
+    m_logger->debug("first index has value {}", divided_string[0]);
     counter = 0;
     for (const std::string &part: divided_string) {
         p.data[counter] = std::stod(part);
@@ -139,8 +139,8 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
     // T
     getline(input_file, line);
     divided_string = Utility::split(line, ';');
-    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(T.get_type()), divided_string.size(), T.get_size());
-    m_logger->info("first index has value {}", divided_string[0]);
+    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(T.get_type()), divided_string.size(), T.get_size());
+    m_logger->debug("first index has value {}", divided_string[0]);
     counter = 0;
     for (const std::string &part: divided_string) {
         T.data[counter] = std::stod(part);
@@ -149,8 +149,8 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
     // C
     getline(input_file, line);
     Utility::split(line, ';');
-    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(C.get_type()), divided_string.size(), C.get_size());
-    m_logger->info("first index has value {}", divided_string[0]);
+    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(C.get_type()), divided_string.size(), C.get_size());
+    m_logger->debug("first index has value {}", divided_string[0]);
     counter = 0;
     for (const std::string &part: divided_string) {
         C.data[counter] = std::stod(part);
@@ -160,7 +160,7 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
 
 //================================= write header ===================================================
 // *************************************************************************************************
-/// \brief  write header for field storage. includes essential information: Nx, Ny, Nz
+/// \brief  write header for field storage. includes essential debugrmation: Nx, Ny, Nz
 /// \details header format:
 /// ###DOMAIN;<Nx>;<Ny>;<Nz>
 /// ###FIELDS;u;v;w;p;T;concentration
@@ -207,7 +207,7 @@ void FieldIO::read_fields(const real t_cur,
 
     std::string line;
     getline(file_original, line);
-    m_logger->info("read time step {}", line);
+    m_logger->debug("read time step {}", line);
 
     if (field_changes.changed) {  // no changes -> read original file
         std::ifstream file_changes(field_changes.filename, std::ifstream::binary);
@@ -215,7 +215,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.u_changed) {
                 read_field(file_changes, u);
                 getline(file_original, line);
-                m_logger->info("read changed u Field");
+                m_logger->debug("read changed u Field");
             } else {
                 read_field(file_original, u);
                 getline(file_changes, line);
@@ -223,7 +223,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.v_changed) {
                 read_field(file_changes, v);
                 getline(file_original, line);
-                m_logger->info("read changed v Field");
+                m_logger->debug("read changed v Field");
             } else {
                 read_field(file_original, v);
                 getline(file_changes, line);
@@ -231,7 +231,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.w_changed) {
                 read_field(file_changes, w);
                 getline(file_original, line);
-                m_logger->info("read changed w Field");
+                m_logger->debug("read changed w Field");
             } else {
                 read_field(file_original, w);
                 getline(file_changes, line);
@@ -239,7 +239,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.p_changed) {
                 read_field(file_changes, p);
                 getline(file_original, line);
-                m_logger->info("read changed p Field");
+                m_logger->debug("read changed p Field");
             } else {
                 read_field(file_original, p);
                 getline(file_changes, line);
@@ -247,7 +247,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.T_changed) {
                 read_field(file_changes, T);
                 getline(file_original, line);
-                m_logger->info("read changed T Field");
+                m_logger->debug("read changed T Field");
             } else {
                 read_field(file_original, T);
                 getline(file_changes, line);
@@ -255,7 +255,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.C_changed) {
                 read_field(file_changes, C);
                 getline(file_original, line);
-                m_logger->info("read changed C Field");
+                m_logger->debug("read changed C Field");
             } else {
                 read_field(file_original, C);
                 getline(file_changes, line);
@@ -265,7 +265,7 @@ void FieldIO::read_fields(const real t_cur,
             read_fields(t_cur, u, v, w, p, T, C);
         }
     } else {
-        m_logger->info("no field changes");
+        m_logger->debug("no field changes");
         read_fields(t_cur, u, v, w, p, T, C);
     }
 }
