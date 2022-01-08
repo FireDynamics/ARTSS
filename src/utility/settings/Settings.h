@@ -317,12 +317,14 @@ namespace Settings {
     };
     namespace data_assimilation {
         struct field_changes {
+            bool changed;
             bool u_changed;
             bool v_changed;
             bool w_changed;
             bool p_changed;
             bool T_changed;
             bool C_changed;
+            std::string filename;
         };
     }
     struct data_assimilation_parameters {

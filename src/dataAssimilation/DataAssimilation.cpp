@@ -62,9 +62,9 @@ void DataAssimilation::config_rollback(const char *msg) {
 #endif
     auto field_changes = m_parameter_handler->read_config(splitted_string[1]);
 #ifndef BENCHMARKING
-    m_logger->debug("read field data from {}", splitted_string[2]);
+    m_logger->debug("read field data from {}", field_changes.filename);
 #endif
-    m_field_IO_handler->read_fields(splitted_string[2], m_t_cur, field_changes,
+    m_field_IO_handler->read_fields(m_t_cur, field_changes,
                                     m_new_field_u, m_new_field_v, m_new_field_w,
                                     m_new_field_p, m_new_field_T, m_new_field_C);
 }

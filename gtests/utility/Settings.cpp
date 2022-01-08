@@ -1787,7 +1787,7 @@ TEST(SettingsTest, assimilationHeatSourceChanges) {
         <sigma_z> 0.1 </sigma_z>
         <tau> 5. </tau>
     </source>
-    <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No"/>
+    <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No" filename="field.dat"/>
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
@@ -1798,6 +1798,7 @@ TEST(SettingsTest, assimilationHeatSourceChanges) {
     EXPECT_FALSE(field_changes.p_changed);
     EXPECT_TRUE(field_changes.T_changed);
     EXPECT_FALSE(field_changes.C_changed);
+    EXPECT_EQ(field_changes.filename, "field,dat");
 
     Settings::solver::temperature_source heat_source = Settings::solver::parse_temperature_source(doc.RootElement(), "temperature_source");
     EXPECT_FALSE(heat_source.dissipation);
@@ -1819,7 +1820,7 @@ TEST(SettingsTest, assimilationHeatSourceChanges) {
 TEST(SettingsTest, assimilationFieldChanges) {
     std::string xml = R"(
 <ARTSS>
-    <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No"/>
+    <fields_changed u="No" v="No" w="No" p="No" T="No" concentration="No"/>
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
@@ -1828,6 +1829,6 @@ TEST(SettingsTest, assimilationFieldChanges) {
     EXPECT_FALSE(field_changes.v_changed);
     EXPECT_FALSE(field_changes.w_changed);
     EXPECT_FALSE(field_changes.p_changed);
-    EXPECT_TRUE(field_changes.T_changed);
+    EXPECT_FALSE(field_changes.T_changed);
     EXPECT_FALSE(field_changes.C_changed);
 }
