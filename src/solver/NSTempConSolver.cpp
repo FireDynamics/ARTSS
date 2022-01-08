@@ -307,6 +307,7 @@ void NSTempConSolver::update_source(real t_cur) {
     m_source_function_concentration->update_source(m_field_controller->get_field_source_concentration(), t_cur);
 }
 
-void NSTempConSolver::replace_heat_source(const Settings::solver::temperature_source &temperature_source) {
+void NSTempConSolver::replace_heat_source(const Settings::solver::temperature_source &temperature_source, const real t_cur) {
     SolverSelection::set_temperature_source_function(temperature_source, &m_source_function_temperature);
+    m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
 }

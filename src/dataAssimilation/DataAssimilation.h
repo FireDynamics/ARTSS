@@ -28,7 +28,7 @@ class DataAssimilation {
                      const Settings::Settings &settings);
     void save_data(real t_cur);
 
-    bool requires_rollback();
+    bool requires_rollback(real t_cur);
     void initiate_rollback();
 
     real get_new_time_value() const;
@@ -45,7 +45,7 @@ private:
     real m_t_cur = -1;
 
     void read_new_data(std::string &file_name);
-    void config_rollback(const char *msg);
+    bool config_rollback(const char *msg);
 
     Field m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, \
           m_new_field_T, m_new_field_C;

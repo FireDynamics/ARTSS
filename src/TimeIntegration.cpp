@@ -110,7 +110,7 @@ void TimeIntegration::run() {
             //     std::cout<<"Von Neumann condition not met!"<<std::endl;
 #endif
 #ifdef ASSIMILATION
-            if (m_data_assimilation->requires_rollback()) {
+            if (m_data_assimilation->requires_rollback(t_cur)) {
                 sleep(3);
                 t_cur = m_data_assimilation->get_new_time_value();
                 std::cout << fmt::format("ROLLBACK with t_cur {}, -> {} -> {}", t_cur, t_cur/dt, static_cast<int>(t_cur/dt)) << std::endl;

@@ -10,7 +10,7 @@ ParameterReader::ParameterReader() {
     m_logger = Utility::create_logger(typeid(this).name());
 }
 
-Settings::data_assimilation::field_changes ParameterReader::read_config(const std::string &filename) {
+Settings::data_assimilation::field_changes ParameterReader::read_config(const std::string &filename, const real t_cur) {
     m_logger->debug("parse file to string");
     auto file_content = Settings::parse_settings_from_file(filename);
     m_logger->debug("parse document to XMLTree");

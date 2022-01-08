@@ -30,15 +30,23 @@ if __name__ == '__main__':
     domain.print_debug()
 
     t_cur = 0.5
-    fields = reader.read_field_data(t_cur)
-    if len(fields.keys()) > 0:
-        field = change_something(domain, fields['T'])
-        fields['T'] = field
-        field_file_name = 'test.txt'
-        reader.write_field_data(field_file_name, fields, t_cur)
-        config_file_name = f'config_{t_cur}.xml'
-        xml.write_config(config_file_name, ['T'], t_cur)
+    #fields = reader.read_field_data(t_cur)
+    #if len(fields.keys()) > 0:
+    #    field = change_something(domain, fields['T'])
+    #    fields['T'] = field
+    #    field_file_name = 'test.txt'
+    #    reader.write_field_data(field_file_name, fields, t_cur)
+    #    config_file_name = f'config_{t_cur}.xml'
+    #    xml.write_config(config_file_name, ['T'], t_cur)
 
-        client = TCP_client.TCPClient()
-        client.connect()
-        client.send_message(create_message(t_cur, config_file_name))
+    client = TCP_client.TCPClient()
+    client.connect()
+
+    for t in [0.2, 0.5, 1.0]:
+        t_cur = reader.get_t_current()
+        while t_cur < t:
+            time.sleep(5)
+            t_cur = reader.get_t_current()
+        config_file_name = f'config_{t}.xml'
+        client.send_message(create_message(t, config_file_name))
+        

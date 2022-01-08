@@ -1,5 +1,5 @@
 /// \file       TemperatureSourceChanger.h
-/// \brief      Class for changing temperatur source
+/// \brief      Class for changing temperature source
 /// \date       Jan 05, 2021
 /// \author     My Linh Wuerzburger
 /// \copyright  <2015-2022> Forschungszentrum Juelich All rights reserved.
@@ -16,7 +16,7 @@ class TemperatureSourceChanger : public IParameterReader {
 public:
     TemperatureSourceChanger(const SolverController &solver_controller,
                              const Settings::solver::temperature_source &temperature_source);
-    Settings::data_assimilation::field_changes read_config(const std::string &filename) override;
+    Settings::data_assimilation::field_changes read_config(const std::string &filename, real t_cur) override;
 private:
     const SolverController &m_solver_controller;
     const Settings::solver::temperature_source &m_temperature_source;
