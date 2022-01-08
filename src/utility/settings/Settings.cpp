@@ -1022,7 +1022,12 @@ namespace Settings {
         field_changes.p_changed = get_required_bool(values, "p", context);
         field_changes.T_changed = get_required_bool(values, "T", context);
         field_changes.C_changed = get_required_bool(values, "concentration", context);
-
+        field_changes.changed = field_changes.u_changed || field_changes.v_changed
+                             || field_changes.w_changed || field_changes.p_changed
+                             || field_changes.T_changed || field_changes.C_changed;
+        if (field_changes.changed) {
+            field_changes.filename = get_required_string(values, "filename", context);
+        }
         return field_changes;
     }
 

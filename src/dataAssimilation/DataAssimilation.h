@@ -18,7 +18,7 @@
 
 struct AssimilationMethods {
     inline static const std::string standard = "default";
-    inline static const std::string temperature_source = "TemperatureSource";
+    inline static const std::string temperature_source = "TemperatureSourceChanger";
 };
 
 class DataAssimilation {
@@ -34,9 +34,7 @@ class DataAssimilation {
     real get_new_time_value() const;
 
 private:
-#ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
-#endif
     const Settings::Settings &m_settings;
     FieldController *m_field_controller;
     const SolverController &m_solver_controller;

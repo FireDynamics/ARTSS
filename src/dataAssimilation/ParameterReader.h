@@ -9,13 +9,16 @@
 
 #include "../interfaces/IParameterReader.h"
 #include "../utility/settings/Settings.h"
+#include "../utility/Utility.h"
 
 class ParameterReader : public IParameterReader {
 public:
-    ParameterReader() = default;
+    ParameterReader();
     ~ParameterReader() = default;
 
     Settings::data_assimilation::field_changes read_config(const std::string &filename) override;
+private:
+    std::shared_ptr<spdlog::logger> m_logger;
 };
 
 
