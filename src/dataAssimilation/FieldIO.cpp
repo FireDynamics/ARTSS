@@ -15,7 +15,7 @@
 #include "../domain/DomainData.h"
 
 
-FieldIO::FieldIO() {
+FieldIO::FieldIO(const std::string &xml_filename) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -23,10 +23,10 @@ FieldIO::FieldIO() {
     auto domain_data = DomainData::getInstance();
     real t_end = domain_data->get_physical_parameters().t_end;
 
-    size_t n = static_cast<size_t>(t_end / domain_data->get_physical_parameters().dt) + 1;
+    size_t n = static_cast<size_t>(std::round(t_end / domain_data->get_physical_parameters().dt)) + 1;
     m_positions = new long[n];
 
-    std::string header = create_header();
+    std::string header = create_header(xml_filename);
     m_positions[0] = static_cast<long>(header.length()) + 1;
 
     std::ofstream output_file(m_filename, std::ios_base::out);
@@ -56,12 +56,13 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
         }
         output.append(fmt::format(("{}\n"), f[size - 1]));
     }
-    size_t n = static_cast<size_t>(t_cur / DomainData::getInstance()->get_physical_parameters().dt) - 1;
+    size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
     long length = static_cast<long>(output.length());
     m_positions[n + 1] = m_positions[n] + length;
 
     std::fstream output_file(m_filename);
     // write field at position dependent on time step
+    m_logger->debug("times: {:>10d} write to: {:>20d}", n, m_positions[n]);
     output_file.seekp(m_positions[n], std::ios_base::beg);
     output_file.write(output.c_str(), length);
 
@@ -85,7 +86,7 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
 // *************************************************************************************************
 void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     std::ifstream input_file(m_filename, std::ifstream::binary);
-    size_t n = static_cast<size_t>(t_cur / DomainData::getInstance()->get_physical_parameters().dt) - 1;
+    size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
     long pos = m_positions[n];
     std::string line;
     input_file.seekg(pos);
@@ -110,7 +111,7 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
 /// ###FIELDS;u;v;w;p;T;concentration
 /// ###DATE:<date>;XML:<XML>
 // *************************************************************************************************
-std::string FieldIO::create_header() {
+std::string FieldIO::create_header(const std::string &xml_filename) {
     auto end = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
@@ -120,14 +121,13 @@ std::string FieldIO::create_header() {
     size_t Nz = domain_data->get_number_of_cells(CoordinateAxis::Z);
 
     std::string string_t_cur_text = "Current time step;";
-    m_logger->info("create header");
     m_pos_time_step = static_cast<long>(string_t_cur_text.length());
-    std::string header = fmt::format(string_t_cur_text + "{:.5e};dt;{}\n", 0,
+    std::string header = fmt::format("{}{:.5e};dt;{}\n", string_t_cur_text, 0.0,
                                      DomainData::getInstance()->get_physical_parameters().dt);
-    m_logger->info("passed");
     header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
     header.append(fmt::format("###DATE;{}", std::ctime(&end_time)));
+    header.append(fmt::format("###XML;{}\n", xml_filename));
     return header;
 }
 
@@ -147,7 +147,7 @@ void FieldIO::read_fields(const real t_cur,
                           Field &u, Field &v, Field &w,
                           Field &p, Field &T, Field &C) {
     std::ifstream file_original(m_filename, std::ifstream::binary);
-    size_t n = static_cast<size_t>(t_cur / DomainData::getInstance()->get_physical_parameters().dt) - 1;
+    size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
     long pos = m_positions[n];
 
     if (field_changes.changed) {  // no changes -> read original file

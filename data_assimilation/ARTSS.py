@@ -22,10 +22,10 @@ class XML:
                 geometry.attrib['name'] = child.attrib['name']
                 self.obstacles.append(geometry.attrib)
 
-    def write_config(config_file_name: str, fields: list, t_cur: float):
+    def write_config(config_file_name: str, fields: list, t_cur: float, field_file_name: str):
         # TODO write config file. format:
         # <ARTSS>
-        #   <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No" filename="fields.csv/dat"/>
+        #   <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No" filename="field_file_name"/>
         # </ARTSS>
         pass
 
@@ -36,9 +36,19 @@ class Domain:
         self.domain_param = domain_param
         self.obstacles = []
         self.domain_boundary_cells = {}
+        self.control_computational_domain()
         self.calculate_domain()
         self.calculate_obstacles(obstacles)
         self.calculate_indices()
+
+    def control_computational_domain(self):
+        if not "x1" in self.domain_param.keys():
+            self.domain_param['x1'] = self.domain_param['X1']
+            self.domain_param['y1'] = self.domain_param['Y1']
+            self.domain_param['z1'] = self.domain_param['Z1']
+            self.domain_param['x2'] = self.domain_param['X2']
+            self.domain_param['y2'] = self.domain_param['Y2']
+            self.domain_param['z2'] = self.domain_param['Z2']
 
     def calculate_domain(self):
         # from Domain.cpp/h

@@ -25,7 +25,7 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_IO_handler = new FieldIO();
+    m_field_IO_handler = new FieldIO(settings.filename);
     if (m_settings.assimilation_parameters.class_name == AssimilationMethods::standard) {
         m_parameter_handler = new ParameterReader();
     } else if (m_settings.assimilation_parameters.class_name == AssimilationMethods::temperature_source) {

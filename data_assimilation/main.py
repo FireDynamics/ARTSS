@@ -5,7 +5,7 @@ from data_assimilation import FieldReader
 
 
 def create_message(t_cur: float, config_file_name: str) -> bin:
-    string_msg = t_cur + ',' +config_file_name
+    string_msg = str(t_cur) + ',' +config_file_name
     return string_msg.encode('utf-8')
 
 
@@ -29,16 +29,16 @@ if __name__ == '__main__':
     domain.print_info()
     domain.print_debug()
 
-    t_cur = 0.08
+    t_cur = 0.2
     fields = reader.read_field_data(t_cur)
     if len(fields.keys()) > 0:
         field = change_something(domain, fields['T'])
         fields['T'] = field
         field_file_name = 'test.txt'
         reader.write_field_data(field_file_name, fields, t_cur)
-        config_file_name = 'config.xml'
+        config_file_name = 'config_0.2.xml'
         xml.write_config(config_file_name, ['T'], t_cur)
 
         client = TCP_client.TCPClient()
         client.connect()
-        client.send_message(create_message(t_cur, config_file_name, field_file_name))
+        client.send_message(create_message(t_cur, config_file_name))

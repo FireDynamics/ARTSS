@@ -14,7 +14,7 @@
 
 class FieldIO {
  public:
-    FieldIO();
+    explicit FieldIO(const std::string &xml_filename);
     void write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
     void set_filename(std::string &filename) { m_filename = filename; }
     void read_fields(real t_cur,
@@ -23,7 +23,7 @@ class FieldIO {
                      Field &p, Field &T, Field &C);
 
  private:
-    std::string create_header();
+    std::string create_header(const std::string &xml_filename);
     void read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
 
     long *m_positions;

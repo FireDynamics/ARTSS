@@ -17,7 +17,6 @@ class FieldReader:
         self.date: datetime
         self.header: str
         self.read_header()
-        self.create_header()
 
     def read_header(self):
         fname = open(self.file_name, 'r')
@@ -96,8 +95,6 @@ class FieldReader:
             print(f'wrong number of fields: expected {number_of_fields} got {len(data.keys())}')
         else:
             file = open(file_name, 'w')
-            header = self.get_header(t_cur)
-            file.write(header)
             for i in range(number_of_fields):
                 field = data[self.fields[i]]
                 line = ''
@@ -107,5 +104,3 @@ class FieldReader:
                 file.write(line)
             file.close()
 
-    def get_header(self, t_cur: float) -> str:
-        return f'TIMESTAMP;{t_cur}\n' + self.header + get_date_now() + '\n'
