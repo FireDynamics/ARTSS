@@ -29,7 +29,7 @@ if __name__ == '__main__':
     domain.print_info()
     domain.print_debug()
 
-    t_cur = 0.2
+    t_cur = 0.5
     fields = reader.read_field_data(t_cur)
     if len(fields.keys()) > 0:
         field = change_something(domain, fields['T'])

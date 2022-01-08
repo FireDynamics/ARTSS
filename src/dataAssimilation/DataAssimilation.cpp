@@ -35,6 +35,7 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
 }
 
 void DataAssimilation::initiate_rollback() {
+    m_logger->info("first T index in initiate_rollback {}", m_new_field_T[0]);
     m_field_controller->replace_data(m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T,
                                      m_new_field_C);
 }
@@ -64,6 +65,7 @@ void DataAssimilation::config_rollback(const char *msg) {
     m_field_IO_handler->read_fields(m_t_cur, field_changes,
                                     m_new_field_u, m_new_field_v, m_new_field_w,
                                     m_new_field_p, m_new_field_T, m_new_field_C);
+    m_logger->info("first T in dex in config_rollback {}", m_new_field_T[0]);
 }
 
 bool DataAssimilation::requires_rollback() {

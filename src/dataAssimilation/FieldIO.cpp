@@ -62,7 +62,7 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
 
     std::fstream output_file(m_filename);
     // write field at position dependent on time step
-    m_logger->debug("times: {:>10d} write to: {:>20d}", n, m_positions[n]);
+    m_logger->info("times: {:>10d} write to: {:>20d}", n, m_positions[n]);
     output_file.seekp(m_positions[n], std::ios_base::beg);
     output_file.write(output.c_str(), length);
 
@@ -85,25 +85,76 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
 /// \param  C       field C to store the read data
 // *************************************************************************************************
 void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
+    m_logger->info("read original data");
     std::ifstream input_file(m_filename, std::ifstream::binary);
     size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
     long pos = m_positions[n];
-    m_logger->debug("times: {:>10d} read from: {:>20d}", n, m_positions[n]);
+    m_logger->info("times: {:>10d} read from: {:>20d}", n, m_positions[n]);
     std::string line;
     input_file.seekg(pos);
 
     getline(input_file, line);
-    m_logger->debug("read time step {}", line);
-    Field fields[] = {u, v, w, p, T, C};
-    for (Field &f: fields) {
-        getline(input_file, line);
-        std::vector<std::string> splitted_string = Utility::split(line, ';');
-        m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(f.get_type()), splitted_string.size(), f.get_size());
-        size_t counter = 0;
-        for (const std::string &part: splitted_string) {
-            f.data[counter] = std::stod(part);
-            counter++;
-        }
+    m_logger->info("read time step {}", line);
+
+    // u
+    getline(input_file, line);
+    std::vector<std::string> divided_string = Utility::split(line, ';');
+    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(u.get_type()), divided_string.size(), u.get_size());
+    m_logger->info("first index has value {}", divided_string[0]);
+    size_t counter = 0;
+    for (const std::string &part: divided_string) {
+        u.data[counter] = std::stod(part);
+        counter++;
+    }
+    // v
+    getline(input_file, line);
+    divided_string = Utility::split(line, ';');
+    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(v.get_type()), divided_string.size(), v.get_size());
+    m_logger->info("first index has value {}", divided_string[0]);
+    counter = 0;
+    for (const std::string &part: divided_string) {
+        v.data[counter] = std::stod(part);
+        counter++;
+    }
+    // w
+    getline(input_file, line);
+    divided_string = Utility::split(line, ';');
+    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(w.get_type()), divided_string.size(), w.get_size());
+    m_logger->info("first index has value {}", divided_string[0]);
+    counter = 0;
+    for (const std::string &part: divided_string) {
+        w.data[counter] = std::stod(part);
+        counter++;
+    }
+    // p
+    getline(input_file, line);
+    divided_string = Utility::split(line, ';');
+    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(p.get_type()), divided_string.size(), p.get_size());
+    m_logger->info("first index has value {}", divided_string[0]);
+    counter = 0;
+    for (const std::string &part: divided_string) {
+        p.data[counter] = std::stod(part);
+        counter++;
+    }
+    // T
+    getline(input_file, line);
+    divided_string = Utility::split(line, ';');
+    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(T.get_type()), divided_string.size(), T.get_size());
+    m_logger->info("first index has value {}", divided_string[0]);
+    counter = 0;
+    for (const std::string &part: divided_string) {
+        T.data[counter] = std::stod(part);
+        counter++;
+    }
+    // C
+    getline(input_file, line);
+    Utility::split(line, ';');
+    m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(C.get_type()), divided_string.size(), C.get_size());
+    m_logger->info("first index has value {}", divided_string[0]);
+    counter = 0;
+    for (const std::string &part: divided_string) {
+        C.data[counter] = std::stod(part);
+        counter++;
     }
 }
 
@@ -138,9 +189,9 @@ std::string FieldIO::create_header(const std::string &xml_filename) {
 void FieldIO::read_field(std::ifstream &file_stream, Field &field) {
     std::string line;
     getline(file_stream, line);
-    std::vector<std::string> splitted_string = Utility::split(line, ';');
+    std::vector<std::string> divided_string = Utility::split(line, ';');
     size_t counter = 0;
-    for (const std::string &part: splitted_string) {
+    for (const std::string &part: divided_string) {
         field.data[counter] = std::stod(part);
         counter++;
     }
@@ -152,58 +203,69 @@ void FieldIO::read_fields(const real t_cur,
                           Field &p, Field &T, Field &C) {
     std::ifstream file_original(m_filename, std::ifstream::binary);
     size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
-    long pos = m_positions[n];
+    file_original.seekg(m_positions[n]);
+
+    std::string line;
+    getline(file_original, line);
+    m_logger->info("read time step {}", line);
 
     if (field_changes.changed) {  // no changes -> read original file
         std::ifstream file_changes(field_changes.filename, std::ifstream::binary);
         if (file_changes.is_open()) {  // could not open file -> read original file + warning
             if (field_changes.u_changed) {
-                file_original.seekg(0);
                 read_field(file_changes, u);
+                getline(file_original, line);
+                m_logger->info("read changed u Field");
             } else {
-                file_original.seekg(pos + 0);
                 read_field(file_original, u);
+                getline(file_changes, line);
             }
             if (field_changes.v_changed) {
-                file_original.seekg(1);
                 read_field(file_changes, v);
+                getline(file_original, line);
+                m_logger->info("read changed v Field");
             } else {
-                file_original.seekg(pos + 1);
                 read_field(file_original, v);
+                getline(file_changes, line);
             }
             if (field_changes.w_changed) {
-                file_original.seekg(2);
                 read_field(file_changes, w);
+                getline(file_original, line);
+                m_logger->info("read changed w Field");
             } else {
-                file_original.seekg(pos + 2);
                 read_field(file_original, w);
+                getline(file_changes, line);
             }
             if (field_changes.p_changed) {
-                file_original.seekg(3);
                 read_field(file_changes, p);
+                getline(file_original, line);
+                m_logger->info("read changed p Field");
             } else {
-                file_original.seekg(pos + 3);
                 read_field(file_original, p);
+                getline(file_changes, line);
             }
             if (field_changes.T_changed) {
-                file_original.seekg(4);
                 read_field(file_changes, T);
+                getline(file_original, line);
+                m_logger->info("read changed T Field");
             } else {
-                file_original.seekg(pos + 4);
                 read_field(file_original, T);
+                getline(file_changes, line);
             }
             if (field_changes.C_changed) {
-                file_original.seekg(5);
                 read_field(file_changes, C);
+                getline(file_original, line);
+                m_logger->info("read changed C Field");
             } else {
-                file_original.seekg(pos + 5);
                 read_field(file_original, C);
+                getline(file_changes, line);
             }
         } else {
             m_logger->warn(fmt::format("File {} could not be open, original data will be loaded", field_changes.filename));
             read_fields(t_cur, u, v, w, p, T, C);
         }
     } else {
+        m_logger->info("no field changes");
         read_fields(t_cur, u, v, w, p, T, C);
     }
 }
