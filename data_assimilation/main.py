@@ -36,7 +36,7 @@ if __name__ == '__main__':
         fields['T'] = field
         field_file_name = 'test.txt'
         reader.write_field_data(field_file_name, fields, t_cur)
-        config_file_name = 'config_0.2.xml'
+        config_file_name = f'config_{t_cur}.xml'
         xml.write_config(config_file_name, ['T'], t_cur)
 
         client = TCP_client.TCPClient()

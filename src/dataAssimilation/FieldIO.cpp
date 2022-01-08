@@ -88,13 +88,17 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
     std::ifstream input_file(m_filename, std::ifstream::binary);
     size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
     long pos = m_positions[n];
+    m_logger->debug("times: {:>10d} read from: {:>20d}", n, m_positions[n]);
     std::string line;
     input_file.seekg(pos);
 
+    getline(input_file, line);
+    m_logger->debug("read time step {}", line);
     Field fields[] = {u, v, w, p, T, C};
     for (Field &f: fields) {
         getline(input_file, line);
         std::vector<std::string> splitted_string = Utility::split(line, ';');
+        m_logger->info("size of {}: {}, should be: {}", Mapping::get_field_type_name(f.get_type()), splitted_string.size(), f.get_size());
         size_t counter = 0;
         for (const std::string &part: splitted_string) {
             f.data[counter] = std::stod(part);

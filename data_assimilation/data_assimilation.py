@@ -80,12 +80,9 @@ class FieldReader:
             return {}
         else:
             number_of_fields = len(self.fields)
-            steps = int(time_step / self.dt)
-            print("t_cur", t_cur, self.dt)
-            print("steps", steps)
+            steps = int(time_step / self.dt) - 1
 
-            starting_line = 5 + number_of_fields * steps
-            print(f"starting line for {time_step}: {starting_line}")
+            starting_line = 5 + (number_of_fields + 1) * steps + 1
             lines = self.get_lines_from_file(list(range(starting_line, starting_line + number_of_fields + 1)))
             fields = {}
             for i in range(number_of_fields):
