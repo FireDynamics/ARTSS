@@ -1776,6 +1776,17 @@ TEST(SettingsTest, assimilation2) {
 TEST(SettingsTest, assimilationHeatSourceChanges) {
     std::string xml = R"(
 <ARTSS>
+    <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="No">
+        <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
+        <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
+        <x0> 1.4 </x0>
+        <y0> 0.02 </y0>
+        <z0> 0. </z0>
+        <sigma_x> 0.15 </sigma_x>
+        <sigma_y> 0.6 </sigma_y>
+        <sigma_z> 0.1 </sigma_z>
+        <tau> 5. </tau>
+    </source>
     <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No"/>
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
@@ -1787,6 +1798,22 @@ TEST(SettingsTest, assimilationHeatSourceChanges) {
     EXPECT_FALSE(field_changes.p_changed);
     EXPECT_TRUE(field_changes.T_changed);
     EXPECT_FALSE(field_changes.C_changed);
+
+    Settings::solver::temperature_source heat_source = Settings::solver::parse_temperature_source(doc.RootElement(), "temperature_source");
+    EXPECT_FALSE(heat_source.dissipation);
+    EXPECT_EQ(heat_source.temp_fct, SourceMethods::Gauss);
+    const auto &gauss_temp = std::get<Settings::solver::sources::gauss>(heat_source.temp_function);
+    EXPECT_DOUBLE_EQ(gauss_temp.tau, 5);
+    EXPECT_DOUBLE_EQ(gauss_temp.heat_release_rate, 50.3);
+    EXPECT_DOUBLE_EQ(gauss_temp.heat_capacity, 1);
+    EXPECT_DOUBLE_EQ(gauss_temp.position[CoordinateAxis::X], 1.4);
+    EXPECT_DOUBLE_EQ(gauss_temp.position[CoordinateAxis::Y], 0.02);
+    EXPECT_DOUBLE_EQ(gauss_temp.position[CoordinateAxis::Z], 0);
+    EXPECT_DOUBLE_EQ(gauss_temp.dimension[CoordinateAxis::X], 0.15);
+    EXPECT_DOUBLE_EQ(gauss_temp.dimension[CoordinateAxis::Y], 0.6);
+    EXPECT_DOUBLE_EQ(gauss_temp.dimension[CoordinateAxis::Z], 0.1);
+
+    EXPECT_FALSE(heat_source.random);
 }
 
 TEST(SettingsTest, assimilationFieldChanges) {
