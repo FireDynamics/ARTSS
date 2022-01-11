@@ -53,10 +53,10 @@ namespace SolverSelection {
     void set_diffusion_solver(const Settings::solver::diffusion_solver &settings,
                               IDiffusion **diffusion_solver) {
         if (settings.type == DiffusionMethods::Jacobi) {
-            auto jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(settings.solver.value());
+            const auto &jacobi = std::get<Settings::solver::diffusion_solvers::jacobi>(settings.solver.value());
             *diffusion_solver = new JacobiDiffuse(jacobi);
         } else if (settings.type == DiffusionMethods::ColoredGaussSeidel) {
-            auto cgs = std::get<Settings::solver::diffusion_solvers::colored_gauss_seidel>(settings.solver.value());
+            const auto &cgs = std::get<Settings::solver::diffusion_solvers::colored_gauss_seidel>(settings.solver.value());
             *diffusion_solver = new ColoredGaussSeidelDiffuse(cgs);
         } else if (settings.type == DiffusionMethods::Explicit) {
             *diffusion_solver = new ExplicitDiffuse();
@@ -131,12 +131,12 @@ namespace SolverSelection {
         logger->debug("create source function {}", source_fct);
 #endif
         if (source_fct == SourceMethods::Gauss) {
-            auto gauss = std::get<Settings::solver::sources::gauss>(settings.temp_function);
+            const auto &gauss = std::get<Settings::solver::sources::gauss>(settings.temp_function);
             *source_function = new GaussFunction(gauss);
         } else if (source_fct == SourceMethods::Buoyancy) {
             *source_function = new BuoyancyMMS();
         } else if (source_fct == SourceMethods::Cube) {
-            auto cube = std::get<Settings::solver::sources::cube>(settings.temp_function);
+            const auto &cube = std::get<Settings::solver::sources::cube>(settings.temp_function);
             *source_function = new Cube(cube);
         } else if (source_fct == SourceMethods::Zero) {
             *source_function = new Zero();
@@ -158,12 +158,12 @@ namespace SolverSelection {
         logger->debug("create source function {}", source_fct);
 #endif
         if (source_fct == SourceMethods::Gauss) {
-            auto gauss = std::get<Settings::solver::sources::gauss>(settings.con_function);
+            const auto &gauss = std::get<Settings::solver::sources::gauss>(settings.con_function);
             *source_function = new GaussFunction(gauss);
         } else if (source_fct == SourceMethods::Buoyancy) {
             *source_function = new BuoyancyMMS();
         } else if (source_fct == SourceMethods::Cube) {
-            auto cube = std::get<Settings::solver::sources::cube>(settings.con_function);
+            const auto &cube = std::get<Settings::solver::sources::cube>(settings.con_function);
             *source_function = new Cube(cube);
         } else if (source_fct == SourceMethods::Zero) {
             *source_function = new Zero();
