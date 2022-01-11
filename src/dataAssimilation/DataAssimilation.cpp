@@ -79,7 +79,7 @@ bool DataAssimilation::config_rollback(const char *msg) {
 
 bool DataAssimilation::requires_rollback(const real t_cur) {
     if (!m_settings.assimilation_parameters.enabled) {
-        return -1;
+        return false;
     }
     m_t_cur = t_cur;
     MPI_Status status;
