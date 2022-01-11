@@ -19,6 +19,8 @@ DomainData::DomainData(const Settings::physical_parameters &physical_params,
 #endif
     number_of_inner_cells = new Coordinate<size_t>[m_levels + 1];
     number_of_cells = new Coordinate<size_t>[m_levels + 1];
+    m_size_PD.resize(m_levels + 1);
+    std::fill(m_size_PD.begin(), m_size_PD.end(), 1);
 
     start_coords_PD.copy(domain_params.start_coords_PD);
     end_coords_PD.copy(domain_params.end_coords_PD);
@@ -29,6 +31,7 @@ DomainData::DomainData(const Settings::physical_parameters &physical_params,
     for (CoordinateAxis axis: {X, Y, Z}) {
         length_PD[axis] = fabs(end_coords_PD[axis] - start_coords_PD[axis]);
         number_of_cells[0][axis] = static_cast<size_t>(length_PD[axis] / get_spacing(axis) + 2);
+        m_size_PD[0] *= get_number_of_cells(axis);
     }
 
     calc_MG_values();
@@ -47,16 +50,9 @@ void DomainData::calc_MG_values() {
         for (CoordinateAxis axis: {X, Y, Z}) {
             number_of_inner_cells[level][axis] = (number_of_inner_cells[level - 1][axis] == 1) ? 1 : static_cast<size_t> (std::round(number_of_inner_cells[level - 1][axis] / 2));
             number_of_cells[0][axis] = static_cast<size_t>(length_PD[axis] / get_spacing(axis));
+            m_size_PD[level] *= get_number_of_cells(axis, level);
         }
     }
-}
-
-size_t DomainData::get_size(size_t level) const {
-    size_t size = 1;
-    for (size_t axis = 0; axis < number_of_axes; axis++) {
-        size *= get_number_of_cells(CoordinateAxis(axis), level);
-    }
-    return size;
 }
 
 // =============================== Resize computational Domain ========================
