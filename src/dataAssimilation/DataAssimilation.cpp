@@ -24,13 +24,16 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
         m_new_field_C(Field(FieldType::RHO)) {
     m_logger = Utility::create_logger(typeid(this).name());
     m_field_IO_handler = new FieldIO(settings.filename);
-    if (m_settings.assimilation_parameters.class_name == AssimilationMethods::standard) {
-        m_parameter_handler = new ParameterReader();
-    } else if (m_settings.assimilation_parameters.class_name == AssimilationMethods::temperature_source) {
-        m_parameter_handler = new TemperatureSourceChanger(m_solver_controller, m_settings.solver_parameters.temperature.source);
-    } else {
-        m_logger->error("assimilation method {} not known", m_settings.assimilation_parameters.class_name);
-        std::exit(1);
+    if (m_settings.assimilation_parameters.enabled) {
+        if (m_settings.assimilation_parameters.class_name == AssimilationMethods::standard) {
+            m_parameter_handler = new ParameterReader();
+        } else if (m_settings.assimilation_parameters.class_name == AssimilationMethods::temperature_source) {
+            m_parameter_handler = new TemperatureSourceChanger(m_solver_controller,
+                                                               m_settings.solver_parameters.temperature.source);
+        } else {
+            m_logger->error("assimilation method {} not known", m_settings.assimilation_parameters.class_name);
+            std::exit(1);
+        }
     }
 }
 
@@ -75,6 +78,9 @@ bool DataAssimilation::config_rollback(const char *msg) {
 }
 
 bool DataAssimilation::requires_rollback(const real t_cur) {
+    if (!m_settings.assimilation_parameters.enabled) {
+        return -1;
+    }
     m_t_cur = t_cur;
     MPI_Status status;
     int flag = -1;
