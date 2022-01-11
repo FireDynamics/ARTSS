@@ -113,17 +113,14 @@ namespace SolverSelection {
         }
     }
 
-    void add_noise(Settings::random_parameters random_parameters, ISourceFunction **source_function) {
-        real range = random_parameters.range;  // +- range of random numbers
-        int seed = -1;
+    void add_noise(const Settings::random_parameters &random_parameters, ISourceFunction **source_function) {
+        IRandomField *noise_maker;
         if (random_parameters.custom_seed) {
-            seed = static_cast<int>(random_parameters.seed);
+            noise_maker = new UniformRandom(random_parameters.range, random_parameters.step_size, random_parameters.seed);
+        } else {
+            noise_maker = new UniformRandom(random_parameters.range, random_parameters.step_size);
         }
-
-        real step_size = random_parameters.step_size;
-
-        IRandomField *noise_maker = new UniformRandom(range, step_size, seed);
-        (*source_function)->set_noise(noise_maker);
+        (*source_function)->set_noise(noise_maker, random_parameters.absolute);
     }
 
     void set_temperature_source_function(const Settings::solver::temperature_source &settings,
@@ -187,8 +184,9 @@ namespace SolverSelection {
     /// \param  source_solver Pointer to SourceSolver
     /// \param  source_type Name of SourceSolver
     // ***************************************************************************************
-    void
-    set_source_solver(const std::string &source_type, ISource **source_solver, const std::vector<CoordinateAxis> &dir) {
+    void set_source_solver(const std::string &source_type,
+                           ISource **source_solver,
+                           const std::vector<CoordinateAxis> &dir) {
         if (source_type == SourceMethods::ExplicitEuler) {
             *source_solver = new ExplicitEulerSource(dir);
         } else {
