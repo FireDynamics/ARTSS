@@ -40,17 +40,18 @@ void Domain::init(size_t size_obstacle_list, PatchObject &size_surface_list) {
     for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
         auto axes = Mapping::get_axes(patch);
         m_size_boundary[patch] =
-                (domain_data->get_number_of_inner_cells(axes[0], m_multigrid_level) + 2)
-                * (domain_data->get_number_of_inner_cells(axes[1], m_multigrid_level) + 2)
-                - size_surface_list[patch];
+                (domain_data->get_number_of_inner_cells(axes[0], m_multigrid_level) + 2) *
+                (domain_data->get_number_of_inner_cells(axes[1], m_multigrid_level) + 2) -
+                size_surface_list[patch];
 
         m_boundary_patch_divided[patch].resize(m_size_boundary[patch]);
     }
 
-    m_inner_list.resize(domain_data->get_number_of_inner_cells(X, m_multigrid_level)
-                        * domain_data->get_number_of_inner_cells(Y, m_multigrid_level)
-                        * domain_data->get_number_of_inner_cells(Z, m_multigrid_level)
-                        - size_obstacle_list);
+    m_inner_list.resize(
+            domain_data->get_number_of_inner_cells(X, m_multigrid_level) *
+            domain_data->get_number_of_inner_cells(Y, m_multigrid_level) *
+            domain_data->get_number_of_inner_cells(Z, m_multigrid_level) -
+            size_obstacle_list);
 }
 
 
