@@ -8,7 +8,6 @@
 #include <cmath>
 #include <string>
 #include "DomainData.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../utility/Algorithm.h"
 
 Domain::Domain(size_t *obstacle_list, size_t size_obstacle_list,
@@ -38,21 +37,20 @@ void Domain::init(size_t size_obstacle_list, PatchObject &size_surface_list) {
     auto domain_data = DomainData::getInstance();
 
     m_boundary_patch_divided.resize(number_of_patches);
-    for (size_t patch = 0; patch < number_of_patches; patch++) {
-        size_t axis1 = (patch / 2 + 1) % number_of_axes;  // patch left (0) -> axis 1 (Y)
-        size_t axis2 = (patch / 2 + 2) % number_of_axes;  // patch left (0) -> axis 2 (Z)
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+        auto axes = Mapping::get_axes(patch);
         m_size_boundary[patch] =
-                domain_data->get_number_of_cells(CoordinateAxis(axis1), m_multigrid_level)
-              * domain_data->get_number_of_cells(CoordinateAxis(axis2), m_multigrid_level)
-              - size_surface_list[patch];
+                (domain_data->get_number_of_inner_cells(axes[0], m_multigrid_level) + 2)
+                * (domain_data->get_number_of_inner_cells(axes[1], m_multigrid_level) + 2)
+                - size_surface_list[patch];
 
         m_boundary_patch_divided[patch].resize(m_size_boundary[patch]);
     }
 
-    m_inner_list.resize(domain_data->get_nx(m_multigrid_level)
-                      * domain_data->get_ny(m_multigrid_level)
-                      * domain_data->get_nz(m_multigrid_level)
-                      - size_obstacle_list);
+    m_inner_list.resize(domain_data->get_number_of_inner_cells(X, m_multigrid_level)
+                        * domain_data->get_number_of_inner_cells(Y, m_multigrid_level)
+                        * domain_data->get_number_of_inner_cells(Z, m_multigrid_level)
+                        - size_obstacle_list);
 }
 
 
@@ -95,8 +93,8 @@ void Domain::print(size_t size_obstacle_list, PatchObject &size_surface_list) {
 void Domain::boundary_cells(size_t **surface_list, PatchObject &size_surface_list) {
     auto domain_data = DomainData::getInstance();
 
-    const size_t Nx = domain_data->get_Nx(m_multigrid_level);
-    const size_t Ny = domain_data->get_Ny(m_multigrid_level);
+    const size_t Nx = domain_data->get_number_of_cells(X, m_multigrid_level);
+    const size_t Ny = domain_data->get_number_of_cells(Y, m_multigrid_level);
 
     // DETAILED and CONCATENATED LISTS
     // BOUNDARY
@@ -104,16 +102,16 @@ void Domain::boundary_cells(size_t **surface_list, PatchObject &size_surface_lis
     // TODO(issue 86): boundaries for physical domain.
     // TODO(issue 86): New method for computational domain -> redefine XML usage of boundaries
 
-    auto tmp_start = new Coordinate<size_t>();
-    auto tmp_end = new Coordinate<size_t>();
+    Coordinate<size_t> tmp_start;
+    Coordinate<size_t> tmp_end;
     // comments for X axis (0)
-    for (size_t axis = 0; axis < number_of_axes; axis++) {
+    for (CoordinateAxis axis: {X, Y, Z}) {
         CoordinateAxis axis1;
         CoordinateAxis axis2;
-        if (CoordinateAxis(axis) == CoordinateAxis::X) {
+        if (axis == CoordinateAxis::X) {
             axis1 = CoordinateAxis::Y;
             axis2 = CoordinateAxis::Z;
-        } else if (CoordinateAxis(axis) == CoordinateAxis::Y) {
+        } else if (axis == CoordinateAxis::Y) {
             axis1 = CoordinateAxis::X;
             axis2 = CoordinateAxis::Z;
         } else {
@@ -121,37 +119,37 @@ void Domain::boundary_cells(size_t **surface_list, PatchObject &size_surface_lis
             axis2 = CoordinateAxis::Y;
         }
 
-        auto patch_start = Patch(axis * 2);  // Patch Left (0)
-        auto patch_end = Patch(axis * 2 + 1);  // Patch Right (1)
+        auto patch_start = Mapping::to_patch(axis, true);  // Patch Left (0)
+        auto patch_end = Mapping::to_patch(axis, false);  // Patch Right (1)
 
         // start indices for computational domain minus 1 for ghost cells
         size_t z1 = domain_data->get_start_index_CD(axis2, m_multigrid_level) - 1;
         size_t y1 = domain_data->get_start_index_CD(axis1, m_multigrid_level) - 1;
-        (*tmp_start)[axis] = domain_data->get_start_index_CD(CoordinateAxis(axis), m_multigrid_level) - 1;
+        tmp_start[axis] = domain_data->get_start_index_CD(CoordinateAxis(axis), m_multigrid_level) - 1;
 
         // end indices for computational domain plus 1 for ghost cells
         size_t z2 = domain_data->get_end_index_CD(axis2, m_multigrid_level) + 1;
         size_t y2 = domain_data->get_end_index_CD(axis1, m_multigrid_level) + 1;
-        (*tmp_end)[axis] = domain_data->get_end_index_CD(CoordinateAxis(axis), m_multigrid_level) + 1;
+        tmp_end[axis] = domain_data->get_end_index_CD(CoordinateAxis(axis), m_multigrid_level) + 1;
 
         size_t counter_start = 0;
         size_t counter_end = 0;
         size_t counter_surface_start = 0;
         size_t counter_surface_end = 0;
         for (size_t k = z1; k <= z2; k++) {
-            (*tmp_start)[axis2] = k;
-            (*tmp_end)[axis2] = k;
+            tmp_start[axis2] = k;
+            tmp_end[axis2] = k;
             for (size_t j = y1; j <= y2; j++) {
-                (*tmp_start)[axis1] = j;
-                size_t idx = tmp_start->get_index(Nx, Ny);
+                tmp_start[axis1] = j;
+                size_t idx = tmp_start.get_index(Nx, Ny);
                 if (counter_surface_start >= size_surface_list[patch_start] || surface_list[patch_start][counter_surface_start] != idx) {
                     m_boundary_patch_divided[patch_start][counter_start++] = idx;
                 } else {
                     counter_surface_start++;
                 }
 
-                (*tmp_end)[axis1] = j;
-                idx = tmp_end->get_index(Nx, Ny);
+                tmp_end[axis1] = j;
+                idx = tmp_end.get_index(Nx, Ny);
                 if (counter_surface_end >= size_surface_list[patch_end] || surface_list[patch_end][counter_surface_end] != idx) {
                     m_boundary_patch_divided[patch_end][counter_end++] = idx;
                 } else {
@@ -170,8 +168,6 @@ void Domain::boundary_cells(size_t **surface_list, PatchObject &size_surface_lis
                         size_surface_list[patch_end], counter_surface_end);
 #endif
     }
-    delete tmp_start;
-    delete tmp_end;
 }
 
 //======================================== Inner cells =============================================
@@ -182,15 +178,15 @@ void Domain::boundary_cells(size_t **surface_list, PatchObject &size_surface_lis
 // *************************************************************************************************
 void Domain::inner_cells(const size_t *obstacle_list, size_t size_obstacle_list) {
     auto domain_data = DomainData::getInstance();
-    size_t k1 = domain_data->get_index_z1(m_multigrid_level);
-    size_t j1 = domain_data->get_index_y1(m_multigrid_level);
-    size_t i1 = domain_data->get_index_x1(m_multigrid_level);
-    size_t k2 = domain_data->get_index_z2(m_multigrid_level);
-    size_t j2 = domain_data->get_index_y2(m_multigrid_level);
-    size_t i2 = domain_data->get_index_x2(m_multigrid_level);
+    size_t k1 = domain_data->get_start_index_CD(Z, m_multigrid_level);
+    size_t j1 = domain_data->get_start_index_CD(Y, m_multigrid_level);
+    size_t i1 = domain_data->get_start_index_CD(X, m_multigrid_level);
+    size_t k2 = domain_data->get_end_index_CD(Z, m_multigrid_level);
+    size_t j2 = domain_data->get_end_index_CD(Y, m_multigrid_level);
+    size_t i2 = domain_data->get_end_index_CD(X, m_multigrid_level);
 
-    size_t Nx = domain_data->get_Nx(m_multigrid_level);
-    size_t Ny = domain_data->get_Ny(m_multigrid_level);
+    size_t Nx = domain_data->get_number_of_cells(X, m_multigrid_level);
+    size_t Ny = domain_data->get_number_of_cells(Y, m_multigrid_level);
 
     size_t counter_inner_cells = 0;
     size_t counter_obstacle_list = 0;
@@ -198,9 +194,7 @@ void Domain::inner_cells(const size_t *obstacle_list, size_t size_obstacle_list)
         for (size_t j = j1; j <= j2; ++j) {
             for (size_t i = i1; i <= i2; ++i) {
                 size_t idx = IX(i, j, k, Nx, Ny);
-                if (counter_obstacle_list >= size_obstacle_list) {
-                    m_inner_list[counter_inner_cells++] = idx;
-                } else if (obstacle_list[counter_obstacle_list] == idx){
+                if (counter_obstacle_list < size_obstacle_list && obstacle_list[counter_obstacle_list] == idx) {
                     counter_obstacle_list++;
                 } else {
                     m_inner_list[counter_inner_cells++] = idx;
@@ -253,5 +247,5 @@ void Domain::joined_list() {
     }
     m_boundary_list = boundary_cells;
     m_domain_list = Algorithm::merge_sort(m_inner_list.data(), m_boundary_list.data(),
-                          m_inner_list.size(), m_boundary_list.size());
+                                          m_inner_list.size(), m_boundary_list.size());
 }

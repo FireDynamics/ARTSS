@@ -56,6 +56,7 @@ namespace Mapping {
     CoordinateAxis to_axis(Patch patch);
     //CoordinateAxis to_axis(size_t patch) { return to_axis(Patch(patch)); }
 
+    std::vector<CoordinateAxis> get_axes(Patch patch);
     std::string get_patch_name(Patch p);
     //std::string get_patch_name(size_t p) { return get_patch_name(Patch(p)); }
     Patch match_patch(const std::string &string);

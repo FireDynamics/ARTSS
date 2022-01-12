@@ -126,3 +126,29 @@ TEST(MappingTest, toPatch) {
     EXPECT_EQ(Patch::FRONT, Mapping::to_patch(CoordinateAxis::Z, true));
     EXPECT_EQ(Patch::BACK, Mapping::to_patch(CoordinateAxis::Z, false));
 }
+
+TEST(MappingTest, getAxes) {
+    auto axes = Mapping::get_axes(Patch::LEFT);
+    EXPECT_NE(std::find(axes.begin(), axes.end(), Y), axes.end());
+    EXPECT_NE(std::find(axes.begin(), axes.end(), Z), axes.end());
+
+    axes = Mapping::get_axes(Patch::RIGHT);
+    EXPECT_NE(std::find(axes.begin(), axes.end(), Y), axes.end());
+    EXPECT_NE(std::find(axes.begin(), axes.end(), Z), axes.end());
+
+    axes = Mapping::get_axes(Patch::BOTTOM);
+    EXPECT_NE(std::find(axes.begin(), axes.end(), X), axes.end());
+    EXPECT_NE(std::find(axes.begin(), axes.end(), Z), axes.end());
+
+    axes = Mapping::get_axes(Patch::TOP);
+    EXPECT_NE(std::find(axes.begin(), axes.end(), X), axes.end());
+    EXPECT_NE(std::find(axes.begin(), axes.end(), Z), axes.end());
+
+    axes = Mapping::get_axes(Patch::FRONT);
+    EXPECT_NE(std::find(axes.begin(), axes.end(), X), axes.end());
+    EXPECT_NE(std::find(axes.begin(), axes.end(), Y), axes.end());
+
+    axes = Mapping::get_axes(Patch::BACK);
+    EXPECT_NE(std::find(axes.begin(), axes.end(), X), axes.end());
+    EXPECT_NE(std::find(axes.begin(), axes.end(), Y), axes.end());
+}

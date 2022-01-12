@@ -7,10 +7,12 @@
 #ifndef ARTSS_DOMAIN_DOMAIN_H_
 #define ARTSS_DOMAIN_DOMAIN_H_
 
+#include <vector>
 
 #include "Obstacle.h"
-#include "../utility/Utility.h"
 #include "PatchObject.h"
+#include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
 
 class Domain {
  public:
