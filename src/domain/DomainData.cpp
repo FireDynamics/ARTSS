@@ -12,12 +12,15 @@ std::unique_ptr<DomainData> DomainData::single{};  // Singleton
 DomainData::DomainData(const Settings::physical_parameters &physical_params,
                        const Settings::domain_parameters &domain_params,
                        size_t multigrid_level) :
-        m_physical_parameters(physical_params),
-        m_levels(multigrid_level) {
+        m_levels(multigrid_level),
+        m_physical_parameters(physical_params) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
     number_of_inner_cells = new Coordinate<size_t>[m_levels + 1];
+    number_of_cells = new Coordinate<size_t>[m_levels + 1];
+    m_size_PD.resize(m_levels + 1);
+    std::fill(m_size_PD.begin(), m_size_PD.end(), 1);
 
     start_coords_PD.copy(domain_params.start_coords_PD);
     end_coords_PD.copy(domain_params.end_coords_PD);
@@ -25,8 +28,10 @@ DomainData::DomainData(const Settings::physical_parameters &physical_params,
 
     start_coords_CD.copy(domain_params.start_coords_CD);
     end_coords_CD.copy(domain_params.end_coords_CD);
-    for (size_t axis = 0; axis < number_of_axes; axis++) {
+    for (CoordinateAxis axis: {X, Y, Z}) {
         length_PD[axis] = fabs(end_coords_PD[axis] - start_coords_PD[axis]);
+        number_of_cells[0][axis] = static_cast<size_t>(std::round(length_PD[axis] / get_spacing(axis)) + 2);
+        m_size_PD[0] *= get_number_of_cells(axis);
     }
 
     calc_MG_values();
@@ -42,18 +47,12 @@ DomainData::DomainData(const Settings::physical_parameters &physical_params,
 // ***************************************************************************************
 void DomainData::calc_MG_values() {
     for (size_t level = 1; level < m_levels + 1; ++level) {
-        for (size_t axis = 0; axis < number_of_axes; axis++) {
+        for (CoordinateAxis axis: {X, Y, Z}) {
             number_of_inner_cells[level][axis] = (number_of_inner_cells[level - 1][axis] == 1) ? 1 : static_cast<size_t> (std::round(number_of_inner_cells[level - 1][axis] / 2));
+            number_of_cells[level][axis] = static_cast<size_t>(std::round(length_PD[axis] / get_spacing(axis, level)) + 2);
+            m_size_PD[level] *= get_number_of_cells(axis, level);
         }
     }
-}
-
-size_t DomainData::get_size(size_t level) const {
-    size_t size = 1;
-    for (size_t axis = 0; axis < number_of_axes; axis++) {
-        size *= get_number_of_cells(CoordinateAxis(axis), level);
-    }
-    return size;
 }
 
 // =============================== Resize computational Domain ========================
