@@ -136,12 +136,14 @@ void server() {
                 MPI_Wait(&request, &status);
             }
             new_client->send_message("message was received");  // send a message back (acknowledgment/error/whatever)
-            MPI_Isend(message.c_str(), message.size(), MPI_CHAR, 0, 0, MPI_COMM_WORLD, &request);
+            MPI_Isend(message.c_str(), message.size() + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &request);
             logger->debug("message was sent to rank 0");
         };
 
         new_client->on_socket_closed = [new_client, logger](int error_code) {
             // on close, client as well server
+            std::cout << fmt::format("Socket closed: {}:{} -> {}", new_client->remote_address(), new_client->remote_port(),
+                         error_code) << std::endl;
             logger->info("Socket closed: {}:{} -> {}", new_client->remote_address(), new_client->remote_port(),
                          error_code);
         };
@@ -172,6 +174,7 @@ void server() {
     }
 
     // close the server before exiting the program.
+    std::cout << "close server" << std::endl;
     tcp_server.close_socket();
 }
 #endif

@@ -47,6 +47,6 @@ if __name__ == '__main__':
         while t_cur < t:
             time.sleep(5)
             t_cur = reader.get_t_current()
-        config_file_name = f'config_{t}.xml'
+        config_file_name = f'/home/linh/Work/git/ARTSS/data_assimilation/example/config_{t}.xml'
         client.send_message(create_message(t, config_file_name))
         

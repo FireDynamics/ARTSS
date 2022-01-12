@@ -207,7 +207,7 @@ void FieldIO::read_fields(const real t_cur,
 
     std::string line;
     getline(file_original, line);
-    m_logger->debug("read time step {}", line);
+    m_logger->info("read time step {}", line);
 
     if (field_changes.changed) {  // no changes -> read original file
         std::ifstream file_changes(field_changes.filename, std::ifstream::binary);
@@ -215,7 +215,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.u_changed) {
                 read_field(file_changes, u);
                 getline(file_original, line);
-                m_logger->debug("read changed u Field");
+                m_logger->info("read changed u Field");
             } else {
                 read_field(file_original, u);
                 getline(file_changes, line);
@@ -223,7 +223,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.v_changed) {
                 read_field(file_changes, v);
                 getline(file_original, line);
-                m_logger->debug("read changed v Field");
+                m_logger->info("read changed v Field");
             } else {
                 read_field(file_original, v);
                 getline(file_changes, line);
@@ -231,7 +231,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.w_changed) {
                 read_field(file_changes, w);
                 getline(file_original, line);
-                m_logger->debug("read changed w Field");
+                m_logger->info("read changed w Field");
             } else {
                 read_field(file_original, w);
                 getline(file_changes, line);
@@ -239,7 +239,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.p_changed) {
                 read_field(file_changes, p);
                 getline(file_original, line);
-                m_logger->debug("read changed p Field");
+                m_logger->info("read changed p Field");
             } else {
                 read_field(file_original, p);
                 getline(file_changes, line);
@@ -247,7 +247,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.T_changed) {
                 read_field(file_changes, T);
                 getline(file_original, line);
-                m_logger->debug("read changed T Field");
+                m_logger->info("read changed T Field");
             } else {
                 read_field(file_original, T);
                 getline(file_changes, line);
@@ -255,7 +255,7 @@ void FieldIO::read_fields(const real t_cur,
             if (field_changes.C_changed) {
                 read_field(file_changes, C);
                 getline(file_original, line);
-                m_logger->debug("read changed C Field");
+                m_logger->info("read changed C Field");
             } else {
                 read_field(file_original, C);
                 getline(file_changes, line);
@@ -265,7 +265,7 @@ void FieldIO::read_fields(const real t_cur,
             read_fields(t_cur, u, v, w, p, T, C);
         }
     } else {
-        m_logger->debug("no field changes");
+        m_logger->info("no field changes");
         read_fields(t_cur, u, v, w, p, T, C);
     }
 }

@@ -42,7 +42,7 @@ private:
     FieldIO *m_field_IO_handler;
     IParameterReader *m_parameter_handler;
 
-    real m_t_cur = -1;
+    real m_t_cur = 0;
 
     void read_new_data(std::string &file_name);
     bool config_rollback(const char *msg);
