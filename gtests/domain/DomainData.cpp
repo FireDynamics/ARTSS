@@ -144,9 +144,9 @@ TEST_F(DomainDataTest, constructor3Test) {
     EXPECT_EQ(24, domain_data->get_number_of_inner_cells(CoordinateAxis::Y));
     EXPECT_EQ(26, domain_data->get_number_of_inner_cells(CoordinateAxis::Z));
 
-    EXPECT_EQ(22, domain_data->get_number_of_cells(CoordinateAxis::X));
-    EXPECT_EQ(26, domain_data->get_number_of_cells(CoordinateAxis::Y));
-    EXPECT_EQ(28, domain_data->get_number_of_cells(CoordinateAxis::Z));
+    EXPECT_EQ(82, domain_data->get_number_of_cells(CoordinateAxis::X));
+    EXPECT_EQ(90, domain_data->get_number_of_cells(CoordinateAxis::Y));
+    EXPECT_EQ(242, domain_data->get_number_of_cells(CoordinateAxis::Z));
 
     EXPECT_DOUBLE_EQ(-0.5, domain_data->get_start_coord_PD(CoordinateAxis::X));
     EXPECT_DOUBLE_EQ(-2.2, domain_data->get_start_coord_PD(CoordinateAxis::Y));
@@ -175,7 +175,7 @@ TEST_F(DomainDataTest, constructor3Test) {
     EXPECT_DOUBLE_EQ(0.005, domain_data->get_spacing(CoordinateAxis::Z));
 
     EXPECT_EQ(0, domain_data->get_levels());
-    EXPECT_EQ(16016, domain_data->get_size());
+    EXPECT_EQ(1785960, domain_data->get_size());
 }
 
 TEST_F(DomainDataTest, goodCaseMultigridTest) {
@@ -212,6 +212,10 @@ TEST_F(DomainDataTest, goodCaseMultigridTest) {
     EXPECT_EQ(8, domain_data->get_number_of_cells(CoordinateAxis::X, 2));
     EXPECT_EQ(3, domain_data->get_number_of_cells(CoordinateAxis::Y, 2));
     EXPECT_EQ(3, domain_data->get_number_of_cells(CoordinateAxis::Z, 2));
+
+    EXPECT_DOUBLE_EQ(1.2, domain_data->get_length_PD(CoordinateAxis::X));
+    EXPECT_DOUBLE_EQ(0.8, domain_data->get_length_PD(CoordinateAxis::Y));
+    EXPECT_DOUBLE_EQ(0.6, domain_data->get_length_PD(CoordinateAxis::Z));
 
     EXPECT_DOUBLE_EQ(1.2, domain_data->get_length_CD(CoordinateAxis::X));
     EXPECT_DOUBLE_EQ(0.8, domain_data->get_length_CD(CoordinateAxis::Y));

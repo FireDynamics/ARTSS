@@ -39,6 +39,12 @@ class DomainData {
     size_t inline get_ny(size_t level = 0) const { return get_number_of_inner_cells(CoordinateAxis::Y, level); }
     [[deprecated("Replaced by get_number_of_inner_cells")]]
     size_t inline get_nz(size_t level = 0) const { return get_number_of_inner_cells(CoordinateAxis::Z, level); }
+    /**
+     * get number of cells of computational domain excluding ghost cells
+     * @param axis  Coordinate Axis
+     * @param level multigrid level, default: 0
+     * @return number of inner cells
+     */
     size_t inline get_number_of_inner_cells(CoordinateAxis axis, size_t level = 0) const {
         return this->number_of_inner_cells[level][axis];
     }
@@ -49,8 +55,14 @@ class DomainData {
     size_t inline get_Ny(size_t level = 0) const { return get_number_of_cells(CoordinateAxis::Y, level); }
     [[deprecated("Replaced by get_number_of_cells")]]
     size_t inline get_Nz(size_t level = 0) const { return get_number_of_cells(CoordinateAxis::Z, level); }
+    /**
+     * number of cells of physical domain including 2 ghost cells for each direction
+     * @param axis Coordinate Axis
+     * @param level multigrid level, default: 0
+     * @return number of cells
+     */
     size_t inline get_number_of_cells(CoordinateAxis axis, size_t level = 0) const {
-        return this->number_of_inner_cells[level][axis] + 2;
+        return this->number_of_cells[level][axis];
     }
 
     [[deprecated("Replaced by get_start_coord_CD")]]
@@ -118,7 +130,7 @@ class DomainData {
     [[deprecated("Replaced by get_spacing")]]
     real inline get_dz(size_t level = 0) const { return get_spacing(CoordinateAxis::Z, level); }
     real inline get_spacing(CoordinateAxis axis, size_t level = 0) const {
-        return get_length_CD(CoordinateAxis(axis)) / static_cast<real>(get_number_of_inner_cells(CoordinateAxis(axis), level));
+        return get_length_CD(axis) / static_cast<real>(get_number_of_inner_cells(axis, level));
     }
 
     // start index of computational domain without ghost cells
@@ -145,7 +157,7 @@ class DomainData {
 
     size_t inline get_levels() const { return m_levels; }
 
-    size_t get_size(size_t level = 0) const;
+    size_t get_size(size_t level = 0) const { return m_size_PD[level]; };
     const Settings::physical_parameters& get_physical_parameters() const { return m_physical_parameters; }
 
     bool resize(const Coordinate<long>& shift_start, const Coordinate<long>& shift_end);
@@ -170,10 +182,11 @@ class DomainData {
     Coordinate<real> end_coords_CD;  // x2/y2/z2
 
     // PD = physical domain (non changing)
+    Coordinate<size_t> *number_of_cells;  // Nx/Ny/Nz
     Coordinate<real> length_PD;  // Lx/Ly/Lz
     Coordinate<real> start_coords_PD;  // X1/Y1/Z1
     Coordinate<real> end_coords_PD;  // X2/Y2/Z2
-
+    std::vector<size_t> m_size_PD;
     size_t m_levels = 0;
 
     const struct Settings::physical_parameters m_physical_parameters;
