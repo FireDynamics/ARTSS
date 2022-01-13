@@ -22,7 +22,7 @@ public:
 
     void do_step(real t, bool sync) override;
     void update_source(real) override {};
-    void replace_heat_source(const Settings::solver::temperature_source &temperature_source, real t_cur) override {};
+    void replace_heat_source(const Settings::solver::temperature_source &temperature_source) override {};
 private:
     const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
