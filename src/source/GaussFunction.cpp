@@ -14,7 +14,7 @@
 #include "../domain/DomainController.h"
 
 GaussFunction::GaussFunction(const Settings::solver::sources::gauss &settings) :
-        m_field_spatial_values(FieldType::RHO),
+        m_field_spatial_values(FieldType::RHO, 0),
         m_settings(settings) {
     create_spatial_values();
 #ifndef BENCHMARKING

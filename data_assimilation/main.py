@@ -1,4 +1,5 @@
 import time
+import os
 import TCP_client
 from ARTSS import XML, Domain
 from data_assimilation import FieldReader

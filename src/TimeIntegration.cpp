@@ -113,7 +113,7 @@ void TimeIntegration::run() {
             if (m_data_assimilation->requires_rollback(t_cur)) {
                 sleep(3);
                 t_cur = m_data_assimilation->get_new_time_value();
-                std::cout << fmt::format("ROLLBACK with t_cur {}, -> {} -> {}", t_cur, t_cur/dt, static_cast<int>(t_cur/dt)) << std::endl;
+                std::cout << fmt::format("ROLLBACK with t_cur {} -> {} -> {}", t_cur, t_cur/dt, static_cast<int>(t_cur/dt)) << std::endl;
                 iteration_step = static_cast<int>(t_cur / dt);
                 m_data_assimilation->initiate_rollback();
                 m_logger->info("first T index in TimeIntegration {}", m_field_controller->get_field_T()[0]);
