@@ -521,7 +521,7 @@ void layers(Field &out, const Settings::initial_conditions::layers_temperature &
 
     std::vector<real> borders;
     borders.resize(layers.number_of_layers + 1);
-    std::copy(layers.borders.begin(), layers.borders.end(), borders.begin());
+    std::copy(layers.borders.begin(), layers.borders.end(), borders.begin() + 1);
     // layer border
     borders[0] = domain_data->get_start_coord_CD(layers.dir);
     borders[layers.number_of_layers] = domain_data->get_end_coord_CD(layers.dir);
