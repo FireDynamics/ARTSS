@@ -25,7 +25,7 @@ void Cube::update_source(Field &out, real) {
 
 Cube::Cube(const Settings::solver::sources::cube &settings) :
         m_settings(settings),
-        m_source_field(FieldType::T) {
+        m_source_field(FieldType::T, 0) {
     set_up();
 }
 
