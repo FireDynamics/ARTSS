@@ -307,5 +307,5 @@ void NSTempTurbSolver::replace_heat_source(const Settings::solver::temperature_s
     m_add_temp_source = temperature_source.temp_fct != SourceMethods::Zero;
     VTKWriter::write_field(m_field_controller->get_field_source_T(), "replace_source_t_" + std::to_string(t_cur) + "_0", "source_t");
     m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
-    VTKWriter::write_field(m_field_controller->get_field_source_T(), "replace_source_t_" + std::to_string(t_cur) + "_1", "source_t");
+    VTKWriter::write_field(m_field_controller->get_field_source_T(), "replace_source_t_" + std::to_string(t_cur) + "_2", "source_t");
 }
