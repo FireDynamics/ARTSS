@@ -13,7 +13,6 @@
 #include "../domain/DomainData.h"
 #include "../domain/DomainController.h"
 #include "SolverSelection.h"
-#include "../visualisation/VTKWriter.h"
 
 NSTempTurbSolver::NSTempTurbSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller) :
         m_solver_settings(solver_settings),
@@ -305,7 +304,4 @@ void NSTempTurbSolver::update_source(real t_cur) {
 void NSTempTurbSolver::replace_heat_source(const Settings::solver::temperature_source &temperature_source, const real t_cur){
     SolverSelection::set_temperature_source_function(temperature_source, &m_source_function_temperature);
     m_add_temp_source = temperature_source.temp_fct != SourceMethods::Zero;
-    VTKWriter::write_field(m_field_controller->get_field_source_T(), "replace_source_t_" + std::to_string(t_cur) + "_0", "source_t");
-    m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
-    VTKWriter::write_field(m_field_controller->get_field_source_T(), "replace_source_t_" + std::to_string(t_cur) + "_2", "source_t");
 }
