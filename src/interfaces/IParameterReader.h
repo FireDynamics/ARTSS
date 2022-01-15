@@ -13,7 +13,7 @@ using return_parameter_reader = std::tuple<bool, Settings::data_assimilation::fi
 
 class IParameterReader {
 public:
-    virtual return_parameter_reader read_config(const std::string &filename, real t_cur) = 0;
+    virtual return_parameter_reader read_config(const std::string &filename) = 0;
 };
 
 #endif /* ARTSS_INTERFACES_IPARAMETERREADER_H */

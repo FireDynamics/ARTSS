@@ -16,7 +16,7 @@ class TemperatureSourceChanger : public IParameterReader {
 public:
     TemperatureSourceChanger(const SolverController &solver_controller,
                              const Settings::solver::temperature_source &temperature_source);
-    return_parameter_reader read_config(const std::string &filename, real t_cur) override;
+    return_parameter_reader read_config(const std::string &filename) override;
 private:
     const SolverController &m_solver_controller;
     const Settings::solver::temperature_source &m_temperature_source;

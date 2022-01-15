@@ -65,19 +65,21 @@ bool DataAssimilation::config_rollback(const char *msg) {
         m_logger->warn("simulation is currently at {}. Cannot rollback to {}", m_t_cur, new_time);
         return false;
     } else if (std::fabs(m_t_cur - new_time) < 1e-10) {
-        // TODO get current fields
+        // TODO take current fields, no need to load them
+    } else {
+        m_t_cur = new_time;
+        m_logger->debug("set new time value to {}", m_t_cur);
+        m_logger->debug("read config data from {}", divided_string[1]);
+        auto[changes, field_changes] = m_parameter_handler->read_config(divided_string[1]);
+        if (changes && field_changes.changed) {
+            m_logger->debug("read field data from {}", field_changes.filename);
+            m_field_IO_handler->read_fields(m_t_cur, field_changes,
+                                            m_new_field_u, m_new_field_v, m_new_field_w,
+                                            m_new_field_p, m_new_field_T, m_new_field_C);
+            return true;
+        }
     }
-    m_t_cur = new_time;
-    m_logger->debug("set new time value to {}", m_t_cur);
-    m_logger->debug("read config data from {}", divided_string[1]);
-    auto [changes, field_changes] = m_parameter_handler->read_config(divided_string[1], m_t_cur);
-    if (changes && field_changes.changed) {
-        m_logger->debug("read field data from {}", field_changes.filename);
-        m_field_IO_handler->read_fields(m_t_cur, field_changes,
-                                        m_new_field_u, m_new_field_v, m_new_field_w,
-                                        m_new_field_p, m_new_field_T, m_new_field_C);
-    }
-    return changes;
+    return false;
 }
 
 bool DataAssimilation::requires_rollback(const real t_cur) {

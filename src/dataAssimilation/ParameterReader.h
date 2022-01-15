@@ -16,7 +16,7 @@ public:
     ParameterReader();
     ~ParameterReader() = default;
 
-    return_parameter_reader read_config(const std::string &filename, real t_cur) override;
+    return_parameter_reader read_config(const std::string &filename) override;
 private:
     std::shared_ptr<spdlog::logger> m_logger;
 };

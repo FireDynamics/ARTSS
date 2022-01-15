@@ -260,6 +260,7 @@ namespace Settings {
                 Coordinate<real> position;
                 Coordinate<real> dimension;
                 real tau;
+                //auto operator<=>(const gauss&) const = default;
             };
             struct cube {
                 Coordinate<real> coords_start;

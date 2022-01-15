@@ -10,7 +10,7 @@ ParameterReader::ParameterReader() {
     m_logger = Utility::create_logger(typeid(this).name());
 }
 
-return_parameter_reader ParameterReader::read_config(const std::string &filename, const real t_cur) {
+return_parameter_reader ParameterReader::read_config(const std::string &filename) {
     try {
         m_logger->debug("parse file to string");
         auto file_content = Settings::parse_settings_from_file(filename);
