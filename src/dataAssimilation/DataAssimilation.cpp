@@ -38,7 +38,6 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
 }
 
 void DataAssimilation::initiate_rollback() {
-    m_logger->debug("first T index in initiate_rollback {}", m_new_field_T[0]);
     m_field_controller->replace_data(m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T,
                                      m_new_field_C);
 }
@@ -61,22 +60,24 @@ real DataAssimilation::get_new_time_value() const {
 bool DataAssimilation::config_rollback(const char *msg) {
     std::vector<std::string> divided_string = Utility::split(msg, ',');
     auto new_time = std::stod(divided_string[0]);
-    m_logger->info("current time step {}, new time {}", m_t_cur, new_time);
-    // TODO get current fields
-    if (m_t_cur <= new_time) {
+    m_logger->debug("current time step {}, new time {}", m_t_cur, new_time);
+    if (m_t_cur < new_time) {
         m_logger->warn("simulation is currently at {}. Cannot rollback to {}", m_t_cur, new_time);
         return false;
+    } else if (std::fabs(m_t_cur - new_time) < 1e-10) {
+        // TODO get current fields
     }
     m_t_cur = new_time;
-    m_logger->info("set new time value to {}", m_t_cur);
-    m_logger->info("read config data from {}", divided_string[1]);
-    auto field_changes = m_parameter_handler->read_config(divided_string[1], m_t_cur);
-    m_logger->info("read field data from {}", field_changes.filename);
-    m_field_IO_handler->read_fields(m_t_cur, field_changes,
-                                    m_new_field_u, m_new_field_v, m_new_field_w,
-                                    m_new_field_p, m_new_field_T, m_new_field_C);
-    m_logger->info("first T in dex in config_rollback {}", m_new_field_T[0]);
-    return true;
+    m_logger->debug("set new time value to {}", m_t_cur);
+    m_logger->debug("read config data from {}", divided_string[1]);
+    auto [changes, field_changes] = m_parameter_handler->read_config(divided_string[1], m_t_cur);
+    if (changes && field_changes.changed) {
+        m_logger->debug("read field data from {}", field_changes.filename);
+        m_field_IO_handler->read_fields(m_t_cur, field_changes,
+                                        m_new_field_u, m_new_field_v, m_new_field_w,
+                                        m_new_field_p, m_new_field_T, m_new_field_C);
+    }
+    return changes;
 }
 
 bool DataAssimilation::requires_rollback(const real t_cur) {
@@ -87,17 +88,17 @@ bool DataAssimilation::requires_rollback(const real t_cur) {
     MPI_Status status;
     int flag = -1;
     MPI_Iprobe(1, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-    m_logger->info("probe: {}", flag);
+    m_logger->debug("probe: {}", flag);
     if (flag) {
         int msg_len;
         MPI_Get_count(&status, MPI_CHAR, &msg_len);
         std::vector<char> msg;
 
         msg.resize(msg_len);
-        m_logger->info("preparing to receive message");
+        m_logger->debug("preparing to receive message");
         MPI_Recv(msg.data(), msg_len, MPI_CHAR, 1, status.MPI_TAG, MPI_COMM_WORLD, &status);
-        m_logger->info("received message: {}", msg.data());
-        return config_rollback(msg.data());  // TODO(MPI): could be done in a third process
+        m_logger->debug("received message: {}", msg.data());
+        return config_rollback(msg.data());
     }
     return flag;
 }

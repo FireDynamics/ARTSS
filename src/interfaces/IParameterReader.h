@@ -9,10 +9,11 @@
 
 #include <string>
 #include "../utility/settings/Settings.h"
+using return_parameter_reader = std::tuple<bool, Settings::data_assimilation::field_changes>;
 
 class IParameterReader {
 public:
-    virtual Settings::data_assimilation::field_changes read_config(const std::string &filename, real t_cur) = 0;
+    virtual return_parameter_reader read_config(const std::string &filename, real t_cur) = 0;
 };
 
 #endif /* ARTSS_INTERFACES_IPARAMETERREADER_H */

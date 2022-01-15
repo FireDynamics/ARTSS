@@ -6,20 +6,27 @@
 
 #include "TemperatureSourceChanger.h"
 
-Settings::data_assimilation::field_changes TemperatureSourceChanger::read_config(const std::string &filename, const real t_cur) {
-    m_logger->info("parse file to string");
-    auto file_content = Settings::parse_settings_from_file(filename);
-    m_logger->info("parse document from {} to XMLTree {}", filename, file_content);
-    tinyxml2::XMLDocument doc;
-    doc.Parse(file_content.c_str());
-    m_logger->info("parse heat source changes {}", static_cast<void *>(doc.RootElement()));
-    // TODO maybe replace the required section with optional with old values, see m_temperature_source
-    auto temperature_source = Settings::solver::parse_temperature_source(doc.RootElement(), "temperature");
-    m_logger->info("apply heat source changes");
-    m_solver_controller.m_solver->replace_heat_source(temperature_source);
-    m_logger->info("parse field changes");
-    auto changes = Settings::parse_field_changes(doc.RootElement(), "field_changes");
-    return changes;
+return_parameter_reader TemperatureSourceChanger::read_config(const std::string &filename, const real t_cur) {
+    try {
+        m_logger->info("parse file to string");
+        auto file_content = Settings::parse_settings_from_file(filename);
+        m_logger->info("parse document from {} to XMLTree {}", filename, file_content);
+        tinyxml2::XMLDocument doc;
+        doc.Parse(file_content.c_str());
+        m_logger->info("parse heat source changes {}", static_cast<void *>(doc.RootElement()));
+        // TODO maybe replace the required section with optional with old values, see m_temperature_source
+        auto temperature_source = Settings::solver::parse_temperature_source(doc.RootElement(), "temperature");
+        m_logger->info("apply heat source changes");
+        m_solver_controller.m_solver->replace_heat_source(temperature_source);
+        m_logger->info("parse field changes");
+        auto field_changes = Settings::parse_field_changes(doc.RootElement(), "TemperatureSourceChanger");
+        return {true, field_changes};
+    } catch (const std::exception &ex) {
+        std::cerr << ex.what() << std::endl;
+    }
+    Settings::data_assimilation::field_changes field_changes;
+    field_changes.changed = false;
+    return {false, field_changes} ;
 }
 
 TemperatureSourceChanger::TemperatureSourceChanger(const SolverController &solver_controller,
