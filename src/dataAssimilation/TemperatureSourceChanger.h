@@ -7,6 +7,8 @@
 #ifndef ARTSS_DATAASSIMILATION_TEMPERATURESOURCECHANGER_H
 #define ARTSS_DATAASSIMILATION_TEMPERATURESOURCECHANGER_H
 
+#include <stdexcept>
+
 #include "../solver/SolverController.h"
 #include "../interfaces/IParameterReader.h"
 #include "../utility/settings/Settings.h"
