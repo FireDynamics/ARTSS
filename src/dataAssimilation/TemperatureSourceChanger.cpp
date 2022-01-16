@@ -5,7 +5,6 @@
 /// \copyright  <2015-2022> Forschungszentrum Juelich All rights reserved.
 
 #include "TemperatureSourceChanger.h"
-#include "../solver/SolverSelection.h"
 
 return_parameter_reader TemperatureSourceChanger::read_config(const std::string &filename) {
     try {
@@ -17,7 +16,7 @@ return_parameter_reader TemperatureSourceChanger::read_config(const std::string 
         m_logger->debug("parse heat source changes {}", static_cast<void *>(doc.RootElement()));
         auto temperature_source = Settings::solver::parse_temperature_source(doc.RootElement(), "temperature");
         bool parameter_changes = true;
-        // TODO
+        // TODO (c++20)
         // bool parameter_changes = temperature_source != m_temperature_source;
         if (parameter_changes) {
             m_logger->debug("apply heat source changes");

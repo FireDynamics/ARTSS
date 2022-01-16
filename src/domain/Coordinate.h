@@ -71,10 +71,10 @@ public:
         return *this;
     }
 
-    // TODO
-    //bool operator<=>(const Coordinate &rhs) const {
-    //    return x <=> rhs.x && y <=> rhs.y && z <=> rhs.z;
-    //}
+    // TODO (c++20)
+    // bool operator<=>(const Coordinate &rhs) const {
+    //     return x <=> rhs.x && y <=> rhs.y && z <=> rhs.z;
+    // }
     bool operator!=(const Coordinate &rhs) const {
         return x != rhs.x || y != rhs.y || z != rhs.z;
     }
