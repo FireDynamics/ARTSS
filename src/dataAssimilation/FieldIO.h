@@ -21,6 +21,9 @@ class FieldIO {
                      const Settings::data_assimilation::field_changes &field_changes,
                      Field &u, Field &v, Field &w,
                      Field &p, Field &T, Field &C);
+    void read_fields(const Settings::data_assimilation::field_changes &field_changes,
+                     Field &u, Field &v, Field &w,
+                     Field &p, Field &T, Field &C);
 
  private:
     std::string create_header(const std::string &xml_filename);
