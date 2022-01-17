@@ -29,6 +29,9 @@ if __name__ == '__main__':
                                          random={'enabled': False})
     da.write_xml('text.xml', pretty_print=True)
 
+
+    xml2 = XML('da.xml')
+    xml2.get_temperature_source()
     reader = FieldReader()
     reader.print_header()
 

@@ -5,13 +5,14 @@ import xml.dom.minidom as md
 class XML:
     def __init__(self, filename):
         self.filename = filename
+        self.xml_tree = ET.parse(self.filename)
         self.has_obstacles = False
         self.obstacles = []
         self.domain = {}
+        self.temperature_source = None
 
     def read_xml(self):
-        xml_tree = ET.parse(self.filename)
-        root = xml_tree.getroot()
+        root = self.xml_tree.getroot()
         domain_param = root.find('domain_parameters')
         for child in domain_param:
             self.domain[child.tag] = float(child.text)
@@ -23,6 +24,16 @@ class XML:
                 geometry = child.find('geometry')
                 geometry.attrib['name'] = child.attrib['name']
                 self.obstacles.append(geometry.attrib)
+
+    def get_temperature_source(self):
+        if self.temperature_source is not None:
+            return self.temperature_source
+        # TODO read temperature source
+        # check if temperature source is even there ? or crash
+        root = self.xml_tree.getroot()
+        source_tree = root.find('solver').find('temperature').find('source')
+        source = {}
+        print(source_tree.attrib)
 
 
 class DAFile:
