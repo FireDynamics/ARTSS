@@ -1,12 +1,12 @@
 import time
 import os
 import TCP_client
-from ARTSS import XML, Domain
+from ARTSS import XML, Domain, DAFile
 from data_assimilation import FieldReader
 
 
 def create_message(t_cur: float, config_file_name: str) -> bin:
-    string_msg = str(t_cur) + ',' +config_file_name
+    string_msg = str(t_cur) + ',' + config_file_name
     return string_msg.encode('utf-8')
 
 
@@ -21,6 +21,13 @@ def change_something(domain: Domain, field: list) -> list:
 
 if __name__ == '__main__':
     cwd = os.getcwd()
+    print(cwd)
+    da = DAFile()
+    da.create_config({'u': True, 'v': False, 'w': True, 'p': True, 'T': False, 'C': False}, 'test.xml')
+    da.create_temperature_source_changes(source_type='ExplicitEuler', dir='y', dissipation=False,
+                                         temperature_source={'HRR': 25000., 'cp': 1.023415823, 'x0': 30, 'y0': -3.},
+                                         random={'enabled': False})
+    da.write_xml('text.xml', pretty_print=True)
 
     reader = FieldReader()
     reader.print_header()
@@ -33,8 +40,8 @@ if __name__ == '__main__':
     domain.print_debug()
 
     t_cur = 0.5
-    #fields = reader.read_field_data(t_cur)
-    #if len(fields.keys()) > 0:
+    # fields = reader.read_field_data(t_cur)
+    # if len(fields.keys()) > 0:
     #    field = change_something(domain, fields['T'])
     #    fields['T'] = field
     #    field_file_name = 'test.txt'
@@ -52,4 +59,3 @@ if __name__ == '__main__':
             t_cur = reader.get_t_current()
         config_file_name = os.path.join(cwd, f'config_{t}.xml')
         client.send_message(create_message(t, config_file_name))
-        

@@ -1,4 +1,6 @@
 import xml.etree.ElementTree as ET
+import xml.dom.minidom as md
+
 
 class XML:
     def __init__(self, filename):
@@ -22,13 +24,82 @@ class XML:
                 geometry.attrib['name'] = child.attrib['name']
                 self.obstacles.append(geometry.attrib)
 
-    def write_config(config_file_name: str, fields: list, t_cur: float, field_file_name: str):
-        # TODO write config file. format:
+
+class DAFile:
+    def __init__(self):
+        self.xml_root = ET.Element('ARTSS')
+
+    def create_temperature_source_changes(self, source_type: str, dir: str, dissipation: bool,
+                                          temperature_source: dict,
+                                          random: dict):
+        # create temperature source part
+        # <ARTSS>
+        #   <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="Yes">
+        #     <HRR> 25000. </HRR> <!-- Total heat release rate( in kW) -->
+        #     <cp> 1.023415823 </cp> <!-- specific heat capacity( in kJ / kgK)-->
+        #     <x0> 40. </x0>
+        #     <y0> -3. </y0>
+        #     <z0> 0. </z0>
+        #     <sigma_x> 1.0 </sigma_x>
+        #     <sigma_y> 1.5 </sigma_y>
+        #     <sigma_z> 1.0 </sigma_z>
+        #     <tau> 5. </tau>
+        #     <random absolute="Yes" custom_seed="Yes" custom_steps="Yes">
+        #       <seed> 0 </seed>
+        #       <step_size> 0.1 </step_size>
+        #       <range> 1 </range>
+        #     </random>
+        #   </source>
+        # </ARTSS>
+        source = ET.SubElement(self.xml_root, 'source', type=source_type, dir=dir,
+                               dissipation='Yes' if dissipation else 'No', random='Yes' if random['enabled'] else 'No')
+        for key in temperature_source:
+            ET.SubElement(source, key).text = str(temperature_source[key])
+
+        if random['enabled']:
+            random_tree = ET.SubElement(source, 'random', absolute='Yes' if random['absolute'] else 'No',
+                                        custom_seed='Yes' if random['custom_seed'] else 'No',
+                                        custom_steps='Yes' if random['custom_steps'] else 'No')
+            ET.SubElement(random_tree, 'range').text = str(random['range'])
+            if random['custom_steps']:
+                ET.SubElement(random_tree, 'step_size').text = str(random['step_size'])
+            if random['custom_seed']:
+                ET.SubElement(random_tree, 'seed').text = str(random['seed'])
+
+    def create_config(self, fields: dict, field_file_name=''):
+        # create config file. format:
         # <ARTSS>
         #   <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No" filename="field_file_name"/>
         # </ARTSS>
-        pass
+        changed = False
+        field_values = {}
+        for key in fields.keys():
+            if fields[key]:
+                field_values[key] = 'Yes'
+                changed = True
+            else:
+                field_values[key] = 'No'
 
+        if changed:
+            ET.SubElement(self.xml_root, 'fields_changed', u=field_values['u'], v=field_values['v'],
+                          w=field_values['w'], p=field_values['p'],
+                          T=field_values['T'], concentration=field_values['C'], filename=field_file_name)
+        else:
+            ET.SubElement(self.xml_root, 'fields_changed', u=field_values['u'], v=field_values['v'],
+                          w=field_values['w'], p=field_values['p'],
+                          T=field_values['T'], concentration=field_values['C'])
+
+    # write xml to file
+    def write_xml(self, config_file_name: str, pretty_print=False):
+        tree = ET.ElementTree(self.xml_root)
+        tree.write(config_file_name)
+        print(config_file_name)
+        if pretty_print:
+            dom = md.parse(config_file_name)
+            pretty_format = dom.toprettyxml()
+            f = open(config_file_name, 'w')
+            f.write(pretty_format)
+            f.close()
 
 
 class Domain:
@@ -42,7 +113,7 @@ class Domain:
         self.calculate_indices()
 
     def control_computational_domain(self):
-        if not "x1" in self.domain_param.keys():
+        if "x1" not in self.domain_param.keys():
             self.domain_param['x1'] = self.domain_param['X1']
             self.domain_param['y1'] = self.domain_param['Y1']
             self.domain_param['z1'] = self.domain_param['Z1']
@@ -80,7 +151,8 @@ class Domain:
 
     def match_grid(self, obstacle_coordinate, direction):
         # from function get_matching_index in Obstacle.cpp
-        return int(round((-self.domain_param[direction.upper() + '1'] + obstacle_coordinate) / self.domain_param['d' + direction.lower()]))
+        return int(round((-self.domain_param[direction.upper() + '1'] + obstacle_coordinate) / self.domain_param[
+            'd' + direction.lower()]))
 
     def calculate_obstacles(self, obstacles):
         for o in obstacles:
@@ -148,8 +220,8 @@ class Domain:
         self.domain_boundary_cells['back'] = back
         for i in range(self.domain_param['nx']):
             for j in range(self.domain_param['ny']):
-                front.append(self.calculate_index(i, j, self.domain_param['start z index']-1))
-                back.append(self.calculate_index(i, j, self.domain_param['end z index']+1))
+                front.append(self.calculate_index(i, j, self.domain_param['start z index'] - 1))
+                back.append(self.calculate_index(i, j, self.domain_param['end z index'] + 1))
 
         bottom = []
         self.domain_boundary_cells['bottom'] = bottom
@@ -157,8 +229,8 @@ class Domain:
         self.domain_boundary_cells['top'] = top
         for i in range(self.domain_param['nx']):
             for k in range(self.domain_param['nz']):
-                bottom.append(self.calculate_index(i, self.domain_param['start y index']-1, k))
-                top.append(self.calculate_index(i, self.domain_param['end y index']+1, k))
+                bottom.append(self.calculate_index(i, self.domain_param['start y index'] - 1, k))
+                top.append(self.calculate_index(i, self.domain_param['end y index'] + 1, k))
 
         left = []
         self.domain_boundary_cells['left'] = left
@@ -166,16 +238,17 @@ class Domain:
         self.domain_boundary_cells['right'] = right
         for j in range(self.domain_param['ny']):
             for k in range(self.domain_param['nz']):
-                left.append(self.calculate_index(self.domain_param['start x index']-1, j, k))
-                right.append(self.calculate_index(self.domain_param['end x index']+1, j, k))
+                left.append(self.calculate_index(self.domain_param['start x index'] - 1, j, k))
+                right.append(self.calculate_index(self.domain_param['end x index'] + 1, j, k))
 
     def calculate_index(self, i, j, k):
         return i + j * self.domain_param['Nx'] + k * self.domain_param['Nx'] * self.domain_param['Ny']
 
     def print_info(self):
         # alike to info output in logger
-        print(f"Domain size inner cells: {self.domain_param['nx']} {self.domain_param['ny']} {self.domain_param['nz']}\n"
-              f"step size (x|y|z): ({self.domain_param['dx']}|{self.domain_param['dy']}|{self.domain_param['dz']})")
+        print(
+            f"Domain size inner cells: {self.domain_param['nx']} {self.domain_param['ny']} {self.domain_param['nz']}\n"
+            f"step size (x|y|z): ({self.domain_param['dx']}|{self.domain_param['dy']}|{self.domain_param['dz']})")
         for o in self.obstacles:
             print(f"-- Obstacle {o['name']}\n"
                   f"   strides (x y z): {o['stride x']} {o['stride y']} {o['stride z']}\n"
@@ -187,11 +260,13 @@ class Domain:
         # alike to debug output in logger
         print(f"Nx: {self.domain_param['Nx']}, Ny: {self.domain_param['Ny']}, Nz: {self.domain_param['Nz']}")
         print(f"nx: {self.domain_param['nx']}, ny: {self.domain_param['ny']}, nz: {self.domain_param['nz']}")
-        print(f"X: ({self.domain_param['X1']}|{self.domain_param['X2']}) Y: ({self.domain_param['Y1']}|{self.domain_param['Y2']}) Z: ({self.domain_param['Z1']}|{self.domain_param['Z2']})")
+        print(
+            f"X: ({self.domain_param['X1']}|{self.domain_param['X2']}) Y: ({self.domain_param['Y1']}|{self.domain_param['Y2']}) Z: ({self.domain_param['Z1']}|{self.domain_param['Z2']})")
         print(f"Lx: {self.domain_param['Lx']}, Ly: {self.domain_param['Ly']}, Lz: {self.domain_param['Lz']}")
         print(f"lx: {self.domain_param['lx']}, ly: {self.domain_param['ly']}, lz: {self.domain_param['lz']}")
         print(f"dx: {self.domain_param['dx']}, dy: {self.domain_param['dy']}, dz: {self.domain_param['dz']}")
-        print(f"X: ({self.domain_param['start x index']}|{self.domain_param['end x index']}) Y: ({self.domain_param['start y index']}|{self.domain_param['end y index']}) Z: ({self.domain_param['start z index']}|{self.domain_param['end z index']})")
+        print(
+            f"X: ({self.domain_param['start x index']}|{self.domain_param['end x index']}) Y: ({self.domain_param['start y index']}|{self.domain_param['end y index']}) Z: ({self.domain_param['start z index']}|{self.domain_param['end z index']})")
 
     def get_ijk_from_xyz(self, coord_x, coord_y, coord_z):
         return self.get_i_from_x(coord_x), self.get_j_from_y(coord_y), self.get_k_from_z(coord_z)
@@ -217,7 +292,7 @@ class Domain:
     def get_type(self, index):
         k = self.get_k(index)
         j = self.get_j(index, k)
-        i = self.get_i(index, k, j) 
+        i = self.get_i(index, k, j)
         matches = []
         patches = ['front', 'back', 'bottom', 'top', 'left', 'right']
         for p in patches:
