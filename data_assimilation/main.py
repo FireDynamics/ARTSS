@@ -40,7 +40,7 @@ def change_heat_source(source_type: dict, temperature_source: dict, random: dict
     return new_source_type, new_temperature_source, new_random
 
 
-if __name__ == '__main__':
+def main():
     cwd = os.getcwd()
     print(cwd)
 
@@ -89,3 +89,7 @@ if __name__ == '__main__':
             t_cur = reader.get_t_current()
         config_file_name = os.path.join(cwd, f'config_{t}.xml')
         client.send_message(create_message(t, config_file_name))
+
+
+if __name__ == '__main__':
+    main()
