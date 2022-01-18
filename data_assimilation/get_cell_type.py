@@ -21,10 +21,8 @@ def plot(x, y, z, show=False):
         plt.close()
 
 
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('filename is mandatory')
-    xml = XML(sys.argv[1])
+def main(file_name: str):
+    xml = XML(file_name)
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
     domain.print_info()
@@ -78,3 +76,9 @@ if __name__ == '__main__':
                 print(domain.get_type(index))
             else:
                 print(domain.get_type(int(text)))
+
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('filename is mandatory')
+    main(sys.argv[1])

@@ -7,6 +7,19 @@ def get_date_now() -> str:
     return datetime.now().strftime('%a %b %d %H:%M:%S %Y')
 
 
+def write_field_data(file_name: str, data: dict, field_keys: list):
+    file = open(file_name, 'w')
+    for key in field_keys:
+        if key in data.keys():
+            field = data[key]
+            line = ''
+            for number in field:
+                line += f'{number};'
+            line += '\n'
+            file.write(line)
+    file.close()
+
+
 class FieldReader:
     def __init__(self):
         self.file_name = 'visualisation.dat'
@@ -89,18 +102,14 @@ class FieldReader:
                 fields[self.fields[i]] = np.fromstring(lines[i], dtype=np.float, sep=';')
             return fields
 
-    def write_field_data(self, file_name: str, data: dict, t_cur: float):
-        number_of_fields = len(self.fields)
-        if number_of_fields != len(data.keys()):
-            print(f'wrong number of fields: expected {number_of_fields} got {len(data.keys())}')
-        else:
-            file = open(file_name, 'w')
-            for i in range(number_of_fields):
-                field = data[self.fields[i]]
+    def write_field_data(self, file_name: str, data: dict):
+        file = open(file_name, 'w')
+        for key in self.fields:
+            if key in data.keys():
+                field = data[key]
                 line = ''
                 for number in field:
                     line += f'{number};'
                 line += '\n'
                 file.write(line)
-            file.close()
-
+        file.close()

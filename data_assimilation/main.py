@@ -1,6 +1,11 @@
 import time
 import os
+
+import numpy as np
+from numpy import ndarray
+
 import TCP_client
+import data_assimilation
 from ARTSS import XML, Domain, DAFile
 from data_assimilation import FieldReader
 
@@ -34,62 +39,88 @@ def change_heat_source(source_type: dict, temperature_source: dict, random: dict
     for key in temperature_source_changes:
         new_temperature_source[key] = temperature_source_changes[key]
 
-    for key in random_changes:
-        new_random[key] = random_changes[key]
+    if not new_source_type['random']:
+        new_random = {}
+    else:
+        for key in random_changes:
+            new_random[key] = random_changes[key]
 
     return new_source_type, new_temperature_source, new_random
 
 
-def main():
+def create_gradient_field(Nx: int, Ny: int, Nz: int) -> ndarray:
+    field = np.zeros(Nx * Ny * Nz)
+    counter = 0
+    for i in range(Nx):
+        for j in range(Ny):
+            for k in range(Nz):
+                field[counter] = i
+                counter += 1
+    return field
+
+
+def main(dry_run=False):
     cwd = os.getcwd()
     print(cwd)
 
-    xml2 = XML('da.xml')
-    source = xml2.get_temperature_source()
-    source_type, temperature_source, random = \
-        change_heat_source(*source,
-                           changes={'source_type': {}, 'temperature_source': {'x0': float(source[1]['x0']) + 10},
-                                    'random': {}})
+    if dry_run:
+        xml = XML('example/da.xml')
+    else:
+        reader = FieldReader()
+        reader.print_header()
 
-    da = DAFile()
-    da.create_config({'u': True, 'v': False, 'w': True, 'p': True, 'T': False, 'C': False}, 'test.xml')
-    da.create_temperature_source_changes(
-        source_type=source_type,
-        temperature_source=temperature_source,
-        random=random)
-    da.write_xml('text.xml', pretty_print=True)
-
-    reader = FieldReader()
-    reader.print_header()
-
-    # optional, provides additional information
-    xml = XML(reader.get_xml_file_name())
+        xml = XML(reader.get_xml_file_name())
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
     domain.print_info()
     domain.print_debug()
 
-    t_cur = 0.5
-    # fields = reader.read_field_data(t_cur)
-    # if len(fields.keys()) > 0:
-    #    field = change_something(domain, fields['T'])
-    #    fields['T'] = field
-    #    field_file_name = 'test.txt'
-    #    reader.write_field_data(field_file_name, fields, t_cur)
-    #    config_file_name = f'config_{t_cur}.xml'
-    #    xml.write_config(config_file_name, ['T'], t_cur)
+    source = xml.get_temperature_source()
 
-    client = TCP_client.TCPClient()
-    client.connect()
+    if not dry_run:
+        client = TCP_client.TCPClient()
+        client.connect()
 
-    for t in [0.2, 0.5, 1.0]:
-        t_cur = reader.get_t_current()
-        while t_cur < t:
-            time.sleep(5)
+    for index, t in enumerate([0.2, 0.5, 1.0], start=1):
+        if dry_run:
+            t_cur = t
+            fields = {'T': create_gradient_field(domain.domain_param['Nx'],
+                                                 domain.domain_param['Ny'],
+                                                 domain.domain_param['Nz'])}
+        else:
             t_cur = reader.get_t_current()
+            while t_cur < t:
+                time.sleep(5)
+                t_cur = reader.get_t_current()
+            fields = reader.read_field_data(t_cur)
+
+        field = change_something(domain, fields['T'])
+        fields['T'] = field
+        field_file_name = f'T_{t_cur}.dat'
+        if dry_run:
+            data_assimilation.write_field_data(file_name=field_file_name, data=fields,
+                                               field_keys=['u', 'v', 'w', 'p', 'T', 'C'])
+        else:
+            reader.write_field_data(file_name=field_file_name, data=fields)
+
+        source_type, temperature_source, random = \
+            change_heat_source(*source,
+                               changes={'source_type': {},
+                                        'temperature_source': {'x0': float(source[1]['x0']) + 10 * index},
+                                        'random': {}})
+        source_type['random'] = False
+        da = DAFile()
+        da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': True, 'C': False}, field_file_name)
+        da.create_temperature_source_changes(
+            source_type=source_type,
+            temperature_source=temperature_source,
+            random=random)
         config_file_name = os.path.join(cwd, f'config_{t}.xml')
-        client.send_message(create_message(t, config_file_name))
+        da.write_xml(config_file_name, pretty_print=dry_run)
+
+        if not dry_run:
+            client.send_message(create_message(t, config_file_name))
 
 
 if __name__ == '__main__':
-    main()
+    main(dry_run=True)
