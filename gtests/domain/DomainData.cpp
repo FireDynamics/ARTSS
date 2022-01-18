@@ -254,3 +254,44 @@ TEST_F(DomainDataTest, badCaseMultigridTest) {
     EXPECT_EQ(2, domain_data->get_levels());
     // TODO currently only warnings
 }
+
+TEST_F(DomainDataTest, startIndexPhysicalDomain) {
+    Settings::domain_parameters domain_parameters{};
+    domain_parameters.enable_computational_domain = false;
+    domain_parameters.number_of_inner_cells.set_coordinate(10, 11, 12);
+    domain_parameters.start_coords_PD.set_coordinate(0, -1, -0.3);
+    domain_parameters.end_coords_PD.set_coordinate(1, 1.2, 0.3);
+    domain_parameters.start_coords_CD.copy(domain_parameters.start_coords_PD);
+    domain_parameters.end_coords_CD.copy(domain_parameters.end_coords_PD);
+    DomainData::init({}, domain_parameters, 2);
+    auto domain_data = DomainData::getInstance();
+
+    EXPECT_EQ(1, domain_data->get_start_index_CD(CoordinateAxis::X));
+    EXPECT_EQ(1, domain_data->get_start_index_CD(CoordinateAxis::Y));
+    EXPECT_EQ(1, domain_data->get_start_index_CD(CoordinateAxis::Z));
+
+    EXPECT_EQ(10, domain_data->get_end_index_CD(CoordinateAxis::X));
+    EXPECT_EQ(11, domain_data->get_end_index_CD(CoordinateAxis::Y));
+    EXPECT_EQ(12, domain_data->get_end_index_CD(CoordinateAxis::Z));
+}
+
+TEST_F(DomainDataTest, startIndexComputationalDomain) {
+    Settings::domain_parameters domain_parameters{};
+    domain_parameters.enable_computational_domain = true;
+    domain_parameters.number_of_inner_cells.set_coordinate(10, 11, 12);
+    domain_parameters.start_coords_CD.set_coordinate(0, -1, -0.3);
+    domain_parameters.end_coords_CD.set_coordinate(1, 1.2, 0.3);
+    domain_parameters.start_coords_PD.set_coordinate(0, -1.2, -0.4);
+    domain_parameters.end_coords_PD.set_coordinate(1, 1.4, 0.4);
+    DomainData::init({}, domain_parameters, 2);
+    auto domain_data = DomainData::getInstance();
+
+
+    EXPECT_EQ(1, domain_data->get_start_index_CD(CoordinateAxis::X));
+    EXPECT_EQ(2, domain_data->get_start_index_CD(CoordinateAxis::Y));
+    EXPECT_EQ(3, domain_data->get_start_index_CD(CoordinateAxis::Z));
+
+    EXPECT_EQ(10, domain_data->get_end_index_CD(CoordinateAxis::X));
+    EXPECT_EQ(12, domain_data->get_end_index_CD(CoordinateAxis::Y));
+    EXPECT_EQ(14, domain_data->get_end_index_CD(CoordinateAxis::Z));
+}

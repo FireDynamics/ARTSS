@@ -32,6 +32,7 @@ enum Patch : int {
     FRONT = 4,
     BACK = 5
 };
+inline static const std::vector<Patch> all_patches = {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK};
 
 inline static const std::vector<std::string> field_type_names = {"rho", "u", "v", "w", "p", "T", "nu"};
 constexpr size_t number_of_field_types = 7;
@@ -55,6 +56,7 @@ namespace Mapping {
     CoordinateAxis to_axis(Patch patch);
     //CoordinateAxis to_axis(size_t patch) { return to_axis(Patch(patch)); }
 
+    std::vector<CoordinateAxis> get_axes(Patch patch);
     std::string get_patch_name(Patch p);
     //std::string get_patch_name(size_t p) { return get_patch_name(Patch(p)); }
     Patch match_patch(const std::string &string);

@@ -7,10 +7,12 @@
 #ifndef ARTSS_DOMAIN_DOMAIN_H_
 #define ARTSS_DOMAIN_DOMAIN_H_
 
+#include <vector>
 
 #include "Obstacle.h"
-#include "../utility/Utility.h"
 #include "PatchObject.h"
+#include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
 
 class Domain {
  public:
@@ -30,7 +32,6 @@ class Domain {
     PatchObject * get_size_boundary_list() { return &m_size_boundary; }
 
     void update_lists(size_t *obstacle_list, size_t size_obstacle_list, size_t **surface_list, PatchObject &size_surface_list);
-    void control(size_t size_obstacle_list, PatchObject &size_surface_list);
 
  private:
 #ifndef BENCHMARKING
