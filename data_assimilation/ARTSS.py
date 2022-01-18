@@ -25,22 +25,38 @@ class XML:
                 geometry.attrib['name'] = child.attrib['name']
                 self.obstacles.append(geometry.attrib)
 
-    def get_temperature_source(self):
-        if self.temperature_source is not None:
-            return self.temperature_source
-        # TODO read temperature source
-        # check if temperature source is even there ? or crash
-        root = self.xml_tree.getroot()
-        source_tree = root.find('solver').find('temperature').find('source')
-        source = {}
-        print(source_tree.attrib)
+    def get_temperature_source(self) -> [dict, dict, dict]:
+        if self.temperature_source is None:
+            # check if temperature source is even there ? or crash
+            root = self.xml_tree.getroot()
+            source_tree = root.find('solver').find('temperature').find('source')
+            source = {}
+            for key in source_tree.attrib:
+                source[key] = source_tree.attrib[key].strip()
+
+            source_params = {}
+            for elem in source_tree:
+                source_params[elem.tag] = elem.text.strip()
+            random_params = {}
+            if source['random']:
+                del source_params['random']  # remove empty random element
+                random = source_tree.find('random')
+                for key in random.attrib:
+                    random_params[key] = random.attrib[key].strip()
+                for elem in random:
+                    random_params[elem.tag] = elem.text.strip()
+            self.temperature_source = {'source_type': source, 'temperature_source': source_params,
+                                       'random': random_params}
+        return self.temperature_source['source_type'], \
+               self.temperature_source['temperature_source'], \
+               self.temperature_source['random']
 
 
 class DAFile:
     def __init__(self):
         self.xml_root = ET.Element('ARTSS')
 
-    def create_temperature_source_changes(self, source_type: str, dir: str, dissipation: bool,
+    def create_temperature_source_changes(self, source_type: dict,
                                           temperature_source: dict,
                                           random: dict):
         # create temperature source part
@@ -62,12 +78,13 @@ class DAFile:
         #     </random>
         #   </source>
         # </ARTSS>
-        source = ET.SubElement(self.xml_root, 'source', type=source_type, dir=dir,
-                               dissipation='Yes' if dissipation else 'No', random='Yes' if random['enabled'] else 'No')
+        source = ET.SubElement(self.xml_root, 'source', type=source_type['type'], dir=source_type['dir'],
+                               dissipation='Yes' if source_type['dissipation'] else 'No',
+                               random='Yes' if source_type['random'] else 'No')
         for key in temperature_source:
             ET.SubElement(source, key).text = str(temperature_source[key])
 
-        if random['enabled']:
+        if source_type['random']:
             random_tree = ET.SubElement(source, 'random', absolute='Yes' if random['absolute'] else 'No',
                                         custom_seed='Yes' if random['custom_seed'] else 'No',
                                         custom_steps='Yes' if random['custom_steps'] else 'No')

@@ -19,19 +19,46 @@ def change_something(domain: Domain, field: list) -> list:
     return new_field
 
 
+def change_heat_source(source_type: dict, temperature_source: dict, random: dict, changes: dict) -> [dict, dict, dict]:
+    source_type_changes = changes['source_type']
+    temperature_source_changes = changes['temperature_source']
+    random_changes = changes['random']
+
+    new_source_type = source_type.copy()
+    new_temperature_source = temperature_source.copy()
+    new_random = random.copy()
+
+    for key in source_type_changes:
+        new_source_type[key] = source_type_changes[key]
+
+    for key in temperature_source_changes:
+        new_temperature_source[key] = temperature_source_changes[key]
+
+    for key in random_changes:
+        new_random[key] = random_changes[key]
+
+    return new_source_type, new_temperature_source, new_random
+
+
 if __name__ == '__main__':
     cwd = os.getcwd()
     print(cwd)
-    da = DAFile()
-    da.create_config({'u': True, 'v': False, 'w': True, 'p': True, 'T': False, 'C': False}, 'test.xml')
-    da.create_temperature_source_changes(source_type='ExplicitEuler', dir='y', dissipation=False,
-                                         temperature_source={'HRR': 25000., 'cp': 1.023415823, 'x0': 30, 'y0': -3.},
-                                         random={'enabled': False})
-    da.write_xml('text.xml', pretty_print=True)
-
 
     xml2 = XML('da.xml')
-    xml2.get_temperature_source()
+    source = xml2.get_temperature_source()
+    source_type, temperature_source, random = \
+        change_heat_source(*source,
+                           changes={'source_type': {}, 'temperature_source': {'x0': float(source[1]['x0']) + 10},
+                                    'random': {}})
+
+    da = DAFile()
+    da.create_config({'u': True, 'v': False, 'w': True, 'p': True, 'T': False, 'C': False}, 'test.xml')
+    da.create_temperature_source_changes(
+        source_type=source_type,
+        temperature_source=temperature_source,
+        random=random)
+    da.write_xml('text.xml', pretty_print=True)
+
     reader = FieldReader()
     reader.print_header()
 
