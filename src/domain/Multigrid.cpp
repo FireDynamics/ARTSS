@@ -70,7 +70,6 @@ Multigrid::Multigrid(const std::vector<Surface> &surfaces,
     send_domain_lists_to_GPU();
 #ifndef BENCHMARKING
     print();
-    control();
     m_logger->debug("end multigrid");
 #endif
 }
@@ -85,102 +84,6 @@ Multigrid::~Multigrid() {
     delete[] m_jl_domain_boundary_list_patch_divided;
     delete[] m_jl_obstacle_boundary_list_patch_divided;
     delete[] m_jl_surface_list_patch_divided;
-}
-
-//======================================== Control =================================================
-// *************************************************************************************************
-/// \brief  Units test emergency solution
-// *************************************************************************************************
-void Multigrid::control() {
-#ifndef BENCHMARKING
-    std::string control_message;
-    auto domain_data = DomainData::getInstance();
-    for (size_t level = 0; level < m_multigrid_levels; level++) {
-        std::string message;
-        size_t original_len = m_MG_domain_object_list[level].get_size_inner_list();
-        size_t calculated_len = m_jl_domain_inner_list.get_last_index(level) - m_jl_domain_inner_list.get_first_index(level) + 1;
-        size_t saved_len = m_jl_domain_inner_list.get_slice_size(level);
-        if (calculated_len != original_len) {
-            size_t control = domain_data->get_nx(level) * domain_data->get_ny(level) * domain_data->get_nz(level);
-            message += fmt::format("length calculated/stored of domain inner cells does not equals its original size size: "
-                                   "original: {} saved: {} calculated: {} control: {}\n",
-                                   original_len, saved_len, calculated_len, control);
-        }
-        original_len = m_MG_domain_object_list[level].get_size_domain_list();
-        calculated_len = m_jl_domain_list.get_last_index(level) - m_jl_domain_list.get_first_index(level) + 1;
-        saved_len = m_jl_domain_list.get_slice_size(level);
-        if (calculated_len != original_len) {
-            size_t control = (domain_data->get_Nx(level) * domain_data->get_Ny(level) * 2)
-                             + (domain_data->get_Nx(level) * (domain_data->get_Nz(level) - 2)) * 2
-                             + ((domain_data->get_Ny(level) - 2) * (domain_data->get_Nz(level) - 2)) * 2;
-            message += fmt::format("length calculated/stored of domain boundary cells does not equals its original size size: "
-                                   "original: {} saved: {} calculated: {} control: {}\n",
-                                   original_len, saved_len, calculated_len, control);
-        }
-        PatchObject *boundary_size = m_MG_domain_object_list[level].get_size_boundary_list();
-        for (size_t patch = 0; patch < number_of_patches; patch++) {
-            original_len = (*boundary_size)[patch];
-            saved_len = m_jl_domain_boundary_list_patch_divided[patch]->get_slice_size(level);
-            calculated_len = m_jl_domain_boundary_list_patch_divided[patch]->get_last_index(level) - m_jl_domain_boundary_list_patch_divided[patch]->get_first_index(level) + 1;
-            if (calculated_len != original_len || saved_len != original_len) {
-                size_t control;
-                if (patch == Patch::FRONT || patch == Patch::BACK) {
-                    control = domain_data->get_Nx(level) * domain_data->get_Ny(level);
-                } else if (patch == Patch::BOTTOM || patch == Patch::TOP) {
-                    control = domain_data->get_Nx(level) * domain_data->get_Nz(level);
-                } else if (patch == Patch::LEFT || patch == Patch::RIGHT) {
-                    control = domain_data->get_Ny(level) * domain_data->get_Nz(level);
-                }
-                message += fmt::format("length calculated/stored of domain boundary '{}' does not equals its original size size: "
-                                       "original: {} saved: {} calculated: {} control: {}\n",
-                                       Mapping::get_patch_name(static_cast<Patch>(patch)),
-                                       original_len, saved_len, calculated_len, control);
-            }
-        }
-
-        size_t csize_inner = domain_data->get_nx(level) * domain_data->get_ny(level) * domain_data->get_nz(level)
-                             - m_jl_obstacle_list.get_slice_size(level);
-        size_t bsize_inner = get_slice_size_domain_inner_cells_level_joined(level);
-        if (csize_inner != bsize_inner) {
-            message += "get_size_domain_inner_cells(level) does not equal (nx-2)*(ny-2)*(nz-2) "
-                       + std::to_string(bsize_inner) + "|" + std::to_string(csize_inner) + "\n";
-        }
-        size_t cindex_inner_start = get_start_index_domain_inner_cells_level_joined(level);
-        size_t cindex_inner_end = get_end_index_domain_inner_cells_level_joined(level);
-        if (cindex_inner_end - cindex_inner_start + 1 != bsize_inner) {
-            message += "get_size_domain_inner_cells(level) does not equal the difference between start and end "
-                       + std::to_string(cindex_inner_start) + "|" + std::to_string(cindex_inner_end) + "\n";
-        }
-        if (!message.empty()) {
-            control_message += "For Level " + std::to_string(level) + "\nsize control\n" + message;
-        }
-    }
-    for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-        Domain &domain = m_MG_domain_object_list[level];
-        PatchObject sum_surfaces;
-        for (size_t patch = 0; patch < number_of_patches; patch++) {
-            sum_surfaces.add_value(patch, m_jl_surface_list_patch_divided[patch]->get_slice_size(level));
-        }
-        domain.control(m_jl_obstacle_list.get_slice_size(level), sum_surfaces);
-    }
-    {
-        size_t bsize_inner = 0;
-        for (size_t level = 0; level < m_multigrid_levels + 1; level++) {
-            bsize_inner += get_slice_size_domain_inner_cells_level_joined(level);
-        }
-        size_t csize_inner = get_size_domain_inner_cells_level_joined();
-        if (bsize_inner != csize_inner) {
-            control_message += "get_size_domain_inner_cells_level_joined does not equal the sum of each inner list "
-                       + std::to_string(bsize_inner) + "|" + std::to_string(csize_inner) + "\n";
-        }
-    }
-
-    if (!control_message.empty()) {
-        control_message = "################ MULTIGRID CONTROL ################\n" + control_message
-                  + "---------------- MULTIGRID CONTROL END ----------------";
-        m_logger->warn(control_message);
-    }
-#endif
 }
 
 //======================================== Print ===================================================

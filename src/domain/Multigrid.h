@@ -89,7 +89,6 @@ private:
     size_t surface_dominant_restriction(size_t level, PatchObject *sum_patches);
     size_t obstacle_dominant_restriction(size_t level, PatchObject *sum_patches, size_t **tmp_store_obstacle);
 
-    void control();
     void print();
 
     BoundaryDataController m_bdc_domain;

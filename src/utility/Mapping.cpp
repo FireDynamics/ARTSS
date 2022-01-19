@@ -89,4 +89,20 @@ BoundaryCondition match_boundary_condition(const std::string &string) {
 std::string get_boundary_condition_name(BoundaryCondition bc) {
     return boundary_condition_names[bc];
 }
+
+std::vector<CoordinateAxis> get_axes(Patch patch) {
+    std::vector<CoordinateAxis> axes;
+    axes.resize(2);
+    if (patch == Patch::LEFT || patch == Patch::RIGHT) {
+        axes[0] = Y;
+        axes[1] = Z;
+    } else if (patch == Patch::BOTTOM || patch == Patch::TOP) {
+        axes[0] = X;
+        axes[1] = Z;
+    } else {  // p == Patch::LEFT || p == Patch::RIGHT
+        axes[0] = X;
+        axes[1] = Y;
+    }
+    return axes;
+}
 }  // end namespace Mapping
