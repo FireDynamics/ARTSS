@@ -777,7 +777,6 @@ namespace Settings {
         temperature_source parse_temperature_source(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "source";
             std::string context = create_context(parent_context, own_context);
-            std::cout << "parse temperature source" << std::endl;
             auto[subsection_source, values_source] = map_parameter_section(head, own_context);
 
             temperature_source source{};
@@ -802,7 +801,6 @@ namespace Settings {
                 throw config_error(fmt::format("temperature source function '{}' has no parsing implementation.",
                                                source.temp_fct));
             }
-            std::cout << "end" << std::endl;
             return source;
         }
 

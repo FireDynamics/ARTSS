@@ -14,7 +14,7 @@ return_parameter_reader TemperatureSourceChanger::read_config(const std::string 
         tinyxml2::XMLDocument doc;
         doc.Parse(file_content.c_str());
         m_logger->info("parse heat source changes {}", static_cast<void *>(doc.RootElement()));
-        auto temperature_source = Settings::solver::parse_temperature_source(doc.RootElement(), "temperature");
+        auto temperature_source = Settings::solver::parse_temperature_source(doc.RootElement(), "temperature_source");
         bool parameter_changes = true;
         // TODO (c++20)
         // bool parameter_changes = temperature_source != m_temperature_source;

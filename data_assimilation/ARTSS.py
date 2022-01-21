@@ -79,6 +79,7 @@ class DAFile:
         #   </source>
         # </ARTSS>
         source = ET.SubElement(self.xml_root, 'source', type=source_type['type'], dir=source_type['dir'],
+                               temp_fct=source_type['temp_fct'],
                                dissipation='Yes' if source_type['dissipation'] == 'Yes' else 'No',
                                random='Yes' if source_type['random'] == 'Yes' else 'No')
         for key in temperature_source:

@@ -1824,7 +1824,7 @@ TEST(SettingsTest, assimilationFieldChanges) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::data_assimilation::field_changes field_changes = Settings::parse_field_changes(doc.RootElement(), "temperature_source");
+    Settings::data_assimilation::field_changes field_changes = Settings::parse_field_changes(doc.RootElement(), "temperature");
     EXPECT_FALSE(field_changes.u_changed);
     EXPECT_FALSE(field_changes.v_changed);
     EXPECT_FALSE(field_changes.w_changed);

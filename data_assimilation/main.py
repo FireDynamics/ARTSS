@@ -122,4 +122,4 @@ def main(dry_run=False):
 
 
 if __name__ == '__main__':
-    main(dry_run=True)
+    main(dry_run=False)
