@@ -38,7 +38,7 @@ class XML:
             for elem in source_tree:
                 source_params[elem.tag] = elem.text.strip()
             random_params = {}
-            if source['random']:
+            if source['random'] == 'Yes':
                 del source_params['random']  # remove empty random element
                 random = source_tree.find('random')
                 for key in random.attrib:
@@ -79,19 +79,19 @@ class DAFile:
         #   </source>
         # </ARTSS>
         source = ET.SubElement(self.xml_root, 'source', type=source_type['type'], dir=source_type['dir'],
-                               dissipation='Yes' if source_type['dissipation'] else 'No',
-                               random='Yes' if source_type['random'] else 'No')
+                               dissipation='Yes' if source_type['dissipation'] == 'Yes' else 'No',
+                               random='Yes' if source_type['random'] == 'Yes' else 'No')
         for key in temperature_source:
             ET.SubElement(source, key).text = str(temperature_source[key])
 
-        if source_type['random']:
-            random_tree = ET.SubElement(source, 'random', absolute='Yes' if random['absolute'] else 'No',
-                                        custom_seed='Yes' if random['custom_seed'] else 'No',
-                                        custom_steps='Yes' if random['custom_steps'] else 'No')
+        if source_type['random'] == 'Yes':
+            random_tree = ET.SubElement(source, 'random', absolute='Yes' if random['absolute'] =='Yes' else 'No',
+                                        custom_seed='Yes' if random['custom_seed'] == 'Yes' else 'No',
+                                        custom_steps='Yes' if random['custom_steps'] == 'Yes' else 'No')
             ET.SubElement(random_tree, 'range').text = str(random['range'])
-            if random['custom_steps']:
+            if random['custom_steps'] == 'Yes':
                 ET.SubElement(random_tree, 'step_size').text = str(random['step_size'])
-            if random['custom_seed']:
+            if random['custom_seed'] == 'Yes':
                 ET.SubElement(random_tree, 'seed').text = str(random['seed'])
 
     def create_config(self, fields: dict, field_file_name=''):

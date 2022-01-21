@@ -39,7 +39,7 @@ def change_heat_source(source_type: dict, temperature_source: dict, random: dict
     for key in temperature_source_changes:
         new_temperature_source[key] = temperature_source_changes[key]
 
-    if not new_source_type['random']:
+    if not source_type['random']:
         new_random = {}
     else:
         for key in random_changes:
@@ -64,7 +64,7 @@ def main(dry_run=False):
     print(cwd)
 
     if dry_run:
-        xml = XML('example/da.xml')
+        xml = XML('da.xml')
     else:
         reader = FieldReader()
         reader.print_header()
@@ -108,9 +108,8 @@ def main(dry_run=False):
                                changes={'source_type': {},
                                         'temperature_source': {'x0': float(source[1]['x0']) + 10 * index},
                                         'random': {}})
-        source_type['random'] = False
         da = DAFile()
-        da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': True, 'C': False}, field_file_name)
+        da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False}, field_file_name)
         da.create_temperature_source_changes(
             source_type=source_type,
             temperature_source=temperature_source,
