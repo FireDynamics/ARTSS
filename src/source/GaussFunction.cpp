@@ -19,7 +19,7 @@ GaussFunction::GaussFunction(const Settings::solver::sources::gauss &settings) :
     create_spatial_values();
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
-    m_logger->info("create gauss function with parameters dimension: {}, position: {}, hc: {}, HRR: {}, tau: {}",
+    m_logger->debug("create gauss function with parameters dimension: {}, position: {}, hc: {}, HRR: {}, tau: {}",
                    settings.dimension, settings.position, settings.heat_capacity, settings.heat_release_rate, settings.tau);
 #endif
 }
@@ -28,9 +28,6 @@ void GaussFunction::update_source(Field &out, real t_cur) {
     auto time_val = get_time_value(t_cur);
     out.copy_data(m_field_spatial_values);
     out *= time_val;
-#ifndef BENCHMARKING
-    m_logger->info("random values: {} {}", m_has_noise, m_absolute);
-#endif
     if (m_has_noise) {
         if (m_absolute) {
             out *= m_noise_maker->random_field(out.get_size());
