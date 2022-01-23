@@ -67,7 +67,7 @@ void SLAdvect::advect(Field &out, const Field &in,
         auto j_end = static_cast<long int> (domain_data->get_index_y2());
         auto k_end = static_cast<long int> (domain_data->get_index_z2());
 
-#pragma acc loop independent
+#pragma acc parallel loop independent
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_inner_list[l];
             auto k = static_cast<long int> (getCoordinateK(idx, Nx, Ny));

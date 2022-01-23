@@ -60,6 +60,18 @@ class FieldReader:
     def get_line_from_file(self, line_number: int) -> str:
         return self.get_lines_from_file([line_number])[0]
 
+    def get_pos_from_all_time_steps(self, line_numbers: list) -> list:
+        lines = []
+        max_val = max(line_numbers)
+        file = open(self.file_name, 'r')
+        for i, line in enumerate(file):
+            if i in line_numbers:
+                lines.append(line)
+            if i > max_val:
+                break
+        file.close()
+        return lines
+
     def get_lines_from_file(self, line_numbers: list) -> list:
         lines = []
         max_val = max(line_numbers)
