@@ -158,9 +158,9 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
     }
 }
 
-//================================= write header ===================================================
+// ================================= write header ==================================================
 // *************************************************************************************************
-/// \brief  write header for field storage. includes essential debugrmation: Nx, Ny, Nz
+/// \brief  write header for field storage. includes essential debugger notation: Nx, Ny, Nz
 /// \details header format:
 /// ###DOMAIN;<Nx>;<Ny>;<Nz>
 /// ###FIELDS;u;v;w;p;T;concentration
