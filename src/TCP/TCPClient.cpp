@@ -4,12 +4,14 @@
 /// \author    My Linh Wuerzburger
 
 #include "TCPClient.h"
+#include "../utility/Utility.h"
 #include <cstring>
 
-TCPSocket::TCPSocket(std::function<void(int, std::string)> onError, int socket_id) : BaseSocket(onError, TCP, socket_id) {
+TCPSocket::TCPSocket(std::function<void(int, std::string)> onError, int socket_id) :
+        BaseSocket(onError, TCP, socket_id) {
 }
 
-int TCPSocket::send_message(const std::string& message) {
+int TCPSocket::send_message(const std::string &message) {
     return this->send_message(message.c_str(), message.length());
 }
 
@@ -19,12 +21,15 @@ int TCPSocket::send_message(const char *bytes, size_t bytes_length) {
 
     ssize_t sent;
     if ((sent = send(this->sock, bytes, bytes_length, 0)) < 0) {
-        perror("send");
+        auto logger = Utility::create_logger(typeid(this).name());
+        logger->error("send");
     }
     return static_cast<int>(sent);
 }
 
-void TCPSocket::initiate_connection(const std::string& host, uint16_t port, const std::function<void()>& on_connected, std::function<void(int, std::string)> onError) {
+void TCPSocket::initiate_connection(const std::string &host, uint16_t port,
+                                    const std::function<void()> &on_connected,
+                                    std::function<void(int, std::string)> onError) {
     struct addrinfo hints{}, *res, *it;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
@@ -48,7 +53,9 @@ void TCPSocket::initiate_connection(const std::string& host, uint16_t port, cons
     this->initiate_connection((uint32_t) this->address.sin_addr.s_addr, port, on_connected, onError);
 }
 
-void TCPSocket::initiate_connection(uint32_t ipv4, uint16_t port, const std::function<void()>& on_connected, std::function<void(int, std::string)> onError) {
+void TCPSocket::initiate_connection(uint32_t ipv4, uint16_t port,
+                                    const std::function<void()> &on_connected,
+                                    std::function<void(int, std::string)> onError) {
     this->address.sin_family = AF_INET;
     this->address.sin_port = htons(port);
     this->address.sin_addr.s_addr = ipv4;
