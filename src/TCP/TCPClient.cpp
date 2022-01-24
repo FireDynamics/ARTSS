@@ -1,4 +1,4 @@
-/// \file      TCPClient.h
+/// \file      TCPClient.cpp
 /// \brief     Based on GitHub Project Asynchronous Sockets for C++ (https://github.com/eminfedar/async-sockets-cpp)
 /// \date      June 23, 2021
 /// \author    My Linh Wuerzburger

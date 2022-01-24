@@ -1,5 +1,11 @@
-#include <iostream>
+/// \file      TCPServer.cpp
+/// \brief     Based on GitHub Project Asynchronous Sockets for C++ (https://github.com/eminfedar/async-sockets-cpp)
+/// \date      June 23, 2021
+/// \author    My Linh Wuerzburger
+
 #include "TCPServer.h"
+
+#include <iostream>
 
 TCPServer::TCPServer(std::function<void(int, std::string)> onError) : BaseSocket(onError, TCP) {
     int opt = 1;
