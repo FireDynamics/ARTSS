@@ -55,8 +55,9 @@ void TCPServer::accept_connection(TCPServer *server, std::function<void(int, std
     int new_socket;
     while (!server->is_closed) {
         while ((new_socket = accept(server->sock, (sockaddr *) &new_socket_info, &new_socket_info_length)) < 0) {
-            if (errno == EBADF || errno == EINVAL) return;
-
+            if (errno == EBADF || errno == EINVAL) {
+                return;
+            }
             on_error(errno, "Error while accepting a new connection.");
             return;
         }
