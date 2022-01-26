@@ -158,22 +158,23 @@ std::string remove_extension(const std::string &filename) {
     if (lastdot == std::string::npos) return filename;
     return filename.substr(0, lastdot);
 }
-    std::string trim_end(std::string string) {
-        string.erase(std::find_if(string.rbegin(), string.rend(), [](char c) {
-            return !std::isspace(static_cast<unsigned char>(c));
-        }).base(), string.end());
-        return string;
-    }
 
-    std::string trim_start(std::string source) {
-        source.erase(source.begin(), std::find_if(source.begin(), source.end(), [](char c) {
-            return !std::isspace(static_cast<unsigned char>(c));
-        }));
-        return source;
-    }
+std::string trim_end(std::string string) {
+    string.erase(std::find_if(string.rbegin(), string.rend(), [](char c) {
+        return !std::isspace(static_cast<unsigned char>(c));
+    }).base(), string.end());
+    return string;
+}
 
-    std::string trim(const std::string &string) {
-        return trim_end(trim_start(string));
-    }
+std::string trim_start(std::string source) {
+    source.erase(source.begin(), std::find_if(source.begin(), source.end(), [](char c) {
+        return !std::isspace(static_cast<unsigned char>(c));
+    }));
+    return source;
+}
+
+std::string trim(const std::string &string) {
+    return trim_end(trim_start(string));
+}
 
 }  // namespace Utility
