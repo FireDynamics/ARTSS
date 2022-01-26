@@ -10,8 +10,8 @@
 std::string BaseSocket::ip_to_string(sockaddr_in addr) {
     char ip[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &(addr.sin_addr), ip, INET_ADDRSTRLEN);
-
-    return std::string(ip);
+    ip[INET_ADDRSTRLEN - 1] = '\0';
+    return ip;
 }
 
 BaseSocket::BaseSocket(std::function<void(int, std::string)> onError,
