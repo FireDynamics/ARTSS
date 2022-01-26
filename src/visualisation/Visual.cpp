@@ -16,14 +16,14 @@
 #include "CSVWriter.h"
 #include "VTKWriter.h"
 
-Visual::Visual(const Settings::visualisation_parameters &settings, const Solution &solution, const std::string &filename) :
+Visual::Visual(const Settings::visualisation_parameters &settings, const Solution &solution, const std::string &file_name) :
         m_settings(settings),
+        m_file_name(Utility::remove_extension(file_name)),
         m_solution(solution),
         m_has_analytical_solution(m_solution.has_analytical_solution()) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_filename = Utility::remove_extension(filename);
 }
 
 void Visual::visualise(const FieldController &field_controller, real t) {
@@ -36,14 +36,14 @@ void Visual::visualise(const FieldController &field_controller, real t) {
 
     int n = static_cast<int> (std::round(t / dt));
 
-    std::string filename_numerical = create_filename(m_filename, n, false);
-    std::string filename_analytical = create_filename(m_filename, n, true);
+    std::string file_name_numerical = create_file_name(m_file_name, n, false);
+    std::string file_name_analytical = create_file_name(m_file_name, n, true);
     if (m_settings.save_vtk) {
         real vtk_plot = static_cast<real>(m_settings.vtk_nth_plot.value());
         if (fmod(n, vtk_plot) == 0 || t >= t_end) {
-            VTKWriter::write_numerical(field_controller, filename_numerical);
+            VTKWriter::write_numerical(field_controller, file_name_numerical);
             if (m_has_analytical_solution) {
-                VTKWriter::write_analytical(m_solution, filename_analytical);
+                VTKWriter::write_analytical(m_solution, file_name_analytical);
             }
         }
     }
@@ -51,27 +51,27 @@ void Visual::visualise(const FieldController &field_controller, real t) {
     if (m_settings.save_csv) {
         real csv_plot = static_cast<real>(m_settings.csv_nth_plot.value());
         if (fmod(n, csv_plot) == 0 || t >= t_end) {
-            CSVWriter::write_numerical(field_controller, filename_numerical);
+            CSVWriter::write_numerical(field_controller, file_name_numerical);
             if (m_has_analytical_solution) {
-                CSVWriter::write_analytical(m_solution, filename_analytical);
+                CSVWriter::write_analytical(m_solution, file_name_analytical);
             }
         }
     }
 }
 
-void Visual::write_csv(FieldController &field_controller, const std::string &filename){
+void Visual::write_csv(FieldController &field_controller, const std::string &file_name){
     field_controller.update_host();
-    CSVWriter::write_numerical(field_controller, filename);
+    CSVWriter::write_numerical(field_controller, file_name);
 }
 
-void Visual::write_vtk(FieldController &field_controller, const std::string &filename){
+void Visual::write_vtk(FieldController &field_controller, const std::string &file_name){
     field_controller.update_host();
-    VTKWriter::write_numerical(field_controller, filename);
+    VTKWriter::write_numerical(field_controller, file_name);
 }
 
-void Visual::write_vtk_debug(FieldController &field_controller, const std::string &filename){
+void Visual::write_vtk_debug(FieldController &field_controller, const std::string &file_name){
     field_controller.update_host_debug();
-    VTKWriter::write_numerical_debug(field_controller, filename);
+    VTKWriter::write_numerical_debug(field_controller, file_name);
 }
 
 void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords,
@@ -94,9 +94,9 @@ void Visual::initialise_grid(real *x_coords, real *y_coords, real *z_coords,
     }
 }
 
-std::string Visual::create_filename(const std::string &filename,
+std::string Visual::create_file_name(const std::string &file_name,
                                     int counter, bool analytical) {
-    std::string fname = filename;
+    std::string fname = file_name;
     if (analytical) {
         fname.append("_ana_");
     } else {
