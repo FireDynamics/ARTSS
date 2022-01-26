@@ -241,4 +241,3 @@ void FieldController::replace_data(Field &u, Field &v, Field &w, Field &p, Field
     field_T.copy_data(T);
     field_concentration.copy_data(C);
 }
-

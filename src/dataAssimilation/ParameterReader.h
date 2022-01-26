@@ -23,5 +23,4 @@ class ParameterReader : public IParameterReader {
     std::shared_ptr<spdlog::logger> m_logger;
 };
 
-
 #endif /* ARTSS_DATAASSIMILATION_PARAMETERREADER_H */

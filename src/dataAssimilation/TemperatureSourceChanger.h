@@ -28,5 +28,4 @@ private:
     std::shared_ptr<spdlog::logger> m_logger;
 };
 
-
 #endif /* ARTSS_DATAASSIMILATION_TEMPERATURESOURCECHANGER_H */

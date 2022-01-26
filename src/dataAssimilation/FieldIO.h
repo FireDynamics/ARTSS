@@ -39,5 +39,4 @@ class FieldIO {
     void read_field(std::ifstream &file_stream, Field &field);
 };
 
-
 #endif /* ARTSS_VISUALISATION_FIELDIO_H */

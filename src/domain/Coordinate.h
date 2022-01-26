@@ -79,7 +79,6 @@ public:
         return x != rhs.x || y != rhs.y || z != rhs.z;
     }
 
-
     Coordinate &operator+=(const numeral n) {
         x += n;
         y += n;

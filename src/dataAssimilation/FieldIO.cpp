@@ -252,4 +252,3 @@ void FieldIO::read_fields(const real t_cur,
         read_fields(t_cur, u, v, w, p, T, C);
     }
 }
-

@@ -51,5 +51,4 @@ class DataAssimilation {
           m_new_field_T, m_new_field_C;
 };
 
-
 #endif /* ARTSS_DATAASSIMILATION_DATAASSIMILATION_H */
