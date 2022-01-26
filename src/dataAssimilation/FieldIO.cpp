@@ -16,10 +16,8 @@
 
 
 FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_file_name) :
-        m_file_name(output_file_name) {
-#ifndef BENCHMARKING
-    m_logger = Utility::create_logger(typeid(this).name());
-#endif
+        m_file_name(output_file_name),
+        m_logger(Utility::create_logger(typeid(this).name())) {
 
     auto domain_data = DomainData::getInstance();
     real t_end = domain_data->get_physical_parameters().t_end;

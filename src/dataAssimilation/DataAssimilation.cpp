@@ -13,6 +13,7 @@
 DataAssimilation::DataAssimilation(const SolverController &solver_controller,
                                    FieldController *field_controller,
                                    const Settings::Settings &settings) :
+        m_logger(Utility::create_logger(typeid(this).name())),
         m_settings(settings),
         m_field_controller(field_controller),
         m_solver_controller(solver_controller),
@@ -22,7 +23,6 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
         m_new_field_p(Field(FieldType::P)),
         m_new_field_T(Field(FieldType::T)),
         m_new_field_C(Field(FieldType::RHO)) {
-    m_logger = Utility::create_logger(typeid(this).name());
     m_field_IO_handler = new FieldIO(settings.filename);
     if (m_settings.assimilation_parameters.enabled) {
         if (m_settings.assimilation_parameters.class_name == AssimilationMethods::standard) {

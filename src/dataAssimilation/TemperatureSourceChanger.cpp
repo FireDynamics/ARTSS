@@ -30,12 +30,5 @@ return_parameter_reader TemperatureSourceChanger::read_config(const std::string 
     }
     Settings::data_assimilation::field_changes field_changes;
     field_changes.changed = false;
-    return {false, field_changes} ;
-}
-
-TemperatureSourceChanger::TemperatureSourceChanger(const SolverController &solver_controller,
-                                                   const Settings::solver::temperature_source &temperature_source) :
-        m_solver_controller(solver_controller),
-        m_temperature_source(temperature_source) {
-    m_logger = Utility::create_logger(typeid(this).name());
+    return {false, field_changes};
 }
