@@ -93,69 +93,15 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
     std::string line;
     input_file.seekg(pos);
 
-    getline(input_file, line);
+    std::getline(input_file, line);
     m_logger->debug("read time step {}", line);
 
-    // u
-    getline(input_file, line);
-    std::vector<std::string> divided_string = Utility::split(line, ';');
-    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(u.get_type()), divided_string.size(), u.get_size());
-    m_logger->debug("first index has value {}", divided_string[0]);
-    size_t counter = 0;
-    for (const std::string &part: divided_string) {
-        u.data[counter] = std::stod(part);
-        counter++;
-    }
-    // v
-    getline(input_file, line);
-    divided_string = Utility::split(line, ';');
-    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(v.get_type()), divided_string.size(), v.get_size());
-    m_logger->debug("first index has value {}", divided_string[0]);
-    counter = 0;
-    for (const std::string &part: divided_string) {
-        v.data[counter] = std::stod(part);
-        counter++;
-    }
-    // w
-    getline(input_file, line);
-    divided_string = Utility::split(line, ';');
-    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(w.get_type()), divided_string.size(), w.get_size());
-    m_logger->debug("first index has value {}", divided_string[0]);
-    counter = 0;
-    for (const std::string &part: divided_string) {
-        w.data[counter] = std::stod(part);
-        counter++;
-    }
-    // p
-    getline(input_file, line);
-    divided_string = Utility::split(line, ';');
-    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(p.get_type()), divided_string.size(), p.get_size());
-    m_logger->debug("first index has value {}", divided_string[0]);
-    counter = 0;
-    for (const std::string &part: divided_string) {
-        p.data[counter] = std::stod(part);
-        counter++;
-    }
-    // T
-    getline(input_file, line);
-    divided_string = Utility::split(line, ';');
-    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(T.get_type()), divided_string.size(), T.get_size());
-    m_logger->debug("first index has value {}", divided_string[0]);
-    counter = 0;
-    for (const std::string &part: divided_string) {
-        T.data[counter] = std::stod(part);
-        counter++;
-    }
-    // C
-    getline(input_file, line);
-    Utility::split(line, ';');
-    m_logger->debug("size of {}: {}, should be: {}", Mapping::get_field_type_name(C.get_type()), divided_string.size(), C.get_size());
-    m_logger->debug("first index has value {}", divided_string[0]);
-    counter = 0;
-    for (const std::string &part: divided_string) {
-        C.data[counter] = std::stod(part);
-        counter++;
-    }
+    read_field(input_file, u);
+    read_field(input_file, v);
+    read_field(input_file, w);
+    read_field(input_file, p);
+    read_field(input_file, T);
+    read_field(input_file, C);
 }
 
 // ================================= write header ==================================================
@@ -188,13 +134,11 @@ std::string FieldIO::create_header(const std::string &xml_filename) {
 
 void FieldIO::read_field(std::ifstream &file_stream, Field &field) {
     std::string line;
-    getline(file_stream, line);
+    auto to_double = [](const auto &v) { return std::stod(v); };
+
+    std::getline(file_stream, line);
     std::vector<std::string> divided_string = Utility::split(line, ';');
-    size_t counter = 0;
-    for (const std::string &part: divided_string) {
-        field.data[counter] = std::stod(part);
-        counter++;
-    }
+    std::transform(divided_string.begin(), divided_string.end(), field.data, to_double);
 }
 
 void FieldIO::read_fields(const Settings::data_assimilation::field_changes &field_changes,
@@ -210,7 +154,7 @@ void FieldIO::read_fields(const Settings::data_assimilation::field_changes &fiel
         if (field_changes.u_changed) {
             read_field(file_changes, u);
             m_logger->debug("read changed u Field");
-            getline(file_changes, line);
+            std::getline(file_changes, line);
         }
         if (field_changes.v_changed) {
             read_field(file_changes, v);
@@ -246,7 +190,7 @@ void FieldIO::read_fields(const real t_cur,
     file_original.seekg(m_positions[n]);
 
     std::string line;
-    getline(file_original, line);
+    std::getline(file_original, line);
     m_logger->debug("read time step {}", line);
 
     if (field_changes.changed) {  // no changes -> read original file
@@ -254,51 +198,51 @@ void FieldIO::read_fields(const real t_cur,
         if (file_changes.is_open()) {  // could not open file -> read original file + warning
             if (field_changes.u_changed) {
                 read_field(file_changes, u);
-                getline(file_original, line);
+                std::getline(file_original, line);
                 m_logger->debug("read changed u Field");
             } else {
                 read_field(file_original, u);
-                getline(file_changes, line);
+                std::getline(file_changes, line);
             }
             if (field_changes.v_changed) {
                 read_field(file_changes, v);
-                getline(file_original, line);
+                std::getline(file_original, line);
                 m_logger->debug("read changed v Field");
             } else {
                 read_field(file_original, v);
-                getline(file_changes, line);
+                std::getline(file_changes, line);
             }
             if (field_changes.w_changed) {
                 read_field(file_changes, w);
-                getline(file_original, line);
+                std::getline(file_original, line);
                 m_logger->debug("read changed w Field");
             } else {
                 read_field(file_original, w);
-                getline(file_changes, line);
+                std::getline(file_changes, line);
             }
             if (field_changes.p_changed) {
                 read_field(file_changes, p);
-                getline(file_original, line);
+                std::getline(file_original, line);
                 m_logger->debug("read changed p Field");
             } else {
                 read_field(file_original, p);
-                getline(file_changes, line);
+                std::getline(file_changes, line);
             }
             if (field_changes.T_changed) {
                 read_field(file_changes, T);
-                getline(file_original, line);
+                std::getline(file_original, line);
                 m_logger->debug("read changed T Field");
             } else {
                 read_field(file_original, T);
-                getline(file_changes, line);
+                std::getline(file_changes, line);
             }
             if (field_changes.C_changed) {
                 read_field(file_changes, C);
-                getline(file_original, line);
+                std::getline(file_original, line);
                 m_logger->debug("read changed C Field");
             } else {
                 read_field(file_original, C);
-                getline(file_changes, line);
+                std::getline(file_changes, line);
             }
         } else {
             m_logger->warn(fmt::format("File '{}' could not be opened, original data will be loaded", field_changes.filename));
