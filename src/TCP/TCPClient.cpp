@@ -7,8 +7,8 @@
 #include "../utility/Utility.h"
 #include <cstring>
 
-TCPSocket::TCPSocket(std::function<void(int, std::string)> onError, int socket_id) :
-        BaseSocket(onError, TCP, socket_id) {
+TCPSocket::TCPSocket(std::function<void(int, std::string)> on_error, int socket_id) :
+        BaseSocket(on_error, TCP, socket_id) {
 }
 
 int TCPSocket::send_message(const std::string &message) {
@@ -29,7 +29,7 @@ int TCPSocket::send_message(const char *bytes, size_t bytes_length) {
 
 void TCPSocket::initiate_connection(const std::string &host, uint16_t port,
                                     const std::function<void()> &on_connected,
-                                    std::function<void(int, std::string)> onError) {
+                                    std::function<void(int, std::string)> on_error) {
     struct addrinfo hints{}, *res, *it;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
@@ -37,7 +37,7 @@ void TCPSocket::initiate_connection(const std::string &host, uint16_t port,
 
     int status;
     if ((status = getaddrinfo(host.c_str(), nullptr, &hints, &res)) != 0) {
-        onError(errno, "Invalid address." + std::string(gai_strerror(status)));
+        on_error(errno, "Invalid address." + std::string(gai_strerror(status)));
         return;
     }
 
@@ -50,7 +50,7 @@ void TCPSocket::initiate_connection(const std::string &host, uint16_t port,
 
     freeaddrinfo(res);
 
-    this->initiate_connection((uint32_t) this->address.sin_addr.s_addr, port, on_connected, onError);
+    this->initiate_connection((uint32_t) this->address.sin_addr.s_addr, port, on_connected, on_error);
 }
 
 void TCPSocket::initiate_connection(uint32_t ipv4, uint16_t port,

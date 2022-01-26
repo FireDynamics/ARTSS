@@ -25,7 +25,7 @@
 
 #define FDR_UNUSED(expr){ (void)(expr); }
 #define FDR_ON_ERROR \
-std::function<void(int, std::string)> onError = [](int errorCode, const std::string &errorMessage) { \
+std::function<void(int, std::string)> on_error = [](int errorCode, const std::string &errorMessage) { \
     { (void) (errorCode); }; \
     { (void) (errorMessage); } \
 }
