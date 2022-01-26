@@ -8,6 +8,7 @@
 #define ARTSS_DATAASSIMILATION_DATAASSIMILATION_H
 
 
+#include <memory>
 #include <string>
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
