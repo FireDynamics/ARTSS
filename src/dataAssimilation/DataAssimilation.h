@@ -33,7 +33,7 @@ class DataAssimilation {
 
     real get_new_time_value() const;
 
-private:
+ private:
     std::shared_ptr<spdlog::logger> m_logger;
     const Settings::Settings &m_settings;
     FieldController *m_field_controller;
