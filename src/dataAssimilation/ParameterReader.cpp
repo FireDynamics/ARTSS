@@ -6,14 +6,10 @@
 
 #include "ParameterReader.h"
 
-ParameterReader::ParameterReader() {
-    m_logger = Utility::create_logger(typeid(this).name());
-}
-
-return_parameter_reader ParameterReader::read_config(const std::string &filename) {
+return_parameter_reader ParameterReader::read_config(const std::string &file_name) {
     try {
         m_logger->debug("parse file to string");
-        auto file_content = Settings::parse_settings_from_file(filename);
+        auto file_content = Settings::parse_settings_from_file(file_name);
         m_logger->debug("parse document to XMLTree");
         tinyxml2::XMLDocument doc;
         doc.Parse(file_content.c_str());

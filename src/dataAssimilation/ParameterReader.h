@@ -15,10 +15,10 @@
 
 class ParameterReader : public IParameterReader {
  public:
-    ParameterReader();
+    ParameterReader() : m_logger(Utility::create_logger(typeid(this).name())) {}
     ~ParameterReader() = default;
 
-    return_parameter_reader read_config(const std::string &filename) override;
+    return_parameter_reader read_config(const std::string &file_name) override;
  private:
     std::shared_ptr<spdlog::logger> m_logger;
 };
