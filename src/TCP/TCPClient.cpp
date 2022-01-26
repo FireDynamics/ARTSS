@@ -16,9 +16,9 @@ int TCPSocket::send_message(const std::string &message) {
 }
 
 int TCPSocket::send_message(const char *bytes, size_t bytes_length) {
-    if (this->is_closed)
+    if (this->is_closed) {
         return -1;
-
+    }
     ssize_t sent;
     if ((sent = send(this->sock, bytes, bytes_length, 0)) < 0) {
         auto logger = Utility::create_logger(typeid(this).name());
@@ -79,8 +79,8 @@ void TCPSocket::initiate_connection(uint32_t ipv4, uint16_t port,
 
 void TCPSocket::start_listening() {
     // Start listening the socket from thread.
-    std::thread receiveListening(receive, this);
-    receiveListening.detach();
+    std::thread receive_listening(receive, this);
+    receive_listening.detach();
 }
 
 void TCPSocket::set_address_struct(sockaddr_in addr) {
@@ -101,19 +101,21 @@ void TCPSocket::set_timeout(int seconds) {
 }
 
 void TCPSocket::receive(TCPSocket *socket) {
-    char tempBuffer[socket->BUFFER_SIZE];
-    ssize_t messageLength;
+    char temp_buffer[socket->BUFFER_SIZE];
+    ssize_t message_length;
 
-    while ((messageLength = recv(socket->sock, tempBuffer, socket->BUFFER_SIZE, 0)) > 0) {
-        tempBuffer[messageLength] = '\0';
-        if (socket->on_message_received)
-            socket->on_message_received(std::string(tempBuffer).substr(0, messageLength));
-
-        if (socket->on_raw_message_received)
-            socket->on_raw_message_received(tempBuffer, messageLength);
+    while ((message_length = recv(socket->sock, temp_buffer, socket->BUFFER_SIZE, 0)) > 0) {
+        temp_buffer[message_length] = '\0';
+        if (socket->on_message_received) {
+            socket->on_message_received(std::string(temp_buffer).substr(0, message_length));
+        }
+        if (socket->on_raw_message_received) {
+            socket->on_raw_message_received(temp_buffer, message_length);
+        }
     }
 
     socket->close_socket();
-    if (socket->on_socket_closed)
+    if (socket->on_socket_closed) {
         socket->on_socket_closed(errno);
+    }
 }
