@@ -325,7 +325,7 @@ namespace Settings {
             bool p_changed;
             bool T_changed;
             bool C_changed;
-            std::string filename;
+            std::string file_name;
         };
     }
     struct data_assimilation_parameters {

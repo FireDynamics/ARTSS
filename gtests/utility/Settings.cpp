@@ -1798,7 +1798,7 @@ TEST(SettingsTest, assimilationHeatSourceChanges) {
     EXPECT_FALSE(field_changes.p_changed);
     EXPECT_TRUE(field_changes.T_changed);
     EXPECT_FALSE(field_changes.C_changed);
-    EXPECT_EQ(field_changes.filename, "field.dat");
+    EXPECT_EQ(field_changes.file_name, "field.dat");
 
     Settings::solver::temperature_source heat_source = Settings::solver::parse_temperature_source(doc.RootElement(), "temperature_source");
     EXPECT_FALSE(heat_source.dissipation);

@@ -15,7 +15,8 @@
 #include "../domain/DomainData.h"
 
 
-FieldIO::FieldIO(const std::string &xml_filename) {
+FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_file_name) :
+        m_file_name(output_file_name) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
@@ -26,10 +27,10 @@ FieldIO::FieldIO(const std::string &xml_filename) {
     size_t n = static_cast<size_t>(std::round(t_end / domain_data->get_physical_parameters().dt)) + 1;
     m_positions = new long[n];
 
-    std::string header = create_header(xml_filename);
+    std::string header = create_header(xml_file_name);
     m_positions[0] = static_cast<long>(header.length()) + 1;
 
-    std::ofstream output_file(m_filename, std::ios_base::out);
+    std::ofstream output_file(m_file_name, std::ios_base::out);
     output_file.write(header.c_str(), m_positions[0]);
     output_file.close();
 }
@@ -60,7 +61,7 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
     long length = static_cast<long>(output.length());
     m_positions[n + 1] = m_positions[n] + length;
 
-    std::fstream output_file(m_filename);
+    std::fstream output_file(m_file_name);
     // write field at position dependent on time step
     m_logger->debug("times: {:>10d} write to: {:>20d}", n, m_positions[n]);
     output_file.seekp(m_positions[n], std::ios_base::beg);
@@ -86,7 +87,7 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
 // *************************************************************************************************
 void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     m_logger->debug("read original data");
-    std::ifstream input_file(m_filename, std::ifstream::binary);
+    std::ifstream input_file(m_file_name, std::ifstream::binary);
     size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
     long pos = m_positions[n];
     m_logger->debug("times: {:>10d} read from: {:>20d}", n, m_positions[n]);
@@ -112,7 +113,7 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
 /// ###FIELDS;u;v;w;p;T;concentration
 /// ###DATE:<date>;XML:<XML>
 // *************************************************************************************************
-std::string FieldIO::create_header(const std::string &xml_filename) {
+std::string FieldIO::create_header(const std::string &xml_file_name) {
     auto end = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
@@ -128,7 +129,7 @@ std::string FieldIO::create_header(const std::string &xml_filename) {
     header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
     header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
     header.append(fmt::format("###DATE;{}", std::ctime(&end_time)));
-    header.append(fmt::format("###XML;{}\n", xml_filename));
+    header.append(fmt::format("###XML;{}\n", xml_file_name));
     return header;
 }
 
@@ -149,7 +150,7 @@ void FieldIO::read_fields(const Settings::data_assimilation::field_changes &fiel
         return;
     }
     // no changes -> read original file
-    std::ifstream file_changes(field_changes.filename, std::ifstream::binary);
+    std::ifstream file_changes(field_changes.file_name, std::ifstream::binary);
     if (file_changes.is_open()) {  // could not open file -> read original file + warning
         if (field_changes.u_changed) {
             read_field(file_changes, u);
@@ -177,7 +178,7 @@ void FieldIO::read_fields(const Settings::data_assimilation::field_changes &fiel
             m_logger->debug("read changed C Field");
         }
     } else {
-        m_logger->warn(fmt::format("File '{}' could not be opened. No changes will be applied.", field_changes.filename));
+        m_logger->warn(fmt::format("File '{}' could not be opened. No changes will be applied.", field_changes.file_name));
     }
 }
 
@@ -185,7 +186,7 @@ void FieldIO::read_fields(const real t_cur,
                           const Settings::data_assimilation::field_changes &field_changes,
                           Field &u, Field &v, Field &w,
                           Field &p, Field &T, Field &C) {
-    std::ifstream file_original(m_filename, std::ifstream::binary);
+    std::ifstream file_original(m_file_name, std::ifstream::binary);
     size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
     file_original.seekg(m_positions[n]);
 
@@ -194,7 +195,7 @@ void FieldIO::read_fields(const real t_cur,
     m_logger->debug("read time step {}", line);
 
     if (field_changes.changed) {  // no changes -> read original file
-        std::ifstream file_changes(field_changes.filename, std::ifstream::binary);
+        std::ifstream file_changes(field_changes.file_name, std::ifstream::binary);
         if (file_changes.is_open()) {  // could not open file -> read original file + warning
             if (field_changes.u_changed) {
                 read_field(file_changes, u);
@@ -245,7 +246,7 @@ void FieldIO::read_fields(const real t_cur,
                 std::getline(file_changes, line);
             }
         } else {
-            m_logger->warn(fmt::format("File '{}' could not be opened, original data will be loaded", field_changes.filename));
+            m_logger->warn(fmt::format("File '{}' could not be opened, original data will be loaded", field_changes.file_name));
             read_fields(t_cur, u, v, w, p, T, C);
         }
     } else {

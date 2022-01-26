@@ -82,7 +82,7 @@ bool DataAssimilation::config_rollback(const char *msg) {
         m_logger->debug("read config data from {}", divided_string[1]);
         auto[changes, field_changes] = m_parameter_handler->read_config(divided_string[1]);
         if (changes && field_changes.changed) {
-            m_logger->debug("read field data from {}", field_changes.filename);
+            m_logger->debug("read field data from {}", field_changes.file_name);
             m_field_IO_handler->read_fields(m_t_cur, field_changes,
                                             m_new_field_u, m_new_field_v, m_new_field_w,
                                             m_new_field_p, m_new_field_T, m_new_field_C);

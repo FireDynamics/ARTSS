@@ -7,6 +7,7 @@
 #ifndef ARTSS_VISUALISATION_FIELDIO_H
 #define ARTSS_VISUALISATION_FIELDIO_H
 
+#include <memory>
 #include <string>
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
@@ -14,9 +15,9 @@
 
 class FieldIO {
  public:
-    explicit FieldIO(const std::string &xml_filename);
+    explicit FieldIO(const std::string &xml_file_name, const std::string &file_name = "visualisation.dat");
     void write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
-    void set_filename(std::string &filename) { m_filename = filename; }
+    void set_file_name(std::string &file_name) { m_file_name = file_name; }
     void read_fields(real t_cur,
                      const Settings::data_assimilation::field_changes &field_changes,
                      Field &u, Field &v, Field &w,
@@ -26,11 +27,11 @@ class FieldIO {
                      Field &p, Field &T, Field &C);
 
  private:
-    std::string create_header(const std::string &xml_filename);
+    std::string create_header(const std::string &xml_file_name);
     void read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
 
     long *m_positions;
-    std::string m_filename = "visualisation.dat";
+    std::string m_file_name;
 
     long m_pos_time_step;
     std::shared_ptr<spdlog::logger> m_logger;
