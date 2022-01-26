@@ -20,9 +20,9 @@
 #define PORT 7777
 void server();
 class tcp_server_error : std::runtime_error { ;
-public:
+ public:
     explicit tcp_server_error(const std::string &message) : std::runtime_error(message) {}
-    explicit tcp_server_error(const char *message) : std::runtime_error(message) {};
+    explicit tcp_server_error(const char *message) : std::runtime_error(message) {}
 };
 #endif
 
@@ -111,11 +111,12 @@ void server() {
     MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
     int msg_len;
     MPI_Get_count(&status, MPI_CHAR, &msg_len);
-    char msg[msg_len];
-    MPI_Recv(msg, msg_len, MPI_CHAR, status.MPI_TAG, 0, MPI_COMM_WORLD, &status);
+    std::vector<char> msg;
+    msg.resize(msg_len);
+    MPI_Recv(msg.data(), msg_len, MPI_CHAR, status.MPI_TAG, 0, MPI_COMM_WORLD, &status);
 
     std::string log_file = "tcp_server.log";
-    Utility::create_logger(msg, log_file);;
+    Utility::create_logger(msg.data(), log_file);;
     std::shared_ptr<spdlog::logger> logger = Utility::create_logger("TCPServer");
 #endif
     TCPServer tcp_server;
