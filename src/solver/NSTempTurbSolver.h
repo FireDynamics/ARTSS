@@ -29,7 +29,7 @@ class NSTempTurbSolver : public ISolver {
 
     void update_source(real) override;
     void replace_heat_source(const Settings::solver::temperature_source &temperature_source) override;
-private:
+ private:
     const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
