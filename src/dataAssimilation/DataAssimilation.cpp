@@ -38,8 +38,8 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
 }
 
 void DataAssimilation::initiate_rollback() {
-    m_field_controller->replace_data(m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, m_new_field_T,
-                                     m_new_field_C);
+    m_field_controller->replace_data(m_new_field_u, m_new_field_v, m_new_field_w,
+                                     m_new_field_p, m_new_field_T, m_new_field_C);
 }
 
 void DataAssimilation::save_data(real t_cur) {
@@ -64,7 +64,7 @@ bool DataAssimilation::config_rollback(const char *msg) {
     if (m_t_cur < new_time) {
         m_logger->warn("simulation is currently at {}. Cannot rollback to {}", m_t_cur, new_time);
         return false;
-    } else if (std::fabs(m_t_cur - new_time) < 1e-10) { // current time step, no need to load original data
+    } else if (std::fabs(m_t_cur - new_time) < 1e-10) {  // current time step, no need to load original data
         m_t_cur = new_time;
         m_logger->info("set new time value to {}", m_t_cur);
         m_logger->debug("read config data from {}", divided_string[1]);
