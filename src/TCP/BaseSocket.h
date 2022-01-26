@@ -31,12 +31,12 @@ std::function<void(int, std::string)> onError = [](int errorCode, const std::str
 }
 
 class EASYSOCKET_API BaseSocket {
-  protected:
+ protected:
     int sock = 0;
 
     static std::string ip_to_string(sockaddr_in addr);
 
-  public:
+ public:
     const uint16_t BUFFER_SIZE = 0xFFFF;
     enum EASYSOCKET_API SocketType {
         TCP = SOCK_STREAM,
