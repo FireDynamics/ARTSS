@@ -14,8 +14,9 @@ std::string BaseSocket::ip_to_string(sockaddr_in addr) {
     return std::string(ip);
 }
 
-BaseSocket::BaseSocket(std::function<void(int, std::string)> onError, SocketType socket_type, int socket_id) : sock(
-        socket_id) {
+BaseSocket::BaseSocket(std::function<void(int, std::string)> onError,
+                       SocketType socket_type, int socket_id) :
+        sock(socket_id) {
     if (socket_id < 0) {
         if ((this->sock = socket(AF_INET, socket_type, 0)) < 0) {
             onError(errno, "Socket creating error.");
@@ -24,7 +25,9 @@ BaseSocket::BaseSocket(std::function<void(int, std::string)> onError, SocketType
 }
 
 void BaseSocket::close_socket() {
-    if (is_closed) return;
+    if (is_closed) {
+        return;
+    }
 
     is_closed = true;
     close(this->sock);
