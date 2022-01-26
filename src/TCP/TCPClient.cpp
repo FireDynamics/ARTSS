@@ -44,7 +44,7 @@ void TCPSocket::initiate_connection(const std::string &host, uint16_t port,
     for (it = res; it != nullptr; it = it->ai_next) {
         if (it->ai_family == AF_INET) { // IPv4
             memcpy((void *) (&this->address), (void *) it->ai_addr, sizeof(sockaddr_in));
-            break; // for now, just get first ip (ipv4).
+            break;  // for now, just get first ip (ipv4).
         }
     }
 
