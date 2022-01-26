@@ -14,7 +14,7 @@
 #include <thread>
 
 class EASYSOCKET_API TCPServer : public BaseSocket {
-  public:
+ public:
     // Event Listeners:
     std::function<void(TCPSocket *)> on_new_connection = [](TCPSocket *sock){FDR_UNUSED(sock)};
 
@@ -30,7 +30,7 @@ class EASYSOCKET_API TCPServer : public BaseSocket {
     // Overriding close to add shutdown():
     void close_socket() override;
 
-  private:
+ private:
     static void accept_connection(TCPServer *server, FDR_ON_ERROR);
 };
 
