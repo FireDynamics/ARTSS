@@ -37,7 +37,7 @@ namespace Utility {
     std::vector<std::string> split(const std::string &text, char delimiter);
     std::string remove_extension(const std::string &filename);
     void log_field_info(Field &field, const std::string &text, const std::string &logger_name);
-
+    std::string trim(const std::string &string);
 #ifndef BENCHMARKING
     void create_logger(const std::string &log_level, const std::optional<std::string> &log_file);
     std::shared_ptr<spdlog::logger> create_logger(std::string const& logger_name);

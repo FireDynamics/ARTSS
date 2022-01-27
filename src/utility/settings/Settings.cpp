@@ -349,8 +349,6 @@ namespace Settings {
             icp.ic = initial_conditions::parse_hat_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::exp_sinus_prod) {
             icp.ic = initial_conditions::parse_exp_sinus_prod(values, context);
-        } else if (icp.usr_fct == FunctionNames::exp_sinus_sum) {
-            // no values
         } else if (icp.usr_fct == FunctionNames::jet) {
             icp.ic = initial_conditions::parse_jet_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::layers) {
@@ -361,7 +359,7 @@ namespace Settings {
             icp.ic = initial_conditions::parse_sin_sin_sin_parameters(values, context);
         } else if (icp.usr_fct == FunctionNames::vortex) {
             icp.ic = initial_conditions::parse_vortex_parameters(values, context);
-        } else if (icp.usr_fct == FunctionNames::zero) {
+        } else if (icp.usr_fct == FunctionNames::zero || icp.usr_fct == FunctionNames::exp_sinus_sum) {
             // do nothing
         } else {
             throw config_error(fmt::format("{} has no parsing implementation.", icp.usr_fct));
@@ -528,8 +526,8 @@ namespace Settings {
         return lp;
     }
 
-    physical_parameters
-    parse_physical_parameters(const tinyxml2::XMLElement *root, const std::string &solver_description) {
+    physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root,
+                                                  const std::string &solver_description) {
         std::string context = "physical_parameters";
         auto[subsection, values] = map_parameter_section(root, context);
         physical_parameters pp{};
@@ -776,6 +774,36 @@ namespace Settings {
             }
         }
 
+        temperature_source parse_temperature_source(const tinyxml2::XMLElement *head, const std::string &parent_context) {
+            std::string own_context = "source";
+            std::string context = create_context(parent_context, own_context);
+            auto[subsection_source, values_source] = map_parameter_section(head, own_context);
+
+            temperature_source source{};
+            source.type = get_required_string(values_source, "type", context);
+            auto fields = Utility::split(get_required_string(values_source, "dir", context), delimiter);
+            for (const std::string &string: fields) {
+                source.dir.emplace_back(Mapping::match_axis(string));
+            }
+            source.dissipation = get_required_bool(values_source, "dissipation", context);
+            source.random = get_required_bool(values_source, "random", context);
+            if (source.random) {
+                source.random_parameters = parse_random_parameters(subsection_source, context);
+            }
+            source.temp_fct = get_required_string(values_source, "temp_fct", context);
+            if (source.temp_fct == SourceMethods::Gauss) {
+                source.temp_function = sources::parse_gauss(values_source, context);
+            } else if (source.temp_fct == SourceMethods::Cube) {
+                source.temp_function = sources::parse_cube(values_source, context);
+            } else if (source.temp_fct == SourceMethods::Buoyancy || source.temp_fct == SourceMethods::Zero) {
+                // do nothing
+            } else {
+                throw config_error(fmt::format("temperature source function '{}' has no parsing implementation.",
+                                               source.temp_fct));
+            }
+            return source;
+        }
+
         temperature_solver parse_temperature_solver(const tinyxml2::XMLElement *head, const std::string &parent_context,
                                                     bool has_turbulence) {
             std::string own_context = "temperature";
@@ -798,32 +826,7 @@ namespace Settings {
             } else {
                 solver_temperature.has_turbulence = false;
             }
-
-            std::string context_source = "source";
-            auto[subsection_source, values_source] = map_parameter_section(subsection, context_source);
-            solver_temperature.source.type = get_required_string(values_source, "type", context_source);
-            auto fields = Utility::split(get_required_string(values_source, "dir", context_source), delimiter);
-            for (const std::string &string: fields) {
-                solver_temperature.source.dir.emplace_back(Mapping::match_axis(string));
-            }
-            solver_temperature.source.dissipation = get_required_bool(values_source, "dissipation", context_source);
-            solver_temperature.source.random = get_required_bool(values_source, "random", context_source);
-            if (solver_temperature.source.random) {
-                solver_temperature.source.random_parameters = parse_random_parameters(subsection_source,
-                                                                                      create_context(context,
-                                                                                                     context_source));
-            }
-            solver_temperature.source.temp_fct = get_required_string(values_source, "temp_fct", context_source);
-            if (solver_temperature.source.temp_fct == SourceMethods::Gauss) {
-                solver_temperature.source.temp_function = sources::parse_gauss(values_source, context_source);
-            } else if (solver_temperature.source.temp_fct == SourceMethods::Cube) {
-                solver_temperature.source.temp_function = sources::parse_cube(values_source, context_source);
-            } else if (solver_temperature.source.temp_fct == SourceMethods::Buoyancy || solver_temperature.source.temp_fct == SourceMethods::Zero) {
-                // do nothing
-            } else {
-                throw config_error(fmt::format("temperature source function '{}' has no parsing implementation.",
-                                               solver_temperature.source.temp_fct));
-            }
+            solver_temperature.source = parse_temperature_source(subsection, context);
             return solver_temperature;
         }
 
@@ -958,6 +961,18 @@ namespace Settings {
         return sp;
     }
 
+    data_assimilation_parameters parse_assimilation_parameters(const tinyxml2::XMLElement *root) {
+        std::string context = "data_assimilation";
+        auto[subsection, values] = map_parameter_section(root, context);
+        data_assimilation_parameters ap{};
+        ap.enabled = get_required_bool(values, "enabled", context);
+
+        if (ap.enabled) {
+            ap.class_name = get_required_string(values, "class_name", context);
+        }
+        return ap;
+    }
+
     Settings parse_settings(const std::string &filename, const std::string &file_content) {
         tinyxml2::XMLDocument doc;
         doc.Parse(file_content.c_str());
@@ -971,21 +986,53 @@ namespace Settings {
                 parse_boundaries_parameters(root),
                 parse_obstacles_parameters(root),
                 parse_surfaces_parameters(root),
+                parse_assimilation_parameters(root),
                 parse_initial_conditions_parameters(root),
                 parse_visualisation_parameters(root),
                 parse_logging_parameters(root)};
     }
 
-    Settings parse_settings_from_file(const std::filesystem::path &path) {
+    std::string parse_settings_from_file(const std::filesystem::path &path) {
         std::ifstream in(path);
+        if (in.fail()) {
+            throw config_error(fmt::format("Could not read file '{}'. Please check if the file exists or the permission are sufficient.", path.c_str()));
+        }
         std::stringstream sstr;
         sstr << in.rdbuf();
-        auto settings = parse_settings(path.filename(), sstr.str());
+        return sstr.str();
+    }
+
+    Settings parse_settings(const std::filesystem::path &path) {
+        std::string file_content = parse_settings_from_file(path);
+        auto settings = parse_settings(path.filename(), file_content);
 #ifndef BENCHMARKING
         Utility::create_logger(settings.logging_parameters.level, settings.logging_parameters.file);  // create global logger
         auto logger = Utility::create_logger("XML File");
-        logger->debug(sstr.str());
+        logger->debug(file_content);
 #endif
         return settings;
     }
+
+    data_assimilation::field_changes parse_field_changes(const tinyxml2::XMLElement *head,
+                                                         const std::string &parent_context) {
+        std::string own_context = "fields_changed";
+        std::string context = create_context(parent_context, own_context);
+        auto[subsection, values] = map_parameter_section(head, own_context);
+        data_assimilation::field_changes field_changes{};
+        field_changes.u_changed = get_required_bool(values, "u", context);
+        field_changes.v_changed = get_required_bool(values, "v", context);
+        field_changes.w_changed = get_required_bool(values, "w", context);
+        field_changes.p_changed = get_required_bool(values, "p", context);
+        field_changes.T_changed = get_required_bool(values, "T", context);
+        field_changes.C_changed = get_required_bool(values, "concentration", context);
+        field_changes.changed = field_changes.u_changed || field_changes.v_changed
+                             || field_changes.w_changed || field_changes.p_changed
+                             || field_changes.T_changed || field_changes.C_changed;
+        if (field_changes.changed) {
+            field_changes.file_name = get_required_string(values, "filename", context);
+        }
+        return field_changes;
+    }
+
+
 }

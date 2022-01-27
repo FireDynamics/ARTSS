@@ -58,6 +58,8 @@
 
   <adaption dynamic="No" data_extraction="No"> </adaption>
 
+  <data_assimilation enabled="No" />
+
   <boundaries>
     <boundary field="w" patch="front,back,left,right,bottom,top" type="dirichlet" value="0.0" />
     <boundary field="u,v" patch="left,right,bottom,top" type="dirichlet" value="2.0" />

@@ -8,10 +8,12 @@
 #define ARTSS_SOURCE_GAUSSFUNCTION_H_
 
 
+#include <string>
 #include "../field/Field.h"
 #include "../interfaces/ISourceFunction.h"
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
+#include "../utility/Utility.h"
 
 class GaussFunction: public ISourceFunction {
  public:
@@ -25,6 +27,9 @@ class GaussFunction: public ISourceFunction {
     void create_spatial_values();
     Field m_field_spatial_values;
     const Settings::solver::sources::gauss m_settings;
+#ifndef BENCHMARKING
+    std::shared_ptr<spdlog::logger> m_logger;
+#endif
 };
 
 #endif /* ARTSS_SOURCE_GAUSSFUNCTION_H_ */

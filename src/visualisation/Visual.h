@@ -15,23 +15,23 @@
 
 class Visual {
 public:
-    Visual(const Settings::visualisation_parameters &settings, const Solution &solution, const std::string &filename);
+    Visual(const Settings::visualisation_parameters &settings, const Solution &solution, const std::string &file_name);
 
     void visualise(const FieldController &field_controller, real t);
 
     static void initialise_grid(real *x_coords, real *y_coords, real *z_coords, int Nx, int Ny, int Nz, real dx, real dy, real dz);
 
-    static void write_csv(FieldController &field_controller, const std::string& filename);
-    static void write_vtk(FieldController &field_controller, const std::string& filename);
-    static void write_vtk_debug(FieldController &field_controller, const std::string& filename);
+    static void write_csv(FieldController &field_controller, const std::string &file_name);
+    static void write_vtk(FieldController &field_controller, const std::string &file_name);
+    static void write_vtk_debug(FieldController &field_controller, const std::string &file_name);
 
 private:
     const Settings::visualisation_parameters &m_settings;
 
-    const std::string &m_filename;
+    const std::string &m_file_name;
     const Solution &m_solution;
 
-    static std::string create_filename(const std::string &filename, int counter, bool analytical);
+    static std::string create_file_name(const std::string &file_name, int counter, bool analytical);
 
     bool m_has_analytical_solution = false;
 #ifndef BENCHMARKING

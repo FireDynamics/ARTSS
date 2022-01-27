@@ -54,6 +54,8 @@ NSTempTurbConSolver::NSTempTurbConSolver(const Settings::solver_parameters &solv
 
     SolverSelection::set_temperature_source_function(m_solver_settings.temperature.source, &m_source_function_temperature);
     SolverSelection::set_concentration_source_function(m_solver_settings.concentration.source, &m_source_function_concentration);
+    m_add_temp_source = m_solver_settings.temperature.source.temp_fct != SourceMethods::Zero;
+    m_add_con_source = m_solver_settings.concentration.source.con_fct != SourceMethods::Zero;
     control();
 }
 
@@ -356,4 +358,9 @@ void NSTempTurbConSolver::control() {
 void NSTempTurbConSolver::update_source(real t_cur) {
     m_source_function_temperature->update_source(m_field_controller->get_field_source_T(), t_cur);
     m_source_function_concentration->update_source(m_field_controller->get_field_source_concentration(), t_cur);
+}
+
+void NSTempTurbConSolver::replace_heat_source(const Settings::solver::temperature_source &temperature_source) {
+    SolverSelection::set_temperature_source_function(temperature_source, &m_source_function_temperature);
+    m_add_temp_source = temperature_source.temp_fct != SourceMethods::Zero;
 }

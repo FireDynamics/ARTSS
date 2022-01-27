@@ -1,10 +1,7 @@
 *.log
-debug/
 *.dat
 *.vtk
 *.ods
-/Debug/
-.idea/
 build/
 *.source
 .project

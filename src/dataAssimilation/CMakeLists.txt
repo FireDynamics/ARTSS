@@ -1,0 +1,11 @@
+target_sources(artss
+        PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/DataAssimilation.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/DataAssimilation.h
+        ${CMAKE_CURRENT_LIST_DIR}/FieldIO.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/FieldIO.h
+        ${CMAKE_CURRENT_LIST_DIR}/TemperatureSourceChanger.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/TemperatureSourceChanger.h
+        ${CMAKE_CURRENT_LIST_DIR}/ParameterReader.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/ParameterReader.h
+        )

@@ -22,8 +22,8 @@ class ISourceFunction {
     virtual void update_source(Field &out, real t_cur) = 0;
 
  protected:
-    bool m_absolute;
-    bool m_has_noise;
+    bool m_absolute = false;
+    bool m_has_noise = false;
     IRandomField *m_noise_maker;
 };
 

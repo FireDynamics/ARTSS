@@ -233,3 +233,11 @@ void FieldController::update_host_debug() {
 #pragma acc wait
 }
 
+void FieldController::replace_data(Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
+    field_u.copy_data(u);
+    field_v.copy_data(v);
+    field_w.copy_data(w);
+    field_p.copy_data(p);
+    field_T.copy_data(T);
+    field_concentration.copy_data(C);
+}

@@ -4,8 +4,12 @@
 /// \author     Severt
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include <unistd.h>
 #include "TimeIntegration.h"
 #include "domain/DomainData.h"
+#ifdef ASSIMILATION
+#include <mpi.h>
+#endif
 
 // ==================================== Constructor ====================================
 // ***************************************************************************************
@@ -26,6 +30,9 @@ TimeIntegration::TimeIntegration(const Settings::Settings &settings, SolverContr
     m_field_controller = m_solver_controller->get_field_controller();
 
     m_adaption = new Adaption(m_settings.adaption_parameters, m_field_controller, m_settings.filename);
+#ifdef ASSIMILATION
+    m_data_assimilation = new DataAssimilation(*m_solver_controller, m_field_controller, m_settings);
+#endif
 #ifndef BENCHMARKING
     m_solution = new Solution(m_settings.initial_conditions_parameters, m_settings.solver_parameters.solution);
     m_analysis = new Analysis(m_settings.solver_parameters.solution, *m_solution);
@@ -42,7 +49,6 @@ void TimeIntegration::run() {
     m_field_controller->update_host();
     m_analysis->analyse(m_field_controller, 0.);
     m_visual->visualise(*m_field_controller, 0.);
-    Visual::write_vtk_debug(*m_field_controller, "initial_steckler");
     m_logger->info("Start calculating and timing...");
 #else
     std::cout << "Start calculating and timing...\n" << std::endl;
@@ -103,6 +109,16 @@ void TimeIntegration::run() {
             // if(!VN_check)
             //     std::cout<<"Von Neumann condition not met!"<<std::endl;
 #endif
+#ifdef ASSIMILATION
+            if (m_data_assimilation->requires_rollback(t_cur)) {
+                t_cur = m_data_assimilation->get_new_time_value();
+                iteration_step = static_cast<int>(t_cur / dt);
+                m_logger->info("ROLLBACK to time step {} (step: {})", t_cur, iteration_step);
+                m_data_assimilation->initiate_rollback();
+            } else {
+                m_data_assimilation->save_data(t_cur);
+            }
+#endif
             // update
             m_adaption->run(t_cur);
 #ifndef BENCHMARKING
@@ -126,6 +142,13 @@ void TimeIntegration::run() {
 #endif
 
     }
+
+#ifdef ASSIMILATION
+    bool simulation_is_running = false;
+    MPI_Request request;
+    MPI_Isend(&simulation_is_running, 1, MPI_LOGICAL, 1, 77, MPI_COMM_WORLD, &request);
+#endif
+
     // stop timer
     end = std::chrono::system_clock::now();
     long ms = std::chrono::duration_cast < std::chrono::milliseconds > (end - start).count();

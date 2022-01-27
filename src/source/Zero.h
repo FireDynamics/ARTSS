@@ -15,5 +15,4 @@ public:
     void update_source(Field &, real) override { }
 };
 
-
 #endif /* ARTSS_SOURCE_ZERO_H */

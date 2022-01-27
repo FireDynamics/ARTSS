@@ -27,6 +27,8 @@
 
   <adaption dynamic="No" data_extraction="No"> </adaption>
 
+  <data_assimilation enabled="No" />
+
   <boundaries>
     <boundary field="u,v,w" patch="front,back,left,right,bottom,top" type="dirichlet" value="0.0" />
   </boundaries>

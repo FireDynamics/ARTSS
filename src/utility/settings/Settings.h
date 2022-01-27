@@ -260,6 +260,7 @@ namespace Settings {
                 Coordinate<real> position;
                 Coordinate<real> dimension;
                 real tau;
+                // TODO (c++20) auto operator<=>(const gauss&) const = default;
             };
             struct cube {
                 Coordinate<real> coords_start;
@@ -276,6 +277,7 @@ namespace Settings {
             struct random_parameters random_parameters;
             std::variant<sources::gauss, sources::cube> temp_function;
         };
+        temperature_source parse_temperature_source(const tinyxml2::XMLElement *head, const std::string &parent_context);
         struct temperature_solver {
             advection_solver advection;
             diffusion_solver diffusion;
@@ -314,6 +316,22 @@ namespace Settings {
         solver::concentration_solver concentration;
         solver::solution solution;
     };
+    namespace data_assimilation {
+        struct field_changes {
+            bool changed;
+            bool u_changed;
+            bool v_changed;
+            bool w_changed;
+            bool p_changed;
+            bool T_changed;
+            bool C_changed;
+            std::string file_name;
+        };
+    }
+    struct data_assimilation_parameters {
+        bool enabled;
+        std::string class_name;
+    };
     struct Settings {
         std::string filename;
         struct physical_parameters physical_parameters;
@@ -323,6 +341,7 @@ namespace Settings {
         struct boundary_parameters boundary_parameters;
         struct obstacles_parameters obstacles_parameters;
         struct surfaces_parameters surfaces_parameters;
+        struct data_assimilation_parameters assimilation_parameters;
         struct initial_conditions_parameters initial_conditions_parameters;
         struct visualisation_parameters visualisation_parameters;
         struct logging_parameters logging_parameters;
@@ -332,13 +351,15 @@ namespace Settings {
     surfaces_parameters parse_surfaces_parameters(const tinyxml2::XMLElement *root);
     obstacles_parameters parse_obstacles_parameters(const tinyxml2::XMLElement *root);
     adaption_parameters parse_adaption_parameters(const tinyxml2::XMLElement *root);
+    data_assimilation_parameters parse_assimilation_parameters(const tinyxml2::XMLElement *root);
     boundary_parameters parse_boundaries_parameters(const tinyxml2::XMLElement *root);
     initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root);
     visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root);
     logging_parameters parse_logging_parameters(const tinyxml2::XMLElement *root);
     domain_parameters parse_domain_parameters(const tinyxml2::XMLElement *root);
     physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root, const std::string &solver_description);
-    Settings parse_settings(const std::string &filename, const std::string &file_content);
-    Settings parse_settings_from_file(const std::filesystem::path &path);
+    Settings parse_settings(const std::filesystem::path &path);
+    std::string parse_settings_from_file(const std::filesystem::path &path);
+    data_assimilation::field_changes parse_field_changes(const tinyxml2::XMLElement *head, const std::string &parent_context);
 }
 #endif

@@ -95,6 +95,8 @@
     </data_extraction>
   </adaption>
 
+  <data_assimilation enabled="No" />
+
   <boundaries>
     <boundary field="u,v,w" patch="front,back,bottom,top" type="dirichlet" value="0.0" />
     <boundary field="u,v,w" patch="left,right" type="neumann" value="0.0" />

@@ -30,6 +30,8 @@
 
   <adaption dynamic="No" data_extraction="No"> </adaption>
 
+  <data_assimilation enabled="No" />
+
   <boundaries>
     <boundary field="u,v,w" patch="front,back,bottom,top,left,right" type="dirichlet" value="1.0" />
   </boundaries>

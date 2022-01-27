@@ -193,7 +193,7 @@ function create_testcases {
   </boundaries>" > ${NAME}_$BFILEVAL
     echo "  <initial_conditions usr_fct=\"Zero\" random=\"No\">
   </initial_conditions>" > ${NAME}_$IFILEVAL
-    echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\"> <!--Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
+    echo "   <source type=\"ExplicitEuler\" force_fct=\"Buoyancy\" dir=\"y\" use_init_values=\"Yes\">  <!-- Direction of force (x,y,z or combinations xy,xz,yz, xyz) -->
     </source>" > ${NAME}_$SFILEVAL
     echo "    <source type=\"ExplicitEuler\" dir=\"y\" temp_fct=\"Buoyancy\" dissipation=\"No\" random=\"No\">
     </source>" > ${NAME}_$TSFILEVAL

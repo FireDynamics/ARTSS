@@ -90,7 +90,7 @@ std::shared_ptr<spdlog::logger> create_logger(const std::string &logger_name) {
     return logger;
 }
 
-// ======================= creates a new logger ================================
+// ========================== creates a logger =================================
 // *****************************************************************************
 /// \brief  creates a new named logger this function is only available
 ///         if BENCHMARKING is not enabled
@@ -116,7 +116,6 @@ void create_logger(const std::string &log_level, const std::optional<std::string
     combined_logger->set_level(spdlog::level::trace);
 }
 #endif
-
 
 void log_field_info(Field &field, const std::string &text, const std::string &logger_name) {
 #ifndef BENCHMARKING
@@ -158,6 +157,24 @@ std::string remove_extension(const std::string &filename) {
     size_t lastdot = filename.find_last_of('.');
     if (lastdot == std::string::npos) return filename;
     return filename.substr(0, lastdot);
+}
+
+std::string trim_end(std::string string) {
+    string.erase(std::find_if(string.rbegin(), string.rend(), [](char c) {
+        return !std::isspace(static_cast<unsigned char>(c));
+    }).base(), string.end());
+    return string;
+}
+
+std::string trim_start(std::string source) {
+    source.erase(source.begin(), std::find_if(source.begin(), source.end(), [](char c) {
+        return !std::isspace(static_cast<unsigned char>(c));
+    }));
+    return source;
+}
+
+std::string trim(const std::string &string) {
+    return trim_end(trim_start(string));
 }
 
 }  // namespace Utility
