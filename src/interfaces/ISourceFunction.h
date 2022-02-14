@@ -18,7 +18,7 @@ class ISourceFunction {
         m_has_noise = true;
         m_noise_maker = noise_maker;
     }
-    virtual ~ISourceFunction() = 0;
+    virtual ~ISourceFunction() = default;
     virtual void update_source(Field &out, real t_cur) = 0;
 
  protected:

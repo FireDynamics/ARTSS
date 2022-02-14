@@ -13,7 +13,6 @@
 class Cube: public ISourceFunction {
  public:
     explicit Cube(const Settings::solver::sources::cube &cube);
-    ~Cube() = default;
     void update_source(Field &out, real t_cur) override;
 
  private:
