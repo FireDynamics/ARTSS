@@ -250,6 +250,7 @@ void NSTempSolver::update_source(real t_cur) {
 }
 
 void NSTempSolver::replace_heat_source(const Settings::solver::temperature_source &temperature_source) {
+    delete m_source_function_temperature;
     SolverSelection::set_temperature_source_function(temperature_source, &m_source_function_temperature);
     m_add_temp_source = m_solver_settings.temperature.source.temp_fct != SourceMethods::Zero;
 }
