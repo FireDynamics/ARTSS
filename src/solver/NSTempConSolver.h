@@ -9,24 +9,30 @@
 #ifndef ARTSS_SOLVER_NSTEMPCONSOLVER_H_
 #define ARTSS_SOLVER_NSTEMPCONSOLVER_H_
 
+#include <string>
+#include <vector>
 
 #include "../interfaces/ISolver.h"
 #include "../interfaces/IAdvection.h"
 #include "../interfaces/IDiffusion.h"
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
+#include "../interfaces/ISourceFunction.h"
 
 class NSTempConSolver: public ISolver {
  public:
-    NSTempConSolver(FieldController *field_controller);
+    NSTempConSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller);
     ~NSTempConSolver() override;
 
     void do_step(real t, bool sync) override;
+    void update_source(real) override;
 
 private:
+    const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -42,18 +48,13 @@ private:
     ISource *sou_con;
 
     FieldController *m_field_controller;
+    ISourceFunction *m_source_function_concentration;
+    ISourceFunction *m_source_function_temperature;
 
-    real m_nu;
-    real m_kappa;
-    real m_gamma;
-    std::string m_dir_vel;
-
-    static void control();
-
-    std::string m_forceFct;
-    bool m_hasDissipation;
-    std::string m_tempFct;
-    std::string m_conFct;
+    bool m_add_source;
+    bool m_add_temp_source;
+    bool m_add_con_source;
+    void control();
 };
 
 #endif /* ARTSS_SOLVER_NSTEMPCONSOLVER_H_ */

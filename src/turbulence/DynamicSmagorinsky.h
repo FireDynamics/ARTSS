@@ -9,6 +9,8 @@
 
 #include "../interfaces/ITurbulence.h"
 #include "../field/Field.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class DynamicSmagorinsky : public ITurbulence {
 public:
@@ -34,7 +36,6 @@ private:
     Field M11, M22, M33, M12, M13, M23;       // High frequency resolved terms
     Field S_bar, S_bar_f;                 // modulus of strain tensor
     Field Cs;                        // dynamic constant
-    real m_nu;                        // viscosity
 };
 
 #endif /* ARTSS_TURBULENCE_DYNAMICSMAGORINSKY_H_ */

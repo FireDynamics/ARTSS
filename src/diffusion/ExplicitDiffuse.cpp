@@ -4,20 +4,16 @@
 /// \author     Max Boehler
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
+#include "ExplicitDiffuse.h"
+
 #include <cmath>
 
 #ifdef _OPENACC
 #include <accelmath.h>
 #endif
 
-#include "ExplicitDiffuse.h"
-#include "../utility/Parameters.h"
-#include "../boundary/BoundaryController.h"
-#include "../Domain.h"
-
-ExplicitDiffuse::ExplicitDiffuse() {
-    m_dt = Parameters::getInstance()->get_real("physical_parameters/dt");
-}
+#include "../domain/DomainController.h"
+#include "../domain/DomainData.h"
 
 //====================================== Diffuse ===============================================
 // ***************************************************************************************
@@ -30,7 +26,7 @@ ExplicitDiffuse::ExplicitDiffuse() {
 // ***************************************************************************************
 void ExplicitDiffuse::diffuse(Field &out, const Field &in, Field const &, real const D, bool sync) {
     ExplicitStep(out, in, D, sync);
-    BoundaryController::getInstance()->apply_boundary(out, sync);
+    DomainController::getInstance()->apply_boundary(out, sync);
 }
 
 //====================================== Turbulent Diffuse ===============================================
@@ -46,35 +42,37 @@ void ExplicitDiffuse::diffuse(
         Field &out, Field const &in,
         Field const &, real const D, Field const &EV, bool sync) {
     ExplicitStep(out, in, D, EV, sync);
-    BoundaryController::getInstance()->apply_boundary(out, sync);
+    DomainController::getInstance()->apply_boundary(out, sync);
 }
 
 
 void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx();  // due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny();
+    const size_t Nx = domain_data->get_Nx();  // due to unnecessary parameter passing of *this
+    const size_t Ny = domain_data->get_Ny();
 
-    auto boundary = BoundaryController::getInstance();
+    const real dt = domain_data->get_physical_parameters().dt;
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    auto domain_controller = DomainController::getInstance();
 
-    real reciprocal_dx = D / (domain->get_dx() * domain->get_dx());
-    real reciprocal_dy = D / (domain->get_dy() * domain->get_dy());
-    real reciprocal_dz = D / (domain->get_dz() * domain->get_dz());
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
+
+    real reciprocal_dx = D / (domain_data->get_dx() * domain_data->get_dx());
+    real reciprocal_dy = D / (domain_data->get_dy() * domain_data->get_dy());
+    real reciprocal_dz = D / (domain_data->get_dz() * domain_data->get_dz());
 
     const size_t neighbour_i = 1;
     const size_t neighbour_j = Nx;
     const size_t neighbour_k = Nx * Ny;
-#pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i]) async
-    for (size_t ii = 0; ii < bsize_i; ++ii) {
-        const size_t idx = d_inner_list[ii];
+#pragma acc parallel loop independent present(out, in, domain_inner_list[:size_domain_inner_list]) async
+    for (size_t ii = 0; ii < size_domain_inner_list; ++ii) {
+        const size_t idx = domain_inner_list[ii];
         out[idx] = in[idx] +
-                     m_dt * ((in[idx + neighbour_i] - 2 * in[idx] + in[idx - neighbour_i]) * reciprocal_dx
-                           + (in[idx + neighbour_j] - 2 * in[idx] + in[idx - neighbour_j]) * reciprocal_dy
-                           + (in[idx + neighbour_k] - 2 * in[idx] + in[idx - neighbour_k]) * reciprocal_dz
+                     dt * ((in[idx + neighbour_i] - 2 * in[idx] + in[idx - neighbour_i]) * reciprocal_dx
+                         + (in[idx + neighbour_j] - 2 * in[idx] + in[idx - neighbour_j]) * reciprocal_dy
+                         + (in[idx + neighbour_k] - 2 * in[idx] + in[idx - neighbour_k]) * reciprocal_dz
                      );
     }
 
@@ -85,22 +83,24 @@ void ExplicitDiffuse::ExplicitStep(Field &out, Field const &in, real const D, bo
 
 // Turbulent Diffuse
 void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Field const &EV, bool sync) {
-    auto domain = Domain::getInstance();
+    auto domain_data = DomainData::getInstance();
     // local variables and parameters for GPU
-    const size_t Nx = domain->get_Nx();  // due to unnecessary parameter passing of *this
-    const size_t Ny = domain->get_Ny();
+    const size_t Nx = domain_data->get_Nx();  // due to unnecessary parameter passing of *this
+    const size_t Ny = domain_data->get_Ny();
 
-    auto boundary = BoundaryController::getInstance();
+    const real dt = domain_data->get_physical_parameters().dt;
 
-    size_t *d_inner_list = boundary->get_inner_list_level_joined();
-    auto bsize_i = boundary->get_size_inner_list();
+    auto domain_controller = DomainController::getInstance();
+
+    size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
+    auto size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     const size_t neighbour_i = 1;
     const size_t neighbour_j = Nx;
     const size_t neighbour_k = Nx * Ny;
-#pragma acc parallel loop independent present(out, in, d_inner_list[:bsize_i], ev) async
-    for (size_t ii = 0; ii < bsize_i; ++ii) {
-        const size_t idx = d_inner_list[ii];
+#pragma acc parallel loop independent present(out, in, domain_inner_list[:size_domain_inner_list], EV) async
+    for (size_t ii = 0; ii < size_domain_inner_list; ++ii) {
+        const size_t idx = domain_inner_list[ii];
         real nu_x1 = 0.5 * (EV[idx + neighbour_i] + EV[idx]) + D;
         real nu_x2 = 0.5 * (EV[idx - neighbour_i] + EV[idx]) + D;
         real nu_y1 = 0.5 * (EV[idx + neighbour_j] + EV[idx]) + D;
@@ -116,9 +116,9 @@ void ExplicitDiffuse::ExplicitStep(Field &out, const Field &in, real const D, Fi
         real dk1 = (in[idx + neighbour_k] - in[idx]);
 
         out[idx] = in[idx] +
-                     m_dt * ((nu_x1 * di0 - nu_x2 * di1)    // dx // * 4 / dx;  // u_{i-0.5} - u_{i+0.5}
-                           + (nu_y1 * dj0 - nu_y2 * dj1)    // dy
-                           + (nu_z1 * dk0 - nu_z2 * dk1));  // dz
+                     dt * ((nu_x1 * di0 - nu_x2 * di1)    // dx // * 4 / dx;  // u_{i-0.5} - u_{i+0.5}
+                         + (nu_y1 * dj0 - nu_y2 * dj1)    // dy
+                         + (nu_z1 * dk0 - nu_z2 * dk1));  // dz
     }
 
     if (sync) {

@@ -12,18 +12,21 @@
 #include "../interfaces/IDiffusion.h"
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
+#include "../interfaces/ISourceFunction.h"
 
 class NSTempSolver : public ISolver {
 public:
-    NSTempSolver(FieldController *field_controller);
-    ~NSTempSolver();
+    NSTempSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller);
+    ~NSTempSolver() override;
 
     void do_step(real t, bool sync) override;
-
+    void update_source(real) override;
  private:
+    const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -37,15 +40,12 @@ public:
     ISource *sou_vel;
     ISource *sou_temp;
 
-    real m_nu;
-    real m_kappa;
-    std::string m_dir_vel;
+    ISourceFunction *m_source_function_temperature;
 
-    static void control();
+    void control();
 
-    std::string m_forceFct;
-    bool m_has_dissipation;
-    std::string m_tempFct;
+    bool m_add_source;
+    bool m_add_temp_source;
 };
 
 #endif /* ARTSS_SOLVER_NSTEMPSOLVER_H_ */

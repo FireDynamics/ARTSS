@@ -32,7 +32,7 @@ running make. The steps are summarized below.
 
 1. Clone
 ```
-git clone https://github.com/FireDynamics/ARTSS.git
+git clone --recurse-submodules https://github.com/FireDynamics/ARTSS.git
 cd ARTSS
 ```
 

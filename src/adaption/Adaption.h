@@ -10,9 +10,9 @@
 
 #include "../field/Field.h"
 #include "../interfaces/IAdaptionFunction.h"
-#include "../utility/GlobalMacrosTypes.h"
-#include "../interfaces/ISolver.h"
 #include "../solver/SolverController.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 /* enum for different types of dynamic adaption:
  * NO = adaption impossible/no changes
@@ -23,15 +23,20 @@ enum class ADTypes : size_t {
     NO = 0, UNKNOWN = 1, YES = 2
 };
 
+struct AdaptionClass {
+    static const std::string layers;
+    static const std::string vortex;
+};
+
 class Field;
 
 class IAdaptionFunction;
 
 class Adaption {
 public:
-    explicit Adaption(FieldController *field_controller);
+    explicit Adaption(const Settings::adaption_parameters &settings, FieldController *field_controller, const std::string &filename);
 
-    bool inline is_data_extraction_enabled() { return m_has_data_extraction; };
+    bool is_data_extraction_enabled() const { return m_settings.has_data_extraction; };
     bool inline is_data_extraction_before_enabled() { return m_has_data_extraction_before; }
     bool inline is_data_extraction_after_enabled() { return m_has_data_extraction_after; }
     bool inline is_data_extraction_endresult_enabled() { return m_has_data_extraction_endresult; }
@@ -67,9 +72,9 @@ private:
     bool isUpdateNecessary();
     void applyChanges();
 
+    const Settings::adaption_parameters &m_settings;
     long m_shift_x1, m_shift_x2, m_shift_y1, m_shift_y2, m_shift_z1, m_shift_z2;
-    bool m_dynamic, m_dynamic_end;
-    bool m_has_data_extraction;
+    bool m_dynamic_end;
     bool m_has_data_extraction_before = false;
     bool m_has_data_extraction_after = false;
     bool m_has_data_extraction_endresult = false;

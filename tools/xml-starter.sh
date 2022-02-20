@@ -289,7 +289,7 @@ then
     SERVER="JURECA"
     JURECA=0
     module load CMake
-    module load PGI
+    module load NVHPC
     module load CUDA
     export CUDA_LIB=${CUDA_ROOT}/lib64/
     export CUDA_INC=${CUDA_ROOT}/include/

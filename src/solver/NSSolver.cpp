@@ -5,41 +5,32 @@
 /// \copyright  <2015-2020> Forschungszentrum Juelich GmbH. All rights reserved.
 
 #include "NSSolver.h"
-#include "../pressure/VCycleMG.h"
-#include "../utility/Parameters.h"
-#include "../Domain.h"
-#include "SolverSelection.h"
-#include "../boundary/BoundaryData.h"
 
-NSSolver::NSSolver(FieldController *field_controller) {
+#include <string>
+#include <vector>
+#include <algorithm>
+
+#include "SolverSelection.h"
+#include "../domain/DomainData.h"
+
+NSSolver::NSSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller) :
+        m_solver_settings(solver_settings),
+        m_field_controller(field_controller) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
 #endif
-    m_field_controller = field_controller;
-
-    auto params = Parameters::getInstance();
 
     //Advection of velocity
-    std::string advectionType = params->get("solver/advection/type");
-    SolverSelection::SetAdvectionSolver(&adv_vel, advectionType);
+    SolverSelection::set_advection_solver(m_solver_settings.advection, &adv_vel);
 
     //Diffusion of velocity
-    std::string diffusionType = params->get("solver/diffusion/type");
-    SolverSelection::SetDiffusionSolver(&dif_vel, diffusionType);
+    SolverSelection::set_diffusion_solver(m_solver_settings.diffusion, &dif_vel);
 
-    m_nu = params->get_real("physical_parameters/nu");
-
-    //Pressure
-    std::string pressureType = params->get("solver/pressure/type");
-    SolverSelection::SetPressureSolver(&pres, pressureType,
-                                       m_field_controller->get_field_p(),
-                                       m_field_controller->get_field_rhs());
+    SolverSelection::set_pressure_solver(m_solver_settings.pressure, &pres);
 
     //Source
-    std::string sourceType = params->get("solver/source/type");
-    SolverSelection::SetSourceSolver(&sou, sourceType);
-
-    m_sourceFct = params->get("solver/source/force_fct");
+    SolverSelection::set_source_solver(m_solver_settings.source.type, &sou_vel, m_solver_settings.source.direction);
+    m_add_source = m_solver_settings.source.force_fct != SourceMethods::Zero;
     control();
 }
 
@@ -47,7 +38,7 @@ NSSolver::~NSSolver() {
     delete adv_vel;
     delete dif_vel;
     delete pres;
-    delete sou;
+    delete sou_vel;
 }
 
 //========================================== do_step ======================================
@@ -72,9 +63,9 @@ void NSSolver::do_step(real t, bool sync) {
     Field &f_y = m_field_controller->get_field_force_y();
     Field &f_z = m_field_controller->get_field_force_z();
 
-    auto nu = m_nu;
+    real nu = DomainData::getInstance()->get_physical_parameters().nu.value();
 
-#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, rhs, fx, fy, fz)
+#pragma acc data present(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, p, rhs, f_x, f_y, f_z)
     {
 // 1. Solve advection equation
 #ifndef BENCHMARKING
@@ -102,11 +93,11 @@ void NSSolver::do_step(real t, bool sync) {
         }
 
 // 3. Add force
-        if (m_sourceFct != SourceMethods::Zero) {
+        if (m_add_source) {
 #ifndef BENCHMARKING
             m_logger->info("Add source ...");
 #endif
-            sou->add_source(u, v, w, f_x, f_y, f_z, sync);
+            sou_vel->add_source(u, v, w, f_x, f_y, f_z, sync);
             // Couple data
             FieldController::couple_vector(u, u0, u_tmp, v, v0, v_tmp, w, w0, w_tmp, sync);
         }
@@ -137,28 +128,29 @@ void NSSolver::do_step(real t, bool sync) {
 /// \brief  Checks if field specified correctly
 // ***************************************************************************************
 void NSSolver::control() {
+    auto fields_adv = m_solver_settings.advection.fields;
+    std::sort(fields_adv.begin(), fields_adv.end());
+    if (fields_adv != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
-    auto logger = Utility::create_logger(typeid(NSSolver).name());
+        m_logger->error("Fields not specified correctly!");
 #endif
-    auto params = Parameters::getInstance();
+        std::exit(1);
+        // TODO Error Handling
+    }
 
-    if (params->get("solver/advection/field") != "u,v,w") {
+    auto fields_dif = m_solver_settings.diffusion.fields;
+    std::sort(fields_dif.begin(), fields_dif.end());
+    if (fields_dif != std::vector<FieldType>({FieldType::U, FieldType::V, FieldType::W})) {
 #ifndef BENCHMARKING
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error Handling
     }
-    if (params->get("solver/diffusion/field") != "u,v,w") {
+
+    if (m_solver_settings.pressure.field != FieldType::P) {
 #ifndef BENCHMARKING
-        logger->error("Fields not specified correctly!");
-#endif
-        std::exit(1);
-        // TODO Error Handling
-    }
-    if (params->get("solver/pressure/field") != BoundaryData::get_field_type_name(FieldType::P)) {
-#ifndef BENCHMARKING
-        logger->error("Fields not specified correctly!");
+        m_logger->error("Fields not specified correctly!");
 #endif
         std::exit(1);
         // TODO Error Handling

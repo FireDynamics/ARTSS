@@ -8,10 +8,12 @@
 #define ARTSS_TURBULENCE_CONSTSMAGORINSKY_H_
 
 #include "../interfaces/ITurbulence.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class ConstSmagorinsky : public ITurbulence {
  public:
-    ConstSmagorinsky();
+    explicit ConstSmagorinsky(const Settings::solver::turbulence_solvers::const_smagorinsky &settings) : m_settings(settings) {}
     ~ConstSmagorinsky() override = default;
 
     void calc_turbulent_viscosity(
@@ -22,7 +24,7 @@ class ConstSmagorinsky : public ITurbulence {
     void explicit_filtering(Field &out, const Field &in, bool sync) override;
 
 private:
-    real m_Cs;
+    const Settings::solver::turbulence_solvers::const_smagorinsky m_settings;
 };
 
 #endif /* ARTSS_TURBULENCE_CONSTSMAGORINSKY_H_ */

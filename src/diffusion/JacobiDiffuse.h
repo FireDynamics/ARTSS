@@ -11,10 +11,12 @@
 #include "../interfaces/IDiffusion.h"
 #include "../field/Field.h"
 #include "../utility/Utility.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class JacobiDiffuse : public IDiffusion {
  public:
-    JacobiDiffuse();
+    explicit JacobiDiffuse(const Settings::solver::diffusion_solvers::jacobi &settings);
 
     void diffuse(
             Field &out, const Field &in, const Field &b,
@@ -37,14 +39,11 @@ class JacobiDiffuse : public IDiffusion {
             const Field &EV, real dt, bool sync = true);  // turbulent version
 
  private:
+    const Settings::solver::diffusion_solvers::jacobi &m_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
-    real m_dt;
     real m_dsign;
-    real m_w;
-    size_t m_max_iter;
-    real m_tol_res;
 };
 
 #endif /* ARTSS_DIFFUSION_JACOBIDIFFUSE_H_ */

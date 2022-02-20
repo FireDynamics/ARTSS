@@ -13,17 +13,20 @@
 #include "../interfaces/IPressure.h"
 #include "../interfaces/ISource.h"
 #include "../interfaces/ITurbulence.h"
-#include "../utility/GlobalMacrosTypes.h"
 #include "../field/FieldController.h"
+#include "../utility/GlobalMacrosTypes.h"
+#include "../utility/settings/Settings.h"
 
 class NSTurbSolver : public ISolver {
  public:
-    NSTurbSolver(FieldController *field_controller);
-    ~NSTurbSolver();
+    NSTurbSolver(const Settings::solver_parameters &solver_settings, FieldController *field_controller);
+    ~NSTurbSolver() override;
 
     void do_step(real t, bool sync) override;
+    void update_source(real) override {};
 
  private:
+    const Settings::solver_parameters &m_solver_settings;
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
 #endif
@@ -35,11 +38,10 @@ class NSTurbSolver : public ISolver {
     ITurbulence *mu_tub;
 
     FieldController *m_field_controller;
-    real m_nu;
 
-    static void control();
+    void control();
 
-    std::string m_force_function;
+    bool m_add_source;
 };
 
 #endif /* ARTSS_SOLVER_NSTURBSOLVER_H_ */

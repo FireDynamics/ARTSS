@@ -6,6 +6,7 @@
     <nu> 0.05 </nu>  <!-- kinematic viscosity -->
     <beta> 1. </beta>  <!-- thermal expansion coefficient -->
     <g> -9.81 </g>  <!-- gravitational constant -->
+    <rhoa> 1 </rhoa>
     <kappa> 0.05 </kappa>  <!-- thermal diffusion -->
   </physical_parameters>
 
@@ -24,9 +25,9 @@
       <n_cycle> 2 </n_cycle> <!-- number of cycles -->
       <max_cycle> 100 </max_cycle>  <!-- maximal number of cycles in first time step -->
       <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
+      <n_relax> 4 </n_relax>  <!-- number of iterations -->
       <diffusion type="Jacobi" field="p">
-        <n_relax> 4 </n_relax>  <!-- number of iterations -->
-        <max_solve> 100 </max_solve>  <!-- maximal number of iterations in solving at lowest level -->
+        <max_iter> 100 </max_iter>  <!-- maximal number of iterations in solving at lowest level -->
         <tol_res> 1e-07 </tol_res>  <!-- tolerance for residuum/ convergence -->
         <w> 0.6666666667 </w>  <!-- relaxation parameter  -->
       </diffusion>
@@ -39,7 +40,7 @@
         <tol_res> 1e-07 </tol_res>
         <w> 1 </w>
       </diffusion>
-    <source type="ExplicitEuler" temp_fct="BuoyancyST_MMS" dissipation="No" random="No">
+    <source type="ExplicitEuler" dir="y" temp_fct="Buoyancy" dissipation="No" random="No">
     </source>
     </temperature>
     <solution available="Yes">
@@ -71,8 +72,7 @@
 
   <surfaces enabled="No"/>
 
-  <initial_conditions usr_fct="BuoyancyMMS" random="No">
-    <rhoa> 1. </rhoa>
+  <initial_conditions usr_fct="Zero" random="No">
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
