@@ -14,6 +14,13 @@
 #include "../solver/SolverController.h"
 
 class FieldIO {
+    struct binary_header {
+        real t_cur;
+        real dt;
+        std::vector<std::string> fields;
+        std::string date;
+        std::string xml_file_name;
+    };
  public:
     explicit FieldIO(const std::string &xml_file_name, const std::string &file_name = "visualisation.dat");
     void write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
@@ -30,6 +37,7 @@ class FieldIO {
     std::string create_header(const std::string &xml_file_name);
     void read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
 
+    binary_header m_header;
     long *m_positions;
     std::string m_file_name;
 

@@ -18,8 +18,19 @@
 FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_file_name) :
         m_file_name(output_file_name),
         m_logger(Utility::create_logger(typeid(this).name())) {
-
     auto domain_data = DomainData::getInstance();
+    m_header.dt = domain_data->get_physical_parameters().dt;
+    std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    m_header.date = std::ctime(&time);
+    m_header.t_cur = 0;
+    m_header.fields = {Mapping::get_field_type_name(FieldType::U),
+                       Mapping::get_field_type_name(FieldType::V),
+                       Mapping::get_field_type_name(FieldType::W),
+                       Mapping::get_field_type_name(FieldType::P),
+                       Mapping::get_field_type_name(FieldType::T),
+                       "concentration"};
+    m_header.xml_file_name = output_file_name;
+
     real t_end = domain_data->get_physical_parameters().t_end;
 
     size_t n = static_cast<size_t>(std::round(t_end / domain_data->get_physical_parameters().dt)) + 1;
@@ -56,18 +67,19 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
         output.append(fmt::format(("{}\n"), f[size - 1]));
     }
     size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
-    long length = static_cast<long>(output.length());
-    m_positions[n + 1] = m_positions[n] + length;
 
     std::fstream output_file(m_file_name);
     // write field at position dependent on time step
     m_logger->debug("times: {:>10d} write to: {:>20d}", n, m_positions[n]);
     output_file.seekp(m_positions[n], std::ios_base::beg);
-    output_file.write(output.c_str(), length);
+    output_file.write(reinterpret_cast<char *>(&m_header), sizeof(m_header));
 
     // overwrite current time step
     output_file.seekp(m_pos_time_step, std::ios_base::beg);
     output_file.write(fmt::format("{:.5e}", t_cur).c_str(), 11);
+    output_file.seekg(0, output_file.end);
+    int length = output_file.tellg();
+    m_positions[n + 1] = length;
 
     output_file.close();
 }
