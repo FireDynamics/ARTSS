@@ -15,7 +15,6 @@
 class BuoyancyMMS: public ISourceFunction {
  public:
     BuoyancyMMS();
-    ~BuoyancyMMS() = default;
     void update_source(Field &out, real t_cur) override;
  private:
     void set_up();
