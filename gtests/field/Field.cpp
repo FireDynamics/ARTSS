@@ -60,6 +60,20 @@ TEST_F(FieldTest, copy_data) {
     }
 }
 
+/**
+ * after using the copy function of Field, the pointer to the data array must
+ * still be the same (important for GPU use).
+ */
+TEST_F(FieldTest, copy_data_but_same_pointer) {
+    size_t size = 100;
+    Field a(UNKNOWN_FIELD, 0.0, 0, size);
+    Field b(UNKNOWN_FIELD, 0.5, 0, size);
+    real *data_pointer = a.data;
+    a.copy_data(b);
+    ASSERT_EQ(data_pointer, a.data);
+}
+
+
 TEST_F(FieldTest, stress_copy_data) {
     size_t size = 100000;
     Field a(UNKNOWN_FIELD, 0.0, 0, size);
@@ -132,7 +146,10 @@ TEST_F(FieldTest, add_two_fields) {
         x += 1.0;
     }
 
+    a.update_dev();
+    b.update_dev();
     a += b;
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -152,9 +169,12 @@ TEST_F(FieldTest, stress_add_two_fields) {
         x += 1.0;
     }
 
+    a.update_dev();
+    b.update_dev();
     for (int i = 0; i <= 100000; ++i) {
         a += b;
     }
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -175,7 +195,10 @@ TEST_F(FieldTest, mul_two_fields) {
         x += 1.0;
     }
 
+    a.update_dev();
+    b.update_dev();
     a *= b;
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -195,9 +218,12 @@ TEST_F(FieldTest, stress_mul_two_fields) {
         x += 1.0;
     }
 
+    a.update_dev();
+    b.update_dev();
     for (int i = 0; i < 100000; ++i) {
         a *= b;
     }
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -215,8 +241,9 @@ TEST_F(FieldTest, add_scalar) {
         a[i] = x;
         x += 1.0;
     }
-
+    a.update_dev();
     a += 0.5;
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -235,9 +262,11 @@ TEST_F(FieldTest, stress_add_scalar) {
         x += 1.0;
     }
 
+    a.update_dev();
     for (int i = 0; i < 100000; ++i) {
         a += 0.5;
     }
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
@@ -256,7 +285,9 @@ TEST_F(FieldTest, mul_scalar) {
         x += 1.0;
     }
 
+    a.update_dev();
     a *= 0.5;
+    a.update_host();
 
     x = 0.0;
     for (auto i = 0; i < size; ++i) {
