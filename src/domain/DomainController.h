@@ -42,6 +42,13 @@ class DomainController {
     size_t get_domain_inner_list_level_joined_start(size_t level) const { return m_multigrid->get_start_index_domain_inner_cells_level_joined(level); }
     size_t get_domain_inner_list_level_joined_end(size_t level) const { return m_multigrid->get_end_index_domain_inner_cells_level_joined(level); }
 
+    /// \brief get array of joined domain boundary list
+    size_t* get_domain_boundary_list_level_joined() const { return m_multigrid->get_domain_boundary_cells_level_joined(); }
+    /// \brief get size of domain boundary list for specified level
+    size_t get_size_domain_boundary_list_level_joined(size_t level) const { return get_slice_size_domain_boundary_list_level_joined(level); }
+    size_t get_domain_boundary_list_level_joined_start(size_t level) const { return m_multigrid->get_start_index_domain_boundary_cells_level_joined(level); }
+    size_t get_domain_boundary_list_level_joined_end(size_t level) const { return m_multigrid->get_end_index_domain_boundary_cells_level_joined(level); }
+
     /// \bierf get array of joined domain list
     size_t* get_domain_list_level_joined() const { return m_multigrid->get_domain_cells_level_joined(); }
     /// \brief get size of domain list for specified level
