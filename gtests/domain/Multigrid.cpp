@@ -177,19 +177,19 @@ TEST_F(MultigridTest, Obstacle_odd_size) {
     EXPECT_EQ(4351, multigrid.get_end_index_obstacle_cells_level_joined(0));
 
     EXPECT_EQ(25+25*66+25*66*66, multigrid.get_obstacle_cells_level_joined()[0]);
-    EXPECT_EQ(41+40*66+40*66*66, multigrid.get_obstacle_cells_level_joined()[4095]);
+    EXPECT_EQ(41+40*66+40*66*66, multigrid.get_obstacle_cells_level_joined()[4351]);
 
     // level 1
     EXPECT_EQ(4352, multigrid.get_start_index_obstacle_cells_level_joined(1));
     EXPECT_EQ(4927, multigrid.get_end_index_obstacle_cells_level_joined(1));
 
-    EXPECT_EQ(13+13*34+13*34*34, multigrid.get_obstacle_cells_level_joined()[4096]);
-    EXPECT_EQ(21+20*34+20*34*34, multigrid.get_obstacle_cells_level_joined()[4607]);
+    EXPECT_EQ(13+13*34+13*34*34, multigrid.get_obstacle_cells_level_joined()[4352]);
+    EXPECT_EQ(21+20*34+20*34*34, multigrid.get_obstacle_cells_level_joined()[4927]);
 
     // level 2
     EXPECT_EQ(4928, multigrid.get_start_index_obstacle_cells_level_joined(2));
     EXPECT_EQ(5007, multigrid.get_end_index_obstacle_cells_level_joined(2));
 
-    EXPECT_EQ(7+7*18+7*18*18, multigrid.get_obstacle_cells_level_joined()[4608]);
-    EXPECT_EQ(11+10*18+10*18*18, multigrid.get_obstacle_cells_level_joined()[4671]);
+    EXPECT_EQ(7+7*18+7*18*18, multigrid.get_obstacle_cells_level_joined()[4928]);
+    EXPECT_EQ(11+10*18+10*18*18, multigrid.get_obstacle_cells_level_joined()[5007]);
 }
