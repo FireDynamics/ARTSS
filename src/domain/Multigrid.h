@@ -32,13 +32,6 @@ class Multigrid {
     size_t get_start_index_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_first_index(level); }
     size_t get_end_index_domain_inner_cells_level_joined(size_t level) const { return m_jl_domain_inner_list.get_last_index(level); }
 
-    // getter -- domain boundary cells
-    size_t* get_domain_boundary_cells_level_joined(CoordinateAxis axis) const { return m_ml_domain_boundary_list[axis].get_data(); }
-    size_t get_slice_size_domain_boundary_cells_level_joined(size_t level) const { return m_jl_domain_boundary_list.get_slice_size(level); };
-    size_t get_size_domain_boundary_cells_level_joined() const { return m_jl_domain_boundary_list.get_size(); }
-    size_t get_start_index_domain_boundary_cells_level_joined(size_t level) const { return m_jl_domain_boundary_list.get_first_index(level); }
-    size_t get_end_index_domain_boundary_cells_level_joined(size_t level) const { return m_jl_domain_boundary_list.get_last_index(level); }
-
     // getter -- domain cells (boundary + inner)
     size_t* get_domain_cells_level_joined() const { return m_jl_domain_list.get_data(); }
     size_t get_slice_size_domain_cells(size_t level) const { return m_jl_domain_list.get_slice_size(level); }
