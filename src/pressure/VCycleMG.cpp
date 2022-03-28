@@ -741,14 +741,8 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
     const size_t size_domain_inner_list __attribute__((unused)) = domain_controller->get_size_domain_inner_list_level_joined(level);
 
-    size_t *domain_boundary_list = domain_controller->get_domain_boundary_list_level_joined();
-    const size_t size_domain_boundary_list __attribute__((unused)) = domain_controller->get_size_domain_boundary_list_level_joined(level);
-
     const size_t start_i = domain_controller->get_domain_inner_list_level_joined_start(level);
     const size_t end_i = domain_controller->get_domain_inner_list_level_joined_end(level) + 1;
-
-    const size_t start_b = domain_controller->get_domain_boundary_list_level_joined_start(level);
-    const size_t end_b = domain_controller->get_domain_boundary_list_level_joined_end(level) + 1;
 
     domain_controller->apply_boundary(out, sync);
 
@@ -766,20 +760,7 @@ void VCycleMG::call_solve_jacobi(Field &out, Field &tmp, Field const &b, const s
 
 #pragma acc data present(out, tmp, b)
     {
-#pragma acc kernels present(d_iList[start_i:(end_i-start_i)]) async
-#pragma acc loop independent
-        for(size_t j = start_i; j < end_i; ++j){
-            const size_t i = domain_inner_list[j];
-            tmp[i] = out[i];
-        }
-
-        //boundary
-#pragma acc kernels present(d_bList[start_b:(end_b-start_b)]) async
-#pragma acc loop independent
-        for(size_t j = start_b; j < end_b; ++j){
-            const size_t i = domain_boundary_list[j];
-            tmp[i] = out[i];
-        }
+        tmp.copy_data(out);
         size_t it = 0;
         real sum;
         real res = 10000.;
