@@ -22,6 +22,12 @@ struct AssimilationMethods {
     inline static const std::string temperature_source = "TemperatureSourceChanger";
 };
 
+struct DataAssimilationPackage {
+    double time;
+    int file_name_len;
+    char *file_name;
+};
+
 class DataAssimilation {
  public:
     DataAssimilation(const SolverController &solver_controller,

@@ -58,17 +58,17 @@ real DataAssimilation::get_new_time_value() const {
 }
 
 bool DataAssimilation::config_rollback(const char *msg) {
-    std::vector<std::string> divided_string = Utility::split(msg, ',');
-    auto new_time = std::stod(divided_string[0]);
-    m_logger->debug("current time step {}, new time {}", m_t_cur, new_time);
-    if (m_t_cur < new_time) {
-        m_logger->warn("simulation is currently at {}. Cannot rollback to {}", m_t_cur, new_time);
+    const DataAssimilationPackage *package = reinterpret_cast<const DataAssimilationPackage*>(msg);
+    const std::string file_name = std::string(package->file_name, package->file_name_len);
+    m_logger->debug("current time step {}, new time {}", m_t_cur, package->time);
+    if (m_t_cur < package->time) {
+        m_logger->warn("simulation is currently at {}. Cannot rollback to {}", m_t_cur, package->time);
         return false;
-    } else if (std::fabs(m_t_cur - new_time) < 1e-10) {  // current time step, no need to load original data
-        m_t_cur = new_time;
+    } else if (std::fabs(m_t_cur - package->time) < 1e-10) {  // current time step, no need to load original data
+        m_t_cur = package->time;
         m_logger->info("set new time value to {}", m_t_cur);
-        m_logger->debug("read config data from {}", divided_string[1]);
-        auto[changes, field_changes] = m_parameter_handler->read_config(divided_string[1]);
+        m_logger->debug("read config data from {}", file_name);
+        auto[changes, field_changes] = m_parameter_handler->read_config(file_name);
         if (changes && field_changes.changed) {
             m_field_IO_handler->read_fields(field_changes,
                                             m_new_field_u, m_new_field_v, m_new_field_w,
@@ -77,10 +77,10 @@ bool DataAssimilation::config_rollback(const char *msg) {
         }
         return changes;
     } else {
-        m_t_cur = new_time;
+        m_t_cur = package->time;
         m_logger->info("set new time value to {}", m_t_cur);
-        m_logger->debug("read config data from {}", divided_string[1]);
-        auto[changes, field_changes] = m_parameter_handler->read_config(divided_string[1]);
+        m_logger->debug("read config data from {}", file_name);
+        auto[changes, field_changes] = m_parameter_handler->read_config(file_name);
         if (changes && field_changes.changed) {
             m_logger->debug("read field data from {}", field_changes.file_name);
             m_field_IO_handler->read_fields(m_t_cur, field_changes,
