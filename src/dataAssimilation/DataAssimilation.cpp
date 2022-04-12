@@ -58,7 +58,7 @@ real DataAssimilation::get_new_time_value() const {
 }
 
 bool DataAssimilation::config_rollback(const char *msg) {
-    const DataAssimilationPackage package = *reinterpret_cast<const DataAssimilationPackage*>(msg);
+    const DataAssimilationPackageHeader package = *reinterpret_cast<const DataAssimilationPackageHeader*>(msg);
     const std::string file_name(msg + 12, package.file_name_len);
     m_logger->info("current time step {}, new time {}", m_t_cur, package.time);
     m_logger->info("new config file {}", file_name);
