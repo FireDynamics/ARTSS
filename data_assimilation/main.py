@@ -12,8 +12,8 @@ from data_assimilation import FieldReader
 
 
 def create_message(t_cur: float, config_file_name: str) -> bin:
-    string_msg = str(t_cur) + ',' + config_file_name
-    return string_msg.encode('utf-8')
+    package = DAPackage(t_cur, config_file_name)
+    return package.pack()
 
 
 def change_something(domain: Domain, field: list) -> list:

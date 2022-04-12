@@ -58,14 +58,15 @@ real DataAssimilation::get_new_time_value() const {
 }
 
 bool DataAssimilation::config_rollback(const char *msg) {
-    const DataAssimilationPackage *package = reinterpret_cast<const DataAssimilationPackage*>(msg);
-    const std::string file_name = std::string(package->file_name, package->file_name_len);
-    m_logger->debug("current time step {}, new time {}", m_t_cur, package->time);
-    if (m_t_cur < package->time) {
-        m_logger->warn("simulation is currently at {}. Cannot rollback to {}", m_t_cur, package->time);
+    const DataAssimilationPackage package = *reinterpret_cast<const DataAssimilationPackage*>(msg);
+    const std::string file_name(msg + 12, package.file_name_len);
+    m_logger->info("current time step {}, new time {}", m_t_cur, package.time);
+    m_logger->info("new config file {}", file_name);
+    if (m_t_cur < package.time) {
+        m_logger->warn("simulation is currently at {}. Cannot rollback to {}", m_t_cur, package.time);
         return false;
-    } else if (std::fabs(m_t_cur - package->time) < 1e-10) {  // current time step, no need to load original data
-        m_t_cur = package->time;
+    } else if (std::fabs(m_t_cur - package.time) < 1e-10) {  // current time step, no need to load original data
+        m_t_cur = package.time;
         m_logger->info("set new time value to {}", m_t_cur);
         m_logger->debug("read config data from {}", file_name);
         auto[changes, field_changes] = m_parameter_handler->read_config(file_name);
@@ -77,7 +78,7 @@ bool DataAssimilation::config_rollback(const char *msg) {
         }
         return changes;
     } else {
-        m_t_cur = package->time;
+        m_t_cur = package.time;
         m_logger->info("set new time value to {}", m_t_cur);
         m_logger->debug("read config data from {}", file_name);
         auto[changes, field_changes] = m_parameter_handler->read_config(file_name);
@@ -103,13 +104,14 @@ bool DataAssimilation::requires_rollback(const real t_cur) {
     m_logger->debug("probe: {}", flag);
     if (flag) {
         int msg_len;
+        m_logger->debug("recved chars1: {}", msg_len);
         MPI_Get_count(&status, MPI_CHAR, &msg_len);
         std::vector<char> msg;
 
         msg.resize(msg_len);
         m_logger->debug("preparing to receive message");
         MPI_Recv(msg.data(), msg_len, MPI_CHAR, 1, status.MPI_TAG, MPI_COMM_WORLD, &status);
-        m_logger->debug("received message: {}", msg.data());
+        m_logger->debug("recved chars: {}", msg_len);
         return config_rollback(msg.data());
     }
     return flag;

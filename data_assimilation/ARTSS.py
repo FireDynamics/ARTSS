@@ -13,7 +13,7 @@ class DAPackage:
         self._file_name = file_name
 
     def pack(self) -> bin:
-        return struct.pack('di', self._time, self._file_name) + str.encode('UTF-8')
+        return struct.pack('di', self._time, len(self._file_name)) + self._file_name.encode('UTF-8')
 
 
 class XML:

@@ -124,12 +124,13 @@ void server() {
         std::cout << fmt::format("New client: [{}:{}]", new_client->remote_address(), new_client->remote_port())
                   << std::endl;
         logger->info("New client: [{}:{}]", new_client->remote_address(), new_client->remote_port());
-        new_client->on_message_received = [new_client, logger, &request, &status](
-                const std::string &message) {  // message from client
-            std::cout << fmt::format("received message from client {}:{} => {}", new_client->remote_address(),
-                                     new_client->remote_port(), message) << std::endl;
-            logger->info("received message from client {}:{} => {}", new_client->remote_address(),
-                         new_client->remote_port(), message);
+        new_client->on_raw_message_received = [new_client, logger, &request, &status](
+                const char *message, const int message_size) {  // message from client
+            std::cout << fmt::format("received message from client {}:{}", new_client->remote_address(),
+                                     reinterpret_cast<const double*>(message)[0]) << std::endl;
+            std::cout << fmt::format("received message from client {}:{}", new_client->remote_address(),
+                                     new_client->remote_port()) << std::endl;
+            logger->info("received message from client {}:{}", new_client->remote_address(), new_client->remote_port());
             int flag;
             MPI_Iprobe(1, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
             if (flag) {
@@ -137,8 +138,10 @@ void server() {
                 MPI_Wait(&request, &status);
             }
             new_client->send_message("message was received");  // send a message back (acknowledgment/error/whatever)
-            MPI_Isend(message.c_str(), message.size() + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &request);
+            std::cout << "message will be sent to rank 0" << std::endl;
+            MPI_Isend(message, message_size + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &request);
             logger->debug("message was sent to rank 0");
+            std::cout << "message was sent to rank 0" << std::endl;
         };
 
         new_client->on_socket_closed = [new_client, logger](int error_code) {
