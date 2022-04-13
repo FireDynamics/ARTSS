@@ -12,6 +12,10 @@
 
 #include <fmt/compile.h>
 #include <fstream>
+
+#include <highfive/H5File.hpp>
+#include <highfive/H5DataSet.hpp>
+
 #include "../domain/DomainData.h"
 
 
@@ -90,9 +94,8 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
     long pos = m_positions[n];
     m_logger->debug("times: {:>10d} read from: {:>20d}", n, m_positions[n]);
     std::string line;
-    input_file.seekg(pos);
+    // input_file.seekg(pos);
 
-    std::getline(input_file, line);
     m_logger->debug("read time step {}", line);
 
     read_field(input_file, u);
@@ -132,24 +135,32 @@ std::string FieldIO::create_header(const std::string &xml_file_name) {
 }
 
 void FieldIO::read_field(std::ifstream &file_stream, Field &field) {
-    std::string line;
-    auto to_double = [](const auto &v) { return std::stod(v); };
+    int n;
+    m_logger->info("attempting to read m{} doubls from stream", n);
+    file_stream.read((char *)&n, sizeof(n));
+    std::cout << "n" << sizeof(n) << ":" << n << ":" << file_stream.tellg() << std::endl;
+    m_logger->info("attempting to read {} doubls from stream", n);
+    for(int i=0; i<n; ++i) {
+        file_stream.read((char*)&(field.data[n]), sizeof(field.data[i]));
 
-    std::getline(file_stream, line);
-    std::vector<std::string> divided_string = Utility::split(line, ';');
-    std::transform(divided_string.begin(), divided_string.end(), field.data, to_double);
+    }
 }
 
 void FieldIO::read_fields(const Settings::data_assimilation::field_changes &field_changes,
                           Field &u, Field &v, Field &w,
                           Field &p, Field &T, Field &C) {
+    int n;
     std::string line;
     if (!field_changes.changed) {
         return;
     }
     // no changes -> read original file
+    m_logger->info("opening dat file {}", field_changes.file_name);
     std::ifstream file_changes(field_changes.file_name, std::ifstream::binary);
+
+    m_logger->info("dat file contains {} fields", n);
     if (file_changes.is_open()) {  // could not open file -> read original file + warning
+        file_changes.read((char *)&n, sizeof(n));
         if (field_changes.u_changed) {
             read_field(file_changes, u);
             m_logger->debug("read changed u Field");
@@ -184,71 +195,56 @@ void FieldIO::read_fields(const real t_cur,
                           const Settings::data_assimilation::field_changes &field_changes,
                           Field &u, Field &v, Field &w,
                           Field &p, Field &T, Field &C) {
-    std::ifstream file_original(m_file_name, std::ifstream::binary);
-    size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
-    file_original.seekg(m_positions[n]);
-
-    std::string line;
-    std::getline(file_original, line);
-    m_logger->debug("read time step {}", line);
-
+    m_logger->debug("read time step {}", t_cur);
     if (field_changes.changed) {  // no changes -> read original file
-        std::ifstream file_changes(field_changes.file_name, std::ifstream::binary);
-        if (file_changes.is_open()) {  // could not open file -> read original file + warning
-            if (field_changes.u_changed) {
-                read_field(file_changes, u);
-                std::getline(file_original, line);
-                m_logger->debug("read changed u Field");
-            } else {
-                read_field(file_original, u);
-                std::getline(file_changes, line);
-            }
-            if (field_changes.v_changed) {
-                read_field(file_changes, v);
-                std::getline(file_original, line);
-                m_logger->debug("read changed v Field");
-            } else {
-                read_field(file_original, v);
-                std::getline(file_changes, line);
-            }
-            if (field_changes.w_changed) {
-                read_field(file_changes, w);
-                std::getline(file_original, line);
-                m_logger->debug("read changed w Field");
-            } else {
-                read_field(file_original, w);
-                std::getline(file_changes, line);
-            }
-            if (field_changes.p_changed) {
-                read_field(file_changes, p);
-                std::getline(file_original, line);
-                m_logger->debug("read changed p Field");
-            } else {
-                read_field(file_original, p);
-                std::getline(file_changes, line);
-            }
-            if (field_changes.T_changed) {
-                read_field(file_changes, T);
-                std::getline(file_original, line);
-                m_logger->debug("read changed T Field");
-            } else {
-                read_field(file_original, T);
-                std::getline(file_changes, line);
-            }
-            if (field_changes.C_changed) {
-                read_field(file_changes, C);
-                std::getline(file_original, line);
-                m_logger->debug("read changed C Field");
-            } else {
-                read_field(file_original, C);
-                std::getline(file_changes, line);
-            }
-        } else {
-            m_logger->warn(fmt::format("File '{}' could not be opened, original data will be loaded", field_changes.file_name));
-            read_fields(t_cur, u, v, w, p, T, C);
-        }
-    } else {
         m_logger->debug("no field changes");
+        read_fields(t_cur, u, v, w, p, T, C);
+        return;
+    }
+
+    try {
+        HighFive::File org_file(m_file_name, HighFive::File::ReadOnly);
+        HighFive::File new_file(field_changes.file_name, HighFive::File::ReadOnly);
+
+        if (field_changes.u_changed) {
+            read_field(new_file, u);
+            m_logger->debug("read changed u Field");
+        } else {
+            read_field(org_file, u);
+        }
+        if (field_changes.v_changed) {
+            read_field(new_file, v);
+            m_logger->debug("read changed v Field");
+        } else {
+            read_field(org_file, v);
+        }
+        if (field_changes.w_changed) {
+            read_field(new_file, w);
+            m_logger->debug("read changed w Field");
+        } else {
+            read_field(org_file, w);
+        }
+        if (field_changes.p_changed) {
+            read_field(new_file, p);
+            m_logger->debug("read changed p Field");
+        } else {
+            read_field(org_file, p);
+        }
+        if (field_changes.T_changed) {
+            read_field(new_file, T);
+            m_logger->debug("read changed T Field");
+        } else {
+            read_field(org_file, T);
+        }
+        if (field_changes.C_changed) {
+            read_field(new_file, C);
+            m_logger->debug("read changed C Field");
+        } else {
+            read_field(org_file, C);
+        }
+    } catch (const std::exception &ex) {
+        m_logger->warn(fmt::format("File '{}' could not be opened, original data will be loaded", field_changes.file_name));
+        m_logger->warn(fmt::format("Exception during reading {}", ex.what()));
         read_fields(t_cur, u, v, w, p, T, C);
     }
 }

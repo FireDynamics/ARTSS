@@ -1,5 +1,9 @@
-import wsgiref.validate
+#!/usr/bin/env python3
+
+import struct
 from datetime import datetime
+
+import wsgiref.validate
 import numpy as np
 
 
@@ -8,16 +12,17 @@ def get_date_now() -> str:
 
 
 def write_field_data(file_name: str, data: dict, field_keys: list):
-    file = open(file_name, 'w')
-    for key in field_keys:
-        if key in data.keys():
+    n = len(set(data.keys()).intersection(field_keys))
+    m = len(data[list(data.keys())[0]])
+    with open(file_name, 'wb') as out:
+        out.write(struct.pack('qq', n, m))
+        for key in field_keys:
+            if key not in data.keys():
+                continue
+
             field = data[key]
-            line = ''
-            for number in field:
-                line += f'{number};'
-            line += '\n'
-            file.write(line)
-    file.close()
+            for i in field:
+                out.write(struct.pack('d', i))
 
 
 class FieldReader:
@@ -115,13 +120,4 @@ class FieldReader:
             return fields
 
     def write_field_data(self, file_name: str, data: dict):
-        file = open(file_name, 'w')
-        for key in self.fields:
-            if key in data.keys():
-                field = data[key]
-                line = ''
-                for number in field:
-                    line += f'{number};'
-                line += '\n'
-                file.write(line)
-        file.close()
+        write_field_data(file_name=file_name, data=data, field_keys=self.fields)
