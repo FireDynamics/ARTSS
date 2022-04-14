@@ -3,6 +3,7 @@
 import struct
 from datetime import datetime
 
+import h5py
 import wsgiref.validate
 import numpy as np
 
@@ -12,17 +13,14 @@ def get_date_now() -> str:
 
 
 def write_field_data(file_name: str, data: dict, field_keys: list):
-    n = len(set(data.keys()).intersection(field_keys))
-    m = len(data[list(data.keys())[0]])
-    with open(file_name, 'wb') as out:
-        out.write(struct.pack('qq', n, m))
+    with h5py.File(file_name, 'w') as out:
         for key in field_keys:
             if key not in data.keys():
                 continue
 
+            print(key)
             field = data[key]
-            for i in field:
-                out.write(struct.pack('d', i))
+            out.create_dataset(key, (len(field), ), dtype='d')
 
 
 class FieldReader:
@@ -37,23 +35,14 @@ class FieldReader:
         self.read_header()
 
     def read_header(self):
-        fname = open(self.file_name, 'r')
-        # first line
-        line = fname.readline()
-        self.dt = float(line.split(';')[3])
-        # second line
-        line = fname.readline().split(';')[1:]
-        self.grid_resolution = {'Nx': int(line[0]), 'Ny': int(line[1]), 'Nz': int(line[2])}
-        # third line
-        line = fname.readline().strip()
-        self.fields = line.split(';')[1:]
-        # fourth line
-        line = fname.readline().strip()
-        self.date = datetime.strptime(line.split(';')[1], '%a %b %d %H:%M:%S %Y')
-        # fifth line
-        line = fname.readline().strip()
-        self.xml_file_name = line.split(';')[1]
-        fname.close()
+        with h5py.File(self.file_name, 'r') as inp:
+            print(inp.keys())
+            metadata = inp['metadata']
+            self.dt = metadata['dt'][()]
+            self.grid_resolution = list(metadata['domain'][:])
+            self.fields = list(metadata['fields'].asstr()[:])
+            self.date = datetime.strptime(metadata['date'].asstr()[()][0].strip(), '%a %b %d %H:%M:%S %Y')
+            self.xml_file_name = metadata['xml'][()][0]
 
     def print_header(self):
         print(f'dt: {self.dt}')

@@ -13,10 +13,8 @@
 #include <fmt/compile.h>
 #include <fstream>
 
-#include <highfive/H5File.hpp>
-#include <highfive/H5DataSet.hpp>
-
 #include "../domain/DomainData.h"
+#include "../utility/Mapping.h"
 
 
 FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_file_name) :
@@ -29,12 +27,8 @@ FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_fil
     size_t n = static_cast<size_t>(std::round(t_end / domain_data->get_physical_parameters().dt)) + 1;
     m_positions = new long[n];
 
-    std::string header = create_header(xml_file_name);
-    m_positions[0] = static_cast<long>(header.length()) + 1;
-
-    std::ofstream output_file(m_file_name, std::ios_base::out);
-    output_file.write(header.c_str(), m_positions[0]);
-    output_file.close();
+    HighFive::File out_file(m_file_name, HighFive::File::ReadWrite | HighFive::File::Create);
+    create_header(out_file, xml_file_name);
 }
 
 
@@ -50,30 +44,24 @@ FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_fil
 /// \param  C       data of field C to be written out
 // *************************************************************************************************
 void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
-    std::string output = fmt::format("{:.5e}\n", t_cur);
-    Field fields[] = {u, v, w, p, T, C};
-    size_t size = u.get_size();
-    for (Field &f: fields) {
-        for (size_t i = 0; i < size - 1; i++) {
-            output.append(fmt::format(("{};"), f[i]));
-        }
-        output.append(fmt::format(("{}\n"), f[size - 1]));
+    HighFive::File out_file(m_file_name, HighFive::File::ReadWrite);
+    auto group_name = fmt::format("{:.5e}", t_cur);
+    m_logger->error("attempt to write @t:{}", t_cur);
+
+    if (out_file.exist(group_name)) {
+        out_file.unlink(group_name);
     }
-    size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
-    long length = static_cast<long>(output.length());
-    m_positions[n + 1] = m_positions[n] + length;
-
-    std::fstream output_file(m_file_name);
-    // write field at position dependent on time step
-    m_logger->debug("times: {:>10d} write to: {:>20d}", n, m_positions[n]);
-    output_file.seekp(m_positions[n], std::ios_base::beg);
-    output_file.write(output.c_str(), length);
-
-    // overwrite current time step
-    output_file.seekp(m_pos_time_step, std::ios_base::beg);
-    output_file.write(fmt::format("{:.5e}", t_cur).c_str(), 11);
-
-    output_file.close();
+    
+    HighFive::Group t_group = out_file.createGroup(group_name);
+    // Field fields[] = {u, v, w, p, T, C};
+    Field fields[] = {u, v, w, T, C};
+    size_t size = u.get_size();
+    std::vector<size_t> dims{1, size};
+    for (Field &f: fields) {
+        auto field_name = Mapping::get_field_type_name(f.get_type());
+        m_logger->error("attempt to write @t:{}:{}", t_cur, field_name);
+        t_group.createDataSet<real>(field_name, HighFive::DataSpace(dims));
+    }
 }
 
 // ========================================== read =================================================
@@ -89,14 +77,7 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
 // *************************************************************************************************
 void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     m_logger->debug("read original data");
-    std::ifstream input_file(m_file_name, std::ifstream::binary);
-    size_t n = static_cast<size_t>(std::round(t_cur / DomainData::getInstance()->get_physical_parameters().dt)) - 1;
-    long pos = m_positions[n];
-    m_logger->debug("times: {:>10d} read from: {:>20d}", n, m_positions[n]);
-    std::string line;
-    // input_file.seekg(pos);
-
-    m_logger->debug("read time step {}", line);
+    HighFive::File input_file(m_file_name, HighFive::File::ReadOnly);
 
     read_field(input_file, u);
     read_field(input_file, v);
@@ -114,36 +95,46 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
 /// ###FIELDS;u;v;w;p;T;concentration
 /// ###DATE:<date>;XML:<XML>
 // *************************************************************************************************
-std::string FieldIO::create_header(const std::string &xml_file_name) {
+void FieldIO::create_header(HighFive::File &file, const std::string &xml_file_name) {
     auto end = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
+    if (file.exist("metadata")) {
+        file.unlink("metadata");
+    }
+    HighFive::Group meta_group = file.createGroup("metadata");
+
     auto domain_data = DomainData::getInstance();
+
+    auto dt = domain_data->get_physical_parameters().dt;
+    HighFive::DataSet dt_set = meta_group.createDataSet<real>("dt", HighFive::DataSpace::From(dt));
+    dt_set.write(dt);
+
     size_t Nx = domain_data->get_number_of_cells(CoordinateAxis::X);
     size_t Ny = domain_data->get_number_of_cells(CoordinateAxis::Y);
     size_t Nz = domain_data->get_number_of_cells(CoordinateAxis::Z);
 
-    std::string string_t_cur_text = "Current time step;";
-    m_pos_time_step = static_cast<long>(string_t_cur_text.length());
-    std::string header = fmt::format("{}{:.5e};dt;{}\n", string_t_cur_text, 0.0,
-                                     DomainData::getInstance()->get_physical_parameters().dt);
-    header.append(fmt::format("###DOMAIN;{};{};{}\n", Nx, Ny, Nz));
-    header.append(fmt::format("###FIELDS;u;v;w;p;T;concentration\n"));
-    header.append(fmt::format("###DATE;{}", std::ctime(&end_time)));
-    header.append(fmt::format("###XML;{}\n", xml_file_name));
-    return header;
+    size_t domain[3] = {Nx, Ny, Nz};
+    HighFive::DataSet domain_set = meta_group.createDataSet<size_t>("domain", HighFive::DataSpace::From(domain));
+    domain_set.write(domain);
+
+    std::vector<std::string> fields{"u" , "v", "w", "p", "T", "concentration"};
+    HighFive::DataSet fields_set = meta_group.createDataSet<std::string>("fields", HighFive::DataSpace::From(fields));
+    fields_set.write(fields);
+
+    std::string date[1] = {std::ctime(&end_time)};
+    HighFive::DataSet date_set = meta_group.createDataSet<std::string>("date", HighFive::DataSpace::From(date));
+    date_set.write(date);
+
+    std::string xml[1] = {xml_file_name};
+    HighFive::DataSet xml_set = meta_group.createDataSet<std::string>("xml", HighFive::DataSpace::From(date));
+    xml_set.write(xml);
 }
 
-void FieldIO::read_field(std::ifstream &file_stream, Field &field) {
-    int n;
-    m_logger->info("attempting to read m{} doubls from stream", n);
-    file_stream.read((char *)&n, sizeof(n));
-    std::cout << "n" << sizeof(n) << ":" << n << ":" << file_stream.tellg() << std::endl;
-    m_logger->info("attempting to read {} doubls from stream", n);
-    for(int i=0; i<n; ++i) {
-        file_stream.read((char*)&(field.data[n]), sizeof(field.data[i]));
-
-    }
+void FieldIO::read_field(HighFive::File &file, Field &field) {
+    auto field_name = Mapping::get_field_type_name(field.get_type());
+    auto ds = file.getDataSet(field_name);
+    ds.read(field.data);
 }
 
 void FieldIO::read_fields(const Settings::data_assimilation::field_changes &field_changes,
@@ -154,17 +145,15 @@ void FieldIO::read_fields(const Settings::data_assimilation::field_changes &fiel
     if (!field_changes.changed) {
         return;
     }
+
     // no changes -> read original file
     m_logger->info("opening dat file {}", field_changes.file_name);
-    std::ifstream file_changes(field_changes.file_name, std::ifstream::binary);
+    try {
+        HighFive::File file_changes(field_changes.file_name, HighFive::File::ReadOnly);
 
-    m_logger->info("dat file contains {} fields", n);
-    if (file_changes.is_open()) {  // could not open file -> read original file + warning
-        file_changes.read((char *)&n, sizeof(n));
         if (field_changes.u_changed) {
             read_field(file_changes, u);
             m_logger->debug("read changed u Field");
-            std::getline(file_changes, line);
         }
         if (field_changes.v_changed) {
             read_field(file_changes, v);
@@ -186,8 +175,9 @@ void FieldIO::read_fields(const Settings::data_assimilation::field_changes &fiel
             read_field(file_changes, C);
             m_logger->debug("read changed C Field");
         }
-    } else {
+    } catch (const std::exception &ex) {
         m_logger->warn(fmt::format("File '{}' could not be opened. No changes will be applied.", field_changes.file_name));
+        m_logger->warn(fmt::format("Exception during reading {}", ex.what()));
     }
 }
 
