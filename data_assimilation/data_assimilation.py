@@ -8,6 +8,14 @@ import wsgiref.validate
 import numpy as np
 
 
+def is_float(x: str) -> bool:
+    try:
+        float(x)
+        return True
+    except ValueError:
+        return False
+
+
 def get_date_now() -> str:
     return datetime.now().strftime('%a %b %d %H:%M:%S %Y')
 
@@ -51,37 +59,13 @@ class FieldReader:
         print(f'date: {self.date}')
         print(f'xml file name: {self.xml_file_name}')
 
-    def get_line_from_file(self, line_number: int) -> str:
-        return self.get_lines_from_file([line_number])[0]
 
-    def get_pos_from_all_time_steps(self, line_numbers: list) -> list:
-        lines = []
-        max_val = max(line_numbers)
-        file = open(self.file_name, 'r')
-        for i, line in enumerate(file):
-            if i in line_numbers:
-                lines.append(line)
-            if i > max_val:
-                break
-        file.close()
-        return lines
-
-    def get_lines_from_file(self, line_numbers: list) -> list:
-        lines = []
-        max_val = max(line_numbers)
-        file = open(self.file_name, 'r')
-        for i, line in enumerate(file):
-            if i in line_numbers:
-                lines.append(line)
-            if i > max_val:
-                break
-        file.close()
-        return lines
+    def get_ts(self) -> [float]:
+        with h5py.File(self.file_name, 'r') as inp:
+            return sorted([float(x) for x in inp if is_float(x)])
 
     def get_t_current(self) -> float:
-        first_line = self.get_line_from_file(0)
-        t_cur = first_line.split(';')[1]
-        return float(t_cur)
+        return self.get_ts()[-1]
 
     def get_xml_file_name(self) -> str:
         return self.xml_file_name
@@ -98,14 +82,14 @@ class FieldReader:
             print(f'cannot read time step {time_step} as the current time step is {t_cur}')
             return {}
         else:
-            number_of_fields = len(self.fields)
-            steps = int(time_step / self.dt) - 1
-
-            starting_line = 5 + (number_of_fields + 1) * steps + 1
-            lines = self.get_lines_from_file(list(range(starting_line, starting_line + number_of_fields + 1)))
             fields = {}
-            for i in range(number_of_fields):
-                fields[self.fields[i]] = np.fromstring(lines[i], dtype=np.float, sep=';')
+            print(f'read time step {time_step}')
+            with h5py.File(self.file_name, 'r') as inp:
+                inp = inp[f'/{time_step:.5e}']
+                for i in inp:
+                    fields[i] = np.array(inp[i][0])
+                    print(f'read field: {i} {fields[i].shape}')
+
             return fields
 
     def write_field_data(self, file_name: str, data: dict):
