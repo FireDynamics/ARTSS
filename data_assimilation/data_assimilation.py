@@ -26,7 +26,6 @@ def write_field_data(file_name: str, data: dict, field_keys: list):
             if key not in data.keys():
                 continue
 
-            print(key)
             field = data[key]
             out.create_dataset(key, (len(field), ), dtype='d')
 
@@ -44,7 +43,6 @@ class FieldReader:
 
     def read_header(self):
         with h5py.File(self.file_name, 'r') as inp:
-            print(inp.keys())
             metadata = inp['metadata']
             self.dt = metadata['dt'][()]
             self.grid_resolution = list(metadata['domain'][:])

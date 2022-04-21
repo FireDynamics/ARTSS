@@ -42,6 +42,7 @@ class FieldIO {
     std::shared_ptr<spdlog::logger> m_logger;
 
     void read_field(HighFive::File &file, Field &field);
+    void read_vis_field(HighFive::File &file, Field &field, const real t);
 };
 
 #endif /* ARTSS_VISUALISATION_FIELDIO_H */

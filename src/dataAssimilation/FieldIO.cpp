@@ -46,7 +46,7 @@ FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_fil
 void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     HighFive::File out_file(m_file_name, HighFive::File::ReadWrite);
     auto group_name = fmt::format("{:.5e}", t_cur);
-    m_logger->error("attempt to write @t:{}", t_cur);
+    m_logger->debug("attempt to write @t:{}", t_cur);
 
     if (out_file.exist(group_name)) {
         out_file.unlink(group_name);
@@ -59,7 +59,7 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
     std::vector<size_t> dims{1, size};
     for (Field &f: fields) {
         auto field_name = Mapping::get_field_type_name(f.get_type());
-        m_logger->error("attempt to write @t:{}:{}", t_cur, field_name);
+        m_logger->debug("attempt to write @t:{}:{}", t_cur, field_name);
         t_group.createDataSet<real>(field_name, HighFive::DataSpace(dims));
     }
 }
@@ -79,12 +79,12 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
     m_logger->debug("read original data");
     HighFive::File input_file(m_file_name, HighFive::File::ReadOnly);
 
-    read_field(input_file, u);
-    read_field(input_file, v);
-    read_field(input_file, w);
-    read_field(input_file, p);
-    read_field(input_file, T);
-    read_field(input_file, C);
+    read_vis_field(input_file, u, t_cur);
+    read_vis_field(input_file, v, t_cur);
+    read_vis_field(input_file, w, t_cur);
+    // read_vis_field(input_file, p, t_cur);
+    read_vis_field(input_file, T, t_cur);
+    read_vis_field(input_file, C, t_cur);
 }
 
 // ================================= write header ==================================================
@@ -134,6 +134,14 @@ void FieldIO::create_header(HighFive::File &file, const std::string &xml_file_na
 void FieldIO::read_field(HighFive::File &file, Field &field) {
     auto field_name = Mapping::get_field_type_name(field.get_type());
     auto ds = file.getDataSet(field_name);
+    ds.read(field.data);
+}
+
+void FieldIO::read_vis_field(HighFive::File &file, Field &field, const real t) {
+    auto field_name = Mapping::get_field_type_name(field.get_type());
+    auto full_name = fmt::format("/{:.5e}/{}", t, field_name);
+    m_logger->info("opening vis file at {}", full_name);
+    auto ds = file.getDataSet(full_name);
     ds.read(field.data);
 }
 
@@ -200,37 +208,37 @@ void FieldIO::read_fields(const real t_cur,
             read_field(new_file, u);
             m_logger->debug("read changed u Field");
         } else {
-            read_field(org_file, u);
+            read_vis_field(org_file, u, t_cur);
         }
         if (field_changes.v_changed) {
             read_field(new_file, v);
             m_logger->debug("read changed v Field");
         } else {
-            read_field(org_file, v);
+            read_vis_field(org_file, v, t_cur);
         }
         if (field_changes.w_changed) {
             read_field(new_file, w);
             m_logger->debug("read changed w Field");
         } else {
-            read_field(org_file, w);
+            read_vis_field(org_file, w, t_cur);
         }
         if (field_changes.p_changed) {
             read_field(new_file, p);
             m_logger->debug("read changed p Field");
         } else {
-            read_field(org_file, p);
+            read_vis_field(org_file, p, t_cur);
         }
         if (field_changes.T_changed) {
             read_field(new_file, T);
             m_logger->debug("read changed T Field");
         } else {
-            read_field(org_file, T);
+            read_vis_field(org_file, T, t_cur);
         }
         if (field_changes.C_changed) {
             read_field(new_file, C);
             m_logger->debug("read changed C Field");
         } else {
-            read_field(org_file, C);
+            read_vis_field(org_file, C, t_cur);
         }
     } catch (const std::exception &ex) {
         m_logger->warn(fmt::format("File '{}' could not be opened, original data will be loaded", field_changes.file_name));
