@@ -122,9 +122,8 @@ def main(dry_run=False):
             client.send_message(create_message(t, config_file_name))
 
 
-def gradient_tmp():
-
-    reader = FieldReader()
+def gradient_tmp(sensor_data_file: str, simulation_data_file: str):
+    reader = FieldReader(simulation_data_file)
     reader.print_header()
     
     xml = XML(reader.get_xml_file_name())
@@ -134,6 +133,14 @@ def gradient_tmp():
     domain.print_debug()
     
     dt = reader.dt
+
+    # pseudo event listener
+    sleep_time = 60
+    times = 5  # how many times we get sensor data
+    for i in range(times):
+        time.sleep(sleep_time)
+
+
 
     t_cur = reader.get_t_current()
     
