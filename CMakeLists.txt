@@ -197,8 +197,9 @@ add_subdirectory(gtests)
 
 add_subdirectory(src/dataAssimilation)
 add_subdirectory(src/TCP)
-add_subdirectory(external/HighFive)
+
 set(HIGHFIVE_USE_BOOST OFF)
+add_subdirectory(external/HighFive)
 
 get_target_property(ARTSS_SOURCE_FILES artss SOURCES)
 add_executable(artss_data_assimilation_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
