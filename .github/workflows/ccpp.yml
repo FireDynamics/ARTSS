@@ -16,7 +16,7 @@ jobs:
     - name: compile
       run: |
         git submodule update --init
-        sudo apt-get install -y mpich
+        sudo apt-get install -y mpich libhdf5-dev
         ./compile.sh --jobs 4 --gcc -s --checkout
         
   build-gcc-serial-benchmarking:
@@ -28,7 +28,7 @@ jobs:
     - name: compile
       run: |
         git submodule update --init
-        sudo apt-get install -y mpich
+        sudo apt-get install -y mpich libhdf5-dev
         ./compile.sh --jobs 4 --gcc --sb --checkout
         
   build-pgi-multicore:
