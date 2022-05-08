@@ -7,3 +7,9 @@
 [submodule "external/googletest"]
 	path = external/googletest
 	url = https://github.com/google/googletest/
+[submodule "external/HighFive"]
+	path = external/HighFive
+	url = https://github.com/BlueBrain/HighFive.git
+[submodule "external/benchmark"]
+	path = external/benchmark
+	url = https://github.com/google/benchmark

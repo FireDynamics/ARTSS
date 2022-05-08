@@ -9,6 +9,11 @@
 
 #include <memory>
 #include <string>
+#include <iostream>
+
+#include <highfive/H5File.hpp>
+#include <highfive/H5DataSet.hpp>
+
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
 #include "../solver/SolverController.h"
@@ -27,7 +32,7 @@ class FieldIO {
                      Field &p, Field &T, Field &C);
 
  private:
-    std::string create_header(const std::string &xml_file_name);
+    void create_header(HighFive::File &file, const std::string &xml_file_name);
     void read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
 
     long *m_positions;
@@ -36,7 +41,8 @@ class FieldIO {
     long m_pos_time_step;
     std::shared_ptr<spdlog::logger> m_logger;
 
-    void read_field(std::ifstream &file_stream, Field &field);
+    void read_field(HighFive::File &file, Field &field);
+    void read_vis_field(HighFive::File &file, Field &field, const real t);
 };
 
 #endif /* ARTSS_VISUALISATION_FIELDIO_H */

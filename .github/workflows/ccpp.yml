@@ -16,6 +16,7 @@ jobs:
     - name: compile
       run: |
         git submodule update --init
+        sudo apt-get install -y mpich libhdf5-dev
         ./compile.sh --jobs 4 --gcc -s --checkout
         
   build-gcc-serial-benchmarking:
@@ -27,6 +28,7 @@ jobs:
     - name: compile
       run: |
         git submodule update --init
+        sudo apt-get install -y mpich libhdf5-dev
         ./compile.sh --jobs 4 --gcc --sb --checkout
         
   build-pgi-multicore:
@@ -97,6 +99,16 @@ jobs:
           ./compile.sh --docker-build
           docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "./compile.sh --jobs 4 -s -m -d && cd build && ctest --output-on-failure -E 'gpu|gtest' --checkout"
           
+  cmake-tests-gpu:
+    
+    runs-on: gpu
+    steps:
+      - uses: actions/checkout@v2
+      - name: compile
+        run: |
+          git submodule update --init
+          ./compile.sh --docker-build
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd --user 1000:1000 artss_docker sh -c "./compile.sh --jobs 32 -g -m -d && cd build && ctest --output-on-failure --checkout"
   unit-tests_serial:
     
     runs-on: ubuntu-latest
