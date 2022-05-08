@@ -5,6 +5,36 @@ on:
       - test_benchmarking
 
 jobs:
+  master-benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - name: compile
+        run: |
+          git submodule update --init
+          mkdir build
+          ./compile.sh --docker-build
+          docker run -i --rm -v $(pwd):/host_pwd -w /host_pwd artss_docker sh -c "cd build && cmake .. && make artss_bench && ./benchmarks/bin/artss_bench --benchmark_format=json | tee ../benchmark_result.json"
+      - name: Download previous benchmark data
+        uses: actions/cache@v1
+        with:
+          path: ./cache
+          key: ${{ runner.os }}-benchmark
+
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          # What benchmark tool the output.txt came from
+          tool: 'googlecpp'
+          # Where the output from the benchmark tool is stored
+          output-file-path: benchmark_result.json
+          # Where the previous data file is stored
+          output-file-path: ./cache/benchmark-data.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+
   benchmark:
     name: Benchmark
     runs-on: ubuntu-latest
@@ -31,9 +61,9 @@ jobs:
           # Where the output from the benchmark tool is stored
           output-file-path: benchmark_result.json
           # Where the previous data file is stored
-          external-data-json-path: ./cache/benchmark-data.json
+          output-file-path: ./cache/benchmark-data.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: true
+          comment-always: true
 
   benchmark-gpu:
     name: Benchmark-GPU
@@ -63,3 +93,4 @@ jobs:
           # Where the previous data file is stored
           external-data-json-path: ./cache/benchmark-data.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-always: true
