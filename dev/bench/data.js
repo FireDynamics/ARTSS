@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1652020450675,
+  "lastUpdate": 1652021137178,
   "repoUrl": "https://github.com/FireDynamics/ARTSS",
   "entries": {
     "Benchmark": [
@@ -216,6 +216,222 @@ window.BENCHMARK_DATA = {
             "value": 103492455.42857131,
             "unit": "ns/iter",
             "extra": "iterations: 7\ncpu: 103485214.28571442 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "c.von.mach@fz-juelich.de",
+            "name": "Christian von Mach",
+            "username": "ChristianVonMach"
+          },
+          "committer": {
+            "email": "c.von.mach@fz-juelich.de",
+            "name": "Christian von Mach",
+            "username": "ChristianVonMach"
+          },
+          "distinct": true,
+          "id": "05b0b6fcefa53027e472af8811f4ad5456a7ddf1",
+          "message": "removed dummy loop to Field mul",
+          "timestamp": "2022-05-08T16:37:47+02:00",
+          "tree_id": "e32e736f971768c4f314c760cf28f1c9133ba29e",
+          "url": "https://github.com/FireDynamics/ARTSS/commit/05b0b6fcefa53027e472af8811f4ad5456a7ddf1"
+        },
+        "date": 1652021136449,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BM_AddScalar/8",
+            "value": 1132.9074361775242,
+            "unit": "ns/iter",
+            "extra": "iterations: 641741\ncpu: 1132.7660224296096 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddScalar/64",
+            "value": 1161.3212907350792,
+            "unit": "ns/iter",
+            "extra": "iterations: 603718\ncpu: 1161.257408260148 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddScalar/512",
+            "value": 1384.2283134448921,
+            "unit": "ns/iter",
+            "extra": "iterations: 505901\ncpu: 1384.0925398447523 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddScalar/4096",
+            "value": 3139.6388952465168,
+            "unit": "ns/iter",
+            "extra": "iterations: 222819\ncpu: 3138.886719714208 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddScalar/32768",
+            "value": 15523.551897272528,
+            "unit": "ns/iter",
+            "extra": "iterations: 45012\ncpu: 15513.072069670308 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddScalar/262144",
+            "value": 174458.92924763376,
+            "unit": "ns/iter",
+            "extra": "iterations: 4014\ncpu: 174452.9147982061 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddScalar/2097152",
+            "value": 1495664.554140111,
+            "unit": "ns/iter",
+            "extra": "iterations: 471\ncpu: 1495550.3184713374 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddScalar/8388608",
+            "value": 26869796.480000332,
+            "unit": "ns/iter",
+            "extra": "iterations: 25\ncpu: 26868200.00000001 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddFields/8",
+            "value": 2278.728652224797,
+            "unit": "ns/iter",
+            "extra": "iterations: 306238\ncpu: 2277.801252620512 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddFields/64",
+            "value": 2319.1898506572447,
+            "unit": "ns/iter",
+            "extra": "iterations: 301990\ncpu: 2318.0072187820806 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddFields/512",
+            "value": 2682.043499003712,
+            "unit": "ns/iter",
+            "extra": "iterations: 262006\ncpu: 2681.2336358709326 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddFields/4096",
+            "value": 5664.646273385107,
+            "unit": "ns/iter",
+            "extra": "iterations: 123423\ncpu: 5663.458998727954 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddFields/32768",
+            "value": 28155.073410383586,
+            "unit": "ns/iter",
+            "extra": "iterations: 24833\ncpu: 28152.33761526999 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddFields/262144",
+            "value": 344206.5667976157,
+            "unit": "ns/iter",
+            "extra": "iterations: 2036\ncpu: 344168.61493123707 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddFields/2097152",
+            "value": 10565033.712122262,
+            "unit": "ns/iter",
+            "extra": "iterations: 66\ncpu: 10564319.696969697 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_AddFields/8388608",
+            "value": 79496276.33334129,
+            "unit": "ns/iter",
+            "extra": "iterations: 9\ncpu: 79484433.33333345 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulScalar/8",
+            "value": 1137.949896429136,
+            "unit": "ns/iter",
+            "extra": "iterations: 613589\ncpu: 1137.9165858579606 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulScalar/64",
+            "value": 1166.40366941938,
+            "unit": "ns/iter",
+            "extra": "iterations: 600858\ncpu: 1166.2151456750212 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulScalar/512",
+            "value": 1382.030415871045,
+            "unit": "ns/iter",
+            "extra": "iterations: 504868\ncpu: 1381.9390414920322 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulScalar/4096",
+            "value": 3144.2487056885816,
+            "unit": "ns/iter",
+            "extra": "iterations: 222319\ncpu: 3143.99803885407 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulScalar/32768",
+            "value": 15469.10367930112,
+            "unit": "ns/iter",
+            "extra": "iterations: 45226\ncpu: 15468.274886127407 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulScalar/262144",
+            "value": 175158.0797912027,
+            "unit": "ns/iter",
+            "extra": "iterations: 4023\ncpu: 174508.55083271195 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulScalar/2097152",
+            "value": 1394322.0732674282,
+            "unit": "ns/iter",
+            "extra": "iterations: 505\ncpu: 1394090.8910891123 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulScalar/8388608",
+            "value": 43287255.18750076,
+            "unit": "ns/iter",
+            "extra": "iterations: 16\ncpu: 43283793.750000134 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulFields/8",
+            "value": 2282.22150216776,
+            "unit": "ns/iter",
+            "extra": "iterations: 306304\ncpu: 2281.658091307982 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulFields/64",
+            "value": 2308.595496827247,
+            "unit": "ns/iter",
+            "extra": "iterations: 300366\ncpu: 2307.9403128183662 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulFields/512",
+            "value": 2675.7648178303816,
+            "unit": "ns/iter",
+            "extra": "iterations: 262201\ncpu: 2674.8387687308627 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulFields/4096",
+            "value": 5665.218839223222,
+            "unit": "ns/iter",
+            "extra": "iterations: 123986\ncpu: 5663.562821608879 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulFields/32768",
+            "value": 28109.38629596808,
+            "unit": "ns/iter",
+            "extra": "iterations: 24854\ncpu: 28104.864408143552 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulFields/262144",
+            "value": 344511.2693254513,
+            "unit": "ns/iter",
+            "extra": "iterations: 2031\ncpu: 344464.10635155055 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulFields/2097152",
+            "value": 11544502.075471943,
+            "unit": "ns/iter",
+            "extra": "iterations: 53\ncpu: 11539332.075471707 ns\nthreads: 1"
+          },
+          {
+            "name": "BM_MulFields/8388608",
+            "value": 82289826.33334504,
+            "unit": "ns/iter",
+            "extra": "iterations: 9\ncpu: 82252677.77777785 ns\nthreads: 1"
           }
         ]
       }
