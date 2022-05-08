@@ -6,7 +6,7 @@ on:
 
 jobs:
   master-benchmark:
-    name: Benchmark
+    name: Benchmark Master
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
