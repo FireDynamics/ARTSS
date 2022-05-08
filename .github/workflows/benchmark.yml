@@ -33,6 +33,7 @@ jobs:
           # Where the previous data file is stored
           external-data-json-path: ./cache/benchmark-data.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
 
   benchmark-gpu:
     name: Benchmark-GPU
