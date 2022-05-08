@@ -47,7 +47,7 @@ public:
         if (i == CoordinateAxis::Z) {
             return z;
         }
-        throw std::runtime_error("unknown axis");
+        // throw std::runtime_error("unknown axis");
     }
 
     const inline numeral &operator[](size_t i) const {
@@ -60,7 +60,7 @@ public:
         if (i == CoordinateAxis::Z) {
             return z;
         }
-        throw std::runtime_error("unknown axis");
+        // throw std::runtime_error("unknown axis");
     }
 
     Coordinate &operator+=(const Coordinate &rhs) {
