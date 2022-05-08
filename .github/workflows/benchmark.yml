@@ -31,7 +31,6 @@ jobs:
           # Where the output from the benchmark tool is stored
           output-file-path: benchmark_result.json
           # Where the previous data file is stored
-          output-file-path: ./cache/benchmark-data.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
 
