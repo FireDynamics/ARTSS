@@ -146,6 +146,15 @@ if(NOT TARGET gtest::gtest)
     add_subdirectory(external/googletest)
 endif()
 
+if(NOT TARGET benchmark::benchmark)
+    # Stand-alone build
+    find_package(benchmark::benchmark QUIET)
+endif()
+# use local fallback
+if(NOT TARGET benchmark::benchmark)
+    add_subdirectory(external/benchmark)
+endif()
+
 if(NOT TARGET MPI)
     find_package(MPI)
 endif()
@@ -209,3 +218,7 @@ target_link_libraries(artss_data_assimilation_serial PRIVATE spdlog::spdlog)
 target_link_libraries(artss_data_assimilation_serial PRIVATE fmt::fmt)
 target_link_libraries(artss_data_assimilation_serial PRIVATE MPI::MPI_CXX)
 target_link_libraries(artss_data_assimilation_serial PRIVATE HighFive)
+
+
+set(BENCHMARK_ENABLE_TESTING OFF)
+add_subdirectory(benchmarks)
