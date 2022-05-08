@@ -48,9 +48,9 @@ static void BM_MulFields(benchmark::State &state) {
     }
 }
 
-BENCHMARK(BM_AddScalar)->Range(8, 8<<20)->Setup(DoSetup);
-BENCHMARK(BM_AddFields)->Range(8, 8<<20)->Setup(DoSetup);
-BENCHMARK(BM_MulScalar)->Range(8, 8<<20)->Setup(DoSetup);
-BENCHMARK(BM_MulFields)->Range(8, 8<<20)->Setup(DoSetup);
+BENCHMARK(BM_AddScalar)->ThreadRange(1, 8)->Range(8, 8<<20)->Setup(DoSetup);
+BENCHMARK(BM_AddFields)->ThreadRange(1, 8)->Range(8, 8<<20)->Setup(DoSetup);
+BENCHMARK(BM_MulScalar)->ThreadRange(1, 8)->Range(8, 8<<20)->Setup(DoSetup);
+BENCHMARK(BM_MulFields)->ThreadRange(1, 8)->Range(8, 8<<20)->Setup(DoSetup);
 
 BENCHMARK_MAIN();
