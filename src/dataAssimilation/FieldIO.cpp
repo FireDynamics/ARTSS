@@ -148,7 +148,6 @@ void FieldIO::read_vis_field(HighFive::File &file, Field &field, const real t) {
 void FieldIO::read_fields(const Settings::data_assimilation::field_changes &field_changes,
                           Field &u, Field &v, Field &w,
                           Field &p, Field &T, Field &C) {
-    int n;
     std::string line;
     if (!field_changes.changed) {
         return;
