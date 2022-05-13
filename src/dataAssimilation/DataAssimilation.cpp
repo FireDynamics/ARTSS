@@ -24,6 +24,7 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
         m_new_field_T(Field(FieldType::T)),
         m_new_field_C(Field(FieldType::RHO)) {
     m_field_IO_handler = new FieldIO(settings.filename);
+
     if (m_settings.assimilation_parameters.enabled) {
         if (m_settings.assimilation_parameters.class_name == AssimilationMethods::standard) {
             m_parameter_handler = new ParameterReader();
@@ -46,7 +47,7 @@ void DataAssimilation::save_data(real t_cur) {
     Field &u = m_field_controller->get_field_u();
     Field &v = m_field_controller->get_field_v();
     Field &w = m_field_controller->get_field_w();
-    Field &p = m_field_controller->get_field_w();
+    Field &p = m_field_controller->get_field_p();
     Field &T = m_field_controller->get_field_T();
     Field &C = m_field_controller->get_field_concentration();
 

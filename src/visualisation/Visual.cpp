@@ -18,7 +18,7 @@
 
 Visual::Visual(const Settings::visualisation_parameters &settings, const Solution &solution, const std::string &file_name) :
         m_settings(settings),
-        m_file_name(Utility::remove_extension(file_name)),
+        m_file_name(file_name),
         m_solution(solution),
         m_has_analytical_solution(m_solution.has_analytical_solution()) {
 #ifndef BENCHMARKING

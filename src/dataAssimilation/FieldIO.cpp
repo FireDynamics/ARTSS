@@ -53,8 +53,7 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
     }
     
     HighFive::Group t_group = out_file.createGroup(group_name);
-    // Field fields[] = {u, v, w, p, T, C};
-    Field fields[] = {u, v, w, T, C};
+    Field fields[] = {u, v, w, p, T, C};
     size_t size = u.get_size();
     std::vector<size_t> dims{1, size};
     for (Field &f: fields) {
@@ -82,7 +81,7 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
     read_vis_field(input_file, u, t_cur);
     read_vis_field(input_file, v, t_cur);
     read_vis_field(input_file, w, t_cur);
-    // read_vis_field(input_file, p, t_cur);
+    read_vis_field(input_file, p, t_cur);
     read_vis_field(input_file, T, t_cur);
     read_vis_field(input_file, C, t_cur);
 }
