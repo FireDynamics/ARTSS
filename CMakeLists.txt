@@ -202,7 +202,7 @@ add_subdirectory(src/TCP)
 # use local fallback
 if(NOT TARGET HighFive)
     set(HIGHFIVE_USE_BOOST OFF)
-    set(HIGHFIVE_PARALLEL_HDF5 ON)
+    set(HIGHFIVE_PARALLEL_HDF5 OFF)
     add_subdirectory(external/HighFive)
 endif()
 
