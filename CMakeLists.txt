@@ -199,6 +199,7 @@ add_subdirectory(src/dataAssimilation)
 add_subdirectory(src/TCP)
 
 set(HIGHFIVE_USE_BOOST OFF)
+set(HIGHFIVE_PARALLEL_HDF5 OFF)
 add_subdirectory(external/HighFive)
 
 get_target_property(ARTSS_SOURCE_FILES artss SOURCES)
