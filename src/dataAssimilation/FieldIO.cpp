@@ -59,7 +59,8 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
     for (Field &f: fields) {
         auto field_name = Mapping::get_field_type_name(f.get_type());
         m_logger->debug("attempt to write @t:{}:{}", t_cur, field_name);
-        t_group.createDataSet<real>(field_name, HighFive::DataSpace(dims));
+        HighFive::DataSet dsf = t_group.createDataSet<real>(field_name, HighFive::DataSpace(dims));
+        dsf.write(f.get_data());
     }
 }
 
