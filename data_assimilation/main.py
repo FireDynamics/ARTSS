@@ -1,5 +1,5 @@
-import time
 import os
+import time
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -7,13 +7,13 @@ from numpy import ndarray
 
 import TCP_client
 import data_assimilation
-from ARTSS import XML, Domain, DAFile
+from ARTSS import XML, Domain, DAFile, DAPackage
 from data_assimilation import FieldReader
 
 
 def create_message(t_cur: float, config_file_name: str) -> bin:
-    string_msg = str(t_cur) + ',' + config_file_name
-    return string_msg.encode('utf-8')
+    package = DAPackage(t_cur, config_file_name)
+    return package.pack()
 
 
 def change_something(domain: Domain, field: list) -> list:
@@ -99,6 +99,8 @@ def main(dry_run=False):
         fields['T'] = field
         field_file_name = f'T_{t_cur}.dat'
         if dry_run:
+            for k in fields:
+                print((k, len(fields[k])))
             data_assimilation.write_field_data(file_name=field_file_name, data=fields,
                                                field_keys=['u', 'v', 'w', 'p', 'T', 'C'])
         else:
@@ -125,13 +127,13 @@ def main(dry_run=False):
 def gradient_tmp(sensor_data_file: str, simulation_data_file: str):
     reader = FieldReader(simulation_data_file)
     reader.print_header()
-    
+
     xml = XML(reader.get_xml_file_name())
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
     domain.print_info()
     domain.print_debug()
-    
+
     dt = reader.dt
 
     # pseudo event listener
