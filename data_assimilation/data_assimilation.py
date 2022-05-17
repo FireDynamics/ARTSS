@@ -1,9 +1,20 @@
-import wsgiref.validate
+#!/usr/bin/env python3
+
+import struct
 from datetime import datetime
-import pandas as pd
+
+import h5py
+import wsgiref.validate
 import numpy as np
-from typing import Type
-from ARTSS import Domain
+import pandas as pd
+
+
+def is_float(x: str) -> bool:
+    try:
+        float(x)
+        return True
+    except ValueError:
+        return False
 
 
 def get_date_now() -> str:
@@ -11,25 +22,17 @@ def get_date_now() -> str:
 
 
 def write_field_data(file_name: str, data: dict, field_keys: list):
-    file = open(file_name, 'w')
-    for key in field_keys:
-        if key in data.keys():
+    with h5py.File(file_name, 'w') as out:
+        for key in field_keys:
+            if key not in data.keys():
+                continue
+
             field = data[key]
-            line = ''
-            for number in field:
-                line += f'{number};'
-            line += '\n'
-            file.write(line)
-    file.close()
+            out.create_dataset(key, (len(field), ), dtype='d')
 
 
 class FieldReader:
     def __init__(self, simulation_data_file_name='visualisation.dat'):
-        self.date = None
-        self.fields = None
-        self.grid_resolution = None
-        self.dt: float = None
-        self.xml_file_name: str = None
         self.file_name: str = simulation_data_file_name
         self.dt: float
         self.xml_file_name: str
@@ -40,23 +43,13 @@ class FieldReader:
         self.read_header()
 
     def read_header(self):
-        fname = open(self.file_name, 'r')
-        # first line
-        line = fname.readline()
-        self.dt = float(line.split(';')[3])
-        # second line
-        line = fname.readline().split(';')[1:]
-        self.grid_resolution = {'Nx': int(line[0]), 'Ny': int(line[1]), 'Nz': int(line[2])}
-        # third line
-        line = fname.readline().strip()
-        self.fields = line.split(';')[1:]
-        # fourth line
-        line = fname.readline().strip()
-        self.date = datetime.strptime(line.split(';')[1], '%a %b %d %H:%M:%S %Y')
-        # fifth line
-        line = fname.readline().strip()
-        self.xml_file_name = line.split(';')[1]
-        fname.close()
+        with h5py.File(self.file_name, 'r') as inp:
+            metadata = inp['metadata']
+            self.dt = metadata['dt'][()]
+            self.grid_resolution = list(metadata['domain'][:])
+            self.fields = list(metadata['fields'].asstr()[:])
+            self.date = datetime.strptime(metadata['date'].asstr()[()][0].strip(), '%a %b %d %H:%M:%S %Y')
+            self.xml_file_name = metadata['xml'][()][0]
 
     def print_header(self):
         print(f'dt: {self.dt}')
@@ -65,37 +58,13 @@ class FieldReader:
         print(f'date: {self.date}')
         print(f'xml file name: {self.xml_file_name}')
 
-    def get_line_from_file(self, line_number: int) -> str:
-        return self.get_lines_from_file([line_number])[0]
 
-    def get_pos_from_all_time_steps(self, line_numbers: list) -> list:
-        lines = []
-        max_val = max(line_numbers)
-        file = open(self.file_name, 'r')
-        for i, line in enumerate(file):
-            if i in line_numbers:
-                lines.append(line)
-            if i > max_val:
-                break
-        file.close()
-        return lines
-
-    def get_lines_from_file(self, line_numbers: list) -> list:
-        lines = []
-        max_val = max(line_numbers)
-        file = open(self.file_name, 'r')
-        for i, line in enumerate(file):
-            if i in line_numbers:
-                lines.append(line)
-            if i > max_val:
-                break
-        file.close()
-        return lines
+    def get_ts(self) -> [float]:
+        with h5py.File(self.file_name, 'r') as inp:
+            return sorted([float(x) for x in inp if is_float(x)])
 
     def get_t_current(self) -> float:
-        first_line = self.get_line_from_file(0)
-        t_cur = first_line.split(';')[1]
-        return float(t_cur)
+        return self.get_ts()[-1]
 
     def get_xml_file_name(self) -> str:
         return self.xml_file_name
@@ -112,27 +81,18 @@ class FieldReader:
             print(f'cannot read time step {time_step} as the current time step is {t_cur}')
             return {}
         else:
-            number_of_fields = len(self.fields)
-            steps = int(time_step / self.dt) - 1
-
-            starting_line = 5 + (number_of_fields + 1) * steps + 1
-            lines = self.get_lines_from_file(list(range(starting_line, starting_line + number_of_fields + 1)))
             fields = {}
-            for i in range(number_of_fields):
-                fields[self.fields[i]] = np.fromstring(lines[i], dtype=np.float, sep=';')
+            print(f'read time step {time_step}')
+            with h5py.File(self.file_name, 'r') as inp:
+                inp = inp[f'/{time_step:.5e}']
+                for i in inp:
+                    fields[i] = np.array(inp[i][0])
+                    print(f'read field: {i} {fields[i].shape}, {sum(fields[i])}')
+
             return fields
 
     def write_field_data(self, file_name: str, data: dict):
-        file = open(file_name, 'w')
-        for key in self.fields:
-            if key in data.keys():
-                field = data[key]
-                line = ''
-                for number in field:
-                    line += f'{number};'
-                line += '\n'
-                file.write(line)
-        file.close()
+        write_field_data(file_name=file_name, data=data, field_keys=self.fields)
 
 
 def gradient_based_optimisation(sensor_data: pd.DataFrame, domain: Type[Domain], field_reader: Type[FieldReader],
