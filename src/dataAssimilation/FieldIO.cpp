@@ -43,14 +43,14 @@ FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_fil
 /// \param  T       data of field T to be written out
 /// \param  C       data of field C to be written out
 // *************************************************************************************************
-void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
+void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     HighFive::File out_file(m_file_name, HighFive::File::ReadWrite);
-    auto group_name = fmt::format("{:.5e}", t_cur);
-    m_logger->debug("attempt to write @t:{}", t_cur);
+    auto group_name = fmt::format("{:.5e}", t_current);
+    m_logger->debug("attempt to write @t:{}", t_current);
 
     HighFive::Group meta_group = out_file.getGroup("metadata");
-    real t[1] = {0};
-    HighFive::DataSet t_cur_set = meta_group.createDataSet<std::string>("t_cur", HighFive::DataSpace::From(t));
+    real t_cur[1] = {t_current};
+    HighFive::DataSet t_cur_set = meta_group.getDataSet("t_cur");
     t_cur_set.write(t_cur);
 
     if (out_file.exist(group_name)) {
@@ -63,7 +63,7 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
     std::vector<size_t> dims{1, size};
     for (Field &f: fields) {
         auto field_name = Mapping::get_field_type_name(f.get_type());
-        m_logger->debug("attempt to write @t:{}:{}", t_cur, field_name);
+        m_logger->debug("attempt to write @t:{}:{}", t_current, field_name);
         HighFive::DataSet dsf = t_group.createDataSet<real>(field_name, HighFive::DataSpace(dims));
         dsf.write(f.get_data());
     }
@@ -133,7 +133,7 @@ void FieldIO::create_header(HighFive::File &file, const std::string &xml_file_na
     xml_set.write(xml);
 
     real t_cur[1] = {0};
-    HighFive::DataSet t_cur_set = meta_group.createDataSet<std::string>("t_cur", HighFive::DataSpace::From(t_cur));
+    HighFive::DataSet t_cur_set = meta_group.createDataSet<real>("t_cur", HighFive::DataSpace::From(t_cur));
     t_cur_set.write(t_cur);
 }
 
