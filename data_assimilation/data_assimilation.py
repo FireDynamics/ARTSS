@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import struct
+import shutil
+import tempfile
 from datetime import datetime
 
 import h5py
@@ -21,7 +23,9 @@ def get_date_now() -> str:
 
 
 def write_field_data(file_name: str, data: dict, field_keys: list):
-    with h5py.File(file_name, 'w') as out:
+    _, tfp = tempfile.mkstemp()
+    shutil.copy2(file_name, tfp)
+    with h5py.File(tfp, 'w') as out:
         for key in field_keys:
             if key not in data.keys():
                 continue
@@ -42,7 +46,9 @@ class FieldReader:
         self.read_header()
 
     def read_header(self):
-        with h5py.File(self.file_name, 'r') as inp:
+        _, tfp = tempfile.mkstemp()
+        shutil.copy2(self.file_name, tfp)
+        with h5py.File(tfp, 'r') as inp:
             metadata = inp['metadata']
             self.dt = metadata['dt'][()]
             self.grid_resolution = list(metadata['domain'][:])
@@ -59,7 +65,9 @@ class FieldReader:
 
 
     def get_ts(self) -> [float]:
-        with h5py.File(self.file_name, 'r') as inp:
+        _, tfp = tempfile.mkstemp()
+        shutil.copy2(self.file_name, tfp)
+        with h5py.File(tfp, 'r') as inp:
             return sorted([float(x) for x in inp if is_float(x)])
 
     def get_t_current(self) -> float:
@@ -82,7 +90,9 @@ class FieldReader:
         else:
             fields = {}
             print(f'read time step {time_step}')
-            with h5py.File(self.file_name, 'r') as inp:
+            _, tfp = tempfile.mkstemp()
+            shutil.copy2(self.file_name, tfp)
+            with h5py.File(tfp, 'r') as inp:
                 inp = inp[f'/{time_step:.5e}']
                 for i in inp:
                     fields[i] = np.array(inp[i][0])
