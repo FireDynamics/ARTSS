@@ -48,6 +48,11 @@ void FieldIO::write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, F
     auto group_name = fmt::format("{:.5e}", t_cur);
     m_logger->debug("attempt to write @t:{}", t_cur);
 
+    HighFive::Group meta_group = out_file.getGroup("metadata");
+    real t[1] = {0};
+    HighFive::DataSet t_cur_set = meta_group.createDataSet<std::string>("t_cur", HighFive::DataSpace::From(t));
+    t_cur_set.write(t_cur);
+
     if (out_file.exist(group_name)) {
         out_file.unlink(group_name);
     }
@@ -89,11 +94,8 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
 
 // ================================= write header ==================================================
 // *************************************************************************************************
-/// \brief  write header for field storage. includes essential debugger notation: Nx, Ny, Nz
-/// \details header format:
-/// ###DOMAIN;<Nx>;<Ny>;<Nz>
-/// ###FIELDS;u;v;w;p;T;concentration
-/// ###DATE:<date>;XML:<XML>
+/// \brief  write header for field storage. includes essential debugger notation: xml file name,
+///         which fields are written, date, Nx, Ny, Nz,
 // *************************************************************************************************
 void FieldIO::create_header(HighFive::File &file, const std::string &xml_file_name) {
     auto end = std::chrono::system_clock::now();
@@ -129,6 +131,10 @@ void FieldIO::create_header(HighFive::File &file, const std::string &xml_file_na
     std::string xml[1] = {xml_file_name};
     HighFive::DataSet xml_set = meta_group.createDataSet<std::string>("xml", HighFive::DataSpace::From(date));
     xml_set.write(xml);
+
+    real t_cur[1] = {0};
+    HighFive::DataSet t_cur_set = meta_group.createDataSet<std::string>("t_cur", HighFive::DataSpace::From(t_cur));
+    t_cur_set.write(t_cur);
 }
 
 void FieldIO::read_field(HighFive::File &file, Field &field) {
