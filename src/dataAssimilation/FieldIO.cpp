@@ -27,7 +27,7 @@ FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_fil
     size_t n = static_cast<size_t>(std::round(t_end / domain_data->get_physical_parameters().dt)) + 1;
     m_positions = new long[n];
 
-    HighFive::File out_file(m_file_name, HighFive::File::ReadWrite | HighFive::File::Create);
+    H5::H5File out_file(m_file_name, H5F_ACC_TRUNC);
     create_header(out_file, xml_file_name);
 }
 
@@ -97,44 +97,45 @@ void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Fi
 /// \brief  write header for field storage. includes essential debugger notation: xml file name,
 ///         which fields are written, date, Nx, Ny, Nz,
 // *************************************************************************************************
-void FieldIO::create_header(HighFive::File &file, const std::string &xml_file_name) {
+void FieldIO::create_header(H5::H5File &file, const std::string &xml_file_name) {
     auto end = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
-    if (file.exist("metadata")) {
+    if (file.exists("metadata")) {
         file.unlink("metadata");
     }
-    HighFive::Group meta_group = file.createGroup("metadata");
+    H5::Group meta_group = file.createGroup("metadata");
 
     auto domain_data = DomainData::getInstance();
 
     auto dt = domain_data->get_physical_parameters().dt;
-    HighFive::DataSet dt_set = meta_group.createDataSet<real>("dt", HighFive::DataSpace::From(dt));
-    dt_set.write(dt);
+    H5::DataSpace data_space = H5Screate(H5S_SCALAR);
+    H5::DataSet dt_set = meta_group.createDataSet("dt", H5::PredType::NATIVE_DOUBLE, data_space);
+    dt_set.write(&dt, H5::PredType::NATIVE_DOUBLE, H5::DataSpace::ALL, H5::DataSpace::ALL, H5::DSetMemXferPropList::DEFAULT);
 
     size_t Nx = domain_data->get_number_of_cells(CoordinateAxis::X);
     size_t Ny = domain_data->get_number_of_cells(CoordinateAxis::Y);
     size_t Nz = domain_data->get_number_of_cells(CoordinateAxis::Z);
 
-    size_t domain[3] = {Nx, Ny, Nz};
-    HighFive::DataSet domain_set = meta_group.createDataSet<size_t>("domain", HighFive::DataSpace::From(domain));
-    domain_set.write(domain);
+//size_t domain[3] = {Nx, Ny, Nz};
+//HighFive::DataSet domain_set = meta_group.createDataSet<size_t>("domain", HighFive::DataSpace::From(domain));
+//domain_set.write(domain);
 
-    std::vector<std::string> fields{"u" , "v", "w", "p", "T", "concentration"};
-    HighFive::DataSet fields_set = meta_group.createDataSet<std::string>("fields", HighFive::DataSpace::From(fields));
-    fields_set.write(fields);
+//std::vector<std::string> fields{"u" , "v", "w", "p", "T", "concentration"};
+//HighFive::DataSet fields_set = meta_group.createDataSet<std::string>("fields", HighFive::DataSpace::From(fields));
+//fields_set.write(fields);
 
-    std::string date[1] = {std::ctime(&end_time)};
-    HighFive::DataSet date_set = meta_group.createDataSet<std::string>("date", HighFive::DataSpace::From(date));
-    date_set.write(date);
+//std::string date[1] = {std::ctime(&end_time)};
+//HighFive::DataSet date_set = meta_group.createDataSet<std::string>("date", HighFive::DataSpace::From(date));
+//date_set.write(date);
 
-    std::string xml[1] = {xml_file_name};
-    HighFive::DataSet xml_set = meta_group.createDataSet<std::string>("xml", HighFive::DataSpace::From(date));
-    xml_set.write(xml);
+//std::string xml[1] = {xml_file_name};
+//HighFive::DataSet xml_set = meta_group.createDataSet<std::string>("xml", HighFive::DataSpace::From(date));
+//xml_set.write(xml);
 
-    real t_cur[1] = {0};
-    HighFive::DataSet t_cur_set = meta_group.createDataSet<real>("t_cur", HighFive::DataSpace::From(t_cur));
-    t_cur_set.write(t_cur);
+//real t_cur[1] = {0};
+//HighFive::DataSet t_cur_set = meta_group.createDataSet<real>("t_cur", HighFive::DataSpace::From(t_cur));
+//t_cur_set.write(t_cur);
 }
 
 void FieldIO::read_field(HighFive::File &file, Field &field) {

@@ -198,13 +198,12 @@ add_subdirectory(gtests)
 add_subdirectory(src/dataAssimilation)
 add_subdirectory(src/TCP)
 
-
-# use local fallback
 if(NOT TARGET HighFive)
     set(HIGHFIVE_USE_BOOST OFF)
     set(HIGHFIVE_PARALLEL_HDF5 OFF)
     add_subdirectory(external/HighFive)
 endif()
+find_package(HDF5)
 
 get_target_property(ARTSS_SOURCE_FILES artss SOURCES)
 add_executable(artss_data_assimilation_serial ${ARTSS_SOURCE_FILES} src/main.cpp)
@@ -214,3 +213,5 @@ target_link_libraries(artss_data_assimilation_serial PRIVATE spdlog::spdlog)
 target_link_libraries(artss_data_assimilation_serial PRIVATE fmt::fmt)
 target_link_libraries(artss_data_assimilation_serial PRIVATE MPI::MPI_CXX)
 target_link_libraries(artss_data_assimilation_serial PRIVATE HighFive)
+target_link_libraries(artss_data_assimilation_serial PRIVATE ${HDF5_CXX_HL_LIBRARIES})
+target_include_directories(artss_data_assimilation_serial PRIVATE ${HDF5_CXX_INCLUDE_DIRS})

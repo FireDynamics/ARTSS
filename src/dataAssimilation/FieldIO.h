@@ -13,6 +13,7 @@
 
 #include <highfive/H5File.hpp>
 #include <highfive/H5DataSet.hpp>
+#include <H5Cpp.h>
 
 #include "../field/FieldController.h"
 #include "../utility/Utility.h"
@@ -32,7 +33,7 @@ class FieldIO {
                      Field &p, Field &T, Field &C);
 
  private:
-    void create_header(HighFive::File &file, const std::string &xml_file_name);
+    void create_header(H5::H5File &file, const std::string &xml_file_name);
     void read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
 
     long *m_positions;
