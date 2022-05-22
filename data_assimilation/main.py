@@ -112,8 +112,8 @@ def main(dry_run=False):
     else:
         reader = FieldReader()
         reader.print_header()
-
         xml = XML(reader.get_xml_file_name())
+
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
     domain.print_info()
