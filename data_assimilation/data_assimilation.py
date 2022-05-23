@@ -23,7 +23,7 @@ def get_date_now() -> str:
 
 
 def write_field_data(file_name: str, data: dict, field_keys: list):
-    with h5py.File(tfp, 'w') as out:
+    with h5py.File(file_name, 'w') as out:
         for key in field_keys:
             if key not in data.keys():
                 continue
@@ -33,8 +33,7 @@ def write_field_data(file_name: str, data: dict, field_keys: list):
 
 
 class FieldReader:
-    def __init__(self, file_name: str):
-        self.file_name = file_name
+    def __init__(self):
         self.dt: float
         self.xml_file_name: str
         self.grid_resolution: dict
@@ -45,7 +44,7 @@ class FieldReader:
 
     def read_header(self):
         tt = self.get_ts()[0]
-        with h5py.File('./.vis/{tt:.5e}', 'r') as inp:
+        with h5py.File(f'./.vis/{tt:.5e}', 'r') as inp:
             metadata = inp['metadata']
             self.dt = metadata['dt'][()]
             self.grid_resolution = list(metadata['domain'][:])
@@ -61,11 +60,13 @@ class FieldReader:
         print(f'xml file name: {self.xml_file_name}')
 
     def get_ts(self) -> [float]:
-        ret = os.listdir('./')
+        ret = os.listdir('./.vis')
         return sorted([float(x) for x in ret if x != 'meta'])
 
     def get_t_current(self) -> float:
-        return self.get_ts()[-1]
+        with open('./.vis/meta', 'r') as inp:
+            t = float([x for x in inp.readlines() if x.startswith('t:')][0][2:])
+        return t
 
     def get_xml_file_name(self) -> str:
         return self.xml_file_name
@@ -84,7 +85,7 @@ class FieldReader:
         else:
             fields = {}
             print(f'read time step {time_step}')
-            with h5py.File('./.vis/{time_step:.5e}', 'r') as inp:
+            with h5py.File(f'./.vis/{time_step:.5e}', 'r') as inp:
                 inp = inp[f'/{time_step:.5e}']
                 for i in inp:
                     fields[i] = np.array(inp[i][0])
