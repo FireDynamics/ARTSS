@@ -4,11 +4,14 @@ import os
 import struct
 import tempfile
 from datetime import datetime
+from typing import Type
 
 import h5py
 import wsgiref.validate
 import numpy as np
 import pandas as pd
+
+from ARTSS import Domain
 
 
 def is_float(x: str) -> bool:
@@ -95,7 +98,7 @@ class FieldReader:
             return fields
 
     @staticmethod
-    def write_field_data(file_name: str, data: dict, field_keys: list):
+    def write_field_data_keys(file_name: str, data: dict, field_keys: list):
         with h5py.File(file_name, 'w') as out:
             for key in field_keys:
                 if key not in data.keys():
@@ -105,7 +108,7 @@ class FieldReader:
                 out.create_dataset(key, (len(field), ), dtype='d')
 
     def write_field_data(self, file_name: str, data: dict):
-        self.write_field_data(file_name=file_name, data=data, field_keys=self.fields)
+        FieldReader.write_field_data_keys(file_name=file_name, data=data, field_keys=self.fields)
 
 
 

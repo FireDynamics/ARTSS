@@ -102,8 +102,8 @@ def main(dry_run=False):
         if dry_run:
             for k in fields:
                 print((k, len(fields[k])))
-            data_assimilation.write_field_data(file_name=field_file_name, data=fields,
-                                               field_keys=['u', 'v', 'w', 'p', 'T', 'C'])
+            data_assimilation.write_field_data_keys(file_name=field_file_name, data=fields,
+                                                    field_keys=['u', 'v', 'w', 'p', 'T', 'C'])
         else:
             reader.write_field_data(file_name=field_file_name, data=fields)
 
@@ -123,6 +123,7 @@ def main(dry_run=False):
 
         if not dry_run:
             client.send_message(create_message(t, config_file_name))
+            time.sleep(10)
 
 
 def gradient_tmp():
