@@ -33,7 +33,8 @@ def write_field_data(file_name: str, data: dict, field_keys: list):
 
 
 class FieldReader:
-    def __init__(self):
+    def __init__(self, time_step):
+        self.t: float = time_step
         self.dt: float
         self.xml_file_name: str
         self.grid_resolution: dict
@@ -43,11 +44,11 @@ class FieldReader:
         self.read_header()
 
     def read_header(self):
-        tt = self.get_ts()[0]
-        with h5py.File(f'./.vis/{tt:.5e}', 'r') as inp:
+        with h5py.File(f'./.vis/{self.t:.5e}', 'r') as inp:
             metadata = inp['metadata']
             self.dt = metadata['dt'][()]
-            self.grid_resolution = list(metadata['domain'][:])
+            domain = list(metadata['domain'][:])
+            self.grid_resolution = {'Nx': domain[0], 'Ny': domain[1], 'Nz': domain[2]}
             self.fields = list(metadata['fields'].asstr()[:])
             self.date = datetime.strptime(metadata['date'].asstr()[()][0].strip(), '%a %b %d %H:%M:%S %Y')
             self.xml_file_name = metadata['xml'][()][0]
@@ -59,17 +60,17 @@ class FieldReader:
         print(f'date: {self.date}')
         print(f'xml file name: {self.xml_file_name}')
 
-    def get_ts(self) -> [float]:
-        ret = os.listdir('./.vis')
-        return sorted([float(x) for x in ret if x != 'meta'])
-
-    def get_t_current(self) -> float:
+    @staticmethod
+    def get_t_current() -> float:
         with open('./.vis/meta', 'r') as inp:
             t = float([x for x in inp.readlines() if x.startswith('t:')][0][2:])
         return t
 
-    def get_xml_file_name(self) -> str:
-        return self.xml_file_name
+    @staticmethod
+    def get_xml_file_name() -> str:
+        with open('./.vis/meta', 'r') as inp:
+            xml_file_name = [x for x in inp.readlines() if x.startswith('xml_name:')][0][len('xml_name:'):]
+        return xml_file_name.strip()
 
     def get_grid_resolution(self) -> dict:
         return self.grid_resolution

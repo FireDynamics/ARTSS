@@ -60,49 +60,6 @@ def create_gradient_field(Nx: int, Ny: int, Nz: int) -> ndarray:
     return field
 
 
-def gradient_tmp():
-    reader = FieldReader()
-    reader.print_header()
-    
-    xml = XML(reader.get_xml_file_name())
-    xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
-    domain.print_info()
-    domain.print_debug()
-    
-    dt = reader.dt
-
-    t_cur = reader.get_t_current()
-    
-    n = int(t_cur/dt)
-    i = 300
-    j = 15
-    k = 16
-    sensor_data= []
-    print('iter')
-    f = open('visualisation.dat', 'r')
-    for i in range(6):
-        f.readline()
-    for i in range(1,34):
-        print(i, i * dt)
-        fields = []
-        for i in range(6):
-            fields.append(np.fromstring(f.readline(), dtype=np.float, sep=';'))
-        sensor_data.append(fields[4][domain.calculate_index(i, j, k)])
-        f.readline()
-    f.close()
-    print("plot")
-    f = open('tmp.tmp', 'w')
-    for i in sensor_data:
-        f.write(str(i) + "\n")
-    f.close()
-    #f = open('tmp.tmp', 'r')
-    #for i in f:
-    #    sensor_data.append(float(i))
-    plt.plot(sensor_data)
-    plt.show()
-
-
 def main(dry_run=False):
     cwd = os.getcwd()
     print(cwd)
@@ -110,9 +67,7 @@ def main(dry_run=False):
     if dry_run:
         xml = XML('da.xml')
     else:
-        reader = FieldReader()
-        reader.print_header()
-        xml = XML(reader.get_xml_file_name())
+        xml = XML(FieldReader.get_xml_file_name())
 
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
@@ -132,11 +87,14 @@ def main(dry_run=False):
                                                  domain.domain_param['Ny'],
                                                  domain.domain_param['Nz'])}
         else:
-            t_cur = reader.get_t_current()
+            t_cur = FieldReader.get_t_current()
             while t_cur < t:
                 time.sleep(5)
-                t_cur = reader.get_t_current()
-            fields = reader.read_field_data(t_cur)
+                t_cur = FieldReader.get_t_current()
+
+            reader = FieldReader(t)
+            reader.print_header()
+            fields = reader.read_field_data(t)
 
         field = change_something(domain, fields['T'])
         fields['T'] = field
@@ -165,6 +123,49 @@ def main(dry_run=False):
 
         if not dry_run:
             client.send_message(create_message(t, config_file_name))
+
+
+def gradient_tmp():
+    reader = FieldReader()
+    reader.print_header()
+
+    xml = XML(reader.get_xml_file_name())
+    xml.read_xml()
+    domain = Domain(xml.domain, xml.obstacles)
+    domain.print_info()
+    domain.print_debug()
+
+    dt = reader.dt
+
+    t_cur = reader.get_t_current()
+
+    n = int(t_cur/dt)
+    i = 300
+    j = 15
+    k = 16
+    sensor_data = []
+    print('iter')
+    f = open('visualisation.dat', 'r')
+    for i in range(6):
+        f.readline()
+    for i in range(1,34):
+        print(i, i * dt)
+        fields = []
+        for i in range(6):
+            fields.append(np.fromstring(f.readline(), dtype=np.float, sep=';'))
+        sensor_data.append(fields[4][domain.calculate_index(i, j, k)])
+        f.readline()
+    f.close()
+    print("plot")
+    f = open('tmp.tmp', 'w')
+    for i in sensor_data:
+        f.write(str(i) + "\n")
+    f.close()
+    #f = open('tmp.tmp', 'r')
+    #for i in f:
+    #    sensor_data.append(float(i))
+    plt.plot(sensor_data)
+    plt.show()
 
 
 if __name__ == '__main__':
