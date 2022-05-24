@@ -10,7 +10,6 @@
 #include <chrono>
 #include <iomanip>
 #include <algorithm>
-#include <filesystem>
 
 #include <fmt/compile.h>
 #include <fstream>
@@ -25,6 +24,9 @@ FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_fil
         m_logger(Utility::create_logger(typeid(this).name())) {
     namespace fs = std::filesystem;
     fs::create_directories(m_path);
+    m_meta_path = m_path;
+    m_meta_path /= "meta";
+
     create_meta_file(0);
 }
 
@@ -42,7 +44,8 @@ FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_fil
 // *************************************************************************************************
 void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     auto tstr = fmt::format("{:.5e}", t_current);
-    auto file_name = m_path + "/" + tstr;
+    std::filesystem::path file_name = m_path;
+    file_name /= tstr;
 
     HighFive::File out_file(file_name, HighFive::File::ReadWrite | HighFive::File::Create);
     m_logger->debug("attempt to write @t:{}", t_current);
@@ -79,7 +82,9 @@ void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &
 // *************************************************************************************************
 void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     m_logger->debug("read original data");
-    auto file_name = fmt::format("{}/{:.5e}", m_path, t_cur);
+    auto t_cur_str = fmt::format("{:.5e}", t_cur);
+    std::filesystem::path file_name = m_path;
+    file_name /= t_cur_str;
     HighFive::File input_file(file_name, HighFive::File::ReadOnly);
 
     read_vis_field(input_file, u, t_cur);
@@ -205,8 +210,9 @@ void FieldIO::read_fields(const real t_cur,
     }
 
     try {
-        auto tstr = fmt::format("{:.5e}", m_path, t_cur);
-        auto file_name = fmt::format("{}/{}", m_path, tstr);
+        auto t_cur_str = fmt::format("{:.5e}", t_cur);
+        std::filesystem::path file_name = m_path;
+        file_name /= t_cur_str;
         HighFive::File org_file(file_name, HighFive::File::ReadOnly);
         HighFive::File new_file(field_changes.file_name, HighFive::File::ReadOnly);
 
@@ -255,7 +261,7 @@ void FieldIO::read_fields(const real t_cur,
 
 void FieldIO::create_meta_file(real t_cur) {
     std::ofstream meta_file;
-    meta_file.open(m_path + "/meta");
+    meta_file.open(m_meta_path);
     meta_file << fmt::format("t:{}\n", t_cur);
     meta_file << fmt::format("xml_name:{}\n", m_xml_filename);
     meta_file.close();

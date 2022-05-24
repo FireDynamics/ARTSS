@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <filesystem>
 
 #include <highfive/H5File.hpp>
 #include <highfive/H5DataSet.hpp>
@@ -38,6 +39,7 @@ class FieldIO {
 
     std::string m_path;
     std::string m_xml_filename;
+    std::filesystem::path m_meta_path;
 
     std::shared_ptr<spdlog::logger> m_logger;
 
