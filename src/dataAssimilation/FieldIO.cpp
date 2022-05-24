@@ -25,6 +25,7 @@ FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_fil
         m_logger(Utility::create_logger(typeid(this).name())) {
     namespace fs = std::filesystem;
     fs::create_directories(m_path);
+    create_meta_file(0);
 }
 
 
@@ -62,13 +63,7 @@ void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &
         HighFive::DataSet dsf = t_group.createDataSet<real>(field_name, HighFive::DataSpace(dims));
         dsf.write(f.get_data());
     }
-
-    // update metafile
-    std::ofstream meta_file;
-    meta_file.open(m_path + "/meta");
-    meta_file << fmt::format("t:{}\n", t_current);
-    meta_file << fmt::format("xml_name:{}\n", m_xml_filename);
-    meta_file.close();
+    create_meta_file(t_current);
 }
 
 // ========================================== read =================================================
@@ -202,6 +197,7 @@ void FieldIO::read_fields(const real t_cur,
                           Field &u, Field &v, Field &w,
                           Field &p, Field &T, Field &C) {
     m_logger->debug("read time step {}", t_cur);
+    create_meta_file(t_cur);
     if (field_changes.changed) {  // no changes -> read original file
         m_logger->debug("no field changes");
         read_fields(t_cur, u, v, w, p, T, C);
@@ -255,4 +251,12 @@ void FieldIO::read_fields(const real t_cur,
         m_logger->warn(fmt::format("Exception during reading {}", ex.what()));
         read_fields(t_cur, u, v, w, p, T, C);
     }
+}
+
+void FieldIO::create_meta_file(real t_cur) {
+    std::ofstream meta_file;
+    meta_file.open(m_path + "/meta");
+    meta_file << fmt::format("t:{}\n", t_cur);
+    meta_file << fmt::format("xml_name:{}\n", m_xml_filename);
+    meta_file.close();
 }
