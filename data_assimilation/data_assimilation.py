@@ -22,15 +22,6 @@ def get_date_now() -> str:
     return datetime.now().strftime('%a %b %d %H:%M:%S %Y')
 
 
-def write_field_data(file_name: str, data: dict, field_keys: list):
-    with h5py.File(file_name, 'w') as out:
-        for key in field_keys:
-            if key not in data.keys():
-                continue
-
-            field = data[key]
-            out.create_dataset(key, (len(field), ), dtype='d')
-
 
 class FieldReader:
     def __init__(self, time_step):
@@ -94,5 +85,16 @@ class FieldReader:
 
             return fields
 
+    @staticmethod
+    def write_field_data(file_name: str, data: dict, field_keys: list):
+        with h5py.File(file_name, 'w') as out:
+            for key in field_keys:
+                if key not in data.keys():
+                    continue
+
+                field = data[key]
+                out.create_dataset(key, (len(field), ), dtype='d')
+
     def write_field_data(self, file_name: str, data: dict):
-        write_field_data(file_name=file_name, data=data, field_keys=self.fields)
+        self.write_field_data(file_name=file_name, data=data, field_keys=self.fields)
+
