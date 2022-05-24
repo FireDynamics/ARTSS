@@ -20,9 +20,9 @@
 
 class FieldIO {
  public:
-    explicit FieldIO(const std::string &xml_file_name, const std::string &file_name = "visualisation.dat");
+    explicit FieldIO(const std::string &xml_file_name, const std::string &file_name = ".vis");
     void write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
-    void set_file_name(std::string &file_name) { m_file_name = file_name; }
+    void set_file_name(std::string &file_name) { m_path = file_name; }
     void read_fields(real t_cur,
                      const Settings::data_assimilation::field_changes &field_changes,
                      Field &u, Field &v, Field &w,
@@ -32,13 +32,13 @@ class FieldIO {
                      Field &p, Field &T, Field &C);
 
  private:
-    void create_header(HighFive::File &file, const std::string &xml_file_name);
+    void create_meta_file(real t_cur);
+    void create_header(HighFive::File &file);
     void read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
 
-    long *m_positions;
-    std::string m_file_name;
+    std::string m_path;
+    std::string m_xml_filename;
 
-    long m_pos_time_step;
     std::shared_ptr<spdlog::logger> m_logger;
 
     void read_field(HighFive::File &file, Field &field);
