@@ -144,33 +144,10 @@ def gradient_tmp():
 
     reader = FieldReader(t)
     dt = reader.dt
-    n = int(t_cur / dt)
-    i = 300
-    j = 15
-    k = 16
 
-    sensor_data = []
-    print('iter')
-    f = open('visualisation.dat', 'r')
-    for i in range(6):
-        f.readline()
-    for i in range(1, 34):
-        print(i, i * dt)
-        fields = []
-        for i in range(6):
-            fields.append(np.fromstring(f.readline(), dtype=np.float, sep=';'))
-        sensor_data.append(fields[4][domain.calculate_index(i, j, k)])
-        f.readline()
-    f.close()
-    print("plot")
-    f = open('tmp.tmp', 'w')
-    for i in sensor_data:
-        f.write(str(i) + "\n")
-    f.close()
-    # f = open('tmp.tmp', 'r')
-    # for i in f:
-    #    sensor_data.append(float(i))
-    plt.plot(sensor_data)
+    # plt.plot(sensor_data)
+    # plt.plot(simulation_data)
+    # plt.plot(assimilation_data)
     plt.show()
 
 
