@@ -105,14 +105,14 @@ bool DataAssimilation::requires_rollback(const real t_cur) {
     m_logger->debug("probe: {}", flag);
     if (flag) {
         int msg_len;
-        m_logger->debug("recved chars1: {}", msg_len);
+        m_logger->debug("received chars1: {}", msg_len);
         MPI_Get_count(&status, MPI_CHAR, &msg_len);
         std::vector<char> msg;
 
         msg.resize(msg_len);
         m_logger->debug("preparing to receive message");
         MPI_Recv(msg.data(), msg_len, MPI_CHAR, 1, status.MPI_TAG, MPI_COMM_WORLD, &status);
-        m_logger->debug("recved chars: {}", msg_len);
+        m_logger->debug("received chars: {}", msg_len);
         return config_rollback(msg.data());
     }
     return flag;
