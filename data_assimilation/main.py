@@ -67,10 +67,8 @@ def main(dry_run=False):
     if dry_run:
         xml = XML('da.xml')
     else:
-        reader = FieldReader()
-        reader.print_header()
+        xml = XML(FieldReader.get_xml_file_name())
 
-        xml = XML(reader.get_xml_file_name())
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
     domain.print_info()
@@ -89,16 +87,21 @@ def main(dry_run=False):
                                                  domain.domain_param['Ny'],
                                                  domain.domain_param['Nz'])}
         else:
-            t_cur = reader.get_t_current()
+            t_cur = FieldReader.get_t_current()
             while t_cur < t:
                 time.sleep(5)
-                t_cur = reader.get_t_current()
-            fields = reader.read_field_data(t_cur)
+                t_cur = FieldReader.get_t_current()
+
+            reader = FieldReader(t)
+            reader.print_header()
+            fields = reader.read_field_data(t)
 
         field = change_something(domain, fields['T'])
         fields['T'] = field
         field_file_name = f'T_{t_cur}.dat'
         if dry_run:
+            for k in fields:
+                print((k, len(fields[k])))
             data_assimilation.write_field_data(file_name=field_file_name, data=fields,
                                                field_keys=['u', 'v', 'w', 'p', 'T', 'C'])
         else:
@@ -123,25 +126,24 @@ def main(dry_run=False):
 
 
 def gradient_tmp():
-
     reader = FieldReader()
     reader.print_header()
-    
+
     xml = XML(reader.get_xml_file_name())
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
     domain.print_info()
     domain.print_debug()
-    
+
     dt = reader.dt
 
     t_cur = reader.get_t_current()
-    
+
     n = int(t_cur/dt)
     i = 300
     j = 15
     k = 16
-    sensor_data= []
+    sensor_data = []
     print('iter')
     f = open('visualisation.dat', 'r')
     for i in range(6):
@@ -166,7 +168,5 @@ def gradient_tmp():
     plt.show()
 
 
-
 if __name__ == '__main__':
-    #gradient_tmp()
     main(dry_run=False)

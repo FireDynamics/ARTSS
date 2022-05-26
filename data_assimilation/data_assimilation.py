@@ -1,28 +1,31 @@
-import wsgiref.validate
+#!/usr/bin/env python3
+
+import os
+import struct
+import tempfile
 from datetime import datetime
+
+import h5py
+import wsgiref.validate
 import numpy as np
+
+
+def is_float(x: str) -> bool:
+    try:
+        float(x)
+        return True
+    except ValueError:
+        return False
 
 
 def get_date_now() -> str:
     return datetime.now().strftime('%a %b %d %H:%M:%S %Y')
 
 
-def write_field_data(file_name: str, data: dict, field_keys: list):
-    file = open(file_name, 'w')
-    for key in field_keys:
-        if key in data.keys():
-            field = data[key]
-            line = ''
-            for number in field:
-                line += f'{number};'
-            line += '\n'
-            file.write(line)
-    file.close()
-
 
 class FieldReader:
-    def __init__(self):
-        self.file_name = 'visualisation.dat'
+    def __init__(self, time_step):
+        self.t: float = time_step
         self.dt: float
         self.xml_file_name: str
         self.grid_resolution: dict
@@ -32,23 +35,14 @@ class FieldReader:
         self.read_header()
 
     def read_header(self):
-        fname = open(self.file_name, 'r')
-        # first line
-        line = fname.readline()
-        self.dt = float(line.split(';')[3])
-        # second line
-        line = fname.readline().split(';')[1:]
-        self.grid_resolution = {'Nx': int(line[0]), 'Ny': int(line[1]), 'Nz': int(line[2])}
-        # third line
-        line = fname.readline().strip()
-        self.fields = line.split(';')[1:]
-        # fourth line
-        line = fname.readline().strip()
-        self.date = datetime.strptime(line.split(';')[1], '%a %b %d %H:%M:%S %Y')
-        # fifth line
-        line = fname.readline().strip()
-        self.xml_file_name = line.split(';')[1]
-        fname.close()
+        with h5py.File(f'./.vis/{self.t:.5e}', 'r') as inp:
+            metadata = inp['metadata']
+            self.dt = metadata['dt'][()]
+            domain = list(metadata['domain'][:])
+            self.grid_resolution = {'Nx': domain[0], 'Ny': domain[1], 'Nz': domain[2]}
+            self.fields = list(metadata['fields'].asstr()[:])
+            self.date = datetime.strptime(metadata['date'].asstr()[()][0].strip(), '%a %b %d %H:%M:%S %Y')
+            self.xml_file_name = metadata['xml'][()][0]
 
     def print_header(self):
         print(f'dt: {self.dt}')
@@ -57,40 +51,17 @@ class FieldReader:
         print(f'date: {self.date}')
         print(f'xml file name: {self.xml_file_name}')
 
-    def get_line_from_file(self, line_number: int) -> str:
-        return self.get_lines_from_file([line_number])[0]
+    @staticmethod
+    def get_t_current() -> float:
+        with open('./.vis/meta', 'r') as inp:
+            t = float([x for x in inp.readlines() if x.startswith('t:')][0][2:])
+        return t
 
-    def get_pos_from_all_time_steps(self, line_numbers: list) -> list:
-        lines = []
-        max_val = max(line_numbers)
-        file = open(self.file_name, 'r')
-        for i, line in enumerate(file):
-            if i in line_numbers:
-                lines.append(line)
-            if i > max_val:
-                break
-        file.close()
-        return lines
-
-    def get_lines_from_file(self, line_numbers: list) -> list:
-        lines = []
-        max_val = max(line_numbers)
-        file = open(self.file_name, 'r')
-        for i, line in enumerate(file):
-            if i in line_numbers:
-                lines.append(line)
-            if i > max_val:
-                break
-        file.close()
-        return lines
-
-    def get_t_current(self) -> float:
-        first_line = self.get_line_from_file(0)
-        t_cur = first_line.split(';')[1]
-        return float(t_cur)
-
-    def get_xml_file_name(self) -> str:
-        return self.xml_file_name
+    @staticmethod
+    def get_xml_file_name() -> str:
+        with open('./.vis/meta', 'r') as inp:
+            xml_file_name = [x for x in inp.readlines() if x.startswith('xml_name:')][0][len('xml_name:'):]
+        return xml_file_name.strip()
 
     def get_grid_resolution(self) -> dict:
         return self.grid_resolution
@@ -104,24 +75,26 @@ class FieldReader:
             print(f'cannot read time step {time_step} as the current time step is {t_cur}')
             return {}
         else:
-            number_of_fields = len(self.fields)
-            steps = int(time_step / self.dt) - 1
-
-            starting_line = 5 + (number_of_fields + 1) * steps + 1
-            lines = self.get_lines_from_file(list(range(starting_line, starting_line + number_of_fields + 1)))
             fields = {}
-            for i in range(number_of_fields):
-                fields[self.fields[i]] = np.fromstring(lines[i], dtype=np.float, sep=';')
+            print(f'read time step {time_step}')
+            with h5py.File(f'./.vis/{time_step:.5e}', 'r') as inp:
+                inp = inp[f'/{time_step:.5e}']
+                for i in inp:
+                    fields[i] = np.array(inp[i][0])
+                    print(f'read field: {i} {fields[i].shape}')
+
             return fields
 
-    def write_field_data(self, file_name: str, data: dict):
-        file = open(file_name, 'w')
-        for key in self.fields:
-            if key in data.keys():
+    @staticmethod
+    def write_field_data(file_name: str, data: dict, field_keys: list):
+        with h5py.File(file_name, 'w') as out:
+            for key in field_keys:
+                if key not in data.keys():
+                    continue
+
                 field = data[key]
-                line = ''
-                for number in field:
-                    line += f'{number};'
-                line += '\n'
-                file.write(line)
-        file.close()
+                out.create_dataset(key, (len(field), ), dtype='d')
+
+    def write_field_data(self, file_name: str, data: dict):
+        self.write_field_data(file_name=file_name, data=data, field_keys=self.fields)
+
