@@ -131,7 +131,7 @@ def gradient_tmp():
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
     domain.print_info()
-    domain.print_debug()
+
 
     #######################################
     # pseudo event listener

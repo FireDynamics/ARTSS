@@ -1,33 +1,9 @@
 #!/usr/bin/env python3
 
-import os
-import struct
-import tempfile
 from datetime import datetime
-from typing import Type
 
 import h5py
-import wsgiref.validate
 import numpy as np
-import pandas as pd
-
-from ARTSS import Domain
-
-
-def is_float(x: str) -> bool:
-    try:
-        float(x)
-        return True
-    except ValueError:
-        return False
-
-
-def is_float(x: str) -> bool:
-    try:
-        float(x)
-        return True
-    except ValueError:
-        return False
 
 
 def is_float(x: str) -> bool:
@@ -40,7 +16,6 @@ def is_float(x: str) -> bool:
 
 def get_date_now() -> str:
     return datetime.now().strftime('%a %b %d %H:%M:%S %Y')
-
 
 
 class FieldReader:
@@ -113,44 +88,7 @@ class FieldReader:
                     continue
 
                 field = data[key]
-                out.create_dataset(key, (len(field), ), dtype='d')
+                out.create_dataset(key, (len(field),), dtype='d')
 
     def write_field_data(self, file_name: str, data: dict):
         FieldReader.write_field_data_keys(file_name=file_name, data=data, field_keys=self.fields)
-
-
-
-def gradient_based_optimisation(sensor_data: pd.DataFrame, domain: Type[Domain], field_reader: Type[FieldReader],
-                                t_cur: float):
-    if not comparison_sensor_simulation_data(sensor_data, field_reader, t_cur):
-        # initiate gradient based optimisation, simulation data differs to much from simulation data
-        pass
-    return False
-
-
-def comparison_sensor_simulation_data(sensor_data: pd.DataFrame, field_reader: Type[FieldReader], t_cur: float):
-    accurate = True
-    nabla: dict[str, float] = {}
-
-    def compare(val_sen: float, val_sim: float, type_sen: str):
-        if type_sen == 'T':
-            diff = 10
-        elif type_sen == 'C':
-            diff = 11
-        else:
-            diff = 3
-        return abs(val_sen - val_sim) < diff
-
-    fields_sim = field_reader.read_field_data(t_cur)
-    for key in sensor_data:
-        # sensor data
-        type_sensor = sensor_data[key]['type']
-        index_sensor = sensor_data[key]['index']
-        value_sensor = sensor_data[key]['value']
-
-        value_sim = fields_sim[type][index_sensor]
-
-        if not compare(value_sensor, value_sim, type_sensor):
-            accurate = False
-
-    return accurate, nabla
