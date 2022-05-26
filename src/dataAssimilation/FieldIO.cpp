@@ -9,7 +9,6 @@
 #include <ctime>
 #include <chrono>
 #include <iomanip>
-#include <algorithm>
 
 #include <fmt/compile.h>
 #include <fstream>
@@ -55,7 +54,7 @@ void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &
     if (out_file.exist(tstr)) {
         out_file.unlink(tstr);
     }
-    
+
     HighFive::Group t_group = out_file.createGroup(tstr);
     Field fields[] = {u, v, w, p, T, C};
     size_t size = u.get_size();

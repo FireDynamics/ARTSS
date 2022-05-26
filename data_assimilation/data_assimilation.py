@@ -30,6 +30,14 @@ def is_float(x: str) -> bool:
         return False
 
 
+def is_float(x: str) -> bool:
+    try:
+        float(x)
+        return True
+    except ValueError:
+        return False
+
+
 def get_date_now() -> str:
     return datetime.now().strftime('%a %b %d %H:%M:%S %Y')
 
