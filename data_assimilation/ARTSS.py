@@ -197,7 +197,7 @@ class Domain:
         return int(round((-self.domain_param[direction.upper() + '1'] + obstacle_coordinate) / self.domain_param['d' + direction.lower()]))
 
     def get_index(self, i: int, j: int, k: int) -> int:
-        return i + self.domain_param['Nx'] * j + self.domain_param['Nx'] * self.domain_param['Ny'] * k
+        return int(i + self.domain_param['Nx'] * j + self.domain_param['Nx'] * self.domain_param['Ny'] * k)
 
     def calculate_obstacles(self, obstacles):
         for o in obstacles:

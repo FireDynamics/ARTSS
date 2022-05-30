@@ -13,11 +13,12 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     domain = Domain(xml.domain, xml.obstacles)
     domain.print_info()
 
-    devc_info, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
-    print(devc_info)
+    devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
+    print(devc_info_temperature)
 
     sensor_times = fds_data.index
 
+    nabla: dict = {}
     for t_sensor in sensor_times[1:]:
         t_cur = FieldReader.get_t_current(path=artss_data_path)
         print(t_cur)
@@ -25,8 +26,17 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
             time.sleep(10)
         t_artss = get_time_step_artss(t_sensor, os.path.join(artss_data_path, '.vis'))
         field_reader = FieldReader(t_artss, path=artss_data_path)
-        comparison_sensor_simulation_data(devc_info, fds_data, domain, field_reader, t_artss, t_sensor)
+        diff = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
+        if not nabla:
+            # first change
+            pass
+        else:
+            # create nabla
+            calc_nabla()
 
+def calc_nabla(old_diff, new_diff, old_params, new_params) -> list:
+    # calc nabla
+    pass
 
 def get_time_step_artss(t_sensor: float, artss_data_path: str) -> float:
     files = os.listdir(artss_data_path)
@@ -35,7 +45,7 @@ def get_time_step_artss(t_sensor: float, artss_data_path: str) -> float:
     files.sort()
 
     estimated_index = int(t_sensor * len(files) / files[-1])
-    print(estimated_index)
+
     t_artss: float = -1
     if abs(files[estimated_index] - t_sensor) < 1e-10:
         t_artss = files[estimated_index]
@@ -58,7 +68,7 @@ def get_time_step_artss(t_sensor: float, artss_data_path: str) -> float:
     return t_artss
 
 
-def read_fds_data(input_path: str, input_file_name: str, artss: Domain) -> [dict, pd.DataFrame]:
+def read_fds_data(input_path: str, input_file_name: str, artss: Domain) -> [dict, dict, pd.DataFrame]:
     full_name = os.path.join(input_path, input_file_name)
     str_devc = read_devc_from_input_file(full_name + '.fds')
     dict_devc = parse_devc(str_devc)
@@ -66,9 +76,18 @@ def read_fds_data(input_path: str, input_file_name: str, artss: Domain) -> [dict
 
     fds_data = read_devc_from_csv_file(os.path.join(input_path, chid_file_name + '_devc.csv'))
     # fds_data = read_fds_file(input_path, artss)
+
+    devc_temperature = {}
+    devc_thermocouple = {}
     for d in dict_devc:
-        dict_devc[d]['type'] = 'T'
-    return dict_devc, fds_data
+        dict_devc[d]['type']: str = 'T'
+        dict_devc[d]['index']: int = artss.get_index(*dict_devc[d]['XYZ'])
+        if d.startswith('Temperatur'):
+            devc_temperature[d] = dict_devc[d]
+        elif d.startswith('Thermocouple'):
+            devc_thermocouple[d] = dict_devc[d]
+
+    return devc_temperature, devc_thermocouple, fds_data
 
 
 def read_devc_from_csv_file(file_name: str) -> pd.DataFrame:
@@ -176,29 +195,16 @@ def gradient_based_optimisation(sensor_data: pd.DataFrame, domain: Domain, field
     return False
 
 
-def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, artss: Domain, field_reader: FieldReader, t_artss: float, t_sensor: float):
-    accurate = True
-    nabla: dict[str, float] = {}
-
-    def compare(val_sen: float, val_sim: float, type_sen: str):
-        if type_sen == 'T':
-            diff = 10
-        elif type_sen == 'C':
-            diff = 11
-        else:
-            diff = 3
-        return abs(val_sen - val_sim) < diff
-
+def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader, t_artss: float, t_sensor: float) -> dict:
+    diff: dict = {'T': [], 'C': []}
     fields_sim = field_reader.read_field_data(t_artss)
-    for key in sensor_data:
+    for key in devc_info:
         # sensor data
-        type_sensor = sensor_data[key]['type']
-        index_sensor = sensor_data[key]['index']
-        value_sensor = sensor_data[key]['value']
+        type_sensor: str = devc_info[key]['type']
+        index_sensor: int = devc_info[key]['index']
+        value_sensor: float = sensor_data[key][t_sensor]
 
-        value_sim = fields_sim[type][index_sensor]
+        value_sim = fields_sim[type_sensor][index_sensor]
+        diff[type_sensor].append(value_sim - value_sensor)
 
-        if not compare(value_sensor, value_sim, type_sensor):
-            accurate = False
-
-    return accurate, nabla
+    return diff
