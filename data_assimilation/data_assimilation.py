@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import os
 from datetime import datetime
 
 import h5py
@@ -53,8 +53,9 @@ class FieldReader:
         return t
 
     @staticmethod
-    def get_xml_file_name() -> str:
-        with open('./.vis/meta', 'r') as inp:
+    def get_xml_file_name(path: str = '.') -> str:
+        fpath = os.path.join(path, '.vis/meta')
+        with open(fpath, 'r') as inp:
             xml_file_name = [x for x in inp.readlines() if x.startswith('xml_name:')][0][len('xml_name:'):]
         return xml_file_name.strip()
 
