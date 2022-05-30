@@ -128,5 +128,5 @@ def main(dry_run=False):
 
 
 if __name__ == '__main__':
-    # gradient_based_optimisation.start('example/FDS_corridor/', 'corridor', 'example')
-    main(dry_run=False)
+    gradient_based_optimisation.start('example/FDS_corridor/', 'corridor', 'example')
+    # main(dry_run=False)

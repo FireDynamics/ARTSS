@@ -18,12 +18,13 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
     sensor_times = fds_data.index
 
-    for t_sensor in sensor_times:
-        t_cur = FieldReader.get_t_current()
+    for t_sensor in sensor_times[1:]:
+        t_cur = FieldReader.get_t_current(path=artss_data_path)
+        print(t_cur)
         while t_cur < t_sensor:
             time.sleep(10)
-        t_artss = get_time_step_artss(t_sensor, artss_data_path)
-        field_reader = FieldReader(t_artss)
+        t_artss = get_time_step_artss(t_sensor, os.path.join(artss_data_path, '.vis'))
+        field_reader = FieldReader(t_artss, path=artss_data_path)
         comparison_sensor_simulation_data(devc_info, fds_data, domain, field_reader, t_artss, t_sensor)
 
 
@@ -175,7 +176,7 @@ def gradient_based_optimisation(sensor_data: pd.DataFrame, domain: Domain, field
     return False
 
 
-def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader, t_artss: float, t_sensor: float):
+def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, artss: Domain, field_reader: FieldReader, t_artss: float, t_sensor: float):
     accurate = True
     nabla: dict[str, float] = {}
 

@@ -19,7 +19,7 @@ def get_date_now() -> str:
 
 
 class FieldReader:
-    def __init__(self, time_step):
+    def __init__(self, time_step, path: str = '.'):
         self.t: float = time_step
         self.dt: float
         self.xml_file_name: str
@@ -27,10 +27,11 @@ class FieldReader:
         self.fields: list
         self.date: datetime
         self.header: str
+        self.path = path
         self.read_header()
 
     def read_header(self):
-        with h5py.File(f'./.vis/{self.t:.5e}', 'r') as inp:
+        with h5py.File(os.path.join(self.path, '.vis', f'{self.t:.5e}'), 'r') as inp:
             metadata = inp['metadata']
             self.dt = metadata['dt'][()]
             domain = list(metadata['domain'][:])
@@ -47,8 +48,8 @@ class FieldReader:
         print(f'xml file name: {self.xml_file_name}')
 
     @staticmethod
-    def get_t_current() -> float:
-        with open('./.vis/meta', 'r') as inp:
+    def get_t_current(path: str = '.') -> float:
+        with open(os.path.join(path, '.vis/meta'), 'r') as inp:
             t = float([x for x in inp.readlines() if x.startswith('t:')][0][2:])
         return t
 
@@ -66,14 +67,14 @@ class FieldReader:
         return self.fields
 
     def read_field_data(self, time_step: float) -> dict:
-        t_cur = self.get_t_current()
+        t_cur = self.get_t_current(path=self.path)
         if time_step > t_cur:
             print(f'cannot read time step {time_step} as the current time step is {t_cur}')
             return {}
         else:
             fields = {}
             print(f'read time step {time_step}')
-            with h5py.File(f'./.vis/{time_step:.5e}', 'r') as inp:
+            with h5py.File(os.path.join(self.path, '.vis', f'{time_step:.5e}'), 'r') as inp:
                 inp = inp[f'/{time_step:.5e}']
                 for i in inp:
                     fields[i] = np.array(inp[i][0])
