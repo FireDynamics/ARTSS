@@ -7,6 +7,7 @@ from numpy import ndarray
 
 import TCP_client
 import data_assimilation
+import gradient_based_optimisation
 from ARTSS import XML, Domain, DAFile, DAPackage
 from data_assimilation import FieldReader
 
@@ -126,32 +127,6 @@ def main(dry_run=False):
             time.sleep(10)
 
 
-def gradient_tmp():
-    xml = XML(FieldReader.get_xml_file_name())
-    xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
-    domain.print_info()
-
-
-    #######################################
-    # pseudo event listener
-    # TODO
-    sleep_time = 60
-    sensor_time_steps = [0.1, 0.2, 0.3]
-    time.sleep(sleep_time)
-    t = sensor_time_steps[0]
-    #######################################
-    t_cur = FieldReader.get_t_current()
-
-    reader = FieldReader(t)
-    dt = reader.dt
-
-    # plt.plot(sensor_data)
-    # plt.plot(simulation_data)
-    # plt.plot(assimilation_data)
-    plt.show()
-
-
 if __name__ == '__main__':
-    # gradient_tmp()
+    # gradient_based_optimisation.start('example/FDS_corridor/', 'corridor', 'example')
     main(dry_run=False)
