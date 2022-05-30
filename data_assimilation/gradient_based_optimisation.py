@@ -8,7 +8,7 @@ from data_assimilation import FieldReader
 
 
 def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
-    xml = XML(os.path.join(artss_data_path, FieldReader.get_xml_file_name(artss_data_path)))
+    xml = XML(FieldReader.get_xml_file_name(artss_data_path), path=artss_data_path)
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
     domain.print_info()

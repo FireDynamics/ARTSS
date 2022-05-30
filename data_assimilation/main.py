@@ -66,9 +66,9 @@ def main(dry_run=False):
     print(cwd)
 
     if dry_run:
-        xml = XML('da.xml')
+        xml = XML('da.xml', path='example')
     else:
-        xml = XML(FieldReader.get_xml_file_name())
+        xml = XML(FieldReader.get_xml_file_name(path='example'), path='example')
 
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)

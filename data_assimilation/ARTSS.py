@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import os
 import struct
 import ctypes
 
@@ -17,9 +17,9 @@ class DAPackage:
 
 
 class XML:
-    def __init__(self, filename):
+    def __init__(self, filename: str, path: str = '.'):
         self.filename = filename
-        self.xml_tree = ET.parse(self.filename)
+        self.xml_tree = ET.parse(os.path.join(path, self.filename))
         self.has_obstacles = False
         self.obstacles = []
         self.domain = {}
