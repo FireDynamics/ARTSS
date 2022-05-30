@@ -100,7 +100,7 @@ class DAFile:
             ET.SubElement(source, key).text = str(temperature_source[key])
 
         if source_type['random'] == 'Yes':
-            random_tree = ET.SubElement(source, 'random', absolute='Yes' if random['absolute'] =='Yes' else 'No',
+            random_tree = ET.SubElement(source, 'random', absolute='Yes' if random['absolute'] == 'Yes' else 'No',
                                         custom_seed='Yes' if random['custom_seed'] == 'Yes' else 'No',
                                         custom_steps='Yes' if random['custom_steps'] == 'Yes' else 'No')
             ET.SubElement(random_tree, 'range').text = str(random['range'])
@@ -193,9 +193,11 @@ class Domain:
         self.domain_param['end z index'] = self.domain_param['Nz'] - 2
 
     def match_grid(self, obstacle_coordinate, direction):
-        # from function get_matching_index in Obstacle.cpp
-        return int(round((-self.domain_param[direction.upper() + '1'] + obstacle_coordinate) / self.domain_param[
-            'd' + direction.lower()]))
+        # from function get_matching_index in Obstacle.cpp for obstacles only
+        return int(round((-self.domain_param[direction.upper() + '1'] + obstacle_coordinate) / self.domain_param['d' + direction.lower()]))
+
+    def get_index(self, i: int, j: int, k: int) -> int:
+        return i + self.domain_param['Nx'] * j + self.domain_param['Nx'] * self.domain_param['Ny'] * k
 
     def calculate_obstacles(self, obstacles):
         for o in obstacles:
