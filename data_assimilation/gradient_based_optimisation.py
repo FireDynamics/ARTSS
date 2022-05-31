@@ -50,7 +50,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
             field_reader = FieldReader(t_artss, path=artss_data_path)
             diff_cur = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
             # calc new nabla
-            assim_table[n]['current'] = (assim_table[n]['current'] - assim_table[n]['original']) / assim_table[n]['delta']
+            assim_table[n]['current'] = assim_table[n]['original'] + (diff_cur['T'] - diff_orig['T']) / assim_table[n]['delta']
         else:
             config_file_name = change_artss(assim_table.loc['current'].to_dict(), [source_type, temperature_source, random], f'{t_artss}_{len(assim_table.columns) - 1}', path=cwd)
             # client.send_message(create_message(t_artss, config_file_name))
