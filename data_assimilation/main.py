@@ -104,5 +104,5 @@ def main(dry_run=False):
 
 
 if __name__ == '__main__':
-    gradient_based_optimisation.start('/home/linh/Work/git/ARTSS/data_assimilation/example/FDS_corridor/', 'corridor', '/home/linh/Work/git/ARTSS/tmp/2022_nfsd/corridor/')
+    gradient_based_optimisation.start('example/FDS_corridor/', 'corridor', 'example')
     # main(dry_run=False)
