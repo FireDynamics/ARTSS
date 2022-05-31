@@ -33,9 +33,11 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                                columns=['HRR', 'x0', 'y0', 'z0'], index=['delta', 'original', 'current'])
     for t_sensor in sensor_times[1:]:
         t_cur = FieldReader.get_t_current(path=artss_data_path)
-        print(t_cur)
+        print('t_cur', t_cur, t_sensor)
         while t_cur < t_sensor:
-            time.sleep(20)
+            time.sleep(10)
+            t_cur = FieldReader.get_t_current(path=artss_data_path)
+            print('t_cur', t_cur)
         t_artss = get_time_step_artss(t_sensor, os.path.join(artss_data_path, '.vis'))
         field_reader = FieldReader(t_artss, path=artss_data_path)
         diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
@@ -47,6 +49,8 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
             while t_cur < t_sensor:
                 time.sleep(5)
+                t_cur = FieldReader.get_t_current(path=artss_data_path)
+                print('t_cur', index, t_cur)
             field_reader = FieldReader(t_artss, path=artss_data_path)
             diff_cur = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
             # calc new nabla
