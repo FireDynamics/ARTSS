@@ -1,13 +1,21 @@
 import os
 import time
 import fdsreader
+import numpy as np
 import pandas as pd
 
-from ARTSS import Domain, XML
+import TCP_client
+import data_assimilation
+from ARTSS import Domain, XML, DAFile
 from data_assimilation import FieldReader
+from main import create_message
 
 
 def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
+    cwd = os.getcwd()
+    # client = TCP_client.TCPClient()
+    # client.connect()
+
     xml = XML(FieldReader.get_xml_file_name(artss_data_path), path=artss_data_path)
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
@@ -18,25 +26,53 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
     sensor_times = fds_data.index
 
-    nabla: dict = {}
+    source_type, temperature_source, random = xml.get_temperature_source()
+    assim_table = pd.DataFrame([[float(temperature_source['HRR']) * 0.1, domain.domain_param['dx'], domain.domain_param['dy'], domain.domain_param['dz']],
+                                [float(temperature_source['HRR']), float(temperature_source['x0']), float(temperature_source['y0']), float(temperature_source['z0'])],
+                                [float(temperature_source['HRR']), float(temperature_source['x0']), float(temperature_source['y0']), float(temperature_source['z0'])]],
+                               columns=['HRR', 'x0', 'y0', 'z0'], index=['delta', 'original', 'current'])
     for t_sensor in sensor_times[1:]:
         t_cur = FieldReader.get_t_current(path=artss_data_path)
         print(t_cur)
         while t_cur < t_sensor:
-            time.sleep(10)
+            time.sleep(20)
         t_artss = get_time_step_artss(t_sensor, os.path.join(artss_data_path, '.vis'))
         field_reader = FieldReader(t_artss, path=artss_data_path)
-        diff = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
-        if not nabla:
-            # first change
-            pass
-        else:
-            # create nabla
-            calc_nabla()
+        diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
+        config_file_name = ''
+        for index, n in enumerate(assim_table.columns):
+            assim_table[n]['current'] += assim_table[n]['delta']
+            config_file_name = change_artss({n: assim_table[n]['current']}, [source_type, temperature_source, random], f'{t_artss}_{index}', path=cwd)
+            # client.send_message(create_message(t_artss, config_file_name))
 
-def calc_nabla(old_diff, new_diff, old_params, new_params) -> list:
-    # calc nabla
-    pass
+            while t_cur < t_sensor:
+                time.sleep(5)
+            field_reader = FieldReader(t_artss, path=artss_data_path)
+            diff_cur = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
+            # calc new nabla
+            assim_table[n]['current'] = (assim_table[n]['current'] - assim_table[n]['original']) / assim_table[n]['delta']
+        else:
+            config_file_name = change_artss(assim_table.loc['current'].to_dict(), [source_type, temperature_source, random], f'{t_artss}_{len(assim_table.columns) - 1}', path=cwd)
+            # client.send_message(create_message(t_artss, config_file_name))
+
+
+def change_artss(change: dict, source: list, file_name: str, path='.') -> str:
+    # initiate rollback
+    source_type, temperature_source, random = data_assimilation.change_heat_source(*source,
+                                                                                   changes={'source_type': {},
+                                                                                            'temperature_source': change,
+                                                                                            'random': {}})
+    da = DAFile()
+    da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
+    da.create_temperature_source_changes(
+        source_type=source_type,
+        temperature_source=temperature_source,
+        random=random)
+
+    config_file_name = os.path.join(path, f'config_{file_name}.xml')
+    da.write_xml(config_file_name)
+    return config_file_name
+
 
 def get_time_step_artss(t_sensor: float, artss_data_path: str) -> float:
     files = os.listdir(artss_data_path)
@@ -174,7 +210,8 @@ def read_fds_file(data_path: str, artss: Domain) -> pd.DataFrame:
         if key.startswith('Thermocouple'):
             if devc[key] is not None:
                 print(key, devc[key].xyz, *devc[key].xyz, devc[key].xyz[1])
-                i, j, k = artss.get_ijk_from_xyz(devc[key].xyz[0], devc[key].xyz[1], devc[key].xyz[2])
+                # be careful, in FDS the third parameter indicates the height, but in ARTSS it is the second
+                i, j, k = artss.get_ijk_from_xyz(devc[key].xyz[0], devc[key].xyz[2], devc[key].xyz[1])
                 index = artss.get_index(i, j, k)
                 print(f'index: {index} of {i}|{j}|{k}')
                 if index in return_val:
@@ -207,4 +244,8 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
         value_sim = fields_sim[type_sensor][index_sensor]
         diff[type_sensor].append(value_sim - value_sensor)
 
+    for key in diff:
+        if len(diff[key]) == 0:
+            continue
+        diff[key] = sum(np.abs(diff[key])) / len(diff[key])
     return diff

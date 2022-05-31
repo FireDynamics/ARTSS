@@ -18,6 +18,30 @@ def get_date_now() -> str:
     return datetime.now().strftime('%a %b %d %H:%M:%S %Y')
 
 
+def change_heat_source(source_type: dict, temperature_source: dict, random: dict, changes: dict) -> [dict, dict, dict]:
+    source_type_changes = changes['source_type']
+    temperature_source_changes = changes['temperature_source']
+    random_changes = changes['random']
+
+    new_source_type = source_type.copy()
+    new_temperature_source = temperature_source.copy()
+    new_random = random.copy()
+
+    for key in source_type_changes:
+        new_source_type[key] = source_type_changes[key]
+
+    for key in temperature_source_changes:
+        new_temperature_source[key] = temperature_source_changes[key]
+
+    if not source_type['random']:
+        new_random = {}
+    else:
+        for key in random_changes:
+            new_random[key] = random_changes[key]
+
+    return new_source_type, new_temperature_source, new_random
+
+
 class FieldReader:
     def __init__(self, time_step, path: str = '.'):
         self.t: float = time_step

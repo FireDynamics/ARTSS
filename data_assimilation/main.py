@@ -26,30 +26,6 @@ def change_something(domain: Domain, field: list) -> list:
     return new_field
 
 
-def change_heat_source(source_type: dict, temperature_source: dict, random: dict, changes: dict) -> [dict, dict, dict]:
-    source_type_changes = changes['source_type']
-    temperature_source_changes = changes['temperature_source']
-    random_changes = changes['random']
-
-    new_source_type = source_type.copy()
-    new_temperature_source = temperature_source.copy()
-    new_random = random.copy()
-
-    for key in source_type_changes:
-        new_source_type[key] = source_type_changes[key]
-
-    for key in temperature_source_changes:
-        new_temperature_source[key] = temperature_source_changes[key]
-
-    if not source_type['random']:
-        new_random = {}
-    else:
-        for key in random_changes:
-            new_random[key] = random_changes[key]
-
-    return new_source_type, new_temperature_source, new_random
-
-
 def create_gradient_field(Nx: int, Ny: int, Nz: int) -> ndarray:
     field = np.zeros(Nx * Ny * Nz)
     counter = 0
@@ -109,10 +85,10 @@ def main(dry_run=False):
             reader.write_field_data(file_name=field_file_name, data=fields)
 
         source_type, temperature_source, random = \
-            change_heat_source(*source,
-                               changes={'source_type': {},
-                                        'temperature_source': {'x0': float(source[1]['x0']) + 10 * index},
-                                        'random': {}})
+            data_assimilation.change_heat_source(*source,
+                                                 changes={'source_type': {},
+                                                          'temperature_source': {'x0': float(source[1]['x0']) + 10 * index},
+                                                          'random': {}})
         da = DAFile()
         da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': True, 'C': False}, field_file_name)
         da.create_temperature_source_changes(
