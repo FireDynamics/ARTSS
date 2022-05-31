@@ -13,8 +13,8 @@ from main import create_message
 
 def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     cwd = os.getcwd()
-    # client = TCP_client.TCPClient()
-    # client.connect()
+    client = TCP_client.TCPClient()
+    client.connect()
 
     xml = XML(FieldReader.get_xml_file_name(artss_data_path), path=artss_data_path)
     xml.read_xml()
@@ -35,20 +35,22 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         t_cur = FieldReader.get_t_current(path=artss_data_path)
         print('t_cur', t_cur, t_sensor)
         while t_cur < t_sensor:
-            time.sleep(10)
+            time.sleep(20)
             t_cur = FieldReader.get_t_current(path=artss_data_path)
             print('t_cur', t_cur)
-        t_artss = get_time_step_artss(t_sensor, os.path.join(artss_data_path, '.vis'))
+        t_artss, t_revert = get_time_step_artss(t_sensor, os.path.join(artss_data_path, '.vis'))
         field_reader = FieldReader(t_artss, path=artss_data_path)
         diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
-        config_file_name = ''
+
         for index, n in enumerate(assim_table.columns):
             assim_table[n]['current'] += assim_table[n]['delta']
             config_file_name = change_artss({n: assim_table[n]['current']}, [source_type, temperature_source, random], f'{t_artss}_{index}', path=cwd)
-            # client.send_message(create_message(t_artss, config_file_name))
+            client.send_message(create_message(t_revert, config_file_name))
 
-            while t_cur < t_sensor:
-                time.sleep(5)
+            time.sleep(30)
+            t_cur = FieldReader.get_t_current(path=artss_data_path)
+            while t_cur <= t_sensor:
+                time.sleep(10)
                 t_cur = FieldReader.get_t_current(path=artss_data_path)
                 print('t_cur', index, t_cur)
             field_reader = FieldReader(t_artss, path=artss_data_path)
@@ -56,8 +58,11 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
             # calc new nabla
             assim_table[n]['current'] = assim_table[n]['original'] + (diff_cur['T'] - diff_orig['T']) / assim_table[n]['delta']
         else:
+            print('changes:', assim_table.loc['current'].to_dict())
             config_file_name = change_artss(assim_table.loc['current'].to_dict(), [source_type, temperature_source, random], f'{t_artss}_{len(assim_table.columns) - 1}', path=cwd)
-            # client.send_message(create_message(t_artss, config_file_name))
+            client.send_message(create_message(t_revert, config_file_name))
+            time.sleep(20)
+            t_cur = FieldReader.get_t_current(path=artss_data_path)
 
 
 def change_artss(change: dict, source: list, file_name: str, path='.') -> str:
@@ -78,7 +83,7 @@ def change_artss(change: dict, source: list, file_name: str, path='.') -> str:
     return config_file_name
 
 
-def get_time_step_artss(t_sensor: float, artss_data_path: str) -> float:
+def get_time_step_artss(t_sensor: float, artss_data_path: str) -> [float, float]:
     files = os.listdir(artss_data_path)
     files.remove('meta')
     files = [float(x) for x in files]
@@ -105,7 +110,8 @@ def get_time_step_artss(t_sensor: float, artss_data_path: str) -> float:
                 break
             else:
                 estimated_index -= 1
-    return t_artss
+    t_revert = files[max(0, estimated_index - 10)]
+    return t_artss, t_revert
 
 
 def read_fds_data(input_path: str, input_file_name: str, artss: Domain) -> [dict, dict, pd.DataFrame]:
