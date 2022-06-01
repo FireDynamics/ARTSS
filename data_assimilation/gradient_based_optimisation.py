@@ -31,11 +31,12 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
     source_type, temperature_source, random = xml.get_temperature_source()
 
+    keys = ['HRR', 'x0', 'y0', 'z0']
     delta = {
         'HRR': float(temperature_source['HRR']) * 0.1,
-        'x0': domain.domain_param['dx'],
-        'y0': domain.domain_param['dy'],
-        'z0': domain.domain_param['dz']
+        'x0': domain.domain_param['dx'] * 4,
+        'y0': domain.domain_param['dy'] * 4,
+        'z0': domain.domain_param['dz'] * 4
     }
 
     cur = {
@@ -46,6 +47,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     }
 
     for t_sensor in sensor_times[1:]:
+        pprint(cur)
         wait_artss(t_sensor, artss_data_path)
 
         t_artss, t_revert = get_time_step_artss(t_sensor, os.path.join(artss_data_path, '.vis'))
@@ -55,7 +57,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         print(t_revert)
 
         nabla = {}
-        for p in delta:
+        for p in keys:
             config_file_name = change_artss(
                     {p: cur[p] + delta[p]},
                     [source_type, temperature_source, random],
@@ -80,6 +82,59 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
             print(nabla[p])
 
         pprint(nabla)
+        hrr_max = cur['HRR'] / -nabla['HRR'] if nabla['HRR'] < 0 else 1.0
+        x_max = 1.0 / -nabla['x0'] if nabla['x0'] < 0 else 1.0
+        y_max = 1.0 / -nabla['y0'] if nabla['y0'] < 0 else 1.0
+        z_max = 1.0 / -nabla['z0'] if nabla['z0'] < 0 else 1.0
+
+        # search direction
+        nabla = np.asarray([nabla[x] for x in keys])
+        D = np.eye(len(delta.keys()))
+        d = np.dot(-D, nabla)
+
+        # calc alpha
+        n = 5
+        sigma = 0.01
+        alpha = min([1.0, hrr_max, x_max, y_max, z_max])
+        print([1.0, hrr_max, x_max, y_max, z_max])
+        print(f'alpha = {alpha}')
+        while n > 0:
+            x = np.asarray([cur[x] for x in keys])
+            new_para = x + (alpha * d)
+            new_para = {
+                p: new_para[n]
+                for n, p in enumerate(keys)
+            }
+            pprint(new_para)
+
+            config_file_name = change_artss(
+                    new_para,
+                    [source_type, temperature_source, random],
+                    f'{t_artss}_{p}',
+                    path=cwd
+            )
+            client.send_message(create_message(t_revert, config_file_name))
+            wait_artss(t_sensor, artss_data_path)
+
+            field_reader = FieldReader(t_artss, path=artss_data_path)
+            diff_cur = comparison_sensor_simulation_data(
+                    devc_info_thermocouple,
+                    fds_data,
+                    field_reader,
+                    t_artss,
+                    t_sensor
+            )
+
+            if diff_cur['T'] < diff_orig['T'] + np.dot(alpha * sigma * nabla, d):
+                print(f'found alpha: {alpha}')
+                print(f'found x_k+1: {new_para}')
+                print(f"al1: {np.dot(alpha * sigma * nabla, d)}")
+                print(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}")
+                break
+
+            alpha = 0.7 * alpha
+            print(f'ls: {diff_cur["T"]}')
+
         return
 
 
