@@ -4,6 +4,9 @@ import fdsreader
 import numpy as np
 import pandas as pd
 
+from copy import copy
+from pprint import pprint
+
 import TCP_client
 import data_assimilation
 from ARTSS import Domain, XML, DAFile
@@ -27,42 +30,68 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     sensor_times = fds_data.index
 
     source_type, temperature_source, random = xml.get_temperature_source()
-    assim_table = pd.DataFrame([[float(temperature_source['HRR']) * 0.1, domain.domain_param['dx'], domain.domain_param['dy'], domain.domain_param['dz']],
-                                [float(temperature_source['HRR']), float(temperature_source['x0']), float(temperature_source['y0']), float(temperature_source['z0'])],
-                                [float(temperature_source['HRR']), float(temperature_source['x0']), float(temperature_source['y0']), float(temperature_source['z0'])]],
-                               columns=['HRR', 'x0', 'y0', 'z0'], index=['delta', 'original', 'current'])
+
+    delta = {
+        'HRR': float(temperature_source['HRR']) * 0.1,
+        'x0': domain.domain_param['dx'],
+        'y0': domain.domain_param['dy'],
+        'z0': domain.domain_param['dz']
+    }
+
+    cur = {
+        'HRR': float(temperature_source['HRR']),
+        'x0': float(temperature_source['x0']),
+        'y0': float(temperature_source['y0']),
+        'z0': float(temperature_source['z0'])
+    }
+
     for t_sensor in sensor_times[1:]:
-        t_cur = FieldReader.get_t_current(path=artss_data_path)
-        print('t_cur', t_cur, t_sensor)
-        while t_cur < t_sensor:
-            time.sleep(20)
-            t_cur = FieldReader.get_t_current(path=artss_data_path)
-            print('t_cur', t_cur)
+        wait_artss(t_sensor, artss_data_path)
+
         t_artss, t_revert = get_time_step_artss(t_sensor, os.path.join(artss_data_path, '.vis'))
         field_reader = FieldReader(t_artss, path=artss_data_path)
         diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
+        print(f'org: {diff_orig["T"]}')
+        print(t_revert)
 
-        for index, n in enumerate(assim_table.columns):
-            assim_table[n]['current'] += assim_table[n]['delta']
-            config_file_name = change_artss({n: assim_table[n]['current']}, [source_type, temperature_source, random], f'{t_artss}_{index}', path=cwd)
+        nabla = {}
+        for p in delta:
+            config_file_name = change_artss(
+                    {p: cur[p] + delta[p]},
+                    [source_type, temperature_source, random],
+                    f'{t_artss}_{p}',
+                    path=cwd
+            )
             client.send_message(create_message(t_revert, config_file_name))
+            wait_artss(t_sensor, artss_data_path)
 
-            time.sleep(30)
-            t_cur = FieldReader.get_t_current(path=artss_data_path)
-            while t_cur <= t_sensor:
-                time.sleep(10)
-                t_cur = FieldReader.get_t_current(path=artss_data_path)
-                print('t_cur', index, t_cur)
             field_reader = FieldReader(t_artss, path=artss_data_path)
-            diff_cur = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
+            diff_cur = comparison_sensor_simulation_data(
+                    devc_info_thermocouple,
+                    fds_data,
+                    field_reader,
+                    t_artss,
+                    t_sensor
+            )
+
             # calc new nabla
-            assim_table[n]['current'] = assim_table[n]['original'] + (diff_cur['T'] - diff_orig['T']) / assim_table[n]['delta']
-        else:
-            print('changes:', assim_table.loc['current'].to_dict())
-            config_file_name = change_artss(assim_table.loc['current'].to_dict(), [source_type, temperature_source, random], f'{t_artss}_{len(assim_table.columns) - 1}', path=cwd)
-            client.send_message(create_message(t_revert, config_file_name))
-            time.sleep(20)
-            t_cur = FieldReader.get_t_current(path=artss_data_path)
+            nabla[p] = (diff_cur['T'] - diff_orig['T']) / delta[p]
+            print(f'cur: {diff_cur["T"]}')
+            print(nabla[p])
+
+        pprint(nabla)
+        return
+
+
+def wait_artss(t, artss_data_path):
+    time.sleep(30)  # needed for artss to rewrite meta file
+    t_cur = FieldReader.get_t_current(path=artss_data_path)
+    while t_cur <= t:
+        time.sleep(1)
+        t_new = FieldReader.get_t_current(path=artss_data_path)
+        if t_new != t_cur:
+            t_cur = t_new
+            print(f't_cur: {t_cur} wait for {t}')
 
 
 def change_artss(change: dict, source: list, file_name: str, path='.') -> str:
