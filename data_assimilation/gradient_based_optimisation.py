@@ -82,10 +82,22 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
             print(nabla[p])
 
         pprint(nabla)
-        hrr_max = cur['HRR'] / -nabla['HRR'] if nabla['HRR'] < 0 else 1.0
-        x_max = 1.0 / -nabla['x0'] if nabla['x0'] < 0 else 1.0
-        y_max = 1.0 / -nabla['y0'] if nabla['y0'] < 0 else 1.0
-        z_max = 1.0 / -nabla['z0'] if nabla['z0'] < 0 else 1.0
+        hrr_max = 1.0 if nabla['HRR'] < 0 else cur['HRR'] / nabla['HRR']
+
+        if nabla['x0'] < 0:
+            x_max = (domain.domain_param['X2'] - cur['x0']) / -nabla['x0']
+        else:
+            x_max = (domain.domain_param['X1'] - cur['x0']) / nabla['x0']
+
+        if nabla['y0'] < 0:
+            y_max = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
+        else:
+            y_max = (domain.domain_param['Y1'] - cur['y0']) / nabla['y0']
+
+        if nabla['z0'] < 0:
+            z_max = (domain.domain_param['Z2'] - cur['z0']) / -nabla['z0']
+        else:
+            z_max = (domain.domain_param['Z1'] - cur['z0']) / nabla['z0']
 
         # search direction
         nabla = np.asarray([nabla[x] for x in keys])
@@ -96,7 +108,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         n = 5
         sigma = 0.01
         alpha = min([1.0, hrr_max, x_max, y_max, z_max])
-        print([1.0, hrr_max, x_max, y_max, z_max])
+        print(('mins', [1.0, hrr_max, x_max, y_max, z_max]))
         print(f'alpha = {alpha}')
         while n > 0:
             x = np.asarray([cur[x] for x in keys])
@@ -130,12 +142,11 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                 print(f'found x_k+1: {new_para}')
                 print(f"al1: {np.dot(alpha * sigma * nabla, d)}")
                 print(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}")
+                cur = copy(new_para)
                 break
 
             alpha = 0.7 * alpha
             print(f'ls: {diff_cur["T"]}')
-
-        return
 
 
 def wait_artss(t, artss_data_path):
