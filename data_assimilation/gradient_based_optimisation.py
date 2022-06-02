@@ -85,19 +85,19 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         hrr_max = 1.0 if nabla['HRR'] < 0 else cur['HRR'] / nabla['HRR']
 
         if nabla['x0'] < 0:
-            x_max = (domain.domain_param['X2'] - cur['x0']) / -nabla['x0']
+            x_max = (domain.domain_param['X1'] - cur['x0']) / -nabla['x0']
         else:
-            x_max = (domain.domain_param['X1'] - cur['x0']) / nabla['x0']
+            x_max = (domain.domain_param['X2'] - cur['x0']) / nabla['x0']
 
         if nabla['y0'] < 0:
-            y_max = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
+            y_max = (domain.domain_param['Y1'] - cur['y0']) / -nabla['y0']
         else:
-            y_max = (domain.domain_param['Y1'] - cur['y0']) / nabla['y0']
+            y_max = (domain.domain_param['Y2'] - cur['y0']) / nabla['y0']
 
         if nabla['z0'] < 0:
-            z_max = (domain.domain_param['Z2'] - cur['z0']) / -nabla['z0']
+            z_max = (domain.domain_param['Z1'] - cur['z0']) / -nabla['z0']
         else:
-            z_max = (domain.domain_param['Z1'] - cur['z0']) / nabla['z0']
+            z_max = (domain.domain_param['Z2'] - cur['z0']) / nabla['z0']
 
         # search direction
         nabla = np.asarray([nabla[x] for x in keys])
