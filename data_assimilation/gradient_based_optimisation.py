@@ -15,9 +15,9 @@ from main import create_message
 
 
 def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
-    cwd = os.getcwd()
     client = TCP_client.TCPClient()
     client.connect()
+    cwd = os.getcwd()
 
     xml = XML(FieldReader.get_xml_file_name(artss_data_path), path=artss_data_path)
     xml.read_xml()
@@ -107,15 +107,15 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         # calc alpha
         n = 5
         sigma = 0.01
-        alpha = min([1.0, hrr_max, x_max, y_max, z_max])
+        alpha = 0.9 * min([1.0, hrr_max, x_max, y_max, z_max])
         print(('mins', [1.0, hrr_max, x_max, y_max, z_max]))
         print(f'alpha = {alpha}')
         while n > 0:
             x = np.asarray([cur[x] for x in keys])
             new_para = x + (alpha * d)
             new_para = {
-                p: new_para[n]
-                for n, p in enumerate(keys)
+                p: new_para[i]
+                for i, p in enumerate(keys)
             }
             pprint(new_para)
 
@@ -146,6 +146,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                 break
 
             alpha = 0.7 * alpha
+            n = n - 1
             print(f'ls: {diff_cur["T"]}')
 
 
