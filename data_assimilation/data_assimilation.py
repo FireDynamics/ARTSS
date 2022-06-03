@@ -90,16 +90,16 @@ class FieldReader:
     def get_fields(self) -> list:
         return self.fields
 
-    def read_field_data(self, time_step: float) -> dict:
+    def read_field_data(self) -> dict:
         t_cur = self.get_t_current(path=self.path)
-        if time_step > t_cur:
-            print(f'cannot read time step {time_step} as the current time step is {t_cur}')
+        if self.t > t_cur:
+            print(f'cannot read time step {self.t} as the current time step is {t_cur}')
             return {}
         else:
             fields = {}
-            print(f'read time step {time_step}')
-            with h5py.File(os.path.join(self.path, '.vis', f'{time_step:.5e}'), 'r') as inp:
-                inp = inp[f'/{time_step:.5e}']
+            print(f'read time step {self.t}')
+            with h5py.File(os.path.join(self.path, '.vis', f'{self.t:.5e}'), 'r') as inp:
+                inp = inp[f'/{self.t:.5e}']
                 for i in inp:
                     fields[i] = np.array(inp[i][0])
                     print(f'read field: {i} {fields[i].shape}, {sum(fields[i])}')

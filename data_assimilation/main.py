@@ -103,6 +103,38 @@ def main(dry_run=False):
             time.sleep(10)
 
 
+def tmp(path):
+    xml = XML(FieldReader.get_xml_file_name(path=path), path=path)
+    xml.read_xml()
+    domain = Domain(xml.domain, xml.obstacles)
+    domain.print_info()
+
+    cwd = os.getcwd()
+    client = TCP_client.TCPClient()
+    client.connect()
+
+    source_type, temperature_source, random = xml.get_temperature_source()
+    params = {'x0': xml.domain['dx'] * 2, 'y0': xml.domain['dy'] * 2, 'z0': xml.domain['dz']}
+    params = [0, 0]
+    for n in params:
+        t_revert = 0.2 * 2
+        t_artss = 0.2 * 5
+        gradient_based_optimisation.wait_artss(t_artss, path)
+        field_reader = FieldReader(t_artss, path=path)
+        field_reader.read_field_data()
+
+        config_file_name = gradient_based_optimisation.change_artss(
+            {},
+            #{'x0': float(temperature_source['x0']) + n},
+            [source_type, temperature_source, random],
+            f'test_{n}.xml',
+            path=cwd)
+        client.send_message(create_message(t_revert, config_file_name))
+
+    gradient_based_optimisation.wait_artss(1, path)
+    field_reader = FieldReader(1, path=path)
+    field_reader.read_field_data()
+
 if __name__ == '__main__':
     gradient_based_optimisation.start('example/FDS_corridor/', 'corridor', 'example')
     # main(dry_run=False)

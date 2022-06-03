@@ -101,7 +101,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
         # search direction
         nabla = np.asarray([nabla[x] for x in keys])
-        D = np.eye(len(delta.keys()))
+        D = np.eye(len(delta.keys()))   # -> hesse matrix
         d = np.dot(-D, nabla)
 
         # calc alpha
@@ -122,7 +122,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
             config_file_name = change_artss(
                     new_para,
                     [source_type, temperature_source, random],
-                    f'{t_artss}_{p}',
+                    f'{t_artss}_{n}',
                     path=cwd
             )
             client.send_message(create_message(t_revert, config_file_name))
@@ -331,16 +331,9 @@ def read_fds_file(data_path: str, artss: Domain) -> pd.DataFrame:
     return return_val
 
 
-def gradient_based_optimisation(sensor_data: pd.DataFrame, domain: Domain, field_reader: FieldReader, t_cur: float):
-    if not comparison_sensor_simulation_data(sensor_data, field_reader, t_cur):
-        # initiate gradient based optimisation, simulation data differs to much from simulation data
-        pass
-    return False
-
-
 def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader, t_artss: float, t_sensor: float) -> dict:
     diff: dict = {'T': [], 'C': []}
-    fields_sim = field_reader.read_field_data(t_artss)
+    fields_sim = field_reader.read_field_data()
     for key in devc_info:
         # sensor data
         type_sensor: str = devc_info[key]['type']
@@ -348,8 +341,8 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
         value_sensor: float = sensor_data[key][t_sensor]
 
         value_sim = fields_sim[type_sensor][index_sensor]
-        diff[type_sensor].append(value_sim - value_sensor)
-
+        diff[type_sensor].append(value_sim - 272.15 - value_sensor)
+    print(f'diff: {diff["T"]}')
     for key in diff:
         if len(diff[key]) == 0:
             continue
