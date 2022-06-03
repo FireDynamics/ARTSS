@@ -23,6 +23,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
     domain.print_info()
+    domain.print_debug()
 
     devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
     print(devc_info_temperature)
@@ -85,19 +86,19 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         hrr_max = 1.0 if nabla['HRR'] < 0 else cur['HRR'] / nabla['HRR']
 
         if nabla['x0'] < 0:
-            x_max = (domain.domain_param['X1'] - cur['x0']) / -nabla['x0']
+            x_max = (domain.domain_param['X2'] - cur['x0']) / -nabla['x0']
         else:
-            x_max = (domain.domain_param['X2'] - cur['x0']) / nabla['x0']
+            x_max = (domain.domain_param['X1'] - cur['x0']) / nabla['x0']
 
         if nabla['y0'] < 0:
-            y_max = (domain.domain_param['Y1'] - cur['y0']) / -nabla['y0']
+            y_max = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
         else:
-            y_max = (domain.domain_param['Y2'] - cur['y0']) / nabla['y0']
+            y_max = (domain.domain_param['Y1'] - cur['y0']) / nabla['y0']
 
         if nabla['z0'] < 0:
-            z_max = (domain.domain_param['Z1'] - cur['z0']) / -nabla['z0']
+            z_max = (domain.domain_param['Z2'] - cur['z0']) / -nabla['z0']
         else:
-            z_max = (domain.domain_param['Z2'] - cur['z0']) / nabla['z0']
+            z_max = (domain.domain_param['Z1'] - cur['z0']) / nabla['z0']
 
         # search direction
         nabla = np.asarray([nabla[x] for x in keys])
@@ -125,6 +126,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                     f'{t_artss}_{n}',
                     path=cwd
             )
+            print(f'make adjustment with {new_para}')
             client.send_message(create_message(t_revert, config_file_name))
             wait_artss(t_sensor, artss_data_path)
 
