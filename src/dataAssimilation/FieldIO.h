@@ -28,9 +28,9 @@ class FieldIO {
                      const Settings::data_assimilation::field_changes &field_changes,
                      Field &u, Field &v, Field &w,
                      Field &p, Field &T, Field &C);
-    void read_fields(const Settings::data_assimilation::field_changes &field_changes,
-                     Field &u, Field &v, Field &w,
-                     Field &p, Field &T, Field &C);
+    void read_changed_fields(const Settings::data_assimilation::field_changes &field_changes,
+                             Field &u, Field &v, Field &w,
+                             Field &p, Field &T, Field &C);
 
  private:
     void create_meta_file(real t_cur);

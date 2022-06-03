@@ -59,7 +59,7 @@ real DataAssimilation::get_new_time_value() const {
 }
 
 bool DataAssimilation::config_rollback(const char *msg) {
-    const DataAssimilationPackageHeader package = *reinterpret_cast<const DataAssimilationPackageHeader*>(msg);
+    const DataAssimilationPackageHeader package = *reinterpret_cast<const DataAssimilationPackageHeader *>(msg);
     const std::string file_name(msg + 12, package.file_name_len);
     m_logger->info("current time step {}, new time {}", m_t_cur, package.time);
     m_logger->info("new config file {}", file_name);
@@ -68,13 +68,14 @@ bool DataAssimilation::config_rollback(const char *msg) {
         return false;
     } else if (std::fabs(m_t_cur - package.time) < 1e-10) {  // current time step, no need to load original data
         m_t_cur = package.time;
-        m_logger->info("set new time value to {}", m_t_cur);
+        m_logger->info("already at time step {}", m_t_cur);
         m_logger->debug("read config data from {}", file_name);
-        auto[changes, field_changes] = m_parameter_handler->read_config(file_name);
-        if (changes && field_changes.changed) {
-            m_field_IO_handler->read_fields(field_changes,
-                                            m_new_field_u, m_new_field_v, m_new_field_w,
-                                            m_new_field_p, m_new_field_T, m_new_field_C);
+        auto [changes, field_changes] = m_parameter_handler->read_config(file_name);
+        if (field_changes.changed) {
+            m_logger->debug("read field data from {}", field_changes.file_name);
+            m_field_IO_handler->read_changed_fields(field_changes,
+                                                    m_new_field_u, m_new_field_v, m_new_field_w,
+                                                    m_new_field_p, m_new_field_T, m_new_field_C);
             return true;
         }
         return changes;
@@ -82,15 +83,13 @@ bool DataAssimilation::config_rollback(const char *msg) {
         m_t_cur = package.time;
         m_logger->info("set new time value to {}", m_t_cur);
         m_logger->debug("read config data from {}", file_name);
-        auto[changes, field_changes] = m_parameter_handler->read_config(file_name);
-        if (changes && field_changes.changed) {
-            m_logger->debug("read field data from {}", field_changes.file_name);
-            m_field_IO_handler->read_fields(m_t_cur, field_changes,
-                                            m_new_field_u, m_new_field_v, m_new_field_w,
-                                            m_new_field_p, m_new_field_T, m_new_field_C);
-            return true;
-        }
-        return changes;
+        auto [changes, field_changes] = m_parameter_handler->read_config(file_name);
+        m_logger->debug("read field data from {}", field_changes.file_name);
+        m_logger->debug("read original field data @t: {}", m_t_cur);
+        m_field_IO_handler->read_fields(m_t_cur, field_changes,
+                                        m_new_field_u, m_new_field_v, m_new_field_w,
+                                        m_new_field_p, m_new_field_T, m_new_field_C);
+        return changes || field_changes.changed;
     }
 }
 

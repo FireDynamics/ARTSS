@@ -64,6 +64,7 @@ void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &
         m_logger->debug("attempt to write @t:{}:{}", t_current, field_name);
         HighFive::DataSet dsf = t_group.createDataSet<real>(field_name, HighFive::DataSpace(dims));
         dsf.write(f.get_data());
+        m_logger->debug("sum of {}: {}", Mapping::get_field_type_name(f.get_type()), f.get_sum());
     }
     create_meta_file(t_current);
 }
@@ -80,7 +81,7 @@ void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &
 /// \param  C       field C to store the read data
 // *************************************************************************************************
 void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
-    m_logger->debug("read original data");
+    m_logger->debug("read original data @t: {}", t_cur);
     auto t_cur_str = fmt::format("{:.5e}", t_cur);
     std::filesystem::path file_name = m_path;
     file_name /= t_cur_str;
@@ -140,6 +141,7 @@ void FieldIO::create_header(HighFive::File &file) {
 }
 
 void FieldIO::read_field(HighFive::File &file, Field &field) {
+    m_logger->debug("read changed field data of {} in {}", Mapping::get_field_type_name(field.get_type()), file.getName());
     auto field_name = Mapping::get_field_type_name(field.get_type());
     auto ds = file.getDataSet(field_name);
     ds.read(field.data);
@@ -151,11 +153,13 @@ void FieldIO::read_vis_field(HighFive::File &file, Field &field, const real t) {
     m_logger->info("opening vis file at {}", full_name);
     auto ds = file.getDataSet(full_name);
     ds.read(field.data);
+
+    m_logger->debug("read @t {} sum of {}: {}", t, Mapping::get_field_type_name(field.get_type()), field.get_sum());
 }
 
-void FieldIO::read_fields(const Settings::data_assimilation::field_changes &field_changes,
-                          Field &u, Field &v, Field &w,
-                          Field &p, Field &T, Field &C) {
+void FieldIO::read_changed_fields(const Settings::data_assimilation::field_changes &field_changes,
+                                  Field &u, Field &v, Field &w,
+                                  Field &p, Field &T, Field &C) {
     std::string line;
     if (!field_changes.changed) {
         return;
@@ -202,7 +206,7 @@ void FieldIO::read_fields(const real t_cur,
                           Field &p, Field &T, Field &C) {
     m_logger->debug("read time step {}", t_cur);
     create_meta_file(t_cur);
-    if (field_changes.changed) {  // no changes -> read original file
+    if (!field_changes.changed) {  // no changes -> read original file
         m_logger->debug("no field changes");
         read_fields(t_cur, u, v, w, p, T, C);
         return;
