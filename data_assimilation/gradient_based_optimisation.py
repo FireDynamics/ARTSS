@@ -35,9 +35,9 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     keys = ['HRR', 'x0', 'y0', 'z0']
     delta = {
         'HRR': float(temperature_source['HRR']) * 0.1,
-        'x0': domain.domain_param['dx'] * 4,
-        'y0': domain.domain_param['dy'] * 4,
-        'z0': domain.domain_param['dz'] * 4
+        'x0': domain.domain_param['dx'] * 1,
+        'y0': domain.domain_param['dy'] * 1,
+        'z0': domain.domain_param['dz'] * 1
     }
 
     cur = {
@@ -47,15 +47,60 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         'z0': float(temperature_source['z0'])
     }
 
+    def f(t_end, param):
+        t_artss, t_revert = get_time_step_artss(t_end, os.path.join(artss_data_path, '.vis'))
+        config_file_name = change_artss(
+                param,
+                [source_type, temperature_source, random],
+                f'{t_artss}_f',
+                path=cwd
+        )
+        client.send_message(create_message(t_revert, config_file_name))
+        wait_artss(t_end, artss_data_path)
+
+        field_reader = FieldReader(t_artss, path=artss_data_path)
+        ret = comparison_sensor_simulation_data(
+                devc_info_thermocouple,
+                fds_data,
+                field_reader,
+                t_artss,
+                t_end
+        )
+
+        return ret['T']
+
+    print('org: {f(t_artss, t_revert, dict())}')
+    t = sensor_times[1]
+    pprint(cur)
+    wait_artss(t, artss_data_path)
+
+    t_artss, t_revert = get_time_step_artss(t, os.path.join(artss_data_path, '.vis'))
+    pprint((t, t_artss, t_revert))
+    field_reader = FieldReader(t_artss, path=artss_data_path)
+    diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t)
+    print(f'org: {diff_orig["T"]}')
+    print(t_revert)
+
+    with open('map_2.csv', 'w') as out:
+        for x in [30 + u*delta['x0'] for u in range(-5, 5)]:
+            for y in [delta['y0'] * t for t in range(8)]:
+                ret = f(t, {'x0': x, 'y0': y})
+                print(f'map: {x},{y},{ret}')
+                out.write(f'{x},{y},{ret}\n')
+
+    return
+
     for t_sensor in sensor_times[1:]:
         pprint(cur)
         wait_artss(t_sensor, artss_data_path)
 
         t_artss, t_revert = get_time_step_artss(t_sensor, os.path.join(artss_data_path, '.vis'))
+        pprint((t_sensor, t_artss, t_revert))
         field_reader = FieldReader(t_artss, path=artss_data_path)
         diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
         print(f'org: {diff_orig["T"]}')
         print(t_revert)
+        return
 
         nabla = {}
         for p in keys:
