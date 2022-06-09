@@ -3,6 +3,7 @@ import time
 import fdsreader
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from copy import copy
 from pprint import pprint
@@ -270,7 +271,7 @@ def read_fds_data(input_path: str, input_file_name: str, artss: Domain) -> [dict
     devc_thermocouple = {}
     for d in dict_devc:
         dict_devc[d]['type']: str = 'T'
-        dict_devc[d]['index']: int = artss.get_index(*dict_devc[d]['XYZ'])
+        dict_devc[d]['index']: int = artss.get_index(dict_devc[d]['XYZ'][0], dict_devc[d]['XYZ'][2], dict_devc[d]['XYZ'][1])
         if d.startswith('Temperatur'):
             devc_temperature[d] = dict_devc[d]
         elif d.startswith('Thermocouple'):
@@ -395,3 +396,53 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
             continue
         diff[key] = sum(np.abs(diff[key])) / len(diff[key])
     return diff
+
+def calc_single_differences(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader, t_artss: float, t_sensor: float) -> dict:
+    diff: dict = {}
+    fields_sim = field_reader.read_field_data()
+    for key in devc_info:
+        type_sensor: str = devc_info[key]['type']
+        index_sensor: int = devc_info[key]['index']
+        value_sensor: float = sensor_data[key][t_sensor]
+
+        value_sim = fields_sim[type_sensor][index_sensor]
+        diff[key] = (value_sim - 272.15 - value_sensor)
+    return diff
+
+def plot_differences(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
+    cwd = os.getcwd()
+    a_path = os.path.join(artss_data_path,'30')
+    xml = XML(FieldReader.get_xml_file_name(path=a_path), path=a_path)
+    xml.read_xml()
+    domain = Domain(xml.domain, xml.obstacles)
+    domain.print_info()
+    domain.print_debug()
+
+    devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
+    print(devc_info_temperature)
+
+    sensor_times = fds_data.index
+    t_sensor = sensor_times[1] 
+    for i in [30,40,50,60,70, 80]:
+        t_artss, t_revert = get_time_step_artss(t_sensor, os.path.join(artss_data_path, str(i), '.vis'))
+        field_reader = FieldReader(t_artss, path=os.path.join(artss_data_path, str(i)))
+        diff = calc_single_differences(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
+        x = []
+        y = []
+        tmp_dict = {}
+        for k in devc_info_thermocouple:
+            x.append(devc_info_thermocouple[k]['XYZ'][0])
+            y.append(diff[k])
+            if x[-1] in tmp_dict:
+                tmp_dict[x[-1]].append(y[-1])
+            else:
+                tmp_dict[x[-1]] = [y[-1]]
+        line_x = []
+        line_y = []
+        for k in tmp_dict:
+            line_x.append(k)
+            line_y.append(sum(tmp_dict[k])/len(tmp_dict[k]))
+        plt.plot(line_x, line_y, label=f'{i} avg: {sum(y)/len(y):.2f}')
+        #plt.scatter(x,y, label=i)
+    plt.legend()
+    plt.savefig('diff.pdf')
