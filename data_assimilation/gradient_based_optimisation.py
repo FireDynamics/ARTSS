@@ -49,7 +49,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     }
 
     def f(t_end, param):
-        t_artss, t_revert = get_time_step_artss(t_end, os.path.join(artss_data_path, '.vis'))
+        t_artss, t_revert = get_time_step_artss(t_end, artss_data_path)
         config_file_name = change_artss(
                 param,
                 [source_type, temperature_source, random],
@@ -75,7 +75,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     pprint(cur)
     wait_artss(t, artss_data_path)
 
-    t_artss, t_revert = get_time_step_artss(t, os.path.join(artss_data_path, '.vis'))
+    t_artss, t_revert = get_time_step_artss(t, artss_data_path)
     pprint((t, t_artss, t_revert))
     field_reader = FieldReader(t_artss, path=artss_data_path)
     diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t)
