@@ -78,6 +78,14 @@ class FieldReader:
         return t
 
     @staticmethod
+    def get_all_time_steps(path: str = '.') -> list:
+        files = os.listdir(os.path.join(path, '.vis'))
+        files.remove('meta')
+        files = [float(x) for x in files]
+        files.sort()
+        return files
+
+    @staticmethod
     def get_xml_file_name(path: str = '.') -> str:
         fpath = os.path.join(path, '.vis/meta')
         with open(fpath, 'r') as inp:
@@ -89,6 +97,7 @@ class FieldReader:
 
     def get_fields(self) -> list:
         return self.fields
+
 
     def read_field_data(self) -> dict:
         t_cur = self.get_t_current(path=self.path)
