@@ -520,13 +520,19 @@ def plot_sensor_data(fds_data_path: str, fds_input_file_name: str, artss_data_pa
         fig, axs = plt.subplots(2,1)
         for i in range(len(tmp_dict[sensor_x])):
             key = tmp_dict[sensor_x][i]
+            key_temp = key.replace('Thermocouple', 'Temperature')
             for x_pos in [30,40,50,60,70,80]:
                 axs[i].plot(artss_times, artss_data[x_pos][sensor_x][i], label=f'artss xpos {x_pos}')
             
             fds_values = []
             for t in sensor_times:
                 fds_values.append(fds_data[key][t])
-            axs[i].plot(sensor_times, fds_values, label='fds')
+            axs[i].plot(sensor_times, fds_values, label='fds thermocouple')
+
+            fds_values = []
+            for t in sensor_times:
+                fds_values.append(fds_data[key_temp][t])
+            axs[i].plot(sensor_times, fds_values, label='fds temperature')
         plt.legend() 
         plt.savefig(f'verlauf_sensor_{sensor_x}.pdf')
         plt.close()
