@@ -50,7 +50,8 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
     for t_sensor in sensor_times[1:]:
         pprint(cur)
-        wait_artss(t_sensor, artss_data_path)
+        wait_artss(t_sensor, 
+                artss_times = artss_data_path)
 
         t_artss, t_revert = get_time_step_artss(t_sensor, os.path.join(artss_data_path, '.vis'))
         field_reader = FieldReader(t_artss, path=artss_data_path)
@@ -183,11 +184,7 @@ def change_artss(change: dict, source: list, file_name: str, path='.') -> str:
 
 
 def get_time_step_artss(t_sensor: float, artss_data_path: str) -> [float, float]:
-    files = os.listdir(artss_data_path)
-    files.remove('meta')
-    files = [float(x) for x in files]
-    files.sort()
-
+    files = FieldReader.get_all_time_steps(path=artss_data_path)
     estimated_index = int(t_sensor * len(files) / files[-1])
 
     t_artss: float = -1
@@ -226,7 +223,9 @@ def read_fds_data(input_path: str, input_file_name: str, artss: Domain) -> [dict
     devc_thermocouple = {}
     for d in dict_devc:
         dict_devc[d]['type']: str = 'T'
-        dict_devc[d]['index']: int = artss.get_index(dict_devc[d]['XYZ'][0], dict_devc[d]['XYZ'][2], dict_devc[d]['XYZ'][1])
+
+        ijk = artss.get_ijk_from_xyz(dict_devc[d]['XYZ'][0], dict_devc[d]['XYZ'][2], dict_devc[d]['XYZ'][1])
+        dict_devc[d]['index']: int = artss.get_index(*ijk)
         if d.startswith('Temperatur'):
             devc_temperature[d] = dict_devc[d]
         elif d.startswith('Thermocouple'):
@@ -344,7 +343,7 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
         value_sensor: float = sensor_data[key][t_sensor]
 
         value_sim = fields_sim[type_sensor][index_sensor]
-        diff[type_sensor].append(value_sim - 272.15 - value_sensor)
+        diff[type_sensor].append(kelvin_to_celsius(value_sim) - value_sensor)
     print(f'diff: {diff["T"]}')
     for key in diff:
         if len(diff[key]) == 0:
@@ -355,14 +354,31 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
 def calc_single_differences(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader, t_artss: float, t_sensor: float) -> dict:
     diff: dict = {}
     fields_sim = field_reader.read_field_data()
+    tmp_x = []
+    tmp_y = []
+    tmp_y2 = []
+    index = []
     for key in devc_info:
         type_sensor: str = devc_info[key]['type']
         index_sensor: int = devc_info[key]['index']
         value_sensor: float = sensor_data[key][t_sensor]
 
         value_sim = fields_sim[type_sensor][index_sensor]
-        diff[key] = (value_sim - 272.15 - value_sensor)
+        diff[key] = (kelvin_to_celsius(value_sim) - value_sensor)
+        tmp_x.append(key)
+        index.append(index_sensor)
+        tmp_y.append(value_sim)
+        tmp_y2.append(value_sensor)
+
+    #print(f' calc single diff {t_artss}, {t_sensor}')
+    #print(index)
+    #print(tmp_x)
+    #print(tmp_y)
+    #print(tmp_y2)
     return diff
+
+def kelvin_to_celsius(kelvin):
+    return kelvin - 273.5
 
 def plot_differences(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     cwd = os.getcwd()
@@ -377,27 +393,96 @@ def plot_differences(fds_data_path: str, fds_input_file_name: str, artss_data_pa
     print(devc_info_temperature)
 
     sensor_times = fds_data.index
-    t_sensor = sensor_times[1] 
-    for i in [30,40,50,60,70, 80]:
-        t_artss, t_revert = get_time_step_artss(t_sensor, os.path.join(artss_data_path, str(i), '.vis'))
-        field_reader = FieldReader(t_artss, path=os.path.join(artss_data_path, str(i)))
-        diff = calc_single_differences(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
-        x = []
-        y = []
-        tmp_dict = {}
-        for k in devc_info_thermocouple:
-            x.append(devc_info_thermocouple[k]['XYZ'][0])
-            y.append(diff[k])
-            if x[-1] in tmp_dict:
-                tmp_dict[x[-1]].append(y[-1])
-            else:
-                tmp_dict[x[-1]] = [y[-1]]
-        line_x = []
-        line_y = []
-        for k in tmp_dict:
-            line_x.append(k)
-            line_y.append(sum(tmp_dict[k])/len(tmp_dict[k]))
-        plt.plot(line_x, line_y, label=f'{i} avg: {sum(y)/len(y):.2f}')
-        #plt.scatter(x,y, label=i)
-    plt.legend()
-    plt.savefig('diff.pdf')
+    print(sensor_times)
+    for t in range(1,8):
+        t_sensor = sensor_times[t]
+        for i in [30,40,50,60,70, 80]:
+            t_artss, t_revert = get_time_step_artss(t_sensor, os.path.join(artss_data_path, str(i)))
+            field_reader = FieldReader(t_artss, path=os.path.join(artss_data_path, str(i)))
+            diff = calc_single_differences(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
+            x = []
+            y = []
+            tmp_dict = {}
+            for k in devc_info_thermocouple:
+                x.append(devc_info_thermocouple[k]['XYZ'][0])
+                y.append(diff[k])
+                if x[-1] in tmp_dict:
+                    tmp_dict[x[-1]].append(y[-1])
+                else:
+                    tmp_dict[x[-1]] = [y[-1]]
+            line_x = []
+            line_y = []
+            for k in tmp_dict:
+                line_x.append(k)
+                line_y.append(sum(tmp_dict[k])/len(tmp_dict[k]))
+            plt.plot(line_x, line_y, label=f'{i} avg: {sum(y)/len(y):.2e}')
+            #plt.scatter(x,y, label=i)
+        plt.legend()
+        plt.savefig(f'diff_{t_artss}.pdf')
+        plt.close()
+
+def plot_sensor_data(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
+    cwd = os.getcwd()
+    a_path = os.path.join(artss_data_path,'30')
+    xml = XML(FieldReader.get_xml_file_name(path=a_path), path=a_path)
+    xml.read_xml()
+    domain = Domain(xml.domain, xml.obstacles)
+    domain.print_info()
+    domain.print_debug()
+
+    devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
+    print(devc_info_temperature)
+
+    sensor_times = fds_data.index[:13]
+    print(sensor_times)
+    print('artss path', artss_data_path)
+    artss_times = FieldReader.get_all_time_steps(a_path)
+    print('artss times',artss_times)
+    print('sensor times', sensor_times)
+    
+    tmp_dict = {}
+    axis_name = set()
+    for d in devc_info_thermocouple:
+        xpos = devc_info_thermocouple[d]['XYZ'][0]
+        axis_name.add(xpos)
+        if xpos in tmp_dict:
+            tmp_dict[xpos].append(d)
+        else:
+            tmp_dict[xpos] = [d]
+
+    for key in tmp_dict:
+        print(key, tmp_dict[key])
+    
+    axis_name = list(axis_name)
+    axis_name.sort()
+
+    artss_data = {}
+    for x_pos in [30,40,50,60,70,80]:
+        artss_data[x_pos] = {}
+        for sensor_x in axis_name:
+            artss_data[x_pos][sensor_x] = [[],[]]
+        for t_artss in artss_times:
+            field_reader = FieldReader(t_artss, path=os.path.join(artss_data_path, str(x_pos)))
+            fields_sim = field_reader.read_field_data()
+            for sensor_x in axis_name:
+                for i in range(len(tmp_dict[sensor_x])):
+                    index_sensor: int = devc_info_thermocouple[tmp_dict[sensor_x][i]]['index']
+                    value_artss = kelvin_to_celsius(fields_sim['T'][index_sensor])
+                    artss_data[x_pos][sensor_x][i].append(value_artss)
+
+
+    for index, sensor_x in enumerate(axis_name):
+        fig, axs = plt.subplots(2,1)
+        for i in range(len(tmp_dict[sensor_x])):
+            key = tmp_dict[sensor_x][i]
+            for x_pos in [30,40,50,60,70,80]:
+                axs[i].plot(artss_times, artss_data[x_pos][sensor_x][i], label=f'artss xpos {x_pos}')
+            
+            fds_values = []
+            for t in sensor_times:
+                fds_values.append(fds_data[key][t])
+            axs[i].plot(sensor_times, fds_values, label='fds')
+        plt.legend() 
+        plt.savefig(f'verlauf_sensor_{sensor_x}.pdf')
+        plt.close()
+    
