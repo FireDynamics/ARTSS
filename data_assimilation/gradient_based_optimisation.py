@@ -17,6 +17,7 @@ from main import create_message
 
 def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     client = TCP_client.TCPClient()
+    client.set_server_address('172.17.0.2', 7777)
     client.connect()
     cwd = os.getcwd()
 
@@ -464,6 +465,56 @@ def plot_differences(fds_data_path: str, fds_input_file_name: str, artss_data_pa
             #plt.scatter(x,y, label=i)
         plt.legend()
         plt.savefig(f'diff_{t_artss}.pdf')
+        plt.close()
+
+def plot_comparision_da():
+    cwd = os.getcwd()
+    a_path = os.path.join(artss_data_path,'with_da')
+    xml = XML(FieldReader.get_xml_file_name(path=a_path), path=a_path)
+    xml.read_xml()
+    domain = Domain(xml.domain, xml.obstacles)
+    domain.print_info()
+    domain.print_debug()
+
+    devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
+    print(devc_info_temperature)
+
+    sensor_times = fds_data.index[:100]
+    print(sensor_times)
+    print('artss path', artss_data_path)
+    artss_times = FieldReader.get_all_time_steps(a_path)[:3051]
+    print('artss times',artss_times)
+    print('sensor times', sensor_times)
+
+    artss_data = {}
+    for path in ['with_da', 'without_da']:
+        artss_data[path] = {}
+        for sensor in devc_info_temperature:
+            artss_data[path][sensor] = []
+        for t_artss in artss_times:
+            field_reader = FieldReader(t_artss, path=os.path.join(artss_data_path, str(x_pos)))
+            fields_sim = field_reader.read_field_data()
+            for sensor in devc_info_temperature:
+                x_pos: float = devc_info_thermocouple[sensor]['XYZ'][0]
+                index_sensor: int = devc_info_thermocouple[sensor]['index']
+                value_artss = kelvin_to_celsius(fields_sim['T'][index_sensor])
+                artss_data[path][sensor].append(value_artss)
+
+    for sensor in devc_info_temperature:
+        for path in artss_data:
+            plt.plot(artss_times, artss_data[path][sensor], label=path.replace('_', ' '))
+        
+        fds_values = []
+        for t in sensor_times:
+            fds_values.append(fds_data[key][t])
+        plt.plot(sensor_times, fds_values, label='fds thermocouple')
+
+        fds_values = []
+        for t in sensor_times:
+            fds_values.append(fds_data[key_temp][t])
+        plt.plot(sensor_times, fds_values, label='fds temperature')
+        plt.legend() 
+        plt.savefig(f'verlauf_sensor_{sensor}.pdf')
         plt.close()
 
 def plot_sensor_data(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
