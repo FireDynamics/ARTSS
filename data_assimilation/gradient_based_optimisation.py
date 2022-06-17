@@ -34,10 +34,10 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
     source_type, temperature_source, random = xml.get_temperature_source()
 
-    keys = ['HRR', 'x0', 'y0', 'z0']
+    keys = ['HRR', 'x0'] #, 'y0', 'z0']
     delta = {
         'HRR': float(temperature_source['HRR']) * 0.1,
-        'x0': domain.domain_param['dx'] * 1,
+        'x0': domain.domain_param['dx'] * 5,
         'y0': domain.domain_param['dy'] * 1,
         'z0': domain.domain_param['dz'] * 1
     }
@@ -52,77 +52,75 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     def f(t_end, param):
         t_artss, t_revert = get_time_step_artss(t_end, artss_data_path)
         config_file_name = change_artss(
-                param,
-                [source_type, temperature_source, random],
-                f'{t_artss}_f',
-                path=cwd
+            param,
+            [source_type, temperature_source, random],
+            f'{t_artss}_f',
+            path=cwd
         )
         client.send_message(create_message(t_revert, config_file_name))
         wait_artss(t_end, artss_data_path)
 
         field_reader = FieldReader(t_artss, path=artss_data_path)
         ret = comparison_sensor_simulation_data(
-                devc_info_thermocouple,
-                fds_data,
-                field_reader,
-                t_artss,
-                t_end
+            devc_info_thermocouple,
+            fds_data,
+            field_reader,
+            t_artss,
+            t_end
         )
 
         return ret['T']
 
-    print('org: {f(t_artss, t_revert, dict())}')
-    t = sensor_times[1]
-    pprint(cur)
-    wait_artss(t, artss_data_path)
+    # print('org: {f(t_artss, t_revert, dict())}')
+    # t = sensor_times[2]
+    # pprint(cur)
+    # wait_artss(t, artss_data_path)
 
-    t_artss, t_revert = get_time_step_artss(t, artss_data_path)
-    pprint((t, t_artss, t_revert))
-    field_reader = FieldReader(t_artss, path=artss_data_path)
-    diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t)
-    print(f'org: {diff_orig["T"]}')
-    print(t_revert)
+    # t_artss, t_revert = get_time_step_artss(t, artss_data_path)
+    # pprint((t, t_artss, t_revert))
+    # field_reader = FieldReader(t_artss, path=artss_data_path)
+    # diff_orig = comparison_sensor_simulation_data(devc_info_temperature, fds_data, field_reader, t_artss, t)
+    # print(f'org: {diff_orig["T"]}')
+    # print(t_revert)
 
-    with open('map_2.csv', 'w') as out:
-        for x in [30 + u*delta['x0'] for u in range(-5, 5)]:
-            for y in [delta['y0'] * t for t in range(8)]:
-                ret = f(t, {'x0': x, 'y0': y})
-                print(f'map: {x},{y},{ret}')
-                out.write(f'{x},{y},{ret}\n')
+    # with open('map_2.csv', 'w') as out:
+    #     for x in range(20, 85, 10):
+    #         for y in [delta['y0'] * t for t in range(8)]:
+    #             ret = f(t, {'x0': x, 'y0': y})
+    #             print(f'map: {x},{y},{ret}')
+    #             out.write(f'{x},{y},{ret}\n')
 
-    return
+    # return
 
-    for t_sensor in sensor_times[1:]:
+    for t_sensor in sensor_times[2:]:
         pprint(cur)
-        wait_artss(t_sensor, 
-                artss_times = artss_data_path)
+        wait_artss(t_sensor, artss_data_path)
 
-        t_artss, t_revert = get_time_step_artss(t_sensor, os.path.join(artss_data_path, '.vis'))
+        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path)
         pprint((t_sensor, t_artss, t_revert))
         field_reader = FieldReader(t_artss, path=artss_data_path)
         diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
         print(f'org: {diff_orig["T"]}')
         print(t_revert)
-        return
 
         nabla = {}
         for p in keys:
             config_file_name = change_artss(
-                    {p: cur[p] + delta[p]},
-                    [source_type, temperature_source, random],
-                    f'{t_artss}_{p}',
-                    path=cwd
+                {p: cur[p] + delta[p]},
+                [source_type, temperature_source, random],
+                f'{t_artss}_{p}',
+                path=cwd
             )
             client.send_message(create_message(t_revert, config_file_name))
             wait_artss(t_sensor, artss_data_path)
 
             field_reader = FieldReader(t_artss, path=artss_data_path)
             diff_cur = comparison_sensor_simulation_data(
-                    devc_info_thermocouple,
-                    fds_data,
-                    field_reader,
-                    t_artss,
-                    t_sensor
+                devc_info_thermocouple,
+                fds_data,
+                field_reader,
+                t_artss,
+                t_sensor
             )
 
             # calc new nabla
@@ -135,29 +133,31 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
         if nabla['x0'] < 0:
             x_max = (domain.domain_param['X2'] - cur['x0']) / -nabla['x0']
-        else:
+        elif nabla['x0'] > 0:
             x_max = (cur['x0'] - domain.domain_param['X1']) / nabla['x0']
-
-        if nabla['y0'] < 0:
-            y_max = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
         else:
-            y_max = (cur['y0'] - domain.domain_param['Y1']) / nabla['y0']
+            x_max = 0
 
-        if nabla['z0'] < 0:
-            z_max = (domain.domain_param['Z2'] - cur['z0']) / -nabla['z0']
-        else:
-            z_max = (cur['z0'] - domain.domain_param['Z1']) / nabla['z0']
+        # if nabla['y0'] < 0:
+        #     y_max = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
+        # else:
+        #     y_max = (cur['y0'] - domain.domain_param['Y1']) / nabla['y0']
+
+        # if nabla['z0'] < 0:
+        #     z_max = (domain.domain_param['Z2'] - cur['z0']) / -nabla['z0']
+        # else:
+        #     z_max = (cur['z0'] - domain.domain_param['Z1']) / nabla['z0']
 
         # search direction
         nabla = np.asarray([nabla[x] for x in keys])
-        D = np.eye(len(delta.keys()))   # -> hesse matrix
+        D = np.eye(len(keys))  # -> hesse matrix
         d = np.dot(-D, nabla)
 
         # calc alpha
         n = 5
         sigma = 0.01
-        alpha = 0.9 * min([1.0, hrr_max, x_max, y_max, z_max])
-        print(('mins', [1.0, hrr_max, x_max, y_max, z_max]))
+        alpha = 0.9 * min([1.0, hrr_max, x_max]) #, y_max, z_max])
+        print(('mins', [1.0, hrr_max, x_max])) #, y_max, z_max]))
         print(f'alpha = {alpha}')
         while n > 0:
             x = np.asarray([cur[x] for x in keys])
@@ -169,10 +169,10 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
             pprint(new_para)
 
             config_file_name = change_artss(
-                    new_para,
-                    [source_type, temperature_source, random],
-                    f'{t_artss}_{n}',
-                    path=cwd
+                new_para,
+                [source_type, temperature_source, random],
+                f'{t_artss}_{n}',
+                path=cwd
             )
             print(f'make adjustment with {new_para}')
             client.send_message(create_message(t_revert, config_file_name))
@@ -180,11 +180,11 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
             field_reader = FieldReader(t_artss, path=artss_data_path)
             diff_cur = comparison_sensor_simulation_data(
-                    devc_info_thermocouple,
-                    fds_data,
-                    field_reader,
-                    t_artss,
-                    t_sensor
+                devc_info_thermocouple,
+                fds_data,
+                field_reader,
+                t_artss,
+                t_sensor
             )
 
             if diff_cur['T'] < diff_orig['T'] + np.dot(alpha * sigma * nabla, d):
@@ -394,8 +394,9 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
     for key in diff:
         if len(diff[key]) == 0:
             continue
-        diff[key] = sum(np.abs(diff[key])) / len(diff[key])
+        diff[key] = np.sqrt(sum(np.array(diff[key])**2))
     return diff
+
 
 def calc_single_differences(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader, t_artss: float, t_sensor: float) -> dict:
     diff: dict = {}
@@ -416,19 +417,21 @@ def calc_single_differences(devc_info: dict, sensor_data: pd.DataFrame, field_re
         tmp_y.append(value_sim)
         tmp_y2.append(value_sensor)
 
-    #print(f' calc single diff {t_artss}, {t_sensor}')
-    #print(index)
-    #print(tmp_x)
-    #print(tmp_y)
-    #print(tmp_y2)
+    # print(f' calc single diff {t_artss}, {t_sensor}')
+    # print(index)
+    # print(tmp_x)
+    # print(tmp_y)
+    # print(tmp_y2)
     return diff
+
 
 def kelvin_to_celsius(kelvin):
     return kelvin - 273.5
 
+
 def plot_differences(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     cwd = os.getcwd()
-    a_path = os.path.join(artss_data_path,'30')
+    a_path = os.path.join(artss_data_path, '30')
     xml = XML(FieldReader.get_xml_file_name(path=a_path), path=a_path)
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
@@ -440,34 +443,49 @@ def plot_differences(fds_data_path: str, fds_input_file_name: str, artss_data_pa
 
     sensor_times = fds_data.index
     print(sensor_times)
-    for t in range(1,8):
+    for t in range(1, 8):
         t_sensor = sensor_times[t]
-        for i in [30,40,50,60,70, 80]:
+        fig, axs = plt.subplots(2, 1)
+        for i in [20, 30, 40, 50, 60, 70, 80]:
             t_artss, t_revert = get_time_step_artss(t_sensor, os.path.join(artss_data_path, str(i)))
             field_reader = FieldReader(t_artss, path=os.path.join(artss_data_path, str(i)))
-            diff = calc_single_differences(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
+            fields = field_reader.read_field_data()
+            diff = calc_single_differences(devc_info_temperature, fds_data, field_reader, t_artss, t_sensor)
             x = []
             y = []
+            y_fds = []
+            y_artss = []
             tmp_dict = {}
-            for k in devc_info_thermocouple:
-                x.append(devc_info_thermocouple[k]['XYZ'][0])
+            for k in devc_info_temperature:
+                x.append(devc_info_temperature[k]['XYZ'][0])
                 y.append(diff[k])
+                y_fds.append(fds_data[k][t_sensor])
                 if x[-1] in tmp_dict:
                     tmp_dict[x[-1]].append(y[-1])
                 else:
                     tmp_dict[x[-1]] = [y[-1]]
+                index = domain.get_index(*domain.get_ijk_from_xyz(devc_info_temperature[k]['XYZ'][0], devc_info_temperature[k]['XYZ'][2], devc_info_temperature[k]['XYZ'][1]))
+                y_artss.append(kelvin_to_celsius(fields['T'][index]))
             line_x = []
             line_y = []
             for k in tmp_dict:
                 line_x.append(k)
-                line_y.append(sum(tmp_dict[k])/len(tmp_dict[k]))
-            plt.plot(line_x, line_y, label=f'{i} avg: {sum(y)/len(y):.2e}')
-            #plt.scatter(x,y, label=i)
-        plt.legend()
+                line_y.append(sum(tmp_dict[k]) / len(tmp_dict[k]))
+            axs[0].plot(line_x, line_y, label=f'{i} avg: {sum(y) / len(y):.2e}')
+            axs[0].scatter(x, y, label=i)
+            axs[1].plot(x, y_artss, label=f'{i}')
+        axs[0].set_title('difference')
+        axs[1].set_title('sensor data')
+        axs[1].plot(x, y_fds, label='fds')
+        plt.xlabel('position of temperature sensor')
+        #axs[0].ylabel('difference [C]')
+        #axs[1].ylabel('T [C]')
+        axs[0].legend()
+        axs[1].legend()
         plt.savefig(f'diff_{t_artss}.pdf')
         plt.close()
 
-def plot_comparision_da():
+def plot_comparison_da():
     cwd = os.getcwd()
     a_path = os.path.join(artss_data_path,'with_da')
     xml = XML(FieldReader.get_xml_file_name(path=a_path), path=a_path)
@@ -519,7 +537,7 @@ def plot_comparision_da():
 
 def plot_sensor_data(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     cwd = os.getcwd()
-    a_path = os.path.join(artss_data_path,'30')
+    a_path = os.path.join(artss_data_path, '30')
     xml = XML(FieldReader.get_xml_file_name(path=a_path), path=a_path)
     xml.read_xml()
     domain = Domain(xml.domain, xml.obstacles)
@@ -533,13 +551,13 @@ def plot_sensor_data(fds_data_path: str, fds_input_file_name: str, artss_data_pa
     print(sensor_times)
     print('artss path', artss_data_path)
     artss_times = FieldReader.get_all_time_steps(a_path)
-    print('artss times',artss_times)
+    print('artss times', artss_times)
     print('sensor times', sensor_times)
-    
+
     tmp_dict = {}
     axis_name = set()
-    for d in devc_info_thermocouple:
-        xpos = devc_info_thermocouple[d]['XYZ'][0]
+    for d in devc_info_temperature:
+        xpos = devc_info_temperature[d]['XYZ'][0]
         axis_name.add(xpos)
         if xpos in tmp_dict:
             tmp_dict[xpos].append(d)
@@ -548,33 +566,32 @@ def plot_sensor_data(fds_data_path: str, fds_input_file_name: str, artss_data_pa
 
     for key in tmp_dict:
         print(key, tmp_dict[key])
-    
+
     axis_name = list(axis_name)
     axis_name.sort()
 
     artss_data = {}
-    for x_pos in [30,40,50,60,70,80]:
+    for x_pos in [20, 30, 40, 50, 60, 70, 80]:
         artss_data[x_pos] = {}
         for sensor_x in axis_name:
-            artss_data[x_pos][sensor_x] = [[],[]]
+            artss_data[x_pos][sensor_x] = [[], []]
         for t_artss in artss_times:
             field_reader = FieldReader(t_artss, path=os.path.join(artss_data_path, str(x_pos)))
             fields_sim = field_reader.read_field_data()
             for sensor_x in axis_name:
                 for i in range(len(tmp_dict[sensor_x])):
-                    index_sensor: int = devc_info_thermocouple[tmp_dict[sensor_x][i]]['index']
+                    index_sensor: int = devc_info_temperature[tmp_dict[sensor_x][i]]['index']
                     value_artss = kelvin_to_celsius(fields_sim['T'][index_sensor])
                     artss_data[x_pos][sensor_x][i].append(value_artss)
 
-
     for index, sensor_x in enumerate(axis_name):
-        fig, axs = plt.subplots(2,1)
+        fig, axs = plt.subplots(2, 1)
         for i in range(len(tmp_dict[sensor_x])):
             key = tmp_dict[sensor_x][i]
             key_temp = key.replace('Thermocouple', 'Temperature')
-            for x_pos in [30,40,50,60,70,80]:
+            for x_pos in [30, 40, 50, 60, 70, 80]:
                 axs[i].plot(artss_times, artss_data[x_pos][sensor_x][i], label=f'artss xpos {x_pos}')
-            
+
             fds_values = []
             for t in sensor_times:
                 fds_values.append(fds_data[key][t])
@@ -584,7 +601,9 @@ def plot_sensor_data(fds_data_path: str, fds_input_file_name: str, artss_data_pa
             for t in sensor_times:
                 fds_values.append(fds_data[key_temp][t])
             axs[i].plot(sensor_times, fds_values, label='fds temperature')
-        plt.legend() 
+
+        plt.xlabel('t [s]')
+        plt.ylabel('T [C]')
+        plt.legend()
         plt.savefig(f'verlauf_sensor_{sensor_x}.pdf')
         plt.close()
-    
