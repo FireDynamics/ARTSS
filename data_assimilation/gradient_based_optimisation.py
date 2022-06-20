@@ -36,7 +36,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
     keys = ['HRR', 'x0'] #, 'y0', 'z0']
     delta = {
-        'HRR': float(temperature_source['HRR']) * 0.1,
+        'HRR': float(temperature_source['HRR']) * 0.5,
         'x0': domain.domain_param['dx'] * 5,
         'y0': domain.domain_param['dy'] * 1,
         'z0': domain.domain_param['dz'] * 1
@@ -92,6 +92,8 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
     # return
 
+    file_da = open('da_details.dat', 'w')
+
     for t_sensor in sensor_times[2:]:
         pprint(cur)
         wait_artss(t_sensor, artss_data_path)
@@ -102,6 +104,8 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
         print(f'org: {diff_orig["T"]}')
         print(t_revert)
+        file_da.write(f'org: {diff_orig["T"]}')
+        file_da.write(f't revert: t_revert')
 
         nabla = {}
         for p in keys:
@@ -127,7 +131,11 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
             nabla[p] = (diff_cur['T'] - diff_orig['T']) / delta[p]
             print(f'cur: {diff_cur["T"]}')
             print(nabla[p])
+            file_da.write(f'cur: {diff_cur["T"]}')
+            file_da.write(f'nabla[{p}]: {nabla[p]}')
 
+
+        file_da.write(f'nabla without restrictions: {nabla}')
         pprint(nabla)
         hrr_max = 1.0 if nabla['HRR'] < 0 else cur['HRR'] / nabla['HRR']
 
@@ -138,6 +146,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         else:
             x_max = 0
 
+        file_da.write(f'nabla with restrictions: {nabla}')
         # if nabla['y0'] < 0:
         #     y_max = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
         # else:
@@ -159,6 +168,8 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         alpha = 0.9 * min([1.0, hrr_max, x_max]) #, y_max, z_max])
         print(('mins', [1.0, hrr_max, x_max])) #, y_max, z_max]))
         print(f'alpha = {alpha}')
+        file_da.write('mins:', [1.0, hrr_max, x_max])
+        file_da.write(f'alpha: {alpha}')
         while n > 0:
             x = np.asarray([cur[x] for x in keys])
             new_para = x + (alpha * d)
@@ -175,6 +186,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                 path=cwd
             )
             print(f'make adjustment with {new_para}')
+            file_da.write(f'make adjustment with: {new_para}')
             client.send_message(create_message(t_revert, config_file_name))
             wait_artss(t_sensor, artss_data_path)
 
@@ -192,13 +204,24 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                 print(f'found x_k+1: {new_para}')
                 print(f"al1: {np.dot(alpha * sigma * nabla, d)}")
                 print(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}")
+                file_da.write(f'found alpha: {alpha}')
+                file_da.write(f'found x_k+1: {new_para}')
+                file_da.write(f'iteration left: {n}')
+                file_da.write(f'al1: {np.dot(alpha * sigma * nabla, d)}')
+                file_da.write(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}")
                 cur = copy(new_para)
                 break
 
             alpha = 0.7 * alpha
             n = n - 1
             print(f'ls: {diff_cur["T"]}')
+            file_da.write(f'ls: diff_cur["T"]}')
 
+        file_da.write(f'alpha: {alpha}')
+        file_da.write(f'using cur: {cur}')
+        file_da.write(f'al1: {np.dot(alpha * sigma * nabla, d)}')
+        file_da.write(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}")
+    file_da.close()
 
 def wait_artss(t, artss_data_path):
     time.sleep(30)  # needed for artss to rewrite meta file
