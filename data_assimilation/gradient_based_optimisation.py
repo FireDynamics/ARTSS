@@ -485,6 +485,29 @@ def plot_differences(fds_data_path: str, fds_input_file_name: str, artss_data_pa
         plt.savefig(f'diff_{t_artss}.pdf')
         plt.close()
 
+def process_data(devc_info_temperature: dict, artss_times: list, artss_data_path: str):
+    f = open('artss_data.dat', 'w', buffering=1)
+    artss_data = {}
+    for path in ['with_da', 'without_da']:
+        artss_data[path] = {}
+        for sensor in devc_info_temperature:
+            artss_data[path][sensor] = []
+        for t_artss in artss_times:
+            print('t:', t_artss)
+            field_reader = FieldReader(t_artss, path=os.path.join(artss_data_path, path))
+            fields_sim = field_reader.read_field_data()
+            for sensor in devc_info_temperature:
+                index_sensor: int = devc_info_temperature[sensor]['index']
+                value_artss = kelvin_to_celsius(fields_sim['T'][index_sensor])
+                artss_data[path][sensor].append(value_artss)
+        for sensor in devc_info_temperature:
+            f.write(f'sensor:{sensor}')
+            f.write(f'x:{artss_times}\n')
+            f.write(f'y:{artss_data[path][sensor]}\n')
+            f.write(f'label:{path}\n')
+    f.close()
+    return artss_data
+
 
 def plot_comparison_da(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     cwd = os.getcwd()
@@ -498,41 +521,35 @@ def plot_comparison_da(fds_data_path: str, fds_input_file_name: str, artss_data_
     devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
     print(devc_info_temperature)
 
-    sensor_times = fds_data.index[:100]
+    sensor_times = fds_data.index[:31]
     print(sensor_times)
     print('artss path', artss_data_path)
-    artss_times = FieldReader.get_all_time_steps(a_path)[:3051]
-    print('artss times',artss_times)
+    artss_times = FieldReader.get_all_time_steps(a_path)[:501]
+    print('artss times', artss_times)
     print('sensor times', sensor_times)
     print('first row fds', fds_data.columns)
 
-    artss_data = {}
-    for path in ['with_da', 'without_da']:
-        artss_data[path] = {}
-        for sensor in devc_info_temperature:
-            artss_data[path][sensor] = []
-        for t_artss in artss_times:
-            field_reader = FieldReader(t_artss, path=os.path.join(artss_data_path, path))
-            fields_sim = field_reader.read_field_data()
-            for sensor in devc_info_temperature:
-                index_sensor: int = devc_info_temperature[sensor]['index']
-                value_artss = kelvin_to_celsius(fields_sim['T'][index_sensor])
-                artss_data[path][sensor].append(value_artss)
+    artss_data = process_data(devc_info_temperature, artss_times, artss_data_path)
 
     for sensor in devc_info_temperature:
         for path in artss_data:
             plt.plot(artss_times, artss_data[path][sensor], label=path.replace('_', ' '))
-        
+            print(type(artss_times))
+            print(type(artss_data[path][sensor]))
         fds_values = []
         for t in sensor_times:
             fds_values.append(fds_data[sensor.replace('Temperature', 'Thermocouple')][t])
         plt.plot(sensor_times, fds_values, label='fds thermocouple')
+        print(type(fds_values))
 
         fds_values = []
         for t in sensor_times:
             fds_values.append(fds_data[sensor][t])
         plt.plot(sensor_times, fds_values, label='fds temperature')
+        print(type(fds_values))
         plt.legend()
+        plt.ylabel('temperature [°C]')
+        plt.xlabel('time [s]')
         sensor_xpos = devc_info_temperature[sensor]['XYZ'][0]
         plt.savefig(f'comparison_sensor_{sensor_xpos}.pdf')
         plt.close()
