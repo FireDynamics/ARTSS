@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import os
 from datetime import datetime
+import time
 
 import h5py
 import numpy as np
+from retry import retry
 
 
 def is_float(x: str) -> bool:
@@ -54,6 +56,7 @@ class FieldReader:
         self.path = path
         self.read_header()
 
+    @retry(delay=1, tries=6)
     def read_header(self):
         with h5py.File(os.path.join(self.path, '.vis', f'{self.t:.5e}'), 'r') as inp:
             metadata = inp['metadata']
@@ -72,12 +75,14 @@ class FieldReader:
         print(f'xml file name: {self.xml_file_name}')
 
     @staticmethod
+    @retry(delay=1, tries=6)
     def get_t_current(path: str = '.') -> float:
         with open(os.path.join(path, '.vis/meta'), 'r') as inp:
             t = float([x for x in inp.readlines() if x.startswith('t:')][0][2:])
         return t
 
     @staticmethod
+    @retry(delay=1, tries=6)
     def get_all_time_steps(path: str = '.') -> list:
         files = os.listdir(os.path.join(path, '.vis'))
         files.remove('meta')
@@ -97,7 +102,6 @@ class FieldReader:
 
     def get_fields(self) -> list:
         return self.fields
-
 
     def read_field_data(self) -> dict:
         t_cur = self.get_t_current(path=self.path)
