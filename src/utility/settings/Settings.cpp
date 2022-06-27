@@ -901,7 +901,7 @@ namespace Settings {
         solver_parameters sp{};
 
         sp.description = get_required_string(values, "description", context);
-ich
+
         if (sp.description == SolverTypes::AdvectionSolver) {
             sp.advection = solver::parse_advection_solver(subsection, context);
         } else if (sp.description == SolverTypes::AdvectionDiffusionSolver) {
