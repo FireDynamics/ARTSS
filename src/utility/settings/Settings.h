@@ -13,6 +13,7 @@
 #include <vector>
 #include <unordered_map>
 #include <filesystem>
+#include <optional>
 #include <variant>
 
 #ifndef BENCHMARKING
