@@ -17,8 +17,8 @@
 #include "../utility/Mapping.h"
 
 
-FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_file_name) :
-        m_path(output_file_name),
+FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_dir) :
+        m_path(output_dir),
         m_xml_filename(xml_file_name),
         m_logger(Utility::create_logger(typeid(this).name())) {
     namespace fs = std::filesystem;

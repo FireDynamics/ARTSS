@@ -332,6 +332,8 @@ namespace Settings {
     struct data_assimilation_parameters {
         bool enabled;
         std::string class_name;
+        real output_time_interval;
+        std::string output_dir;
     };
     struct Settings {
         std::string filename;

@@ -21,7 +21,7 @@
 
 class FieldIO {
  public:
-    explicit FieldIO(const std::string &xml_file_name, const std::string &file_name = ".vis");
+    FieldIO(const std::string &xml_file_name, const std::string &output_dir);
     void write_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
     void set_file_name(std::string &file_name) { m_path = file_name; }
     void read_fields(real t_cur,
@@ -44,7 +44,7 @@ class FieldIO {
     std::shared_ptr<spdlog::logger> m_logger;
 
     void read_field(HighFive::File &file, Field &field);
-    void read_vis_field(HighFive::File &file, Field &field, const real t);
+    void read_vis_field(HighFive::File &file, Field &field, real t);
 };
 
 #endif /* ARTSS_VISUALISATION_FIELDIO_H */
