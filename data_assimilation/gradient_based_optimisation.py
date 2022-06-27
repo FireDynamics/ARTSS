@@ -1,5 +1,7 @@
 import os
 import time
+import typing
+
 import fdsreader
 import numpy as np
 import pandas as pd
@@ -13,6 +15,12 @@ import data_assimilation
 from ARTSS import Domain, XML, DAFile
 from data_assimilation import FieldReader
 from main import create_message
+
+
+def write_da_data(file_da: typing.TextIO, parameters: dict):
+    for key in parameters:
+        file_da.write(f';{key}:{parameters[key]}')
+    file_da.write('\n')
 
 
 def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
@@ -55,6 +63,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
             param,
             [source_type, temperature_source, random],
             f'{t_artss}_f',
+            file_da=file_da,
             path=cwd
         )
         client.send_message(create_message(t_revert, config_file_name))
@@ -93,6 +102,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     # return
 
     file_da = open('da_details.dat', 'w')
+    file_debug = open('da_debug_details.dat', 'w')
 
     for t_sensor in sensor_times[2:]:
         pprint(cur)
@@ -101,11 +111,13 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path)
         pprint((t_sensor, t_artss, t_revert))
         field_reader = FieldReader(t_artss, path=artss_data_path)
-        diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_artss, t_sensor)
+        file_da.write(f'time_sensor:{t_sensor};time_artss:{t_artss}')
+        write_da_data(file_da=file_da, parameters=cur)
+        diff_orig = comparison_sensor_simulation_data(devc_info_thermocouple, fds_data, field_reader, t_sensor, file_da)
         print(f'org: {diff_orig["T"]}')
         print(t_revert)
-        file_da.write(f'org: {diff_orig["T"]}\n')
-        file_da.write(f't revert: {t_revert}\n')
+        file_debug.write(f'org: {diff_orig["T"]}\n')
+        file_debug.write(f't revert: {t_revert}\n')
 
         nabla = {}
         for p in keys:
@@ -113,28 +125,31 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                 {p: cur[p] + delta[p]},
                 [source_type, temperature_source, random],
                 f'{t_artss}_{p}',
+                file_da=file_da,
                 path=cwd
             )
+            write_da_data(file_da=file_da, parameters={p: cur[p] + delta[p]})
             client.send_message(create_message(t_revert, config_file_name))
             wait_artss(t_sensor, artss_data_path)
 
             field_reader = FieldReader(t_artss, path=artss_data_path)
+            file_da.write(f'time_sensor:{t_sensor};time_artss:{t_artss}')
             diff_cur = comparison_sensor_simulation_data(
                 devc_info_thermocouple,
                 fds_data,
                 field_reader,
-                t_artss,
-                t_sensor
+                t_sensor,
+                file_da
             )
 
             # calc new nabla
             nabla[p] = (diff_cur['T'] - diff_orig['T']) / delta[p]
             print(f'cur: {diff_cur["T"]}')
             print(nabla[p])
-            file_da.write(f'cur: {diff_cur["T"]}\n')
-            file_da.write(f'nabla[{p}]: {nabla[p]}\n')
+            file_debug.write(f'cur: {diff_cur["T"]}\n')
+            file_debug.write(f'nabla[{p}]: {nabla[p]}\n')
 
-        file_da.write(f'nabla without restrictions: {nabla}\n')
+        file_debug.write(f'nabla without restrictions: {nabla}\n')
         pprint(nabla)
         hrr_max = 1.0 if nabla['HRR'] < 0 else cur['HRR'] / nabla['HRR']
 
@@ -145,7 +160,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         else:
             x_max = 0
 
-        file_da.write(f'nabla with restrictions: {nabla}')
+        file_debug.write(f'nabla with restrictions: {nabla}')
         # if nabla['y0'] < 0:
         #     y_max = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
         # else:
@@ -167,8 +182,8 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         alpha = 0.9 * min([1.0, hrr_max, x_max]) #, y_max, z_max])
         print(('mins', [1.0, hrr_max, x_max])) #, y_max, z_max]))
         print(f'alpha = {alpha}')
-        file_da.write(f'mins: {[1.0, hrr_max, x_max]}\n')
-        file_da.write(f'alpha: {alpha}\n')
+        file_debug.write(f'mins: {[1.0, hrr_max, x_max]}\n')
+        file_debug.write(f'alpha: {alpha}\n')
         while n > 0:
             x = np.asarray([cur[x] for x in keys])
             new_para = x + (alpha * d)
@@ -182,20 +197,23 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                 new_para,
                 [source_type, temperature_source, random],
                 f'{t_artss}_{n}',
+                file_da=file_da,
                 path=cwd
             )
             print(f'make adjustment with {new_para}')
-            file_da.write(f'make adjustment with: {new_para}\n')
+            file_debug.write(f'make adjustment with: {new_para}\n')
+            write_da_data(file_da=file_da, parameters=new_para)
             client.send_message(create_message(t_revert, config_file_name))
             wait_artss(t_sensor, artss_data_path)
 
             field_reader = FieldReader(t_artss, path=artss_data_path)
+            file_da.write(f'time_sensor:{t_sensor};time_artss:{t_artss}')
             diff_cur = comparison_sensor_simulation_data(
                 devc_info_thermocouple,
                 fds_data,
                 field_reader,
-                t_artss,
-                t_sensor
+                t_sensor,
+                file_da
             )
 
             if diff_cur['T'] < diff_orig['T'] + np.dot(alpha * sigma * nabla, d):
@@ -203,23 +221,26 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                 print(f'found x_k+1: {new_para}')
                 print(f"al1: {np.dot(alpha * sigma * nabla, d)}")
                 print(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}")
-                file_da.write(f'found alpha: {alpha}\n')
-                file_da.write(f'found x_k+1: {new_para}\n')
-                file_da.write(f'iteration left: {n}\n')
-                file_da.write(f'al1: {np.dot(alpha * sigma * nabla, d)}\n')
-                file_da.write(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}\n")
+                file_debug.write(f'found alpha: {alpha}\n')
+                file_debug.write(f'found x_k+1: {new_para}\n')
+                file_debug.write(f'iteration left: {n}\n')
+                file_debug.write(f'al1: {np.dot(alpha * sigma * nabla, d)}\n')
+                file_debug.write(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}\n")
                 cur = copy(new_para)
                 break
 
             alpha = 0.7 * alpha
             n = n - 1
             print(f'ls: {diff_cur["T"]}')
-            file_da.write(f'ls: {diff_cur["T"]}\n')
+            file_debug.write(f'ls: {diff_cur["T"]}\n')
 
-        file_da.write(f'alpha: {alpha}\n')
-        file_da.write(f'using cur: {cur}\n')
-        file_da.write(f'al1: {np.dot(alpha * sigma * nabla, d)}\n')
-        file_da.write(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}\n")
+        write_da_data(file_da=file_da, parameters=cur)
+
+        file_debug.write(f'alpha: {alpha}\n')
+        file_debug.write(f'using cur: {cur}\n')
+        file_debug.write(f'al1: {np.dot(alpha * sigma * nabla, d)}\n')
+        file_debug.write(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}\n")
+    file_debug.close()
     file_da.close()
 
 
@@ -234,12 +255,13 @@ def wait_artss(t, artss_data_path):
             print(f't_cur: {t_cur} wait for {t}')
 
 
-def change_artss(change: dict, source: list, file_name: str, path='.') -> str:
+def change_artss(change: dict, source: list, file_name: str, file_da: typing.TextIO, path='.') -> str:
     # initiate rollback
     source_type, temperature_source, random = data_assimilation.change_heat_source(*source,
                                                                                    changes={'source_type': {},
                                                                                             'temperature_source': change,
                                                                                             'random': {}})
+    write_da_data(file_da=file_da, parameters=temperature_source)
     da = DAFile()
     da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
     da.create_temperature_source_changes(
@@ -402,7 +424,7 @@ def read_fds_file(data_path: str, artss: Domain) -> pd.DataFrame:
     return return_val
 
 
-def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader, t_artss: float, t_sensor: float) -> dict:
+def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader, t_sensor: float, file_da: typing.TextIO) -> dict:
     diff: dict = {'T': [], 'C': []}
     fields_sim = field_reader.read_field_data()
     for key in devc_info:
@@ -413,11 +435,13 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
 
         value_sim = fields_sim[type_sensor][index_sensor]
         diff[type_sensor].append(kelvin_to_celsius(value_sim) - value_sensor)
+        file_da.write(f'sensor:{key};time_sensor:{t_sensor};time_artss:{field_reader.t};sensor_val:{value_sensor};artss_val:{value_sim};diff:{diff[type_sensor][-1]}\n')
     print(f'diff: {diff["T"]}')
     for key in diff:
         if len(diff[key]) == 0:
             continue
         diff[key] = np.sqrt(sum(np.array(diff[key])**2))
+        file_da.write(f'differences:{key}:{diff[key]}')
     return diff
 
 
