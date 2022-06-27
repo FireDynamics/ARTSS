@@ -49,6 +49,8 @@ class DataAssimilation {
     IParameterReader *m_parameter_handler;
 
     real m_t_cur = 0;
+    real m_output_time_interval;
+    int m_time_interval_counter;
 
     void read_new_data(std::string &file_name);
     bool config_rollback(const char *msg);

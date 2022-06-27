@@ -23,7 +23,11 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
         m_new_field_p(Field(FieldType::P)),
         m_new_field_T(Field(FieldType::T)),
         m_new_field_C(Field(FieldType::RHO)) {
-    m_field_IO_handler = new FieldIO(settings.filename);
+    m_time_interval_counter = 0;
+    m_output_time_interval = m_settings.assimilation_parameters.output_time_interval;
+
+    m_field_IO_handler = new FieldIO(settings.filename,
+                                     m_settings.assimilation_parameters.output_dir);
 
     if (m_settings.assimilation_parameters.enabled) {
         if (m_settings.assimilation_parameters.class_name == AssimilationMethods::standard) {
@@ -44,14 +48,17 @@ void DataAssimilation::initiate_rollback() {
 }
 
 void DataAssimilation::save_data(real t_cur) {
-    Field &u = m_field_controller->get_field_u();
-    Field &v = m_field_controller->get_field_v();
-    Field &w = m_field_controller->get_field_w();
-    Field &p = m_field_controller->get_field_p();
-    Field &T = m_field_controller->get_field_T();
-    Field &C = m_field_controller->get_field_concentration();
+    if (t_cur > m_output_time_interval * m_time_interval_counter) {
+        m_time_interval_counter++;
+        Field &u = m_field_controller->get_field_u();
+        Field &v = m_field_controller->get_field_v();
+        Field &w = m_field_controller->get_field_w();
+        Field &p = m_field_controller->get_field_p();
+        Field &T = m_field_controller->get_field_T();
+        Field &C = m_field_controller->get_field_concentration();
 
-    m_field_IO_handler->write_fields(t_cur, u, v, w, p, T, C);
+        m_field_IO_handler->write_fields(t_cur, u, v, w, p, T, C);
+    }
 }
 
 real DataAssimilation::get_new_time_value() const {

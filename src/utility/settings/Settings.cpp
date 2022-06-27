@@ -901,7 +901,7 @@ namespace Settings {
         solver_parameters sp{};
 
         sp.description = get_required_string(values, "description", context);
-
+ich
         if (sp.description == SolverTypes::AdvectionSolver) {
             sp.advection = solver::parse_advection_solver(subsection, context);
         } else if (sp.description == SolverTypes::AdvectionDiffusionSolver) {
@@ -969,6 +969,8 @@ namespace Settings {
 
         if (ap.enabled) {
             ap.class_name = get_required_string(values, "class_name", context);
+            ap.output_time_interval = get_optional_real(values, "write_output", 1);
+            ap.output_dir = get_optional_string(values, "output_dir", ".vis");
         }
         return ap;
     }
