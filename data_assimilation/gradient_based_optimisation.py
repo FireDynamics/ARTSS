@@ -70,7 +70,6 @@ def map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_ther
 
 
 def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_data_path, devc_info, fds_data, domain, source_type, temperature_source, random, delta, n):
-    keys = cur.keys()
     n = max(1, n)
     cwd = os.getcwd()
     for t_sensor in sensor_times[2:]:
@@ -80,7 +79,7 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
         t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path)
         pprint((t_sensor, t_artss, t_revert))
         field_reader = FieldReader(t_artss, path=artss_data_path)
-        file_da.write(f'original data;time_sensor:{t_sensor};\ntime_artss:{t_artss}\n')
+        file_da.write(f'original data;time_sensor:{t_sensor};time_artss:{t_artss}\n')
         write_da_data(file_da=file_da, parameters=cur)
         diff_orig = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
         print(f'org: {diff_orig["T"]}')
@@ -89,7 +88,7 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
         file_debug.write(f't revert: {t_revert}\n')
 
         nabla = {}
-        for p in keys:
+        for p in cur.keys():
             config_file_name = change_artss(
                 {p: cur[p] + delta[p]},
                 [source_type, temperature_source, random],
@@ -119,7 +118,7 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
             file_debug.write(f'cur: {diff_cur["T"]}\n')
             file_debug.write(f'nabla[{p}]: {nabla[p]}\n')
 
-        pprint(f'nabla without restrictions: {nabla}\n')
+        print(f'nabla without restrictions: {nabla}\n')
         file_debug.write(f'nabla without restrictions: {nabla}\n')
         hrr_max = 1.0 if nabla['HRR'] < 0 else cur['HRR'] / nabla['HRR']
 
@@ -130,7 +129,7 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
         else:
             x_max = 0
 
-        pprint(f'nabla with restrictions: {nabla}')
+        print(f'nabla with restrictions: {nabla}')
         file_debug.write(f'nabla with restrictions: {nabla}')
         # if nabla['y0'] < 0:
         #     y_max = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
@@ -143,8 +142,8 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
         #     z_max = (cur['z0'] - domain.domain_param['Z1']) / nabla['z0']
 
         # search direction
-        nabla = np.asarray([nabla[x] for x in keys])
-        D = np.eye(len(keys))  # -> hesse matrix
+        nabla = np.asarray([nabla[x] for x in cur.keys()])
+        D = np.eye(len(cur.keys()))  # -> hesse matrix
         d = np.dot(-D, nabla)
 
         # calc alpha
@@ -155,11 +154,11 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
         file_debug.write(f'mins: {[1.0, hrr_max, x_max]}\n')
         file_debug.write(f'alpha: {alpha}\n')
         while n > 0:
-            x = np.asarray([cur[x] for x in keys])
+            x = np.asarray([cur[x] for x in cur.keys()])
             new_para = x + (alpha * d)
             new_para = {
                 p: new_para[i]
-                for i, p in enumerate(keys)
+                for i, p in enumerate(cur.keys())
             }
             pprint(new_para)
 
@@ -186,7 +185,7 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
                 t_sensor,
                 file_da
             )
-            pprint('abbruchbedingung ', diff_orig['T'] + np.dot(alpha * sigma * nabla, d))
+            print('abbruchbedingung ', diff_orig['T'] + np.dot(alpha * sigma * nabla, d))
             if diff_cur['T'] < diff_orig['T'] + np.dot(alpha * sigma * nabla, d):
                 print(f'found alpha: {alpha}')
                 print(f'found x_k+1: {new_para}')
@@ -261,7 +260,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                         devc_info=devc_info_temperature, fds_data=fds_data,
                         artss_data_path=artss_data_path,
                         domain=domain, source_type=source_type, temperature_source=temperature_source, random=random,
-                        cur=cur, delta=delta, n=1)
+                        cur=cur, delta=delta, n=5)
 
     # map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd)
 
