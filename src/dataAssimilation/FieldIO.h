@@ -32,8 +32,9 @@ class FieldIO {
                              Field &u, Field &v, Field &w,
                              Field &p, Field &T, Field &C);
 
- private:
     void create_meta_file(real t_cur);
+
+private:
     void create_header(HighFive::File &file);
     void read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C);
 

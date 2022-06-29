@@ -66,7 +66,6 @@ void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &
         dsf.write(f.get_data());
         m_logger->debug("sum of {}: {}", Mapping::get_field_type_name(f.get_type()), f.get_sum());
     }
-    create_meta_file(t_current);
 }
 
 // ========================================== read =================================================

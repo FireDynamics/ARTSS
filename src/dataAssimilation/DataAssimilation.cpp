@@ -48,7 +48,7 @@ void DataAssimilation::initiate_rollback() {
 }
 
 void DataAssimilation::save_data(real t_cur) {
-    if (t_cur > m_output_time_interval * m_time_interval_counter) {
+    if (t_cur >= m_output_time_interval * m_time_interval_counter) {
         m_time_interval_counter++;
         Field &u = m_field_controller->get_field_u();
         Field &v = m_field_controller->get_field_v();
@@ -59,6 +59,7 @@ void DataAssimilation::save_data(real t_cur) {
 
         m_field_IO_handler->write_fields(t_cur, u, v, w, p, T, C);
     }
+    m_field_IO_handler->create_meta_file(t_cur);
 }
 
 real DataAssimilation::get_new_time_value() const {
