@@ -30,7 +30,7 @@ def write_da_data(file_da: typing.TextIO, parameters: dict):
 def map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd, artss):
     def f(t_end, param):
         t_artss, t_revert = get_time_step_artss(t_end, artss_data_path)
-        config_file_name = change_artss(
+        config_file_name, _ = change_artss(
             param,
             [source_type, temperature_source, random],
             f'{t_artss}_f',
@@ -100,12 +100,12 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
             precondition = False
             cur['x0'] = minima_x
             temperature_source['x0'] = cur['x0']
-            config_file_name = change_artss(
+            config_file_name, _ = change_artss(
                 {'x0': cur['x0']},
                 [source_type, temperature_source, random],
                 f'{t_artss}_precondition',
                 file_da=file_da,
-                path=cwd
+                path=artss_data_path
             )
             write_da_data(file_da=file_da, parameters={'x0': cur['x0']})
             client.send_message(create_message(t_revert, config_file_name))
@@ -118,12 +118,12 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
 
         nabla = {}
         for p in cur.keys():
-            config_file_name = change_artss(
+            config_file_name, _ = change_artss(
                 {p: cur[p] + delta[p]},
                 [source_type, temperature_source, random],
                 f'{t_artss}_{p}',
                 file_da=file_da,
-                path=cwd
+                path=artss_data_path
             )
             file_da.write(f'calc_nabla;')
             write_da_data(file_da=file_da, parameters={p: cur[p] + delta[p]})
@@ -191,12 +191,12 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
             }
             pprint(new_para)
 
-            config_file_name = change_artss(
+            config_file_name, _ = change_artss(
                 new_para,
                 [source_type, temperature_source, random],
                 f'{t_artss}_{n}',
                 file_da=file_da,
-                path=cwd
+                path=artss_data_path
             )
             print(f'make adjustment with {new_para}')
             file_debug.write(f'make adjustment with: {new_para}\n')
@@ -252,7 +252,6 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     client = TCP_client.TCPClient()
     # client.set_server_address('172.17.0.2', 7777)
     client.connect()
-    cwd = os.getcwd()
 
     xml = XML(FieldReader.get_xml_file_name(artss_data_path), path=artss_data_path)
     xml.read_xml()
@@ -319,7 +318,7 @@ def wait_artss(t_sensor, artss_data_path, artss: ARTSS.XML):
     pbar.close()
 
 
-def change_artss(change: dict, source: list, file_name: str, file_da: typing.TextIO, path='.') -> str:
+def change_artss(change: dict, source: list, file_name: str, file_da: typing.TextIO, path='.') -> [str, str]:
     # initiate rollback
     source_type, temperature_source, random = data_assimilation.change_heat_source(*source,
                                                                                    changes={'source_type': {},
@@ -333,9 +332,10 @@ def change_artss(change: dict, source: list, file_name: str, file_da: typing.Tex
         temperature_source=temperature_source,
         random=random)
 
-    config_file_name = os.path.join(path, f'config_{file_name}.xml')
-    da.write_xml(config_file_name)
-    return config_file_name
+    config_file_name = f'config_{file_name}.xml'
+    config_file_path = os.path.join(path, config_file_name)
+    da.write_xml(config_file_path)
+    return config_file_name, config_file_path
 
 
 def get_time_step_artss(t_sensor: float, artss_data_path: str) -> [float, float]:
