@@ -2,6 +2,7 @@
 import os
 from datetime import datetime
 import time
+import locale
 
 import h5py
 import numpy as np
@@ -64,7 +65,10 @@ class FieldReader:
             domain = list(metadata['domain'][:])
             self.grid_resolution = {'Nx': domain[0], 'Ny': domain[1], 'Nz': domain[2]}
             self.fields = list(metadata['fields'].asstr()[:])
+            loc = locale.getlocale()
+            locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
             self.date = datetime.strptime(metadata['date'].asstr()[()][0].strip(), '%a %b %d %H:%M:%S %Y')
+            locale.setlocale(locale.LC_ALL, loc)
             self.xml_file_name = metadata['xml'][()][0]
 
     def print_header(self):
