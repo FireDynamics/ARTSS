@@ -1,3 +1,4 @@
+import math
 import os
 import time
 import typing
@@ -10,6 +11,9 @@ import matplotlib.pyplot as plt
 from copy import copy
 from pprint import pprint
 
+from tqdm import tqdm
+
+import ARTSS
 import TCP_client
 import data_assimilation
 from ARTSS import Domain, XML, DAFile
@@ -23,7 +27,7 @@ def write_da_data(file_da: typing.TextIO, parameters: dict):
     file_da.write('\n')
 
 
-def map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd):
+def map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd, artss):
     def f(t_end, param):
         t_artss, t_revert = get_time_step_artss(t_end, artss_data_path)
         config_file_name = change_artss(
@@ -34,10 +38,10 @@ def map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_ther
             path=cwd
         )
         client.send_message(create_message(t_revert, config_file_name))
-        wait_artss(t_end, artss_data_path)
+        wait_artss(t_end, artss_data_path, artss)
 
         field_reader = FieldReader(t_artss, path=artss_data_path)
-        ret = comparison_sensor_simulation_data(
+        ret, _ = comparison_sensor_simulation_data(
             devc_info_thermocouple,
             fds_data,
             field_reader,
@@ -50,12 +54,12 @@ def map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_ther
     print('org: {f(t_artss, t_revert, dict())}')
     t = sensor_times[2]
     pprint(cur)
-    wait_artss(t, artss_data_path)
+    wait_artss(t, artss_data_path, artss)
 
     t_artss, t_revert = get_time_step_artss(t, artss_data_path)
     pprint((t, t_artss, t_revert))
     field_reader = FieldReader(t_artss, path=artss_data_path)
-    diff_orig = comparison_sensor_simulation_data(devc_info_temperature, fds_data, field_reader, t_artss, t)
+    diff_orig, _ = comparison_sensor_simulation_data(devc_info_temperature, fds_data, field_reader, t_artss, t)
     print(f'org: {diff_orig["T"]}')
     print(t_revert)
 
@@ -69,23 +73,48 @@ def map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_ther
     return
 
 
-def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_data_path, devc_info, fds_data, domain, source_type, temperature_source, random, delta, n):
+def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_data_path, devc_info, fds_data, domain, source_type, temperature_source, random, delta, n, artss):
     n = max(1, n)
     cwd = os.getcwd()
+    precondition = True
     for t_sensor in sensor_times[2:]:
         pprint(cur)
-        wait_artss(t_sensor, artss_data_path)
+        wait_artss(t_sensor, artss_data_path, artss)
 
         t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path)
         pprint((t_sensor, t_artss, t_revert))
         field_reader = FieldReader(t_artss, path=artss_data_path)
         file_da.write(f'original data;time_sensor:{t_sensor};time_artss:{t_artss}\n')
         write_da_data(file_da=file_da, parameters=cur)
-        diff_orig = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
+        diff_orig, minima_x = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
+
         print(f'org: {diff_orig["T"]}')
         print(t_revert)
         file_debug.write(f'org: {diff_orig["T"]}\n')
         file_debug.write(f't revert: {t_revert}\n')
+
+        if sum(diff_orig.values()) < 1e-5:
+            continue
+
+        if precondition:
+            precondition = False
+            cur['x0'] = minima_x
+            temperature_source['x0'] = cur['x0']
+            config_file_name = change_artss(
+                {'x0': cur['x0']},
+                [source_type, temperature_source, random],
+                f'{t_artss}_precondition',
+                file_da=file_da,
+                path=cwd
+            )
+            write_da_data(file_da=file_da, parameters={'x0': cur['x0']})
+            client.send_message(create_message(t_revert, config_file_name))
+            wait_artss(t_sensor, artss_data_path, artss)
+
+            field_reader = FieldReader(t_artss, path=artss_data_path)
+            file_da.write(f'preconditioning;time_sensor:{t_sensor};time_artss:{t_artss}\n')
+            write_da_data(file_da=file_da, parameters=cur)
+            diff_orig, _ = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
 
         nabla = {}
         for p in cur.keys():
@@ -99,11 +128,11 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
             file_da.write(f'calc_nabla;')
             write_da_data(file_da=file_da, parameters={p: cur[p] + delta[p]})
             client.send_message(create_message(t_revert, config_file_name))
-            wait_artss(t_sensor, artss_data_path)
+            wait_artss(t_sensor, artss_data_path, artss)
 
             field_reader = FieldReader(t_artss, path=artss_data_path)
             file_da.write(f'time_sensor:{t_sensor};time_artss:{t_artss}\n')
-            diff_cur = comparison_sensor_simulation_data(
+            diff_cur, _ = comparison_sensor_simulation_data(
                 devc_info,
                 fds_data,
                 field_reader,
@@ -174,11 +203,11 @@ def continuous_gradient(client, file_da, file_debug, sensor_times, cur, artss_da
             file_da.write(f'iterate:{n};')
             write_da_data(file_da=file_da, parameters=new_para)
             client.send_message(create_message(t_revert, config_file_name))
-            wait_artss(t_sensor, artss_data_path)
+            wait_artss(t_sensor, artss_data_path, artss)
 
             field_reader = FieldReader(t_artss, path=artss_data_path)
             file_da.write(f'time_sensor:{t_sensor};time_artss:{t_artss}\n')
-            diff_cur = comparison_sensor_simulation_data(
+            diff_cur, _ = comparison_sensor_simulation_data(
                 devc_info,
                 fds_data,
                 field_reader,
@@ -260,23 +289,34 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                         devc_info=devc_info_temperature, fds_data=fds_data,
                         artss_data_path=artss_data_path,
                         domain=domain, source_type=source_type, temperature_source=temperature_source, random=random,
-                        cur=cur, delta=delta, n=5)
+                        cur=cur, delta=delta, n=5, artss=xml)
 
-    # map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd)
+    # map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd, xml)
 
     file_debug.close()
     file_da.close()
 
 
-def wait_artss(t, artss_data_path):
-    time.sleep(30)  # needed for artss to rewrite meta file
+def wait_artss(t_sensor, artss_data_path, artss: ARTSS.XML):
+    time_step = artss.get_output_time_step()
+    if t_sensor % time_step == 0:
+        t = t_sensor
+    else:
+        t = (t_sensor // time_step + 1) * time_step
+
+    for i in tqdm(range(30)):
+        time.sleep(1)
+    # time.sleep(30)  # needed for artss to rewrite meta file
     t_cur = FieldReader.get_t_current(path=artss_data_path)
+    pbar = tqdm(total=t)
+    pbar.update(t_cur)
     while t_cur <= t:
         time.sleep(1)
         t_new = FieldReader.get_t_current(path=artss_data_path)
-        if t_new != t_cur:
-            t_cur = t_new
-            print(f't_cur: {t_cur} wait for {t}')
+        pbar.update(t_new - t_cur)
+        t_cur = t_new
+
+    pbar.close()
 
 
 def change_artss(change: dict, source: list, file_name: str, file_da: typing.TextIO, path='.') -> str:
@@ -300,29 +340,13 @@ def change_artss(change: dict, source: list, file_name: str, file_da: typing.Tex
 
 def get_time_step_artss(t_sensor: float, artss_data_path: str) -> [float, float]:
     files = FieldReader.get_all_time_steps(path=artss_data_path)
-    estimated_index = int(t_sensor * len(files) / files[-1])
-
-    t_artss: float = -1
-    if abs(files[estimated_index] - t_sensor) < 1e-10:
-        t_artss = files[estimated_index]
-    elif files[estimated_index] < t_sensor:
-        # ascending
-        while files[estimated_index] < len(files):
-            if files[estimated_index] >= t_sensor:
-                t_artss = files[estimated_index]
-                break
-            else:
-                estimated_index += 1
-    else:
-        # descending
-        while files[estimated_index] >= 0:
-            if files[estimated_index] <= t_sensor:
-                t_artss = files[estimated_index + 1]
-                break
-            else:
-                estimated_index -= 1
-    t_revert = files[max(0, estimated_index - 10)]
-    return t_artss, t_revert
+    times = list(filter(lambda x: x > t_sensor, files))
+    t_revert = list(filter(lambda x: x < max(0., t_sensor - 3), files))[-1]
+    print(t_sensor)
+    print(files)
+    print(times)
+    print(t_revert)
+    return times[0], t_revert
 
 
 def read_fds_data(input_path: str, input_file_name: str, artss: Domain) -> [dict, dict, pd.DataFrame]:
@@ -448,9 +472,11 @@ def read_fds_file(data_path: str, artss: Domain) -> pd.DataFrame:
     return return_val
 
 
-def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader, t_sensor: float, file_da: typing.TextIO) -> dict:
+def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader, t_sensor: float, file_da: typing.TextIO) -> (dict, float):
     diff: dict = {'T': [], 'C': []}
     fields_sim = field_reader.read_field_data()
+    min_pos_x: float = 0
+    min_sensor_val = math.inf
     for key in devc_info:
         # sensor data
         type_sensor: str = devc_info[key]['type']
@@ -463,6 +489,10 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
             diff[type_sensor].append(difference)
         file_da.write(f'sensor:{key};time_sensor:{t_sensor};time_artss:{field_reader.t};sensor_val:{value_sensor};artss_val:{value_sim};diff:{difference};considered:{abs(difference)>0.5};position:{devc_info[key]["XYZ"]}\n')
         file_da.flush()
+
+        if difference < min_sensor_val:
+            min_sensor_val = difference
+            min_pos_x = devc_info[key]['XYZ'][0]
     print(f'diff: {diff["T"]}')
     result = {}
     for key in diff:
@@ -470,7 +500,7 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
             continue
         result[key] = np.sqrt(sum(np.array(diff[key])**2))
         file_da.write(f'differences:{key}:{result[key]};no_of_sensors:{len(diff[key])}\n')
-    return result
+    return result, min_pos_x
 
 
 def calc_single_differences(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader, t_artss: float, t_sensor: float) -> dict:

@@ -39,6 +39,16 @@ class XML:
                 geometry.attrib['name'] = child.attrib['name']
                 self.obstacles.append(geometry.attrib)
 
+    def get_output_time_step(self) -> float:
+        root = self.xml_tree.getroot()
+        da_param = root.find('data_assimilation')
+        dict_da = {}
+        for key in da_param.attrib:
+            dict_da[key] = (da_param.attrib[key])
+        if 'write_output' in dict_da.keys():
+            return float(dict_da['write_output'])
+        return 1
+
     def get_temperature_source(self) -> [dict, dict, dict]:
         if self.temperature_source is None:
             # check if temperature source is even there ? or crash
