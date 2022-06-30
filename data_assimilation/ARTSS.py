@@ -49,7 +49,7 @@ class XML:
             return float(dict_da['write_output'])
         return 1
 
-    def get_temperature_source(self) -> [dict, dict, dict]:
+    def get_temperature_source(self) -> dict:
         if self.temperature_source is None:
             # check if temperature source is even there ? or crash
             root = self.xml_tree.getroot()
@@ -71,9 +71,7 @@ class XML:
                     random_params[elem.tag] = elem.text.strip()
             self.temperature_source = {'source_type': source, 'temperature_source': source_params,
                                        'random': random_params}
-        return self.temperature_source['source_type'], \
-               self.temperature_source['temperature_source'], \
-               self.temperature_source['random']
+        return self.temperature_source
 
 
 class DAFile:
