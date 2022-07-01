@@ -115,7 +115,7 @@ def log(message: str, file_debug: typing.TextIO):
 
 def continuous_gradient(client: TCP_client,
                         file_da: typing.TextIO, file_debug: typing.TextIO,
-                        sensor_times: list, devc_info: dict,
+                        sensor_times: pandas.Index, devc_info: dict,
                         cur: dict, delta: dict,
                         artss_data_path: str, artss: XML, domain: Domain,
                         fds_data: pandas.DataFrame,
@@ -287,7 +287,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
                         devc_info=devc_info_temperature, fds_data=fds_data,
                         artss_data_path=artss_data_path,
                         domain=domain, heat_source=heat_source,
-                        cur=cur, delta=delta, n=5, artss=xml)
+                        cur=cur, delta=delta, n_iterations=5, artss=xml)
 
     # map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd, xml)
 
