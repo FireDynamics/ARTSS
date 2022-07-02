@@ -82,7 +82,7 @@ def do_rollback(client: TCP_client,
                 artss_data_path: str, artss: XML,
                 fds_data,
                 devc_info: dict,
-                file_da: typing.TextIO, file_debug: typing.TextIO) -> dict:
+                file_da: typing.TextIO, file_debug: typing.TextIO) -> [dict, float]:
     config_file_name, _ = write_changes_xml(
         new_para,
         heat_source,
@@ -98,14 +98,14 @@ def do_rollback(client: TCP_client,
 
     field_reader = FieldReader(t_artss, path=artss_data_path)
     file_da.write(f'time_sensor:{t_sensor};time_artss:{t_artss}\n')
-    diff_cur, _ = comparison_sensor_simulation_data(
+    diff_cur, min_pos_x = comparison_sensor_simulation_data(
         devc_info,
         fds_data,
         field_reader,
         t_sensor,
         file_da
     )
-    return diff_cur
+    return diff_cur, min_pos_x
 
 
 def log(message: str, file_debug: typing.TextIO):
