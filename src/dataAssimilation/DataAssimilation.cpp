@@ -120,7 +120,11 @@ bool DataAssimilation::requires_rollback(const real t_cur) {
         m_logger->debug("preparing to receive message");
         MPI_Recv(msg.data(), msg_len, MPI_CHAR, 1, status.MPI_TAG, MPI_COMM_WORLD, &status);
         m_logger->debug("received chars: {}", msg_len);
-        return config_rollback(msg.data());
+        bool result = config_rollback(msg.data());
+        std::string response = "Rollback done";
+        MPI_Request request;
+        MPI_Isend(response.c_str(), response.size() + 1, MPI_CHAR, 1, 0, MPI_COMM_WORLD, &request);
+        return result;
     }
     return flag;
 }

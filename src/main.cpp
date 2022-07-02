@@ -131,17 +131,25 @@ void server() {
             std::cout << fmt::format("received message from client {}:{}", new_client->remote_address(),
                                      new_client->remote_port()) << std::endl;
             logger->info("received message from client {}:{}", new_client->remote_address(), new_client->remote_port());
-            int flag;
-            MPI_Iprobe(1, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-            if (flag) {
-                logger->warn("message couldn't be processed as a message is already being processed");
-                MPI_Wait(&request, &status);
-            }
-            new_client->send_message("message was received");  // send a message back (acknowledgment/error/whatever)
             std::cout << "message will be sent to rank 0" << std::endl;
             MPI_Isend(message, message_size + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &request);
             logger->debug("message was sent to rank 0");
             std::cout << "message was sent to rank 0" << std::endl;
+            int flag = -1;
+            while (true) {
+                MPI_Iprobe(1, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+                if (flag) {
+                    break;
+                }
+            }
+
+            int msg_len;
+            MPI_Get_count(&status, MPI_CHAR, &msg_len);
+            std::vector<char> msg;
+
+            msg.resize(msg_len);
+            MPI_Recv(msg.data(), msg_len, MPI_CHAR, 1, status.MPI_TAG, MPI_COMM_WORLD, &status);
+            new_client->send_message(fmt::format("message was received: {}", msg.data()));  // send a message back (acknowledgment/error/whatever)
         };
 
         new_client->on_socket_closed = [new_client, logger](int error_code) {
