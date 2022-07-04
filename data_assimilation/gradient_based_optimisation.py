@@ -301,9 +301,6 @@ def wait_artss(t_sensor, artss_data_path, artss: ARTSS.XML):
         t = t_sensor
     else:
         t = (t_sensor // time_step + 1) * time_step
-
-    for i in tqdm(range(30)):
-        time.sleep(1)
     # time.sleep(30)  # needed for artss to rewrite meta file
     t_cur = FieldReader.get_t_current(path=artss_data_path)
     pbar = tqdm(total=t)

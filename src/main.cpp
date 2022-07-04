@@ -137,18 +137,19 @@ void server() {
             std::cout << "message was sent to rank 0" << std::endl;
             int flag = -1;
             while (true) {
-                MPI_Iprobe(1, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+                MPI_Iprobe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
                 if (flag) {
                     break;
                 }
             }
-
             int msg_len;
             MPI_Get_count(&status, MPI_CHAR, &msg_len);
             std::vector<char> msg;
 
             msg.resize(msg_len);
-            MPI_Recv(msg.data(), msg_len, MPI_CHAR, 1, status.MPI_TAG, MPI_COMM_WORLD, &status);
+            MPI_Recv(msg.data(), msg_len, MPI_CHAR, 0, status.MPI_TAG, MPI_COMM_WORLD, &status);
+            std::cout << "received reply: " << msg.data() << std::endl;
+            logger->debug("received reply: {}", msg.data());
             new_client->send_message(fmt::format("message was received: {}", msg.data()));  // send a message back (acknowledgment/error/whatever)
         };
 
