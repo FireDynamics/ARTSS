@@ -117,13 +117,13 @@ def log(message: str, file_debug: typing.TextIO):
 def continuous_gradient(client: TCP_client,
                         file_da: typing.TextIO, file_debug: typing.TextIO,
                         sensor_times: pandas.Index, devc_info: dict,
-                        cur: dict, delta: dict,
+                        cur: dict, delta: dict, keys: list,
                         artss_data_path: str, artss: XML, domain: Domain,
                         fds_data: pandas.DataFrame,
                         heat_source: dict,
                         n_iterations: int):
     n = max(1, n_iterations)
-    precondition = True
+    precondition = False
     for t_sensor in sensor_times[2:]:
         pprint(cur)
         wait_artss(t_sensor, artss_data_path, artss)
@@ -157,11 +157,11 @@ def continuous_gradient(client: TCP_client,
                                        file_da=file_da, file_debug=file_debug)
 
         nabla = {}
-        for p in cur.keys():
+        for p in keys:
             file_da.write(f'calc_nabla;')
             diff_cur, _ = do_rollback(client=client,
                                       t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
-                                      new_para={'x0': cur['x0']}, heat_source=heat_source.values(),
+                                      new_para={p: cur[p] + delta[p]}, heat_source=heat_source.values(),
                                       sub_file_name=p,
                                       artss_data_path=artss_data_path, artss=artss,
                                       fds_data=fds_data,
@@ -174,49 +174,60 @@ def continuous_gradient(client: TCP_client,
             log(f'nabla[{p}]: {nabla[p]}', file_debug)
 
         log(f'nabla without restrictions: {nabla}', file_debug)
-        hrr_max = 1.0 if nabla['HRR'] < 0 else cur['HRR'] / nabla['HRR']
+        restrictions = {}
+        if 'HRR' in keys:
+            restrictions['HRR'] = 1.0 if nabla['HRR'] < 0 else cur['HRR'] / nabla['HRR']
 
-        if nabla['x0'] < 0:
-            x_max = (domain.domain_param['X2'] - cur['x0']) / -nabla['x0']
-        elif nabla['x0'] > 0:
-            x_max = (cur['x0'] - domain.domain_param['X1']) / nabla['x0']
-        else:
-            x_max = 0
-
-        log(f'nabla with restrictions: {nabla}', file_debug)
-        # if nabla['y0'] < 0:
-        #     y_max = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
-        # else:
-        #     y_max = (cur['y0'] - domain.domain_param['Y1']) / nabla['y0']
-
-        # if nabla['z0'] < 0:
-        #     z_max = (domain.domain_param['Z2'] - cur['z0']) / -nabla['z0']
-        # else:
-        #     z_max = (cur['z0'] - domain.domain_param['Z1']) / nabla['z0']
+        if 'x0' in keys:
+            if nabla['x0'] < 0:
+                restrictions['x0'] = (domain.domain_param['X2'] - cur['x0']) / -nabla['x0']
+            elif nabla['x0'] > 0:
+                restrictions['x0'] = (cur['x0'] - domain.domain_param['X1']) / nabla['x0']
+            else:
+                restrictions['x0'] = 0
+        if 'y0' in keys:
+            if nabla['y0'] < 0:
+                restrictions['y0'] = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
+            elif nabla['y0'] > 0:
+                restrictions['y0'] = (cur['y0'] - domain.domain_param['Y1']) / nabla['y0']
+            else:
+                restrictions['y0'] = 0
+        if 'z0' in keys:
+            if nabla['z0'] < 0:
+                restrictions['z0'] = (domain.domain_param['Z2'] - cur['z0']) / -nabla['z0']
+            elif nabla['z0'] > 0:
+                restrictions['z0'] = (cur['z0'] - domain.domain_param['Z1']) / nabla['z0']
+            else:
+                restrictions['z0'] = 0
+        log(f'restrictions: {restrictions}', file_debug)
 
         # search direction
-        nabla = np.asarray([nabla[x] for x in cur.keys()])
-        D = np.eye(len(cur.keys()))  # -> hesse matrix
+        nabla = np.asarray([nabla[x] for x in keys])
+        D = np.eye(len(keys))  # -> hesse matrix
         d = np.dot(-D, nabla)
 
         # calc alpha
         sigma = 0.01
-        alpha = 0.9 * min([1.0, hrr_max, x_max])  # , y_max, z_max])
-        log(f'mins: {[1.0, hrr_max, x_max]}', file_debug)
+
+        alpha_min = 1
+        for k in keys:
+            alpha_min = min(alpha_min, restrictions[k])
+        alpha = 0.9 * alpha_min
+        log(f'mins: 1.0, {restrictions.values()}', file_debug)
         log(f'alpha: {alpha}', file_debug)
         while n > 0:
-            x = np.asarray([cur[x] for x in cur.keys()])
+            x = np.asarray([cur[x] for x in keys])
             new_para = x + (alpha * d)
             new_para = {
                 p: new_para[i]
-                for i, p in enumerate(cur.keys())
+                for i, p in enumerate(keys)
             }
             pprint(new_para)
 
             file_da.write(f'iterate:{n};')
             diff_cur, _ = do_rollback(client=client,
                                       t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
-                                      new_para={'x0': cur['x0']}, heat_source=heat_source.values(),
+                                      new_para=new_para, heat_source=heat_source.values(),
                                       sub_file_name=n,
                                       artss_data_path=artss_data_path, artss=artss,
                                       fds_data=fds_data,
@@ -272,23 +283,24 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     delta = {
         'HRR': float(heat_source['temperature_source']['HRR']) * 0.5,
         'x0': domain.domain_param['dx'] * 5,
-        # 'y0': domain.domain_param['dy'] * 1,
-        # 'z0': domain.domain_param['dz'] * 1
+        'y0': domain.domain_param['dy'] * 1,
+        'z0': domain.domain_param['dz'] * 1
     }
 
     cur = {
         'HRR': float(heat_source['temperature_source']['HRR']),
         'x0': float(heat_source['temperature_source']['x0']),
-        # 'y0': float(heat_source['temperature_source']['y0']),
-        # 'z0': float(heat_source['temperature_source']['z0'])
+        'y0': float(heat_source['temperature_source']['y0']),
+        'z0': float(heat_source['temperature_source']['z0'])
     }
 
+    keys = ['HRR']
     continuous_gradient(client=client, file_da=file_da, file_debug=file_debug,
                         sensor_times=sensor_times,
                         devc_info=devc_info_temperature, fds_data=fds_data,
                         artss_data_path=artss_data_path,
                         domain=domain, heat_source=heat_source,
-                        cur=cur, delta=delta, n_iterations=5, artss=xml)
+                        cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml)
 
     # map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd, xml)
 
