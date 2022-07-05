@@ -87,7 +87,8 @@ def main(dry_run=False):
         source_type, temperature_source, random = \
             data_assimilation.change_heat_source(*source,
                                                  changes={'source_type': {},
-                                                          'temperature_source': {'x0': float(source[1]['x0']) + 10 * index},
+                                                          'temperature_source': {
+                                                              'x0': float(source[1]['x0']) + 10 * index},
                                                           'random': {}})
         da = DAFile()
         da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': True, 'C': False}, field_file_name)
@@ -119,22 +120,24 @@ def tmp(path):
     for n in params:
         t_revert = 0.2 * 2
         t_artss = 0.2 * 5
-        gradient_based_optimisation.wait_artss(t_artss, path)
+        gradient_based_optimisation.wait_artss(t_artss, path, xml)
         field_reader = FieldReader(t_artss, path=path)
         field_reader.read_field_data()
 
-        config_file_name = gradient_based_optimisation.change_artss(
+        config_file_name = gradient_based_optimisation.write_changes_xml(
             {},
-            #{'x0': float(temperature_source['x0']) + n},
+            # {'x0': float(temperature_source['x0']) + n},
             [source_type, temperature_source, random],
             f'test_{n}.xml',
             path=cwd)
         client.send_message(create_message(t_revert, config_file_name))
 
-    gradient_based_optimisation.wait_artss(1, path)
+    gradient_based_optimisation.wait_artss(1, path, xml)
     field_reader = FieldReader(1, path=path)
     field_reader.read_field_data()
 
+
 if __name__ == '__main__':
-    gradient_based_optimisation.start('example/FDS_corridor/', 'corridor', 'example')
+    gradient_based_optimisation.start(artss_data_path='../tmp/tunnel/',
+                                      fds_data_path='../tmp/tunnel/', fds_input_file_name='tunnel')
     # main(dry_run=False)

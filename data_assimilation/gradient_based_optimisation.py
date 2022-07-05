@@ -4,6 +4,7 @@ import time
 import typing
 
 import fdsreader
+import numpy
 import numpy as np
 import pandas
 import pandas as pd
@@ -282,7 +283,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         # 'z0': float(heat_source['temperature_source']['z0'])
     }
 
-    continuous_gradient(client, file_da, file_debug,
+    continuous_gradient(client=client, file_da=file_da, file_debug=file_debug,
                         sensor_times=sensor_times,
                         devc_info=devc_info_temperature, fds_data=fds_data,
                         artss_data_path=artss_data_path,
