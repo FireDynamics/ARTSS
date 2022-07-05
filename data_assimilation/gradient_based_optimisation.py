@@ -124,11 +124,11 @@ def continuous_gradient(client: TCP_client,
                         n_iterations: int):
     n = max(1, n_iterations)
     precondition = False
-    for t_sensor in sensor_times[2:]:
+    for t_sensor in sensor_times[4:]:
         pprint(cur)
         wait_artss(t_sensor, artss_data_path, artss)
 
-        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path)
+        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=artss.get_dt())
 
         log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
         field_reader = FieldReader(t_artss, path=artss_data_path)
@@ -176,7 +176,12 @@ def continuous_gradient(client: TCP_client,
         log(f'nabla without restrictions: {nabla}', file_debug)
         restrictions = {}
         if 'HRR' in keys:
-            restrictions['HRR'] = 1.0 if nabla['HRR'] < 0 else cur['HRR'] / nabla['HRR']
+            if nabla['HRR'] < 0:
+                restrictions['HRR'] = 1.0
+            elif nabla['HRR'] > 0:
+                restrictions['HRR'] = cur['HRR'] / nabla['HRR']
+            else:
+                restrictions['HRR'] = 0
 
         if 'x0' in keys:
             if nabla['x0'] < 0:
@@ -277,7 +282,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
     heat_source = xml.get_temperature_source()
 
-    file_da = open('da_details.dat', 'w')
+    file_da = open('da_details.csv', 'w')
     file_debug = open('da_debug_details.dat', 'w')
 
     delta = {
@@ -346,10 +351,10 @@ def write_changes_xml(change: dict, source: list, file_name: str, file_da: typin
     return config_file_name, config_file_path
 
 
-def get_time_step_artss(t_sensor: float, artss_data_path: str) -> [float, float]:
+def get_time_step_artss(t_sensor: float, artss_data_path: str, dt: float) -> [float, float]:
     files = FieldReader.get_all_time_steps(path=artss_data_path)
     times = list(filter(lambda x: x > t_sensor, files))
-    t_revert = list(filter(lambda x: x < max(0., t_sensor - 3), files))[-1]
+    t_revert = ([dt] + list(filter(lambda x: x <= max(0., t_sensor - 3), files)))[-1]
     print(t_sensor)
     print(files)
     print(times)

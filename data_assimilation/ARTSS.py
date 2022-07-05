@@ -73,6 +73,12 @@ class XML:
                                        'random': random_params}
         return self.temperature_source
 
+    def get_dt(self) -> float:
+        pp = self.xml_tree.getroot().find('physical_parameters')
+        for elem in pp:
+            if elem.tag == 'dt':
+                return float(elem.text)
+
 
 class DAFile:
     def __init__(self):
