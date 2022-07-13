@@ -219,7 +219,7 @@ fi
 
 if [ $DOCKERRUNCPU -eq 1 ]
 then
-  docker run -it --rm --hostname=${DOCKERHOST} -p7777:777 7-v "$(pwd)":/host_pwd -w /host_pwd artss_docker bash # /bin/bash -c "./compile.sh"
+  docker run -it --rm --hostname=${DOCKERHOST} -p7777:7777 -v "$(pwd)":/host_pwd -w /host_pwd artss_docker bash # /bin/bash -c "./compile.sh"
 fi
 
 if [[ $DOCKERRUN -eq 1 || $DOCKERRUNCPU -eq 1 || $DOCKERBUILD -eq 1 ]]
