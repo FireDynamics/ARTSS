@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+eckout#!/usr/bin/env bash
 COMPILE=""
 GPU=0
 JURECA=0
@@ -32,6 +32,8 @@ Executables:
    ${YELLOW}-g${NC}
   ${YELLOW}--gpu${NC}
   ${YELLOW}--artss_gpu${NC}                      \t Executable: artss_gpu
+
+  ${YELLOW}--mpi${NC}                            \t Executable: artss_data_assimilation_serial
 ----  
   Benchmarking (without output, visualization, analysis):
   ${YELLOW}--sb${NC}
@@ -51,9 +53,9 @@ Other:
   ${YELLOW}--cudaversion${NC}                     \t set CUDA Version
   ${YELLOW}--cc${NC}
   ${YELLOW}--computecompatibility${NC}            \t set compute compability of the GPU (35|50|60|62|70|72|75|80)
-  ${YELLOW}-checkout${NC}                         \t set libraries in external folder to a specific version (spdlog v1.9.2, fmt 8.0.1, googletest release-1.8.1)
+  ${YELLOW}--checkout${NC}                         \t set libraries in external folder to a specific version (spdlog v1.9.2, fmt 8.0.1, googletest release-1.8.1)
    ${YELLOW}-d${NC}
-   ${YELLOW}--debugmode${NC}                      \t set debug flag for build type (default: ${BUILDTYPE})
+  ${YELLOW}--debugmode${NC}                      \t set debug flag for build type (default: ${BUILDTYPE})
 
   ${YELLOW}--jobs${NC}                            \t set the number of recipes to execute at once (-j/--jobs flag in make)
 
