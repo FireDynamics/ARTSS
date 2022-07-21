@@ -930,7 +930,9 @@ bool Obstacle::line_crosses(const Coordinate<size_t> &start, const Coordinate<si
     // m_logger->error("i:{} j:{} k:{}", i0, j0, k0);
     // m_logger->warn("i:{} j:{} k:{}", i, j, k);
     bool blocked;
-    const Coordinate<size_t> delta = diff(start, end);
+    const Coordinate<int> delta(static_cast<int>(end[CoordinateAxis::X]) - start[CoordinateAxis::X],
+                                static_cast<int>(end[CoordinateAxis::Y]) - start[CoordinateAxis::Y],
+                                static_cast<int>(end[CoordinateAxis::Z]) - start[CoordinateAxis::Z]);
     // m_logger->warn("i:{} j:{} k:{}", di, dj, dk);
     const auto point_i1 = m_start[CoordinateAxis::X];
     const auto point_i2 = m_end[CoordinateAxis::X];
@@ -938,14 +940,14 @@ bool Obstacle::line_crosses(const Coordinate<size_t> &start, const Coordinate<si
     const auto point_j2 = m_end[CoordinateAxis::Y];
     const auto point_k1 = m_start[CoordinateAxis::Z];
     const auto point_k2 = m_end[CoordinateAxis::Z];
-    real indeces[6] = {static_cast<real>(point_i1), static_cast<real>(point_i2),
+    real indices[6] = {static_cast<real>(point_i1), static_cast<real>(point_i2),
                        static_cast<real>(point_j1), static_cast<real>(point_j2),
                        static_cast<real>(point_k1), static_cast<real>(point_k2)};
 
     if (is_obstacle_cell(end))
         return true;
 
-    for (int surface_id=0; surface_id < 6; ++surface_id) {
+    for (int surface_id = 0; surface_id < 6; ++surface_id) {
         // m_logger->debug("surface_id: {}", surface_id);
         auto s = surface_points[surface_id];
         auto p1 = cuboid_points[s[0]];
@@ -959,15 +961,15 @@ bool Obstacle::line_crosses(const Coordinate<size_t> &start, const Coordinate<si
         //        indeces[p3[0]], indeces[p3[1]], indeces[p3[2]]);
 
         // surface vector 1
-        auto svi1 = indeces[p2[0]] - indeces[p1[0]];  // saving dx
-        auto svj1 = indeces[p2[1]] - indeces[p1[1]];
-        auto svk1 = indeces[p2[2]] - indeces[p1[2]];
+        auto svi1 = indices[p2[0]] - indices[p1[0]];  // saving dx
+        auto svj1 = indices[p2[1]] - indices[p1[1]];
+        auto svk1 = indices[p2[2]] - indices[p1[2]];
         // m_logger->debug("surface_vector1: ({},{},{})", svi1, svj1, svk1);
 
         // surface vector 2
-        auto svi2 = indeces[p3[0]] - indeces[p1[0]];
-        auto svj2 = indeces[p3[1]] - indeces[p1[1]];
-        auto svk2 = indeces[p3[2]] - indeces[p1[2]];
+        auto svi2 = indices[p3[0]] - indices[p1[0]];
+        auto svj2 = indices[p3[1]] - indices[p1[1]];
+        auto svk2 = indices[p3[2]] - indices[p1[2]];
         // m_logger->debug("surface_vector1: ({},{},{})", svi2, svj2, svk2);
 
         // p1 + l*sv1 + m*sv2 = n*d + c0 <=>
@@ -989,9 +991,9 @@ bool Obstacle::line_crosses(const Coordinate<size_t> &start, const Coordinate<si
         }
 
         // rhs of les (c - p1)
-        auto ddi = indeces[p1[0]] - static_cast<real>(start[CoordinateAxis::X]);
-        auto ddj = indeces[p1[1]] - static_cast<real>(start[CoordinateAxis::Y]);
-        auto ddk = indeces[p1[2]] - static_cast<real>(start[CoordinateAxis::Z]);
+        auto ddi = indices[p1[0]] - static_cast<real>(start[CoordinateAxis::X]);
+        auto ddj = indices[p1[1]] - static_cast<real>(start[CoordinateAxis::Y]);
+        auto ddk = indices[p1[2]] - static_cast<real>(start[CoordinateAxis::Z]);
         // m_logger->debug("rhs: ({},{},{})", ddi, ddj, ddk);
 
         auto det_Ax = det3(ddi, -svi1, -svi2,

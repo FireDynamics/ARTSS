@@ -5,4 +5,5 @@ target_sources(artss_gtest
     ${CMAKE_CURRENT_LIST_DIR}/Multigrid.cpp
     ${CMAKE_CURRENT_LIST_DIR}/PatchObject.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Coordinate.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Obstacle.cpp
     )
