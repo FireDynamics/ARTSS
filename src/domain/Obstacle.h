@@ -61,6 +61,7 @@ class Obstacle {
     bool has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1, size_t k2) const;
 
     bool static remove_circular_constraints(Obstacle &o1, Obstacle &o2);
+    bool line_crosses(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const;
 private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;

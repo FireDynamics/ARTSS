@@ -20,6 +20,7 @@ enum CoordinateAxis : int {
     Y = 1,
     Z = 2
 };
+inline static const std::vector<CoordinateAxis> all_coordinate_axes = {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z};
 
 inline static const std::vector<std::string> patch_names = {"left", "right", "bottom", "top", "front", "back"};
 constexpr size_t number_of_patches = 6;

@@ -16,8 +16,22 @@ TEST(CoordinateTest, constructorVal) {
 }
 
 TEST(CoordinateTest, constructorVal2) {
-    Coordinate<size_t> coord(1,2,3);
+    Coordinate<size_t> coord(1, 2, 3);
     for (size_t i = 0; i < number_of_axes; i++) {
-        EXPECT_EQ(coord[i], i+1);
+        EXPECT_EQ(coord[i], i + 1);
     }
+}
+
+TEST(CoordinateTest, operatorMinus) {
+    Coordinate<real> coord1(0, 0, 0);
+    Coordinate<real> coord2(1, 2, 1);
+
+    EXPECT_EQ(fdiff(coord2, coord1), coord2);
+}
+
+TEST(CoordinateTest, operatorMinus2) {
+    Coordinate<size_t> coord1(0, 0, 0);
+    Coordinate<size_t> coord2(1, 2, 1);
+
+    EXPECT_EQ(diff(coord1, coord2), coord2);
 }

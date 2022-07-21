@@ -24,12 +24,18 @@ namespace Utility {
 const static std::string class_name = "Utility";
 const static std::string global_logger = "ARTSS";
 
-    // do not use only for debug purpose
-std::tuple<size_t, size_t, size_t> get_coordinates(size_t index, size_t Nx, size_t Ny) {
-    size_t k = getCoordinateK(index, Nx, Ny);
-    size_t j = getCoordinateJ(index, Nx, Ny, k);
-    size_t i = getCoordinateI(index, Nx, Ny, j, k);
+// do not use in parallel regions
+Coordinate<size_t> get_coordinates(size_t index, const Coordinate<size_t> &number_of_cells) {
+    size_t k = getCoordinateK(index, number_of_cells[CoordinateAxis::X], number_of_cells[CoordinateAxis::Y]);
+    size_t j = getCoordinateJ(index, number_of_cells[CoordinateAxis::X], number_of_cells[CoordinateAxis::Y], k);
+    size_t i = getCoordinateI(index, number_of_cells[CoordinateAxis::X], number_of_cells[CoordinateAxis::Y], j, k);
     return {i, j, k};
+}
+
+Coordinate<real> get_physical_coords_midpoint(const Coordinate<real> &physical_coords, const Coordinate<size_t> &index, const Coordinate<real> &spacing) {
+    return {xi(index[CoordinateAxis::X], physical_coords[CoordinateAxis::X], spacing[CoordinateAxis::X]),
+            yj(index[CoordinateAxis::Y], physical_coords[CoordinateAxis::Y], spacing[CoordinateAxis::Y]),
+            zk(index[CoordinateAxis::Z], physical_coords[CoordinateAxis::Z], spacing[CoordinateAxis::Z])};
 }
 
 //======================================== get index ===============================================
@@ -42,6 +48,20 @@ std::tuple<size_t, size_t, size_t> get_coordinates(size_t index, size_t Nx, size
 // *************************************************************************************************
 size_t get_index(real physical_coordinate, real spacing, real start_coordinate) {
     return std::round((-start_coordinate + physical_coordinate) / spacing) + 1;
+}
+
+Coordinate<size_t> get_index(const Coordinate<real> &physical_coordinates) {
+    auto domain_data = DomainData::getInstance();
+    Coordinate spacing = domain_data->get_spacing();
+    Coordinate start_coordinates = domain_data->get_start_coord_PD();
+    Coordinate<size_t> result;
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
+        result[axis] = get_index(physical_coordinates[axis], spacing[axis], start_coordinates[axis]);
+    }
+    for (size_t axis: all_coordinate_axes) {
+        result[axis] = get_index(physical_coordinates[axis], spacing[axis], start_coordinates[axis]);
+    }
+    return result;
 }
 
 std::string to_upper(std::string string) {

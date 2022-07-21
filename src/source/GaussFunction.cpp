@@ -53,47 +53,37 @@ void GaussFunction::update_source(Field &out, real t_cur) {
 // ***************************************************************************************
 void GaussFunction::create_spatial_values() {
     auto domain_data = DomainData::getInstance();
-    // local variables and parameters for GPU
-    size_t level = m_field_spatial_values.get_level();
+    Coordinate<size_t> number_of_cells = domain_data->get_number_of_cells();
+    Coordinate<real> start_coord_PD = domain_data->get_start_coord_PD();
+    Coordinate<real> spacing = domain_data->get_spacing();
 
-    size_t Nx = domain_data->get_Nx(level);
-    size_t Ny = domain_data->get_Ny(level);
-
-    real X1 = domain_data->get_X1();
-    real Y1 = domain_data->get_Y1();
-    real Z1 = domain_data->get_Z1();
-
-    real dx = domain_data->get_dx(level);
-    real dy = domain_data->get_dy(level);
-    real dz = domain_data->get_dz(level);
-
-    real sigma_x_2 = 2 * m_settings.dimension[CoordinateAxis::X] * m_settings.dimension[CoordinateAxis::X];
-    real r_sigma_x_2 = 1. / sigma_x_2;
-    real sigma_y_2 = 2 * m_settings.dimension[CoordinateAxis::Y] * m_settings.dimension[CoordinateAxis::Y];
-    real r_sigma_y_2 = 1. / sigma_y_2;
-    real sigma_z_2 = 2 * m_settings.dimension[CoordinateAxis::Z] * m_settings.dimension[CoordinateAxis::Z];
-    real r_sigma_z_2 = 1. / sigma_z_2;
+    Coordinate<real> r_sigma = m_settings.dimension;
+    r_sigma *= m_settings.dimension;
+    r_sigma *= 2;
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
+        r_sigma[axis] = 1. / r_sigma[axis];
+    }
 
     // set Gaussian to cells
     auto domain_controller = DomainController::getInstance();
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
-
     auto size_domain_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     real HRRrV;
 
+    Coordinate<size_t> start_coordinates = Utility::get_index(m_settings.position);
+
     real V = 0.;
     for (size_t l = 0; l < size_domain_list; ++l) {
         const size_t idx = domain_inner_list[l];
-        size_t k = getCoordinateK(idx, Nx, Ny);
-        size_t j = getCoordinateJ(idx, Nx, Ny, k);
-        size_t i = getCoordinateI(idx, Nx, Ny, j, k);
+        auto index_components = Utility::get_coordinates(idx, number_of_cells);
+        auto delta = diff(start_coordinates, index_components);
 
-        auto x_i = xi(i, X1, dx) - m_settings.position[CoordinateAxis::X];
-        auto y_j = yj(j, Y1, dy) - m_settings.position[CoordinateAxis::Y];
-        auto z_k = zk(k, Z1, dz) - m_settings.position[CoordinateAxis::Z];
-        real expr = std::exp(-(r_sigma_x_2 * (x_i * x_i) + r_sigma_y_2 * (y_j * y_j) + r_sigma_z_2 * (z_k * z_k)));
-        V += expr * dx * dy * dz;
+        auto midpoints = Utility::get_physical_coords_midpoint(start_coord_PD, index_components, spacing);
+        midpoints *= midpoints;
+        midpoints *= r_sigma;
+        real expr = std::exp(-(midpoints[CoordinateAxis::X] + midpoints[CoordinateAxis::Y] + midpoints[CoordinateAxis::Z]));
+        V += expr * spacing[CoordinateAxis::X] * spacing[CoordinateAxis::Y] * spacing[CoordinateAxis::Z];
     }
 
     HRRrV = m_settings.heat_release_rate / V;       // in case of concentration Ys*HRR
@@ -101,14 +91,10 @@ void GaussFunction::create_spatial_values() {
 
     for (size_t l = 0; l < size_domain_list; ++l) {
         const size_t idx = domain_inner_list[l];
-        size_t k = getCoordinateK(idx, Nx, Ny);
-        size_t j = getCoordinateJ(idx, Nx, Ny, k);
-        size_t i = getCoordinateI(idx, Nx, Ny, j, k);
+        Coordinate<size_t> index_components = Utility::get_coordinates(idx, number_of_cells);
 
-        auto x_i = (xi(i, X1, dx) - m_settings.position[CoordinateAxis::X]);
-        auto y_j = (yj(j, Y1, dy) - m_settings.position[CoordinateAxis::Y]);
-        auto z_k = (zk(k, Z1, dz) - m_settings.position[CoordinateAxis::Z]);
-        real expr = std::exp(-(r_sigma_x_2 * x_i * x_i + r_sigma_y_2 * y_j * y_j + r_sigma_z_2 * z_k * z_k));
+        auto midpoints = Utility::get_physical_coords_midpoint(start_coord_PD, index_components, spacing);
+        real expr = std::exp(-(midpoints[CoordinateAxis::X] + midpoints[CoordinateAxis::Y] + midpoints[CoordinateAxis::Z]));
         m_field_spatial_values[idx] = HRRrV * rcp * expr;
     }
     m_field_spatial_values.update_dev();
