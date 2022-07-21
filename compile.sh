@@ -1,4 +1,4 @@
-eckout#!/usr/bin/env bash
+#!/usr/bin/env bash
 COMPILE=""
 GPU=0
 JURECA=0
