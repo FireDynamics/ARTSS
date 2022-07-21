@@ -54,6 +54,8 @@ class Multigrid {
 
     std::vector<FieldType> get_used_fields();
 
+    bool is_blocked_by_obstacle(Coordinate<size_t> &start, Coordinate<size_t> &end);
+
 private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;

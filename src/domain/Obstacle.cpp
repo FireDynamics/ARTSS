@@ -942,7 +942,7 @@ bool Obstacle::line_crosses(const Coordinate<size_t> &start, const Coordinate<si
                        static_cast<real>(point_j1), static_cast<real>(point_j2),
                        static_cast<real>(point_k1), static_cast<real>(point_k2)};
 
-    if (is_obstacle_cell( end))
+    if (is_obstacle_cell(end))
         return true;
 
     for (int surface_id=0; surface_id < 6; ++surface_id) {

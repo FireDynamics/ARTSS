@@ -82,6 +82,11 @@ void GaussFunction::create_spatial_values() {
         auto midpoints = Utility::get_physical_coords_midpoint(start_coord_PD, index_components, spacing);
         midpoints *= midpoints;
         midpoints *= r_sigma;
+
+        if (DomainController::getInstance()->is_blocked_by_obstacle(start_coordinates, index_components)){
+            continue;
+        }
+
         real expr = std::exp(-(midpoints[CoordinateAxis::X] + midpoints[CoordinateAxis::Y] + midpoints[CoordinateAxis::Z]));
         V += expr * spacing[CoordinateAxis::X] * spacing[CoordinateAxis::Y] * spacing[CoordinateAxis::Z];
     }
