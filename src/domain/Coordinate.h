@@ -8,6 +8,7 @@
 #define ARTSS_DOMAIN_COORDINATE_H_
 
 
+#include <cmath>
 #include <cstdlib>
 #include <algorithm>
 #include <string>
