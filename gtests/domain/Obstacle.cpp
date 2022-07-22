@@ -42,6 +42,55 @@ TEST_F(ObstacleTest, testSimple) {
     }
 }
 
+TEST_F(ObstacleTest, testRoom) {
+    std::vector<Obstacle> room;
+    room.reserve(5);
+
+    Coordinate<size_t> obst_wall_ceiling_start(22, 41, 22);
+    Coordinate<size_t> obst_wall_ceiling_end(42, 42, 42);
+    room.emplace_back(obst_wall_ceiling_start, obst_wall_ceiling_end, 0, "ceiling");
+
+    Coordinate<size_t> obst_wall_left_start(22, 0, 22);
+    Coordinate<size_t> obst_wall_left_end(25, 40, 42);
+    room.emplace_back(obst_wall_left_start, obst_wall_left_end, 0, "left");
+
+    Coordinate<size_t> obst_wall_right_start(39, 0, 22);
+    Coordinate<size_t> obst_wall_right_end(42, 40, 42);
+    room.emplace_back(obst_wall_right_start, obst_wall_right_end, 0, "right");
+
+    Coordinate<size_t> obst_wall_front_start(26, 0, 22);
+    Coordinate<size_t> obst_wall_front_end(38, 40, 25);
+    room.emplace_back(obst_wall_front_start, obst_wall_front_end, 0, "front");
+
+    Coordinate<size_t> obst_wall_back_start(26, 0, 39);
+    Coordinate<size_t> obst_wall_back_end(38, 40, 42);
+    room.emplace_back(obst_wall_back_start, obst_wall_back_end, 0, "back");
+
+    // heat source
+    Coordinate<size_t> start(32, 1, 32);
+    auto no_inner_cells = DomainData::getInstance()->get_number_of_inner_cells();
+    for (size_t i = 1; i <= no_inner_cells[CoordinateAxis::X]; i++) {
+        for (size_t j = 1; j <= no_inner_cells[CoordinateAxis::Y]; j++) {
+            for (size_t k = 1; k <= no_inner_cells[CoordinateAxis::Z]; k++) {
+                Coordinate<size_t> end(i, j, k);
+                bool ret = false;
+                for (Obstacle &obst: room) {
+                    bool tmp = obst.line_crosses(start, end);
+                    ret = ret || tmp;
+                    if (i > 25 && i < 39 && j < 40 && k > 25 && k < 39) {
+                        EXPECT_FALSE(tmp) << "Failed for obst "<< obst.get_name() << " at (" << i << "|" << j << "|" << k << ")";
+                    }
+                }
+                if (i > 25 && i < 39 && j < 40 && k > 25 && k < 39) {
+                    EXPECT_FALSE(ret) << "Failed for (" << i << "|" << j << "|" << k << ")";
+                } else {
+                    EXPECT_TRUE(ret) << "Failed for (" << i << "|" << j << "|" << k << ")";
+                }
+            }
+        }
+    }
+}
+
 TEST_F(ObstacleTest, testSingleObstCorner0) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
