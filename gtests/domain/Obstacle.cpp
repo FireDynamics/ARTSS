@@ -2,7 +2,6 @@
 
 
 #include "../../src/domain/DomainData.h"
-#include "../../src/utility/Utility.h"
 #include "../../src/domain/Obstacle.h"
 
 class ObstacleTest : public testing::Test {
@@ -24,7 +23,26 @@ class ObstacleTest : public testing::Test {
     }
 };
 
-TEST_F(ObstacleTest, test_single_obst_corner_0) {
+TEST_F(ObstacleTest, testSimple) {
+    Coordinate<size_t> obst_start(25, 16, 25);
+    Coordinate<size_t> obst_end(39, 18, 39);
+    Obstacle obst(obst_start, obst_end, 0, "cube");
+
+    Coordinate<size_t> start(32, 1, 32);
+
+    for (size_t j = 1; j < 16; j++) {
+        Coordinate<size_t> end(32, j, 32);
+        bool ret = obst.line_crosses(start, end);
+        EXPECT_FALSE(ret) << "Failed at y = " << j;
+    }
+    for (size_t j = 16; j <= 64; j++) {
+        Coordinate<size_t> end(32, j, 32);
+        bool ret = obst.line_crosses(start, end);
+        EXPECT_TRUE(ret) << "Failed at y = " << j;
+    }
+}
+
+TEST_F(ObstacleTest, testSingleObstCorner0) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -35,7 +53,7 @@ TEST_F(ObstacleTest, test_single_obst_corner_0) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_corner_1) {
+TEST_F(ObstacleTest, testSingleObstCorner1) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -46,7 +64,7 @@ TEST_F(ObstacleTest, test_single_obst_corner_1) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_corner_2) {
+TEST_F(ObstacleTest, testSingleObstCorner2) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -57,7 +75,7 @@ TEST_F(ObstacleTest, test_single_obst_corner_2) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_corner_3) {
+TEST_F(ObstacleTest, testSingleObstCorner3) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -68,7 +86,7 @@ TEST_F(ObstacleTest, test_single_obst_corner_3) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_corner_4) {
+TEST_F(ObstacleTest, testSingleObstCorner4) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -79,7 +97,7 @@ TEST_F(ObstacleTest, test_single_obst_corner_4) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_corner_5) {
+TEST_F(ObstacleTest, testSingleObstCorner5) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -90,7 +108,7 @@ TEST_F(ObstacleTest, test_single_obst_corner_5) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_corner_6) {
+TEST_F(ObstacleTest, testSingleObstCorner6) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -101,7 +119,7 @@ TEST_F(ObstacleTest, test_single_obst_corner_6) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_corner_7) {
+TEST_F(ObstacleTest, testSingleObstCorner7) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -112,7 +130,7 @@ TEST_F(ObstacleTest, test_single_obst_corner_7) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obstsurf__0) {
+TEST_F(ObstacleTest, testSingleObstSurf0) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -123,7 +141,7 @@ TEST_F(ObstacleTest, test_single_obstsurf__0) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_surf_1) {
+TEST_F(ObstacleTest, testSingleObstSurf1) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -134,7 +152,7 @@ TEST_F(ObstacleTest, test_single_obst_surf_1) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_surf_2) {
+TEST_F(ObstacleTest, testSingleObstSurf2) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -145,7 +163,7 @@ TEST_F(ObstacleTest, test_single_obst_surf_2) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_surf_3) {
+TEST_F(ObstacleTest, testSingleObstSurf3) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -156,7 +174,7 @@ TEST_F(ObstacleTest, test_single_obst_surf_3) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_surf_4) {
+TEST_F(ObstacleTest, testSingleObstSurf4) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -167,7 +185,7 @@ TEST_F(ObstacleTest, test_single_obst_surf_4) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_surf_5) {
+TEST_F(ObstacleTest, testSingleObstSurf5) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -178,7 +196,7 @@ TEST_F(ObstacleTest, test_single_obst_surf_5) {
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(ObstacleTest, test_single_obst_field) {
+TEST_F(ObstacleTest, testSingleObstField) {
     Coordinate<size_t> obst_start(16, 16, 16);
     Coordinate<size_t> obst_end(48, 48, 48);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -189,7 +207,7 @@ TEST_F(ObstacleTest, test_single_obst_field) {
 // Obstacle::update_source(&out, 0.0);
 }
 
-TEST_F(ObstacleTest, test_single_obst_field_2d_1) {
+TEST_F(ObstacleTest, testSingleObstField2d1) {
 // |ooooooo|
 // |ooooooo|
 // |ooooooo|
@@ -271,7 +289,7 @@ TEST_F(ObstacleTest, test_single_obst_field_2d_1) {
     }
 }
 
-TEST_F(ObstacleTest, test_single_obst_field_2d_2) {
+TEST_F(ObstacleTest, testSingleObstField2d2) {
     Coordinate<size_t> obst_start(33, 33, 0);
     Coordinate<size_t> obst_end(34, 34, 64);
     Obstacle obst(obst_start, obst_end, 0, "cube");
@@ -326,7 +344,7 @@ TEST_F(ObstacleTest, test_single_obst_field_2d_2) {
     }
 }
 
-TEST_F(ObstacleTest, stress_test_single_obst_field1) {
+TEST_F(ObstacleTest, stressTestSingleObstField1) {
     DomainData::reset();
     Settings::domain_parameters domain_parameters{ };
     domain_parameters.enable_computational_domain = false;
