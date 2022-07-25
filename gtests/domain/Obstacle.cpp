@@ -77,11 +77,11 @@ TEST_F(ObstacleTest, testRoom) {
                 for (Obstacle &obst: room) {
                     bool tmp = obst.line_crosses(start, end);
                     ret = ret || tmp;
-                    if (i > 25 && i < 39 && j < 40 && k > 25 && k < 39) {
+                    if (i > 25 && i < 39 && j < 41 && k > 25 && k < 39) {
                         EXPECT_FALSE(tmp) << "Failed for obst "<< obst.get_name() << " at (" << i << "|" << j << "|" << k << ")";
                     }
                 }
-                if (i > 25 && i < 39 && j < 40 && k > 25 && k < 39) {
+                if (i > 25 && i < 39 && j < 41 && k > 25 && k < 39) {
                     EXPECT_FALSE(ret) << "Failed for (" << i << "|" << j << "|" << k << ")";
                 } else {
                     EXPECT_TRUE(ret) << "Failed for (" << i << "|" << j << "|" << k << ")";
