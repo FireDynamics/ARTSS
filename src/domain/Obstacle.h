@@ -39,7 +39,7 @@ class Obstacle {
     const std::vector<std::vector<size_t>> & get_boundary_list() const { return m_boundary; }
     PatchObject *get_size_boundary_list() { return &m_size_boundary; }
 
-    bool is_obstacle_cell(const Coordinate<size_t> &coords) const;
+    template<typename T> bool is_obstacle_cell(const Coordinate<T> &coords) const;
 
     void print() const;
 
@@ -62,6 +62,7 @@ class Obstacle {
 
     bool static remove_circular_constraints(Obstacle &o1, Obstacle &o2);
     bool line_crosses(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const;
+    bool line_crosses2(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const;
 private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;

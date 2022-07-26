@@ -87,6 +87,10 @@ public:
         return *this;
     }
 
+    real sum() {
+        return x + y + z;
+    }
+
     Coordinate &operator*=(const numeral n) {
         x *= n;
         y *= n;
@@ -126,7 +130,15 @@ private:
     numeral z = 0;
 };
 
-template<typename T, typename S> Coordinate<real> div(const Coordinate<T> &lhs, const Coordinate<S> &rhs) {
+template<typename T, typename S>
+real dot(const Coordinate<T> &lhs, const Coordinate<S> &rhs) {
+    return lhs[CoordinateAxis::X] * rhs[CoordinateAxis::X] +
+           lhs[CoordinateAxis::Y] * rhs[CoordinateAxis::Y] +
+           lhs[CoordinateAxis::Z] * rhs[CoordinateAxis::Z];
+}
+
+template<typename T, typename S>
+Coordinate<real> div(const Coordinate<T> &lhs, const Coordinate<S> &rhs) {
     return {lhs[CoordinateAxis::X] / rhs[CoordinateAxis::X],
             lhs[CoordinateAxis::Y] / rhs[CoordinateAxis::Y],
             lhs[CoordinateAxis::Z] / rhs[CoordinateAxis::Z]};

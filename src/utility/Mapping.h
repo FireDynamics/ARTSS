@@ -63,6 +63,7 @@ namespace Mapping {
     Patch match_patch(const std::string &string);
     Patch to_patch(CoordinateAxis axis, bool start);
     //Patch to_patch(size_t axis, bool start) { return to_patch(CoordinateAxis(axis), start); }
+    std::vector<Patch> get_patches(CoordinateAxis axis);
 
     std::string get_field_type_name(FieldType f);
     //std::string get_field_type_name(size_t f) { return get_field_type_name(FieldType(f)); };

@@ -21,8 +21,10 @@ Obstacle::Obstacle(const Coordinate<real> &coords_start,
 #endif
     auto domain_data = DomainData::getInstance();
     for (CoordinateAxis axis: {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z}) {
-        m_start[axis] = get_matching_index(coords_start[axis], domain_data->get_spacing(axis), domain_data->get_start_coord_PD(axis)) + 1;  // plus 1 for ghost cell
-        m_end[axis] = get_matching_index(coords_end[axis], domain_data->get_spacing(axis), domain_data->get_start_coord_PD(axis));
+        m_start[axis] = get_matching_index(coords_start[axis], domain_data->get_spacing(axis),
+                                           domain_data->get_start_coord_PD(axis)) + 1;  // plus 1 for ghost cell
+        m_end[axis] = get_matching_index(coords_end[axis], domain_data->get_spacing(axis),
+                                         domain_data->get_start_coord_PD(axis));
     }
     init();
 }
@@ -110,14 +112,16 @@ void Obstacle::create_obstacle(size_t Nx, size_t Ny) {
             }
         }
 #ifndef BENCHMARKING
-        m_logger->debug("added {} front patch cells to obstacle, array size: {}", counter, m_size_boundary[Patch::FRONT]);
+        m_logger->debug("added {} front patch cells to obstacle, array size: {}", counter,
+                        m_size_boundary[Patch::FRONT]);
 #endif
     }
     if (m_size_boundary[BACK] > 0) {
         counter = 0;
         for (size_t j = 0; j < m_strides[CoordinateAxis::Y]; ++j) {
             for (size_t i = 0; i < m_strides[CoordinateAxis::X]; ++i) {
-                size_t idx_back = IX(i, j, m_strides[CoordinateAxis::Z] - 1, m_strides[CoordinateAxis::X], m_strides[CoordinateAxis::Y]);
+                size_t idx_back = IX(i, j, m_strides[CoordinateAxis::Z] - 1, m_strides[CoordinateAxis::X],
+                                     m_strides[CoordinateAxis::Y]);
                 m_boundary[BACK][counter++] = m_obstacle_list[idx_back];
             }
         }
@@ -138,14 +142,16 @@ void Obstacle::create_obstacle(size_t Nx, size_t Ny) {
             }
         }
 #ifndef BENCHMARKING
-        m_logger->debug("added {} bottom patch cells to obstacle, array size: {}", counter, m_size_boundary[Patch::BOTTOM]);
+        m_logger->debug("added {} bottom patch cells to obstacle, array size: {}", counter,
+                        m_size_boundary[Patch::BOTTOM]);
 #endif
     }
     if (m_size_boundary[TOP] > 0) {
         counter = 0;
         for (size_t k = 0; k < m_strides[CoordinateAxis::Z]; ++k) {
             for (size_t i = 0; i < m_strides[CoordinateAxis::X]; ++i) {
-                size_t idx_top = IX(i, m_strides[CoordinateAxis::Y] - 1, k, m_strides[CoordinateAxis::X], m_strides[CoordinateAxis::Y]);
+                size_t idx_top = IX(i, m_strides[CoordinateAxis::Y] - 1, k, m_strides[CoordinateAxis::X],
+                                    m_strides[CoordinateAxis::Y]);
                 m_boundary[TOP][counter++] = m_obstacle_list[idx_top];
             }
         }
@@ -172,12 +178,14 @@ void Obstacle::create_obstacle(size_t Nx, size_t Ny) {
         counter = 0;
         for (size_t k = 0; k < m_strides[CoordinateAxis::Z]; ++k) {
             for (size_t j = 0; j < m_strides[CoordinateAxis::Y]; ++j) {
-                size_t idx_right = IX(m_strides[CoordinateAxis::X] - 1, j, k, m_strides[CoordinateAxis::X], m_strides[CoordinateAxis::Y]);
+                size_t idx_right = IX(m_strides[CoordinateAxis::X] - 1, j, k, m_strides[CoordinateAxis::X],
+                                      m_strides[CoordinateAxis::Y]);
                 m_boundary[RIGHT][counter++] = m_obstacle_list[idx_right];
             }
         }
 #ifndef BENCHMARKING
-        m_logger->debug("added {} right patch cells to obstacle, array size: {}", counter, m_size_boundary[Patch::RIGHT]);
+        m_logger->debug("added {} right patch cells to obstacle, array size: {}", counter,
+                        m_size_boundary[Patch::RIGHT]);
 #endif
     }
 }
@@ -189,13 +197,15 @@ void Obstacle::create_obstacle(size_t Nx, size_t Ny) {
 void Obstacle::print() const {
 #ifndef BENCHMARKING
     m_logger->info("-- Obstacle {}", m_name);
-    m_logger->info("\t strides (x y z): {} {} {}", m_strides[CoordinateAxis::X], m_strides[CoordinateAxis::Y], m_strides[CoordinateAxis::Z]);
+    m_logger->info("\t strides (x y z): {} {} {}", m_strides[CoordinateAxis::X], m_strides[CoordinateAxis::Y],
+                   m_strides[CoordinateAxis::Z]);
     m_logger->info("\t size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}",
                    m_size_boundary[FRONT], m_size_boundary[BACK],
                    m_size_boundary[BOTTOM], m_size_boundary[TOP],
                    m_size_boundary[LEFT], m_size_boundary[RIGHT]);
     m_logger->info("\t size of Obstacle: {}", m_size_obstacle_list);
-    m_logger->info("\t coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_start[CoordinateAxis::X], m_end[CoordinateAxis::X], m_start[CoordinateAxis::Y], m_end[CoordinateAxis::Y],
+    m_logger->info("\t coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_start[CoordinateAxis::X], m_end[CoordinateAxis::X],
+                   m_start[CoordinateAxis::Y], m_end[CoordinateAxis::Y],
                    m_start[CoordinateAxis::Z], m_end[CoordinateAxis::Z]);
 #endif
 }
@@ -213,13 +223,15 @@ void Obstacle::print_details() {
 
     m_logger->debug("############### OBSTACLE {} ###############", m_name);
     m_logger->debug("level: {}", m_level);
-    m_logger->debug("strides (x y z): {} {} {}", m_strides[CoordinateAxis::X], m_strides[CoordinateAxis::Y], m_strides[CoordinateAxis::Z]);
+    m_logger->debug("strides (x y z): {} {} {}", m_strides[CoordinateAxis::X], m_strides[CoordinateAxis::Y],
+                    m_strides[CoordinateAxis::Z]);
     m_logger->debug("size of slices  (Front|Back Bottom|Top Left|Right): {}|{} {}|{} {}|{}",
                     m_size_boundary[FRONT], m_size_boundary[BACK],
                     m_size_boundary[BOTTOM], m_size_boundary[TOP],
                     m_size_boundary[LEFT], m_size_boundary[RIGHT]);
     m_logger->debug("size of Obstacle: {}", m_size_obstacle_list);
-    m_logger->debug("coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_start[CoordinateAxis::X], m_end[CoordinateAxis::X], m_start[CoordinateAxis::Y], m_end[CoordinateAxis::Y],
+    m_logger->debug("coords (x y z): ({}|{}) ({}|{}) ({}|{})", m_start[CoordinateAxis::X], m_end[CoordinateAxis::X],
+                    m_start[CoordinateAxis::Y], m_end[CoordinateAxis::Y],
                     m_start[CoordinateAxis::Z], m_end[CoordinateAxis::Z]);
 
     std::vector<size_t> coords;
@@ -364,7 +376,8 @@ void Obstacle::control() {
         }
     }
     if (m_size_boundary[BACK] > 0) {
-        size_t back_start = IX(m_start[CoordinateAxis::X], m_start[CoordinateAxis::Y], m_end[CoordinateAxis::Z], Nx, Ny);
+        size_t back_start = IX(m_start[CoordinateAxis::X], m_start[CoordinateAxis::Y], m_end[CoordinateAxis::Z], Nx,
+                               Ny);
         if (back_start != m_boundary[BACK][0] ||
             end_index != m_boundary[BACK][m_size_boundary[BACK] - 1]) {
             message += "first or last index of obstacle back list not correct ("
@@ -404,7 +417,8 @@ void Obstacle::control() {
         }
     }
     if (m_size_boundary[RIGHT] > 0) {
-        size_t right_start = IX(m_end[CoordinateAxis::X], m_start[CoordinateAxis::Y], m_start[CoordinateAxis::Z], Nx, Ny);
+        size_t right_start = IX(m_end[CoordinateAxis::X], m_start[CoordinateAxis::Y], m_start[CoordinateAxis::Z], Nx,
+                                Ny);
         if (right_start != m_boundary[RIGHT][0] ||
             end_index != m_boundary[RIGHT][m_size_boundary[RIGHT] - 1]) {
             message += "first or last index of obstacle right list not correct ("
@@ -431,7 +445,8 @@ void Obstacle::control() {
 /// \param  k z-coordinate
 /// \return  bool true if yes false if no
 // *************************************************************************************************
-bool Obstacle::is_obstacle_cell(const Coordinate<size_t> &coords) const {
+template<typename T>
+bool Obstacle::is_obstacle_cell(const Coordinate<T> &coords) const {
     return m_start[CoordinateAxis::X] <= coords[CoordinateAxis::X]
            && coords[CoordinateAxis::X] <= m_end[CoordinateAxis::X]
            && m_start[CoordinateAxis::Y] <= coords[CoordinateAxis::Y]
@@ -641,9 +656,10 @@ bool Obstacle::circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis c
             auto o2_patch = Mapping::to_patch(coordinate_axis, false);
 #ifndef BENCHMARKING
             // for constraints in x-direction: front patch of o1 and back patch of o2
-            logger->debug("neighbouring obstacles ! obstacles are next to each other. Working on '{}' {} side and on '{}' {} side",
-                          o1.get_name(), Mapping::get_patch_name(o1_patch),
-                          o2.get_name(), Mapping::get_patch_name(o2_patch));
+            logger->debug(
+                    "neighbouring obstacles ! obstacles are next to each other. Working on '{}' {} side and on '{}' {} side",
+                    o1.get_name(), Mapping::get_patch_name(o1_patch),
+                    o2.get_name(), Mapping::get_patch_name(o2_patch));
 #endif
             overlap = true;
             // calculate coordinates of area which should be removed
@@ -775,7 +791,8 @@ bool Obstacle::circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis c
             }
 
             if (!o1_end) {
-                for (; o1_counter_old < (*o1.get_size_boundary_list())[o1_patch] && o1_current_axis_1 <= o1_remove_end[other_axes[1]]; o1_counter_old++) {
+                for (; o1_counter_old < (*o1.get_size_boundary_list())[o1_patch] &&
+                       o1_current_axis_1 <= o1_remove_end[other_axes[1]]; o1_counter_old++) {
                     o1_current_index = o1.get_boundary_list()[o1_patch][o1_counter_old];
                     if (o1_current_index != o1_removing_index) {
                         o1_new.push_back(o1_current_index);
@@ -795,7 +812,8 @@ bool Obstacle::circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis c
             }
 
             if (!o2_end) {
-                for (; o2_counter_old < (*o2.get_size_boundary_list())[o2_patch] && o2_current_axis_1 <= o2_remove_end[other_axes[1]]; o2_counter_old++) {
+                for (; o2_counter_old < (*o2.get_size_boundary_list())[o2_patch] &&
+                       o2_current_axis_1 <= o2_remove_end[other_axes[1]]; o2_counter_old++) {
                     o2_current_index = o2.get_boundary_list()[o2_patch][o2_counter_old];
                     if (o2_current_index != o2_removing_index) {
                         o2_new.push_back(o2_current_index);
@@ -820,7 +838,8 @@ bool Obstacle::circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis c
             }
             o1_new.resize(o1_new_size);
 
-            size_t o1_diff_target = (o1_remove_end[other_axes[0]] - o1_remove_start[other_axes[0]] + 1) * (o1_remove_end[other_axes[1]] - o1_remove_start[other_axes[1]] + 1);
+            size_t o1_diff_target = (o1_remove_end[other_axes[0]] - o1_remove_start[other_axes[0]] + 1) *
+                                    (o1_remove_end[other_axes[1]] - o1_remove_start[other_axes[1]] + 1);
             size_t o1_diff_actual = (*o1.get_size_boundary_list())[o1_patch] - o1_new_size;
 #ifndef BENCHMARKING
             logger->debug("neighbouring obstacles ! new size of obstacle '{}' {} patch: {} -> {} ({}|{})",
@@ -838,7 +857,8 @@ bool Obstacle::circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis c
             }
             o2_new.resize(o2_new_size);
 
-            size_t o2_diff_target = (o2_remove_end[other_axes[0]] - o2_remove_start[other_axes[0]] + 1) * (o2_remove_end[other_axes[1]] - o2_remove_start[other_axes[1]] + 1);
+            size_t o2_diff_target = (o2_remove_end[other_axes[0]] - o2_remove_start[other_axes[0]] + 1) *
+                                    (o2_remove_end[other_axes[1]] - o2_remove_start[other_axes[1]] + 1);
             size_t o2_diff_actual = (*o2.get_size_boundary_list())[o2_patch] - o2_new_size;
 #ifndef BENCHMARKING
             logger->debug("neighbouring obstacles ! new size of obstacle '{}' {} patch: {} -> {} ({}|{})",
@@ -862,9 +882,12 @@ bool Obstacle::circular_constraints(Obstacle &o1, Obstacle &o2, CoordinateAxis c
 /// \return true if cell is a corner cell, otherwise false
 // *************************************************************************************************
 bool Obstacle::is_corner_cell(const Coordinate<size_t> &coord) const {
-    bool on_x = (coord[CoordinateAxis::X] == m_start[CoordinateAxis::X] || coord[CoordinateAxis::X] == m_end[CoordinateAxis::X]);
-    bool on_y = (coord[CoordinateAxis::Y] == m_start[CoordinateAxis::Y] || coord[CoordinateAxis::Y] == m_end[CoordinateAxis::Y]);
-    bool on_z = (coord[CoordinateAxis::Z] == m_start[CoordinateAxis::Z] || coord[CoordinateAxis::Z] == m_end[CoordinateAxis::Z]);
+    bool on_x = (coord[CoordinateAxis::X] == m_start[CoordinateAxis::X] ||
+                 coord[CoordinateAxis::X] == m_end[CoordinateAxis::X]);
+    bool on_y = (coord[CoordinateAxis::Y] == m_start[CoordinateAxis::Y] ||
+                 coord[CoordinateAxis::Y] == m_end[CoordinateAxis::Y]);
+    bool on_z = (coord[CoordinateAxis::Z] == m_start[CoordinateAxis::Z] ||
+                 coord[CoordinateAxis::Z] == m_end[CoordinateAxis::Z]);
     return on_x && on_y && on_z;
 }
 
@@ -875,14 +898,19 @@ bool Obstacle::is_corner_cell(const Coordinate<size_t> &coord) const {
 /// \return true if cell is a edge cell, otherwise false
 // *************************************************************************************************
 bool Obstacle::is_edge_cell(const Coordinate<size_t> &coord) const {
-    bool on_x = (coord[CoordinateAxis::X] == m_start[CoordinateAxis::X] || coord[CoordinateAxis::X] == m_end[CoordinateAxis::X]);
-    bool on_y = (coord[CoordinateAxis::Y] == m_start[CoordinateAxis::Y] || coord[CoordinateAxis::Y] == m_end[CoordinateAxis::Y]);
-    bool on_z = (coord[CoordinateAxis::Z] == m_start[CoordinateAxis::Z] || coord[CoordinateAxis::Z] == m_end[CoordinateAxis::Z]);
+    bool on_x = (coord[CoordinateAxis::X] == m_start[CoordinateAxis::X] ||
+                 coord[CoordinateAxis::X] == m_end[CoordinateAxis::X]);
+    bool on_y = (coord[CoordinateAxis::Y] == m_start[CoordinateAxis::Y] ||
+                 coord[CoordinateAxis::Y] == m_end[CoordinateAxis::Y]);
+    bool on_z = (coord[CoordinateAxis::Z] == m_start[CoordinateAxis::Z] ||
+                 coord[CoordinateAxis::Z] == m_end[CoordinateAxis::Z]);
     return (on_x && on_y) || (on_y || on_z) || (on_x && on_z);
 }
 
 bool Obstacle::has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1, size_t k2) const {
-    return has_overlap(m_start[CoordinateAxis::X], m_end[CoordinateAxis::X], i1, i2) && has_overlap(m_start[CoordinateAxis::Y], m_end[CoordinateAxis::Y], j1, j2) && has_overlap(m_start[CoordinateAxis::Z], m_end[CoordinateAxis::Z], k1, k2);
+    return has_overlap(m_start[CoordinateAxis::X], m_end[CoordinateAxis::X], i1, i2) &&
+           has_overlap(m_start[CoordinateAxis::Y], m_end[CoordinateAxis::Y], j1, j2) &&
+           has_overlap(m_start[CoordinateAxis::Z], m_end[CoordinateAxis::Z], k1, k2);
 }
 
 real constexpr det3(real a1, real a2, real a3,
@@ -915,6 +943,73 @@ constexpr int surface_points[6][3] = {
         {4, 5, 7},
 };
 
+bool Obstacle::line_crosses(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const {
+    if (is_obstacle_cell(end)) {
+        return true;
+    }
+    Coordinate<real> tmp_start_line = {
+            static_cast<real>(start[CoordinateAxis::X]) + 0.5,
+            static_cast<real>(start[CoordinateAxis::Y]) + 0.5,
+            static_cast<real>(start[CoordinateAxis::Z]) + 0.5};
+    Coordinate<real> tmp_end_line = {
+            static_cast<real>(end[CoordinateAxis::X] ) + 0.5,
+            static_cast<real>(end[CoordinateAxis::Y] ) + 0.5,
+            static_cast<real>(end[CoordinateAxis::Z] ) + 0.5};
+    Coordinate<real> direction_vector = fdiff(tmp_start_line, tmp_end_line);
+    // line equation : (tmp_start_line) + a * (direction_vector)
+
+    Coordinate<real> tmp_start_area = {
+            static_cast<real>(m_start[CoordinateAxis::X]) + 0.5,
+            static_cast<real>(m_start[CoordinateAxis::Y]) + 0.5,
+            static_cast<real>(m_start[CoordinateAxis::Z]) + 0.5};
+    Coordinate<real> tmp_end_area = {
+            static_cast<real>(m_end[CoordinateAxis::X]) + 0.5,
+            static_cast<real>(m_end[CoordinateAxis::Y]) + 0.5,
+            static_cast<real>(m_end[CoordinateAxis::Z]) + 0.5};
+    for (CoordinateAxis coordinate_axis: {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z}) {
+        auto other_axes = new CoordinateAxis[2];
+        if (coordinate_axis == CoordinateAxis::X) {
+            other_axes[0] = CoordinateAxis::Y;
+            other_axes[1] = CoordinateAxis::Z;
+        } else if (coordinate_axis == CoordinateAxis::Y) {
+            other_axes[0] = CoordinateAxis::X;
+            other_axes[1] = CoordinateAxis::Z;
+        } else if (coordinate_axis == CoordinateAxis::Z) {
+            other_axes[0] = CoordinateAxis::X;
+            other_axes[1] = CoordinateAxis::Y;
+        }
+        for (auto patch: Mapping::get_patches(CoordinateAxis(coordinate_axis))) {
+            // normal vector of area equation :
+            Coordinate<real> normal_vector = {0, 0, 0};
+            normal_vector[coordinate_axis] =
+                    (tmp_end_area[other_axes[0]] - tmp_start_area[other_axes[0]]) *
+                    (tmp_end_area[other_axes[1]] - tmp_start_area[other_axes[1]]);
+            real res_dot = dot(normal_vector, direction_vector);
+            if (fabs(res_dot) < eps) {
+                // area and line are parallel
+                Coordinate<real> check = normal_vector;
+                check *= tmp_start_line;
+                if (fabs(check.sum() - normal_vector[coordinate_axis] * tmp_start_area[coordinate_axis]) < eps) {
+                    // line is in area
+                    // return true;
+                }
+                // else area and line are truly parallel
+            } else {
+                // intersection
+                real lambda = (tmp_start_area[coordinate_axis] - tmp_start_line[coordinate_axis]) /
+                              direction_vector[coordinate_axis];
+                Coordinate<real> intersection = direction_vector;
+                intersection *= lambda;
+                intersection += tmp_start_line;
+                if (is_obstacle_cell(intersection)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 // ======================== Tests if line crosses obstacle ====================
 // ****************************************************************************
 /// \brief  Check if any cell  between two pins is inside the obstacle
@@ -926,7 +1021,7 @@ constexpr int surface_points[6][3] = {
 /// \param  k z-coordinate (end_point)
 /// \return  bool true if yes false if no
 // ****************************************************************************
-bool Obstacle::line_crosses(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const {
+bool Obstacle::line_crosses2(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const {
     // m_logger->error("i:{} j:{} k:{}", i0, j0, k0);
     // m_logger->warn("i:{} j:{} k:{}", i, j, k);
     bool blocked;
