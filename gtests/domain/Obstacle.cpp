@@ -23,35 +23,101 @@ class ObstacleTest : public testing::Test {
     }
 };
 
-TEST_F(ObstacleTest, lineAreaRelationParallel) {
-    Coordinate<size_t> obst_start(2, 0, 0);
+TEST_F(ObstacleTest, lineAreaRelationParallelX) {
+    Coordinate<size_t> obst_start(2, 1, 0);
     Coordinate<size_t> obst_end(5, 3, 3);
     Obstacle obst(obst_start, obst_end, 0, "cube");
 
-    Coordinate<size_t> start(1, 5, 0);
+    Coordinate<size_t> start(1, 0, 0);
     Coordinate<size_t> end(1, 4, 0);
     bool ret = obst.line_crosses(start, end);
     EXPECT_FALSE(ret);
 }
 
-TEST_F(ObstacleTest, lineAreaRelationSliced) {
-    Coordinate<size_t> obst_start(2, 0, 0);
+TEST_F(ObstacleTest, lineAreaRelationSlicedX) {
+    Coordinate<size_t> obst_start(2, 1, 0);
     Coordinate<size_t> obst_end(5, 3, 3);
     Obstacle obst(obst_start, obst_end, 0, "cube");
 
-    Coordinate<size_t> start(3, 5, 0);
+    Coordinate<size_t> start(3, 0, 0);
     Coordinate<size_t> end(3, 4, 0);
     bool ret = obst.line_crosses(start, end);
     EXPECT_TRUE(ret);
 }
 
-TEST_F(ObstacleTest, lineAreaRelationTangential) {
-    Coordinate<size_t> obst_start(2, 0, 0);
+TEST_F(ObstacleTest, lineAreaRelationTangentialX) {
+    Coordinate<size_t> obst_start(2, 1, 0);
     Coordinate<size_t> obst_end(5, 3, 3);
     Obstacle obst(obst_start, obst_end, 0, "cube");
 
-    Coordinate<size_t> start(2, 5, 0);
+    Coordinate<size_t> start(2, 0, 0);
     Coordinate<size_t> end(2, 4, 0);
+    bool ret = obst.line_crosses(start, end);
+    EXPECT_TRUE(ret);
+}
+
+TEST_F(ObstacleTest, lineAreaRelationParallelY) {
+    Coordinate<size_t> obst_start(0, 2, 1);
+    Coordinate<size_t> obst_end(3, 5, 3);
+    Obstacle obst(obst_start, obst_end, 0, "cube");
+
+    Coordinate<size_t> start(0, 1, 0);
+    Coordinate<size_t> end(0, 1, 4);
+    bool ret = obst.line_crosses(start, end);
+    EXPECT_FALSE(ret);
+}
+
+TEST_F(ObstacleTest, lineAreaRelationSlicedY) {
+    Coordinate<size_t> obst_start(0, 2, 1);
+    Coordinate<size_t> obst_end(3, 5, 3);
+    Obstacle obst(obst_start, obst_end, 0, "cube");
+
+    Coordinate<size_t> start(0, 3, 0);
+    Coordinate<size_t> end(0, 3, 4);
+    bool ret = obst.line_crosses(start, end);
+    EXPECT_TRUE(ret);
+}
+
+TEST_F(ObstacleTest, lineAreaRelationTangentialY) {
+    Coordinate<size_t> obst_start(0, 2, 1);
+    Coordinate<size_t> obst_end(3, 5, 3);
+    Obstacle obst(obst_start, obst_end, 0, "cube");
+
+    Coordinate<size_t> start(0, 2, 0);
+    Coordinate<size_t> end(0, 2, 4);
+    bool ret = obst.line_crosses(start, end);
+    EXPECT_TRUE(ret);
+}
+
+TEST_F(ObstacleTest, lineAreaRelationParallelZ) {
+    Coordinate<size_t> obst_start(1, 0, 2);
+    Coordinate<size_t> obst_end(3, 3, 5);
+    Obstacle obst(obst_start, obst_end, 0, "cube");
+
+    Coordinate<size_t> start(0, 0, 1);
+    Coordinate<size_t> end(4, 0, 1);
+    bool ret = obst.line_crosses(start, end);
+    EXPECT_FALSE(ret);
+}
+
+TEST_F(ObstacleTest, lineAreaRelationSlicedZ) {
+    Coordinate<size_t> obst_start(1, 0, 2);
+    Coordinate<size_t> obst_end(3, 3, 5);
+    Obstacle obst(obst_start, obst_end, 0, "cube");
+
+    Coordinate<size_t> start(0, 0, 3);
+    Coordinate<size_t> end(4, 0, 3);
+    bool ret = obst.line_crosses(start, end);
+    EXPECT_TRUE(ret);
+}
+
+TEST_F(ObstacleTest, lineAreaRelationTangentialZ) {
+    Coordinate<size_t> obst_start(1, 0, 2);
+    Coordinate<size_t> obst_end(3, 3, 5);
+    Obstacle obst(obst_start, obst_end, 0, "cube");
+
+    Coordinate<size_t> start(0, 0, 2);
+    Coordinate<size_t> end(4, 0, 2);
     bool ret = obst.line_crosses(start, end);
     EXPECT_TRUE(ret);
 }
@@ -113,7 +179,7 @@ TEST_F(ObstacleTest, testRoom) {
                 for (Obstacle &obst: room) {
                     bool tmp = obst.line_crosses(start, end);
                     ret = ret || tmp;
-                    if (i >= 26 && i <= 38 && j <= 40 && k >= 26 && k <= 38) {
+                    if (i > 25 && i < 39 && j < 41 && k > 25 && k < 39) {
                         EXPECT_FALSE(tmp) << "Failed for obst "<< obst.get_name() << " at (" << i << "|" << j << "|" << k << ")";
                     }
                 }

@@ -955,17 +955,12 @@ bool Obstacle::line_crosses(const Coordinate<size_t> &start, const Coordinate<si
             static_cast<real>(end[CoordinateAxis::X] ) + 0.5,
             static_cast<real>(end[CoordinateAxis::Y] ) + 0.5,
             static_cast<real>(end[CoordinateAxis::Z] ) + 0.5};
-    Coordinate<real> direction_vector = fdiff(tmp_start_line, tmp_end_line);
+    Coordinate<real> direction_vector;
+    for (size_t axis = 0; axis < number_of_axes; axis++) {
+        direction_vector[axis] = tmp_end_line[axis] - tmp_start_line[axis];
+    }
     // line equation : (tmp_start_line) + a * (direction_vector)
 
-    Coordinate<real> tmp_start_area = {
-            static_cast<real>(m_start[CoordinateAxis::X]) + 0.5,
-            static_cast<real>(m_start[CoordinateAxis::Y]) + 0.5,
-            static_cast<real>(m_start[CoordinateAxis::Z]) + 0.5};
-    Coordinate<real> tmp_end_area = {
-            static_cast<real>(m_end[CoordinateAxis::X]) + 0.5,
-            static_cast<real>(m_end[CoordinateAxis::Y]) + 0.5,
-            static_cast<real>(m_end[CoordinateAxis::Z]) + 0.5};
     for (CoordinateAxis coordinate_axis: {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z}) {
         auto other_axes = new CoordinateAxis[2];
         if (coordinate_axis == CoordinateAxis::X) {
@@ -979,30 +974,47 @@ bool Obstacle::line_crosses(const Coordinate<size_t> &start, const Coordinate<si
             other_axes[1] = CoordinateAxis::Y;
         }
         for (auto patch: Mapping::get_patches(CoordinateAxis(coordinate_axis))) {
+            Coordinate<real> tmp_end_area;
+            Coordinate<real> tmp_start_area;
+            if (patch % 2 == 0) {
+                tmp_start_area = {
+                        static_cast<real>(m_start[CoordinateAxis::X]) + 0.5,
+                        static_cast<real>(m_start[CoordinateAxis::Y]) + 0.5,
+                        static_cast<real>(m_start[CoordinateAxis::Z]) + 0.5};
+                tmp_end_area = {
+                        static_cast<real>(m_end[CoordinateAxis::X]) + 0.5,
+                        static_cast<real>(m_end[CoordinateAxis::Y]) + 0.5,
+                        static_cast<real>(m_end[CoordinateAxis::Z]) + 0.5};
+            } else {
+                tmp_end_area = {
+                        static_cast<real>(m_start[CoordinateAxis::X]) + 0.5,
+                        static_cast<real>(m_start[CoordinateAxis::Y]) + 0.5,
+                        static_cast<real>(m_start[CoordinateAxis::Z]) + 0.5};
+                tmp_start_area = {
+                        static_cast<real>(m_end[CoordinateAxis::X]) + 0.5,
+                        static_cast<real>(m_end[CoordinateAxis::Y]) + 0.5,
+                        static_cast<real>(m_end[CoordinateAxis::Z]) + 0.5};
+            }
             // normal vector of area equation :
             Coordinate<real> normal_vector = {0, 0, 0};
             normal_vector[coordinate_axis] =
                     (tmp_end_area[other_axes[0]] - tmp_start_area[other_axes[0]]) *
                     (tmp_end_area[other_axes[1]] - tmp_start_area[other_axes[1]]);
             real res_dot = dot(normal_vector, direction_vector);
-            if (fabs(res_dot) < eps) {
-                // area and line are parallel
-                Coordinate<real> check = normal_vector;
-                check *= tmp_start_line;
-                if (fabs(check.sum() - normal_vector[coordinate_axis] * tmp_start_area[coordinate_axis]) < eps) {
-                    // line is in area
-                    // return true;
-                }
-                // else area and line are truly parallel
-            } else {
+            if (fabs(res_dot) > eps) {  // else area and line are parallel
                 // intersection
                 real lambda = (tmp_start_area[coordinate_axis] - tmp_start_line[coordinate_axis]) /
                               direction_vector[coordinate_axis];
-                Coordinate<real> intersection = direction_vector;
-                intersection *= lambda;
-                intersection += tmp_start_line;
-                if (is_obstacle_cell(intersection)) {
-                    return true;
+                if (lambda <= 1 && lambda >= 0) {
+                    Coordinate<real> intersection = direction_vector;
+                    intersection *= lambda;
+                    intersection += tmp_start_line;
+                    for (size_t axis = 0; axis < number_of_axes; axis++) {
+                        intersection[axis] -= 0.5;
+                    }
+                    if (is_obstacle_cell(intersection)) {
+                        return true;
+                    }
                 }
             }
         }
