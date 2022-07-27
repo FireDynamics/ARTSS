@@ -39,7 +39,23 @@ class Obstacle {
     const std::vector<std::vector<size_t>> & get_boundary_list() const { return m_boundary; }
     PatchObject *get_size_boundary_list() { return &m_size_boundary; }
 
-    template<typename T> bool is_obstacle_cell(const Coordinate<T> &coords) const;
+    //======================================== Is obstacle cell ====================================
+    // *********************************************************************************************
+    /// \brief  Check if cell is an obstacle cell
+    /// \param  i x-coordinate
+    /// \param  j y-coordinate
+    /// \param  k z-coordinate
+    /// \return  bool true if yes false if no
+    // *********************************************************************************************
+    template<typename T>
+    bool is_obstacle_cell(const Coordinate<T> &coords) const {
+        return m_start[CoordinateAxis::X] <= coords[CoordinateAxis::X]
+               && coords[CoordinateAxis::X] <= m_end[CoordinateAxis::X]
+               && m_start[CoordinateAxis::Y] <= coords[CoordinateAxis::Y]
+               && coords[CoordinateAxis::Y] <= m_end[CoordinateAxis::Y]
+               && m_start[CoordinateAxis::Z] <= coords[CoordinateAxis::Z]
+               && coords[CoordinateAxis::Z] <= m_end[CoordinateAxis::Z];
+    }
 
     void print() const;
 

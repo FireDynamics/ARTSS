@@ -439,24 +439,6 @@ void Obstacle::control() {
     }
 }
 
-//======================================== Is obstacle cell ========================================
-// *************************************************************************************************
-/// \brief  Check if cell is an obstacle cell
-/// \param  i x-coordinate
-/// \param  j y-coordinate
-/// \param  k z-coordinate
-/// \return  bool true if yes false if no
-// *************************************************************************************************
-template<typename T>
-bool Obstacle::is_obstacle_cell(const Coordinate<T> &coords) const {
-    return m_start[CoordinateAxis::X] <= coords[CoordinateAxis::X]
-           && coords[CoordinateAxis::X] <= m_end[CoordinateAxis::X]
-           && m_start[CoordinateAxis::Y] <= coords[CoordinateAxis::Y]
-           && coords[CoordinateAxis::Y] <= m_end[CoordinateAxis::Y]
-           && m_start[CoordinateAxis::Z] <= coords[CoordinateAxis::Z]
-           && coords[CoordinateAxis::Z] <= m_end[CoordinateAxis::Z];
-}
-
 //======================================== Match grid ==============================================
 // *************************************************************************************************
 /// \brief  Snaps value to grid discretisation
