@@ -926,7 +926,7 @@ bool Obstacle::intersection(const Coordinate<size_t> &start, const Coordinate<si
     // line equation : (tmp_start_line) + a * (direction_vector)
 
     for (CoordinateAxis coordinate_axis: {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z}) {
-        auto other_axes = new CoordinateAxis[2];
+        CoordinateAxis other_axes[2];
         if (coordinate_axis == CoordinateAxis::X) {
             other_axes[0] = CoordinateAxis::Y;
             other_axes[1] = CoordinateAxis::Z;
