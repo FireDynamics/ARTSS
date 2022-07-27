@@ -165,9 +165,6 @@ TEST_F(ObstacleTest, testRoom) {
     Coordinate<size_t> obst_wall_back_end(38, 40, 42);
     room.emplace_back(obst_wall_back_start, obst_wall_back_end, 0, "back");
 
-    for (const auto &obst: room) {
-        obst.print();
-    }
     // heat source
     Coordinate<size_t> start(32, 1, 32);
     auto no_inner_cells = DomainData::getInstance()->get_number_of_inner_cells();

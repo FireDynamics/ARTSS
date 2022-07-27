@@ -62,7 +62,6 @@ class Obstacle {
 
     bool static remove_circular_constraints(Obstacle &o1, Obstacle &o2);
     bool intersection(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const;
-    bool line_crosses2(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const;
 private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
