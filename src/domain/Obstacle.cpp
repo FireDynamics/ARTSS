@@ -945,25 +945,16 @@ bool Obstacle::intersection(const Coordinate<size_t> &start, const Coordinate<si
                 static_cast<real>(m_end[CoordinateAxis::X]) + 0.5,
                 static_cast<real>(m_end[CoordinateAxis::Y]) + 0.5,
                 static_cast<real>(m_end[CoordinateAxis::Z]) + 0.5};
-        for (auto patch: Mapping::get_patches(CoordinateAxis(coordinate_axis))) {
+        for (const auto &patch: Mapping::get_patches(CoordinateAxis(coordinate_axis))) {
             if (patch % 2 == 1) {  // equals patch == BACK || patch == RIGHT || patch == TOP
                 // set point of area.
                 // for FRONT,LEFT,TOP it is m_start
-                // for bACK, RIGHT, TOP it is m_end
+                // for BACK, RIGHT, TOP it is m_end
                 std::swap(tmp_start_area, tmp_end_area);
             }
-
-            // calculate parameter form of area by using the start point and the
-            // respective edges of the area, resulting in orthogonal direction vectors
-            // e.g. Patch FRONT has the starting point in the lower left corner,
-            // one direction vectors goes to the x-direction and the other
-            // direction vector goes to the y-direction.
-
             // normal vector of area equation :
             Coordinate<real> normal_vector = {0, 0, 0};
-            normal_vector[coordinate_axis] =
-                    (tmp_end_area[other_axes[0]] - tmp_start_area[other_axes[0]]) *
-                    (tmp_end_area[other_axes[1]] - tmp_start_area[other_axes[1]]);
+            normal_vector[coordinate_axis] = 1;
             real res_dot = dot(normal_vector, direction_vector);
             if (fabs(res_dot) > eps) {  // else area and line are parallel
                 // intersection

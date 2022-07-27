@@ -171,6 +171,6 @@ std::vector<FieldType> DomainController::get_used_fields() const {
     return m_multigrid->get_used_fields();
 }
 
-bool DomainController::is_blocked_by_obstacle(Coordinate<size_t> &start, Coordinate<size_t> &end) {
+bool DomainController::is_blocked_by_obstacle(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const {
     return m_multigrid->is_blocked_by_obstacle(start, end);
 }

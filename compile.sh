@@ -202,6 +202,7 @@ then
   cd ../spdlog || exit
   git checkout v1.9.2
   cd ../googletest || exit
+  # older versions have warning as error. commit hash equals HEAD (27.7.2022)
   git checkout 7735334a46da480a749945c0f645155d90d73855
   cd ../..
 fi

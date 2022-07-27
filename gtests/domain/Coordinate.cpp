@@ -29,9 +29,39 @@ TEST(CoordinateTest, fdiff) {
     EXPECT_EQ(fdiff(coord2, coord1), coord2);
 }
 
+TEST(CoordinateTest, fdiff2) {
+    Coordinate<real> coord1(0, 0, 0);
+    Coordinate<real> coord2(1, 2, 1);
+
+    EXPECT_EQ(fdiff(coord1, coord2), coord2);
+}
+
+TEST(CoordinateTest, fdiff3) {
+    Coordinate<real> coord1(1, 2, 1);
+    Coordinate<real> coord2(1, 2, 1);
+
+    Coordinate<real> res(0, 0, 0);
+    EXPECT_EQ(fdiff(coord2, coord1), res);
+}
+
 TEST(CoordinateTest, diff) {
     Coordinate<size_t> coord1(0, 0, 0);
     Coordinate<size_t> coord2(1, 2, 1);
 
     EXPECT_EQ(diff(coord1, coord2), coord2);
+}
+
+TEST(CoordinateTest, diff2) {
+    Coordinate<size_t> coord1(0, 0, 0);
+    Coordinate<size_t> coord2(1, 2, 1);
+
+    EXPECT_EQ(diff(coord2, coord1), coord2);
+}
+
+TEST(CoordinateTest, diff3) {
+    Coordinate<size_t> coord1(1, 2, 1);
+    Coordinate<size_t> coord2(1, 2, 1);
+
+    Coordinate<size_t> res(0, 0, 0);
+    EXPECT_EQ(diff(coord2, coord1), res);
 }

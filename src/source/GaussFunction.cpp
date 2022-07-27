@@ -53,9 +53,9 @@ void GaussFunction::update_source(Field &out, real t_cur) {
 // ***************************************************************************************
 void GaussFunction::create_spatial_values() {
     auto domain_data = DomainData::getInstance();
-    Coordinate<size_t> number_of_cells = domain_data->get_number_of_cells();
-    Coordinate<real> start_coord_PD = domain_data->get_start_coord_PD();
-    Coordinate<real> spacing = domain_data->get_spacing();
+    const Coordinate<size_t> number_of_cells = domain_data->get_number_of_cells();
+    const Coordinate<real> start_coord_PD = domain_data->get_start_coord_PD();
+    const Coordinate<real> spacing = domain_data->get_spacing();
 
     Coordinate<real> r_sigma = m_settings.dimension;
     r_sigma *= m_settings.dimension;

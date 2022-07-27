@@ -54,7 +54,7 @@ class Multigrid {
 
     std::vector<FieldType> get_used_fields();
 
-    bool is_blocked_by_obstacle(Coordinate<size_t> &start, Coordinate<size_t> &end);
+    bool is_blocked_by_obstacle(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const;
 
 private:
 #ifndef BENCHMARKING

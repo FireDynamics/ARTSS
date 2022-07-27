@@ -87,7 +87,7 @@ public:
         return *this;
     }
 
-    real sum() {
+    real sum() const {
         return x + y + z;
     }
 

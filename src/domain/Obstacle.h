@@ -41,10 +41,9 @@ class Obstacle {
 
     //======================================== Is obstacle cell ====================================
     // *********************************************************************************************
-    /// \brief  Check if cell is an obstacle cell
-    /// \param  i x-coordinate
-    /// \param  j y-coordinate
-    /// \param  k z-coordinate
+    /// \brief  Check if cell at index position is an obstacle cell. (no physical parameters)
+    /// \details will be compared with the start and end coordinate of obstacle
+    /// \param  coords indices of cell
     /// \return  bool true if yes false if no
     // *********************************************************************************************
     template<typename T>

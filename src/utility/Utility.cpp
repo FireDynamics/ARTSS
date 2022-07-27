@@ -58,9 +58,6 @@ Coordinate<size_t> get_index(const Coordinate<real> &physical_coordinates) {
     for (size_t axis = 0; axis < number_of_axes; axis++) {
         result[axis] = get_index(physical_coordinates[axis], spacing[axis], start_coordinates[axis]);
     }
-    for (size_t axis: all_coordinate_axes) {
-        result[axis] = get_index(physical_coordinates[axis], spacing[axis], start_coordinates[axis]);
-    }
     return result;
 }
 

@@ -608,11 +608,10 @@ std::vector<FieldType> Multigrid::get_used_fields() {
     return m_bdc_domain.get_used_fields();
 }
 
-bool Multigrid::is_blocked_by_obstacle(Coordinate<size_t> &start, Coordinate<size_t> &end) {
-    std::vector<Obstacle> obstacle_list = m_MG_obstacle_object_list[0];
-    for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
-        bool blocked = obstacle_list[id].intersection(start, end);
-        if (blocked) {
+bool Multigrid::is_blocked_by_obstacle(const Coordinate<size_t> &from, const Coordinate<size_t> &to) const {
+    const auto &obstacles = m_MG_obstacle_object_list[0];
+    for (const auto &obstacle: obstacles) {
+        if (obstacle.intersection(from, to)) {
             return true;
         }
     }
