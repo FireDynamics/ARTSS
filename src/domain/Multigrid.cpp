@@ -611,7 +611,7 @@ std::vector<FieldType> Multigrid::get_used_fields() {
 bool Multigrid::is_blocked_by_obstacle(Coordinate<size_t> &start, Coordinate<size_t> &end) {
     std::vector<Obstacle> obstacle_list = m_MG_obstacle_object_list[0];
     for (size_t id = 0; id < m_number_of_obstacle_objects; id++) {
-        bool blocked = obstacle_list[id].line_crosses(start, end);
+        bool blocked = obstacle_list[id].intersection(start, end);
         if (blocked) {
             return true;
         }

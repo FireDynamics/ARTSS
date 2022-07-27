@@ -943,7 +943,15 @@ constexpr int surface_points[6][3] = {
         {4, 5, 7},
 };
 
-bool Obstacle::line_crosses(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const {
+/**
+ * Calculates whether the obstacle is between the two points or not.
+ * Done by calculation the intersection point between area spanned by the individual patches and the
+ * line spanned by the two given points. Algorithm is optimised due to the patches being axis aligned.
+ * @param start start point
+ * @param end end point
+ * @return bool, whether the obstacle intersects with the line from start to end
+ */
+bool Obstacle::intersection(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const {
     if (is_obstacle_cell(end)) {
         return true;
     }
@@ -973,28 +981,28 @@ bool Obstacle::line_crosses(const Coordinate<size_t> &start, const Coordinate<si
             other_axes[0] = CoordinateAxis::X;
             other_axes[1] = CoordinateAxis::Y;
         }
+        Coordinate<real> tmp_start_area = {
+                static_cast<real>(m_start[CoordinateAxis::X]) + 0.5,
+                static_cast<real>(m_start[CoordinateAxis::Y]) + 0.5,
+                static_cast<real>(m_start[CoordinateAxis::Z]) + 0.5};
+        Coordinate<real> tmp_end_area = {
+                static_cast<real>(m_end[CoordinateAxis::X]) + 0.5,
+                static_cast<real>(m_end[CoordinateAxis::Y]) + 0.5,
+                static_cast<real>(m_end[CoordinateAxis::Z]) + 0.5};
         for (auto patch: Mapping::get_patches(CoordinateAxis(coordinate_axis))) {
-            Coordinate<real> tmp_end_area;
-            Coordinate<real> tmp_start_area;
-            if (patch % 2 == 0) {
-                tmp_start_area = {
-                        static_cast<real>(m_start[CoordinateAxis::X]) + 0.5,
-                        static_cast<real>(m_start[CoordinateAxis::Y]) + 0.5,
-                        static_cast<real>(m_start[CoordinateAxis::Z]) + 0.5};
-                tmp_end_area = {
-                        static_cast<real>(m_end[CoordinateAxis::X]) + 0.5,
-                        static_cast<real>(m_end[CoordinateAxis::Y]) + 0.5,
-                        static_cast<real>(m_end[CoordinateAxis::Z]) + 0.5};
-            } else {
-                tmp_end_area = {
-                        static_cast<real>(m_start[CoordinateAxis::X]) + 0.5,
-                        static_cast<real>(m_start[CoordinateAxis::Y]) + 0.5,
-                        static_cast<real>(m_start[CoordinateAxis::Z]) + 0.5};
-                tmp_start_area = {
-                        static_cast<real>(m_end[CoordinateAxis::X]) + 0.5,
-                        static_cast<real>(m_end[CoordinateAxis::Y]) + 0.5,
-                        static_cast<real>(m_end[CoordinateAxis::Z]) + 0.5};
+            if (patch % 2 == 1) {  // equals patch == BACK || patch == RIGHT || patch == TOP
+                // set point of area.
+                // for FRONT,LEFT,TOP it is m_start
+                // for bACK, RIGHT, TOP it is m_end
+                std::swap(tmp_start_area, tmp_end_area);
             }
+
+            // calculate parameter form of area by using the start point and the
+            // respective edges of the area, resulting in orthogonal direction vectors
+            // e.g. Patch FRONT has the starting point in the lower left corner,
+            // one direction vectors goes to the x-direction and the other
+            // direction vector goes to the y-direction.
+
             // normal vector of area equation :
             Coordinate<real> normal_vector = {0, 0, 0};
             normal_vector[coordinate_axis] =
