@@ -22,14 +22,14 @@ TEST(CoordinateTest, constructorVal2) {
     }
 }
 
-TEST(CoordinateTest, operatorMinus) {
+TEST(CoordinateTest, fdiff) {
     Coordinate<real> coord1(0, 0, 0);
     Coordinate<real> coord2(1, 2, 1);
 
     EXPECT_EQ(fdiff(coord2, coord1), coord2);
 }
 
-TEST(CoordinateTest, operatorMinus2) {
+TEST(CoordinateTest, diff) {
     Coordinate<size_t> coord1(0, 0, 0);
     Coordinate<size_t> coord2(1, 2, 1);
 
