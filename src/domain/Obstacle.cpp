@@ -10,8 +10,6 @@
 #include <vector>
 
 
-real constexpr eps = 10E-6;
-
 Obstacle::Obstacle(const Coordinate<real> &coords_start,
                    const Coordinate<real> &coords_end,
                    const std::string &name) :
@@ -903,22 +901,23 @@ bool Obstacle::has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1
 /// \details Done by calculation the intersection point between area spanned by the individual
 /// patches and the line spanned by the two given points. Algorithm is optimised due to the patches
 /// being axis aligned.
-/// \param start start point
-/// \param end end point
-/// \return bool, whether the obstacle intersects with the line from start to end
+/// \param source source cell index
+/// \param cell_to_test cell_to_test cell index
+/// \return bool, whether the obstacle intersects with the line from source to cell_to_test
 // *************************************************************************************************
-bool Obstacle::intersection(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const {
-    if (is_obstacle_cell(end)) {
+bool Obstacle::intersection(const Coordinate<size_t> &source, const Coordinate<size_t> &cell_to_test) const {
+    real constexpr eps = 10E-6;
+    if (is_obstacle_cell(cell_to_test)) {
         return true;
     }
     Coordinate<real> tmp_start_line = {
-            static_cast<real>(start[CoordinateAxis::X]) + 0.5,
-            static_cast<real>(start[CoordinateAxis::Y]) + 0.5,
-            static_cast<real>(start[CoordinateAxis::Z]) + 0.5};
+            static_cast<real>(source[CoordinateAxis::X]) + 0.5,
+            static_cast<real>(source[CoordinateAxis::Y]) + 0.5,
+            static_cast<real>(source[CoordinateAxis::Z]) + 0.5};
     Coordinate<real> tmp_end_line = {
-            static_cast<real>(end[CoordinateAxis::X] ) + 0.5,
-            static_cast<real>(end[CoordinateAxis::Y] ) + 0.5,
-            static_cast<real>(end[CoordinateAxis::Z] ) + 0.5};
+            static_cast<real>(cell_to_test[CoordinateAxis::X] ) + 0.5,
+            static_cast<real>(cell_to_test[CoordinateAxis::Y] ) + 0.5,
+            static_cast<real>(cell_to_test[CoordinateAxis::Z] ) + 0.5};
     Coordinate<real> direction_vector;
     for (size_t axis = 0; axis < number_of_axes; axis++) {
         direction_vector[axis] = tmp_end_line[axis] - tmp_start_line[axis];
