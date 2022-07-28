@@ -105,4 +105,8 @@ std::vector<CoordinateAxis> get_axes(Patch patch) {
     }
     return axes;
 }
+
+std::array<Patch, 2> get_patches(CoordinateAxis axis) {
+    return {Patch(axis * 2), Patch(axis * 2 + 1)};
+}
 }  // end namespace Mapping

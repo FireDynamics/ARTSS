@@ -8,6 +8,7 @@
 #define ARTSS_DOMAIN_COORDINATE_H_
 
 
+#include <cmath>
 #include <cstdlib>
 #include <algorithm>
 #include <string>
@@ -17,7 +18,9 @@
 #include "../utility/Mapping.h"
 
 #ifndef BENCHMARKING
+
 #include <fmt/format.h>
+
 #endif
 
 template<class numeral>
@@ -64,19 +67,10 @@ public:
     }
 
     Coordinate &operator+=(const Coordinate &rhs) {
-        auto rhs_patches = rhs.m_coordinates;
-        for (size_t i = 0; i < number_of_axes; ++i) {
-            this->m_coordinates[i] += rhs_patches[i];
-        }
+        x += rhs.x;
+        y += rhs.y;
+        z += rhs.z;
         return *this;
-    }
-
-    // TODO (c++20)
-    // bool operator<=>(const Coordinate &rhs) const {
-    //     return x <=> rhs.x && y <=> rhs.y && z <=> rhs.z;
-    // }
-    bool operator!=(const Coordinate &rhs) const {
-        return x != rhs.x || y != rhs.y || z != rhs.z;
     }
 
     Coordinate &operator+=(const numeral n) {
@@ -93,17 +87,32 @@ public:
         return *this;
     }
 
+    real sum() const {
+        return x + y + z;
+    }
+
     Coordinate &operator*=(const numeral n) {
-        for (size_t i = 0; i < number_of_axes; ++i) {
-            this->m_coordinates[i] *= n;
-        }
+        x *= n;
+        y *= n;
+        z *= n;
         return *this;
     }
 
+    bool operator==(const Coordinate &coord) const {
+        return x == coord.x && y == coord.y && z == coord.z;
+    }
+
+    // TODO (c++20)
+    // bool operator<=>(const Coordinate &rhs) const {
+    //     return x <=> rhs.x && y <=> rhs.y && z <=> rhs.z;
+    // }
+    bool operator!=(const Coordinate &rhs) const {
+        return x != rhs.x || y != rhs.y || z != rhs.z;
+    }
 
     void set_coordinate(numeral numeral_x, numeral numeral_y, numeral numeral_z) {
         x = numeral_x;
-        y = numeral_y,
+        y = numeral_y;
         z = numeral_z;
     }
 
@@ -121,19 +130,56 @@ private:
     numeral z = 0;
 };
 
+template<typename T, typename S>
+real dot(const Coordinate<T> &lhs, const Coordinate<S> &rhs) {
+    return lhs[CoordinateAxis::X] * rhs[CoordinateAxis::X] +
+           lhs[CoordinateAxis::Y] * rhs[CoordinateAxis::Y] +
+           lhs[CoordinateAxis::Z] * rhs[CoordinateAxis::Z];
+}
+
+template<typename T, typename S>
+Coordinate<real> div(const Coordinate<T> &lhs, const Coordinate<S> &rhs) {
+    return {lhs[CoordinateAxis::X] / rhs[CoordinateAxis::X],
+            lhs[CoordinateAxis::Y] / rhs[CoordinateAxis::Y],
+            lhs[CoordinateAxis::Z] / rhs[CoordinateAxis::Z]};
+}
+
+template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
+Coordinate<T> fdiff(const Coordinate<T> &lhs, const Coordinate<T> &rhs) {
+    return {fabs(lhs[CoordinateAxis::X] - rhs[CoordinateAxis::X]),
+            fabs(lhs[CoordinateAxis::Y] - rhs[CoordinateAxis::Y]),
+            fabs(lhs[CoordinateAxis::Z] - rhs[CoordinateAxis::Z])};
+
+}
+
+template<typename T, typename = std::enable_if_t<std::is_unsigned_v<T>>>
+Coordinate<T> diff(const Coordinate<T> &lhs, const Coordinate<T> &rhs) {
+    auto diff_ = [&lhs, &rhs](const auto &axis) {
+        if (lhs[axis] > rhs[axis]) {
+            return lhs[axis] - rhs[axis];
+        } else {
+            return rhs[axis] - lhs[axis];
+        }
+    };
+    return {diff_(CoordinateAxis::X), diff_(CoordinateAxis::Y), diff_(CoordinateAxis::Z)};
+}
+
 #ifndef BENCHMARKING
-template <typename T> struct fmt::formatter<Coordinate<T>> {
+
+template<typename T>
+struct fmt::formatter<Coordinate<T>> {
     // Parses the format specifier, if needed (in my case, only return an iterator to the context)
-    constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
 
     // Actual formatting. The second parameter is the format specifier and the next parameters are the actual values from my custom type
-    template <typename FormatContext>
+    template<typename FormatContext>
     auto format(const Coordinate<T> &coord, FormatContext &ctx) -> decltype(ctx.out()) {
         return format_to(
                 ctx.out(),
                 "({}|{}|{})", coord[X], coord[Y], coord[Z]);
     }
 };
+
 #endif
 
 #endif /* ARTSS_DOMAIN_COORDINATE_H_ */

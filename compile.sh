@@ -204,7 +204,10 @@ then
   cd ../spdlog || exit
   git checkout v1.9.2
   cd ../googletest || exit
-  git checkout release-1.8.1
+  # gtest is pinned to this commit because older versions do not build warning
+  # free on GCC11 and gtest insists on using -Werror. No release version was
+  # available that builds without warnings on GCC11 at this time [2022-07-27]
+  git checkout 7735334a46da480a749945c0f645155d90d73855
   cd ../..
 fi
 if [ $DOCKERBUILD -eq 1 ]

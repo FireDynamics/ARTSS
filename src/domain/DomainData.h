@@ -48,6 +48,9 @@ class DomainData {
     size_t inline get_number_of_inner_cells(CoordinateAxis axis, size_t level = 0) const {
         return this->number_of_inner_cells[level][axis];
     }
+    Coordinate<size_t> inline get_number_of_inner_cells(size_t level = 0) const {
+        return this->number_of_inner_cells[level];
+    }
 
     [[deprecated("Replaced by get_number_of_cells")]]
     size_t inline get_Nx(size_t level = 0) const { return get_number_of_cells(CoordinateAxis::X, level); }
@@ -63,6 +66,9 @@ class DomainData {
      */
     size_t inline get_number_of_cells(CoordinateAxis axis, size_t level = 0) const {
         return this->number_of_cells[level][axis];
+    }
+    Coordinate<size_t> inline get_number_of_cells(size_t level = 0) const {
+        return this->number_of_cells[level];
     }
 
     [[deprecated("Replaced by get_start_coord_CD")]]
@@ -94,6 +100,9 @@ class DomainData {
     real inline get_start_coord_PD(CoordinateAxis axis) const {
         return start_coords_PD[axis];
     }
+    const Coordinate<real>& get_start_coord_PD() const {
+        return start_coords_PD;
+    }
 
     [[deprecated("Replaced by get_end_coord_PD")]]
     real inline get_X2() const { return get_end_coord_PD(CoordinateAxis::X); }
@@ -122,6 +131,9 @@ class DomainData {
     real inline get_length_CD(CoordinateAxis axis) const {
         return fabs(end_coords_CD[axis] - start_coords_CD[axis]);
     }
+    Coordinate<real> inline get_length_CD() const {
+        return fdiff(end_coords_CD, start_coords_CD);
+    }
 
     [[deprecated("Replaced by get_spacing")]]
     real inline get_dx(size_t level = 0) const { return get_spacing(CoordinateAxis::X, level); }
@@ -131,6 +143,9 @@ class DomainData {
     real inline get_dz(size_t level = 0) const { return get_spacing(CoordinateAxis::Z, level); }
     real inline get_spacing(CoordinateAxis axis, size_t level = 0) const {
         return get_length_CD(axis) / static_cast<real>(get_number_of_inner_cells(axis, level));
+    }
+    Coordinate<real> inline get_spacing(size_t level = 0) const {
+        return div(get_length_CD(), get_number_of_inner_cells(level));
     }
 
     // start index of computational domain without ghost cells
