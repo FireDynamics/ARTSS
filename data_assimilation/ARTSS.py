@@ -1,5 +1,19 @@
+#!/usr/bin/env python3
+
+import struct
+import ctypes
+
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as md
+
+
+class DAPackage:
+    def __init__(self, time: float, file_name: str):
+        self._time = time
+        self._file_name = file_name
+
+    def pack(self) -> bin:
+        return struct.pack('di', self._time, len(self._file_name)) + self._file_name.encode('UTF-8')
 
 
 class XML:

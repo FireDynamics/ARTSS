@@ -21,6 +21,7 @@
 #include <memory>
 #endif
 
+#include <optional>
 #include "tinyxml2.h"
 #include "../GlobalMacrosTypes.h"
 #include "../../domain/Coordinate.h"

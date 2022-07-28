@@ -24,6 +24,7 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
         m_new_field_T(Field(FieldType::T)),
         m_new_field_C(Field(FieldType::RHO)) {
     m_field_IO_handler = new FieldIO(settings.filename);
+
     if (m_settings.assimilation_parameters.enabled) {
         if (m_settings.assimilation_parameters.class_name == AssimilationMethods::standard) {
             m_parameter_handler = new ParameterReader();
@@ -46,7 +47,7 @@ void DataAssimilation::save_data(real t_cur) {
     Field &u = m_field_controller->get_field_u();
     Field &v = m_field_controller->get_field_v();
     Field &w = m_field_controller->get_field_w();
-    Field &p = m_field_controller->get_field_w();
+    Field &p = m_field_controller->get_field_p();
     Field &T = m_field_controller->get_field_T();
     Field &C = m_field_controller->get_field_concentration();
 
@@ -58,17 +59,18 @@ real DataAssimilation::get_new_time_value() const {
 }
 
 bool DataAssimilation::config_rollback(const char *msg) {
-    std::vector<std::string> divided_string = Utility::split(msg, ',');
-    auto new_time = std::stod(divided_string[0]);
-    m_logger->debug("current time step {}, new time {}", m_t_cur, new_time);
-    if (m_t_cur < new_time) {
-        m_logger->warn("simulation is currently at {}. Cannot rollback to {}", m_t_cur, new_time);
+    const DataAssimilationPackageHeader package = *reinterpret_cast<const DataAssimilationPackageHeader*>(msg);
+    const std::string file_name(msg + 12, package.file_name_len);
+    m_logger->info("current time step {}, new time {}", m_t_cur, package.time);
+    m_logger->info("new config file {}", file_name);
+    if (m_t_cur < package.time) {
+        m_logger->warn("simulation is currently at {}. Cannot rollback to {}", m_t_cur, package.time);
         return false;
-    } else if (std::fabs(m_t_cur - new_time) < 1e-10) {  // current time step, no need to load original data
-        m_t_cur = new_time;
+    } else if (std::fabs(m_t_cur - package.time) < 1e-10) {  // current time step, no need to load original data
+        m_t_cur = package.time;
         m_logger->info("set new time value to {}", m_t_cur);
-        m_logger->debug("read config data from {}", divided_string[1]);
-        auto[changes, field_changes] = m_parameter_handler->read_config(divided_string[1]);
+        m_logger->debug("read config data from {}", file_name);
+        auto[changes, field_changes] = m_parameter_handler->read_config(file_name);
         if (changes && field_changes.changed) {
             m_field_IO_handler->read_fields(field_changes,
                                             m_new_field_u, m_new_field_v, m_new_field_w,
@@ -77,10 +79,10 @@ bool DataAssimilation::config_rollback(const char *msg) {
         }
         return changes;
     } else {
-        m_t_cur = new_time;
+        m_t_cur = package.time;
         m_logger->info("set new time value to {}", m_t_cur);
-        m_logger->debug("read config data from {}", divided_string[1]);
-        auto[changes, field_changes] = m_parameter_handler->read_config(divided_string[1]);
+        m_logger->debug("read config data from {}", file_name);
+        auto[changes, field_changes] = m_parameter_handler->read_config(file_name);
         if (changes && field_changes.changed) {
             m_logger->debug("read field data from {}", field_changes.file_name);
             m_field_IO_handler->read_fields(m_t_cur, field_changes,
@@ -103,13 +105,14 @@ bool DataAssimilation::requires_rollback(const real t_cur) {
     m_logger->debug("probe: {}", flag);
     if (flag) {
         int msg_len;
+        m_logger->debug("recved chars1: {}", msg_len);
         MPI_Get_count(&status, MPI_CHAR, &msg_len);
         std::vector<char> msg;
 
         msg.resize(msg_len);
         m_logger->debug("preparing to receive message");
         MPI_Recv(msg.data(), msg_len, MPI_CHAR, 1, status.MPI_TAG, MPI_COMM_WORLD, &status);
-        m_logger->debug("received message: {}", msg.data());
+        m_logger->debug("recved chars: {}", msg_len);
         return config_rollback(msg.data());
     }
     return flag;

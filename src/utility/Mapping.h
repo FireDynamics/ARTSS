@@ -7,6 +7,7 @@
 #ifndef ARTSS_MAPPING_H_
 #define ARTSS_MAPPING_H_
 
+#include <array>
 #include <vector>
 #include <string>
 
@@ -20,6 +21,7 @@ enum CoordinateAxis : int {
     Y = 1,
     Z = 2
 };
+inline static const std::vector<CoordinateAxis> all_coordinate_axes = {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z};
 
 inline static const std::vector<std::string> patch_names = {"left", "right", "bottom", "top", "front", "back"};
 constexpr size_t number_of_patches = 6;
@@ -62,6 +64,7 @@ namespace Mapping {
     Patch match_patch(const std::string &string);
     Patch to_patch(CoordinateAxis axis, bool start);
     //Patch to_patch(size_t axis, bool start) { return to_patch(CoordinateAxis(axis), start); }
+    std::array<Patch, 2> get_patches(CoordinateAxis axis);
 
     std::string get_field_type_name(FieldType f);
     //std::string get_field_type_name(size_t f) { return get_field_type_name(FieldType(f)); };

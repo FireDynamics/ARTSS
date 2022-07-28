@@ -30,8 +30,10 @@
 class Field;
 
 namespace Utility {
-    std::tuple<size_t, size_t, size_t> get_coordinates(size_t index, size_t Nx, size_t Ny);
+    Coordinate<real> get_physical_coords_midpoint(const Coordinate<real> &physical_coords, const Coordinate<size_t> &index, const Coordinate<real> &spacing);
+    Coordinate<size_t> get_coordinates(const size_t index, const Coordinate<size_t> &number_of_cells);
     size_t get_index(real physical_coordinate, real spacing, real start_coordinate);
+    Coordinate<size_t> get_index(const Coordinate<real> &physical_coordinates);
     std::string to_upper(std::string string);
     std::string to_lower(std::string string);
     std::vector<std::string> split(const char *text, char delimiter);
@@ -43,6 +45,7 @@ namespace Utility {
     void create_logger(const std::string &log_level, const std::optional<std::string> &log_file);
     std::shared_ptr<spdlog::logger> create_logger(std::string const& logger_name);
 #endif
+
 }  // namespace Utility
 
 #endif /* ARTSS_UTILITY_UTILITY_H_ */
