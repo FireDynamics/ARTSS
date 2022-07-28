@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <filesystem>
 #include <variant>
+#include <optional>
 
 #ifndef BENCHMARKING
 #include <spdlog/logger.h>
