@@ -39,7 +39,22 @@ class Obstacle {
     const std::vector<std::vector<size_t>> & get_boundary_list() const { return m_boundary; }
     PatchObject *get_size_boundary_list() { return &m_size_boundary; }
 
-    bool is_obstacle_cell(const Coordinate<size_t> &coords) const;
+    //======================================== Is obstacle cell ====================================
+    // *********************************************************************************************
+    /// \brief  Check if cell at index position is an obstacle cell. (no physical parameters)
+    /// \details will be compared with the start and end coordinate of obstacle
+    /// \param  coords indices of cell
+    /// \return  bool true if yes false if no
+    // *********************************************************************************************
+    template<typename T>
+    bool is_obstacle_cell(const Coordinate<T> &coords) const {
+        return m_start[CoordinateAxis::X] <= coords[CoordinateAxis::X]
+               && coords[CoordinateAxis::X] <= m_end[CoordinateAxis::X]
+               && m_start[CoordinateAxis::Y] <= coords[CoordinateAxis::Y]
+               && coords[CoordinateAxis::Y] <= m_end[CoordinateAxis::Y]
+               && m_start[CoordinateAxis::Z] <= coords[CoordinateAxis::Z]
+               && coords[CoordinateAxis::Z] <= m_end[CoordinateAxis::Z];
+    }
 
     void print() const;
 
@@ -61,6 +76,7 @@ class Obstacle {
     bool has_overlap(size_t i1, size_t i2, size_t j1, size_t j2, size_t k1, size_t k2) const;
 
     bool static remove_circular_constraints(Obstacle &o1, Obstacle &o2);
+    bool intersection(const Coordinate<size_t> &source, const Coordinate<size_t> &cell_to_test) const;
 private:
 #ifndef BENCHMARKING
     std::shared_ptr<spdlog::logger> m_logger;
