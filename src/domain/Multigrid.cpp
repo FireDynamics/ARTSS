@@ -464,8 +464,8 @@ size_t Multigrid::obstacle_dominant_restriction(size_t level, PatchObject *sum_p
 #ifndef BENCHMARKING
         for (size_t axis = 0; axis < number_of_axes; axis++) {
             auto coordinate_axis = CoordinateAxis(axis);
-            if (end_fine[axis] - start_fine[axis] + 1 < domain_data->get_number_of_inner_cells(coordinate_axis, level - 1)
-                && end_coarse[CoordinateAxis::X] - start_coarse[CoordinateAxis::X] + 1 >= domain_data->get_number_of_inner_cells(coordinate_axis, level)) {
+            if (end_fine[coordinate_axis] - start_fine[coordinate_axis] + 1 < domain_data->get_number_of_inner_cells(coordinate_axis, level - 1)
+                && end_coarse[coordinate_axis] - start_coarse[coordinate_axis] + 1 >= domain_data->get_number_of_inner_cells(coordinate_axis, level)) {
                 m_logger->warn("Be cautious! Obstacle '{}' fills up inner cells in {}-direction at level {}", obstacle_fine.get_name(), Mapping::get_axis_name(coordinate_axis), level);
             }
         }
