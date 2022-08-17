@@ -121,10 +121,10 @@ def continuous_gradient(client: TCP_client,
                         artss_data_path: str, artss: XML, domain: Domain,
                         fds_data: pandas.DataFrame,
                         heat_source: dict,
-                        n_iterations: int):
+                        n_iterations: int,
+                        precondition: bool = False):
     n = max(1, n_iterations)
-    precondition = False
-    for t_sensor in sensor_times[4:]:
+    for t_sensor in sensor_times[3:]:
         pprint(cur)
         wait_artss(t_sensor, artss_data_path, artss)
 
@@ -176,12 +176,7 @@ def continuous_gradient(client: TCP_client,
         log(f'nabla without restrictions: {nabla}', file_debug)
         restrictions = {}
         if 'HRR' in keys:
-            if nabla['HRR'] < 0:
-                restrictions['HRR'] = 1.0
-            elif nabla['HRR'] > 0:
-                restrictions['HRR'] = cur['HRR'] / nabla['HRR']
-            else:
-                restrictions['HRR'] = 0
+            restrictions['HRR'] = 1
 
         if 'x0' in keys:
             if nabla['x0'] < 0:
@@ -287,7 +282,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
     delta = {
         'HRR': float(heat_source['temperature_source']['HRR']) * 0.5,
-        'x0': domain.domain_param['dx'] * 5,
+        'x0': domain.domain_param['dx'] * 10,
         'y0': domain.domain_param['dy'] * 1,
         'z0': domain.domain_param['dz'] * 1
     }
@@ -299,13 +294,14 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         'z0': float(heat_source['temperature_source']['z0'])
     }
 
-    keys = ['HRR']
+    keys = ['HRR', 'x0']
     continuous_gradient(client=client, file_da=file_da, file_debug=file_debug,
                         sensor_times=sensor_times,
                         devc_info=devc_info_temperature, fds_data=fds_data,
                         artss_data_path=artss_data_path,
                         domain=domain, heat_source=heat_source,
-                        cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml)
+                        cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
+                        precondition=False)
 
     # map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd, xml)
 
@@ -351,10 +347,10 @@ def write_changes_xml(change: dict, source: list, file_name: str, file_da: typin
     return config_file_name, config_file_path
 
 
-def get_time_step_artss(t_sensor: float, artss_data_path: str, dt: float) -> [float, float]:
+def get_time_step_artss(t_sensor: float, artss_data_path: str, dt: float, time_back: float = 10) -> [float, float]:
     files = FieldReader.get_all_time_steps(path=artss_data_path)
     times = list(filter(lambda x: x > t_sensor, files))
-    t_revert = ([dt] + list(filter(lambda x: x <= max(0., t_sensor - 3), files)))[-1]
+    t_revert = ([dt] + list(filter(lambda x: x <= max(0., t_sensor - time_back), files)))[-1]
     print(t_sensor)
     print(files)
     print(times)
