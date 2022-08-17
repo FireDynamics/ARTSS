@@ -77,17 +77,16 @@ void GaussFunction::create_spatial_values() {
     for (size_t l = 0; l < size_domain_list; ++l) {
         const size_t idx = domain_inner_list[l];
         auto index_components = Utility::get_coordinates(idx, number_of_cells);
-        auto delta = diff(start_coordinates, index_components);
-
-        auto midpoints = Utility::get_physical_coords_midpoint(start_coord_PD, index_components, spacing);
-        midpoints *= midpoints;
-        midpoints *= r_sigma;
 
         if (DomainController::getInstance()->is_blocked_by_obstacle(start_coordinates, index_components)){
             continue;
         }
 
-        real expr = std::exp(-(midpoints[CoordinateAxis::X] + midpoints[CoordinateAxis::Y] + midpoints[CoordinateAxis::Z]));
+        auto midpoints = Utility::get_physical_coords_midpoint(start_coord_PD, index_components, spacing);
+        Coordinate<real> delta(midpoints[X] - m_settings.position[X], midpoints[Y] - m_settings.position[Y], midpoints[Z] - m_settings.position[Z]);
+        delta *= delta;
+        delta *= r_sigma;
+        real expr = std::exp( -(delta[X] + delta[Y] + delta[Z]));
         V += expr * spacing[CoordinateAxis::X] * spacing[CoordinateAxis::Y] * spacing[CoordinateAxis::Z];
     }
 
@@ -98,8 +97,14 @@ void GaussFunction::create_spatial_values() {
         const size_t idx = domain_inner_list[l];
         Coordinate<size_t> index_components = Utility::get_coordinates(idx, number_of_cells);
 
+        if (DomainController::getInstance()->is_blocked_by_obstacle(start_coordinates, index_components)){
+            continue;
+        }
         auto midpoints = Utility::get_physical_coords_midpoint(start_coord_PD, index_components, spacing);
-        real expr = std::exp(-(midpoints[CoordinateAxis::X] + midpoints[CoordinateAxis::Y] + midpoints[CoordinateAxis::Z]));
+        Coordinate<real> delta(midpoints[X] - m_settings.position[X], midpoints[Y] - m_settings.position[Y], midpoints[Z] - m_settings.position[Z]);
+        delta *= delta;
+        delta *= r_sigma;
+        real expr = std::exp( -(delta[X] + delta[Y] + delta[Z]));
         m_field_spatial_values[idx] = HRRrV * rcp * expr;
     }
     m_field_spatial_values.update_dev();
