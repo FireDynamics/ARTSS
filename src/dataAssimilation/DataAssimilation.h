@@ -35,9 +35,11 @@ class DataAssimilation {
     void save_data(real t_cur);
 
     bool requires_rollback(real t_cur);
-    void initiate_rollback(real t_cur);
+    void initiate_time_skip(real t_cur);
 
     real get_new_time_value() const;
+
+    bool load_data();
 
  private:
     std::shared_ptr<spdlog::logger> m_logger;
@@ -52,11 +54,10 @@ class DataAssimilation {
     real m_output_time_interval;
     int m_time_interval_counter;
 
-    void read_new_data(std::string &file_name);
     bool config_rollback(const char *msg);
 
-    Field m_new_field_u, m_new_field_v, m_new_field_w, m_new_field_p, \
-          m_new_field_T, m_new_field_C;
+    Field m_new_field_u, m_new_field_v, m_new_field_w, \
+          m_new_field_p, m_new_field_T, m_new_field_C;
 };
 
 #endif /* ARTSS_DATAASSIMILATION_DATAASSIMILATION_H */

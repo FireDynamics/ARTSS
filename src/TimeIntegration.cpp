@@ -68,6 +68,16 @@ void TimeIntegration::run() {
 #endif
 
         int iteration_step = 1;
+#ifdef ASSIMILATION
+        if (m_data_assimilation->load_data()) {
+            t_cur = m_data_assimilation->get_new_time_value();
+            iteration_step = static_cast<int>(t_cur / dt);
+            m_logger->info("load data of time step {} (step: {})", t_cur, iteration_step);
+            m_data_assimilation->initiate_time_skip(t_cur);
+            m_solver_controller->update_sources(t_cur, false);
+            m_field_controller->update_data(false);
+        }
+#endif
         // std::ofstream file;
         // file.open(adaption->get_write_runtime_name(), ios::app);
         // std::chrono::time_point<std::chrono::system_clock> iter_start, iter_end;
@@ -114,7 +124,7 @@ void TimeIntegration::run() {
                 t_cur = m_data_assimilation->get_new_time_value();
                 iteration_step = static_cast<int>(t_cur / dt);
                 m_logger->info("ROLLBACK to time step {} (step: {})", t_cur, iteration_step);
-                m_data_assimilation->initiate_rollback(t_cur);
+                m_data_assimilation->initiate_time_skip(t_cur);
             } else {
                 m_data_assimilation->save_data(t_cur);
             }

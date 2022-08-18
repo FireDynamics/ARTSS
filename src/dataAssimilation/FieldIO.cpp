@@ -122,7 +122,7 @@ void FieldIO::create_header(HighFive::File &file) {
     HighFive::DataSet domain_set = meta_group.createDataSet<size_t>("domain", HighFive::DataSpace::From(domain));
     domain_set.write(domain);
 
-    std::vector<std::string> fields{"u" , "v", "w", "p", "T", "concentration"};
+    std::vector<std::string> fields{"u", "v", "w", "p", "T", "concentration"};
     HighFive::DataSet fields_set = meta_group.createDataSet<std::string>("fields", HighFive::DataSpace::From(fields));
     fields_set.write(fields);
 
@@ -267,4 +267,17 @@ void FieldIO::create_meta_file(real t_cur) {
     meta_file << fmt::format("t:{}\n", t_cur);
     meta_file << fmt::format("xml_name:{}\n", m_xml_filename);
     meta_file.close();
+}
+
+void FieldIO::read_fields(const std::string &file_name, const real t,
+                          Field &u, Field &v, Field &w,
+                          Field &p, Field &T, Field &C) {
+    HighFive::File file(file_name, HighFive::File::ReadOnly);
+
+    read_vis_field(file, u, t);
+    read_vis_field(file, v, t);
+    read_vis_field(file, w, t);
+    read_vis_field(file, p, t);
+    read_vis_field(file, T, t);
+    read_vis_field(file, C, t);
 }

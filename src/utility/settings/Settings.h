@@ -335,6 +335,9 @@ namespace Settings {
         std::string class_name;
         real output_time_interval;
         std::string output_dir;
+        bool load_data;
+        std::string file;
+        real time;
     };
     struct Settings {
         std::string filename;
