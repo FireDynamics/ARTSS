@@ -17,7 +17,6 @@
 #ifdef ASSIMILATION
 #include <mpi.h>
 #include "TCP/TCPServer.h"
-#define PORT 7777
 void server();
 class tcp_server_error : std::runtime_error { ;
  public:
@@ -63,6 +62,8 @@ int main(int argc, char **argv) {
             Settings::Settings settings = Settings::parse_settings(argv[1]);
 #ifdef ASSIMILATION
             MPI_Request request;
+            int port = settings.assimilation_parameters.port;
+            MPI_Isend(port, 1, MPI_INT, 1, 10, MPI_COMM_WORLD,&request);
             MPI_Isend(settings.logging_parameters.level.c_str(),
                       static_cast<int>(settings.logging_parameters.level.size()), MPI_CHAR, 1, 0, MPI_COMM_WORLD,
                       &request);
@@ -106,6 +107,9 @@ void server() {
     bool simulation_is_running = true;
     MPI_Status status;
     MPI_Request request = MPI_REQUEST_NULL;  // communication is finished
+
+    int port;
+    MPI_Recv(&port, 1, MPI_INT, status.MPI_TAG, 10, MPI_COMM_WORLD, &status);
 
 #ifndef BENCHMARKING
     MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
@@ -164,7 +168,7 @@ void server() {
 
     // bind the server to a port.
     logger->debug("bind server to a port");
-    tcp_server.bind_port(PORT, [logger](int error_code, const std::string &error_message) {
+    tcp_server.bind_port(port, [logger](int error_code, const std::string &error_message) {
         // BINDING FAILED:
         logger->critical("Binding failed - {} : {}", error_code, error_message);
         // binding wasn't possible, therefore exit ARTSS because something's wrong with the environment
