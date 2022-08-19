@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 from datetime import datetime
 import time
 import locale
@@ -88,8 +89,13 @@ class FieldReader:
     @staticmethod
     @retry(delay=1, tries=6)
     def get_all_time_steps(path: str = '.') -> list:
-        files = os.listdir(os.path.join(path, '.vis'))
-        files.remove('meta')
+        pattern = re.compile('[0-9]+\.[0-9]{5}e[+|-][0-9]+')
+        f = os.listdir(os.path.join(path, '.vis'))
+        files = []
+        for p in f:
+            if pattern.match(p):
+                files.append(p)
+        print('files', files)
         files = [float(x) for x in files]
         files.sort()
         return files
