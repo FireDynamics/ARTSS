@@ -35,7 +35,9 @@ TimeIntegration::TimeIntegration(const Settings::Settings &settings, SolverContr
 #endif
 #ifndef BENCHMARKING
     m_solution = new Solution(m_settings.initial_conditions_parameters, m_settings.solver_parameters.solution);
-    m_analysis = new Analysis(m_settings.solver_parameters.solution, *m_solution);
+    m_analysis = new Analysis(m_settings.solver_parameters.solution,
+                              m_settings.visualisation_parameters,
+                              *m_solution);
     m_visual = new Visual(m_settings.visualisation_parameters, *m_solution, m_settings.filename);
 #endif
 }

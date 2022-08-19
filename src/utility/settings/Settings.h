@@ -57,6 +57,7 @@ namespace Settings {
         bool save_csv;
         std::optional<size_t> vtk_nth_plot;
         std::optional<size_t> csv_nth_plot;
+        std::optional<bool> final_output;
     };
     struct logging_parameters {
         std::string file;
@@ -338,6 +339,7 @@ namespace Settings {
         bool load_data;
         std::string file;
         real time;
+        int port;
     };
     struct Settings {
         std::string filename;
