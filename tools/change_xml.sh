@@ -132,10 +132,10 @@ then
       cp $OUTPUT $TMP
       sed 's/load_data=.*>/load_data="Yes" file="'${DA_FILE}'">\n    <time> '${DA_TIME}' </time>/g' "${TMP}" > "${OUTPUT}"
     fi
-  fi 
+  fi
   cp $OUTPUT $TMP
-  sed 's/save_vtk\s*=\s*".*"/save_vtk="No"/g' "${TMP}" > "${OUTPUT}"
+  sed 's/save_vtk="\(Yes\|No\)"/save_vtk="No"/g' "${TMP}" > "${OUTPUT}"
   cp $OUTPUT $TMP
-  sed 's/save_csv\s*=\s*".*"/save_csv="No"/g' "${TMP}" > "${OUTPUT}"
+  sed 's/save_csv="\(Yes\|No\)"/save_csv="No"/g' "${TMP}" > "${OUTPUT}"
   cp $OUTPUT $TMP
 fi
