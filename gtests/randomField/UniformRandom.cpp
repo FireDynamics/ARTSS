@@ -371,3 +371,42 @@ TEST_F(UniformRandomFieldTest, numberComparison3) {
         EXPECT_DOUBLE_EQ(a[i], numbers[i]);
     }
 }
+
+TEST_F(UniformRandomFieldTest, absolute) {
+    real range = 0.1;
+    real step_size = 0.01;
+    size_t size = 100;
+
+    UniformRandom noise_maker(range, step_size, 0);
+    Field a = noise_maker.random_field(size);
+    a += 299;
+
+    for (int i = 0; i < size; i++) {
+        EXPECT_GE(a[i], 299 - range);
+        EXPECT_LE(a[i], 299 + range);
+    }
+}
+
+TEST_F(UniformRandomFieldTest, relative) {
+    real range = 0.1;
+    real step_size = 0.01;
+    std::vector<real> random_numbers = {0.01, 0.02, 0.05, 0.07, 0.02, 0.08, 0.01, 0.07, -0.02, 0.03, 0.03, -0.02, -0.01, -0.04};
+    std::vector<real> numbers =        {50,   100,   70,  20,   300,   100,  40,   14,   500,   600,  17,  1001,  2222,  7};
+    std::vector<real> result =         {50.5,  102,  73.5, 21.4, 306, 108,   40.4, 14.98, 490, 618,  17.51, 980.98, 2199.78, 6.72};
+    result.reserve(numbers.size());
+
+    size_t size = numbers.size();
+
+    UniformRandom noise_maker(range, step_size, 0);
+    Field a = noise_maker.random_field(size);
+    Field b(numbers.size());
+    for (size_t i = 0; i < size; i++) {
+        b[i] = numbers[i];
+    }
+    a += 1;
+    a *= b;
+
+    for (int i = 0; i < size; i++) {
+        EXPECT_DOUBLE_EQ(a[i], result[i]);
+    }
+}
