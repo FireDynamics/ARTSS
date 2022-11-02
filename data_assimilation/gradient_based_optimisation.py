@@ -4,7 +4,7 @@ import time
 import typing
 
 import fdsreader
-import numpy
+import multiprocessing
 import numpy as np
 import pandas
 import pandas as pd
@@ -76,6 +76,58 @@ def map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_ther
     return
 
 
+def start_new_instance(output_file: str, directory: str, artss_exe_path: str,
+                       artss_exe: str = 'artss_data_assimilation_serial'):
+    cwd = os.getcwd()
+    os.chdir(directory)
+    exe_command = f'mpirun --np 2 {os.path.join(artss_exe_path, artss_exe)} {output_file}'
+    print(exe_command)
+    os.system(exe_command)
+    os.chdir(cwd)
+
+
+def create_start_xml(change: dict, input_file: str, output_file: str, t_revert: float, file: str, t_end: float,
+                     directory: str, artss_path: str, file_debug: typing.TextIO, dir_name: str = '') -> [str, str]:
+    f = os.path.join('..', file)
+    f = f.replace("/", "\/")
+
+    command = ''
+    name = ''
+    for key in change:
+        command += f' --{key} {change[key]}'
+        name += f'{key}_'
+    name = name[:-1]
+
+    if not dir_name == '':
+        name = dir_name
+    output_dir = os.path.join(directory, '.vis', name)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    out_file = os.path.join(output_dir, output_file)
+    log(f'out_file: {out_file}', file_debug)
+    log(f'out_dir: {output_dir}', file_debug)
+    command = f'{os.path.join(artss_path, "tools", "change_xml.sh")} -i {input_file} -o {out_file} --da {t_revert} "{f}" 7779 --tend {t_end} --loglevel off' + command
+    log(f'{command}', file_debug)
+    os.system(command)
+    return out_file, output_dir
+
+
+def calc_diff(t_artss: float, t_sensor: float,
+              data_path: str, fds_data: pd.DataFrame, devc_info: dict,
+              file_da: typing.TextIO) -> [dict[str, float], float]:
+    field_reader = FieldReader(t_artss, path=data_path)
+    file_da.write(f'time_sensor:{t_sensor};time_artss:{t_artss}\n')
+    diff_cur, min_pos_x = comparison_sensor_simulation_data(
+        devc_info,
+        fds_data,
+        field_reader,
+        t_sensor,
+        file_da
+    )
+    return diff_cur, min_pos_x
+
+
 def do_rollback(client: TCP_client,
                 t_sensor, t_artss, t_revert,
                 new_para: dict, heat_source: [dict, dict, dict],
@@ -98,7 +150,6 @@ def do_rollback(client: TCP_client,
     wait_artss(t_sensor, artss_data_path, artss)
 
     field_reader = FieldReader(t_artss, path=artss_data_path)
-    file_da.write(f'time_sensor:{t_sensor};time_artss:{t_artss}\n')
     diff_cur, min_pos_x = comparison_sensor_simulation_data(
         devc_info,
         fds_data,
@@ -114,21 +165,25 @@ def log(message: str, file_debug: typing.TextIO):
     file_debug.write(f'{message}\n')
 
 
-def continuous_gradient(client: TCP_client,
-                        file_da: typing.TextIO, file_debug: typing.TextIO,
-                        sensor_times: pandas.Index, devc_info: dict,
-                        cur: dict, delta: dict, keys: list,
-                        artss_data_path: str, artss: XML, domain: Domain,
-                        fds_data: pandas.DataFrame,
-                        heat_source: dict,
-                        n_iterations: int):
+def continuous_gradient_parallel(client: TCP_client,
+                                 file_da: typing.TextIO, file_debug: typing.TextIO,
+                                 sensor_times: pandas.Index, devc_info: dict,
+                                 cur: dict, delta: dict, keys: list,
+                                 artss_path: str, artss_data_path: str,
+                                 artss: XML, domain: Domain,
+                                 fds_data: pandas.DataFrame,
+                                 heat_source: dict,
+                                 n_iterations: int,
+                                 precondition: bool = False):
+    no_cpus = multiprocessing.cpu_count()
+    artss_exe_path = os.path.join(artss_path, 'build', 'bin')
+    xml_input_file = os.path.join(artss_data_path, FieldReader.get_xml_file_name(path=artss_data_path))
     n = max(1, n_iterations)
-    precondition = False
-    for t_sensor in sensor_times[4:]:
+    for t_sensor in sensor_times[3:]:
         pprint(cur)
         wait_artss(t_sensor, artss_data_path, artss)
 
-        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=artss.get_dt())
+        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=artss.get_dt(), time_back=6)
 
         log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
         field_reader = FieldReader(t_artss, path=artss_data_path)
@@ -157,6 +212,171 @@ def continuous_gradient(client: TCP_client,
                                        file_da=file_da, file_debug=file_debug)
 
         nabla = {}
+
+        jobs = {}
+        directories = {}
+        counter = 1
+        for p in keys:
+            output_file, output_dir = create_start_xml(change={p: cur[p] + delta[p]},
+                                                       input_file=xml_input_file, output_file=f'config_{p}.xml',
+                                                       t_revert=t_revert, t_end=t_artss,
+                                                       directory=artss_data_path,
+                                                       file=f'{t_revert:.5e}',
+                                                       artss_path=artss_path,
+                                                       file_debug=file_debug)
+            directories[p] = output_dir
+            job = multiprocessing.Process(target=start_new_instance, args=(
+                output_file, output_dir, artss_exe_path, 'artss_data_assimilation_serial'))
+            job.start()
+            counter += 1
+            jobs[p] = job
+            if counter >= no_cpus:
+                # wait if you want to start more multi processes than cpus available
+                j = jobs.pop(list(jobs.keys())[0])
+                j.join()
+        print('calc nabla parallel')
+        for p in keys:
+            if p in jobs.keys():
+                job = jobs[p]
+                print(f'wait for {job.name} [{job}]')
+                job.join()
+            file_da.write(f'calc_nabla;{p}:{cur[p] + delta[p]}')
+            diff_cur, _ = calc_diff(t_artss=t_artss, t_sensor=t_sensor,
+                                    data_path=directories[p], fds_data=fds_data, devc_info=devc_info,
+                                    file_da=file_da)
+            print(p, diff_cur['T'])
+            nabla[p] = (diff_cur['T'] - diff_orig['T']) / delta[p]
+        log(f'nabla: {nabla}', file_debug)
+        file_da.write(f'nabla without restrictions;')
+        write_da_data(file_da, nabla)
+
+        log(f'nabla without restrictions: {nabla}', file_debug)
+        restrictions = {}
+        if 'HRR' in keys:
+            restrictions['HRR'] = 1
+
+        if 'x0' in keys:
+            if nabla['x0'] < 0:
+                restrictions['x0'] = (domain.domain_param['X2'] - cur['x0']) / -nabla['x0']
+            elif nabla['x0'] > 0:
+                restrictions['x0'] = (cur['x0'] - domain.domain_param['X1']) / nabla['x0']
+            else:
+                restrictions['x0'] = 0
+        if 'y0' in keys:
+            if nabla['y0'] < 0:
+                restrictions['y0'] = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
+            elif nabla['y0'] > 0:
+                restrictions['y0'] = (cur['y0'] - domain.domain_param['Y1']) / nabla['y0']
+            else:
+                restrictions['y0'] = 0
+        if 'z0' in keys:
+            if nabla['z0'] < 0:
+                restrictions['z0'] = (domain.domain_param['Z2'] - cur['z0']) / -nabla['z0']
+            elif nabla['z0'] > 0:
+                restrictions['z0'] = (cur['z0'] - domain.domain_param['Z1']) / nabla['z0']
+            else:
+                restrictions['z0'] = 0
+        log(f'restrictions: {restrictions}', file_debug)
+
+        # search direction
+        nabla = np.asarray([nabla[x] for x in keys])
+        D = np.eye(len(keys))  # -> hesse matrix
+        d = np.dot(-D, nabla)
+
+        # calc alpha
+        sigma = 0.01
+
+        alpha_min = 1
+        for k in keys:
+            alpha_min = min(alpha_min, restrictions[k])
+        alpha = 0.9 * alpha_min
+        log(f'mins: 1.0, {restrictions.values()}', file_debug)
+        log(f'alpha: {alpha}', file_debug)
+        while n > 0:
+            x = np.asarray([cur[x] for x in keys])
+            new_para = x + (alpha * d)
+            new_para = {
+                p: new_para[i]
+                for i, p in enumerate(keys)
+            }
+            pprint(new_para)
+
+            file_da.write(f'iterate:{n};')
+            diff_cur, _ = do_rollback(client=client,
+                                      t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                      new_para=new_para, heat_source=heat_source.values(),
+                                      sub_file_name=n,
+                                      artss_data_path=artss_data_path, artss=artss,
+                                      fds_data=fds_data,
+                                      devc_info=devc_info,
+                                      file_da=file_da, file_debug=file_debug)
+            log(f'conditional statement {diff_orig["T"] + np.dot(alpha * sigma * nabla, d)}', file_debug)
+            if diff_cur['T'] < diff_orig['T'] + np.dot(alpha * sigma * nabla, d):
+                log(f'found alpha: {alpha}', file_debug)
+                log(f'found x_k+1: {new_para}', file_debug)
+                log(f"al1: {np.dot(alpha * sigma * nabla, d)}", file_debug)
+                log(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}", file_debug)
+                cur = copy(new_para)
+                break
+
+            alpha = 0.7 * alpha
+            n = n - 1
+            log(f'ls: {diff_cur["T"]}', file_debug)
+
+        log(f'final nabla: {nabla}', file_debug)
+        file_da.write(f'final;')
+        write_da_data(file_da=file_da, parameters=cur)
+        for key in cur:
+            heat_source['temperature_source'][key] = cur[key]
+
+        log(f'alpha: {alpha}', file_debug)
+        log(f'using cur: {cur}', file_debug)
+
+
+def continuous_gradient(client: TCP_client,
+                        file_da: typing.TextIO, file_debug: typing.TextIO,
+                        sensor_times: pandas.Index, devc_info: dict,
+                        cur: dict, delta: dict, keys: list,
+                        artss_data_path: str, artss: XML, domain: Domain,
+                        fds_data: pandas.DataFrame,
+                        heat_source: dict,
+                        n_iterations: int,
+                        precondition: bool = False):
+    n = max(1, n_iterations)
+    for t_sensor in sensor_times[2:]:
+        pprint(cur)
+        wait_artss(t_sensor, artss_data_path, artss)
+
+        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=artss.get_dt(), time_back=6)
+
+        log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
+        field_reader = FieldReader(t_artss, path=artss_data_path)
+        file_da.write(f'original data;time_sensor:{t_sensor};time_artss:{t_artss}\n')
+        write_da_data(file_da=file_da, parameters=cur)
+        diff_orig, minima_x = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
+
+        log(f'org: {diff_orig["T"]}', file_debug)
+        log(f't revert: {t_revert}', file_debug)
+
+        if sum(diff_orig.values()) < 1e-5:
+            continue
+
+        if precondition:
+            precondition = False
+            cur['x0'] = minima_x
+            heat_source['temperature_source']['x0'] = cur['x0']
+            file_da.write(f'preconditioning;')
+            diff_orig, _ = do_rollback(client=client,
+                                       t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                       new_para={'x0': cur['x0']}, heat_source=heat_source.values(),
+                                       sub_file_name='precondition',
+                                       artss_data_path=artss_data_path, artss=artss,
+                                       fds_data=fds_data,
+                                       devc_info=devc_info,
+                                       file_da=file_da, file_debug=file_debug)
+
+        nabla = {}
+
         for p in keys:
             file_da.write(f'calc_nabla;')
             diff_cur, _ = do_rollback(client=client,
@@ -167,7 +387,6 @@ def continuous_gradient(client: TCP_client,
                                       fds_data=fds_data,
                                       devc_info=devc_info,
                                       file_da=file_da, file_debug=file_debug)
-
             # calc new nabla
             nabla[p] = (diff_cur['T'] - diff_orig['T']) / delta[p]
             log(f'cur: {diff_cur["T"]}', file_debug)
@@ -176,12 +395,7 @@ def continuous_gradient(client: TCP_client,
         log(f'nabla without restrictions: {nabla}', file_debug)
         restrictions = {}
         if 'HRR' in keys:
-            if nabla['HRR'] < 0:
-                restrictions['HRR'] = 1.0
-            elif nabla['HRR'] > 0:
-                restrictions['HRR'] = cur['HRR'] / nabla['HRR']
-            else:
-                restrictions['HRR'] = 0
+            restrictions['HRR'] = 1
 
         if 'x0' in keys:
             if nabla['x0'] < 0:
@@ -260,11 +474,170 @@ def continuous_gradient(client: TCP_client,
         log(f'using cur: {cur}', file_debug)
 
 
-def one_time_gradient():
-    pass
+def one_time_gradient_parallel(client: TCP_client,
+                               file_da: typing.TextIO, file_debug: typing.TextIO,
+                               sensor_times: pandas.Index, devc_info: dict,
+                               cur: dict, delta: dict, keys: list,
+                               artss_path: str, artss_data_path: str,
+                               artss: XML, domain: Domain,
+                               fds_data: pandas.DataFrame,
+                               heat_source: dict,
+                               n_iterations: int,
+                               precondition: bool = False):
+    no_cpus = multiprocessing.cpu_count()
+    artss_exe_path = os.path.join(artss_path, 'build', 'bin')
+    xml_input_file = os.path.join(artss_data_path, FieldReader.get_xml_file_name(path=artss_data_path))
+    for t_sensor in sensor_times[2:]:
+        pprint(cur)
+        wait_artss(t_sensor, artss_data_path, artss)
+
+        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=artss.get_dt(), time_back=6)
+
+        log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
+        field_reader = FieldReader(t_artss, path=artss_data_path)
+        file_da.write(f'original data;time_sensor:{t_sensor};time_artss:{t_artss}\n')
+        write_da_data(file_da=file_da, parameters=cur)
+        diff_orig, minima_x = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
+
+        log(f'org: {diff_orig["T"]}', file_debug)
+        log(f't revert: {t_revert}', file_debug)
+
+        if sum(diff_orig.values()) < 1e-5:
+            continue
+
+        if precondition:
+            precondition = False
+            cur['x0'] = minima_x
+            heat_source['temperature_source']['x0'] = cur['x0']
+            file_da.write(f'preconditioning;')
+            diff_orig, _ = do_rollback(client=client,
+                                       t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                       new_para={'x0': cur['x0']}, heat_source=heat_source.values(),
+                                       sub_file_name='precondition',
+                                       artss_data_path=artss_data_path, artss=artss,
+                                       fds_data=fds_data,
+                                       devc_info=devc_info,
+                                       file_da=file_da, file_debug=file_debug)
+
+        nabla = {}
+
+        jobs = {}
+        directories = {}
+        counter = 1
+        for p in keys:
+            file_da.write(f'calc_nabla;')
+            output_file, output_dir = create_start_xml(change={p: cur[p] + delta[p]},
+                                                       input_file=xml_input_file, output_file=f'config_{p}.xml',
+                                                       t_revert=t_revert, t_end=t_artss,
+                                                       directory=artss_data_path,
+                                                       file=f'{t_revert:.5e}',
+                                                       artss_path=artss_path,
+                                                       file_debug=file_debug)
+            directories[p] = output_dir
+            job = multiprocessing.Process(target=start_new_instance, args=(
+                output_file, output_dir, artss_exe_path, 'artss_data_assimilation_serial'))
+            job.start()
+            counter += 1
+            print(f'after start job {p} with name {job.name}, {job}')
+            jobs[p] = job
+            print(f'added job {p}')
+            if counter >= no_cpus:
+                # wait if you want to start more multi processes than cpus available
+                j = jobs.pop(list(jobs.keys())[0])
+                j.join()
+        print('calc nabla parallel')
+        new_para = {}
+        for p in keys:
+            if p in jobs.keys():
+                job = jobs[p]
+                print(f'wait for {job.name} [{job}]')
+                job.join()
+            diff_cur, _ = calc_diff(t_artss=t_artss, t_sensor=t_sensor,
+                                    data_path=directories[p], fds_data=fds_data, devc_info=devc_info,
+                                    file_da=file_da)
+            print(p, diff_cur['T'])
+            nabla[p] = (diff_cur['T'] - diff_orig['T']) / delta[p]
+            log(f'nabla[{p}]={nabla[p]}', file_debug)
+            if nabla[p] > 0:
+                new_para[p] = cur[p] + delta[p]
+
+        log(f'nabla without restrictions: {nabla}', file_debug)
+        restrictions = {}
+        if 'HRR' in keys:
+            restrictions['HRR'] = 1
+
+        if 'x0' in keys:
+            if nabla['x0'] < 0:
+                restrictions['x0'] = (domain.domain_param['X2'] - cur['x0']) / -nabla['x0']
+            elif nabla['x0'] > 0:
+                restrictions['x0'] = (cur['x0'] - domain.domain_param['X1']) / nabla['x0']
+            else:
+                restrictions['x0'] = 0
+        if 'y0' in keys:
+            if nabla['y0'] < 0:
+                restrictions['y0'] = (domain.domain_param['Y2'] - cur['y0']) / -nabla['y0']
+            elif nabla['y0'] > 0:
+                restrictions['y0'] = (cur['y0'] - domain.domain_param['Y1']) / nabla['y0']
+            else:
+                restrictions['y0'] = 0
+        if 'z0' in keys:
+            if nabla['z0'] < 0:
+                restrictions['z0'] = (domain.domain_param['Z2'] - cur['z0']) / -nabla['z0']
+            elif nabla['z0'] > 0:
+                restrictions['z0'] = (cur['z0'] - domain.domain_param['Z1']) / nabla['z0']
+            else:
+                restrictions['z0'] = 0
+        log(f'restrictions: {restrictions}', file_debug)
+        # search direction
+        nabla = np.asarray([nabla[x] for x in keys])
+        D = np.eye(len(keys))  # -> hesse matrix
+        d = np.dot(-D, nabla)
+
+        # calc alpha
+        sigma = 0.01
+
+        alpha_min = 1
+        for k in keys:
+            alpha_min = min(alpha_min, restrictions[k])
+        alpha = 0.9 * alpha_min
+        log(f'mins: 1.0, {restrictions.values()}', file_debug)
+        log(f'alpha: {alpha}', file_debug)
+        n = n_iterations
+        while n > 0:
+            x = np.asarray([cur[x] for x in keys])
+            new_para = x + (alpha * d)
+            new_para = {
+                p: new_para[i]
+                for i, p in enumerate(keys)
+            }
+            pprint(new_para)
+
+            file_da.write(f'iterate:{n};')
+            diff_cur, _ = do_rollback(client=client,
+                                      t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                      new_para=new_para, heat_source=heat_source.values(),
+                                      sub_file_name=n,
+                                      artss_data_path=artss_data_path, artss=artss,
+                                      fds_data=fds_data,
+                                      devc_info=devc_info,
+                                      file_da=file_da, file_debug=file_debug)
+            log(f'conditional statement {diff_orig["T"] + np.dot(alpha * sigma * nabla, d)}', file_debug)
+            if diff_cur['T'] < diff_orig['T'] + np.dot(alpha * sigma * nabla, d):
+                log(f'found alpha: {alpha}', file_debug)
+                log(f'found x_k+1: {new_para}', file_debug)
+                log(f"al1: {np.dot(alpha * sigma * nabla, d)}", file_debug)
+                log(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}", file_debug)
+                cur = copy(new_para)
+                break
+
+            alpha = 0.7 * alpha
+            n = n - 1
+            log(f'ls: {diff_cur["T"]}', file_debug)
 
 
-def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
+def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, artss_path: str, parallel=False):
+    artss_path = os.path.abspath(artss_path)
+    artss_data_path = os.path.abspath(artss_data_path)
     client = TCP_client.TCPClient()
     # client.set_server_address('172.17.0.2', 7777)
     client.connect()
@@ -287,7 +660,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
 
     delta = {
         'HRR': float(heat_source['temperature_source']['HRR']) * 0.5,
-        'x0': domain.domain_param['dx'] * 5,
+        'x0': domain.domain_param['dx'] * 10,
         'y0': domain.domain_param['dy'] * 1,
         'z0': domain.domain_param['dz'] * 1
     }
@@ -299,13 +672,24 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
         'z0': float(heat_source['temperature_source']['z0'])
     }
 
-    keys = ['HRR']
-    continuous_gradient(client=client, file_da=file_da, file_debug=file_debug,
-                        sensor_times=sensor_times,
-                        devc_info=devc_info_temperature, fds_data=fds_data,
-                        artss_data_path=artss_data_path,
-                        domain=domain, heat_source=heat_source,
-                        cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml)
+    keys = ['HRR', 'x0']
+    if parallel:
+        continuous_gradient_parallel(client=client, file_da=file_da, file_debug=file_debug,
+                                     sensor_times=sensor_times,
+                                     devc_info=devc_info_temperature, fds_data=fds_data,
+                                     artss_data_path=artss_data_path,
+                                     artss_path=artss_path,
+                                     domain=domain, heat_source=heat_source,
+                                     cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
+                                     precondition=False)
+    else:
+        continuous_gradient(client=client, file_da=file_da, file_debug=file_debug,
+                            sensor_times=sensor_times,
+                            devc_info=devc_info_temperature, fds_data=fds_data,
+                            artss_data_path=artss_data_path,
+                            domain=domain, heat_source=heat_source,
+                            cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
+                            precondition=False)
 
     # map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd, xml)
 
@@ -351,10 +735,10 @@ def write_changes_xml(change: dict, source: list, file_name: str, file_da: typin
     return config_file_name, config_file_path
 
 
-def get_time_step_artss(t_sensor: float, artss_data_path: str, dt: float) -> [float, float]:
+def get_time_step_artss(t_sensor: float, artss_data_path: str, dt: float, time_back: float = 10) -> [float, float]:
     files = FieldReader.get_all_time_steps(path=artss_data_path)
     times = list(filter(lambda x: x > t_sensor, files))
-    t_revert = ([dt] + list(filter(lambda x: x <= max(0., t_sensor - 3), files)))[-1]
+    t_revert = ([dt] + list(filter(lambda x: x <= max(0., t_sensor - time_back), files)))[-1]
     print(t_sensor)
     print(files)
     print(times)
@@ -486,7 +870,7 @@ def read_fds_file(data_path: str, artss: Domain) -> pd.DataFrame:
 
 
 def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader,
-                                      t_sensor: float, file_da: typing.TextIO) -> (dict, float):
+                                      t_sensor: float, file_da: typing.TextIO) -> (dict[str, float], float):
     diff: dict = {'T': [], 'C': []}
     fields_sim = field_reader.read_field_data()
     min_pos_x: float = 0
@@ -750,4 +1134,121 @@ def plot_sensor_data(fds_data_path: str, fds_input_file_name: str, artss_data_pa
         plt.ylabel('T [C]')
         plt.legend()
         plt.savefig(f'verlauf_sensor_{sensor_x}.pdf')
+        plt.close()
+
+
+def compare_distance(fds_data_path: str, fds_input_file_name: str, a_data_path: str, artss_path: str):
+    artss_data_path = os.path.abspath(os.path.join(a_data_path, 'distance'))
+    artss_exe_path = os.path.abspath(os.path.join(artss_path, 'build', 'bin'))
+    xml_input_file = os.path.join(artss_data_path, FieldReader.get_xml_file_name(path=artss_data_path))
+
+    file_da = open(os.path.join(artss_data_path, 'da_details.csv'), 'w')
+    file_plot = open(os.path.join(artss_data_path, 'da_plot_details.csv'), 'w')
+    file_plot.write(f'time;x pos;diff\n')
+    file_debug = open(os.path.join(artss_data_path, 'da_debug_details.dat'), 'w')
+
+    xml = XML(FieldReader.get_xml_file_name(path=artss_data_path), path=artss_data_path)
+    xml.read_xml()
+    domain = Domain(xml.domain, xml.obstacles)
+    domain.print_info()
+    domain.print_debug()
+
+    devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
+    log(f'devc info: {devc_info_temperature}', file_debug)
+
+    x_pos_orig = 52.5
+    sensor_times = fds_data.index[3:5]
+    log(sensor_times, file_debug)
+    log(f'artss path {artss_data_path}', file_debug)
+    artss_times = FieldReader.get_all_time_steps(artss_data_path)
+    log(f'artss times {artss_times}', file_debug)
+    log(f'sensor times {sensor_times}', file_debug)
+
+    heat_source = xml.get_temperature_source()
+    x0 = float(heat_source['temperature_source']['x0'])
+    dx = float(domain.domain_param['dx'])
+    sigma_x = float(heat_source['temperature_source']['sigma_x'])
+
+    steps = np.array(range(-20, 20))
+    delta_dx = steps * dx
+    delta_sigma_x = steps * sigma_x
+    log(f'sigma x: {delta_sigma_x}', file_debug)
+    log(f'x: {delta_dx}', file_debug)
+
+    no_cpus = multiprocessing.cpu_count()
+    devc_info = devc_info_temperature
+
+    for t_sensor in sensor_times:
+        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(), time_back=6)
+
+        log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
+        field_reader = FieldReader(t_artss, path=artss_data_path)
+        diff_orig, minima_x = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
+        file_plot.write(f'{t_sensor};{x_pos_orig};{diff_orig}\n')
+        log(f'org: {diff_orig["T"]}', file_debug)
+        log(f't revert: {t_revert}', file_debug)
+
+        jobs = {}
+        directories = {}
+        counter = 1
+
+        l_diff = []
+        l_xpos = []
+        l_xpos_r = []
+
+        for delta in delta_dx:
+            x_pos = x0 + delta
+            log(f'xpos: {x_pos}', file_debug)
+            output_file, output_dir = create_start_xml(change={'x0': x_pos},
+                                                       input_file=xml_input_file, output_file=f'config_{delta:.5e}.xml',
+                                                       t_revert=t_revert, t_end=t_artss,
+                                                       directory=artss_data_path,
+                                                       file=f'{t_revert:.5e}',
+                                                       artss_path=artss_path,
+                                                       file_debug=file_debug,
+                                                       dir_name=f'x_{x_pos}')
+            directories[delta] = output_dir
+            job = multiprocessing.Process(target=start_new_instance, args=(
+                output_file, output_dir, artss_exe_path, 'artss_data_assimilation_serial'))
+            job.start()
+            counter += 1
+            jobs[delta] = job
+            if counter >= no_cpus:
+                # wait if you want to start more multi processes than cpus available
+                j = jobs.pop(list(jobs.keys())[0])
+                j.join()
+
+        for delta in delta_sigma_x:
+            x_pos = x0 + delta
+            if delta in jobs.keys():
+                job = jobs[delta]
+                print(f'wait for {job.name} [{job}]')
+                job.join()
+            file_da.write(f'sigma_x;{x_pos};{delta}\n')
+            diff_cur, _ = calc_diff(t_artss=t_artss, t_sensor=t_sensor,
+                                    data_path=directories[delta], fds_data=fds_data, devc_info=devc_info,
+                                    file_da=file_da)
+            l_diff.append(diff_cur['T'])
+            l_xpos.append(x_pos)
+            l_xpos_r.append(delta)
+            file_plot.write(f'{t_artss};{x_pos};{diff_cur["T"]}\n')
+
+        file_plot.flush()
+        file_da.flush()
+        log(f'x_pos: {l_xpos}\ndiff: {l_diff}', file_debug)
+        file_debug.flush()
+
+        tmp_int = int(t_artss)
+        plt.plot(l_xpos, l_diff)
+        plt.xlabel('x position of heat source')
+        plt.ylabel('difference to FDS data')
+        plt.title('Move heat source based on cell width dx')
+        plt.savefig(f'distance_dx_{tmp_int:02d}.pdf', format='pdf')
+        plt.close()
+
+        plt.plot(l_xpos_r, l_diff)
+        plt.title('Move heat source based on cell width dx')
+        plt.xlabel('relative x position of heat source')
+        plt.ylabel('difference to FDS data')
+        plt.savefig(f'distance_dx_{tmp_int:02d}_relative.pdf', format='pdf')
         plt.close()

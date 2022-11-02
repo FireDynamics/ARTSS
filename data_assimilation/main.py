@@ -138,6 +138,8 @@ def tmp(path):
 
 
 if __name__ == '__main__':
-    gradient_based_optimisation.start(artss_data_path='../tmp/tunnel/',
-                                      fds_data_path='../tmp/tunnel/', fds_input_file_name='tunnel')
+    gradient_based_optimisation.start(artss_data_path='example',
+                                      fds_data_path='example/fds_data', fds_input_file_name='tunnel',
+                                      artss_path=os.path.join(os.getcwd(), '..'),
+                                      parallel=True)
     # main(dry_run=False)

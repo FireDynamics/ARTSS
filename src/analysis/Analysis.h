@@ -15,7 +15,9 @@
 
 class Analysis {
  public:
-    Analysis(const Settings::solver::solution &solution_settings, Solution &solution);
+    Analysis(const Settings::solver::solution &solution_settings,
+             const Settings::visualisation_parameters &visualisation_settings,
+             Solution &solution);
 
     void analyse(FieldController *solver, real t);
 
@@ -29,6 +31,7 @@ class Analysis {
 
  private:
     const Settings::solver::solution &m_solution_settings;
+    const Settings::visualisation_parameters &m_visualisation_settings;
 
     bool compare_solutions(read_ptr num, read_ptr ana, FieldType type, real t);
 

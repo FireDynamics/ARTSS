@@ -42,13 +42,18 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
     }
 }
 
-void DataAssimilation::initiate_rollback() {
+void DataAssimilation::initiate_time_skip(const real t_cur) {
+    m_time_interval_counter = static_cast<int>(t_cur / m_output_time_interval) + 1;
+    m_logger->debug("change counter to {} for {}", m_time_interval_counter, t_cur);
     m_field_controller->replace_data(m_new_field_u, m_new_field_v, m_new_field_w,
                                      m_new_field_p, m_new_field_T, m_new_field_C);
 }
 
 void DataAssimilation::save_data(real t_cur) {
     if (t_cur >= m_output_time_interval * m_time_interval_counter) {
+        m_logger->debug("save data for {} with interval {} counter {}",
+                        t_cur, m_output_time_interval,
+                        m_time_interval_counter);
         m_time_interval_counter++;
         Field &u = m_field_controller->get_field_u();
         Field &v = m_field_controller->get_field_v();
@@ -129,4 +134,19 @@ bool DataAssimilation::requires_rollback(const real t_cur) {
         return result;
     }
     return flag;
+}
+
+bool DataAssimilation::load_data() {
+    bool load_data = m_settings.assimilation_parameters.load_data;
+    if (!load_data) {
+        return load_data;
+    }
+    m_t_cur = m_settings.assimilation_parameters.time;
+
+    m_field_IO_handler->read_fields(m_settings.assimilation_parameters.file,
+                                    m_t_cur,
+                                    m_new_field_u, m_new_field_v, m_new_field_w,
+                                    m_new_field_p, m_new_field_T, m_new_field_C);
+
+    return load_data;
 }

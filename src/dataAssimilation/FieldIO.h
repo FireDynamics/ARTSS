@@ -33,6 +33,9 @@ class FieldIO {
                              Field &p, Field &T, Field &C);
 
     void create_meta_file(real t_cur);
+    void read_fields(const std::string &file_name, real t,
+                     Field &u, Field &v, Field &w,
+                     Field &p, Field &T, Field &C);
 
 private:
     void create_header(HighFive::File &file);

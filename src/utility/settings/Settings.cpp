@@ -159,6 +159,7 @@ namespace Settings {
         if (vp.save_vtk) {
             vp.vtk_nth_plot = get_required_size_t(values, "vtk_nth_plot", context);
         }
+        vp.final_output = get_optional_bool(values, "final_output", true);
         return vp;
     }
 
@@ -971,6 +972,12 @@ namespace Settings {
             ap.class_name = get_required_string(values, "class_name", context);
             ap.output_time_interval = get_optional_real(values, "write_output", 1);
             ap.output_dir = get_optional_string(values, "output_dir", ".vis");
+            ap.load_data = get_required_bool(values, "load_data", context);
+            if (ap.load_data) {
+                ap.file = get_required_string(values, "file", context);
+                ap.time = get_required_real(values, "time", context);
+            }
+            ap.port = static_cast<int>(get_optional_size_t(values, "port", 7777));
         }
         return ap;
     }
