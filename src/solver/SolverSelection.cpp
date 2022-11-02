@@ -114,6 +114,18 @@ namespace SolverSelection {
     }
 
     void add_noise(const Settings::random_parameters &random_parameters, ISourceFunction **source_function) {
+#ifndef BENCHMARKING
+        auto logger = Utility::create_logger(class_name);
+        if (!random_parameters.absolute && (random_parameters.range > 1 || random_parameters.range  < 0)) {
+            logger->error("range for relative noise has to be between [0:1], given value: {}", random_parameters.range);
+            std::exit(1);
+        }
+#else
+        if (!random_parameters.absolute && (random_parameters.range > 1 || random_parameters.range  < 0)) {
+            std::cout << "range for relative noise has to be between [0:1], given value: {}" << random_parameters.range << std::endl;
+            std::exit(1);
+        }
+#endif
         IRandomField *noise_maker;
         if (random_parameters.custom_seed) {
             noise_maker = new UniformRandom(random_parameters.range, random_parameters.step_size, random_parameters.seed);

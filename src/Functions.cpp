@@ -17,6 +17,8 @@
 #include "domain/DomainData.h"
 #include "domain/DomainController.h"
 #include "utility/Utility.h"
+#include "interfaces/IRandomField.h"
+#include "randomField/UniformRandom.h"
 
 const std::string FunctionNames::beltrami = "Beltrami";
 const std::string FunctionNames::buoyancy_mms = "BuoyancyMMS";
@@ -734,30 +736,38 @@ void mcdermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, c
 /// \param  step_size    interval steps of random numbers
 // ***************************************************************************************
 void random(Field &out, const Settings::random_parameters &random_params) {
+#ifndef BENCHMARKING
+    auto logger = Utility::create_logger(class_name);
+    if (!random_params.absolute && (random_params.range > 1 || random_params.range  < 0)) {
+        logger->error("range for relative noise has to be between [0:1], given value: {}", random_params.range);
+        std::exit(1);
+    }
+#else
+    if (!random_params.absolute && (random_params.range > 1 || random_params.range  < 0)) {
+        std::cout << "range for relative noise has to be between [0:1], given value: {}" << random_params.range << std::endl;
+        std::exit(1);
+    }
+#endif
     auto domain_controller = DomainController::getInstance();
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
     size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
-
-    std::mt19937 mt;
-    int steps = static_cast<int>(random_params.range / random_params.step_size);
-    if (random_params.seed > 0) {
-        mt = std::mt19937(random_params.seed);
+    IRandomField *noise_maker;
+    if (random_params.custom_seed) {
+        noise_maker = new UniformRandom(random_params.range, random_params.step_size, random_params.seed);
     } else {
-        std::random_device rd;
-        mt = std::mt19937(rd());
+        noise_maker = new UniformRandom(random_params.range, random_params.step_size);
     }
-    std::uniform_int_distribution<int> dist(-steps, steps);
 
     out.update_host();
+    auto noise = noise_maker->random_field(out.get_size());
+
     // inner cells
     for (size_t i = 0; i < size_domain_inner_list; i++) {
         size_t idx = domain_inner_list[i];
-        // generate secret number between -range and range:
-        double no = dist(mt) * random_params.step_size;
         if (random_params.absolute) {
-            out[idx] += (no);
+            out[idx] += noise[idx];
         } else {
-            out[idx] *= (1 + no);
+            out[idx] *= (1 + noise[idx]);
         }
     }
     out.update_dev();
