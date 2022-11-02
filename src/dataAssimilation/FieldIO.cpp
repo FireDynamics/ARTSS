@@ -80,7 +80,7 @@ void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &
 /// \param  C       field C to store the read data
 // *************************************************************************************************
 void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
-    m_logger->debug("read original data @t: {}", t_cur);
+    m_logger->debug("read all original data @t: {}", t_cur);
     auto t_cur_str = fmt::format("{:.5e}", t_cur);
     std::filesystem::path file_name = m_path;
     file_name /= t_cur_str;
@@ -206,8 +206,9 @@ void FieldIO::read_fields(const real t_cur,
     m_logger->debug("read time step {}", t_cur);
     create_meta_file(t_cur);
     if (!field_changes.changed) {  // no changes -> read original file
-        m_logger->debug("no field changes");
+        m_logger->debug("no field changes, read original data");
         read_fields(t_cur, u, v, w, p, T, C);
+        m_logger->debug("finished reading original data");
         return;
     }
 
