@@ -114,8 +114,9 @@ namespace SolverSelection {
     }
 
     void add_noise(const Settings::random_parameters &random_parameters, ISourceFunction **source_function) {
+        auto logger = Utility::create_logger(class_name);
         if (!random_parameters.absolute && (random_parameters.range > 1 || random_parameters.range  < 0)) {
-            std::cout << "range for relative noise has to be between [0:1], given value: " << random_parameters.range << std::endl;
+            logger->error("range for relative noise has to be between [0:1], given value: {}", random_parameters.range);
             std::exit(1);
         }
         IRandomField *noise_maker;

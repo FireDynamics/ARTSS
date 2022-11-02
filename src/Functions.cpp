@@ -736,8 +736,9 @@ void mcdermott(Field &out_x, Field &out_y, Field &out_z, Field &out_p, real t, c
 /// \param  step_size    interval steps of random numbers
 // ***************************************************************************************
 void random(Field &out, const Settings::random_parameters &random_params) {
+    auto logger = Utility::create_logger(class_name);
     if (!random_params.absolute && (random_params.range > 1 || random_params.range  < 0)) {
-        std::cout << "range for relative noise has to be between [0:1], given value: " << random_params.range << std::endl;
+        logger->error("range for relative noise has to be between [0:1], given value: {}", random_params.range);
         std::exit(1);
     }
     auto domain_controller = DomainController::getInstance();
