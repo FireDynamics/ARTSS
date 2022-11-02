@@ -16,12 +16,12 @@
 GaussFunction::GaussFunction(const Settings::solver::sources::gauss &settings) :
         m_field_spatial_values(FieldType::RHO, 0),
         m_settings(settings) {
-    create_spatial_values();
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
     m_logger->debug("create gauss function with parameters dimension: {}, position: {}, hc: {}, HRR: {}, tau: {}",
-                   settings.dimension, settings.position, settings.heat_capacity, settings.heat_release_rate, settings.tau);
+                    settings.dimension, settings.position, settings.heat_capacity, settings.heat_release_rate, settings.tau);
 #endif
+    create_spatial_values();
 }
 
 void GaussFunction::update_source(Field &out, real t_cur) {
