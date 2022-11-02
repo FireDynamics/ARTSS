@@ -114,6 +114,10 @@ namespace SolverSelection {
     }
 
     void add_noise(const Settings::random_parameters &random_parameters, ISourceFunction **source_function) {
+        if (!random_parameters.absolute && (random_parameters.range > 1 || random_parameters.range  < 0)) {
+            std::cout << "range for relative noise has to be between [0:1], given value: " << random_parameters.range << std::endl;
+            std::exit(1);
+        }
         IRandomField *noise_maker;
         if (random_parameters.custom_seed) {
             noise_maker = new UniformRandom(random_parameters.range, random_parameters.step_size, random_parameters.seed);
