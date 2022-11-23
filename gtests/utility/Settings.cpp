@@ -1771,6 +1771,30 @@ TEST(SettingsTest, assimilation2) {
     Settings::data_assimilation_parameters da = Settings::parse_assimilation_parameters(doc.RootElement());
     EXPECT_TRUE(da.enabled);
     EXPECT_EQ("TemperatureSource", da.class_name);
+    EXPECT_FALSE(da.load_data);
+    EXPECT_EQ(da.output_dir, ".vis");
+}
+
+TEST(SettingsTest, assimilation3) {
+    std::string xml = R"(
+<ARTSS>
+  <data_assimilation enabled="Yes" class_name="TemperatureSourceChanger" load_data="Yes" file="1.10000e+01">
+    <write_output> 1 </write_output>
+    <time> 11 </time>
+    <port> 10 </port>
+  </data_assimilation>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::data_assimilation_parameters da = Settings::parse_assimilation_parameters(doc.RootElement());
+    EXPECT_TRUE(da.enabled);
+    EXPECT_EQ("TemperatureSourceChanger", da.class_name);
+    EXPECT_TRUE(da.load_data);
+    EXPECT_EQ(da.file, "1.10000e+01");
+    EXPECT_EQ(da.output_dir, ".vis");
+    EXPECT_EQ(da.output_time_interval, 1);
+    EXPECT_EQ(da.time, 11);
+    EXPECT_EQ(da.port, 10);
 }
 
 TEST(SettingsTest, assimilationHeatSourceChanges) {
