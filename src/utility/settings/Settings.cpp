@@ -968,10 +968,10 @@ namespace Settings {
         data_assimilation_parameters ap{};
         ap.enabled = get_required_bool(values, "enabled", context);
 
+        ap.output_dir = get_optional_string(values, "output_dir", ".vis");
         if (ap.enabled) {
             ap.class_name = get_required_string(values, "class_name", context);
             ap.output_time_interval = get_optional_real(values, "write_output", 1);
-            ap.output_dir = get_optional_string(values, "output_dir", ".vis");
             ap.load_data = get_optional_bool(values, "load_data", false);
             if (ap.load_data) {
                 ap.file = get_required_string(values, "file", context);
