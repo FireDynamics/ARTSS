@@ -46,6 +46,8 @@ class Multigrid {
     size_t get_start_index_obstacle_cells_level_joined(size_t level) const { return m_jl_obstacle_list.get_first_index(level); }
     size_t get_end_index_obstacle_cells_level_joined(size_t level) const { return m_jl_obstacle_list.get_last_index(level); }
 
+    void replace_obstacles(const std::vector<Obstacle> &obstacles, const std::vector<BoundaryDataController> &bdc_obstacles);
+
     void update_lists();
 
     void apply_boundary_condition(Field &field, bool sync = false);

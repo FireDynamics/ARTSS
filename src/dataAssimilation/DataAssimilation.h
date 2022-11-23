@@ -20,6 +20,7 @@
 struct AssimilationMethods {
     inline static const std::string standard = "default";
     inline static const std::string temperature_source = "TemperatureSourceChanger";
+    inline static const std::string obstacle_changer = "ObstacleChanger";
 };
 
 struct DataAssimilationPackageHeader {

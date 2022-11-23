@@ -174,3 +174,9 @@ std::vector<FieldType> DomainController::get_used_fields() const {
 bool DomainController::is_blocked_by_obstacle(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const {
     return m_multigrid->is_blocked_by_obstacle(start, end);
 }
+
+void DomainController::replace_obstacles(const Settings::obstacles_parameters &obstacle_parameters) {
+    auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(obstacle_parameters);
+    detect_neighbouring_obstacles(obstacles);
+    m_multigrid->replace_obstacles(obstacles, bdc_obstacles);
+}

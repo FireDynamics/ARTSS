@@ -9,6 +9,7 @@
 #include "../TCP/TCPServer.h"
 #include "mpi.h"
 #include "TemperatureSourceChanger.h"
+#include "ObstacleChanger.h"
 
 DataAssimilation::DataAssimilation(const SolverController &solver_controller,
                                    FieldController *field_controller,
@@ -35,6 +36,8 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
         } else if (m_settings.assimilation_parameters.class_name == AssimilationMethods::temperature_source) {
             m_parameter_handler = new TemperatureSourceChanger(m_solver_controller,
                                                                m_settings.solver_parameters.temperature.source);
+        } else if (m_settings.assimilation_parameters.class_name == AssimilationMethods::obstacle_changer) {
+            m_parameter_handler = new ObstacleChanger(m_settings.obstacles_parameters);
         } else {
             m_logger->error("assimilation method {} not known", m_settings.assimilation_parameters.class_name);
             std::exit(1);
