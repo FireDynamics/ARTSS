@@ -1,6 +1,5 @@
 import os
 import time
-import matplotlib.pyplot as plt
 
 import numpy as np
 from numpy import ndarray
@@ -10,6 +9,7 @@ import data_assimilation
 import gradient_based_optimisation
 from ARTSS import XML, Domain, DAFile, DAPackage
 from data_assimilation import FieldReader
+from obstacle import Obstacle
 
 
 def create_message(t_cur: float, config_file_name: str) -> bin:
@@ -104,37 +104,19 @@ def main(dry_run=False):
             time.sleep(10)
 
 
-def tmp(path):
-    xml = XML(FieldReader.get_xml_file_name(path=path), path=path)
-    xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
-    domain.print_info()
-
-    cwd = os.getcwd()
-    client = TCP_client.TCPClient()
-    client.connect()
-
-    source_type, temperature_source, random = xml.get_temperature_source()
-    params = {'x0': xml.domain['dx'] * 2, 'y0': xml.domain['dy'] * 2, 'z0': xml.domain['dz']}
-    params = [0, 0]
-    for n in params:
-        t_revert = 0.2 * 2
-        t_artss = 0.2 * 5
-        gradient_based_optimisation.wait_artss(t_artss, path, xml)
-        field_reader = FieldReader(t_artss, path=path)
-        field_reader.read_field_data()
-
-        config_file_name = gradient_based_optimisation.write_changes_xml(
-            {},
-            # {'x0': float(temperature_source['x0']) + n},
-            [source_type, temperature_source, random],
-            f'test_{n}.xml',
-            path=cwd)
-        client.send_message(create_message(t_revert, config_file_name))
-
-    gradient_based_optimisation.wait_artss(1, path, xml)
-    field_reader = FieldReader(1, path=path)
-    field_reader.read_field_data()
+def tmp():
+    obstacle = Obstacle("cube")
+    obstacle.add_geometry([1, 2, 2, 3, 3, 4])
+    obstacle.add_boundary(fields=['u', 'v', 'w'], patches=['front', 'back', 'left', 'right', 'bottom', 'top'],
+                          boundary_condition='dirichlet', value=0)
+    obstacle.add_boundary(fields=['p'], patches=['front', 'right', 'bottom', 'top'], boundary_condition='neumann',
+                          value=1)
+    obstacle.add_boundary(fields=['p'], patches=['back'], boundary_condition='neumann', value=10)
+    obstacle.add_boundary(fields=['p'], patches=['left'], boundary_condition='dirichlet', value=11)
+    da = DAFile()
+    da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
+    da.create_obstacle_changes([obstacle], True)
+    da.write_xml('change_obstacle.xml', pretty_print=True)
 
 
 if __name__ == '__main__':

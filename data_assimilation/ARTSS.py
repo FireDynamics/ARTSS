@@ -5,6 +5,9 @@ import ctypes
 
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as md
+from typing import List
+
+from obstacle import Obstacle, FIELD_TYPES, PATCHES
 
 
 class DAPackage:
@@ -84,28 +87,51 @@ class DAFile:
     def __init__(self):
         self.xml_root = ET.Element('ARTSS')
 
+    def create_obstacle_changes(self, list_obstacles: List[Obstacle], obstacle_enabled: bool):
+        # create obstacle part
+        # <obstacles enabled = "Yes">
+        #   <obstacle name = "name">
+        #       <geometry ox1 = "0.0273" ox2 = "0.964" oy1 = "0.0078" oy2 = "0.992" oz1 = "-0.492" oz2 = "0.4785" />
+        #       <boundary field = "u,v,w" patch = "front,back,left,right,bottom,top" type = "dirichlet" value = "0.0" />
+        #       <boundary field = "p" patch = "front,back,left,right,bottom,top" type = "neumann" value = "0.0" />
+        #   </obstacle>
+        # </obstacles>
+        obstacle_root = ET.SubElement(self.xml_root, 'obstacles',
+                                      enabled='Yes' if obstacle_enabled else 'No')
+        for obstacle in list_obstacles:
+            single_obstacle = ET.SubElement(obstacle_root, 'obstacle', name=obstacle.name)
+            ET.SubElement(single_obstacle, 'geometry',
+                          ox1=str(obstacle.geometry[0]), ox2=str(obstacle.geometry[1]),
+                          oy1=str(obstacle.geometry[2]), oy2=str(obstacle.geometry[3]),
+                          oz1=str(obstacle.geometry[4]), oz2=str(obstacle.geometry[5]))
+            for count, boundary in enumerate(obstacle.boundary):
+                field_type = list(FIELD_TYPES.keys())[count]
+                if not boundary.empty:
+                    for p in PATCHES.keys():
+                        ET.SubElement(single_obstacle, 'boundary', field=field_type, patch=p,
+                                      type=boundary.boundary_conditions[PATCHES[p]],
+                                      value=str(boundary.values[PATCHES[p]]))
+
     def create_temperature_source_changes(self, source_type: dict,
                                           temperature_source: dict,
                                           random: dict):
         # create temperature source part
-        # <ARTSS>
-        #   <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="Yes">
-        #     <HRR> 25000. </HRR> <!-- Total heat release rate( in kW) -->
-        #     <cp> 1.023415823 </cp> <!-- specific heat capacity( in kJ / kgK)-->
-        #     <x0> 40. </x0>
-        #     <y0> -3. </y0>
-        #     <z0> 0. </z0>
-        #     <sigma_x> 1.0 </sigma_x>
-        #     <sigma_y> 1.5 </sigma_y>
-        #     <sigma_z> 1.0 </sigma_z>
-        #     <tau> 5. </tau>
-        #     <random absolute="Yes" custom_seed="Yes" custom_steps="Yes">
-        #       <seed> 0 </seed>
-        #       <step_size> 0.1 </step_size>
-        #       <range> 1 </range>
-        #     </random>
-        #   </source>
-        # </ARTSS>
+        # <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="Yes">
+        #   <HRR> 25000. </HRR> <!-- Total heat release rate( in kW) -->
+        #   <cp> 1.023415823 </cp> <!-- specific heat capacity( in kJ / kgK)-->
+        #   <x0> 40. </x0>
+        #   <y0> -3. </y0>
+        #   <z0> 0. </z0>
+        #   <sigma_x> 1.0 </sigma_x>
+        #   <sigma_y> 1.5 </sigma_y>
+        #   <sigma_z> 1.0 </sigma_z>
+        #   <tau> 5. </tau>
+        #   <random absolute="Yes" custom_seed="Yes" custom_steps="Yes">
+        #     <seed> 0 </seed>
+        #     <step_size> 0.1 </step_size>
+        #     <range> 1 </range>
+        #   </random>
+        # </source>
         source = ET.SubElement(self.xml_root, 'source', type=source_type['type'], dir=source_type['dir'],
                                temp_fct=source_type['temp_fct'],
                                dissipation='Yes' if source_type['dissipation'] == 'Yes' else 'No',
