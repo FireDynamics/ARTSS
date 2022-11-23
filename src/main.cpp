@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 #ifdef ASSIMILATION
             MPI_Request request;
             int port = settings.assimilation_parameters.port;
-            MPI_Isend(port, 1, MPI_INT, 1, 10, MPI_COMM_WORLD,&request);
+            MPI_Isend(&port, 1, MPI_INT, 1, 10, MPI_COMM_WORLD,&request);
             MPI_Isend(settings.logging_parameters.level.c_str(),
                       static_cast<int>(settings.logging_parameters.level.size()), MPI_CHAR, 1, 0, MPI_COMM_WORLD,
                       &request);
@@ -109,7 +109,7 @@ void server() {
     MPI_Request request = MPI_REQUEST_NULL;  // communication is finished
 
     int port;
-    MPI_Recv(&port, 1, MPI_INT, status.MPI_TAG, 10, MPI_COMM_WORLD, &status);
+    MPI_Recv(&port, 1, MPI_INT, MPI_ANY_SOURCE, 10, MPI_COMM_WORLD, &status);
 
 #ifndef BENCHMARKING
     MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
@@ -117,7 +117,7 @@ void server() {
     MPI_Get_count(&status, MPI_CHAR, &msg_len);
     std::vector<char> msg;
     msg.resize(msg_len);
-    MPI_Recv(msg.data(), msg_len, MPI_CHAR, status.MPI_TAG, 0, MPI_COMM_WORLD, &status);
+    MPI_Recv(msg.data(), msg_len, MPI_CHAR, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
 
     std::string log_file = "tcp_server.log";
     Utility::create_logger(msg.data(), log_file);;
@@ -151,7 +151,7 @@ void server() {
             std::vector<char> msg;
 
             msg.resize(msg_len);
-            MPI_Recv(msg.data(), msg_len, MPI_CHAR, 0, status.MPI_TAG, MPI_COMM_WORLD, &status);
+            MPI_Recv(msg.data(), msg_len, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             std::cout << "received reply: " << msg.data() << std::endl;
             logger->debug("received reply: {}", msg.data());
             new_client->send_message(fmt::format("message was received: {}", msg.data()));  // send a message back (acknowledgment/error/whatever)
