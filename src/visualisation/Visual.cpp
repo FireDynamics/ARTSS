@@ -35,12 +35,18 @@ void Visual::visualise(const FieldController &field_controller, real t) {
     real t_end = domain_data->get_physical_parameters().t_end;
 
     int n = static_cast<int> (std::round(t / dt));
+#ifndef BENCHMARKING
+    m_logger->debug("{}th time step", n);
+#endif
 
     std::string file_name_numerical = create_file_name(m_file_name, n, false);
     std::string file_name_analytical = create_file_name(m_file_name, n, true);
     if (m_settings.save_vtk) {
         real vtk_plot = static_cast<real>(m_settings.vtk_nth_plot.value());
         if (fmod(n, vtk_plot) == 0 || t >= t_end) {
+#ifndef BENCHMARKING
+            m_logger->debug("write vtk file {}", n);
+#endif
             VTKWriter::write_numerical(field_controller, file_name_numerical);
             if (m_has_analytical_solution) {
                 VTKWriter::write_analytical(m_solution, file_name_analytical);
@@ -51,6 +57,9 @@ void Visual::visualise(const FieldController &field_controller, real t) {
     if (m_settings.save_csv) {
         real csv_plot = static_cast<real>(m_settings.csv_nth_plot.value());
         if (fmod(n, csv_plot) == 0 || t >= t_end) {
+#ifndef BENCHMARKING
+            m_logger->debug("write csv file {}", n);
+#endif
             CSVWriter::write_numerical(field_controller, file_name_numerical);
             if (m_has_analytical_solution) {
                 CSVWriter::write_analytical(m_solution, file_name_analytical);
