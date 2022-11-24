@@ -11,15 +11,20 @@
 #include "../interfaces/IParameterReader.h"
 #include "../utility/settings/Settings.h"
 #include "../utility/Utility.h"
+#include "../solver/SolverController.h"
 
 class ObstacleChanger : public IParameterReader {
 public:
-    explicit ObstacleChanger(const Settings::obstacles_parameters &obstacle_parameters) :
+    ObstacleChanger(const SolverController &solver_controller,
+                    const Settings::obstacles_parameters &obstacle_parameters) :
+            m_solver_controller(solver_controller),
             m_obstacles(obstacle_parameters),
-            m_logger(Utility::create_logger(typeid(this).name())) {}
+            m_logger(Utility::create_logger(typeid(this).name())) { }
+
     return_parameter_reader read_config(const std::string &filename) override;
 
 private:
+    const SolverController &m_solver_controller;
     const Settings::obstacles_parameters &m_obstacles;
     std::shared_ptr<spdlog::logger> m_logger;
 };

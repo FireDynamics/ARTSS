@@ -20,8 +20,9 @@ return_parameter_reader ObstacleChanger::read_config(const std::string &filename
         // TODO (c++20)
         // bool parameter_changes = new struct obstacle_parameters != old struct obstacle_parameters;
         if (parameter_changes) {
-            m_logger->debug("apply heat source changes");
+            m_logger->debug("apply obstacle changes");
             DomainController::getInstance()->replace_obstacles(obstacle_parameters);
+            m_solver_controller.update_sight();
         }
         m_logger->debug("parse field changes");
 

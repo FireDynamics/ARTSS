@@ -37,7 +37,7 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
             m_parameter_handler = new TemperatureSourceChanger(m_solver_controller,
                                                                m_settings.solver_parameters.temperature.source);
         } else if (m_settings.assimilation_parameters.class_name == AssimilationMethods::obstacle_changer) {
-            m_parameter_handler = new ObstacleChanger(m_settings.obstacles_parameters);
+            m_parameter_handler = new ObstacleChanger(m_solver_controller, m_settings.obstacles_parameters);
         } else {
             m_logger->error("assimilation method {} not known", m_settings.assimilation_parameters.class_name);
             std::exit(1);
