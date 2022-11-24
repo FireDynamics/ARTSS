@@ -1,7 +1,7 @@
 import math
 import os
 import time
-import typing
+from typing import Dict, TextIO
 
 import fdsreader
 import multiprocessing
@@ -23,7 +23,7 @@ from data_assimilation import FieldReader
 from main import create_message
 
 
-def write_da_data(file_da: typing.TextIO, parameters: dict):
+def write_da_data(file_da: TextIO, parameters: dict):
     for key in parameters:
         file_da.write(f';{key}:{parameters[key]}')
     file_da.write('\n')
@@ -87,7 +87,7 @@ def start_new_instance(output_file: str, directory: str, artss_exe_path: str,
 
 
 def create_start_xml(change: dict, input_file: str, output_file: str, t_revert: float, file: str, t_end: float,
-                     directory: str, artss_path: str, file_debug: typing.TextIO, dir_name: str = '') -> [str, str]:
+                     directory: str, artss_path: str, file_debug: TextIO, dir_name: str = '') -> [str, str]:
     f = os.path.join('..', file)
     f = f.replace("/", "\/")
 
@@ -115,7 +115,7 @@ def create_start_xml(change: dict, input_file: str, output_file: str, t_revert: 
 
 def calc_diff(t_artss: float, t_sensor: float,
               data_path: str, fds_data: pd.DataFrame, devc_info: dict,
-              file_da: typing.TextIO) -> [dict[str, float], float]:
+              file_da: TextIO) -> [Dict[str, float], float]:
     field_reader = FieldReader(t_artss, path=data_path)
     file_da.write(f'time_sensor:{t_sensor};time_artss:{t_artss}\n')
     diff_cur, min_pos_x = comparison_sensor_simulation_data(
@@ -135,7 +135,7 @@ def do_rollback(client: TCP_client,
                 artss_data_path: str, artss: XML,
                 fds_data,
                 devc_info: dict,
-                file_da: typing.TextIO, file_debug: typing.TextIO) -> [dict, float]:
+                file_da: TextIO, file_debug: TextIO) -> [dict, float]:
     config_file_name, _ = write_changes_xml(
         new_para,
         heat_source,
@@ -160,13 +160,13 @@ def do_rollback(client: TCP_client,
     return diff_cur, min_pos_x
 
 
-def log(message: str, file_debug: typing.TextIO):
+def log(message: str, file_debug: TextIO):
     print(message)
     file_debug.write(f'{message}\n')
 
 
 def continuous_gradient_parallel(client: TCP_client,
-                                 file_da: typing.TextIO, file_debug: typing.TextIO,
+                                 file_da: TextIO, file_debug: TextIO,
                                  sensor_times: pandas.Index, devc_info: dict,
                                  cur: dict, delta: dict, keys: list,
                                  artss_path: str, artss_data_path: str,
@@ -334,7 +334,7 @@ def continuous_gradient_parallel(client: TCP_client,
 
 
 def continuous_gradient(client: TCP_client,
-                        file_da: typing.TextIO, file_debug: typing.TextIO,
+                        file_da: TextIO, file_debug: TextIO,
                         sensor_times: pandas.Index, devc_info: dict,
                         cur: dict, delta: dict, keys: list,
                         artss_data_path: str, artss: XML, domain: Domain,
@@ -475,7 +475,7 @@ def continuous_gradient(client: TCP_client,
 
 
 def one_time_gradient_parallel(client: TCP_client,
-                               file_da: typing.TextIO, file_debug: typing.TextIO,
+                               file_da: TextIO, file_debug: TextIO,
                                sensor_times: pandas.Index, devc_info: dict,
                                cur: dict, delta: dict, keys: list,
                                artss_path: str, artss_data_path: str,
@@ -716,7 +716,7 @@ def wait_artss(t_sensor, artss_data_path, artss: ARTSS.XML):
     pbar.close()
 
 
-def write_changes_xml(change: dict, source: list, file_name: str, file_da: typing.TextIO, path='.') -> [str, str]:
+def write_changes_xml(change: dict, source: list, file_name: str, file_da: TextIO, path='.') -> [str, str]:
     source_type, temperature_source, random = data_assimilation.change_heat_source(*source,
                                                                                    changes={'source_type': {},
                                                                                             'temperature_source': change,
@@ -737,12 +737,8 @@ def write_changes_xml(change: dict, source: list, file_name: str, file_da: typin
 
 def get_time_step_artss(t_sensor: float, artss_data_path: str, dt: float, time_back: float = 10) -> [float, float]:
     files = FieldReader.get_all_time_steps(path=artss_data_path)
-    times = list(filter(lambda x: x > t_sensor, files))
+    times = list(filter(lambda x: x >= t_sensor, files))
     t_revert = ([dt] + list(filter(lambda x: x <= max(0., t_sensor - time_back), files)))[-1]
-    print(t_sensor)
-    print(files)
-    print(times)
-    print(t_revert)
     return times[0], t_revert
 
 
@@ -777,8 +773,8 @@ def read_devc_from_csv_file(file_name: str) -> pd.DataFrame:
     return df
 
 
-def get_chid_from_input_file(input: str) -> str:
-    with open(input, 'r') as inp:
+def get_chid_from_input_file(input_file: str) -> str:
+    with open(input_file, 'r') as inp:
         for line in inp:
             if line.startswith('&HEAD'):
                 line = line[len('&HEAD'):].strip()
@@ -870,7 +866,7 @@ def read_fds_file(data_path: str, artss: Domain) -> pd.DataFrame:
 
 
 def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader,
-                                      t_sensor: float, file_da: typing.TextIO) -> (dict[str, float], float):
+                                      t_sensor: float, file_da: TextIO) -> (Dict[str, float], float):
     diff: dict = {'T': [], 'C': []}
     fields_sim = field_reader.read_field_data()
     min_pos_x: float = 0
