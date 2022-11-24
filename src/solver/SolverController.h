@@ -28,7 +28,10 @@ class SolverController {
     FieldController *get_field_controller() { return m_field_controller; }
 
     ISolver *m_solver;
- private:
+
+    void update_sight() const;
+
+private:
     void init_solver(const Settings::solver_parameters &solver_settings);
     void set_up_fields(const std::string &solver_description, const Settings::initial_conditions_parameters &ic_settings);
 

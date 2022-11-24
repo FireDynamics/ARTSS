@@ -180,7 +180,7 @@ void SolverController::set_up_fields(const std::string &string_solver, const Set
         }
     } else if (string_init_usr_fct == FunctionNames::zero) {
 #ifndef BENCHMARKING
-            m_logger->info("Initial values all set to zero!");
+        m_logger->info("Initial values all set to zero!");
 #endif
     } else if (string_init_usr_fct == FunctionNames::jet) {
         const auto &jet = std::get<Settings::initial_conditions::jet>(ic_settings.ic.value());
@@ -201,13 +201,21 @@ void SolverController::set_up_fields(const std::string &string_solver, const Set
         force_source();
     }
 
+    update_sight();
+}
+
+void SolverController::update_sight() const {
     // Sight of boundaries
+#ifndef BENCHMARKING
+    m_logger->debug("update sight");
+#endif
     auto domain_controller = DomainController::getInstance();
     size_t *domain_inner_list = domain_controller->get_domain_inner_list_level_joined();
     size_t size_domain_inner_list = domain_controller->get_size_domain_inner_list_level_joined(0);
 
     Field &sight = m_field_controller->get_field_sight();
     sight.update_host();
+    sight.set_value(1);
     for (size_t i = 0; i < size_domain_inner_list; i++) {
         size_t idx = domain_inner_list[i];
         sight[idx] = 0.;
