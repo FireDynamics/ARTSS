@@ -13,6 +13,7 @@ from obstacle import Obstacle
 
 
 def create_message(t_cur: float, config_file_name: str) -> bin:
+    print(f'send message with time step "{t_cur}" and xml "{config_file_name}"')
     package = DAPackage(t_cur, config_file_name)
     return package.pack()
 

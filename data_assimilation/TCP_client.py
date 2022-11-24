@@ -18,6 +18,7 @@ class TCPClient:
     def send_message(self, message: bin):
         # Send data
         self.socket.sendall(message)
+        print('message was sent. Waiting for response.')
 
         # Look for the response
         expected_response = "message was received: Rollback done"

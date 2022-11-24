@@ -95,7 +95,6 @@ class FieldReader:
         for p in f:
             if pattern.match(p):
                 files.append(p)
-        print('files', files)
         files = [float(x) for x in files]
         files.sort()
         return files
