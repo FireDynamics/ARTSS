@@ -635,6 +635,7 @@ void Multigrid::replace_obstacles(const std::vector<Obstacle> &obstacles,
         send_obstacle_lists_to_GPU();
     }
 
+    m_MG_domain_object_list.clear();
     create_multigrid_domain_lists();
     send_domain_lists_to_GPU();
 }
