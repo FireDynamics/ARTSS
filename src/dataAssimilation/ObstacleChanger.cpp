@@ -4,6 +4,7 @@
 /// \author    My Linh Wuerzburger
 /// \copyright <2015-2022> Forschungszentrum Juelich. All rights reserved
 
+#include <chrono>
 #include "ObstacleChanger.h"
 #include "../domain/DomainController.h"
 
@@ -21,9 +22,35 @@ return_parameter_reader ObstacleChanger::read_config(const std::string &filename
         // bool parameter_changes = new struct obstacle_parameters != old struct obstacle_parameters;
         if (parameter_changes) {
             m_logger->debug("apply obstacle changes");
+            std::chrono::time_point<std::chrono::system_clock> start, end;
+            start = std::chrono::system_clock::now();
             DomainController::getInstance()->replace_obstacles(obstacle_parameters);
+            end = std::chrono::system_clock::now();
+            long ms = std::chrono::duration_cast < std::chrono::milliseconds > (end - start).count();
+            m_logger->debug("replace obstacles time: {}", ms);
+#ifndef BENCHMARKING
+            int counter_unmodified = 0;
+            int counter_deleted = 0;
+            int counter_rest = 0;
+            for (const auto& obstacle: obstacle_parameters.obstacles) {
+                if (obstacle.state == State::UNMODIFIED) {
+                    counter_unmodified++;
+                } else if (obstacle.state == State::DELETED) {
+                    counter_deleted++;
+                } else if (obstacle.state == State::MODIFIED || obstacle.state == State::NEW) {
+                    counter_rest++;
+                } else {
+                    m_logger->warn("wrong state: {} ({})", obstacle.state, obstacle.name);
+                }
+            }
+            m_logger->debug("changed obstacles, unmodified: {}, modified/new: {}, deleted {}", counter_unmodified, counter_deleted, counter_rest);
+#endif
             m_solver_controller.update_sight();
+            start = std::chrono::system_clock::now();
             m_solver_controller.m_solver->update_obstacle_change();
+            end = std::chrono::system_clock::now();
+            ms = std::chrono::duration_cast < std::chrono::milliseconds > (end - start).count();
+            m_logger->debug("update source: {}", ms);
         }
         m_logger->debug("parse field changes");
 
