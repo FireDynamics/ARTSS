@@ -29,7 +29,7 @@
 using Map = std::map<std::string, std::string>;
 using return_xml_data = std::tuple<const tinyxml2::XMLElement*,Map>;
 namespace Settings {
-    class config_error : std::runtime_error { ;
+    class config_error : public std::runtime_error { ;
     public:
         explicit config_error(const std::string &message) : std::runtime_error(message) {}
         explicit config_error(const char *message) : std::runtime_error(message) {};
