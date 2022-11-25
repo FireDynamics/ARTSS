@@ -159,6 +159,7 @@ namespace Settings {
     };
     struct obstacle {
         std::string name;
+        State state;
         Coordinate<real> start_coords;
         Coordinate<real> end_coords;
         std::vector<struct boundary> boundaries;

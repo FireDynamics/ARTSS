@@ -152,3 +152,25 @@ TEST(MappingTest, getAxes) {
     EXPECT_NE(std::find(axes.begin(), axes.end(), X), axes.end());
     EXPECT_NE(std::find(axes.begin(), axes.end(), Y), axes.end());
 }
+
+TEST(MappingTest, matchState) {
+    State st_unmodified = Mapping::match_state("unmodified");
+    EXPECT_EQ(st_unmodified, State::UNMODIFIED);
+    State st_modified = Mapping::match_state("modified");
+    EXPECT_EQ(st_modified, State::MODIFIED);
+    State st_new = Mapping::match_state("new");
+    EXPECT_EQ(st_new, State::NEW);
+    State st_deleted = Mapping::match_state("deleted");
+    EXPECT_EQ(st_deleted, State::DELETED);
+}
+
+TEST(MappingTest, getStateName) {
+    std::string unmodified = Mapping::get_state_name(State::UNMODIFIED);
+    EXPECT_EQ("unmodified", unmodified);
+    std::string modified = Mapping::get_state_name(State::MODIFIED);
+    EXPECT_EQ("modified", modified);
+    std::string state_new = Mapping::get_state_name(State::NEW);
+    EXPECT_EQ("new", state_new);
+    std::string deleted = Mapping::get_state_name(State::DELETED);
+    EXPECT_EQ("deleted", deleted);
+}

@@ -125,8 +125,8 @@ namespace Settings {
 
     domain_parameters parse_domain_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "domain_parameters";
-        auto[subsection, values] = map_parameter_section(root, context);
-        domain_parameters dp{};
+        auto [subsection, values] = map_parameter_section(root, context);
+        domain_parameters dp{ };
 
         dp.enable_computational_domain = get_optional_bool(values, "enable_computational_domain", false);
         for (size_t a = 0; a < number_of_axes; a++) {
@@ -149,8 +149,8 @@ namespace Settings {
 
     visualisation_parameters parse_visualisation_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "visualisation";
-        auto[subsection, values] = map_parameter_section(root, context);
-        visualisation_parameters vp{};
+        auto [subsection, values] = map_parameter_section(root, context);
+        visualisation_parameters vp{ };
         vp.save_csv = get_required_bool(values, "save_csv", context);
         if (vp.save_csv) {
             vp.csv_nth_plot = get_required_size_t(values, "csv_nth_plot", context);
@@ -167,8 +167,8 @@ namespace Settings {
                                               const std::string &parent_context) {
         std::string own_context = "random";
         std::string context = create_context(parent_context, own_context);
-        auto[subsection, values] = map_parameter_section(head, own_context);
-        random_parameters rp{};
+        auto [subsection, values] = map_parameter_section(head, own_context);
+        random_parameters rp{ };
         rp.absolute = get_required_bool(values, "absolute", context);
         rp.custom_seed = get_required_bool(values, "custom_seed", context);
         if (rp.custom_seed) {
@@ -191,7 +191,7 @@ namespace Settings {
                                          const std::string &parent_context) {
             std::string own_context = FunctionNames::uniform;
             std::string context = create_context(parent_context, own_context);
-            uniform uniform{};
+            uniform uniform{ };
 
             uniform.value = get_required_real(values, "val", context);
             return uniform;
@@ -201,7 +201,7 @@ namespace Settings {
                                             const std::string &parent_context) {
             std::string own_context = FunctionNames::exp_sinus_prod;
             std::string context = create_context(parent_context, own_context);
-            exp_sinus_prod exp_sinus_prod{};
+            exp_sinus_prod exp_sinus_prod{ };
 
             exp_sinus_prod.l = get_required_real(values, "l", context);
             return exp_sinus_prod;
@@ -211,7 +211,7 @@ namespace Settings {
                                                    const std::string &parent_context) {
             std::string own_context = FunctionNames::gauss_bubble;
             std::string context = create_context(parent_context, own_context);
-            gauss_bubble gauss_bubble{};
+            gauss_bubble gauss_bubble{ };
 
             gauss_bubble.l = get_required_real(values, "l", context);
             gauss_bubble.velocity_lin[CoordinateAxis::X] = get_required_real(values, "u_lin", context);
@@ -226,7 +226,7 @@ namespace Settings {
         hat parse_hat_parameters(const Map &values, const std::string &parent_context) {
             std::string own_context = FunctionNames::hat;
             std::string context = create_context(parent_context, own_context);
-            hat hat{};
+            hat hat{ };
 
             hat.start_coords[CoordinateAxis::X] = get_required_real(values, "x1", context);
             hat.start_coords[CoordinateAxis::Y] = get_required_real(values, "y1", context);
@@ -242,7 +242,7 @@ namespace Settings {
         drift parse_drift_parameters(const Map &values, const std::string &parent_context) {
             std::string own_context = FunctionNames::drift;
             std::string context = create_context(parent_context, own_context);
-            drift drift{};
+            drift drift{ };
 
             drift.velocity_lin[CoordinateAxis::X] = get_required_real(values, "u_lin", context);
             drift.velocity_lin[CoordinateAxis::Y] = get_required_real(values, "v_lin", context);
@@ -254,7 +254,7 @@ namespace Settings {
         vortex parse_vortex_parameters(const Map &values, const std::string &parent_context) {
             std::string own_context = FunctionNames::vortex;
             std::string context = create_context(parent_context, own_context);
-            vortex vortex{};
+            vortex vortex{ };
 
             vortex.velocity_lin[CoordinateAxis::X] = get_required_real(values, "u_lin", context);
             vortex.velocity_lin[CoordinateAxis::Y] = get_required_real(values, "v_lin", context);
@@ -267,7 +267,7 @@ namespace Settings {
         mc_dermott parse_mc_dermott_parameters(const Map &values, const std::string &parent_context) {
             std::string own_context = FunctionNames::mcdermott;
             std::string context = create_context(parent_context, own_context);
-            mc_dermott mc_dermott{};
+            mc_dermott mc_dermott{ };
 
             mc_dermott.A = get_required_real(values, "A", context);
             return mc_dermott;
@@ -276,7 +276,7 @@ namespace Settings {
         jet parse_jet_parameters(const Map &values, const std::string &parent_context) {
             std::string own_context = FunctionNames::jet;
             std::string context = create_context(parent_context, own_context);
-            jet jet{};
+            jet jet{ };
 
             jet.dir = Mapping::match_axis(get_required_string(values, "dir", context));
             if (jet.dir == CoordinateAxis::X) {
@@ -298,10 +298,11 @@ namespace Settings {
             jet.value = get_required_real(values, "value", context);
             return jet;
         }
+
         layers_temperature parse_layers_parameters(const Map &values, const std::string &parent_context) {
             std::string own_context = FunctionNames::layers;
             std::string context = create_context(parent_context, own_context);
-            layers_temperature layers{};
+            layers_temperature layers{ };
 
             layers.number_of_layers = get_required_size_t(values, "n_layers", context);
             if (layers.number_of_layers == 0) {
@@ -323,7 +324,7 @@ namespace Settings {
         sin_sin_sin parse_sin_sin_sin_parameters(const Map &values, const std::string &parent_context) {
             std::string own_context = FunctionNames::sin_sin_sin;
             std::string context = create_context(parent_context, own_context);
-            sin_sin_sin sin{};
+            sin_sin_sin sin{ };
             sin.l = get_required_real(values, "l", context);
             return sin;
         }
@@ -331,8 +332,8 @@ namespace Settings {
 
     initial_conditions_parameters parse_initial_conditions_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "initial_conditions";
-        auto[subsection, values] = map_parameter_section(root, context);
-        initial_conditions_parameters icp{};
+        auto [subsection, values] = map_parameter_section(root, context);
+        initial_conditions_parameters icp{ };
 
         icp.random = get_required_bool(values, "random", context);
         if (icp.random) {
@@ -372,7 +373,7 @@ namespace Settings {
         std::string own_context = "boundary";
         std::string context = create_context(parent_context, own_context);
         auto values = map_parameter_line(head);
-        boundary boundary{};
+        boundary boundary{ };
 
         boundary.boundary_condition = Mapping::match_boundary_condition(get_required_string(values, "type", context));
         if (boundary.boundary_condition != BoundaryCondition::PERIODIC) {
@@ -391,8 +392,8 @@ namespace Settings {
 
     boundary_parameters parse_boundaries_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "boundaries";
-        auto[subsection, values] = map_parameter_section(root, context);
-        boundary_parameters bp{};
+        auto [subsection, values] = map_parameter_section(root, context);
+        boundary_parameters bp{ };
 
         for (auto i = subsection->FirstChildElement(); i; i = i->NextSiblingElement()) {
             if (i->Name() == std::string("boundary")) {
@@ -407,11 +408,12 @@ namespace Settings {
         std::string context = create_context(parent_context, own_context);
         auto values = map_parameter_line(head);
 
-        obstacle obstacle{};
+        obstacle obstacle{ };
         obstacle.name = get_required_string(values, "name", context);
+        obstacle.state = Mapping::match_state(get_optional_string(values, "state", Mapping::get_state_name(State::UNMODIFIED)));
 
         std::string context_geometry = create_context(context, fmt::format("geometry ({})", obstacle.name));
-        auto[head_geometry, values_geometry] = map_parameter_section(head, "geometry");
+        auto [head_geometry, values_geometry] = map_parameter_section(head, "geometry");
         for (size_t a = 0; a < number_of_axes; a++) {
             auto axis = CoordinateAxis(a);
             std::string axis_name = Utility::to_lower(Mapping::get_axis_name(axis));
@@ -430,8 +432,8 @@ namespace Settings {
 
     obstacles_parameters parse_obstacles_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "obstacles";
-        auto[subsection, values] = map_parameter_section(root, context);
-        obstacles_parameters op{};
+        auto [subsection, values] = map_parameter_section(root, context);
+        obstacles_parameters op{ };
         op.enabled = get_required_bool(values, "enabled", context);
         if (op.enabled) {
             for (const auto *i = subsection->FirstChildElement(); i; i = i->NextSiblingElement()) {
@@ -446,7 +448,7 @@ namespace Settings {
         std::string own_context = "boundary";
         std::string context = create_context(parent_context, own_context);
         auto values = map_parameter_line(head);
-        boundary boundary{};
+        boundary boundary{ };
 
         boundary.boundary_condition = Mapping::match_boundary_condition(get_required_string(values, "type", context));
         if (boundary.boundary_condition != BoundaryCondition::PERIODIC) {
@@ -464,12 +466,12 @@ namespace Settings {
         std::string context = create_context(parent_context, own_context);
         auto values = map_parameter_line(head);
 
-        surface surface{};
+        surface surface{ };
         surface.name = get_required_string(values, "name", context);
         surface.patch = Mapping::match_patch(get_required_string(values, "patch", context));
 
         std::string context_geometry = create_context(context, fmt::format("geometry ({})", surface.name));
-        auto[head_geometry, values_geometry] = map_parameter_section(head, "geometry");
+        auto [head_geometry, values_geometry] = map_parameter_section(head, "geometry");
         std::vector<CoordinateAxis> axes = {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z};
         CoordinateAxis coord_axis = Mapping::to_axis(surface.patch);
         auto tmp = std::remove(axes.begin(), axes.end(), coord_axis);
@@ -489,10 +491,11 @@ namespace Settings {
         }
         return surface;
     }
+
     surfaces_parameters parse_surfaces_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "surfaces";
-        auto[subsection, values] = map_parameter_section(root, context);
-        surfaces_parameters sp{};
+        auto [subsection, values] = map_parameter_section(root, context);
+        surfaces_parameters sp{ };
 
         sp.enabled = get_required_bool(values, "enabled", context);
         if (sp.enabled) {
@@ -506,8 +509,8 @@ namespace Settings {
 
     adaption_parameters parse_adaption_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "adaption";
-        auto[subsection, values] = map_parameter_section(root, context);
-        adaption_parameters ap{};
+        auto [subsection, values] = map_parameter_section(root, context);
+        adaption_parameters ap{ };
 
         ap.enabled = get_required_bool(values, "dynamic", context);
         if (ap.enabled) {
@@ -520,8 +523,8 @@ namespace Settings {
 
     logging_parameters parse_logging_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "logging";
-        auto[subsection, values] = map_parameter_section(root, context);
-        logging_parameters lp{};
+        auto [subsection, values] = map_parameter_section(root, context);
+        logging_parameters lp{ };
         lp.file = get_required_string(values, "file", context);
         lp.level = get_required_string(values, "level", context);
         return lp;
@@ -530,8 +533,8 @@ namespace Settings {
     physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root,
                                                   const std::string &solver_description) {
         std::string context = "physical_parameters";
-        auto[subsection, values] = map_parameter_section(root, context);
-        physical_parameters pp{};
+        auto [subsection, values] = map_parameter_section(root, context);
+        physical_parameters pp{ };
         pp.t_end = get_required_real(values, "t_end", context);
         pp.dt = get_required_real(values, "dt", context);
         if (solver_description != SolverTypes::AdvectionSolver &&
@@ -568,9 +571,9 @@ namespace Settings {
         advection_solver parse_advection_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "advection";
             std::string context = create_context(parent_context, own_context);
-            auto[subsection, values] = map_parameter_section(head, own_context);
+            auto [subsection, values] = map_parameter_section(head, own_context);
 
-            advection_solver solver_advection{};
+            advection_solver solver_advection{ };
             solver_advection.type = get_required_string(values, "type", context);
             if (solver_advection.type == AdvectionMethods::SemiLagrangian) {
                 // no values
@@ -591,7 +594,7 @@ namespace Settings {
                 std::string own_context = DiffusionMethods::ColoredGaussSeidel;
                 std::string context = create_context(parent_context, own_context);
 
-                colored_gauss_seidel colored_gauss_seidel{};
+                colored_gauss_seidel colored_gauss_seidel{ };
                 colored_gauss_seidel.w = get_required_real(values, "w", context);
                 colored_gauss_seidel.tol_res = get_required_real(values, "tol_res", context);
                 colored_gauss_seidel.max_iter = get_required_size_t(values, "max_iter", context);
@@ -602,7 +605,7 @@ namespace Settings {
                 std::string own_context = DiffusionMethods::Jacobi;
                 std::string context = create_context(parent_context, own_context);
 
-                jacobi jacobi{};
+                jacobi jacobi{ };
                 jacobi.w = get_required_real(values, "w", context);
                 jacobi.tol_res = get_required_real(values, "tol_res", context);
                 jacobi.max_iter = get_required_size_t(values, "max_iter", context);
@@ -613,9 +616,9 @@ namespace Settings {
         diffusion_solver parse_diffusion_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "diffusion";
             std::string context = create_context(parent_context, own_context);
-            auto[subsection, values] = map_parameter_section(head, own_context);
+            auto [subsection, values] = map_parameter_section(head, own_context);
 
-            diffusion_solver solver_diffusion{};
+            diffusion_solver solver_diffusion{ };
             solver_diffusion.type = get_required_string(values, "type", context);
             if (solver_diffusion.type == DiffusionMethods::Jacobi) {
                 solver_diffusion.solver = diffusion_solvers::parse_jacobi(values, context);
@@ -640,7 +643,7 @@ namespace Settings {
                 std::string own_context = "ConstSmagorinsky";
                 std::string context = create_context(parent_context, own_context);
 
-                const_smagorinsky cs{};
+                const_smagorinsky cs{ };
                 cs.cs = get_required_real(values, "Cs", context);
                 return cs;
             }
@@ -649,9 +652,9 @@ namespace Settings {
         turbulence_solver parse_turbulence_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "turbulence";
             std::string context = create_context(parent_context, own_context);
-            auto[subsection, values] = map_parameter_section(head, own_context);
+            auto [subsection, values] = map_parameter_section(head, own_context);
 
-            turbulence_solver solver_turbulence{};
+            turbulence_solver solver_turbulence{ };
             solver_turbulence.type = get_required_string(values, "type", context);
             if (solver_turbulence.type == TurbulenceMethods::ConstSmagorinsky) {
                 solver_turbulence.solver = turbulence_solvers::parse_const_smagorinsky(values, context);
@@ -670,7 +673,7 @@ namespace Settings {
                 std::string own_context = SourceMethods::Buoyancy;
                 std::string context = create_context(parent_context, own_context);
 
-                buoyancy buoyancy{};
+                buoyancy buoyancy{ };
                 buoyancy.use_init_values = get_required_bool(values, "use_init_values", context);
                 if (!buoyancy.use_init_values) {
                     buoyancy.ambient_temperature_value = get_required_real(values, "ambient_temperature_value",
@@ -683,7 +686,7 @@ namespace Settings {
                 std::string own_context = SourceMethods::Uniform;
                 std::string context = create_context(parent_context, own_context);
 
-                uniform uniform{};
+                uniform uniform{ };
                 uniform.velocity_value[CoordinateAxis::X] = get_required_real(values, "val_x", context);
                 uniform.velocity_value[CoordinateAxis::Y] = get_required_real(values, "val_y", context);
                 uniform.velocity_value[CoordinateAxis::Z] = get_required_real(values, "val_z", context);
@@ -694,9 +697,9 @@ namespace Settings {
         source_solver parse_source_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "source";
             std::string context = create_context(parent_context, own_context);
-            auto[subsection, values] = map_parameter_section(head, own_context);
+            auto [subsection, values] = map_parameter_section(head, own_context);
 
-            source_solver solver_source{};
+            source_solver solver_source{ };
             solver_source.type = get_required_string(values, "type", context);
             solver_source.force_fct = get_required_string(values, "force_fct", context);
             if (solver_source.force_fct == SourceMethods::Buoyancy) {
@@ -720,7 +723,7 @@ namespace Settings {
             parse_vcycle_mg(const Map &values, const tinyxml2::XMLElement *head, const std::string &parent_context) {
                 std::string own_context = "vcycle";
                 std::string context = create_context(parent_context, own_context);
-                vcycle_mg mg{};
+                vcycle_mg mg{ };
                 mg.n_level = get_required_size_t(values, "n_level", context);
                 mg.n_cycle = get_required_size_t(values, "n_cycle", context);
                 mg.max_cycle = get_required_size_t(values, "max_cycle", context);
@@ -734,9 +737,9 @@ namespace Settings {
         pressure_solver parse_pressure_solver(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "pressure";
             std::string context = create_context(parent_context, own_context);
-            auto[subsection, values] = map_parameter_section(head, own_context);
+            auto [subsection, values] = map_parameter_section(head, own_context);
 
-            pressure_solver solver_pressure{};
+            pressure_solver solver_pressure{ };
             solver_pressure.type = get_required_string(values, "type", context);
             solver_pressure.field = Mapping::match_field(get_required_string(values, "field", context));
             if (solver_pressure.type == PressureMethods::VCycleMG) {
@@ -751,7 +754,7 @@ namespace Settings {
         namespace sources {
             gauss parse_gauss(const Map &values, const std::string &parent_context) {
                 std::string context = create_context(parent_context, SourceMethods::Gauss);
-                gauss gauss{};
+                gauss gauss{ };
                 gauss.heat_release_rate = get_required_real(values, "HRR", context);
                 gauss.heat_capacity = get_required_real(values, "cp", context);
                 for (const auto axis: {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z}) {
@@ -762,9 +765,10 @@ namespace Settings {
                 gauss.tau = get_required_real(values, "tau", context);
                 return gauss;
             }
+
             cube parse_cube(const Map &values, const std::string &parent_context) {
                 std::string context = create_context(parent_context, SourceMethods::Cube);
-                cube cube{};
+                cube cube{ };
                 for (const auto axis: {CoordinateAxis::X, CoordinateAxis::Y, CoordinateAxis::Z}) {
                     std::string axis_name = Utility::to_lower(Mapping::get_axis_name(axis));
                     cube.coords_start[axis] = get_required_real(values, axis_name + "_start", context);
@@ -778,9 +782,9 @@ namespace Settings {
         temperature_source parse_temperature_source(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "source";
             std::string context = create_context(parent_context, own_context);
-            auto[subsection_source, values_source] = map_parameter_section(head, own_context);
+            auto [subsection_source, values_source] = map_parameter_section(head, own_context);
 
-            temperature_source source{};
+            temperature_source source{ };
             source.type = get_required_string(values_source, "type", context);
             auto fields = Utility::split(get_required_string(values_source, "dir", context), delimiter);
             for (const std::string &string: fields) {
@@ -809,15 +813,15 @@ namespace Settings {
                                                     bool has_turbulence) {
             std::string own_context = "temperature";
             std::string context = create_context(parent_context, own_context);
-            auto[subsection, values] = map_parameter_section(head, own_context);
+            auto [subsection, values] = map_parameter_section(head, own_context);
 
-            temperature_solver solver_temperature{};
+            temperature_solver solver_temperature{ };
             solver_temperature.advection = parse_advection_solver(subsection, context);
             solver_temperature.diffusion = parse_diffusion_solver(subsection, context);
 
             if (has_turbulence) {
                 std::string context_turb = "turbulence";
-                auto[subsection_turb, values_turb] = map_parameter_section(subsection, context_turb);
+                auto [subsection_turb, values_turb] = map_parameter_section(subsection, context_turb);
                 solver_temperature.has_turbulence = get_required_bool(values_turb, "include",
                                                                       create_context(context, context_turb));
                 if (solver_temperature.has_turbulence) {
@@ -836,15 +840,15 @@ namespace Settings {
                                    bool has_turbulence) {
             std::string own_context = "concentration";
             std::string context = create_context(parent_context, own_context);
-            auto[subsection, values] = map_parameter_section(head, own_context);
+            auto [subsection, values] = map_parameter_section(head, own_context);
 
-            concentration_solver solver_concentration{};
+            concentration_solver solver_concentration{ };
             solver_concentration.advection = parse_advection_solver(subsection, context);
             solver_concentration.diffusion = parse_diffusion_solver(subsection, context);
 
             if (has_turbulence) {
                 std::string context_turb = "turbulence";
-                auto[subsection_turb, values_turb] = map_parameter_section(subsection, context_turb);
+                auto [subsection_turb, values_turb] = map_parameter_section(subsection, context_turb);
                 solver_concentration.has_turbulence =
                         get_required_bool(values_turb, "include",
                                           create_context(context, context_turb));
@@ -857,8 +861,8 @@ namespace Settings {
                 solver_concentration.has_turbulence = false;
             }
 
-    std::string context_source = "source";
-            auto[subsection_source, values_source] = map_parameter_section(subsection, context_source);
+            std::string context_source = "source";
+            auto [subsection_source, values_source] = map_parameter_section(subsection, context_source);
             solver_concentration.source.type = get_required_string(values_source, "type", context_source);
             auto fields = Utility::split(get_required_string(values_source, "dir", context_source), delimiter);
             for (const std::string &string: fields) {
@@ -885,9 +889,9 @@ namespace Settings {
         solution parse_solution(const tinyxml2::XMLElement *head, const std::string &parent_context) {
             std::string own_context = "solution";
             std::string context = create_context(parent_context, own_context);
-            auto[subsection, values] = map_parameter_section(head, own_context);
+            auto [subsection, values] = map_parameter_section(head, own_context);
 
-            solution sol{};
+            solution sol{ };
             sol.analytical_solution = get_required_bool(values, "available", context);
             if (sol.analytical_solution) {
                 sol.solution_tolerance = get_optional_real(values, "tol", 1e-3);
@@ -898,8 +902,8 @@ namespace Settings {
 
     solver_parameters parse_solver_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "solver";
-        auto[subsection, values] = map_parameter_section(root, context);
-        solver_parameters sp{};
+        auto [subsection, values] = map_parameter_section(root, context);
+        solver_parameters sp{ };
 
         sp.description = get_required_string(values, "description", context);
 
@@ -964,8 +968,8 @@ namespace Settings {
 
     data_assimilation_parameters parse_assimilation_parameters(const tinyxml2::XMLElement *root) {
         std::string context = "data_assimilation";
-        auto[subsection, values] = map_parameter_section(root, context);
-        data_assimilation_parameters ap{};
+        auto [subsection, values] = map_parameter_section(root, context);
+        data_assimilation_parameters ap{ };
         ap.enabled = get_required_bool(values, "enabled", context);
 
         ap.output_dir = get_optional_string(values, "output_dir", ".vis");
@@ -1004,6 +1008,7 @@ namespace Settings {
     std::string parse_settings_from_file(const std::filesystem::path &path) {
         std::ifstream in(path);
         if (in.fail()) {
+            std::cerr << fmt::format("Could not read file '{}'. Please check if the file exists or the permission are sufficient.", path.c_str()) << std::endl;
             throw config_error(fmt::format("Could not read file '{}'. Please check if the file exists or the permission are sufficient.", path.c_str()));
         }
         std::stringstream sstr;
@@ -1026,8 +1031,8 @@ namespace Settings {
                                                          const std::string &parent_context) {
         std::string own_context = "fields_changed";
         std::string context = create_context(parent_context, own_context);
-        auto[subsection, values] = map_parameter_section(head, own_context);
-        data_assimilation::field_changes field_changes{};
+        auto [subsection, values] = map_parameter_section(head, own_context);
+        data_assimilation::field_changes field_changes{ };
         field_changes.u_changed = get_required_bool(values, "u", context);
         field_changes.v_changed = get_required_bool(values, "v", context);
         field_changes.w_changed = get_required_bool(values, "w", context);
