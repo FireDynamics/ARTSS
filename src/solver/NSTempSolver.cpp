@@ -253,3 +253,7 @@ void NSTempSolver::replace_heat_source(const Settings::solver::temperature_sourc
     SolverSelection::set_temperature_source_function(temperature_source, &m_source_function_temperature);
     m_add_temp_source = m_solver_settings.temperature.source.temp_fct != SourceMethods::Zero;
 }
+
+void NSTempSolver::update_obstacle_change() {
+    m_source_function_temperature->update_obstacle_change();
+}

@@ -108,6 +108,11 @@ void GaussFunction::create_spatial_values() {
     m_field_spatial_values.update_dev();
 }
 
+void GaussFunction::update_obstacle_change() {
+    m_field_spatial_values.set_value(0);
+    create_spatial_values();
+}
+
 // ============================= Ramp up function for HRR source =========================
 // ***************************************************************************************
 /// \brief  Ramp up function (in time) for Gaussian source in energy equation

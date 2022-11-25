@@ -14,6 +14,7 @@ class Cube: public ISourceFunction {
  public:
     explicit Cube(const Settings::solver::sources::cube &cube);
     void update_source(Field &out, real t_cur) override;
+    void update_obstacle_change() override { }
 
  private:
     const Settings::solver::sources::cube m_settings;

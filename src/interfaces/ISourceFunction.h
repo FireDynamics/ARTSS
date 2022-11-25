@@ -20,6 +20,7 @@ class ISourceFunction {
     }
     virtual ~ISourceFunction() = default;
     virtual void update_source(Field &out, real t_cur) = 0;
+    virtual void update_obstacle_change() = 0;
 
  protected:
     bool m_absolute = false;

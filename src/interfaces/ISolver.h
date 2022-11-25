@@ -34,6 +34,7 @@ class ISolver {
     virtual void do_step(real t, bool sync) = 0;
     virtual void update_source(real t) = 0;
     virtual void replace_heat_source(const Settings::solver::temperature_source &temperature_source) = 0;
+    virtual void update_obstacle_change() = 0;
 };
 
 #endif /* ARTSS_INTERFACES_ISOLVER_H_ */

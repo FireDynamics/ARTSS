@@ -23,6 +23,7 @@ return_parameter_reader ObstacleChanger::read_config(const std::string &filename
             m_logger->debug("apply obstacle changes");
             DomainController::getInstance()->replace_obstacles(obstacle_parameters);
             m_solver_controller.update_sight();
+            m_solver_controller.m_solver->update_obstacle_change();
         }
         m_logger->debug("parse field changes");
 
