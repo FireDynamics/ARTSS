@@ -174,3 +174,11 @@ TEST(MappingTest, getStateName) {
     std::string deleted = Mapping::get_state_name(State::DELETED);
     EXPECT_EQ("deleted", deleted);
 }
+
+TEST(MappingTest, sizes) {
+    EXPECT_EQ(number_of_axes, axis_names.size());
+    EXPECT_EQ(number_of_boundary_conditions, boundary_condition_names.size());
+    EXPECT_EQ(number_of_patches, patch_names.size());
+    EXPECT_EQ(number_of_field_types, field_type_names.size());
+    EXPECT_EQ(number_of_states, state_name.size());
+}
