@@ -410,21 +410,23 @@ namespace Settings {
 
         obstacle obstacle{ };
         obstacle.name = get_required_string(values, "name", context);
-        obstacle.state = Mapping::match_state(get_optional_string(values, "state", Mapping::get_state_name(State::UNMODIFIED)));
+        obstacle.state = Mapping::match_state(get_optional_string(values, "state", Mapping::get_state_name(State::XML)));
 
-        std::string context_geometry = create_context(context, fmt::format("geometry ({})", obstacle.name));
-        auto [head_geometry, values_geometry] = map_parameter_section(head, "geometry");
-        for (size_t a = 0; a < number_of_axes; a++) {
-            auto axis = CoordinateAxis(a);
-            std::string axis_name = Utility::to_lower(Mapping::get_axis_name(axis));
-            obstacle.start_coords[axis] = get_required_real(values_geometry, "o" + axis_name + "1", context);
-            obstacle.end_coords[axis] = get_required_real(values_geometry, "o" + axis_name + "2", context);
-        }
+        if (obstacle.state != State::UNMODIFIED) {
+            std::string context_geometry = create_context(context, fmt::format("geometry ({})", obstacle.name));
+            auto [head_geometry, values_geometry] = map_parameter_section(head, "geometry");
+            for (size_t a = 0; a < number_of_axes; a++) {
+                auto axis = CoordinateAxis(a);
+                std::string axis_name = Utility::to_lower(Mapping::get_axis_name(axis));
+                obstacle.start_coords[axis] = get_required_real(values_geometry, "o" + axis_name + "1", context);
+                obstacle.end_coords[axis] = get_required_real(values_geometry, "o" + axis_name + "2", context);
+            }
 
-        std::string context_boundaries = create_context(context, fmt::format("boundaries ({})", obstacle.name));
-        for (const auto *i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
-            if (i->Name() == std::string("boundary")) {
-                obstacle.boundaries.emplace_back(parse_boundary(i, context_boundaries));
+            std::string context_boundaries = create_context(context, fmt::format("boundaries ({})", obstacle.name));
+            for (const auto *i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
+                if (i->Name() == std::string("boundary")) {
+                    obstacle.boundaries.emplace_back(parse_boundary(i, context_boundaries));
+                }
             }
         }
         return obstacle;

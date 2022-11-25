@@ -154,6 +154,8 @@ TEST(MappingTest, getAxes) {
 }
 
 TEST(MappingTest, matchState) {
+    State st_xml = Mapping::match_state("XML");
+    EXPECT_EQ(st_xml, State::XML);
     State st_unmodified = Mapping::match_state("unmodified");
     EXPECT_EQ(st_unmodified, State::UNMODIFIED);
     State st_modified = Mapping::match_state("modified");
@@ -165,6 +167,8 @@ TEST(MappingTest, matchState) {
 }
 
 TEST(MappingTest, getStateName) {
+    std::string state_xml = Mapping::get_state_name(State::XML);
+    EXPECT_EQ("XML", state_xml);
     std::string unmodified = Mapping::get_state_name(State::UNMODIFIED);
     EXPECT_EQ("unmodified", unmodified);
     std::string modified = Mapping::get_state_name(State::MODIFIED);

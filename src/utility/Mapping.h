@@ -13,14 +13,15 @@
 
 #include "../utility/GlobalMacrosTypes.h"
 
-inline static const std::vector<std::string> state_name = {"unmodified", "modified", "new", "deleted"};
-constexpr size_t number_of_states = 4;
+inline static const std::vector<std::string> state_name = {"XML", "unmodified", "modified", "new", "deleted"};
+constexpr size_t number_of_states = 5;
 enum State : int {
     UNKNOWN_STATE = -1,
-    UNMODIFIED = 0,
-    MODIFIED = 1,
-    NEW = 2,
-    DELETED = 3
+    XML = 0,
+    UNMODIFIED = 1,
+    MODIFIED = 2,
+    NEW = 3,
+    DELETED = 4
 };
 
 inline static const std::vector<std::string> axis_names = {"X", "Y", "Z"};
