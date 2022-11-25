@@ -3,3 +3,4 @@ tqdm
 h5py
 fdsreader
 pandas
+numpy
