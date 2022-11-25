@@ -87,10 +87,43 @@ class DAFile:
     def __init__(self):
         self.xml_root = ET.Element('ARTSS')
 
+    def write_obstacle_changes(self, list_obstacles: List[Obstacle], obstacle_enabled: bool):
+        # create obstacle part
+        # <obstacles enabled = "Yes">
+        #   <obstacle name="name1" state="unmodified"/>
+        #   <obstacle name="name2" state="modified" >
+        #       <geometry ox1 = "0.0273" ox2 = "0.964" oy1 = "0.0078" oy2 = "0.992" oz1 = "-0.492" oz2 = "0.4785" />
+        #       <boundary field = "u,v,w" patch = "front,back,left,right,bottom,top" type = "dirichlet" value = "0.0" />
+        #       <boundary field = "p" patch = "front,back,left,right,bottom,top" type = "neumann" value = "0.0" />
+        #   </obstacle>
+        #   <obstacle name="name3" state="new" >
+        #       <geometry ox1 = "0.0273" ox2 = "0.964" oy1 = "0.0078" oy2 = "0.992" oz1 = "-0.492" oz2 = "0.4785" />
+        #       <boundary field = "u,v,w" patch = "front,back,left,right,bottom,top" type = "dirichlet" value = "0.0" />
+        #       <boundary field = "p" patch = "front,back,left,right,bottom,top" type = "neumann" value = "0.0" />
+        #   </obstacle>
+        # </obstacles>
+
+        obstacle_root = ET.SubElement(self.xml_root, 'obstacles',
+                                      enabled='Yes' if obstacle_enabled else 'No')
+        for obstacle in list_obstacles:
+            single_obstacle = ET.SubElement(obstacle_root, 'obstacle', name=obstacle.name, state=obstacle.state)
+            if obstacle.state != 'unmodified':
+                ET.SubElement(single_obstacle, 'geometry',
+                              ox1=str(obstacle.geometry[0]), ox2=str(obstacle.geometry[1]),
+                              oy1=str(obstacle.geometry[2]), oy2=str(obstacle.geometry[3]),
+                              oz1=str(obstacle.geometry[4]), oz2=str(obstacle.geometry[5]))
+                for count, boundary in enumerate(obstacle.boundary):
+                    field_type = list(FIELD_TYPES.keys())[count]
+                    if not boundary.empty:
+                        for p in PATCHES.keys():
+                            ET.SubElement(single_obstacle, 'boundary', field=field_type, patch=p,
+                                          type=boundary.boundary_conditions[PATCHES[p]],
+                                          value=str(boundary.values[PATCHES[p]]))
+
     def create_obstacle_changes(self, list_obstacles: List[Obstacle], obstacle_enabled: bool):
         # create obstacle part
         # <obstacles enabled = "Yes">
-        #   <obstacle name = "name">
+        #   <obstacle name = "name" state="changed">
         #       <geometry ox1 = "0.0273" ox2 = "0.964" oy1 = "0.0078" oy2 = "0.992" oz1 = "-0.492" oz2 = "0.4785" />
         #       <boundary field = "u,v,w" patch = "front,back,left,right,bottom,top" type = "dirichlet" value = "0.0" />
         #       <boundary field = "p" patch = "front,back,left,right,bottom,top" type = "neumann" value = "0.0" />

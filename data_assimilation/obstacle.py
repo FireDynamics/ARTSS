@@ -22,10 +22,11 @@ class BoundaryData:
 
 
 class Obstacle:
-    def __init__(self, name: str):
+    def __init__(self, name: str, state: str = 'unmodified'):
         self.name = name
         self.geometry: List[float]
         self.boundary: List[BoundaryData] = [BoundaryData(f) for f in FIELD_TYPES.keys()]
+        self.state = state
 
     def add_boundary(self, fields: List[str], patches: List[str], boundary_condition: str, value: float):
         for f in fields:
