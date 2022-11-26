@@ -7,15 +7,9 @@ from numpy import ndarray
 import TCP_client
 import data_assimilation
 import gradient_based_optimisation
-from ARTSS import XML, Domain, DAFile, DAPackage
-from data_assimilation import FieldReader
+from ARTSS import XML, Domain
+from data_assimilation import FieldReader, DAFile
 from obstacle import Obstacle
-
-
-def create_message(t_cur: float, config_file_name: str) -> bin:
-    print(f'send message with time step "{t_cur}" and xml "{config_file_name}"')
-    package = DAPackage(t_cur, config_file_name)
-    return package.pack()
 
 
 def change_something(domain: Domain, field: list) -> list:
@@ -101,7 +95,7 @@ def main(dry_run=False):
         da.write_xml(config_file_name, pretty_print=dry_run)
 
         if not dry_run:
-            client.send_message(create_message(t, config_file_name))
+            client.send_message(data_assimilation.create_message(t, config_file_name))
             time.sleep(10)
 
 

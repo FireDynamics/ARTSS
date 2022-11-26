@@ -19,8 +19,7 @@ import ARTSS
 import TCP_client
 import data_assimilation
 from ARTSS import Domain, XML, DAFile
-from data_assimilation import FieldReader
-from main import create_message
+from data_assimilation import FieldReader, create_message
 
 
 def write_da_data(file_da: TextIO, parameters: dict):
@@ -30,9 +29,9 @@ def write_da_data(file_da: TextIO, parameters: dict):
 
 
 def map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature,
-               fds_data, source_type, temperature_source, random, file_da, cwd, artss):
+               fds_data, source_type, temperature_source, random, file_da, cwd, artss, xml):
     def f(t_end, param):
-        t_artss, t_revert = get_time_step_artss(t_end, artss_data_path)
+        t_artss, t_revert = get_time_step_artss(t_end, artss_data_path, xml.get_dt())
         config_file_name, _ = write_changes_xml(
             param,
             [source_type, temperature_source, random],
@@ -59,7 +58,7 @@ def map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_ther
     pprint(cur)
     wait_artss(t, artss_data_path, artss)
 
-    t_artss, t_revert = get_time_step_artss(t, artss_data_path)
+    t_artss, t_revert = get_time_step_artss(t, artss_data_path, xml.get_dt())
     pprint((t, t_artss, t_revert))
     field_reader = FieldReader(t_artss, path=artss_data_path)
     diff_orig, _ = comparison_sensor_simulation_data(devc_info_temperature, fds_data, field_reader, t_artss, t)
@@ -947,9 +946,11 @@ def plot_differences(fds_data_path: str, fds_input_file_name: str, artss_data_pa
     for t in range(1, 8):
         t_sensor = sensor_times[t]
         fig, axs = plt.subplots(2, 1)
-        for i in [20, 30, 40, 50, 60, 70, 80]:
-            t_artss, t_revert = get_time_step_artss(t_sensor, os.path.join(artss_data_path, str(i)))
-            field_reader = FieldReader(t_artss, path=os.path.join(artss_data_path, str(i)))
+        for pos in [20, 30, 40, 50, 60, 70, 80]:
+            t_artss, t_revert = get_time_step_artss(t_sensor=t_sensor,
+                                                    artss_data_path=os.path.join(artss_data_path, str(pos)),
+                                                    dt=xml.get_dt())
+            field_reader = FieldReader(t_artss, path=os.path.join(artss_data_path, str(pos)))
             fields = field_reader.read_field_data()
             diff = calc_single_differences(devc_info_temperature, fds_data, field_reader, t_artss, t_sensor)
             x = []
@@ -974,9 +975,9 @@ def plot_differences(fds_data_path: str, fds_input_file_name: str, artss_data_pa
             for k in tmp_dict:
                 line_x.append(k)
                 line_y.append(sum(tmp_dict[k]) / len(tmp_dict[k]))
-            axs[0].plot(line_x, line_y, label=f'{i} avg: {sum(y) / len(y):.2e}')
-            axs[0].scatter(x, y, label=i)
-            axs[1].plot(x, y_artss, label=f'{i}')
+            axs[0].plot(line_x, line_y, label=f'{pos} avg: {sum(y) / len(y):.2e}')
+            axs[0].scatter(x, y, label=pos)
+            axs[1].plot(x, y_artss, label=f'{pos}')
         axs[0].set_title('difference')
         axs[1].set_title('sensor data')
         axs[1].plot(x, y_fds, label='fds')

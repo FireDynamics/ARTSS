@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ARTSS>
   <physical_parameters>
-    <t_end> 1800. </t_end>  <!-- simulation end time -->
+    <t_end> 100 </t_end>  <!-- simulation end time -->
     <dt> 0.05 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
     <nu> 3.1e-5 </nu>  <!-- kinematic viscosity -->
     <beta> 3.34e-3 </beta>  <!-- thermal expansion coefficient -->
@@ -77,7 +77,9 @@
 
   <adaption dynamic="No" data_extraction="No"> </adaption>
 
-  <data_assimilation enabled="No" />
+  <data_assimilation enabled="Yes" class_name="ObstacleChanger" load_data="Yes" file="4.00000e+00">
+    <time> 4 </time>
+  </data_assimilation>
 
   <boundaries>
     <boundary field="u,v,w" patch="front,back,bottom,top,left,right" type="dirichlet" value="0.0" />

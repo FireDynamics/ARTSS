@@ -24,13 +24,28 @@ class BoundaryData:
 class Obstacle:
     def __init__(self, name: str, state: str = 'unmodified'):
         self.name = name
-        self.geometry: List[float]
+        self.geometry: Dict[str, float] = {}
         self.boundary: List[BoundaryData] = [BoundaryData(f) for f in FIELD_TYPES.keys()]
         self.state = state
+        self.stride: Dict[str, float] = {}
 
     def add_boundary(self, fields: List[str], patches: List[str], boundary_condition: str, value: float):
         for f in fields:
             self.boundary[FIELD_TYPES[f]].add_boundary_data(patches, boundary_condition, value)
 
+    def add_boundary_line(self, boundary: Dict[str, str]):
+        fields = boundary['field'].split(",")
+        patches = boundary['patch'].split(",")
+        self.add_boundary(fields=fields, patches=patches, boundary_condition=boundary['type'], value=float(boundary['value']))
+
     def add_geometry(self, geometry: List[float]):
-        self.geometry = geometry
+        keys = ['ox1', 'ox2', 'oy1', 'oy2', 'oz1', 'oz2']
+        self.geometry = dict(zip(keys, geometry))
+
+    def add_geometry_line(self, geometry: Dict[str, str]):
+        self.geometry = dict(zip(geometry.keys(), [float(a) for a in geometry.values()]))
+
+    def calculate_details(self):
+        self.stride['stride x'] = self.geometry['ox2'] - self.geometry['ox1'] + 1
+        self.stride['stride y'] = self.geometry['oy2'] - self.geometry['oy1'] + 1
+        self.stride['stride z'] = self.geometry['oz2'] - self.geometry['oz1'] + 1

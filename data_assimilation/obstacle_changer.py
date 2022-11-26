@@ -8,9 +8,8 @@ import numpy as np
 
 import TCP_client
 from ARTSS import XML, DAFile
-from data_assimilation import FieldReader
+from data_assimilation import FieldReader, create_message
 from gradient_based_optimisation import get_time_step_artss
-from main import create_message
 from obstacle import Obstacle
 
 
@@ -93,7 +92,7 @@ def steckler_door(artss_data_path: str):
     door = create_door(obstacles)
 
     time_back = 1
-    t_sensor = 100 * xml.get_dt() + time_back * xml.get_dt()
+    t_sensor = 81 * xml.get_dt() + time_back * xml.get_dt()
 
     wait_artss(t_sensor, artss_data_path)
 
@@ -163,4 +162,5 @@ def wait_artss(t_sensor: float, artss_data_path: str):
 
 
 if __name__ == '__main__':
-    obstacle_wonder(artss_data_path='example')
+    # obstacle_wonder(artss_data_path='example')
+    steckler_door(artss_data_path='example')
