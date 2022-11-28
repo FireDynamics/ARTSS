@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from typing import List, Dict
 
+STATE: Dict[str, int] = {'XML': 0, 'unmodified': 1, 'modified': 2, 'new': 3, 'deleted': 4}
 FIELD_TYPES: Dict[str, int] = {'u': 0, 'v': 1, 'w': 2, 'p': 3, 'T': 4, 'C': 5}
 PATCHES: Dict[str, int] = {'front': 0, 'back': 1, 'bottom': 2, 'top': 3, 'left': 4, 'right': 5}
 NEUMANN = 'neumann'
