@@ -3,7 +3,7 @@ import os
 import xml.etree.ElementTree as ET
 from typing import List, Dict, Union, Set
 
-from obstacle import Obstacle, PATCHES
+from obstacle import Obstacle, PATCHES, STATE
 
 
 class XML:
@@ -12,14 +12,14 @@ class XML:
         self.xml_tree: ET = ET.parse(os.path.join(path, self.filename))
         self.has_obstacles: bool = False
         self.obstacles: List[Obstacle] = []
-        self.domain: Dict = {}
+        self.computational_domain: bool = False
+        self.domain: Dict[str, float] = {}
         self.temperature_source: Dict[str, Dict[str, str]] = {}
 
     def read_xml(self):
         root = self.xml_tree.getroot()
         domain_param = root.find('domain_parameters')
-        for attrib in domain_param:
-            self.domain[attrib] = domain_param[attrib]
+        self.computational_domain = domain_param.attrib == "Yes"
         for child in domain_param:
             self.domain[child.tag] = float(child.text)
 
@@ -29,7 +29,7 @@ class XML:
             for child in obstacles:
                 state = 'XML'
                 if 'state' in child.attrib:
-                    state = child.attrib['state']
+                    state = STATE[child.attrib['state']]
                 obstacle = Obstacle(name=child.attrib['name'], state=state)
                 for content in child:
                     if content.tag == 'boundary':
@@ -81,27 +81,25 @@ class XML:
 
 
 class Domain:
-    def __init__(self, domain_param: Dict[str, float], obstacles: List[Obstacle]):
+    def __init__(self, domain_param: Dict[str, float], enable_computational_domain: bool, obstacles: List[Obstacle]):
         self.domain_param: Dict[str, Union[int, float]] = {}
         self.obstacles: List[Obstacle] = obstacles
         self.domain_boundary_cells: Dict[str, Set[int]] = {}
         self.domain_inner_cells: Dict[str, Set[int]] = {}
         self.obstacle_cells: Dict[str, Dict[str, Set[int]]] = {}
-        self.computational_domain(domain_param)
+        self.computational_domain(domain_param, enable_computational_domain)
         self.calculate_domain()
         self.calculate_indices()
 
-    def computational_domain(self, domain_param: Dict):
+    def computational_domain(self, domain_param: Dict, enable_computational_domain: bool):
         self.domain_param = dict(domain_param)
-        if not self.domain_param['enable_computational_domain'] == "Yes":
+        if enable_computational_domain:
             self.domain_param['x1'] = domain_param['X1']
             self.domain_param['y1'] = domain_param['Y1']
             self.domain_param['z1'] = domain_param['Z1']
             self.domain_param['x2'] = domain_param['X2']
             self.domain_param['y2'] = domain_param['Y2']
             self.domain_param['z2'] = domain_param['Z2']
-        self.domain_param.pop('enable_computational_domain')
-        self.domain_param = domain_param
 
     def calculate_domain(self):
         # from Domain.cpp/h

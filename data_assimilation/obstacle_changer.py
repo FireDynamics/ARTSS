@@ -7,8 +7,8 @@ from typing import List
 import numpy as np
 
 import TCP_client
-from ARTSS import XML, DAFile
-from data_assimilation import FieldReader, create_message
+from ARTSS import XML
+from data_assimilation import FieldReader, create_message, DAFile
 from gradient_based_optimisation import get_time_step_artss
 from obstacle import Obstacle
 
@@ -59,12 +59,12 @@ def obstacle_wonder(artss_data_path: str):
     xml.read_xml()
 
     time_back = 1
-    sensor_times = (np.array(range(10)) + 1) / 10 + time_back * xml.get_dt()
+    sensor_times = (np.array(range(20)) + 1) / 10 + time_back * xml.get_dt()
     print(sensor_times)
     obstacles = create_obstacles()
 
     counter = 1
-    for t_sensor in sensor_times:
+    for t_sensor in sensor_times[:8]:
         wait_artss(t_sensor, artss_data_path)
 
         t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
@@ -74,6 +74,22 @@ def obstacle_wonder(artss_data_path: str):
         da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
         da.create_obstacle_changes([obstacles[counter]], True)
         counter = (counter + 1) % 4
+        config_file_name = f'change_obstacle_{int(t_sensor * 10)}.xml'
+        config_file_path = os.path.join(artss_data_path, config_file_name)
+        da.write_xml(config_file_path, pretty_print=True)
+        client.send_message(create_message(t_revert, config_file_path))
+
+    counter = 0
+    for t_sensor in sensor_times[8:]:
+        wait_artss(t_sensor, artss_data_path)
+
+        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
+                                                time_back=time_back * xml.get_dt())
+
+        da = DAFile()
+        da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
+        da.create_obstacle_changes([obstacles[counter], obstacles[counter + 2]], True)
+        counter = (counter + 1) % 2
         config_file_name = f'change_obstacle_{int(t_sensor * 10)}.xml'
         config_file_path = os.path.join(artss_data_path, config_file_name)
         da.write_xml(config_file_path, pretty_print=True)
@@ -89,6 +105,8 @@ def steckler_door(artss_data_path: str):
     xml.read_xml()
 
     obstacles = xml.obstacles
+    # for o in obstacles:
+    #     o.state = 'unmodified'
     door = create_door(obstacles)
 
     time_back = 1
@@ -101,7 +119,7 @@ def steckler_door(artss_data_path: str):
 
     da = DAFile()
     da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
-    da.write_obstacle_changes(obstacles + door, True)
+    da.write_obstacle_changes(obstacles + [door], True)
     # da.remove_obstacle(obstacles, door)
     config_file_name = f'change_obstacle_{int(t_sensor * 10)}.xml'
     config_file_path = os.path.join(artss_data_path, config_file_name)
@@ -118,29 +136,31 @@ def create_door(obstacles: List[Obstacle], door_identifier: str = None, ground_c
     names = ['left from door', 'right from door', 'above door']
     if door_identifier is not None:
         names = [n + door_identifier for n in names]
-    door_coordinates = np.zeros(6)
+    door_coordinates = {}
     for obstacle in obstacles:
         if names[2] in obstacle.name:
             obstacle_above = obstacle
         elif names[1] in obstacle.name:
-            obstacle_left = obstacle
-        elif names[0] in obstacle.name:
             obstacle_right = obstacle
+        elif names[0] in obstacle.name:
+            obstacle_left = obstacle
 
-    door_coordinates[1] = ground_coordinate
-    door_coordinates[2] = obstacle_above.geometry[3]
-    if obstacle_left.geometry[1] < obstacle_right.geometry[0]:
+    if obstacle_left.geometry['ox2'] < obstacle_right.geometry['ox1']:
         # door faces z-direction
-        door_coordinates[0] = obstacle_left.geometry[1]
-        door_coordinates[1] = obstacle_right.geometry[0]
-        door_coordinates[4] = max(obstacle_left.geometry[4], obstacle_right.geometry[4])
-        door_coordinates[5] = min(obstacle_left.geometry[5], obstacle_right.geometry[5])
+        door_coordinates['ox1'] = obstacle_left.geometry['ox2']
+        door_coordinates['ox2'] = obstacle_right.geometry['ox1']
+        door_coordinates['oy1'] = ground_coordinate
+        door_coordinates['oy2'] = obstacle_above.geometry['oy1']
+        door_coordinates['oz1'] = max(obstacle_left.geometry['oz1'], obstacle_right.geometry['oz1'])
+        door_coordinates['oz2'] = min(obstacle_left.geometry['oz2'], obstacle_right.geometry['oz2'])
     else:
         # door faces x-direction
-        door_coordinates[4] = obstacle_left.geometry[5]
-        door_coordinates[5] = obstacle_right.geometry[4]
-        door_coordinates[0] = max(obstacle_left.geometry[0], obstacle_right.geometry[0])
-        door_coordinates[1] = min(obstacle_left.geometry[1], obstacle_right.geometry[1])
+        door_coordinates['ox1'] = max(obstacle_left.geometry['ox1'], obstacle_right.geometry['ox1'])
+        door_coordinates['ox2'] = min(obstacle_left.geometry['ox2'], obstacle_right.geometry['ox2'])
+        door_coordinates['oy1'] = ground_coordinate
+        door_coordinates['oy2'] = obstacle_above.geometry['oy1']
+        door_coordinates['oz1'] = obstacle_left.geometry['oz2']
+        door_coordinates['oz2'] = obstacle_right.geometry['oz1']
 
     door = Obstacle(name="door", state='new')
     door.geometry = door_coordinates
