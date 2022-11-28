@@ -18,8 +18,8 @@ from tqdm import tqdm
 import ARTSS
 import TCP_client
 import data_assimilation
-from ARTSS import Domain, XML, DAFile
-from data_assimilation import FieldReader, create_message
+from ARTSS import Domain, XML
+from data_assimilation import FieldReader, create_message, DAFile
 
 
 def write_da_data(file_da: TextIO, parameters: dict):
