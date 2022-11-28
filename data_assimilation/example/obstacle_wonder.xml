@@ -2,7 +2,7 @@
 <ARTSS>
   <physical_parameters>
     <t_end> 10. </t_end>  <!-- simulation end time -->
-    <dt> 0.01 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
+    <dt> 0.05 </dt>  <!-- time stepping, caution: CFL-condition dt < 0.5*dx^2/nu -->
     <nu> 0.00001 </nu>  <!-- kinematic viscosity -->
   </physical_parameters>
 
@@ -36,7 +36,7 @@
   </solver>
 
   <domain_parameters enable_computational_domain="No">
-    <X1> -6.4. </X1>  <!-- physical domain -->
+    <X1> -6.4 </X1>  <!-- physical domain -->
     <X2> 6.4 </X2>
     <Y1> -6.4 </Y1>
     <Y2> 6.4 </Y2>
@@ -49,7 +49,9 @@
 
   <adaption dynamic="No" data_extraction="No"> </adaption>
 
-  <data_assimilation enabled="No" />
+  <data_assimilation enabled="Yes" class_name="ObstacleChanger">
+    <write_output> 0.05 </write_output>
+  </data_assimilation>
 
   <boundaries>
     <boundary field="u" patch="left,right" type="dirichlet" value="0.4" />
@@ -75,7 +77,7 @@
   </initial_conditions>
 
   <visualisation save_vtk="Yes" save_csv="No">
-    <vtk_nth_plot> 10 </vtk_nth_plot>
+    <vtk_nth_plot> 1 </vtk_nth_plot>
   </visualisation>
 
   <logging file="output_obstacle_wonder.log" level="info">
