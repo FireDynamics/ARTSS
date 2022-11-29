@@ -1010,7 +1010,6 @@ namespace Settings {
     std::string parse_settings_from_file(const std::filesystem::path &path) {
         std::ifstream in(path);
         if (in.fail()) {
-            std::cerr << fmt::format("Could not read file '{}'. Please check if the file exists or the permission are sufficient.", path.c_str()) << std::endl;
             throw config_error(fmt::format("Could not read file '{}'. Please check if the file exists or the permission are sufficient.", path.c_str()));
         }
         std::stringstream sstr;

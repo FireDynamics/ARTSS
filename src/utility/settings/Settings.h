@@ -57,7 +57,7 @@ namespace Settings {
         bool save_csv;
         std::optional<size_t> vtk_nth_plot;
         std::optional<size_t> csv_nth_plot;
-        std::optional<bool> final_output;
+        bool final_output;
     };
     struct logging_parameters {
         std::string file;

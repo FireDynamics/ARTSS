@@ -182,12 +182,13 @@ TEST(SettingsTest, requiredVisualisationParameters) {
     EXPECT_TRUE(visualisation_parameters.save_vtk);
     EXPECT_EQ(visualisation_parameters.vtk_nth_plot, 10);
     EXPECT_EQ(visualisation_parameters.csv_nth_plot, 21);
+    EXPECT_TRUE(visualisation_parameters.final_output);
 }
 
 TEST(SettingsTest, optionalVisualisationParameters) {
     std::string xml = R"(
 <ARTSS>
-    <visualisation save_vtk="No" save_csv="No">
+    <visualisation save_vtk="No" save_csv="No" final_output="No">
     </visualisation>
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
@@ -196,6 +197,7 @@ TEST(SettingsTest, optionalVisualisationParameters) {
             doc.RootElement());
     EXPECT_FALSE(visualisation_parameters.save_csv);
     EXPECT_FALSE(visualisation_parameters.save_vtk);
+    EXPECT_FALSE(visualisation_parameters.final_output);
 }
 
 TEST(SettingsTest, requiredInitialConditionsParameters) {
