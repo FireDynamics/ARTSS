@@ -2,7 +2,7 @@
 import os
 from tqdm import tqdm
 import time
-from typing import List
+from typing import List, Dict
 
 import numpy as np
 
@@ -10,7 +10,7 @@ import TCP_client
 from ARTSS import XML, Domain
 from data_assimilation import FieldReader, create_message, DAFile
 from gradient_based_optimisation import get_time_step_artss
-from obstacle import Obstacle
+from obstacle import Obstacle, PATCHES
 
 
 def create_obstacles() -> List[Obstacle]:
@@ -107,7 +107,7 @@ def steckler_door(artss_data_path: str):
     obstacles = xml.obstacles
     # for o in obstacles:
     #     o.state = 'unmodified'
-    door = create_door(obstacles)
+    door, neighbours = create_door(obstacles)
 
     time_back = 1
     t_sensor = 81 * xml.get_dt() + time_back * xml.get_dt()
@@ -124,7 +124,7 @@ def steckler_door(artss_data_path: str):
     domain.print_info()
     print()
     domain.print_debug()
-    da = set_zero(t_artss, t_revert, domain=domain, obstacle_name=door.name)
+    da = set_zero(t_artss, t_revert, domain=domain, obstacle_name=door.name, neighbouring_obstacle_patches=neighbours)
     da.write_obstacle_changes(obstacles + [door], True)
     # da.remove_obstacle(obstacles, door)
     config_file_name = f'change_obstacle_{int(t_sensor * 10)}.xml'
@@ -133,10 +133,13 @@ def steckler_door(artss_data_path: str):
     client.send_message(create_message(t_revert, config_file_path))
 
 
-def set_zero(t_artss: float, t_revert: float, obstacle_name: str, domain: Domain) -> DAFile:
+def set_zero(t_artss: float, t_revert: float, obstacle_name: str, domain: Domain, neighbouring_obstacle_patches: Dict[str, List[str]]) -> DAFile:
     reader = FieldReader(t_artss, path='example')
     field_T = reader.read_field_data()['T']
     domain.set_value_of_obstacle_cells(value=-1, field=field_T, obstacle_name=obstacle_name)
+    for o_name in neighbouring_obstacle_patches:
+        for patch in neighbouring_obstacle_patches[o_name]:
+            domain.set_value_of_obstacle_patch(value=-1, field=field_T, obstacle_name=o_name, patch=patch)
     field_file_name = f'temperature_{t_revert:.5e}'
 
     FieldReader.write_field_data_keys(file_name=field_file_name,
@@ -148,7 +151,7 @@ def set_zero(t_artss: float, t_revert: float, obstacle_name: str, domain: Domain
     return da
 
 
-def create_door(obstacles: List[Obstacle], door_identifier: str = None, ground_coordinate: float = 0) -> Obstacle:
+def create_door(obstacles: List[Obstacle], door_identifier: str = None, ground_coordinate: float = 0) -> [Obstacle, Dict[str, List[int]]]:
     """
     door measurements are calculated based on the obstacle names "left from door", "right from door", "above door" +
     door identifier. E.g. door identifier = "Room1" results in looking for obstacle names which include
@@ -158,13 +161,17 @@ def create_door(obstacles: List[Obstacle], door_identifier: str = None, ground_c
     if door_identifier is not None:
         names = [n + door_identifier for n in names]
     door_coordinates = {}
+    neighbours = {}
     for obstacle in obstacles:
         if names[2] in obstacle.name:
             obstacle_above = obstacle
+            neighbours[obstacle.name] = ['bottom']
         elif names[1] in obstacle.name:
             obstacle_right = obstacle
+            neighbours[obstacle.name] = ['left']
         elif names[0] in obstacle.name:
             obstacle_left = obstacle
+            neighbours[obstacle.name] = ['right']
 
     if obstacle_left.geometry['ox2'] < obstacle_right.geometry['ox1']:
         # door faces z-direction
@@ -186,7 +193,7 @@ def create_door(obstacles: List[Obstacle], door_identifier: str = None, ground_c
     door = Obstacle(name="door", state='new')
     door.geometry = door_coordinates
     door.boundary = obstacle_above.boundary
-    return door
+    return door, neighbours
 
 
 def wait_artss(t_sensor: float, artss_data_path: str):

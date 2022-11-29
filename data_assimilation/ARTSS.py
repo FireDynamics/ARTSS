@@ -366,3 +366,7 @@ class Domain:
 
         for cell in cells:
             field[cell] = value
+
+    def set_value_of_obstacle_patch(self, value: float, field: np.ndarray, obstacle_name: str, patch: str):
+        for cell in self.obstacle_cells[obstacle_name][patch]:
+            field[cell] = value
