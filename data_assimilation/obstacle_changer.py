@@ -7,7 +7,7 @@ from typing import List
 import numpy as np
 
 import TCP_client
-from ARTSS import XML
+from ARTSS import XML, Domain
 from data_assimilation import FieldReader, create_message, DAFile
 from gradient_based_optimisation import get_time_step_artss
 from obstacle import Obstacle
@@ -117,14 +117,35 @@ def steckler_door(artss_data_path: str):
     t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
                                             time_back=time_back * xml.get_dt())
 
-    da = DAFile()
-    da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
+    # da = DAFile()
+    # da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
+    domain = Domain(xml.domain, xml.computational_domain, obstacles)
+    domain.add_obstacle(door)
+    domain.print_info()
+    print()
+    domain.print_debug()
+    da = set_zero(t_artss, t_revert, domain=domain, obstacle_name=door.name)
     da.write_obstacle_changes(obstacles + [door], True)
     # da.remove_obstacle(obstacles, door)
     config_file_name = f'change_obstacle_{int(t_sensor * 10)}.xml'
     config_file_path = os.path.join(artss_data_path, config_file_name)
     da.write_xml(config_file_path, pretty_print=True)
     client.send_message(create_message(t_revert, config_file_path))
+
+
+def set_zero(t_artss: float, t_revert: float, obstacle_name: str, domain: Domain) -> DAFile:
+    reader = FieldReader(t_artss, path='example')
+    field_T = reader.read_field_data()['T']
+    domain.set_value_of_obstacle_cells(value=-1, field=field_T, obstacle_name=obstacle_name)
+    field_file_name = f'temperature_{t_revert:.5e}'
+
+    FieldReader.write_field_data_keys(file_name=field_file_name,
+                                      data={'T': field_T},
+                                      field_keys=['T'])
+    da = DAFile()
+    da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': True, 'C': False},
+                     field_file_name=os.path.abspath(field_file_name))
+    return da
 
 
 def create_door(obstacles: List[Obstacle], door_identifier: str = None, ground_coordinate: float = 0) -> Obstacle:
