@@ -17,9 +17,13 @@ return_parameter_reader ObstacleChanger::read_config(const std::string &filename
         doc.Parse(file_content.c_str());
         m_logger->debug("parse obstacles {}", static_cast<void *>(doc.RootElement()));
         auto obstacle_parameters = Settings::parse_obstacles_parameters(doc.RootElement());
-        bool parameter_changes = true;
-        // TODO (c++20)
-        // bool parameter_changes = new struct obstacle_parameters != old struct obstacle_parameters;
+        bool parameter_changes = false;
+        for (const auto& obstacle: obstacle_parameters.obstacles) {
+            if (obstacle.state == State::MODIFIED || obstacle.state == State::NEW || obstacle.state == State::DELETED) {
+                parameter_changes = true;
+                break;
+            }
+        }
         if (parameter_changes) {
             m_logger->debug("apply obstacle changes");
             std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -51,6 +55,10 @@ return_parameter_reader ObstacleChanger::read_config(const std::string &filename
             end = std::chrono::system_clock::now();
             ms = std::chrono::duration_cast < std::chrono::milliseconds > (end - start).count();
             m_logger->debug("update source: {}", ms);
+#ifndef BENCHMARKING
+        } else {
+            m_logger->debug("no obstacle changes");
+#endif
         }
         m_logger->debug("parse field changes");
 
