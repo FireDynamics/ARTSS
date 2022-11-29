@@ -24,6 +24,7 @@ class NSTurbSolver : public ISolver {
 
     void do_step(real t, bool sync) override;
     void update_source(real) override {};
+    void update_obstacle_change() override {};
     void replace_heat_source(const Settings::solver::temperature_source &temperature_source) override {};
  private:
     const Settings::solver_parameters &m_solver_settings;

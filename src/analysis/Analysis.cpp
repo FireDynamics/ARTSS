@@ -13,8 +13,11 @@
 #include "../domain/DomainData.h"
 #include "../utility/Utility.h"
 
-Analysis::Analysis(const Settings::solver::solution &solution_settings, Solution &solution) :
+Analysis::Analysis(const Settings::solver::solution &solution_settings,
+                   const Settings::visualisation_parameters &visualisation_settings,
+                   Solution &solution) :
         m_solution_settings(solution_settings),
+        m_visualisation_settings(visualisation_settings),
         m_solution(solution) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
@@ -355,6 +358,9 @@ real Analysis::calc_CFL(Field const &u, Field const &v, Field const &w, real dt)
 /// \param  field_controller    pointer to field controller
 // ***************************************************************************************
 void Analysis::save_variables_in_file(FieldController *field_controller) {
+    if (!m_visualisation_settings.final_output) {
+        return;
+    }
     auto domain_controller = DomainController::getInstance();
     std::vector<FieldType> v_fields = domain_controller->get_used_fields();
 

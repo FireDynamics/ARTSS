@@ -20,7 +20,7 @@ class GaussFunction: public ISourceFunction {
     explicit GaussFunction(const Settings::solver::sources::gauss &settings);
 
     void update_source(Field &out, real t_cur) override;
-
+    void update_obstacle_change() override;
  private:
     real get_time_value(real t_cur);
     void create_spatial_values();

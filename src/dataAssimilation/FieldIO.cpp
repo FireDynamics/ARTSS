@@ -9,8 +9,6 @@
 #include <ctime>
 #include <chrono>
 #include <iomanip>
-#include <algorithm>
-#include <filesystem>
 
 #include <fmt/compile.h>
 #include <fstream>
@@ -19,12 +17,15 @@
 #include "../utility/Mapping.h"
 
 
-FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_file_name) :
-        m_path(output_file_name),
+FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_dir) :
+        m_path(output_dir),
         m_xml_filename(xml_file_name),
         m_logger(Utility::create_logger(typeid(this).name())) {
     namespace fs = std::filesystem;
     fs::create_directories(m_path);
+    m_meta_path = m_path;
+    m_meta_path /= "meta";
+
     create_meta_file(0);
 }
 
@@ -42,7 +43,8 @@ FieldIO::FieldIO(const std::string &xml_file_name, const std::string &output_fil
 // *************************************************************************************************
 void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
     auto tstr = fmt::format("{:.5e}", t_current);
-    auto file_name = m_path + "/" + tstr;
+    std::filesystem::path file_name = m_path;
+    file_name /= tstr;
 
     HighFive::File out_file(file_name, HighFive::File::ReadWrite | HighFive::File::Create);
     m_logger->debug("attempt to write @t:{}", t_current);
@@ -52,7 +54,7 @@ void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &
     if (out_file.exist(tstr)) {
         out_file.unlink(tstr);
     }
-    
+
     HighFive::Group t_group = out_file.createGroup(tstr);
     Field fields[] = {u, v, w, p, T, C};
     size_t size = u.get_size();
@@ -62,8 +64,8 @@ void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &
         m_logger->debug("attempt to write @t:{}:{}", t_current, field_name);
         HighFive::DataSet dsf = t_group.createDataSet<real>(field_name, HighFive::DataSpace(dims));
         dsf.write(f.get_data());
+        m_logger->debug("sum of {}: {}", Mapping::get_field_type_name(f.get_type()), f.get_sum());
     }
-    create_meta_file(t_current);
 }
 
 // ========================================== read =================================================
@@ -78,8 +80,10 @@ void FieldIO::write_fields(real t_current, Field &u, Field &v, Field &w, Field &
 /// \param  C       field C to store the read data
 // *************************************************************************************************
 void FieldIO::read_fields(real t_cur, Field &u, Field &v, Field &w, Field &p, Field &T, Field &C) {
-    m_logger->debug("read original data");
-    auto file_name = fmt::format("{}/{:.5e}", m_path, t_cur);
+    m_logger->debug("read all original data @t: {}", t_cur);
+    auto t_cur_str = fmt::format("{:.5e}", t_cur);
+    std::filesystem::path file_name = m_path;
+    file_name /= t_cur_str;
     HighFive::File input_file(file_name, HighFive::File::ReadOnly);
 
     read_vis_field(input_file, u, t_cur);
@@ -118,7 +122,7 @@ void FieldIO::create_header(HighFive::File &file) {
     HighFive::DataSet domain_set = meta_group.createDataSet<size_t>("domain", HighFive::DataSpace::From(domain));
     domain_set.write(domain);
 
-    std::vector<std::string> fields{"u" , "v", "w", "p", "T", "concentration"};
+    std::vector<std::string> fields{"u", "v", "w", "p", "T", "concentration"};
     HighFive::DataSet fields_set = meta_group.createDataSet<std::string>("fields", HighFive::DataSpace::From(fields));
     fields_set.write(fields);
 
@@ -136,6 +140,7 @@ void FieldIO::create_header(HighFive::File &file) {
 }
 
 void FieldIO::read_field(HighFive::File &file, Field &field) {
+    m_logger->debug("read changed field data of {} in {}", Mapping::get_field_type_name(field.get_type()), file.getName());
     auto field_name = Mapping::get_field_type_name(field.get_type());
     auto ds = file.getDataSet(field_name);
     ds.read(field.data);
@@ -147,11 +152,13 @@ void FieldIO::read_vis_field(HighFive::File &file, Field &field, const real t) {
     m_logger->info("opening vis file at {}", full_name);
     auto ds = file.getDataSet(full_name);
     ds.read(field.data);
+
+    m_logger->debug("read @t {} sum of {}: {}", t, Mapping::get_field_type_name(field.get_type()), field.get_sum());
 }
 
-void FieldIO::read_fields(const Settings::data_assimilation::field_changes &field_changes,
-                          Field &u, Field &v, Field &w,
-                          Field &p, Field &T, Field &C) {
+void FieldIO::read_changed_fields(const Settings::data_assimilation::field_changes &field_changes,
+                                  Field &u, Field &v, Field &w,
+                                  Field &p, Field &T, Field &C) {
     std::string line;
     if (!field_changes.changed) {
         return;
@@ -198,15 +205,17 @@ void FieldIO::read_fields(const real t_cur,
                           Field &p, Field &T, Field &C) {
     m_logger->debug("read time step {}", t_cur);
     create_meta_file(t_cur);
-    if (field_changes.changed) {  // no changes -> read original file
-        m_logger->debug("no field changes");
+    if (!field_changes.changed) {  // no changes -> read original file
+        m_logger->debug("no field changes, read original data");
         read_fields(t_cur, u, v, w, p, T, C);
+        m_logger->debug("finished reading original data");
         return;
     }
 
     try {
-        auto tstr = fmt::format("{:.5e}", m_path, t_cur);
-        auto file_name = fmt::format("{}/{}", m_path, tstr);
+        auto t_cur_str = fmt::format("{:.5e}", t_cur);
+        std::filesystem::path file_name = m_path;
+        file_name /= t_cur_str;
         HighFive::File org_file(file_name, HighFive::File::ReadOnly);
         HighFive::File new_file(field_changes.file_name, HighFive::File::ReadOnly);
 
@@ -255,8 +264,21 @@ void FieldIO::read_fields(const real t_cur,
 
 void FieldIO::create_meta_file(real t_cur) {
     std::ofstream meta_file;
-    meta_file.open(m_path + "/meta");
+    meta_file.open(m_meta_path);
     meta_file << fmt::format("t:{}\n", t_cur);
     meta_file << fmt::format("xml_name:{}\n", m_xml_filename);
     meta_file.close();
+}
+
+void FieldIO::read_fields(const std::string &file_name, const real t,
+                          Field &u, Field &v, Field &w,
+                          Field &p, Field &T, Field &C) {
+    HighFive::File file(file_name, HighFive::File::ReadOnly);
+
+    read_vis_field(file, u, t);
+    read_vis_field(file, v, t);
+    read_vis_field(file, w, t);
+    read_vis_field(file, p, t);
+    read_vis_field(file, T, t);
+    read_vis_field(file, C, t);
 }

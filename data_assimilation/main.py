@@ -1,19 +1,15 @@
 import os
 import time
-import matplotlib.pyplot as plt
 
 import numpy as np
 from numpy import ndarray
 
 import TCP_client
 import data_assimilation
-from ARTSS import XML, Domain, DAFile, DAPackage
-from data_assimilation import FieldReader
-
-
-def create_message(t_cur: float, config_file_name: str) -> bin:
-    package = DAPackage(t_cur, config_file_name)
-    return package.pack()
+import gradient_based_optimisation
+from ARTSS import XML, Domain
+from data_assimilation import FieldReader, DAFile
+from obstacle import Obstacle
 
 
 def change_something(domain: Domain, field: list) -> list:
@@ -23,30 +19,6 @@ def change_something(domain: Domain, field: list) -> list:
         for k in range(domain.domain_param['Nz']):
             new_field[domain.calculate_index(i, j, k)] = 513
     return new_field
-
-
-def change_heat_source(source_type: dict, temperature_source: dict, random: dict, changes: dict) -> [dict, dict, dict]:
-    source_type_changes = changes['source_type']
-    temperature_source_changes = changes['temperature_source']
-    random_changes = changes['random']
-
-    new_source_type = source_type.copy()
-    new_temperature_source = temperature_source.copy()
-    new_random = random.copy()
-
-    for key in source_type_changes:
-        new_source_type[key] = source_type_changes[key]
-
-    for key in temperature_source_changes:
-        new_temperature_source[key] = temperature_source_changes[key]
-
-    if not source_type['random']:
-        new_random = {}
-    else:
-        for key in random_changes:
-            new_random[key] = random_changes[key]
-
-    return new_source_type, new_temperature_source, new_random
 
 
 def create_gradient_field(Nx: int, Ny: int, Nz: int) -> ndarray:
@@ -65,12 +37,12 @@ def main(dry_run=False):
     print(cwd)
 
     if dry_run:
-        xml = XML('da.xml')
+        xml = XML('da.xml', path='example')
     else:
-        xml = XML(FieldReader.get_xml_file_name())
+        xml = XML(FieldReader.get_xml_file_name(path='example'), path='example')
 
     xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
+    domain = Domain(domain_param=xml.domain, obstacles=xml.obstacles, enable_computational_domain=xml.computational_domain)
     domain.print_info()
     domain.print_debug()
 
@@ -94,7 +66,7 @@ def main(dry_run=False):
 
             reader = FieldReader(t)
             reader.print_header()
-            fields = reader.read_field_data(t)
+            fields = reader.read_field_data()
 
         field = change_something(domain, fields['T'])
         fields['T'] = field
@@ -102,16 +74,17 @@ def main(dry_run=False):
         if dry_run:
             for k in fields:
                 print((k, len(fields[k])))
-            data_assimilation.write_field_data(file_name=field_file_name, data=fields,
-                                               field_keys=['u', 'v', 'w', 'p', 'T', 'C'])
+            FieldReader.write_field_data_keys(file_name=field_file_name, data=fields,
+                                              field_keys=['u', 'v', 'w', 'p', 'T', 'C'])
         else:
             reader.write_field_data(file_name=field_file_name, data=fields)
 
         source_type, temperature_source, random = \
-            change_heat_source(*source,
-                               changes={'source_type': {},
-                                        'temperature_source': {'x0': float(source[1]['x0']) + 10 * index},
-                                        'random': {}})
+            data_assimilation.change_heat_source(*source,
+                                                 changes={'source_type': {},
+                                                          'temperature_source': {
+                                                              'x0': float(source[1]['x0']) + 10 * index},
+                                                          'random': {}})
         da = DAFile()
         da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': True, 'C': False}, field_file_name)
         da.create_temperature_source_changes(
@@ -122,51 +95,28 @@ def main(dry_run=False):
         da.write_xml(config_file_name, pretty_print=dry_run)
 
         if not dry_run:
-            client.send_message(create_message(t, config_file_name))
+            client.send_message(data_assimilation.create_message(t, config_file_name))
+            time.sleep(10)
 
 
-def gradient_tmp():
-    reader = FieldReader()
-    reader.print_header()
-
-    xml = XML(reader.get_xml_file_name())
-    xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
-    domain.print_info()
-    domain.print_debug()
-
-    dt = reader.dt
-
-    t_cur = reader.get_t_current()
-
-    n = int(t_cur/dt)
-    i = 300
-    j = 15
-    k = 16
-    sensor_data = []
-    print('iter')
-    f = open('visualisation.dat', 'r')
-    for i in range(6):
-        f.readline()
-    for i in range(1,34):
-        print(i, i * dt)
-        fields = []
-        for i in range(6):
-            fields.append(np.fromstring(f.readline(), dtype=np.float, sep=';'))
-        sensor_data.append(fields[4][domain.calculate_index(i, j, k)])
-        f.readline()
-    f.close()
-    print("plot")
-    f = open('tmp.tmp', 'w')
-    for i in sensor_data:
-        f.write(str(i) + "\n")
-    f.close()
-    #f = open('tmp.tmp', 'r')
-    #for i in f:
-    #    sensor_data.append(float(i))
-    plt.plot(sensor_data)
-    plt.show()
+def tmp():
+    obstacle = Obstacle("cube")
+    obstacle.add_geometry([1, 2, 2, 3, 3, 4])
+    obstacle.add_boundary(fields=['u', 'v', 'w'], patches=['front', 'back', 'left', 'right', 'bottom', 'top'],
+                          boundary_condition='dirichlet', value=0)
+    obstacle.add_boundary(fields=['p'], patches=['front', 'right', 'bottom', 'top'], boundary_condition='neumann',
+                          value=1)
+    obstacle.add_boundary(fields=['p'], patches=['back'], boundary_condition='neumann', value=10)
+    obstacle.add_boundary(fields=['p'], patches=['left'], boundary_condition='dirichlet', value=11)
+    da = DAFile()
+    da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
+    da.create_obstacle_changes([obstacle], True)
+    da.write_xml('change_obstacle.xml', pretty_print=True)
 
 
 if __name__ == '__main__':
-    main(dry_run=False)
+    gradient_based_optimisation.start(artss_data_path='example',
+                                      fds_data_path='example/fds_data', fds_input_file_name='tunnel',
+                                      artss_path=os.path.join(os.getcwd(), '..'),
+                                      parallel=True)
+    # main(dry_run=False)

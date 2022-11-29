@@ -16,6 +16,7 @@ class BuoyancyMMS: public ISourceFunction {
  public:
     BuoyancyMMS();
     void update_source(Field &out, real t_cur) override;
+    void update_obstacle_change() override { }
  private:
     void set_up();
     Field m_source_field;

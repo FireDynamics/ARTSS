@@ -1,6 +1,9 @@
 # Data assimilation
 Data assimilation is a technique which, generally speaking, combines observational data with numerical simulation. In the case of ARTSS, it is now possible to directly or indirectly modify the simulation data during runtime with the help of TCP. The data can be changed directly by rewriting the respective cells or indirectly by changing parameters.
 
+## Configuration
+`pip install -r requirements.txt`
+
 ## How to use
 1. Compile target data_assimilation (`./compile.sh --mpi`)
 1. Go to directory `ARTSS/data_assimilation/example`

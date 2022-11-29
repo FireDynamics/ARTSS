@@ -16,7 +16,7 @@ namespace Mapping {
 // *************************************************************************************************
 CoordinateAxis match_axis(std::string string) {
     std::transform(string.begin(), string.end(), string.begin(), ::toupper);
-    for (size_t an = 0; an < axis_names.size(); an++) {
+    for (size_t an = 0; an < number_of_axes; an++) {
         if (axis_names[an] == string) return (CoordinateAxis) an;
     }
     return UNKNOWN_AXIS;
@@ -35,7 +35,7 @@ CoordinateAxis to_axis(Patch patch) {
 /// \param  string           string to be matched
 // *************************************************************************************************
 Patch match_patch(const std::string &string) {
-    for (size_t pn = 0; pn < patch_names.size(); pn++) {
+    for (size_t pn = 0; pn < number_of_patches; pn++) {
         if (patch_names[pn] == string) return (Patch) pn;
     }
     return UNKNOWN_PATCH;
@@ -61,7 +61,7 @@ Patch to_patch(CoordinateAxis axis, bool start) {
 /// \param  string           string to be matched
 // *************************************************************************************************
 FieldType match_field(const std::string &string) {
-    for (size_t fn = 0; fn < field_type_names.size(); fn++) {
+    for (size_t fn = 0; fn < number_of_field_types; fn++) {
         if (field_type_names[fn] == string) return (FieldType) fn;
     }
     return UNKNOWN_FIELD;
@@ -80,7 +80,7 @@ std::string get_field_type_name(FieldType f) {
 /// \param  string           string to be matched
 // *************************************************************************************************
 BoundaryCondition match_boundary_condition(const std::string &string) {
-    for (size_t tn = 0; tn < boundary_condition_names.size(); tn++) {
+    for (size_t tn = 0; tn < number_of_boundary_conditions; tn++) {
         if (boundary_condition_names[tn] == string) return static_cast<BoundaryCondition>(tn);
     }
     return UNKNOWN_CONDITION;
@@ -109,4 +109,16 @@ std::vector<CoordinateAxis> get_axes(Patch patch) {
 std::array<Patch, 2> get_patches(CoordinateAxis axis) {
     return {Patch(axis * 2), Patch(axis * 2 + 1)};
 }
+
+State match_state(const std::string &string) {
+    for (size_t sn = 0; sn < number_of_states; sn++) {
+        if (state_name[sn] == string) return static_cast<State>(sn);
+    }
+    return UNKNOWN_STATE;
+}
+
+std::string get_state_name(State state) {
+    return state_name[state];
+}
+
 }  // end namespace Mapping

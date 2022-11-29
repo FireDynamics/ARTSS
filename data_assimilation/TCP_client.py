@@ -18,9 +18,10 @@ class TCPClient:
     def send_message(self, message: bin):
         # Send data
         self.socket.sendall(message)
+        print('message was sent. Waiting for response.')
 
         # Look for the response
-        expected_response = "message was received"
+        expected_response = "message was received: Rollback done"
         response = ''
 
         while len(response) < len(expected_response):
@@ -36,6 +37,6 @@ class TCPClient:
             else:
                 response += reply.decode('utf-8')
         if response == expected_response:
-            print("message was sent successfully")
+            print("message was sent successfully. reply:", response)
         else:
             print("an error occurred during the connection:", response)

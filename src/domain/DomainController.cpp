@@ -91,6 +91,11 @@ return_obstacle DomainController::parse_obstacle_parameter(const Settings::obsta
        obstacles.reserve(obstacle_settings.obstacles.size());
        bdc_obstacles.reserve(obstacle_settings.obstacles.size());
        for (const Settings::obstacle &o: obstacle_settings.obstacles) {
+#ifndef BENCHMARKING
+           m_logger->debug("read {}", o.name);
+           m_logger->debug("start coords {}", o.start_coords);
+           m_logger->debug("end coords {}", o.end_coords);
+#endif
            obstacles.emplace_back(o.start_coords, o.end_coords, o.name);
            bdc_obstacles.emplace_back(o.boundaries);
        }
@@ -173,4 +178,48 @@ std::vector<FieldType> DomainController::get_used_fields() const {
 
 bool DomainController::is_blocked_by_obstacle(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const {
     return m_multigrid->is_blocked_by_obstacle(start, end);
+}
+
+void DomainController::replace_obstacles(const Settings::obstacles_parameters &obstacle_parameters) {
+//#ifndef BENCHMARKING
+//    m_logger->debug("start parsing obstacle parameter");
+//#endif
+//    std::vector<std::string> unmodified;
+//    std::vector<std::string> deleted;
+//    std::vector<Obstacle> obstacles;
+//    std::vector<BoundaryDataController> bdc_obstacles;
+//    if (obstacle_parameters.enabled) {
+//        obstacles.reserve(obstacle_parameters.obstacles.size());
+//        bdc_obstacles.reserve(obstacle_parameters.obstacles.size());
+//        for (const Settings::obstacle &o: obstacle_parameters.obstacles) {
+//            switch (o.state) {
+//                case State::DELETED:
+//                    deleted.push_back(o.name);
+//                case State::UNMODIFIED:
+//                    unmodified.push_back(o.name);
+//                    break;
+//                case State::NEW:
+//                case State::MODIFIED:
+//                    obstacles.emplace_back(o.start_coords, o.end_coords, o.name);
+//                    bdc_obstacles.emplace_back(o.boundaries);
+//                    break;
+//                default:
+//                    m_logger->warn("obstacle ({}) with unknown state: {}", o.name, o.state);
+//            }
+//        }
+//    }
+//#ifndef BENCHMARKING
+//    m_logger->debug("finished parsing obstacle parameter");
+//#endif
+
+    auto [bdc_domain, surfaces, bdc_surfaces, obstacles2, bdc_obstacles2] = read_XML();
+    auto [obstacles, bdc_obstacles] = parse_obstacle_parameter(obstacle_parameters);
+    detect_neighbouring_obstacles(obstacles);
+    //m_multigrid->replace_obstacles(obstacles, bdc_obstacles);
+    size_t multigrid_level = DomainData::getInstance()->get_levels();
+    delete m_multigrid;
+    m_multigrid = new Multigrid(surfaces, bdc_surfaces,
+                                obstacles, bdc_obstacles,
+                                bdc_domain,
+                                multigrid_level);
 }

@@ -13,6 +13,7 @@
 #include <vector>
 #include <unordered_map>
 #include <filesystem>
+#include <optional>
 #include <variant>
 
 #ifndef BENCHMARKING
@@ -28,7 +29,7 @@
 using Map = std::map<std::string, std::string>;
 using return_xml_data = std::tuple<const tinyxml2::XMLElement*,Map>;
 namespace Settings {
-    class config_error : std::runtime_error { ;
+    class config_error : public std::runtime_error { ;
     public:
         explicit config_error(const std::string &message) : std::runtime_error(message) {}
         explicit config_error(const char *message) : std::runtime_error(message) {};
@@ -56,6 +57,7 @@ namespace Settings {
         bool save_csv;
         std::optional<size_t> vtk_nth_plot;
         std::optional<size_t> csv_nth_plot;
+        bool final_output;
     };
     struct logging_parameters {
         std::string file;
@@ -157,6 +159,7 @@ namespace Settings {
     };
     struct obstacle {
         std::string name;
+        State state;
         Coordinate<real> start_coords;
         Coordinate<real> end_coords;
         std::vector<struct boundary> boundaries;
@@ -332,6 +335,12 @@ namespace Settings {
     struct data_assimilation_parameters {
         bool enabled;
         std::string class_name;
+        real output_time_interval;
+        std::string output_dir;
+        bool load_data;
+        std::string file;
+        real time;
+        int port;
     };
     struct Settings {
         std::string filename;

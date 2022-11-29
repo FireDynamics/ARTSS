@@ -13,6 +13,17 @@
 
 #include "../utility/GlobalMacrosTypes.h"
 
+inline static const std::vector<std::string> state_name = {"XML", "unmodified", "modified", "new", "deleted"};
+constexpr size_t number_of_states = 5;
+enum State : int {
+    UNKNOWN_STATE = -1,
+    XML = 0,
+    UNMODIFIED = 1,
+    MODIFIED = 2,
+    NEW = 3,
+    DELETED = 4
+};
+
 inline static const std::vector<std::string> axis_names = {"X", "Y", "Z"};
 constexpr size_t number_of_axes = 3;
 enum CoordinateAxis : int {
@@ -73,6 +84,9 @@ namespace Mapping {
     std::string get_boundary_condition_name(BoundaryCondition bc);
     //std::string get_boundary_condition_name(size_t bc) { return get_boundary_condition_name(BoundaryCondition(bc)); };
     BoundaryCondition match_boundary_condition(const std::string &string);
+
+    std::string get_state_name(State state);
+    State match_state(const std::string &string);
 }
 
 #endif /* ARTSS_MAPPING_H_ */

@@ -8,7 +8,7 @@
 
 return_parameter_reader TemperatureSourceChanger::read_config(const std::string &filename) {
     try {
-        m_logger->debug("parse file to string");
+        m_logger->debug("parse file to string {}", filename);
         auto file_content = Settings::parse_settings_from_file(filename);
         m_logger->debug("parse document from {} to XMLTree {}", filename, file_content);
         tinyxml2::XMLDocument doc;

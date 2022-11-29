@@ -222,6 +222,7 @@ void Obstacle::print_details() {
     size_t coords_i, coords_j, coords_k;
 
     m_logger->debug("############### OBSTACLE {} ###############", m_name);
+    m_logger->debug("name: {}", m_name);
     m_logger->debug("level: {}", m_level);
     m_logger->debug("strides (x y z): {} {} {}", m_strides[CoordinateAxis::X], m_strides[CoordinateAxis::Y],
                     m_strides[CoordinateAxis::Z]);

@@ -182,12 +182,13 @@ TEST(SettingsTest, requiredVisualisationParameters) {
     EXPECT_TRUE(visualisation_parameters.save_vtk);
     EXPECT_EQ(visualisation_parameters.vtk_nth_plot, 10);
     EXPECT_EQ(visualisation_parameters.csv_nth_plot, 21);
+    EXPECT_TRUE(visualisation_parameters.final_output);
 }
 
 TEST(SettingsTest, optionalVisualisationParameters) {
     std::string xml = R"(
 <ARTSS>
-    <visualisation save_vtk="No" save_csv="No">
+    <visualisation save_vtk="No" save_csv="No" final_output="No">
     </visualisation>
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
@@ -196,6 +197,7 @@ TEST(SettingsTest, optionalVisualisationParameters) {
             doc.RootElement());
     EXPECT_FALSE(visualisation_parameters.save_csv);
     EXPECT_FALSE(visualisation_parameters.save_vtk);
+    EXPECT_FALSE(visualisation_parameters.final_output);
 }
 
 TEST(SettingsTest, requiredInitialConditionsParameters) {
@@ -1771,6 +1773,52 @@ TEST(SettingsTest, assimilation2) {
     Settings::data_assimilation_parameters da = Settings::parse_assimilation_parameters(doc.RootElement());
     EXPECT_TRUE(da.enabled);
     EXPECT_EQ("TemperatureSource", da.class_name);
+    EXPECT_FALSE(da.load_data);
+    EXPECT_EQ(da.output_dir, ".vis");
+}
+
+TEST(SettingsTest, assimilation3) {
+    std::string xml = R"(
+<ARTSS>
+  <data_assimilation enabled="Yes" class_name="TemperatureSourceChanger" load_data="Yes" file="1.10000e+01">
+    <write_output> 1 </write_output>
+    <time> 11 </time>
+    <port> 10 </port>
+  </data_assimilation>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::data_assimilation_parameters da = Settings::parse_assimilation_parameters(doc.RootElement());
+    EXPECT_TRUE(da.enabled);
+    EXPECT_EQ("TemperatureSourceChanger", da.class_name);
+    EXPECT_TRUE(da.load_data);
+    EXPECT_EQ(da.file, "1.10000e+01");
+    EXPECT_EQ(da.output_dir, ".vis");
+    EXPECT_EQ(da.output_time_interval, 1);
+    EXPECT_EQ(da.time, 11);
+    EXPECT_EQ(da.port, 10);
+}
+
+TEST(SettingsTest, assimilation4) {
+    std::string xml = R"(
+<ARTSS>
+  <data_assimilation enabled="Yes" class_name="ObstacleChanger" load_data="Yes" file="1.10000e+01">
+    <write_output> 1 </write_output>
+    <time> 11 </time>
+    <port> 10 </port>
+  </data_assimilation>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::data_assimilation_parameters da = Settings::parse_assimilation_parameters(doc.RootElement());
+    EXPECT_TRUE(da.enabled);
+    EXPECT_EQ("ObstacleChanger", da.class_name);
+    EXPECT_TRUE(da.load_data);
+    EXPECT_EQ(da.file, "1.10000e+01");
+    EXPECT_EQ(da.output_dir, ".vis");
+    EXPECT_EQ(da.output_time_interval, 1);
+    EXPECT_EQ(da.time, 11);
+    EXPECT_EQ(da.port, 10);
 }
 
 TEST(SettingsTest, assimilationHeatSourceChanges) {

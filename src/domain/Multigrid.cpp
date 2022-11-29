@@ -66,7 +66,6 @@ Multigrid::Multigrid(const std::vector<Surface> &surfaces,
         send_surface_lists_to_GPU();
     }
     create_multigrid_domain_lists();
-
     send_domain_lists_to_GPU();
 #ifndef BENCHMARKING
     print();
@@ -617,3 +616,42 @@ bool Multigrid::is_blocked_by_obstacle(const Coordinate<size_t> &from, const Coo
     }
     return false;
 }
+
+void Multigrid::replace_obstacles(const std::vector<Obstacle> &obstacles,
+                                  const std::vector<BoundaryDataController> &bdc_obstacles) {
+#ifndef BENCHMARKING
+    m_logger->debug("replace obstacles start");
+#endif
+    if (obstacles.size() != m_number_of_obstacle_objects) {
+        m_number_of_obstacle_objects = obstacles.size();
+        for (size_t patch = 0; patch < number_of_patches; patch++) {
+            delete m_jl_obstacle_boundary_list_patch_divided[patch];
+            m_jl_obstacle_boundary_list_patch_divided[patch] = new MultipleJoinedList(m_multigrid_levels,
+                                                                                      m_number_of_obstacle_objects);
+        }
+    }
+    for (size_t level = 0; level < m_multigrid_levels; level++) {
+        m_MG_obstacle_object_list[level].clear();
+    }
+#ifndef BENCHMARKING
+    m_logger->debug("create obstacles");
+#endif
+    if (m_number_of_obstacle_objects > 0) {
+        m_bdc_obstacle = bdc_obstacles;
+        m_MG_obstacle_object_list[0] = obstacles;  // level 0
+
+        create_multigrid_obstacle_lists();
+        send_obstacle_lists_to_GPU();
+    }
+
+#ifndef BENCHMARKING
+    m_logger->debug("create domain");
+#endif
+    m_MG_domain_object_list.clear();
+    create_multigrid_domain_lists();
+    send_domain_lists_to_GPU();
+#ifndef BENCHMARKING
+    m_logger->debug("replace obstacles end");
+#endif
+}
+

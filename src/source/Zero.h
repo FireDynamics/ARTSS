@@ -13,6 +13,7 @@
 class Zero: public ISourceFunction {
 public:
     void update_source(Field &, real) override { }
+    void update_obstacle_change() override { }
 };
 
 #endif /* ARTSS_SOURCE_ZERO_H */

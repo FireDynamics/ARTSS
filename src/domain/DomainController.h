@@ -61,6 +61,8 @@ class DomainController {
     }
     bool is_blocked_by_obstacle(const Coordinate<size_t> &start, const Coordinate<size_t> &end) const;
 
+    void replace_obstacles(const Settings::obstacles_parameters &parameters);
+
 private:
     size_t get_slice_size_domain_inner_list_level_joined(size_t level) const { return m_multigrid->get_slice_size_domain_inner_cells_level_joined(level); }  // get size of domain inner list
 

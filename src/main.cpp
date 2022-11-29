@@ -17,7 +17,6 @@
 #ifdef ASSIMILATION
 #include <mpi.h>
 #include "TCP/TCPServer.h"
-#define PORT 7777
 void server();
 class tcp_server_error : std::runtime_error { ;
  public:
@@ -63,6 +62,8 @@ int main(int argc, char **argv) {
             Settings::Settings settings = Settings::parse_settings(argv[1]);
 #ifdef ASSIMILATION
             MPI_Request request;
+            int port = settings.assimilation_parameters.port;
+            MPI_Isend(&port, 1, MPI_INT, 1, 10, MPI_COMM_WORLD,&request);
             MPI_Isend(settings.logging_parameters.level.c_str(),
                       static_cast<int>(settings.logging_parameters.level.size()), MPI_CHAR, 1, 0, MPI_COMM_WORLD,
                       &request);
@@ -107,13 +108,16 @@ void server() {
     MPI_Status status;
     MPI_Request request = MPI_REQUEST_NULL;  // communication is finished
 
+    int port;
+    MPI_Recv(&port, 1, MPI_INT, MPI_ANY_SOURCE, 10, MPI_COMM_WORLD, &status);
+
 #ifndef BENCHMARKING
     MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
     int msg_len;
     MPI_Get_count(&status, MPI_CHAR, &msg_len);
     std::vector<char> msg;
     msg.resize(msg_len);
-    MPI_Recv(msg.data(), msg_len, MPI_CHAR, status.MPI_TAG, 0, MPI_COMM_WORLD, &status);
+    MPI_Recv(msg.data(), msg_len, MPI_CHAR, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
 
     std::string log_file = "tcp_server.log";
     Utility::create_logger(msg.data(), log_file);;
@@ -131,17 +135,26 @@ void server() {
             std::cout << fmt::format("received message from client {}:{}", new_client->remote_address(),
                                      new_client->remote_port()) << std::endl;
             logger->info("received message from client {}:{}", new_client->remote_address(), new_client->remote_port());
-            int flag;
-            MPI_Iprobe(1, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-            if (flag) {
-                logger->warn("message couldn't be processed as a message is already being processed");
-                MPI_Wait(&request, &status);
-            }
-            new_client->send_message("message was received");  // send a message back (acknowledgment/error/whatever)
             std::cout << "message will be sent to rank 0" << std::endl;
             MPI_Isend(message, message_size + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &request);
             logger->debug("message was sent to rank 0");
             std::cout << "message was sent to rank 0" << std::endl;
+            int flag = -1;
+            while (true) {
+                MPI_Iprobe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+                if (flag) {
+                    break;
+                }
+            }
+            int msg_len;
+            MPI_Get_count(&status, MPI_CHAR, &msg_len);
+            std::vector<char> msg;
+
+            msg.resize(msg_len);
+            MPI_Recv(msg.data(), msg_len, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            std::cout << "received reply: " << msg.data() << std::endl;
+            logger->debug("received reply: {}", msg.data());
+            new_client->send_message(fmt::format("message was received: {}", msg.data()));  // send a message back (acknowledgment/error/whatever)
         };
 
         new_client->on_socket_closed = [new_client, logger](int error_code) {
@@ -155,7 +168,7 @@ void server() {
 
     // bind the server to a port.
     logger->debug("bind server to a port");
-    tcp_server.bind_port(PORT, [logger](int error_code, const std::string &error_message) {
+    tcp_server.bind_port(port, [logger](int error_code, const std::string &error_message) {
         // BINDING FAILED:
         logger->critical("Binding failed - {} : {}", error_code, error_message);
         // binding wasn't possible, therefore exit ARTSS because something's wrong with the environment
