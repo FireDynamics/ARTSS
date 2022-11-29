@@ -24,7 +24,7 @@ def plot(x, y, z, show=False):
 def main(file_name: str):
     xml = XML(file_name)
     xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
+    domain = Domain(domain_param=xml.domain, obstacles=xml.obstacles, enable_computational_domain=xml.computational_domain)
     domain.print_info()
     #    domain.print_debug()
     while True:

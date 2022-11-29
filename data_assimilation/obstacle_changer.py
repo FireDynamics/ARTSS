@@ -10,7 +10,7 @@ import TCP_client
 from ARTSS import XML, Domain
 from data_assimilation import FieldReader, create_message, DAFile
 from gradient_based_optimisation import get_time_step_artss
-from obstacle import Obstacle, PATCHES
+from obstacle import Obstacle
 
 
 def create_obstacles() -> List[Obstacle]:

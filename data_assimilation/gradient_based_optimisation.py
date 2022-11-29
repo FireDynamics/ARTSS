@@ -643,7 +643,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, ar
 
     xml = XML(FieldReader.get_xml_file_name(artss_data_path), path=artss_data_path)
     xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
+    domain = Domain(domain_param=xml.domain, obstacles=xml.obstacles, enable_computational_domain=xml.computational_domain)
     domain.print_info()
     domain.print_debug()
 
@@ -930,11 +930,10 @@ def kelvin_to_celsius(kelvin):
 
 
 def plot_differences(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
-    cwd = os.getcwd()
     a_path = os.path.join(artss_data_path, '30')
     xml = XML(FieldReader.get_xml_file_name(path=a_path), path=a_path)
     xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
+    domain = Domain(domain_param=xml.domain, obstacles=xml.obstacles, enable_computational_domain=xml.computational_domain)
     domain.print_info()
     domain.print_debug()
 
@@ -1015,11 +1014,10 @@ def process_data(devc_info_temperature: dict, artss_times: list, artss_data_path
 
 
 def plot_comparison_da(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
-    cwd = os.getcwd()
     a_path = os.path.join(artss_data_path, 'with_da')
     xml = XML(FieldReader.get_xml_file_name(path=a_path), path=a_path)
     xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
+    domain = Domain(domain_param=xml.domain, obstacles=xml.obstacles, enable_computational_domain=xml.computational_domain)
     domain.print_info()
     domain.print_debug()
 
@@ -1061,11 +1059,10 @@ def plot_comparison_da(fds_data_path: str, fds_input_file_name: str, artss_data_
 
 
 def plot_sensor_data(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
-    cwd = os.getcwd()
     a_path = os.path.join(artss_data_path, '30')
     xml = XML(FieldReader.get_xml_file_name(path=a_path), path=a_path)
     xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
+    domain = Domain(domain_param=xml.domain, obstacles=xml.obstacles, enable_computational_domain=xml.computational_domain)
     domain.print_info()
     domain.print_debug()
 
@@ -1146,7 +1143,7 @@ def compare_distance(fds_data_path: str, fds_input_file_name: str, a_data_path: 
 
     xml = XML(FieldReader.get_xml_file_name(path=artss_data_path), path=artss_data_path)
     xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
+    domain = Domain(domain_param=xml.domain, obstacles=xml.obstacles, enable_computational_domain=xml.computational_domain)
     domain.print_info()
     domain.print_debug()
 

@@ -42,7 +42,7 @@ def main(dry_run=False):
         xml = XML(FieldReader.get_xml_file_name(path='example'), path='example')
 
     xml.read_xml()
-    domain = Domain(xml.domain, xml.obstacles)
+    domain = Domain(domain_param=xml.domain, obstacles=xml.obstacles, enable_computational_domain=xml.computational_domain)
     domain.print_info()
     domain.print_debug()
 
@@ -66,7 +66,7 @@ def main(dry_run=False):
 
             reader = FieldReader(t)
             reader.print_header()
-            fields = reader.read_field_data(t)
+            fields = reader.read_field_data()
 
         field = change_something(domain, fields['T'])
         fields['T'] = field
@@ -74,8 +74,8 @@ def main(dry_run=False):
         if dry_run:
             for k in fields:
                 print((k, len(fields[k])))
-            data_assimilation.write_field_data_keys(file_name=field_file_name, data=fields,
-                                                    field_keys=['u', 'v', 'w', 'p', 'T', 'C'])
+            FieldReader.write_field_data_keys(file_name=field_file_name, data=fields,
+                                              field_keys=['u', 'v', 'w', 'p', 'T', 'C'])
         else:
             reader.write_field_data(file_name=field_file_name, data=fields)
 
