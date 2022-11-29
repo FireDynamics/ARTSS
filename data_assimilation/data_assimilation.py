@@ -4,7 +4,7 @@ import re
 import struct
 from datetime import datetime
 import locale
-from typing import List
+from typing import List, Dict
 
 import h5py
 import numpy as np
@@ -202,18 +202,19 @@ class DAFile:
 class FieldReader:
     def __init__(self, time_step, path: str = '.'):
         self.t: float = time_step
-        self.dt: float
-        self.xml_file_name: str
-        self.grid_resolution: dict
-        self.fields: list
+        self.dt: float = 0
+        self.xml_file_name: str = ''
+        self.grid_resolution: Dict[str, int] = {}
+        self.fields: List[str] = []
         self.date: datetime
         self.header: str
-        self.path = path
+        self.path: str = path
         self.read_header()
 
     @retry(delay=1, tries=6)
     def read_header(self):
-        with h5py.File(os.path.join(self.path, '.vis', f'{self.t:.5e}'), 'r') as inp:
+        file = os.path.join(self.path, '.vis', f'{self.t:.5e}')
+        with h5py.File(file, 'r') as inp:
             metadata = inp['metadata']
             self.dt = metadata['dt'][()]
             domain = list(metadata['domain'][:])
@@ -259,13 +260,13 @@ class FieldReader:
             xml_file_name = [x for x in inp.readlines() if x.startswith('xml_name:')][0][len('xml_name:'):]
         return xml_file_name.strip()
 
-    def get_grid_resolution(self) -> dict:
+    def get_grid_resolution(self) -> Dict[str, int]:
         return self.grid_resolution
 
     def get_fields(self) -> list:
         return self.fields
 
-    def read_field_data(self) -> dict:
+    def read_field_data(self) -> Dict[str, np.ndarray]:
         t_cur = self.get_t_current(path=self.path)
         if self.t > t_cur:
             print(f'cannot read time step {self.t} as the current time step is {t_cur}')
@@ -282,14 +283,15 @@ class FieldReader:
             return fields
 
     @staticmethod
-    def write_field_data_keys(file_name: str, data: dict, field_keys: list):
+    def write_field_data_keys(file_name: str, data: Dict[str, np.ndarray], field_keys: List[str]):
         with h5py.File(file_name, 'w') as out:
             for key in field_keys:
                 if key not in data.keys():
                     continue
 
                 field = data[key]
-                out.create_dataset(key, (len(field),), dtype='d')
+                dset = out.create_dataset(key, (len(field),), dtype='d')
+                dset[:] = field
 
-    def write_field_data(self, file_name: str, data: dict):
+    def write_field_data(self, file_name: str, data: Dict[str, np.ndarray]):
         FieldReader.write_field_data_keys(file_name=file_name, data=data, field_keys=self.fields)
