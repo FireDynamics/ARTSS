@@ -10,6 +10,7 @@
 #include "mpi.h"
 #include "TemperatureSourceChanger.h"
 #include "ObstacleChanger.h"
+#include "../domain/DomainController.h"
 
 DataAssimilation::DataAssimilation(const SolverController &solver_controller,
                                    FieldController *field_controller,
@@ -105,6 +106,11 @@ bool DataAssimilation::config_rollback(const char *msg) {
         m_field_IO_handler->read_fields(m_t_cur, field_changes,
                                         m_new_field_u, m_new_field_v, m_new_field_w,
                                         m_new_field_p, m_new_field_T, m_new_field_C);
+        auto domain_controller = DomainController::getInstance();
+        if (field_changes.T_changed) {
+            domain_controller->apply_boundary(m_new_field_T);
+        }
+        //TODO
         return changes || field_changes.changed;
     }
 }
