@@ -77,7 +77,7 @@
 
   <adaption dynamic="No" data_extraction="No"> </adaption>
 
-  <data_assimilation enabled="Yes" class_name="ObstacleChanger" load_data="Yes" file="4.00000e+00">
+  <data_assimilation enabled="Yes" load_data="Yes" file="4.00000e+00">
     <time> 4 </time>
     <write_output> 0.05 </write_output>
   </data_assimilation>
