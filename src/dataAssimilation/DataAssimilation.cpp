@@ -6,10 +6,7 @@
 
 #include "DataAssimilation.h"
 #include "../domain/DomainData.h"
-#include "../TCP/TCPServer.h"
 #include "mpi.h"
-#include "TemperatureSourceChanger.h"
-#include "ObstacleChanger.h"
 #include "../domain/DomainController.h"
 
 DataAssimilation::DataAssimilation(const SolverController &solver_controller,
@@ -32,17 +29,7 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
                                      m_settings.assimilation_parameters.output_dir);
 
     if (m_settings.assimilation_parameters.enabled) {
-        if (m_settings.assimilation_parameters.class_name == AssimilationMethods::standard) {
-            m_parameter_handler = new ParameterReader();
-        } else if (m_settings.assimilation_parameters.class_name == AssimilationMethods::temperature_source) {
-            m_parameter_handler = new TemperatureSourceChanger(m_solver_controller,
-                                                               m_settings.solver_parameters.temperature.source);
-        } else if (m_settings.assimilation_parameters.class_name == AssimilationMethods::obstacle_changer) {
-            m_parameter_handler = new ObstacleChanger(m_solver_controller, m_settings.obstacles_parameters);
-        } else {
-            m_logger->error("assimilation method {} not known", m_settings.assimilation_parameters.class_name);
-            std::exit(1);
-        }
+        m_parameter_handler = new ParameterReader(m_solver_controller);
     }
 }
 
@@ -107,10 +94,24 @@ bool DataAssimilation::config_rollback(const char *msg) {
                                         m_new_field_u, m_new_field_v, m_new_field_w,
                                         m_new_field_p, m_new_field_T, m_new_field_C);
         auto domain_controller = DomainController::getInstance();
+        if (field_changes.u_changed) {
+            domain_controller->apply_boundary(m_new_field_u);
+        }
+        if (field_changes.v_changed) {
+            domain_controller->apply_boundary(m_new_field_v);
+        }
+        if (field_changes.w_changed) {
+            domain_controller->apply_boundary(m_new_field_w);
+        }
+        if (field_changes.p_changed) {
+            domain_controller->apply_boundary(m_new_field_p);
+        }
         if (field_changes.T_changed) {
             domain_controller->apply_boundary(m_new_field_T);
         }
-        //TODO
+        if (field_changes.C_changed) {
+            domain_controller->apply_boundary(m_new_field_C);
+        }
         return changes || field_changes.changed;
     }
 }

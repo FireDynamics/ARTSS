@@ -49,7 +49,7 @@ class DataAssimilation {
     const SolverController &m_solver_controller;
 
     FieldIO *m_field_IO_handler;
-    IParameterReader *m_parameter_handler;
+    ParameterReader *m_parameter_handler;
 
     real m_t_cur = 0;
     real m_output_time_interval;

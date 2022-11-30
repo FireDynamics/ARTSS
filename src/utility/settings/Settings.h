@@ -334,7 +334,6 @@ namespace Settings {
     }
     struct data_assimilation_parameters {
         bool enabled;
-        std::string class_name;
         real output_time_interval;
         std::string output_dir;
         bool load_data;
@@ -359,6 +358,7 @@ namespace Settings {
     random_parameters parse_random_parameters(const tinyxml2::XMLElement *head, const std::string &parent_context);
     solver_parameters parse_solver_parameters(const tinyxml2::XMLElement *root);
     surfaces_parameters parse_surfaces_parameters(const tinyxml2::XMLElement *root);
+    obstacle parse_obstacle(const tinyxml2::XMLElement *root, const std::string &context);
     obstacles_parameters parse_obstacles_parameters(const tinyxml2::XMLElement *root);
     adaption_parameters parse_adaption_parameters(const tinyxml2::XMLElement *root);
     data_assimilation_parameters parse_assimilation_parameters(const tinyxml2::XMLElement *root);
@@ -370,6 +370,9 @@ namespace Settings {
     physical_parameters parse_physical_parameters(const tinyxml2::XMLElement *root, const std::string &solver_description);
     Settings parse_settings(const std::filesystem::path &path);
     std::string parse_settings_from_file(const std::filesystem::path &path);
-    data_assimilation::field_changes parse_field_changes(const tinyxml2::XMLElement *head, const std::string &parent_context);
+    data_assimilation::field_changes parse_field_changes(const tinyxml2::XMLElement *head);
+    std::vector<std::tuple<std::string, std::string>> parse_data_assimilation_methods(const tinyxml2::XMLElement *head);
+    const tinyxml2::XMLElement *get_subsection(const std::string &context, const tinyxml2::XMLElement *head);
+
 }
 #endif

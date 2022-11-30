@@ -69,10 +69,14 @@ class DAPackage:
 class DAFile:
     def __init__(self):
         self.xml_root = ET.Element('ARTSS')
+        self.data_assimilation: ET.SubElement = ET.SubElement(self.xml_root, 'data_assimilation')
 
     def write_obstacle_changes(self, list_obstacles: List[Obstacle], obstacle_enabled: bool):
         # create obstacle part
-        # <obstacles enabled = "Yes">
+        # <data_assimilation>
+        #   <class name="ObstacleChanger" tag="obstacle_changer" />
+        # </data_assimilation>
+        # <obstacle_changer>
         #   <obstacle name="name1" state="unmodified"/>
         #   <obstacle name="name2" state="modified" >
         #       <geometry ox1 = "0.0273" ox2 = "0.964" oy1 = "0.0078" oy2 = "0.992" oz1 = "-0.492" oz2 = "0.4785" />
@@ -84,10 +88,10 @@ class DAFile:
         #       <boundary field = "u,v,w" patch = "front,back,left,right,bottom,top" type = "dirichlet" value = "0.0" />
         #       <boundary field = "p" patch = "front,back,left,right,bottom,top" type = "neumann" value = "0.0" />
         #   </obstacle>
-        # </obstacles>
-
-        obstacle_root = ET.SubElement(self.xml_root, 'obstacles',
-                                      enabled='Yes' if obstacle_enabled else 'No')
+        # </obstacle_changer>
+        tag = 'obstacle_changer'
+        ET.SubElement(self.data_assimilation, 'class', {'name': 'ObstacleChanger', 'tag': tag})
+        obstacle_root = ET.SubElement(self.xml_root, tag)
         for obstacle in list_obstacles:
             single_obstacle = ET.SubElement(obstacle_root, 'obstacle', name=obstacle.name, state=obstacle.state)
             if obstacle.state != 'unmodified':
@@ -104,15 +108,19 @@ class DAFile:
 
     def create_obstacle_changes(self, list_obstacles: List[Obstacle], obstacle_enabled: bool):
         # create obstacle part
-        # <obstacles enabled = "Yes">
+        # <data_assimilation>
+        #   <class name="ObstacleChanger" tag="obstacle_changer" />
+        # </data_assimilation>
+        # <obstacle_changer>
         #   <obstacle name = "name" state="changed">
         #       <geometry ox1 = "0.0273" ox2 = "0.964" oy1 = "0.0078" oy2 = "0.992" oz1 = "-0.492" oz2 = "0.4785" />
         #       <boundary field = "u,v,w" patch = "front,back,left,right,bottom,top" type = "dirichlet" value = "0.0" />
         #       <boundary field = "p" patch = "front,back,left,right,bottom,top" type = "neumann" value = "0.0" />
         #   </obstacle>
-        # </obstacles>
-        obstacle_root = ET.SubElement(self.xml_root, 'obstacles',
-                                      enabled='Yes' if obstacle_enabled else 'No')
+        # </obstacle_changer>
+        tag = 'obstacle_changer'
+        ET.SubElement(self.data_assimilation, 'class', {'name': 'ObstacleChanger', 'tag': tag})
+        obstacle_root = ET.SubElement(self.xml_root, tag)
         for obstacle in list_obstacles:
             single_obstacle = ET.SubElement(obstacle_root, 'obstacle', name=obstacle.name)
             # convert from Dict[str, float] to Dict[str, str]
@@ -146,7 +154,10 @@ class DAFile:
         #     <range> 1 </range>
         #   </random>
         # </source>
-        source = ET.SubElement(self.xml_root, 'source', type=source_type['type'], dir=source_type['dir'],
+        tag = 'temperature_source'
+        ET.SubElement(self.data_assimilation, 'class', {'name': 'TemperatureSourceChanger', 'tag': tag})
+        source_root = ET.SubElement(self.xml_root, tag)
+        source = ET.SubElement(source_root, 'source', type=source_type['type'], dir=source_type['dir'],
                                temp_fct=source_type['temp_fct'],
                                dissipation='Yes' if source_type['dissipation'] == 'Yes' else 'No',
                                random='Yes' if source_type['random'] == 'Yes' else 'No')
