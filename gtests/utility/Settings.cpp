@@ -1913,11 +1913,21 @@ TEST(SettingsTest, assimilationHeatSourceChanges) {
 TEST(SettingsTest, assimilationFieldChanges) {
     std::string xml = R"(
 <ARTSS>
-    <fields_changed u="No" v="No" w="No" p="No" T="No" concentration="No"/>
+    <data_assimilation>
+        <class name="FieldChanger" tag="field_changer"/>
+    </data_assimilation>
+    <field_changer>
+        <fields_changed u="No" v="No" w="No" p="No" T="No" concentration="No"/>
+    </field_changer>
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::data_assimilation::field_changes field_changes = Settings::parse_field_changes(doc.RootElement());
+    auto methods = Settings::parse_data_assimilation_methods(doc.RootElement());
+    EXPECT_EQ(std::get<0>(methods[0]), "FieldChanger");
+    std::string tag = std::get<1>(methods[0]);
+    EXPECT_EQ(tag, "field_changer");
+    auto subsection = Settings::get_subsection(tag, doc.RootElement());
+    Settings::data_assimilation::field_changes field_changes = Settings::parse_field_changes(subsection);
     EXPECT_FALSE(field_changes.u_changed);
     EXPECT_FALSE(field_changes.v_changed);
     EXPECT_FALSE(field_changes.w_changed);
@@ -1982,8 +1992,6 @@ TEST(SettingsTest, assimilationChanges2) {
             <boundary field="u,v,p" patch="front,back,left,right,top,bottom" type="periodic" />
             <boundary field="w,T" patch="front,back,left,right,top,bottom" type="dirichlet" value="10.0" />
         </obstacle>
-        <obstacle name="deleted obstacle" state="deleted"/>
-        <obstacle name="obstacle not from xml but unchanged from previous round" state="unmodified"/>
     </obstacle_changer>
 </ARTSS>
 )";
@@ -2025,8 +2033,8 @@ TEST(SettingsTest, assimilationChanges2) {
             bool parameter_changes = counter_deleted + counter_new + counter_modified > 0;
             EXPECT_EQ(counter_new, 1);
             EXPECT_EQ(counter_modified, 1);
-            EXPECT_EQ(counter_unmodified, 1);
-            EXPECT_EQ(counter_deleted, 1);
+            EXPECT_EQ(counter_unmodified, 0);
+            EXPECT_EQ(counter_deleted, 0);
             EXPECT_EQ(counter_xml, 1);
             EXPECT_TRUE(parameter_changes);
             obstacle_parameters.enabled = counter_new + counter_modified + counter_unmodified + counter_xml > 0;
@@ -2054,7 +2062,7 @@ TEST(SettingsTest, assimilationChanges2) {
 
     // obstacle
     EXPECT_TRUE(obstacle_parameters.enabled);
-    EXPECT_EQ(obstacle_parameters.obstacles.size(), 5);
+    EXPECT_EQ(obstacle_parameters.obstacles.size(), 3);
 
     const auto &obstacle1 = obstacle_parameters.obstacles[0];
     EXPECT_EQ(obstacle1.name, "ceiling");
@@ -2164,12 +2172,4 @@ TEST(SettingsTest, assimilationChanges2) {
     EXPECT_DOUBLE_EQ(obstacle3.end_coords[CoordinateAxis::X], 3.2);
     EXPECT_DOUBLE_EQ(obstacle3.end_coords[CoordinateAxis::Y], 2.38);
     EXPECT_DOUBLE_EQ(obstacle3.end_coords[CoordinateAxis::Z], -0.43);
-
-    const auto &obstacle4 = obstacle_parameters.obstacles[3];
-    EXPECT_EQ(obstacle4.name, "deleted obstacle");
-    EXPECT_EQ(obstacle4.state, State::DELETED);
-
-    const auto &obstacle5 = obstacle_parameters.obstacles[4];
-    EXPECT_EQ(obstacle5.name, "obstacle not from xml but unchanged from previous round");
-    EXPECT_EQ(obstacle5.state, State::UNMODIFIED);
 }
