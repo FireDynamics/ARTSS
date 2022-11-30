@@ -86,7 +86,7 @@ def main(dry_run=False):
                                                               'x0': float(source[1]['x0']) + 10 * index},
                                                           'random': {}})
         da = DAFile()
-        da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': True, 'C': False}, field_file_name)
+        da.create_field_changes({'T': True}, field_file_name)
         da.create_temperature_source_changes(
             source_type=source_type,
             temperature_source=temperature_source,
@@ -109,7 +109,6 @@ def tmp():
     obstacle.add_boundary(fields=['p'], patches=['back'], boundary_condition='neumann', value=10)
     obstacle.add_boundary(fields=['p'], patches=['left'], boundary_condition='dirichlet', value=11)
     da = DAFile()
-    da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
     da.create_obstacle_changes([obstacle], True)
     da.write_xml('change_obstacle.xml', pretty_print=True)
 

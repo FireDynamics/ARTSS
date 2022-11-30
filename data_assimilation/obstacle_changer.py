@@ -71,7 +71,6 @@ def obstacle_wonder(artss_data_path: str):
                                                 time_back=time_back * xml.get_dt())
 
         da = DAFile()
-        da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
         da.create_obstacle_changes([obstacles[counter]], True)
         counter = (counter + 1) % 4
         config_file_name = f'change_obstacle_{int(t_sensor * 10)}.xml'
@@ -87,7 +86,6 @@ def obstacle_wonder(artss_data_path: str):
                                                 time_back=time_back * xml.get_dt())
 
         da = DAFile()
-        da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
         da.create_obstacle_changes([obstacles[counter], obstacles[counter + 2]], True)
         counter = (counter + 1) % 2
         config_file_name = f'change_obstacle_{int(t_sensor * 10)}.xml'
@@ -146,8 +144,8 @@ def set_zero(t_artss: float, t_revert: float, obstacle_name: str, domain: Domain
                                       data={'T': field_T},
                                       field_keys=['T'])
     da = DAFile()
-    da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': True, 'C': False},
-                     field_file_name=os.path.abspath(field_file_name))
+    da.create_field_changes({'T': True},
+                            field_file_name=os.path.abspath(field_file_name))
     return da
 
 

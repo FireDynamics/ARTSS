@@ -18,7 +18,7 @@
 #include "../interfaces/IParameterReader.h"
 
 struct AssimilationMethods {
-    inline static const std::string standard = "default";
+    inline static const std::string field_changer = "FieldChanger";
     inline static const std::string temperature_source = "TemperatureSourceChanger";
     inline static const std::string obstacle_changer = "ObstacleChanger";
 };

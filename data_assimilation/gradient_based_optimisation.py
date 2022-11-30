@@ -722,7 +722,7 @@ def write_changes_xml(change: dict, source: list, file_name: str, file_da: TextI
                                                                                             'random': {}})
     write_da_data(file_da=file_da, parameters=temperature_source)
     da = DAFile()
-    da.create_config({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
+    #    da.create_field_changes({'u': False, 'v': False, 'w': False, 'p': False, 'T': False, 'C': False})
     da.create_temperature_source_changes(
         source_type=source_type,
         temperature_source=temperature_source,

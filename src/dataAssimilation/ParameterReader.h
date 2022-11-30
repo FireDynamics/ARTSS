@@ -26,9 +26,9 @@ private:
     const SolverController &m_solver_controller;
     std::shared_ptr<spdlog::logger> m_logger;
 
-    bool temperature_source_changer(const tinyxml2::XMLElement *doc, const std::string &context);
+    bool temperature_source_changer(const tinyxml2::XMLElement *doc, const std::string &context) const;
 
-    bool obstacle_changer(const tinyxml2::XMLElement *head, const std::string &context);
+    bool obstacle_changer(const tinyxml2::XMLElement *head, const std::string &context) const;
 };
 
 #endif /* ARTSS_DATAASSIMILATION_PARAMETERREADER_H */

@@ -11,19 +11,22 @@
 
 return_parameter_reader ParameterReader::read_config(const std::string &file_name) {
     bool parameter_changes = false;
+    Settings::data_assimilation::field_changes field_changes{ };
+    field_changes.changed = false;
     try {
         m_logger->debug("parse file to string {}", file_name);
         auto file_content = Settings::parse_settings_from_file(file_name);
         m_logger->debug("parse document to XMLTree\n{}", file_content);
         tinyxml2::XMLDocument doc;
         doc.Parse(file_content.c_str());
-        m_logger->debug("parse field changes");
-        auto field_changes = Settings::parse_field_changes(doc.RootElement());
         auto da_methods = Settings::parse_data_assimilation_methods(doc.RootElement());
         for (std::tuple<std::string, std::string> tuple: da_methods) {
             std::string name = std::get<0>(tuple);
             std::string tag = std::get<1>(tuple);
-            if (name == AssimilationMethods::temperature_source) {
+            if (name == AssimilationMethods::field_changer) {
+                auto subsection = Settings::get_subsection(tag, doc.RootElement());
+                field_changes = Settings::parse_field_changes(subsection);
+            } else if (name == AssimilationMethods::temperature_source) {
                 auto subsection = Settings::get_subsection(tag, doc.RootElement());
                 parameter_changes = parameter_changes || temperature_source_changer(subsection, tag);
             } else if (name == AssimilationMethods::obstacle_changer) {
@@ -33,16 +36,13 @@ return_parameter_reader ParameterReader::read_config(const std::string &file_nam
                 m_logger->debug("Unknown Assimilation method: {}", name);
             }
         }
-        return {true, field_changes};
     } catch (const std::exception &ex) {
         std::cerr << ex.what() << std::endl;
     }
-    Settings::data_assimilation::field_changes field_changes;
-    field_changes.changed = false;
     return {parameter_changes, field_changes};
 }
 
-bool ParameterReader::temperature_source_changer(const tinyxml2::XMLElement *head, const std::string &context) {
+bool ParameterReader::temperature_source_changer(const tinyxml2::XMLElement *head, const std::string &context) const {
     auto temperature_source = Settings::solver::parse_temperature_source(head, context);
     bool parameter_changes = true;
     // TODO (c++20)
@@ -54,7 +54,7 @@ bool ParameterReader::temperature_source_changer(const tinyxml2::XMLElement *hea
     return parameter_changes;
 }
 
-bool ParameterReader::obstacle_changer(const tinyxml2::XMLElement *head, const std::string &context) {
+bool ParameterReader::obstacle_changer(const tinyxml2::XMLElement *head, const std::string &context) const {
     Settings::obstacles_parameters obstacle_parameters{ };
     for (const auto *i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
         obstacle_parameters.obstacles.emplace_back(Settings::parse_obstacle(i, context));

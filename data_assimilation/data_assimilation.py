@@ -138,22 +138,27 @@ class DAFile:
                                           temperature_source: dict,
                                           random: dict):
         # create temperature source part
-        # <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="Yes">
-        #   <HRR> 25000. </HRR> <!-- Total heat release rate( in kW) -->
-        #   <cp> 1.023415823 </cp> <!-- specific heat capacity( in kJ / kgK)-->
-        #   <x0> 40. </x0>
-        #   <y0> -3. </y0>
-        #   <z0> 0. </z0>
-        #   <sigma_x> 1.0 </sigma_x>
-        #   <sigma_y> 1.5 </sigma_y>
-        #   <sigma_z> 1.0 </sigma_z>
-        #   <tau> 5. </tau>
-        #   <random absolute="Yes" custom_seed="Yes" custom_steps="Yes">
-        #     <seed> 0 </seed>
-        #     <step_size> 0.1 </step_size>
-        #     <range> 1 </range>
-        #   </random>
-        # </source>
+        # <data_assimilation>
+        #   <class name="TemperatureSourceChanger" tag="temperature_source" />
+        # </data_assimilation>
+        # <temperature_source>
+        #   <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="Yes">
+        #     <HRR> 25000. </HRR> <!-- Total heat release rate( in kW) -->
+        #     <cp> 1.023415823 </cp> <!-- specific heat capacity( in kJ / kgK)-->
+        #     <x0> 40. </x0>
+        #     <y0> -3. </y0>
+        #     <z0> 0. </z0>
+        #     <sigma_x> 1.0 </sigma_x>
+        #     <sigma_y> 1.5 </sigma_y>
+        #     <sigma_z> 1.0 </sigma_z>
+        #     <tau> 5. </tau>
+        #     <random absolute="Yes" custom_seed="Yes" custom_steps="Yes">
+        #       <seed> 0 </seed>
+        #       <step_size> 0.1 </step_size>
+        #       <range> 1 </range>
+        #     </random>
+        #   </source>
+        # </temperature_source>
         tag = 'temperature_source'
         ET.SubElement(self.data_assimilation, 'class', {'name': 'TemperatureSourceChanger', 'tag': tag})
         source_root = ET.SubElement(self.xml_root, tag)
@@ -174,26 +179,30 @@ class DAFile:
             if random['custom_seed'] == 'Yes':
                 ET.SubElement(random_tree, 'seed').text = str(random['seed'])
 
-    def create_config(self, fields: dict, field_file_name=''):
-        # create config file. format:
-        # <ARTSS>
+    def create_field_changes(self, fields: Dict[str, bool], field_file_name=''):
+        # create field changes part
+        # <data_assimilation>
+        #   <class name="FieldChanger" tag="field_changes" />
+        # </data_assimilation>
+        # <field_changes>
         #   <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No" filename="field_file_name"/>
-        # </ARTSS>
-        changed = False
+        # </field_changes>
+        tag: str = 'field_changes'
+        keys = ['u', 'v', 'w', 'p', 'T', 'C']
+        ET.SubElement(self.data_assimilation, 'class', {'name': 'FieldChanger', 'tag': tag})
         field_values = {}
-        for key in fields.keys():
-            if fields[key]:
-                field_values[key] = 'Yes'
-                changed = True
+        for key in keys:
+            if key in fields.keys():
+                field_values[key] = 'Yes' if fields[key] else 'No'
             else:
                 field_values[key] = 'No'
-
-        if changed:
-            ET.SubElement(self.xml_root, 'fields_changed', u=field_values['u'], v=field_values['v'],
+        subsection = ET.SubElement(self.xml_root, tag)
+        if 'Yes' in field_values.values():
+            ET.SubElement(subsection, 'fields_changed', u=field_values['u'], v=field_values['v'],
                           w=field_values['w'], p=field_values['p'],
                           T=field_values['T'], concentration=field_values['C'], filename=field_file_name)
         else:
-            ET.SubElement(self.xml_root, 'fields_changed', u=field_values['u'], v=field_values['v'],
+            ET.SubElement(subsection, 'fields_changed', u=field_values['u'], v=field_values['v'],
                           w=field_values['w'], p=field_values['p'],
                           T=field_values['T'], concentration=field_values['C'])
 
