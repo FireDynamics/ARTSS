@@ -71,13 +71,18 @@ class DAFile:
         self.xml_root = ET.Element('ARTSS')
         self.data_assimilation: ET.SubElement = ET.SubElement(self.xml_root, 'data_assimilation')
 
-    def write_obstacle_changes(self, list_obstacles: List[Obstacle], obstacle_enabled: bool):
+    def write_obstacle_changes(self, list_obstacles: List[Obstacle]):
+        """
+        write part of the xml for the obstacle changes. State UNMODIFIED not implemented in ARTSS, use XML and provide the
+        necessary details
+        :param list_obstacles: obstacles to be written out
+        """
         # create obstacle part
         # <data_assimilation>
         #   <class name="ObstacleChanger" tag="obstacle_changer" />
         # </data_assimilation>
         # <obstacle_changer>
-        #   <obstacle name="name1" state="unmodified"/>
+        #   <obstacle name="name1" state="deleted"/>
         #   <obstacle name="name2" state="modified" >
         #       <geometry ox1 = "0.0273" ox2 = "0.964" oy1 = "0.0078" oy2 = "0.992" oz1 = "-0.492" oz2 = "0.4785" />
         #       <boundary field = "u,v,w" patch = "front,back,left,right,bottom,top" type = "dirichlet" value = "0.0" />
@@ -94,7 +99,7 @@ class DAFile:
         obstacle_root = ET.SubElement(self.xml_root, tag)
         for obstacle in list_obstacles:
             single_obstacle = ET.SubElement(obstacle_root, 'obstacle', name=obstacle.name, state=obstacle.state)
-            if obstacle.state != 'unmodified':
+            if obstacle.state != 'deleted':  # && obstacle.state != 'unmodified'
                 # convert from Dict[str, float] to Dict[str, str]
                 geometry = dict(zip(obstacle.geometry.keys(), [str(a) for a in obstacle.geometry.values()]))
                 ET.SubElement(single_obstacle, 'geometry', geometry)
@@ -303,8 +308,9 @@ class FieldReader:
             return fields
 
     @staticmethod
-    def write_field_data_keys(file_name: str, data: Dict[str, np.ndarray], field_keys: List[str]):
-        with h5py.File(file_name, 'w') as out:
+    def write_field_data_keys(file_name: str, data: Dict[str, np.ndarray], field_keys: List[str], path: str = './'):
+        file = os.path.join(path, file_name)
+        with h5py.File(file, 'w') as out:
             for key in field_keys:
                 if key not in data.keys():
                     continue
@@ -313,5 +319,5 @@ class FieldReader:
                 dset = out.create_dataset(key, (len(field),), dtype='d')
                 dset[:] = field
 
-    def write_field_data(self, file_name: str, data: Dict[str, np.ndarray]):
-        FieldReader.write_field_data_keys(file_name=file_name, data=data, field_keys=self.fields)
+    def write_field_data(self, file_name: str, data: Dict[str, np.ndarray], path: str = './'):
+        FieldReader.write_field_data_keys(file_name=file_name, data=data, field_keys=self.fields, path=path)
