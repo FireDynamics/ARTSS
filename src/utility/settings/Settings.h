@@ -166,6 +166,7 @@ namespace Settings {
     };
     struct obstacles_parameters {
         bool enabled;
+        std::vector<std::string> names_of_deleted_obstacles;
         std::vector<struct obstacle> obstacles;
     };
     namespace adaption_classes {

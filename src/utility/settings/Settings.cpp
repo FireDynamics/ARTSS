@@ -414,7 +414,7 @@ namespace Settings {
         obstacle.state = Mapping::match_state(get_optional_string(values, "state", Mapping::get_state_name(State::XML)));
 
         std::string sub_context = create_context(context, obstacle.name);
-        //if (obstacle.state == State::NEW || obstacle.state == State::MODIFIED || obstacle.state == State::XML) {
+        if (obstacle.state == State::NEW || obstacle.state == State::MODIFIED || obstacle.state == State::XML) {
             std::string context_geometry = create_context(sub_context, fmt::format("geometry ({})", obstacle.name));
             auto [head_geometry, values_geometry] = map_parameter_section(head, "geometry");
             for (size_t a = 0; a < number_of_axes; a++) {
@@ -430,7 +430,7 @@ namespace Settings {
                     obstacle.boundaries.emplace_back(parse_boundary(i, context_boundaries));
                 }
             }
-        //}
+        }
         return obstacle;
     }
 
@@ -441,7 +441,12 @@ namespace Settings {
         op.enabled = get_required_bool(values, "enabled", context);
         if (op.enabled) {
             for (const auto *i = subsection->FirstChildElement(); i; i = i->NextSiblingElement()) {
-                op.obstacles.emplace_back(parse_obstacle(i, context));
+                obstacle o = parse_obstacle(i, context);
+                if (o.state != State::DELETED) {
+                    op.obstacles.push_back(o);
+                } else {
+                    op.names_of_deleted_obstacles.push_back(o.name);
+                }
             }
         }
         op.obstacles.shrink_to_fit();

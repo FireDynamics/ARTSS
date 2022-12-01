@@ -59,16 +59,14 @@ bool ParameterReader::obstacle_changer(const tinyxml2::XMLElement *head, const s
     for (const auto *i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
         obstacle_parameters.obstacles.emplace_back(Settings::parse_obstacle(i, context));
     }
-    int counter_unmodified = 0;
-    int counter_deleted = 0;
-    int counter_new = 0;
-    int counter_modified = 0;
-    int counter_xml = 0;
+    size_t counter_deleted = obstacle_parameters.names_of_deleted_obstacles.size();
+    size_t counter_unmodified = 0;
+    size_t counter_new = 0;
+    size_t counter_modified = 0;
+    size_t counter_xml = 0;
     for (const auto &obstacle: obstacle_parameters.obstacles) {
         if (obstacle.state == State::UNMODIFIED) {
             counter_unmodified++;
-        } else if (obstacle.state == State::DELETED) {
-            counter_deleted++;
         } else if (obstacle.state == State::MODIFIED) {
             counter_modified++;
         } else if (obstacle.state == State::NEW) {
