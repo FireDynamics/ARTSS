@@ -2,6 +2,8 @@
 #include <gtest/gtest.h>
 
 #include "src/randomField/UniformRandom.h"
+#include "src/source/GaussFunction.h"
+#include "src/domain/DomainData.h"
 
 
 #define EPS 10e-5
@@ -408,5 +410,32 @@ TEST_F(UniformRandomFieldTest, relative) {
 
     for (int i = 0; i < size; i++) {
         EXPECT_DOUBLE_EQ(a[i], result[i]);
+    }
+}
+
+TEST_F(UniformRandomFieldTest, gauss) {
+    Settings::domain_parameters domain_params{ };
+    domain_params.start_coords_PD.set_coordinate(0, 0, 0);
+    domain_params.start_coords_CD.copy(domain_params.start_coords_PD);
+    domain_params.end_coords_PD.set_coordinate(5, 10, 15);
+    domain_params.end_coords_CD.copy(domain_params.end_coords_PD);
+    domain_params.enable_computational_domain = false;
+    domain_params.number_of_inner_cells.set_coordinate(5, 20, 10);
+    DomainData::init({ }, domain_params, 0);
+
+    Coordinate<real> position(10, 9, 8);
+    Coordinate<real> dimension(1, 2, 3);
+    Settings::solver::sources::gauss settings_gauss = {100, 1.5, position, dimension, 0.5};
+
+    Field a1(FieldType::UNKNOWN_FIELD, 100);
+    auto gauss1 = GaussFunction(settings_gauss);
+    gauss1.update_source(a1, 0);
+
+    Field a2(FieldType::UNKNOWN_FIELD, 100);
+    auto gauss2 = GaussFunction(settings_gauss);
+    gauss2.update_source(a2, 0);
+
+    for (size_t i = 0; i < DomainData::getInstance()->get_size(); i++){
+        EXPECT_DOUBLE_EQ(a1[i], a2[i]);
     }
 }
