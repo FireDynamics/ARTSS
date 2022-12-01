@@ -441,12 +441,7 @@ namespace Settings {
         op.enabled = get_required_bool(values, "enabled", context);
         if (op.enabled) {
             for (const auto *i = subsection->FirstChildElement(); i; i = i->NextSiblingElement()) {
-                obstacle o = parse_obstacle(i, context);
-                if (o.state != State::DELETED) {
-                    op.obstacles.push_back(o);
-                } else {
-                    op.names_of_deleted_obstacles.push_back(o.name);
-                }
+                op.obstacles.emplace_back(parse_obstacle(i, context));
             }
         }
         op.obstacles.shrink_to_fit();

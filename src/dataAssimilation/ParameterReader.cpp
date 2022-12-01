@@ -56,10 +56,17 @@ bool ParameterReader::temperature_source_changer(const tinyxml2::XMLElement *hea
 
 bool ParameterReader::obstacle_changer(const tinyxml2::XMLElement *head, const std::string &context) const {
     Settings::obstacles_parameters obstacle_parameters{ };
+    std::vector<std::string> names_of_deleted_obstacles;
     for (const auto *i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
+        Settings::obstacle o = Settings::parse_obstacle(i, context);
+        if (o.state != State::DELETED) {
+            obstacle_parameters.obstacles.push_back(o);
+        } else {
+            names_of_deleted_obstacles.push_back(o.name);
+        }
         obstacle_parameters.obstacles.emplace_back(Settings::parse_obstacle(i, context));
     }
-    size_t counter_deleted = obstacle_parameters.names_of_deleted_obstacles.size();
+    size_t counter_deleted = names_of_deleted_obstacles.size();
     size_t counter_unmodified = 0;
     size_t counter_new = 0;
     size_t counter_modified = 0;

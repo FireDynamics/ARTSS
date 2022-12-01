@@ -2067,7 +2067,6 @@ TEST(SettingsTest, assimilationChanges2) {
     // obstacle
     EXPECT_TRUE(obstacle_parameters.enabled);
     EXPECT_EQ(obstacle_parameters.obstacles.size(), 3);
-    EXPECT_EQ(obstacle_parameters.number_of_deleted_obstacles, 4);
 
     const auto &obstacle1 = obstacle_parameters.obstacles[0];
     EXPECT_EQ(obstacle1.name, "ceiling");
