@@ -89,8 +89,7 @@ class Domain:
         for o in obstacles:
             self.obstacles[o.name] = o
         self.domain_boundary_cells: Dict[str, Set[int]] = {}
-        self.domain_inner_cells: Dict[str, Set[int]] = {}
-        self.obstacle_cells: Dict[str, Dict[str, Set[int]]] = {}
+        self.domain_inner_cells: Set[int] = set()
         self.computational_domain(domain_param, enable_computational_domain)
         self.calculate_domain()
         self.calculate_indices()
@@ -166,12 +165,12 @@ class Domain:
         index_y2: int = self.get_matching_obstacle_index(o.geometry['oy2'], 'y')
         index_z1: int = self.get_matching_obstacle_index(o.geometry['oz1'], 'z') + 1
         index_z2: int = self.get_matching_obstacle_index(o.geometry['oz2'], 'z')
+        o.index = {'x1': index_x1, 'x2': index_x2, 'y1': index_y1, 'y2': index_y2, 'z1': index_z1, 'z2': index_z2}
         for i in range(index_x1 + 1, index_x2):
             for j in range(index_y1 + 1, index_y2):
                 for k in range(index_z1 + 1, index_z2):
                     inner_cells.append(self.calculate_index(i, j, k))
-        self.obstacle_cells[o.name]: Dict[str, Set[int]] = {}
-        self.obstacle_cells[o.name]['inner cells'] = set(inner_cells)
+        self.obstacles[o.name].cells['inner cells'] = set(inner_cells)
 
         # indices of obstacle boundary cells
         front = []
@@ -180,8 +179,8 @@ class Domain:
             for j in range(index_y1, index_y2 + 1):
                 front.append(self.calculate_index(i, j, index_z1))
                 back.append(self.calculate_index(i, j, index_z2))
-        self.obstacle_cells[o.name]['front'] = set(front)
-        self.obstacle_cells[o.name]['back'] = set(back)
+        self.obstacles[o.name].cells['front'] = set(front)
+        self.obstacles[o.name].cells['back'] = set(back)
 
         bottom = []
         top = []
@@ -189,8 +188,8 @@ class Domain:
             for k in range(index_z1, index_z2 + 1):
                 bottom.append(self.calculate_index(i, index_y1, k))
                 top.append(self.calculate_index(i, index_y2, k))
-        self.obstacle_cells[o.name]['bottom'] = set(bottom)
-        self.obstacle_cells[o.name]['top'] = set(top)
+        self.obstacles[o.name].cells['bottom'] = set(bottom)
+        self.obstacles[o.name].cells['top'] = set(top)
 
         left = []
         right = []
@@ -198,8 +197,8 @@ class Domain:
             for k in range(index_z1, index_z2 + 1):
                 left.append(self.calculate_index(index_x1, j, k))
                 right.append(self.calculate_index(index_x2, j, k))
-        self.obstacle_cells[o.name]['left'] = set(left)
-        self.obstacle_cells[o.name]['right'] = set(right)
+        self.obstacles[o.name].cells['left'] = set(left)
+        self.obstacles[o.name].cells['right'] = set(right)
 
     def calculate_domain_boundaries(self):
         front = []
@@ -236,9 +235,9 @@ class Domain:
                 for k in range(self.domain_param['start z index CD'], self.domain_param['end z index CD']):
                     inner.append(self.calculate_index(i, j, k))
         inner = set(inner)
-        for oc in self.obstacle_cells:
-            for type_of_cell in self.obstacle_cells[oc]:
-                inner = inner - self.obstacle_cells[oc][type_of_cell]
+        for obstacle in self.obstacles.values():
+            for type_of_cell in obstacle.cells:
+                inner = inner - obstacle.cells[type_of_cell]
         self.domain_inner_cells = inner
 
     def calculate_index(self, i, j, k):
@@ -252,12 +251,12 @@ class Domain:
         for o in self.obstacles.values():
             print(f"-- Obstacle {o.name}\n"
                   f"   size of slices (Front|Back Bottom|Top Left|Right): "
-                  f"{len(self.obstacle_cells[o.name]['front'])}|"
-                  f"{len(self.obstacle_cells[o.name]['back'])} "
-                  f"{len(self.obstacle_cells[o.name]['bottom'])}|"
-                  f"{len(self.obstacle_cells[o.name]['top'])} "
-                  f"{len(self.obstacle_cells[o.name]['left'])}|"
-                  f"{len(self.obstacle_cells[o.name]['right'])}\n"
+                  f"{len(self.obstacles[o.name].cells['front'])}|"
+                  f"{len(self.obstacles[o.name].cells['back'])} "
+                  f"{len(self.obstacles[o.name].cells['bottom'])}|"
+                  f"{len(self.obstacles[o.name].cells['top'])} "
+                  f"{len(self.obstacles[o.name].cells['left'])}|"
+                  f"{len(self.obstacles[o.name].cells['right'])}\n"
                   f"   coords (x y z): "
                   f"({o.geometry['ox1']}|{o.geometry['ox2']}) "
                   f"({o.geometry['oy1']}|{o.geometry['oy2']}) "
@@ -279,23 +278,27 @@ class Domain:
         print(f"index X PD: ({self.domain_param['start x index PD']}|{self.domain_param['end x index PD']}) "
               f"index Y PD: ({self.domain_param['start y index PD']}|{self.domain_param['end y index PD']}) "
               f"index Z PD: ({self.domain_param['start z index PD']}|{self.domain_param['end z index PD']})")
+        print(f"inner cells index: ({min(self.domain_inner_cells)}|{max(self.domain_inner_cells)})")
+        for patch in PATCHES:
+            print(f"boundary cells index {patch}: ({min(self.domain_boundary_cells[patch])}|{max(self.domain_boundary_cells[patch])})")
+        print()
         for o in self.obstacles.values():
             print(f"-- Obstacle {o.name}\n"
                   f"   size of slices (Front|Back Bottom|Top Left|Right): "
-                  f"{len(self.obstacle_cells[o.name]['front'])}|"
-                  f"{len(self.obstacle_cells[o.name]['back'])} "
-                  f"{len(self.obstacle_cells[o.name]['bottom'])}|"
-                  f"{len(self.obstacle_cells[o.name]['top'])} "
-                  f"{len(self.obstacle_cells[o.name]['left'])}|"
-                  f"{len(self.obstacle_cells[o.name]['right'])}\n"
+                  f"{len(self.obstacles[o.name].cells['front'])}|"
+                  f"{len(self.obstacles[o.name].cells['back'])} "
+                  f"{len(self.obstacles[o.name].cells['bottom'])}|"
+                  f"{len(self.obstacles[o.name].cells['top'])} "
+                  f"{len(self.obstacles[o.name].cells['left'])}|"
+                  f"{len(self.obstacles[o.name].cells['right'])}\n"
                   f"   coords (x y z): "
                   f"({o.geometry['ox1']}|{o.geometry['ox2']}) "
                   f"({o.geometry['oy1']}|{o.geometry['oy2']}) "
                   f"({o.geometry['oz1']}|{o.geometry['oz2']})")
             str_obstacle_cells = ''
             for patch in PATCHES:
-                start = min(self.obstacle_cells[o.name][patch])
-                end = max(self.obstacle_cells[o.name][patch])
+                start = min(self.obstacles[o.name].cells[patch])
+                end = max(self.obstacles[o.name].cells[patch])
                 str_obstacle_cells += f"   ({patch}: {start}|{end})\n"
                 k = self.get_k(start)
                 j = self.get_j(start, k=k)
@@ -305,7 +308,7 @@ class Domain:
                 j = self.get_j(end, k=k)
                 i = self.get_i(end, k=k, j=j)
                 str_obstacle_cells += f"   {patch} end: {i}|{j}|{k}\n"
-            print(str_obstacle_cells)
+            print(str_obstacle_cells[:-2])
 
     def get_ijk_from_xyz(self, coord_x, coord_y, coord_z):
         return self.get_i_from_x(coord_x), self.get_j_from_y(coord_y), self.get_k_from_z(coord_z)
@@ -336,11 +339,11 @@ class Domain:
         for p in PATCHES.keys():
             if index in self.domain_boundary_cells[p]:
                 matches.append(f'domain boundary cell ({p})')
-        for oc in self.obstacle_cells:
+        for oc in self.obstacles:
             for p in PATCHES.keys():
-                if index in self.obstacle_cells[oc][p]:
+                if index in self.obstacles[oc].cells[p]:
                     matches.append(f'obstacle boundary cell ({oc}/{p})')
-            if index in self.obstacle_cells['inner cells']:
+            if index in self.obstacles[oc].cells['inner cells']:
                 matches.append(f'obstacle inner cell ({oc})')
         if len(matches) == 0:
             return "cell type unknown"
@@ -356,17 +359,22 @@ class Domain:
         self.obstacles[obstacle.name] = obstacle
         self.calculate_obstacle_cells(obstacle)
 
-    def remove_obstacle(self, name: str):
-        self.obstacles[name].state = 'deleted'
+    def remove_obstacle(self, name: str) -> Obstacle:
+        obstacle = self.obstacles.pop(name)
+        obstacle.state = 'deleted'
+        return obstacle
 
     def set_value_of_obstacle_cells(self, value: float, field: np.ndarray, obstacle_name: str):
         cells: Set[float] = set()
-        for val in self.obstacle_cells[obstacle_name].values():
+        for val in self.obstacles[obstacle_name].cells.values():
             cells.update(val)
 
         for cell in cells:
             field[cell] = value
 
     def set_value_of_obstacle_patch(self, value: float, field: np.ndarray, obstacle_name: str, patch: str):
-        for cell in self.obstacle_cells[obstacle_name][patch]:
+        for cell in self.obstacles[obstacle_name].cells[patch]:
             field[cell] = value
+
+    def get_obstacles(self):
+        return list(self.obstacles.values())
