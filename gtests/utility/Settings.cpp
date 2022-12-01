@@ -2005,16 +2005,22 @@ TEST(SettingsTest, assimilationChanges2) {
     auto da_methods = Settings::parse_data_assimilation_methods(doc.RootElement());
     Settings::solver::temperature_source temperature_source;
     Settings::obstacles_parameters obstacle_parameters{ };
+    std::vector<std::string> names_of_deleted_obstacles;
     for (std::tuple<std::string, std::string> tuple: da_methods) {
         std::string name = std::get<0>(tuple);
         std::string tag = std::get<1>(tuple);
         if (name == "TemperatureSourceChanger") {
             auto subsection = Settings::get_subsection(tag, doc.RootElement());
-            temperature_source = Settings::solver::parse_temperature_source(subsection, std::get<1>(tuple));
+            temperature_source = Settings::solver::parse_temperature_source(subsection, tag);
         } else if (name == "ObstacleChanger") {
             auto subsection = Settings::get_subsection(tag, doc.RootElement());
             for (const auto *i = subsection->FirstChildElement(); i; i = i->NextSiblingElement()) {
-                obstacle_parameters.obstacles.emplace_back(Settings::parse_obstacle(i, tag));
+                Settings::obstacle o = Settings::parse_obstacle(i, tag);
+                if (o.state != State::DELETED) {
+                    obstacle_parameters.obstacles.push_back(o);
+                } else {
+                    names_of_deleted_obstacles.push_back(o.name);
+                }
             }
             int counter_unmodified = 0;
             int counter_deleted = 0;

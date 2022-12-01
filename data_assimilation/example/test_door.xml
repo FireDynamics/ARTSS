@@ -142,6 +142,6 @@
     <vtk_nth_plot> 1 </vtk_nth_plot>
   </visualisation>
 
-  <logging file="output_door.log" level="info">
+  <logging file="output_door.log" level="debug">
   </logging>
 </ARTSS>

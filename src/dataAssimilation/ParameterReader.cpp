@@ -64,7 +64,6 @@ bool ParameterReader::obstacle_changer(const tinyxml2::XMLElement *head, const s
         } else {
             names_of_deleted_obstacles.push_back(o.name);
         }
-        obstacle_parameters.obstacles.emplace_back(Settings::parse_obstacle(i, context));
     }
     size_t counter_deleted = names_of_deleted_obstacles.size();
     size_t counter_unmodified = 0;
