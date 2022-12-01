@@ -4,6 +4,7 @@
 #include "src/randomField/UniformRandom.h"
 #include "src/source/GaussFunction.h"
 #include "src/domain/DomainData.h"
+#include "src/domain/DomainController.h"
 
 
 #define EPS 10e-5
@@ -422,6 +423,9 @@ TEST_F(UniformRandomFieldTest, gauss) {
     domain_params.enable_computational_domain = false;
     domain_params.number_of_inner_cells.set_coordinate(5, 20, 10);
     DomainData::init({ }, domain_params, 0);
+    Settings::Settings settings;
+    settings.domain_parameters = domain_params;
+    DomainController::init(settings);
 
     Coordinate<real> position(10, 9, 8);
     Coordinate<real> dimension(1, 2, 3);
