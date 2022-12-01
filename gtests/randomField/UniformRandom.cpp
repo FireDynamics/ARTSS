@@ -219,7 +219,7 @@ TEST_F(UniformRandomFieldTest, range_100_at_least_one) {
         real no = -range + j * step_size;
         bool found = false;
         for (size_t i = 0; i < size; ++i) {
-            if (abs(a[i] == no) < EPS) {
+            if (abs(a[i] - no) < EPS) {
                 found = true;
                 break;
             }
