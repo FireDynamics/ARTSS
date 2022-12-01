@@ -1992,6 +1992,10 @@ TEST(SettingsTest, assimilationChanges2) {
             <boundary field="u,v,p" patch="front,back,left,right,top,bottom" type="periodic" />
             <boundary field="w,T" patch="front,back,left,right,top,bottom" type="dirichlet" value="10.0" />
         </obstacle>
+        <obstacle name="deleted" state="deleted" />
+        <obstacle name="deleted1" state="deleted" />
+        <obstacle name="deleted2" state="deleted" />
+        <obstacle name="deleted3" state="deleted" />
     </obstacle_changer>
 </ARTSS>
 )";
@@ -2063,6 +2067,7 @@ TEST(SettingsTest, assimilationChanges2) {
     // obstacle
     EXPECT_TRUE(obstacle_parameters.enabled);
     EXPECT_EQ(obstacle_parameters.obstacles.size(), 3);
+    EXPECT_EQ(obstacle_parameters.number_of_deleted_obstacles, 4);
 
     const auto &obstacle1 = obstacle_parameters.obstacles[0];
     EXPECT_EQ(obstacle1.name, "ceiling");
