@@ -140,14 +140,34 @@ def steckler_door(artss_data_path: str):
     door = domain.remove_obstacle(door.name)
     domain.print_debug()
     da = DAFile()
-    [field_changes, field_file_name] = set_gradient_x(t_artss=t_artss, domain=domain, obstacle=door,
-                                                      artss_data_path=artss_data_path)
+    [field_changes, field_file_name] = set_ambient_temperature(t_artss=t_artss, domain=domain, obstacle=door,
+                                                               artss_data_path=artss_data_path, value=299.14)
+    # [field_changes, field_file_name] = set_gradient_x(t_artss=t_artss, domain=domain, obstacle=door,
+    #                                                   artss_data_path=artss_data_path)
     da.create_field_changes(field_changes, field_file_name=field_file_name)
     da.write_obstacle_changes(domain.get_obstacles() + [door])
     config_file_name = f'change_obstacle_{int(t_sensor * 10)}.xml'
     config_file_path = os.path.join(artss_data_path, config_file_name)
     da.write_xml(config_file_path, pretty_print=True)
     client.send_message(create_message(t_revert, config_file_name))
+
+
+def set_ambient_temperature(t_artss: float, obstacle: Obstacle, domain: Domain, artss_data_path: str, value: float) -> [Dict[str, bool], str]:
+    reader = FieldReader(t_artss, path=artss_data_path)
+    field_T = reader.read_field_data()['T']
+    field_file_name = f'temperature_{t_artss:.5e}'
+
+    for j in range(obstacle.index['y1'], obstacle.index['y2'] + 1):
+        for k in range(obstacle.index['z1'], obstacle.index['z2'] + 1):
+            for i in range(obstacle.index['x1'], obstacle.index['x2'] + 1):
+                index = domain.get_index(i, j, k)
+                field_T[index] = value
+
+    FieldReader.write_field_data_keys(file_name=field_file_name,
+                                      data={'T': field_T},
+                                      field_keys=['T'],
+                                      path=artss_data_path)
+    return {'T': True}, field_file_name
 
 
 def set_gradient_x(t_artss: float, obstacle: Obstacle, domain: Domain, artss_data_path: str) -> [Dict[str, bool], str]:
@@ -169,6 +189,9 @@ def set_gradient_x(t_artss: float, obstacle: Obstacle, domain: Domain, artss_dat
             end_val = field_T[domain.get_index(obstacle.index['x2'] + 1, j, k)]
             delta = (end_val - start_val) / (obstacle.index['x2'] - obstacle.index['x1'])
             counter = 1
+            print(f"start val: {field_T[domain.get_index(obstacle.index['x1'] - 1, j, k)]}, index: {domain.get_index(obstacle.index['x1'] - 1, j, k)}")
+            print(f"end val: {field_T[domain.get_index(obstacle.index['x2'] + 1, j, k)]}, index: {domain.get_index(obstacle.index['x2'] + 1, j, k)}")
+            print(f"delta: {(end_val - start_val) / (obstacle.index['x2'] - obstacle.index['x1'])}")
             for i in range(obstacle.index['x1'], obstacle.index['x2'] + 1):
                 index = domain.get_index(i, j, k)
                 field_T[index] = start_val + delta * counter
@@ -194,18 +217,19 @@ def set_zero(t_artss: float, obstacle_name: str, domain: Domain,
     :return:
     """
     reader = FieldReader(t_artss, path=artss_data_path)
-    field_T = reader.read_field_data()['T']
-    domain.set_value_of_obstacle_cells(value=-1, field=field_T, obstacle_name=obstacle_name)
-    for o_name in neighbouring_obstacle_patches:
-        for patch in neighbouring_obstacle_patches[o_name]:
-            domain.set_value_of_obstacle_patch(value=0, field=field_T, obstacle_name=o_name, patch=patch)
-    field_file_name = f'temperature_{t_artss:.5e}'
+    fields = reader.read_field_data()
+    for field in fields:
+        domain.set_value_of_obstacle_cells(value=0, field=fields[field], obstacle_name=obstacle_name)
+        for o_name in neighbouring_obstacle_patches:
+            for patch in neighbouring_obstacle_patches[o_name]:
+                domain.set_value_of_obstacle_patch(value=0, field=fields[field], obstacle_name=o_name, patch=patch)
+    field_file_name = f'new_fields_{t_artss:.5e}'
 
     FieldReader.write_field_data_keys(file_name=field_file_name,
-                                      data={'T': field_T},
-                                      field_keys=['T'],
+                                      data=fields,
+                                      field_keys=list(fields.keys()),
                                       path=artss_data_path)
-    return {'T': True}, field_file_name
+    return dict(zip(fields.keys(), [True] * len(fields))), field_file_name
 
 
 def create_door(obstacles: List[Obstacle], door_identifier: str = None, ground_coordinate: float = 0) \
@@ -226,10 +250,8 @@ def create_door(obstacles: List[Obstacle], door_identifier: str = None, ground_c
             neighbours[obstacle.name] = ['bottom']
         elif names[1] in obstacle.name:
             obstacle_right = obstacle
-            neighbours[obstacle.name] = ['left']
         elif names[0] in obstacle.name:
             obstacle_left = obstacle
-            neighbours[obstacle.name] = ['right']
 
     if obstacle_left.geometry['ox2'] < obstacle_right.geometry['ox1']:
         # door faces z-direction
@@ -239,6 +261,8 @@ def create_door(obstacles: List[Obstacle], door_identifier: str = None, ground_c
         door_coordinates['oy2'] = obstacle_above.geometry['oy1']
         door_coordinates['oz1'] = max(obstacle_left.geometry['oz1'], obstacle_right.geometry['oz1'])
         door_coordinates['oz2'] = min(obstacle_left.geometry['oz2'], obstacle_right.geometry['oz2'])
+        neighbours[obstacle_left.name] = ['right']
+        neighbours[obstacle_right.name] = ['left']
     else:
         # door faces x-direction
         door_coordinates['ox1'] = max(obstacle_left.geometry['ox1'], obstacle_right.geometry['ox1'])
@@ -247,6 +271,8 @@ def create_door(obstacles: List[Obstacle], door_identifier: str = None, ground_c
         door_coordinates['oy2'] = obstacle_above.geometry['oy1']
         door_coordinates['oz1'] = obstacle_left.geometry['oz2']
         door_coordinates['oz2'] = obstacle_right.geometry['oz1']
+        neighbours[obstacle_left.name] = ['back']
+        neighbours[obstacle_right.name] = ['front']
 
     door = Obstacle(name="door", state='new')
     door.geometry = door_coordinates

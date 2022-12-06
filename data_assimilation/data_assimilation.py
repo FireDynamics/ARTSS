@@ -310,6 +310,7 @@ class FieldReader:
     @staticmethod
     def write_field_data_keys(file_name: str, data: Dict[str, np.ndarray], field_keys: List[str], path: str = './'):
         file = os.path.join(path, file_name)
+        print(f"write file {file}")
         with h5py.File(file, 'w') as out:
             for key in field_keys:
                 if key not in data.keys():
