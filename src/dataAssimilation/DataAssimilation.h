@@ -15,7 +15,6 @@
 #include "FieldIO.h"
 #include "../solver/SolverController.h"
 #include "ParameterReader.h"
-#include "../interfaces/IParameterReader.h"
 
 struct AssimilationMethods {
     inline static const std::string field_changer = "FieldChanger";
@@ -44,7 +43,7 @@ class DataAssimilation {
 
  private:
     std::shared_ptr<spdlog::logger> m_logger;
-    const Settings::Settings &m_settings;
+    const Settings::data_assimilation_parameters &m_settings;
     FieldController *m_field_controller;
     const SolverController &m_solver_controller;
 

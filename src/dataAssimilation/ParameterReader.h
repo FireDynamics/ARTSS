@@ -9,12 +9,13 @@
 
 #include <memory>
 
-#include "../interfaces/IParameterReader.h"
 #include "../utility/settings/Settings.h"
 #include "../utility/Utility.h"
 #include "../solver/SolverController.h"
 
-class ParameterReader : public IParameterReader {
+using return_parameter_reader = std::tuple<bool, Settings::data_assimilation::field_changes>;
+
+class ParameterReader {
 public:
     explicit ParameterReader(const SolverController &solver_controller) : m_solver_controller(solver_controller), m_logger(Utility::create_logger(typeid(this).name())) { }
 
