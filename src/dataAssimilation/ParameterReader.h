@@ -21,7 +21,7 @@ public:
 
     ~ParameterReader() = default;
 
-    return_parameter_reader read_config(const std::string &file_name) override;
+    return_parameter_reader read_config(const std::string &file_name);
 
 private:
     const SolverController &m_solver_controller;
