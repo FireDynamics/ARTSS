@@ -125,7 +125,7 @@ def full_corridor_doors(artss_data_path: str):
         domain.print_info()
         da = DAFile()
         reader = FieldReader(t_artss, path=artss_data_path)
-        field_file_name = f'full_corridor_obstacle_{t_artss:.5e}.xml'
+        field_file_name = f'fields_{t_artss:.5e}.hdf'
         field_changes, _ = set_zero(fields=reader.read_field_data(), domain=domain,
                                     obstacle_names=[doors[counter].name],
                                     neighbouring_obstacle_patches={doors[counter].name: neighbours[counter]})
@@ -144,13 +144,13 @@ def full_corridor_doors(artss_data_path: str):
         door = domain.remove_obstacle(doors[counter].name)
         domain.print_info()
         da = DAFile()
-        field_file_name = f'full_corridor_obstacle_{t_artss:.5e}.xml'
+        field_file_name = f'fields_{t_artss:.5e}.hdf'
         reader = FieldReader(t_artss, path=artss_data_path)
         field_changes, fields = set_ambient_temperature(domain=domain, obstacles=[door], value=299.14,
                                                         fields=reader.read_field_data())
         da.create_field_changes(field_changes, field_file_name=field_file_name)
         da.write_obstacle_changes(domain.get_obstacles() + [door])
-        config_file_name = f'change_obstacle_{int(t_sensor * 10)}.xml'
+        config_file_name = f'full_corridor_obstacle_{int(t_sensor * 10)}.xml'
         config_file_path = os.path.join(artss_data_path, config_file_name)
         da.write_xml(config_file_path, pretty_print=True)
         client.send_message(create_message(t_revert, config_file_name))
@@ -376,9 +376,10 @@ def set_zero(fields: Dict[str, np.ndarray], obstacle_names: List[str], domain: D
     for obstacle_name in obstacle_names:
         for field in fields:
             domain.set_value_of_obstacle_cells(value=0, field=fields[field], obstacle_name=obstacle_name)
-            for o_name in neighbouring_obstacle_patches[obstacle_name]:
-                for patch in neighbouring_obstacle_patches[obstacle_name][o_name]:
-                    domain.set_value_of_obstacle_patch(value=0, field=fields[field], obstacle_name=o_name, patch=patch)
+            if obstacle_name in neighbouring_obstacle_patches:
+                for o_name in neighbouring_obstacle_patches[obstacle_name]:
+                    for patch in neighbouring_obstacle_patches[obstacle_name][o_name]:
+                        domain.set_value_of_obstacle_patch(value=0, field=fields[field], obstacle_name=o_name, patch=patch)
 
     return dict(zip(fields.keys(), [True] * len(fields))), fields
 
@@ -466,5 +467,5 @@ def wait_artss(t_sensor: float, artss_data_path: str):
 if __name__ == '__main__':
     # obstacle_wonder(artss_data_path='example')
     # steckler_door(artss_data_path='example')
-    # full_corridor_doors(artss_data_path='full_corridor')
-    full_corridor_rooms(artss_data_path='full_corridor')
+    full_corridor_doors(artss_data_path='full_corridor')
+    # full_corridor_rooms(artss_data_path='full_corridor')
