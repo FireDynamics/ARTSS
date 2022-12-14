@@ -249,7 +249,7 @@ class Domain:
             f"Domain size inner cells: {self.domain_param['nx']} {self.domain_param['ny']} {self.domain_param['nz']}\n"
             f"step size (x|y|z): ({self.domain_param['dx']}|{self.domain_param['dy']}|{self.domain_param['dz']})")
         for o in self.obstacles.values():
-            print(f"-- Obstacle {o.name}\n"
+            print(f"-- Obstacle {o.name} ({o.state})\n"
                   f"   size of slices (Front|Back Bottom|Top Left|Right): "
                   f"{len(self.obstacles[o.name].cells['front'])}|"
                   f"{len(self.obstacles[o.name].cells['back'])} "
