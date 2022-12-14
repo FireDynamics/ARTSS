@@ -16,7 +16,7 @@ from obstacle import Obstacle, FIELD_TYPES, PATCHES
 
 
 def create_message(t_cur: float, config_file_name: str) -> bin:
-    print(f'send message with time step "{t_cur}" and xml "{config_file_name}"')
+    print(f'create message with time step "{t_cur}" and xml "{config_file_name}"')
     package = DAPackage(t_cur, config_file_name)
     return package.pack()
 
@@ -260,16 +260,16 @@ class FieldReader:
 
     @staticmethod
     @retry(delay=1, tries=6)
-    def get_t_current(path: str = '.') -> float:
-        with open(os.path.join(path, '.vis/meta'), 'r') as inp:
+    def get_t_current(path: str = '.', dir_name='.vis') -> float:
+        with open(os.path.join(path, dir_name, 'meta'), 'r') as inp:
             t = float([x for x in inp.readlines() if x.startswith('t:')][0][2:])
         return t
 
     @staticmethod
     @retry(delay=1, tries=6)
-    def get_all_time_steps(path: str = '.') -> List[float]:
+    def get_all_time_steps(path: str = '.', dir_name='.vis') -> List[float]:
         pattern = re.compile('[0-9]+\.[0-9]{5}e[+|-][0-9]+')
-        f = os.listdir(os.path.join(path, '.vis'))
+        f = os.listdir(os.path.join(path, dir_name))
         files = []
         for p in f:
             if pattern.match(p):
@@ -279,8 +279,8 @@ class FieldReader:
         return files
 
     @staticmethod
-    def get_xml_file_name(path: str = '.') -> str:
-        fpath = os.path.join(path, '.vis/meta')
+    def get_xml_file_name(path: str = '.', dir_name='.vis') -> str:
+        fpath = os.path.join(path, dir_name, 'meta')
         with open(fpath, 'r') as inp:
             xml_file_name = [x for x in inp.readlines() if x.startswith('xml_name:')][0][len('xml_name:'):]
         return xml_file_name.strip()
