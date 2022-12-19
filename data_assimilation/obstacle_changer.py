@@ -125,9 +125,9 @@ def full_corridor_doors(artss_data_path: str):
         domain.print_info()
         da = DAFile()
         reader = FieldReader(t_artss, path=artss_data_path)
-        field_changes, fields = set_zero(fields=reader.read_field_data(), domain=domain,
-                                         obstacle_names=[doors[counter].name],
-                                         neighbouring_obstacle_patches={doors[counter].name: neighbours[counter]})
+        field_changes, fields = set_value(fields=reader.read_field_data(), domain=domain,
+                                          obstacle_names=[doors[counter].name],
+                                          neighbouring_obstacle_patches={doors[counter].name: neighbours[counter]})
         field_key_changes: List[str] = merge_field_keys(field_changes, field_key_changes=[])
         field_file_name = f'fields_{t_artss:.5e}.hdf'
         FieldReader.write_field_data_keys(file_name=field_file_name, data=fields, field_keys=field_key_changes,
@@ -198,9 +198,9 @@ def full_corridor_rooms(artss_data_path: str):
         o_names = [x.name for x in rooms[counter][0]]
         domain.print_info()
         reader = FieldReader(t_artss, path=artss_data_path)
-        field_changes, fields = set_zero(fields=reader.read_field_data(), domain=domain,
-                                         obstacle_names=o_names,
-                                         neighbouring_obstacle_patches={})
+        field_changes, fields = set_value(fields=reader.read_field_data(), domain=domain,
+                                          obstacle_names=o_names,
+                                          neighbouring_obstacle_patches={})
         field_key_changes: List[str] = merge_field_keys(field_changes, field_key_changes=[])
         field_file_name = f'fields_{t_artss:.5e}.hdf'
         FieldReader.write_field_data_keys(file_name=field_file_name, data=fields, field_keys=field_key_changes,
@@ -229,11 +229,11 @@ def full_corridor_rooms(artss_data_path: str):
         reader = FieldReader(t_artss, path=artss_data_path)
         field_changes, fields = set_ambient_temperature(fields=reader.read_field_data(), domain=domain,
                                                         obstacles=removed,
-                                                        value=299.14)
+                                                        value=293.15)
         field_key_changes = merge_field_keys(field_changes, field_key_changes=[])
-        field_changes, fields = set_zero(fields=reader.read_field_data(), domain=domain,
-                                         obstacle_names=o_names,
-                                         neighbouring_obstacle_patches={})
+        field_changes, fields = set_value(fields=fields, domain=domain,
+                                          obstacle_names=o_names,
+                                          neighbouring_obstacle_patches={})
         field_key_changes = merge_field_keys(field_changes, field_key_changes=field_key_changes)
 
         field_file_name = f'fields_{t_artss:.5e}.hdf'
@@ -276,9 +276,9 @@ def steckler_door(artss_data_path: str):
     domain.print_debug()
     da = DAFile()
     reader = FieldReader(t_artss, path=artss_data_path)
-    field_changes, fields = set_zero(domain=domain, obstacle_names=[door.name],
-                                     neighbouring_obstacle_patches={door.name: neighbours},
-                                     fields=reader.read_field_data())
+    field_changes, fields = set_value(domain=domain, obstacle_names=[door.name],
+                                      neighbouring_obstacle_patches={door.name: neighbours},
+                                      fields=reader.read_field_data())
     field_key_changes: List[str] = []
     for f in field_changes:
         if field_changes[f] and f not in field_key_changes:
@@ -368,9 +368,9 @@ def set_gradient_x(t_artss: float, obstacle: Obstacle, domain: Domain, artss_dat
     return {'T': True}, field_file_name
 
 
-def set_zero(fields: Dict[str, np.ndarray], obstacle_names: List[str], domain: Domain,
-             neighbouring_obstacle_patches: Dict[str, Dict[str, List[str]]]) -> [Dict[str, bool],
-                                                                                 Dict[str, np.ndarray]]:
+def set_value(fields: Dict[str, np.ndarray], obstacle_names: List[str], domain: Domain,
+              neighbouring_obstacle_patches: Dict[str, Dict[str, List[str]]], value=0) -> [Dict[str, bool],
+                                                                                           Dict[str, np.ndarray]]:
     """
     set all cells given obstacle to zero in order to see the obstacle in the simulation
     :param fields: fields to be changed
@@ -382,11 +382,11 @@ def set_zero(fields: Dict[str, np.ndarray], obstacle_names: List[str], domain: D
     """
     for obstacle_name in obstacle_names:
         for field in fields:
-            domain.set_value_of_obstacle_cells(value=0, field=fields[field], obstacle_name=obstacle_name)
+            domain.set_value_of_obstacle_cells(value=value, field=fields[field], obstacle_name=obstacle_name)
             if obstacle_name in neighbouring_obstacle_patches:
                 for o_name in neighbouring_obstacle_patches[obstacle_name]:
                     for patch in neighbouring_obstacle_patches[obstacle_name][o_name]:
-                        domain.set_value_of_obstacle_patch(value=0, field=fields[field], obstacle_name=o_name,
+                        domain.set_value_of_obstacle_patch(value=value, field=fields[field], obstacle_name=o_name,
                                                            patch=patch)
 
     return dict(zip(fields.keys(), [True] * len(fields))), fields
