@@ -126,8 +126,8 @@ def full_corridor_doors(artss_data_path: str):
         da = DAFile()
         reader = FieldReader(t_artss, path=artss_data_path)
         field_changes, fields = set_zero(fields=reader.read_field_data(), domain=domain,
-                                    obstacle_names=[doors[counter].name],
-                                    neighbouring_obstacle_patches={doors[counter].name: neighbours[counter]})
+                                         obstacle_names=[doors[counter].name],
+                                         neighbouring_obstacle_patches={doors[counter].name: neighbours[counter]})
         field_key_changes: List[str] = merge_field_keys(field_changes, field_key_changes=[])
         field_file_name = f'fields_{t_artss:.5e}.hdf'
         FieldReader.write_field_data_keys(file_name=field_file_name, data=fields, field_keys=field_key_changes,
@@ -160,6 +160,7 @@ def full_corridor_doors(artss_data_path: str):
         config_file_path = os.path.join(artss_data_path, config_file_name)
         da.write_xml(config_file_path, pretty_print=True)
         client.send_message(create_message(t_revert, config_file_name))
+
 
 def merge_field_keys(field_changes: Dict[str, bool], field_key_changes: List[str]):
     for f in field_changes:
@@ -319,7 +320,8 @@ def steckler_door(artss_data_path: str):
     client.send_message(create_message(t_revert, config_file_name))
 
 
-def set_ambient_temperature(fields: Dict[str, np.ndarray], obstacles: List[Obstacle], domain: Domain, value: float) -> [Dict[str, bool], str]:
+def set_ambient_temperature(fields: Dict[str, np.ndarray], obstacles: List[Obstacle], domain: Domain, value: float) -> [
+    Dict[str, bool], str]:
     for obstacle in obstacles:
         for j in range(obstacle.index['y1'], obstacle.index['y2'] + 1):
             for k in range(obstacle.index['z1'], obstacle.index['z2'] + 1):
@@ -384,7 +386,8 @@ def set_zero(fields: Dict[str, np.ndarray], obstacle_names: List[str], domain: D
             if obstacle_name in neighbouring_obstacle_patches:
                 for o_name in neighbouring_obstacle_patches[obstacle_name]:
                     for patch in neighbouring_obstacle_patches[obstacle_name][o_name]:
-                        domain.set_value_of_obstacle_patch(value=0, field=fields[field], obstacle_name=o_name, patch=patch)
+                        domain.set_value_of_obstacle_patch(value=0, field=fields[field], obstacle_name=o_name,
+                                                           patch=patch)
 
     return dict(zip(fields.keys(), [True] * len(fields))), fields
 
@@ -447,6 +450,7 @@ def replace_room2(domain: Domain) -> Tuple[List[Obstacle], List[str]]:
                                domain.obstacles['wall between 1 and 2'].geometry['oz1'],
                                domain.obstacles['wall between 1 and 2'].geometry['oz2'],
                                ])
+    created.append(room_blocker)
 
     deleted: List[str] = ['wall between 1 and 2',
                           'wall between 2 and 3',
@@ -472,5 +476,5 @@ def wait_artss(t_sensor: float, artss_data_path: str):
 if __name__ == '__main__':
     # obstacle_wonder(artss_data_path='example')
     # steckler_door(artss_data_path='example')
-    full_corridor_doors(artss_data_path='full_corridor')
-    # full_corridor_rooms(artss_data_path='full_corridor')
+    # full_corridor_doors(artss_data_path='full_corridor')
+    full_corridor_rooms(artss_data_path='full_corridor')
