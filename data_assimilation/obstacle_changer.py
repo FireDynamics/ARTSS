@@ -125,10 +125,13 @@ def full_corridor_doors(artss_data_path: str):
         domain.print_info()
         da = DAFile()
         reader = FieldReader(t_artss, path=artss_data_path)
-        field_file_name = f'fields_{t_artss:.5e}.hdf'
-        field_changes, _ = set_zero(fields=reader.read_field_data(), domain=domain,
+        field_changes, fields = set_zero(fields=reader.read_field_data(), domain=domain,
                                     obstacle_names=[doors[counter].name],
                                     neighbouring_obstacle_patches={doors[counter].name: neighbours[counter]})
+        field_key_changes: List[str] = merge_field_keys(field_changes, field_key_changes=[])
+        field_file_name = f'fields_{t_artss:.5e}.hdf'
+        FieldReader.write_field_data_keys(file_name=field_file_name, data=fields, field_keys=field_key_changes,
+                                          path=artss_data_path)
         da.create_field_changes(field_changes, field_file_name=field_file_name)
         da.write_obstacle_changes(domain.get_obstacles())
         config_file_name = f'full_corridor_obstacle_{int(t_sensor * 10)}.xml'
@@ -144,16 +147,25 @@ def full_corridor_doors(artss_data_path: str):
         door = domain.remove_obstacle(doors[counter].name)
         domain.print_info()
         da = DAFile()
-        field_file_name = f'fields_{t_artss:.5e}.hdf'
         reader = FieldReader(t_artss, path=artss_data_path)
         field_changes, fields = set_ambient_temperature(domain=domain, obstacles=[door], value=299.14,
                                                         fields=reader.read_field_data())
+        field_key_changes = merge_field_keys(field_changes, field_key_changes=[])
+        field_file_name = f'fields_{t_artss:.5e}.hdf'
+        FieldReader.write_field_data_keys(file_name=field_file_name, data=fields, field_keys=field_key_changes,
+                                          path=artss_data_path)
         da.create_field_changes(field_changes, field_file_name=field_file_name)
         da.write_obstacle_changes(domain.get_obstacles() + [door])
         config_file_name = f'full_corridor_obstacle_{int(t_sensor * 10)}.xml'
         config_file_path = os.path.join(artss_data_path, config_file_name)
         da.write_xml(config_file_path, pretty_print=True)
         client.send_message(create_message(t_revert, config_file_name))
+
+def merge_field_keys(field_changes: Dict[str, bool], field_key_changes: List[str]):
+    for f in field_changes:
+        if field_changes[f] and f not in field_key_changes:
+            field_key_changes.append(f)
+    return field_key_changes
 
 
 def full_corridor_rooms(artss_data_path: str):
@@ -188,10 +200,7 @@ def full_corridor_rooms(artss_data_path: str):
         field_changes, fields = set_zero(fields=reader.read_field_data(), domain=domain,
                                          obstacle_names=o_names,
                                          neighbouring_obstacle_patches={})
-        field_key_changes: List[str] = []
-        for f in field_changes:
-            if field_changes[f] and f not in field_key_changes:
-                field_key_changes.append(f)
+        field_key_changes: List[str] = merge_field_keys(field_changes, field_key_changes=[])
         field_file_name = f'fields_{t_artss:.5e}.hdf'
         FieldReader.write_field_data_keys(file_name=field_file_name, data=fields, field_keys=field_key_changes,
                                           path=artss_data_path)
@@ -220,16 +229,12 @@ def full_corridor_rooms(artss_data_path: str):
         field_changes, fields = set_ambient_temperature(fields=reader.read_field_data(), domain=domain,
                                                         obstacles=removed,
                                                         value=299.14)
-        field_key_changes: List[str] = []
-        for f in field_changes:
-            if field_changes[f] and f not in field_key_changes:
-                field_key_changes.append(f)
+        field_key_changes = merge_field_keys(field_changes, field_key_changes=[])
         field_changes, fields = set_zero(fields=reader.read_field_data(), domain=domain,
                                          obstacle_names=o_names,
                                          neighbouring_obstacle_patches={})
-        for f in field_changes:
-            if field_changes[f] and f not in field_key_changes:
-                field_key_changes.append(f)
+        field_key_changes = merge_field_keys(field_changes, field_key_changes=field_key_changes)
+
         field_file_name = f'fields_{t_artss:.5e}.hdf'
         FieldReader.write_field_data_keys(file_name=field_file_name, data=fields, field_keys=field_key_changes,
                                           path=artss_data_path)
