@@ -52,7 +52,7 @@ class XML:
         return 1
 
     def get_temperature_source(self) -> dict:
-        if self.temperature_source is None:
+        if not self.temperature_source:
             # check if temperature source is even there ? or crash
             root = self.xml_tree.getroot()
             source_tree = root.find('solver').find('temperature').find('source')
