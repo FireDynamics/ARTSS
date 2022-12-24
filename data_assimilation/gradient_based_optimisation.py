@@ -1,7 +1,7 @@
 import math
 import os
 import time
-from typing import Dict, TextIO
+from typing import Dict, TextIO, Tuple
 
 import fdsreader
 import multiprocessing
@@ -341,7 +341,6 @@ def continuous_gradient(client: TCP_client,
                         heat_source: dict,
                         n_iterations: int,
                         precondition: bool = False):
-    n = max(1, n_iterations)
     for t_sensor in sensor_times[2:]:
         pprint(cur)
         wait_artss(t_sensor, artss_data_path, artss)
@@ -357,7 +356,8 @@ def continuous_gradient(client: TCP_client,
         log(f'org: {diff_orig["T"]}', file_debug)
         log(f't revert: {t_revert}', file_debug)
 
-        if sum(diff_orig.values()) < 1e-5:
+        if diff_orig['T'] < 1e-5:
+            log(f'skip, difference: {diff_orig["T"]}', file_debug)
             continue
 
         if precondition:
@@ -432,8 +432,9 @@ def continuous_gradient(client: TCP_client,
             alpha_min = min(alpha_min, restrictions[k])
         alpha = 0.9 * alpha_min
         log(f'mins: 1.0, {restrictions.values()}', file_debug)
-        log(f'alpha: {alpha}', file_debug)
+        n = max(1, n_iterations)
         while n > 0:
+            log(f'alpha: {alpha}, n: {n_iterations-n}', file_debug)
             x = np.asarray([cur[x] for x in keys])
             new_para = x + (alpha * d)
             new_para = {
@@ -441,6 +442,7 @@ def continuous_gradient(client: TCP_client,
                 for i, p in enumerate(keys)
             }
             pprint(new_para)
+            pprint(new_para, stream=file_debug)
 
             file_da.write(f'iterate:{n};')
             diff_cur, _ = do_rollback(client=client,
@@ -458,6 +460,8 @@ def continuous_gradient(client: TCP_client,
                 log(f"al1: {np.dot(alpha * sigma * nabla, d)}", file_debug)
                 log(f"als: {diff_cur['T']} < {diff_orig['T'] + np.dot(alpha * sigma * nabla, d)}", file_debug)
                 cur = copy(new_para)
+                file_da.flush()
+                file_debug.flush()
                 break
 
             alpha = 0.7 * alpha
@@ -471,6 +475,8 @@ def continuous_gradient(client: TCP_client,
 
         log(f'alpha: {alpha}', file_debug)
         log(f'using cur: {cur}', file_debug)
+        file_da.flush()
+        file_debug.flush()
 
 
 def one_time_gradient_parallel(client: TCP_client,
@@ -654,8 +660,8 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, ar
 
     heat_source = xml.get_temperature_source()
 
-    file_da = open('da_details.csv', 'w')
-    file_debug = open('da_debug_details.dat', 'w')
+    file_da = open(os.path.join(artss_data_path,'da_details.csv'), 'w')
+    file_debug = open(os.path.join(artss_data_path, 'da_debug_details.dat'), 'w')
 
     delta = {
         'HRR': float(heat_source['temperature_source']['HRR']) * 0.5,
@@ -865,7 +871,7 @@ def read_fds_file(data_path: str, artss: Domain) -> pd.DataFrame:
 
 
 def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader,
-                                      t_sensor: float, file_da: TextIO) -> (Dict[str, float], float):
+                                      t_sensor: float, file_da: TextIO) -> Tuple[Dict[str, float], float]:
     diff: dict = {'T': [], 'C': []}
     fields_sim = field_reader.read_field_data()
     min_pos_x: float = 0
