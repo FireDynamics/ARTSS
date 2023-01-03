@@ -178,7 +178,7 @@ def continuous_gradient_parallel(client: TCP_client,
     artss_exe_path = os.path.join(artss_path, 'build', 'bin')
     xml_input_file = os.path.join(artss_data_path, FieldReader.get_xml_file_name(path=artss_data_path))
     n = max(1, n_iterations)
-    for t_sensor in sensor_times[3:]:
+    for t_sensor in sensor_times:
         pprint(cur)
         wait_artss(t_sensor, artss_data_path, artss)
 
@@ -341,7 +341,7 @@ def continuous_gradient(client: TCP_client,
                         heat_source: dict,
                         n_iterations: int,
                         precondition: bool = False):
-    for t_sensor in sensor_times[2:]:
+    for t_sensor in sensor_times:
         pprint(cur)
         wait_artss(t_sensor, artss_data_path, artss)
 
@@ -434,7 +434,7 @@ def continuous_gradient(client: TCP_client,
         log(f'mins: 1.0, {restrictions.values()}', file_debug)
         n = max(1, n_iterations)
         while n > 0:
-            log(f'alpha: {alpha}, n: {n_iterations-n}', file_debug)
+            log(f'alpha: {alpha}, n: {n}', file_debug)
             x = np.asarray([cur[x] for x in keys])
             new_para = x + (alpha * d)
             new_para = {
@@ -453,7 +453,7 @@ def continuous_gradient(client: TCP_client,
                                       fds_data=fds_data,
                                       devc_info=devc_info,
                                       file_da=file_da, file_debug=file_debug)
-            log(f'conditional statement {diff_orig["T"] + np.dot(alpha * sigma * nabla, d)}', file_debug)
+            log(f'conditional statement {diff_cur["T"]} < {diff_orig["T"] + np.dot(alpha * sigma * nabla, d)}', file_debug)
             if diff_cur['T'] < diff_orig['T'] + np.dot(alpha * sigma * nabla, d):
                 log(f'found alpha: {alpha}', file_debug)
                 log(f'found x_k+1: {new_para}', file_debug)
@@ -656,7 +656,8 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, ar
     devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
     print(devc_info_temperature)
 
-    sensor_times = fds_data.index
+    sensor_times = fds_data.index[3:]
+    print('sensor times:', fds_data.index)
 
     heat_source = xml.get_temperature_source()
 
@@ -743,6 +744,10 @@ def write_changes_xml(change: dict, source: list, file_name: str, file_da: TextI
 def get_time_step_artss(t_sensor: float, artss_data_path: str, dt: float, time_back: float = 10) -> [float, float]:
     files = FieldReader.get_all_time_steps(path=artss_data_path)
     times = list(filter(lambda x: x >= t_sensor, files))
+    while len(times) == 0:
+        time.sleep(1)
+        files = FieldReader.get_all_time_steps(path=artss_data_path)
+        times = list(filter(lambda x: x >= t_sensor, files))
     t_revert = ([dt] + list(filter(lambda x: x <= max(0., t_sensor - time_back), files)))[-1]
     return times[0], t_revert
 
@@ -884,7 +889,7 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
 
         value_sim = fields_sim[type_sensor][index_sensor]
         difference = kelvin_to_celsius(value_sim) - value_sensor
-        if abs(difference) > 0.5:
+        if abs(difference) > 2:
             diff[type_sensor].append(difference)
         file_da.write(
             f'sensor:{key};time_sensor:{t_sensor};time_artss:{field_reader.t};sensor_val:{value_sensor};artss_val:{value_sim};diff:{difference};considered:{abs(difference) > 0.5};position:{devc_info[key]["XYZ"]}\n')
