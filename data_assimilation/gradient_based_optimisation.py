@@ -146,7 +146,7 @@ def do_rollback(client: TCP_client,
     file_debug.write(f'make adjustment with: {new_para}\n')
     write_da_data(file_da=file_da, parameters=new_para)
     client.send_message(create_message(t_revert, config_file_name))
-    wait_artss(t_sensor, artss_data_path, artss)
+    wait_artss(t_artss, artss_data_path, artss)
 
     field_reader = FieldReader(t_artss, path=artss_data_path)
     diff_cur, min_pos_x = comparison_sensor_simulation_data(
@@ -181,8 +181,8 @@ def continuous_gradient_parallel(client: TCP_client,
     for t_sensor in sensor_times:
         pprint(cur)
         wait_artss(t_sensor, artss_data_path, artss)
-
         t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=artss.get_dt(), time_back=6)
+        wait_artss(t_artss, artss_data_path, artss)
 
         log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
         field_reader = FieldReader(t_artss, path=artss_data_path)
@@ -344,8 +344,8 @@ def continuous_gradient(client: TCP_client,
     for t_sensor in sensor_times:
         pprint(cur)
         wait_artss(t_sensor, artss_data_path, artss)
-
         t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=artss.get_dt(), time_back=6)
+        wait_artss(t_artss, artss_data_path, artss)
 
         log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
         field_reader = FieldReader(t_artss, path=artss_data_path)
