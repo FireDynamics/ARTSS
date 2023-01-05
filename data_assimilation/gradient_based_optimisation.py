@@ -365,6 +365,7 @@ def continuous_gradient(client: TCP_client,
             cur['x0'] = minima_x
             heat_source['temperature_source']['x0'] = cur['x0']
             file_da.write(f'preconditioning;')
+            start_time = time.time()
             diff_orig, _ = do_rollback(client=client,
                                        t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
                                        new_para={'x0': cur['x0']}, heat_source=heat_source.values(),
@@ -373,11 +374,13 @@ def continuous_gradient(client: TCP_client,
                                        fds_data=fds_data,
                                        devc_info=devc_info,
                                        file_da=file_da, file_debug=file_debug)
-
+            end_time = time.time()
+            file_da.write(f'time: {end_time-start_time}\n')
         nabla = {}
 
         for p in keys:
             file_da.write(f'calc_nabla;')
+            start_time = time.time()
             diff_cur, _ = do_rollback(client=client,
                                       t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
                                       new_para={p: cur[p] + delta[p]}, heat_source=heat_source.values(),
@@ -386,6 +389,8 @@ def continuous_gradient(client: TCP_client,
                                       fds_data=fds_data,
                                       devc_info=devc_info,
                                       file_da=file_da, file_debug=file_debug)
+            end_time = time.time()
+            file_da.write(f'time: {end_time-start_time}\n')
             # calc new nabla
             nabla[p] = (diff_cur['T'] - diff_orig['T']) / delta[p]
             log(f'cur: {diff_cur["T"]}', file_debug)
@@ -445,6 +450,7 @@ def continuous_gradient(client: TCP_client,
             pprint(new_para, stream=file_debug)
 
             file_da.write(f'iterate:{n};')
+            start_time = time.time()
             diff_cur, _ = do_rollback(client=client,
                                       t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
                                       new_para=new_para, heat_source=heat_source.values(),
@@ -453,6 +459,8 @@ def continuous_gradient(client: TCP_client,
                                       fds_data=fds_data,
                                       devc_info=devc_info,
                                       file_da=file_da, file_debug=file_debug)
+            end_time = time.time()
+            file_da.write(f'time: {end_time-start_time}\n')
             log(f'conditional statement {diff_cur["T"]} < {diff_orig["T"] + np.dot(alpha * sigma * nabla, d)}', file_debug)
             if diff_cur['T'] < diff_orig['T'] + np.dot(alpha * sigma * nabla, d):
                 log(f'found alpha: {alpha}', file_debug)
@@ -892,7 +900,7 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
         if abs(difference) > 2:
             diff[type_sensor].append(difference)
         file_da.write(
-            f'sensor:{key};time_sensor:{t_sensor};time_artss:{field_reader.t};sensor_val:{value_sensor};artss_val:{value_sim};diff:{difference};considered:{abs(difference) > 0.5};position:{devc_info[key]["XYZ"]}\n')
+            f'sensor:{key};time_sensor:{t_sensor};time_artss:{field_reader.t};sensor_val:{value_sensor};artss_val:{value_sim};diff:{difference};considered:{abs(difference) > 2};position:{devc_info[key]["XYZ"]}\n')
         file_da.flush()
 
         if difference < min_sensor_val:
@@ -902,6 +910,8 @@ def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame
     result = {}
     for key in diff:
         if len(diff[key]) == 0:
+            result[key] = 0
+            file_da.write(f'differences:{key}:{result[key]};no_of_sensors:{len(diff[key])}\n')
             continue
         result[key] = np.sqrt(sum(np.array(diff[key]) ** 2))
         file_da.write(f'differences:{key}:{result[key]};no_of_sensors:{len(diff[key])}\n')
