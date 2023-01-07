@@ -41,7 +41,7 @@ void DataAssimilation::initiate_time_skip(const real t_cur) {
 }
 
 void DataAssimilation::save_data(real t_cur) {
-    if (t_cur >= m_output_time_interval * m_time_interval_counter) {
+    if (t_cur >= m_output_time_interval * m_time_interval_counter - DomainData::getInstance()->get_physical_parameters().dt/2) {
         m_logger->debug("save data for {} with interval {} counter {}",
                         t_cur, m_output_time_interval,
                         m_time_interval_counter);
