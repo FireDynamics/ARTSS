@@ -574,6 +574,8 @@ def opt_scipy(client: TCP_client,
         file_da.write(f'res_jac: {list(res.jac)}\n')
         file_da.write(f'res_fun: {res.fun}\n')
         file_da.write(f'res_n: {res.nit}\n')
+        file_da.write(f'res_nfev: {list(res.nfev)}\n')
+        file_da.write(f'res_msg: {res.message}\n')
         file_da.write(f'res_suc: {res.success}\n')
 
         file_da.flush()
