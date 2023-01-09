@@ -1,8 +1,10 @@
 import math
 import os
+import sys
 import time
 from typing import Dict, TextIO, Tuple
 
+import scipy
 import fdsreader
 import multiprocessing
 import numpy as np
@@ -487,6 +489,96 @@ def continuous_gradient(client: TCP_client,
         file_debug.flush()
 
 
+def opt_scipy(client: TCP_client,
+              file_da: TextIO, file_debug: TextIO,
+              sensor_times: pandas.Index, devc_info: dict,
+              cur: dict, delta: dict, keys: list,
+              artss_data_path: str, artss: XML, domain: Domain,
+              fds_data: pandas.DataFrame,
+              heat_source: dict,
+              n_iterations: int,
+              precondition: bool = False):
+    t_artss = 0.0
+    t_revert = 0.0
+    t_sensor = 0.0
+
+    def f(x):
+        print(x)
+        print(keys)
+        new_para = {
+                'HRR': x[0],
+                'x0': x[1],
+        }
+        diff_cur, _ = do_rollback(client=client,
+                                  t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                  new_para=new_para, heat_source=heat_source.values(),
+                                  sub_file_name='scipy',
+                                  artss_data_path=artss_data_path, artss=artss,
+                                  fds_data=fds_data,
+                                  devc_info=devc_info,
+                                  file_da=file_da, file_debug=file_debug)
+
+        return diff_cur['T']
+
+    def call_back(xk) -> bool:
+        print(f'xk: {xk}')
+
+    for t_sensor in sensor_times:
+        pprint(cur)
+
+        wait_artss(t_sensor, artss_data_path, artss)
+        t_artss, t_revert = get_time_step_artss(
+                t_sensor,
+                artss_data_path,
+                dt=artss.get_dt(),
+                time_back=6
+        )
+        wait_artss(t_artss, artss_data_path, artss)
+
+        log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
+        field_reader = FieldReader(t_artss, path=artss_data_path)
+        file_da.write(f'original data;time_sensor:{t_sensor};time_artss:{t_artss}\n')
+        write_da_data(file_da=file_da, parameters=cur)
+        diff_orig, minima_x = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
+
+        file_da.write(f't: {t_sensor}\n')
+        file_da.write(f'HRR: {cur["HRR"]}\n')
+        file_da.write(f'x0: {cur["x0"]}\n')
+        file_da.write(f'T: {diff_orig["T"]}\n')
+
+        log(f'org: {diff_orig["T"]}', file_debug)
+        log(f't_revert: {t_revert}', file_debug)
+
+        if diff_orig['T'] < 1e-5:
+            log(f'skip, difference: {diff_orig["T"]}', file_debug)
+            continue
+
+        x0 = [cur[x] for x in keys]
+        res = scipy.optimize.minimize(f,
+                                      x0=x0,
+                                      callback=call_back,
+                                      tol=1e-5,
+                                      options={
+                                          'maxiter': n_iterations,
+                                          'disp': True,
+                                      },
+                                      method='BFGS')
+
+        print(f'org: {diff_orig}')
+        print(res)
+        cur = {
+                'HRR': res.x[0],
+                'x0': res.x[1],
+        }
+        file_da.write(f'res_x: {list(res.x)}\n')
+        file_da.write(f'res_jac: {list(res.jac)}\n')
+        file_da.write(f'res_fun: {res.fun}\n')
+        file_da.write(f'res_n: {res.nit}\n')
+        file_da.write(f'res_suc: {res.success}\n')
+
+        file_da.flush()
+
+
 def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, artss_path: str, parallel=False):
     artss_path = os.path.abspath(artss_path)
     artss_data_path = os.path.abspath(artss_data_path)
@@ -526,23 +618,31 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, ar
     }
 
     keys = ['HRR', 'x0']
-    if parallel:
-        continuous_gradient_parallel(client=client, file_da=file_da, file_debug=file_debug,
-                                     sensor_times=sensor_times,
-                                     devc_info=devc_info_temperature, fds_data=fds_data,
-                                     artss_data_path=artss_data_path,
-                                     artss_path=artss_path,
-                                     domain=domain, heat_source=heat_source,
-                                     cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
-                                     precondition=False)
-    else:
-        continuous_gradient(client=client, file_da=file_da, file_debug=file_debug,
-                            sensor_times=sensor_times,
-                            devc_info=devc_info_temperature, fds_data=fds_data,
-                            artss_data_path=artss_data_path,
-                            domain=domain, heat_source=heat_source,
-                            cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
-                            precondition=False)
+    opt_scipy(client=client, file_da=file_da, file_debug=file_debug,
+              sensor_times=sensor_times,
+              devc_info=devc_info_temperature, fds_data=fds_data,
+              artss_data_path=artss_data_path,
+              domain=domain, heat_source=heat_source,
+              cur=cur, delta=delta, keys=keys, n_iterations=10, artss=xml,
+              precondition=False)
+
+    # if parallel:
+    #     continuous_gradient_parallel(client=client, file_da=file_da, file_debug=file_debug,
+    #                                  sensor_times=sensor_times,
+    #                                  devc_info=devc_info_temperature, fds_data=fds_data,
+    #                                  artss_data_path=artss_data_path,
+    #                                  artss_path=artss_path,
+    #                                  domain=domain, heat_source=heat_source,
+    #                                  cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
+    #                                  precondition=False)
+    # else:
+    #     continuous_gradient(client=client, file_da=file_da, file_debug=file_debug,
+    #                         sensor_times=sensor_times,
+    #                         devc_info=devc_info_temperature, fds_data=fds_data,
+    #                         artss_data_path=artss_data_path,
+    #                         domain=domain, heat_source=heat_source,
+    #                         cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
+    #                         precondition=False)
 
     # map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd, xml)
 
@@ -558,12 +658,12 @@ def wait_artss(t_sensor, artss_data_path, artss: ARTSS.XML):
         t = (t_sensor // time_step + 1) * time_step
     # time.sleep(30)  # needed for artss to rewrite meta file
     t_cur = FieldReader.get_t_current(path=artss_data_path)
-    pbar = tqdm(total=t)
+    pbar = tqdm(total=t, bar_format='{l_bar}{bar}| {elapsed}<{remaining}')
     pbar.update(t_cur)
     while t_cur <= t:
         time.sleep(1)
         t_new = FieldReader.get_t_current(path=artss_data_path)
-        pbar.update(t_new - t_cur)
+        pbar.update(float(f'{(t_new - t_cur):0.2f}'))
         t_cur = t_new
 
     pbar.close()
