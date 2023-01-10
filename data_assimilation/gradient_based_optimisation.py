@@ -502,6 +502,11 @@ def opt_scipy(client: TCP_client,
     t_revert = 0.0
     t_sensor = 0.0
 
+    bounds = scipy.optimize.Bounds(
+        lb=np.asarray([0, domain.domain_param['X1']]),
+        ub=np.asarray([np.inf, domain.domain_param['X2']])
+    )
+
     def f(x):
         print(x)
         print(keys)
@@ -558,11 +563,12 @@ def opt_scipy(client: TCP_client,
                                       x0=x0,
                                       callback=call_back,
                                       tol=1e-5,
+                                      bounds=bounds,
                                       options={
                                           'maxiter': n_iterations,
                                           'disp': True,
                                       },
-                                      method='BFGS')
+                                      method='Nelder-Mead')
 
         print(f'org: {diff_orig}')
         print(res)
@@ -571,10 +577,11 @@ def opt_scipy(client: TCP_client,
                 'x0': res.x[1],
         }
         file_da.write(f'res_x: {list(res.x)}\n')
-        file_da.write(f'res_jac: {list(res.jac)}\n')
+        # file_da.write(f'res_jac: {list(res.jac)}\n')
+        file_da.write(f'res_sim: {res.final_simplex}\n')
         file_da.write(f'res_fun: {res.fun}\n')
         file_da.write(f'res_n: {res.nit}\n')
-        file_da.write(f'res_nfev: {list(res.nfev)}\n')
+        file_da.write(f'res_nfev: {res.nfev}\n')
         file_da.write(f'res_msg: {res.message}\n')
         file_da.write(f'res_suc: {res.success}\n')
 
@@ -625,7 +632,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, ar
               devc_info=devc_info_temperature, fds_data=fds_data,
               artss_data_path=artss_data_path,
               domain=domain, heat_source=heat_source,
-              cur=cur, delta=delta, keys=keys, n_iterations=10, artss=xml,
+              cur=cur, delta=delta, keys=keys, n_iterations=50, artss=xml,
               precondition=False)
 
     # if parallel:
@@ -665,7 +672,7 @@ def wait_artss(t_sensor, artss_data_path, artss: ARTSS.XML):
     while t_cur <= t:
         time.sleep(1)
         t_new = FieldReader.get_t_current(path=artss_data_path)
-        pbar.update(float(f'{(t_new - t_cur):0.2f}'))
+        pbar.update(min(1.0, float(f'{(t_new - t_cur):0.2f}')))
         t_cur = t_new
 
     pbar.close()
