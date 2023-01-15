@@ -53,9 +53,9 @@
         <x0> 30 </x0>
         <y0> 0. </y0>
         <z0> 3. </z0>
-        <sigma_x> 0.5 </sigma_x>
-        <sigma_y> 0.1 </sigma_y>
-        <sigma_z> 0.5 </sigma_z>
+        <sigma_x> 1.5 </sigma_x>
+        <sigma_y> 3 </sigma_y>
+        <sigma_z> 2.5 </sigma_z>
         <tau> 5. </tau>
       </source>
     </temperature>
