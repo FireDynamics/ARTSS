@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from copy import copy
 from pprint import pprint
 
+import scipy.optimize as op
 from tqdm import tqdm
 
 import ARTSS
@@ -370,7 +371,7 @@ def continuous_gradient(client: TCP_client,
                                        devc_info=devc_info,
                                        file_da=file_da, file_debug=file_debug)
             end_time = time.time()
-            file_da.write(f'time: {end_time-start_time}\n')
+            file_da.write(f'time: {end_time - start_time}\n')
         nabla = {}
 
         for p in keys:
@@ -385,7 +386,7 @@ def continuous_gradient(client: TCP_client,
                                       devc_info=devc_info,
                                       file_da=file_da, file_debug=file_debug)
             end_time = time.time()
-            file_da.write(f'time: {end_time-start_time}\n')
+            file_da.write(f'time: {end_time - start_time}\n')
             # calc new nabla
             nabla[p] = (diff_cur['T'] - diff_orig['T']) / delta[p]
             log(f'cur: {diff_cur["T"]}', file_debug)
@@ -455,7 +456,7 @@ def continuous_gradient(client: TCP_client,
                                       devc_info=devc_info,
                                       file_da=file_da, file_debug=file_debug)
             end_time = time.time()
-            file_da.write(f'time: {end_time-start_time}\n')
+            file_da.write(f'time: {end_time - start_time}\n')
             log(f'conditional statement {diff_cur["T"]} < {diff_orig["T"] + np.dot(alpha * sigma * nabla, d)}', file_debug)
             if diff_cur['T'] < diff_orig['T'] + np.dot(alpha * sigma * nabla, d):
                 log(f'found alpha: {alpha}', file_debug)
@@ -482,6 +483,118 @@ def continuous_gradient(client: TCP_client,
         file_debug.flush()
 
 
+def opt_scipy(client: TCP_client,
+              file_da: TextIO, file_debug: TextIO,
+              sensor_times: pandas.Index, devc_info: dict,
+              cur: dict, delta: dict, keys: list,
+              artss_data_path: str, artss: XML, domain: Domain,
+              fds_data: pandas.DataFrame,
+              heat_source: dict,
+              n_iterations: int,
+              precondition: bool = False):
+    t_artss = 0.0
+    t_revert = 0.0
+    t_sensor = 0.0
+
+    bounds = op.Bounds(
+        lb=np.asarray([0, domain.domain_param['X1']]),
+        ub=np.asarray([np.inf, domain.domain_param['X2']])
+    )
+
+    def f(x):
+        print(x)
+        print(keys)
+        new_para = {
+            'HRR': x[0],
+            'x0': x[1],
+        }
+        diff_cur, _ = do_rollback(client=client,
+                                  t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                  new_para=new_para, heat_source=heat_source.values(),
+                                  sub_file_name='scipy',
+                                  artss_data_path=artss_data_path, artss=artss,
+                                  fds_data=fds_data,
+                                  devc_info=devc_info,
+                                  file_da=file_da, file_debug=file_debug)
+
+        return diff_cur['T']
+
+    def call_back(xk) -> bool:
+        print(f'xk: {xk}')
+
+    for t_sensor in sensor_times:
+        pprint(cur)
+
+        wait_artss(t_sensor, artss_data_path, artss)
+        t_artss, t_revert = get_time_step_artss(
+            t_sensor,
+            artss_data_path,
+            dt=artss.get_dt(),
+            time_back=6
+        )
+        wait_artss(t_artss, artss_data_path, artss)
+
+        start_time = time.time()
+        log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
+        field_reader = FieldReader(t_artss, path=artss_data_path)
+        file_da.write(f'original data;time_sensor:{t_sensor};time_artss:{t_artss}\n')
+        write_da_data(file_da=file_da, parameters=cur)
+        diff_orig, minima_x = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
+
+        file_da.write(f't: {t_sensor}\n')
+        file_da.write(f'HRR: {cur["HRR"]}\n')
+        file_da.write(f'x0: {cur["x0"]}\n')
+        file_da.write(f'T: {diff_orig["T"]}\n')
+
+        log(f'org: {diff_orig["T"]}', file_debug)
+        log(f't_revert: {t_revert}', file_debug)
+
+        if diff_orig['T'] < 1e-5:
+            log(f'skip, difference: {diff_orig["T"]}', file_debug)
+            continue
+
+        x0 = np.array([cur[x] for x in keys])
+        interim_start = time.time()
+        res = op.minimize(f,
+                          x0=x0,
+                          callback=call_back,
+                          tol=1e-5,
+                          method='Nelder-Mead',
+                          options={
+                              'bounds': bounds,
+                              'maxiter': n_iterations,
+                              'disp': True,
+                          })
+        interim_end = time.time()
+        log(f'interim time: {interim_end - interim_start}', file_debug)
+        log(f'org: {diff_orig}', file_debug)
+        log(f'res: {res}', file_debug)
+        cur = {
+            'HRR': res.x[0],
+            'x0': res.x[1],
+        }
+        log(f'res_x (new parameter): {list(res.x)}\n', file_debug)
+        log(f'res_sim (final simplex): {res.final_simplex}\n', file_debug)
+        log(f'res_fun: {res.fun}\n', file_debug)
+        log(f'res_n (number of iterations): {res.nit}\n', file_debug)
+        log(f'res_nfev: {res.nfev}\n', file_debug)
+        log(f'res_suc (exit successfully): {res.success}\n', file_debug)
+        log(f'res_msg (message if exit was unsuccessful): {res.message}\n', file_debug)
+        log(f'final rollback', file_debug)
+        diff_cur, _ = do_rollback(client=client,
+                                  t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                  new_para=cur, heat_source=heat_source.values(),
+                                  sub_file_name='final',
+                                  artss_data_path=artss_data_path, artss=artss,
+                                  fds_data=fds_data,
+                                  devc_info=devc_info,
+                                  file_da=file_da, file_debug=file_debug)
+        file_da.flush()
+        file_debug.flush()
+        end_time = time.time()
+        log(f'time: {end_time - start_time}', file_debug)
+
+
 def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, artss_path: str, parallel=False):
     artss_path = os.path.abspath(artss_path)
     artss_data_path = os.path.abspath(artss_data_path)
@@ -503,7 +616,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, ar
 
     heat_source = xml.get_temperature_source()
 
-    file_da = open(os.path.join(artss_data_path,'da_details.csv'), 'w')
+    file_da = open(os.path.join(artss_data_path, 'da_details.csv'), 'w')
     file_debug = open(os.path.join(artss_data_path, 'da_debug_details.dat'), 'w')
 
     delta = {
@@ -520,24 +633,32 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, ar
         'z0': float(heat_source['temperature_source']['z0'])
     }
 
-    keys = ['HRR']
-    if parallel:
-        continuous_gradient_parallel(client=client, file_da=file_da, file_debug=file_debug,
-                                     sensor_times=sensor_times,
-                                     devc_info=devc_info_temperature, fds_data=fds_data,
-                                     artss_data_path=artss_data_path,
-                                     artss_path=artss_path,
-                                     domain=domain, heat_source=heat_source,
-                                     cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
-                                     precondition=False)
-    else:
-        continuous_gradient(client=client, file_da=file_da, file_debug=file_debug,
-                            sensor_times=sensor_times,
-                            devc_info=devc_info_temperature, fds_data=fds_data,
-                            artss_data_path=artss_data_path,
-                            domain=domain, heat_source=heat_source,
-                            cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
-                            precondition=False)
+    keys = ['HRR', 'x0']
+    opt_scipy(client=client, file_da=file_da, file_debug=file_debug,
+              sensor_times=sensor_times,
+              devc_info=devc_info_temperature, fds_data=fds_data,
+              artss_data_path=artss_data_path,
+              domain=domain, heat_source=heat_source,
+              cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
+              precondition=False)
+
+    # if parallel:
+    #    continuous_gradient_parallel(client=client, file_da=file_da, file_debug=file_debug,
+    #                                 sensor_times=sensor_times,
+    #                                 devc_info=devc_info_temperature, fds_data=fds_data,
+    #                                 artss_data_path=artss_data_path,
+    #                                 artss_path=artss_path,
+    #                                 domain=domain, heat_source=heat_source,
+    #                                 cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
+    #                                 precondition=False)
+    # else:
+    #    continuous_gradient(client=client, file_da=file_da, file_debug=file_debug,
+    #                        sensor_times=sensor_times,
+    #                        devc_info=devc_info_temperature, fds_data=fds_data,
+    #                        artss_data_path=artss_data_path,
+    #                        domain=domain, heat_source=heat_source,
+    #                        cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
+    #                        precondition=False)
 
     # map_minima(client, artss_data_path, cur, delta, sensor_times, devc_info_thermocouple, devc_info_temperature, fds_data, source_type, temperature_source, random, file_da, cwd, xml)
 
@@ -1129,7 +1250,7 @@ if __name__ == '__main__':
 
     heat_source = xml.get_temperature_source()
 
-    file_da = open(os.path.join(artss_data_path,'da_details.csv'), 'w')
+    file_da = open(os.path.join(artss_data_path, 'da_details.csv'), 'w')
     file_debug = open(os.path.join(artss_data_path, 'da_debug_details.dat'), 'w')
     cur = {
         'HRR': float(heat_source['temperature_source']['HRR']),
