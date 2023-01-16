@@ -1,0 +1,259 @@
+import math
+import os
+import time
+from pprint import pprint
+from typing import TextIO, Tuple, Dict
+
+import numpy as np
+import pandas
+import pandas as pd
+import scipy.optimize as op
+
+import TCP_client
+import data_assimilation
+import fds_utility
+from ARTSS import XML, Domain
+from data_assimilation import FieldReader, DAFile
+from utility import wait_artss, log, write_da_data, kelvin_to_celsius
+
+
+def opt_scipy(client: TCP_client,
+              file_da: TextIO, file_debug: TextIO,
+              sensor_times: pandas.Index, devc_info: dict,
+              cur: dict, delta: dict, keys: list,
+              artss_data_path: str, artss: XML, domain: Domain,
+              fds_data: pandas.DataFrame,
+              heat_source: dict,
+              n_iterations: int):
+    t_artss = 0.0
+    t_revert = 0.0
+    t_sensor = 0.0
+
+    bounds = op.Bounds(
+        lb=np.asarray([0, domain.domain_param['X1']]),
+        ub=np.asarray([np.inf, domain.domain_param['X2']])
+    )
+
+    def f(x):
+        print(x)
+        print(keys)
+        new_para = {
+            'HRR': x[0],
+            'x0': x[1],
+        }
+        diff_cur, _ = do_rollback(client=client,
+                                  t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                  new_para=new_para, heat_source=heat_source.values(),
+                                  sub_file_name='scipy',
+                                  artss_data_path=artss_data_path,
+                                  fds_data=fds_data,
+                                  devc_info=devc_info,
+                                  file_da=file_da, file_debug=file_debug)
+
+        return diff_cur['T']
+
+    def call_back(xk) -> bool:
+        print(f'xk: {xk}')
+
+    for t_sensor in sensor_times:
+        pprint(cur)
+
+        wait_artss(t_sensor, artss_data_path)
+        t_artss, t_revert = FieldReader.get_time_step_artss(t_sensor,
+                                                            artss_data_path,
+                                                            dt=artss.get_dt(),
+                                                            time_back=6)
+        wait_artss(t_artss, artss_data_path)
+
+        start_time = time.time()
+        log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
+        field_reader = FieldReader(t_artss, path=artss_data_path)
+        file_da.write(f'original data;time_sensor:{t_sensor};time_artss:{t_artss}\n')
+        write_da_data(file_da=file_da, parameters=cur)
+        diff_orig, minima_x = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
+
+        file_da.write(f't: {t_sensor}\n')
+        file_da.write(f'HRR: {cur["HRR"]}\n')
+        file_da.write(f'x0: {cur["x0"]}\n')
+        file_da.write(f'T: {diff_orig["T"]}\n')
+
+        log(f'org: {diff_orig["T"]}', file_debug)
+        log(f't_revert: {t_revert}', file_debug)
+
+        if diff_orig['T'] < 1e-5:
+            log(f'skip, difference: {diff_orig["T"]}', file_debug)
+            continue
+
+        x0 = np.array([cur[x] for x in keys])
+        interim_start = time.time()
+        res = op.minimize(f,
+                          x0=x0,
+                          callback=call_back,
+                          tol=1e-5,
+                          method='Nelder-Mead',
+                          options={
+                              'bounds': bounds,
+                              'maxiter': n_iterations,
+                              'disp': True,
+                          })
+        interim_end = time.time()
+        log(f'interim time: {interim_end - interim_start}', file_debug)
+        log(f'org: {diff_orig}', file_debug)
+        log(f'res: {res}', file_debug)
+        cur = {
+            'HRR': res.x[0],
+            'x0': res.x[1],
+        }
+        log(f'res_x (new parameter): {list(res.x)}\n', file_debug)
+        log(f'res_sim (final simplex): {res.final_simplex}\n', file_debug)
+        log(f'res_fun: {res.fun}\n', file_debug)
+        log(f'res_n (number of iterations): {res.nit}\n', file_debug)
+        log(f'res_nfev: {res.nfev}\n', file_debug)
+        log(f'res_suc (exit successfully): {res.success}\n', file_debug)
+        log(f'res_msg (message if exit was unsuccessful): {res.message}\n', file_debug)
+        log(f'final rollback', file_debug)
+        diff_cur, _ = do_rollback(client=client,
+                                  t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                  new_para=cur, heat_source=heat_source.values(),
+                                  sub_file_name='final',
+                                  artss_data_path=artss_data_path,
+                                  fds_data=fds_data,
+                                  devc_info=devc_info,
+                                  file_da=file_da, file_debug=file_debug)
+        file_da.flush()
+        file_debug.flush()
+        end_time = time.time()
+        log(f'time: {end_time - start_time}', file_debug)
+
+
+def do_rollback(client: TCP_client,
+                t_sensor, t_artss, t_revert,
+                new_para: dict, heat_source: [dict, dict, dict],
+                sub_file_name: str,
+                artss_data_path: str,
+                fds_data,
+                devc_info: dict,
+                file_da: TextIO, file_debug: TextIO) -> [dict, float]:
+    config_file_name, _ = write_changes_xml(
+        new_para,
+        heat_source,
+        f'{t_artss}_{sub_file_name}',
+        file_da=file_da,
+        path=artss_data_path
+    )
+    print(f'make adjustment with {new_para}')
+    file_debug.write(f'make adjustment with: {new_para}\n')
+    write_da_data(file_da=file_da, parameters=new_para)
+    client.send_message(data_assimilation.create_message(t_revert, config_file_name))
+    wait_artss(t_artss, artss_data_path)
+
+    field_reader = FieldReader(t_artss, path=artss_data_path)
+    diff_cur, min_pos_x = comparison_sensor_simulation_data(
+        devc_info,
+        fds_data,
+        field_reader,
+        t_sensor,
+        file_da
+    )
+    return diff_cur, min_pos_x
+
+
+def comparison_sensor_simulation_data(devc_info: dict, sensor_data: pd.DataFrame, field_reader: FieldReader,
+                                      t_sensor: float, file_da: TextIO) -> Tuple[Dict[str, float], float]:
+    diff: dict = {'T': [], 'C': []}
+    fields_sim = field_reader.read_field_data()
+    min_pos_x: float = 0
+    min_sensor_val = math.inf
+    for key in devc_info:
+        # sensor data
+        type_sensor: str = devc_info[key]['type']
+        index_sensor: int = devc_info[key]['index']
+        value_sensor: float = sensor_data[key][t_sensor]
+
+        value_sim = fields_sim[type_sensor][index_sensor]
+        difference = kelvin_to_celsius(value_sim) - value_sensor
+        if abs(difference) > 2:
+            diff[type_sensor].append(difference)
+        file_da.write(
+            f'sensor:{key};time_sensor:{t_sensor};time_artss:{field_reader.t};sensor_val:{value_sensor};artss_val:{value_sim};diff:{difference};considered:{abs(difference) > 2};position:{devc_info[key]["XYZ"]}\n')
+        file_da.flush()
+
+        if difference < min_sensor_val:
+            min_sensor_val = difference
+            min_pos_x = devc_info[key]['XYZ'][0]
+    print(f'diff: {diff["T"]}')
+    result = {}
+    for key in diff:
+        if len(diff[key]) == 0:
+            result[key] = 0
+            file_da.write(f'differences:{key}:{result[key]};no_of_sensors:{len(diff[key])}\n')
+            continue
+        result[key] = np.sqrt(sum(np.array(diff[key]) ** 2))
+        file_da.write(f'differences:{key}:{result[key]};no_of_sensors:{len(diff[key])}\n')
+    return result, min_pos_x
+
+
+def write_changes_xml(change: dict, source: list, file_name: str, file_da: TextIO, path='.') -> [str, str]:
+    source_type, temperature_source, random = data_assimilation.change_heat_source(*source,
+                                                                                   changes={'source_type': {},
+                                                                                            'temperature_source': change,
+                                                                                            'random': {}})
+    write_da_data(file_da=file_da, parameters=temperature_source)
+    da = DAFile()
+    da.create_temperature_source_changes(
+        source_type=source_type,
+        temperature_source=temperature_source,
+        random=random)
+
+    config_file_name = f'config_{file_name}.xml'
+    config_file_path = os.path.join(path, config_file_name)
+    da.write_xml(config_file_path)
+    return config_file_name, config_file_path
+
+
+def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
+    artss_data_path = os.path.abspath(artss_data_path)
+    client = TCP_client.TCPClient()
+    # client.set_server_address('172.17.0.2', 7777)
+    client.connect()
+
+    xml = XML(FieldReader.get_xml_file_name(artss_data_path), path=artss_data_path)
+    xml.read_xml()
+    domain = Domain(domain_param=xml.domain, obstacles=xml.obstacles,
+                    enable_computational_domain=xml.computational_domain)
+    domain.print_info()
+    domain.print_debug()
+
+    devc_info_temperature, devc_info_thermocouple, fds_data = fds_utility.read_fds_data(fds_data_path,
+                                                                                        fds_input_file_name, domain)
+    print(devc_info_temperature)
+
+    sensor_times = fds_data.index[3:]
+    print('sensor times:', fds_data.index)
+
+    heat_source = xml.get_temperature_source()
+
+    file_da = open(os.path.join(artss_data_path, 'da_details.csv'), 'w')
+    file_debug = open(os.path.join(artss_data_path, 'da_debug_details.dat'), 'w')
+
+    delta = {
+        'HRR': float(heat_source['temperature_source']['HRR']) * 0.2,
+        'x0': domain.domain_param['dx'] * 10,
+        'y0': domain.domain_param['dy'] * 1,
+        'z0': domain.domain_param['dz'] * 1
+    }
+
+    cur = {
+        'HRR': float(heat_source['temperature_source']['HRR']),
+        'x0': float(heat_source['temperature_source']['x0']),
+        'y0': float(heat_source['temperature_source']['y0']),
+        'z0': float(heat_source['temperature_source']['z0'])
+    }
+
+    keys = ['HRR', 'x0']
+    opt_scipy(client=client, file_da=file_da, file_debug=file_debug,
+              sensor_times=sensor_times,
+              devc_info=devc_info_temperature, fds_data=fds_data,
+              artss_data_path=artss_data_path,
+              domain=domain, heat_source=heat_source,
+              cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml)

@@ -2,6 +2,7 @@
 import os
 import re
 import struct
+import time
 from datetime import datetime
 import locale
 from typing import List, Dict
@@ -277,6 +278,17 @@ class FieldReader:
         files = [float(x) for x in files]
         files.sort()
         return files
+
+    @staticmethod
+    def get_time_step_artss(t_sensor: float, artss_data_path: str, dt: float, time_back: float = 10) -> [float, float]:
+        files = FieldReader.get_all_time_steps(path=artss_data_path)
+        times = list(filter(lambda x: x >= t_sensor, files))
+        while len(times) == 0:
+            time.sleep(1)
+            files = FieldReader.get_all_time_steps(path=artss_data_path)
+            times = list(filter(lambda x: x >= t_sensor, files))
+        t_revert = ([dt] + list(filter(lambda x: x <= max(0., t_sensor - time_back), files)))[-1]
+        return times[0], t_revert
 
     @staticmethod
     def get_xml_file_name(path: str = '.', dir_name='.vis') -> str:

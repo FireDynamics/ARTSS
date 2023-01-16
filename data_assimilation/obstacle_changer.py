@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 import os
-from tqdm import tqdm
-import time
 from typing import List, Dict, Tuple
 
 import numpy as np
@@ -9,8 +7,8 @@ import numpy as np
 import TCP_client
 from ARTSS import XML, Domain
 from data_assimilation import FieldReader, create_message, DAFile
-from gradient_based_optimisation import get_time_step_artss
 from obstacle import Obstacle
+from utility import wait_artss
 
 
 def create_obstacles() -> List[Obstacle]:
@@ -67,8 +65,8 @@ def obstacle_wonder(artss_data_path: str):
     for t_sensor in sensor_times[:8]:
         wait_artss(t_sensor, artss_data_path)
 
-        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
-                                                time_back=time_back * xml.get_dt())
+        t_artss, t_revert = FieldReader.get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
+                                                            time_back=time_back * xml.get_dt())
 
         da = DAFile()
         da.create_obstacle_changes([obstacles[counter]], True)
@@ -82,8 +80,8 @@ def obstacle_wonder(artss_data_path: str):
     for t_sensor in sensor_times[8:]:
         wait_artss(t_sensor, artss_data_path)
 
-        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
-                                                time_back=time_back * xml.get_dt())
+        t_artss, t_revert = FieldReader.get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
+                                                            time_back=time_back * xml.get_dt())
 
         da = DAFile()
         da.create_obstacle_changes([obstacles[counter], obstacles[counter + 2]], True)
@@ -119,8 +117,8 @@ def full_corridor_doors(artss_data_path: str):
         # close door
         t_sensor = 11 * xml.get_dt() + time_back * xml.get_dt() + counter * xml.get_dt() * 4
         wait_artss(t_sensor, artss_data_path)
-        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
-                                                time_back=time_back * xml.get_dt())
+        t_artss, t_revert = FieldReader.get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
+                                                            time_back=time_back * xml.get_dt())
         domain.add_obstacle(doors[counter])
         domain.print_info()
         da = DAFile()
@@ -142,8 +140,8 @@ def full_corridor_doors(artss_data_path: str):
         # open door
         t_sensor = 13 * xml.get_dt() + time_back * xml.get_dt() + counter * xml.get_dt() * 4
         wait_artss(t_sensor, artss_data_path)
-        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
-                                                time_back=time_back * xml.get_dt())
+        t_artss, t_revert = FieldReader.get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
+                                                            time_back=time_back * xml.get_dt())
         door = domain.remove_obstacle(doors[counter].name)
         domain.print_info()
         da = DAFile()
@@ -187,8 +185,8 @@ def full_corridor_rooms(artss_data_path: str):
         # close door
         t_sensor = 11 * xml.get_dt() + time_back * xml.get_dt() + counter * xml.get_dt() * 4
         wait_artss(t_sensor, artss_data_path)
-        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
-                                                time_back=time_back * xml.get_dt())
+        t_artss, t_revert = FieldReader.get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
+                                                            time_back=time_back * xml.get_dt())
         removed = []
         for o in rooms[counter][0]:
             domain.add_obstacle(o)
@@ -216,8 +214,8 @@ def full_corridor_rooms(artss_data_path: str):
         # open door
         t_sensor = 13 * xml.get_dt() + time_back * xml.get_dt() + counter * xml.get_dt() * 4
         wait_artss(t_sensor, artss_data_path)
-        t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
-                                                time_back=time_back * xml.get_dt())
+        t_artss, t_revert = FieldReader.get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
+                                                            time_back=time_back * xml.get_dt())
         for o in removed:
             domain.add_obstacle(o)
         o_names = [x.name for x in removed]
@@ -269,8 +267,8 @@ def steckler_door(artss_data_path: str):
     # close door
     t_sensor = 81 * xml.get_dt() + time_back * xml.get_dt()
     wait_artss(t_sensor, artss_data_path)
-    t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
-                                            time_back=time_back * xml.get_dt())
+    t_artss, t_revert = FieldReader.get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
+                                                        time_back=time_back * xml.get_dt())
     domain = Domain(xml.domain, xml.computational_domain, obstacles)
     domain.add_obstacle(door)
     domain.print_debug()
@@ -296,8 +294,8 @@ def steckler_door(artss_data_path: str):
     # open door
     t_sensor = 101 * xml.get_dt() + time_back * xml.get_dt()  # 101
     wait_artss(t_sensor, artss_data_path)
-    t_artss, t_revert = get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
-                                            time_back=time_back * xml.get_dt())
+    t_artss, t_revert = FieldReader.get_time_step_artss(t_sensor, artss_data_path, dt=xml.get_dt(),
+                                                        time_back=time_back * xml.get_dt())
     door = domain.remove_obstacle(door.name)
     domain.print_debug()
     da = DAFile()
@@ -458,19 +456,6 @@ def replace_room2(domain: Domain) -> Tuple[List[Obstacle], List[str]]:
                           'room 2 above doorRoom2',
                           'room 2 left from doorRoom2']
     return created, deleted
-
-
-def wait_artss(t_sensor: float, artss_data_path: str):
-    t_cur = FieldReader.get_t_current(path=artss_data_path)
-    pbar = tqdm(total=t_sensor)
-    pbar.update(t_cur)
-    while t_cur <= t_sensor:
-        time.sleep(1)
-        t_new = FieldReader.get_t_current(path=artss_data_path)
-        pbar.update(t_new - t_cur)
-        t_cur = t_new
-
-    pbar.close()
 
 
 if __name__ == '__main__':

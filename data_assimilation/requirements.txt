@@ -5,3 +5,4 @@ fdsreader
 pandas
 numpy
 matplotlib
+scipy
