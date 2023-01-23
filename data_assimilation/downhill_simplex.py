@@ -24,7 +24,8 @@ def opt_scipy(client: TCP_client,
               artss_data_path: str, artss: XML, domain: Domain,
               fds_data: pandas.DataFrame,
               heat_source: dict,
-              n_iterations: int):
+              n_iterations: int,
+              parallel=True):
     t_artss = 0.0
     t_revert = 0.0
     t_sensor = 0.0
@@ -49,11 +50,13 @@ def opt_scipy(client: TCP_client,
                                   fds_data=fds_data,
                                   devc_info=devc_info,
                                   file_da=file_da, file_debug=file_debug)
-
+        log(f'diff: {diff_cur["T"]}', file_debug)
         return diff_cur['T']
 
     def call_back(xk) -> bool:
         print(f'xk: {xk}')
+        file_debug.write(f'xk: {xk}')
+        return True
 
     for t_sensor in sensor_times:
         pprint(cur)
@@ -72,10 +75,7 @@ def opt_scipy(client: TCP_client,
         write_da_data(file_da=file_da, parameters=cur)
         diff_orig, minima_x = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
 
-        file_da.write(f't: {t_sensor}\n')
-        file_da.write(f'HRR: {cur["HRR"]}\n')
-        file_da.write(f'x0: {cur["x0"]}\n')
-        file_da.write(f'T: {diff_orig["T"]}\n')
+        file_da.write(f'original: t_artss:{t_artss};t_sensor:{t_sensor};differenceT:{diff_orig["T"]};HRR:{cur["HRR"]};x0:{cur["x0"]}\n')
 
         log(f'org: {diff_orig["T"]}', file_debug)
         log(f't_revert: {t_revert}', file_debug)
@@ -83,27 +83,28 @@ def opt_scipy(client: TCP_client,
         if diff_orig['T'] < 1e-5:
             log(f'skip, difference: {diff_orig["T"]}', file_debug)
             continue
-
-        x0 = np.array([cur[x] for x in keys])
+        x0 = [cur[x] for x in keys]
+        initial_simplex = np.array([x0] * (len(keys)+1))
+        for i in range(len(keys)):
+            initial_simplex[i, i] += delta[keys[i]]
         interim_start = time.time()
         res = op.minimize(f,
-                          x0=x0,
+                          x0=np.array(x0),
                           callback=call_back,
                           tol=1e-5,
                           method='Nelder-Mead',
+                          bounds=bounds,
                           options={
-                              'bounds': bounds,
                               'maxiter': n_iterations,
                               'disp': True,
+                              'initial_simplex': initial_simplex
                           })
         interim_end = time.time()
-        log(f'interim time: {interim_end - interim_start}', file_debug)
+        log(f't_artss: {t_artss}; interim time: {interim_end - interim_start}', file_debug)
         log(f'org: {diff_orig}', file_debug)
         log(f'res: {res}', file_debug)
-        cur = {
-            'HRR': res.x[0],
-            'x0': res.x[1],
-        }
+        for i in range(len(keys)):
+            cur[keys[i]] = res.x[i]
         log(f'res_x (new parameter): {list(res.x)}\n', file_debug)
         log(f'res_sim (final simplex): {res.final_simplex}\n', file_debug)
         log(f'res_fun: {res.fun}\n', file_debug)
@@ -111,7 +112,7 @@ def opt_scipy(client: TCP_client,
         log(f'res_nfev: {res.nfev}\n', file_debug)
         log(f'res_suc (exit successfully): {res.success}\n', file_debug)
         log(f'res_msg (message if exit was unsuccessful): {res.message}\n', file_debug)
-        log(f'final rollback', file_debug)
+        log(f'final rollback with {cur}', file_debug)
         diff_cur, _ = do_rollback(client=client,
                                   t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
                                   new_para=cur, heat_source=heat_source.values(),
@@ -120,6 +121,7 @@ def opt_scipy(client: TCP_client,
                                   fds_data=fds_data,
                                   devc_info=devc_info,
                                   file_da=file_da, file_debug=file_debug)
+        file_da.write(f'final: t_artss:{t_artss};t_sensor:{t_sensor};differenceT:{diff_cur["T"]};HRR:{cur["HRR"]};x0:{cur["x0"]}\n')
         file_da.flush()
         file_debug.flush()
         end_time = time.time()
@@ -211,9 +213,10 @@ def write_changes_xml(change: dict, source: list, file_name: str, file_da: TextI
     return config_file_name, config_file_path
 
 
-def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
+def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, parallel=True, port=7777):
     artss_data_path = os.path.abspath(artss_data_path)
     client = TCP_client.TCPClient()
+    client.set_server_address('localhost', port)
     # client.set_server_address('172.17.0.2', 7777)
     client.connect()
 
@@ -237,8 +240,8 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     file_debug = open(os.path.join(artss_data_path, 'da_debug_details.dat'), 'w')
 
     delta = {
-        'HRR': float(heat_source['temperature_source']['HRR']) * 0.2,
-        'x0': domain.domain_param['dx'] * 10,
+        'HRR': float(heat_source['temperature_source']['HRR']) * 0.05,
+        'x0': domain.domain_param['dx'] * 0.05,
         'y0': domain.domain_param['dy'] * 1,
         'z0': domain.domain_param['dz'] * 1
     }
@@ -251,9 +254,14 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str):
     }
 
     keys = ['HRR', 'x0']
+
+    log(f'cur: {cur}', file_debug)
+    log(f'delta: {delta}', file_debug)
+    log(f'keys: {keys}', file_debug)
     opt_scipy(client=client, file_da=file_da, file_debug=file_debug,
               sensor_times=sensor_times,
               devc_info=devc_info_temperature, fds_data=fds_data,
               artss_data_path=artss_data_path,
               domain=domain, heat_source=heat_source,
-              cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml)
+              cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
+              parallel=parallel)

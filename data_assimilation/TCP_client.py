@@ -1,3 +1,4 @@
+import datetime
 import socket
 import struct
 
@@ -25,7 +26,8 @@ class TCPClient:
         # Look for the response
         expected_response = "message was received: Rollback done"
         response = ''
-
+        self.socket.settimeout(30)
+        print('time', datetime.datetime.now())
         while len(response) < len(expected_response):
             try:
                 reply = self.socket.recv(16)
