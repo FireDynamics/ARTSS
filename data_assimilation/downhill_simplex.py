@@ -84,6 +84,7 @@ def opt_scipy(client: TCP_client,
             log(f'skip, difference: {diff_orig["T"]}', file_debug)
             continue
         x0 = [cur[x] for x in keys]
+        delta['HRR'] = cur['HRR'] * 0.05,
         initial_simplex = np.array([x0] * (len(keys)+1))
         for i in range(len(keys)):
             initial_simplex[i, i] += delta[keys[i]]
