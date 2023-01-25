@@ -22,9 +22,10 @@ def read_fds_data(input_path: str, input_file_name: str, artss: Domain) -> [dict
 
         ijk = artss.get_ijk_from_xyz(dict_devc[d]['XYZ'][0], dict_devc[d]['XYZ'][2], dict_devc[d]['XYZ'][1])
         dict_devc[d]['index']: int = artss.get_index(*ijk)
-        if d.startswith('Temperatur'):
+        d.lower()
+        if d.startswith('temperatur'):
             devc_temperature[d] = dict_devc[d]
-        elif d.startswith('Thermocouple'):
+        elif d.startswith('thermocouple'):
             devc_thermocouple[d] = dict_devc[d]
 
     return devc_temperature, devc_thermocouple, fds_data

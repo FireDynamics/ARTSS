@@ -17,31 +17,26 @@ from data_assimilation import FieldReader, DAFile
 from utility import wait_artss, log, write_da_data, kelvin_to_celsius
 
 
-def opt_scipy(client: TCP_client,
-              file_da: TextIO, file_debug: TextIO,
-              sensor_times: pandas.Index, devc_info: dict,
-              cur: dict, delta: dict, keys: list,
-              artss_data_path: str, artss: XML, domain: Domain,
-              fds_data: pandas.DataFrame,
-              heat_source: dict,
-              n_iterations: int,
-              parallel=True):
+def nelder_mead_special(client: TCP_client,
+                        file_da: TextIO, file_debug: TextIO,
+                        sensor_times: pandas.Index, devc_info: dict,
+                        cur: dict, delta: dict, keys: list,
+                        artss_data_path: str, artss: XML, domain: Domain,
+                        fds_data: pandas.DataFrame,
+                        heat_source: dict,
+                        n_iterations: int,
+                        parallel=True,
+                        precondition=False):
     t_artss = 0.0
     t_revert = 0.0
     t_sensor = 0.0
 
-    bounds = op.Bounds(
-        lb=np.asarray([0, domain.domain_param['X1']]),
-        ub=np.asarray([np.inf, domain.domain_param['X2']])
-    )
-
     def f(x):
         print(x)
         print(keys)
-        new_para = {
-            'HRR': x[0],
-            'x0': x[1],
-        }
+        new_para = {}
+        for i in range(len(keys)):
+            new_para[keys[i]] = x[i]
         diff_cur, _ = do_rollback(client=client,
                                   t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
                                   new_para=new_para, heat_source=heat_source.values(),
@@ -58,7 +53,7 @@ def opt_scipy(client: TCP_client,
         file_debug.write(f'xk: {xk}')
         return True
 
-    for t_sensor in sensor_times:
+    for count, t_sensor in enumerate(sensor_times):
         pprint(cur)
 
         wait_artss(t_sensor, artss_data_path)
@@ -83,9 +78,60 @@ def opt_scipy(client: TCP_client,
         if diff_orig['T'] < 1e-5:
             log(f'skip, difference: {diff_orig["T"]}', file_debug)
             continue
+
+        if precondition:
+            log('precondition for x0', file_debug)
+            precondition = False
+            safe_keys = keys
+            key_precon = ['x0']
+            keys = key_precon
+            x0 = [cur[x] for x in key_precon]
+            initial_simplex = np.array([x0] * (len(key_precon) + 1))
+            for i in range(len(key_precon)):
+                initial_simplex[i, i] += delta[key_precon[i]]
+            interim_start = time.time()
+            res = op.minimize(f,
+                              x0=np.array(x0),
+                              callback=call_back,
+                              tol=1e-5,
+                              method='Nelder-Mead',
+                              options={
+                                  'maxiter': 5,
+                                  'disp': True,
+                                  'initial_simplex': initial_simplex
+                              })
+            interim_end = time.time()
+            log(f't_artss: {t_artss}; interim time: {interim_end - interim_start}', file_debug)
+            log(f'org: {diff_orig}', file_debug)
+            log(f'res: {res}', file_debug)
+            for i in range(len(keys)):
+                cur[keys[i]] = res.x[i]
+            log(f'res_x (new parameter): {list(res.x)}\n', file_debug)
+            log(f'res_sim (final simplex): {res.final_simplex}\n', file_debug)
+            log(f'res_fun: {res.fun}\n', file_debug)
+            log(f'res_n (number of iterations): {res.nit}\n', file_debug)
+            log(f'res_nfev: {res.nfev}\n', file_debug)
+            log(f'res_suc (exit successfully): {res.success}\n', file_debug)
+            log(f'res_msg (message if exit was unsuccessful): {res.message}\n', file_debug)
+            log(f'final rollback with {cur}', file_debug)
+            diff_cur, _ = do_rollback(client=client,
+                                      t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                      new_para=cur, heat_source=heat_source.values(),
+                                      sub_file_name='final',
+                                      artss_data_path=artss_data_path,
+                                      fds_data=fds_data,
+                                      devc_info=devc_info,
+                                      file_da=file_da, file_debug=file_debug)
+            file_da.write(f'final: t_artss:{t_artss};t_sensor:{t_sensor};differenceT:{diff_cur["T"]};HRR:{cur["HRR"]};x0:{cur["x0"]}\n')
+            file_da.flush()
+            file_debug.flush()
+            end_time = time.time()
+            log(f'time: {end_time - start_time}', file_debug)
+            keys = safe_keys
+
         x0 = [cur[x] for x in keys]
         delta['HRR'] = cur['HRR'] * 0.05,
-        initial_simplex = np.array([x0] * (len(keys)+1))
+        initial_simplex = np.array([x0] * (len(keys) + 1))
         for i in range(len(keys)):
             initial_simplex[i, i] += delta[keys[i]]
         interim_start = time.time()
@@ -94,7 +140,6 @@ def opt_scipy(client: TCP_client,
                           callback=call_back,
                           tol=1e-5,
                           method='Nelder-Mead',
-                          bounds=bounds,
                           options={
                               'maxiter': n_iterations,
                               'disp': True,
@@ -123,6 +168,120 @@ def opt_scipy(client: TCP_client,
                                   devc_info=devc_info,
                                   file_da=file_da, file_debug=file_debug)
         file_da.write(f'final: t_artss:{t_artss};t_sensor:{t_sensor};differenceT:{diff_cur["T"]};HRR:{cur["HRR"]};x0:{cur["x0"]}\n')
+        file_da.flush()
+        file_debug.flush()
+        end_time = time.time()
+        log(f'time: {end_time - start_time}', file_debug)
+
+
+def opt_scipy(client: TCP_client,
+              file_da: TextIO, file_debug: TextIO,
+              sensor_times: pandas.Index, devc_info: dict,
+              cur: dict, delta: dict, keys: list,
+              artss_data_path: str, artss: XML, domain: Domain,
+              fds_data: pandas.DataFrame,
+              heat_source: dict,
+              n_iterations: int,
+              parallel=True):
+    t_artss = 0.0
+    t_revert = 0.0
+    t_sensor = 0.0
+
+    bounds = op.Bounds(
+        lb=np.asarray([0, domain.domain_param['X1']]),
+        ub=np.asarray([np.inf, domain.domain_param['X2']])
+    )
+
+    def f(x):
+        print(x)
+        print(keys)
+        new_para = {}
+        for i in range(len(keys)):
+            new_para[keys[i]] = x[i]
+        diff_cur, _ = do_rollback(client=client,
+                                  t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                  new_para=new_para, heat_source=heat_source.values(),
+                                  sub_file_name='scipy',
+                                  artss_data_path=artss_data_path,
+                                  fds_data=fds_data,
+                                  devc_info=devc_info,
+                                  file_da=file_da, file_debug=file_debug)
+        log(f'diff: {diff_cur["T"]}', file_debug)
+        return diff_cur['T']
+
+    def call_back(xk) -> bool:
+        print(f'xk: {xk}')
+        file_debug.write(f'xk: {xk}')
+        return True
+
+    iterations = np.ones(len(sensor_times)) * n_iterations
+    # iterations[0] = 15
+    for count, t_sensor in enumerate(sensor_times):
+        pprint(cur)
+
+        wait_artss(t_sensor, artss_data_path)
+        t_artss, t_revert = FieldReader.get_time_step_artss(t_sensor,
+                                                            artss_data_path,
+                                                            dt=artss.get_dt(),
+                                                            time_back=6)
+        wait_artss(t_artss, artss_data_path)
+        if count == 0:
+            t_revert = 0.2
+        start_time = time.time()
+        log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
+        field_reader = FieldReader(t_artss, path=artss_data_path)
+        file_da.write(f'original data;time_sensor:{t_sensor};time_artss:{t_artss}\n')
+        write_da_data(file_da=file_da, parameters=cur)
+        diff_orig, minima_x = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
+
+        file_da.write(f'original: t_artss:{t_artss};t_sensor:{t_sensor};differenceT:{diff_orig["T"]};HRR:{cur["HRR"]};x0:{cur["x0"]};z0:{cur["z0"]}\n')
+
+        log(f'org: {diff_orig["T"]}', file_debug)
+        log(f't_revert: {t_revert}', file_debug)
+
+        if diff_orig['T'] < 1e-5:
+            log(f'skip, difference: {diff_orig["T"]}', file_debug)
+            continue
+        x0 = [cur[x] for x in keys]
+        delta['HRR'] = cur['HRR'] * 0.05,
+        initial_simplex = np.array([x0] * (len(keys) + 1))
+        for i in range(len(keys)):
+            initial_simplex[i, i] += delta[keys[i]]
+        interim_start = time.time()
+        res = op.minimize(f,
+                          x0=np.array(x0),
+                          callback=call_back,
+                          tol=1e-5,
+                          method='Nelder-Mead',
+                          bounds=bounds,
+                          options={
+                              'maxiter': iterations[count],
+                              'disp': True,
+                              'initial_simplex': initial_simplex
+                          })
+        interim_end = time.time()
+        log(f't_artss: {t_artss}; interim time: {interim_end - interim_start}', file_debug)
+        log(f'org: {diff_orig}', file_debug)
+        log(f'res: {res}', file_debug)
+        for i in range(len(keys)):
+            cur[keys[i]] = res.x[i]
+        log(f'res_x (new parameter): {list(res.x)}\n', file_debug)
+        log(f'res_sim (final simplex): {res.final_simplex}\n', file_debug)
+        log(f'res_fun: {res.fun}\n', file_debug)
+        log(f'res_n (number of iterations): {res.nit}\n', file_debug)
+        log(f'res_nfev: {res.nfev}\n', file_debug)
+        log(f'res_suc (exit successfully): {res.success}\n', file_debug)
+        log(f'res_msg (message if exit was unsuccessful): {res.message}\n', file_debug)
+        log(f'final rollback with {cur}', file_debug)
+        diff_cur, _ = do_rollback(client=client,
+                                  t_sensor=t_sensor, t_artss=t_artss, t_revert=t_revert,
+                                  new_para=cur, heat_source=heat_source.values(),
+                                  sub_file_name='final',
+                                  artss_data_path=artss_data_path,
+                                  fds_data=fds_data,
+                                  devc_info=devc_info,
+                                  file_da=file_da, file_debug=file_debug)
+        file_da.write(f'final: t_artss:{t_artss};t_sensor:{t_sensor};differenceT:{diff_cur["T"]};HRR:{cur["HRR"]};x0:{cur["x0"]};z0:{cur["z0"]}\n')
         file_da.flush()
         file_debug.flush()
         end_time = time.time()
@@ -230,15 +389,16 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, pa
 
     devc_info_temperature, devc_info_thermocouple, fds_data = fds_utility.read_fds_data(fds_data_path,
                                                                                         fds_input_file_name, domain)
-    print(devc_info_temperature)
+    pprint(devc_info_temperature)
 
-    sensor_times = fds_data.index[3:]
+    sensor_times = fds_data.index[49:]
     print('sensor times:', fds_data.index)
 
     heat_source = xml.get_temperature_source()
 
     file_da = open(os.path.join(artss_data_path, 'da_details.csv'), 'w')
     file_debug = open(os.path.join(artss_data_path, 'da_debug_details.dat'), 'w')
+    file_debug.write(devc_info_temperature)
 
     delta = {
         'HRR': float(heat_source['temperature_source']['HRR']) * 0.05,
@@ -254,11 +414,19 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, pa
         'z0': float(heat_source['temperature_source']['z0'])
     }
 
-    keys = ['HRR', 'x0']
+    keys = ['HRR', 'x0', 'z0']
 
     log(f'cur: {cur}', file_debug)
     log(f'delta: {delta}', file_debug)
     log(f'keys: {keys}', file_debug)
+    #nelder_mead_special(client=client, file_da=file_da, file_debug=file_debug,
+    #                    sensor_times=sensor_times,
+    #                    devc_info=devc_info_temperature, fds_data=fds_data,
+    #                    artss_data_path=artss_data_path,
+    #                    domain=domain, heat_source=heat_source,
+    #                    cur=cur, delta=delta, keys=keys, n_iterations=5, artss=xml,
+    #                    parallel=parallel,
+    #                    precondition=True)
     opt_scipy(client=client, file_da=file_da, file_debug=file_debug,
               sensor_times=sensor_times,
               devc_info=devc_info_temperature, fds_data=fds_data,
