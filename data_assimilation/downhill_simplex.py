@@ -389,22 +389,23 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, pa
 
     devc_info_temperature, devc_info_thermocouple, fds_data = fds_utility.read_fds_data(fds_data_path,
                                                                                         fds_input_file_name, domain)
+    print('devices:')
     pprint(devc_info_temperature)
 
-    sensor_times = fds_data.index[49:]
+    sensor_times = fds_data.index[3:]
     print('sensor times:', fds_data.index)
 
     heat_source = xml.get_temperature_source()
 
     file_da = open(os.path.join(artss_data_path, 'da_details.csv'), 'w')
     file_debug = open(os.path.join(artss_data_path, 'da_debug_details.dat'), 'w')
-    file_debug.write(devc_info_temperature)
+    pprint(devc_info_temperature, stream=file_debug)
 
     delta = {
         'HRR': float(heat_source['temperature_source']['HRR']) * 0.05,
-        'x0': domain.domain_param['dx'] * 0.05,
+        'x0': 1.5,
         'y0': domain.domain_param['dy'] * 1,
-        'z0': domain.domain_param['dz'] * 1
+        'z0': 0.5
     }
 
     cur = {
