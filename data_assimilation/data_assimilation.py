@@ -2,6 +2,7 @@
 import os
 import re
 import struct
+import time
 from datetime import datetime
 import locale
 from typing import List, Dict
@@ -16,7 +17,7 @@ from obstacle import Obstacle, FIELD_TYPES, PATCHES
 
 
 def create_message(t_cur: float, config_file_name: str) -> bin:
-    print(f'send message with time step "{t_cur}" and xml "{config_file_name}"')
+    print(f'create message with time step "{t_cur}" and xml "{config_file_name}"')
     package = DAPackage(t_cur, config_file_name)
     return package.pack()
 
@@ -69,11 +70,20 @@ class DAPackage:
 class DAFile:
     def __init__(self):
         self.xml_root = ET.Element('ARTSS')
+        self.data_assimilation: ET.SubElement = ET.SubElement(self.xml_root, 'data_assimilation')
 
-    def write_obstacle_changes(self, list_obstacles: List[Obstacle], obstacle_enabled: bool):
+    def write_obstacle_changes(self, list_obstacles: List[Obstacle]):
+        """
+        write part of the xml for the obstacle changes. State UNMODIFIED not implemented in ARTSS, use XML and provide the
+        necessary details
+        :param list_obstacles: obstacles to be written out
+        """
         # create obstacle part
-        # <obstacles enabled = "Yes">
-        #   <obstacle name="name1" state="unmodified"/>
+        # <data_assimilation>
+        #   <class name="ObstacleChanger" tag="obstacle_changer" />
+        # </data_assimilation>
+        # <obstacle_changer>
+        #   <obstacle name="name1" state="deleted"/>
         #   <obstacle name="name2" state="modified" >
         #       <geometry ox1 = "0.0273" ox2 = "0.964" oy1 = "0.0078" oy2 = "0.992" oz1 = "-0.492" oz2 = "0.4785" />
         #       <boundary field = "u,v,w" patch = "front,back,left,right,bottom,top" type = "dirichlet" value = "0.0" />
@@ -84,13 +94,13 @@ class DAFile:
         #       <boundary field = "u,v,w" patch = "front,back,left,right,bottom,top" type = "dirichlet" value = "0.0" />
         #       <boundary field = "p" patch = "front,back,left,right,bottom,top" type = "neumann" value = "0.0" />
         #   </obstacle>
-        # </obstacles>
-
-        obstacle_root = ET.SubElement(self.xml_root, 'obstacles',
-                                      enabled='Yes' if obstacle_enabled else 'No')
+        # </obstacle_changer>
+        tag = 'obstacle_changer'
+        ET.SubElement(self.data_assimilation, 'class', {'name': 'ObstacleChanger', 'tag': tag})
+        obstacle_root = ET.SubElement(self.xml_root, tag)
         for obstacle in list_obstacles:
             single_obstacle = ET.SubElement(obstacle_root, 'obstacle', name=obstacle.name, state=obstacle.state)
-            if obstacle.state != 'unmodified':
+            if obstacle.state != 'deleted':  # && obstacle.state != 'unmodified'
                 # convert from Dict[str, float] to Dict[str, str]
                 geometry = dict(zip(obstacle.geometry.keys(), [str(a) for a in obstacle.geometry.values()]))
                 ET.SubElement(single_obstacle, 'geometry', geometry)
@@ -104,15 +114,19 @@ class DAFile:
 
     def create_obstacle_changes(self, list_obstacles: List[Obstacle], obstacle_enabled: bool):
         # create obstacle part
-        # <obstacles enabled = "Yes">
+        # <data_assimilation>
+        #   <class name="ObstacleChanger" tag="obstacle_changer" />
+        # </data_assimilation>
+        # <obstacle_changer>
         #   <obstacle name = "name" state="changed">
         #       <geometry ox1 = "0.0273" ox2 = "0.964" oy1 = "0.0078" oy2 = "0.992" oz1 = "-0.492" oz2 = "0.4785" />
         #       <boundary field = "u,v,w" patch = "front,back,left,right,bottom,top" type = "dirichlet" value = "0.0" />
         #       <boundary field = "p" patch = "front,back,left,right,bottom,top" type = "neumann" value = "0.0" />
         #   </obstacle>
-        # </obstacles>
-        obstacle_root = ET.SubElement(self.xml_root, 'obstacles',
-                                      enabled='Yes' if obstacle_enabled else 'No')
+        # </obstacle_changer>
+        tag = 'obstacle_changer'
+        ET.SubElement(self.data_assimilation, 'class', {'name': 'ObstacleChanger', 'tag': tag})
+        obstacle_root = ET.SubElement(self.xml_root, tag)
         for obstacle in list_obstacles:
             single_obstacle = ET.SubElement(obstacle_root, 'obstacle', name=obstacle.name)
             # convert from Dict[str, float] to Dict[str, str]
@@ -130,23 +144,31 @@ class DAFile:
                                           temperature_source: dict,
                                           random: dict):
         # create temperature source part
-        # <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="Yes">
-        #   <HRR> 25000. </HRR> <!-- Total heat release rate( in kW) -->
-        #   <cp> 1.023415823 </cp> <!-- specific heat capacity( in kJ / kgK)-->
-        #   <x0> 40. </x0>
-        #   <y0> -3. </y0>
-        #   <z0> 0. </z0>
-        #   <sigma_x> 1.0 </sigma_x>
-        #   <sigma_y> 1.5 </sigma_y>
-        #   <sigma_z> 1.0 </sigma_z>
-        #   <tau> 5. </tau>
-        #   <random absolute="Yes" custom_seed="Yes" custom_steps="Yes">
-        #     <seed> 0 </seed>
-        #     <step_size> 0.1 </step_size>
-        #     <range> 1 </range>
-        #   </random>
-        # </source>
-        source = ET.SubElement(self.xml_root, 'source', type=source_type['type'], dir=source_type['dir'],
+        # <data_assimilation>
+        #   <class name="TemperatureSourceChanger" tag="temperature_source" />
+        # </data_assimilation>
+        # <temperature_source>
+        #   <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="Yes">
+        #     <HRR> 25000. </HRR> <!-- Total heat release rate( in kW) -->
+        #     <cp> 1.023415823 </cp> <!-- specific heat capacity( in kJ / kgK)-->
+        #     <x0> 40. </x0>
+        #     <y0> -3. </y0>
+        #     <z0> 0. </z0>
+        #     <sigma_x> 1.0 </sigma_x>
+        #     <sigma_y> 1.5 </sigma_y>
+        #     <sigma_z> 1.0 </sigma_z>
+        #     <tau> 5. </tau>
+        #     <random absolute="Yes" custom_seed="Yes" custom_steps="Yes">
+        #       <seed> 0 </seed>
+        #       <step_size> 0.1 </step_size>
+        #       <range> 1 </range>
+        #     </random>
+        #   </source>
+        # </temperature_source>
+        tag = 'temperature_source'
+        ET.SubElement(self.data_assimilation, 'class', {'name': 'TemperatureSourceChanger', 'tag': tag})
+        source_root = ET.SubElement(self.xml_root, tag)
+        source = ET.SubElement(source_root, 'source', type=source_type['type'], dir=source_type['dir'],
                                temp_fct=source_type['temp_fct'],
                                dissipation='Yes' if source_type['dissipation'] == 'Yes' else 'No',
                                random='Yes' if source_type['random'] == 'Yes' else 'No')
@@ -163,26 +185,30 @@ class DAFile:
             if random['custom_seed'] == 'Yes':
                 ET.SubElement(random_tree, 'seed').text = str(random['seed'])
 
-    def create_config(self, fields: dict, field_file_name=''):
-        # create config file. format:
-        # <ARTSS>
+    def create_field_changes(self, fields: Dict[str, bool], field_file_name=''):
+        # create field changes part
+        # <data_assimilation>
+        #   <class name="FieldChanger" tag="field_changes" />
+        # </data_assimilation>
+        # <field_changes>
         #   <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No" filename="field_file_name"/>
-        # </ARTSS>
-        changed = False
+        # </field_changes>
+        tag: str = 'field_changes'
+        keys = ['u', 'v', 'w', 'p', 'T', 'C']
+        ET.SubElement(self.data_assimilation, 'class', {'name': 'FieldChanger', 'tag': tag})
         field_values = {}
-        for key in fields.keys():
-            if fields[key]:
-                field_values[key] = 'Yes'
-                changed = True
+        for key in keys:
+            if key in fields.keys():
+                field_values[key] = 'Yes' if fields[key] else 'No'
             else:
                 field_values[key] = 'No'
-
-        if changed:
-            ET.SubElement(self.xml_root, 'fields_changed', u=field_values['u'], v=field_values['v'],
+        subsection = ET.SubElement(self.xml_root, tag)
+        if 'Yes' in field_values.values():
+            ET.SubElement(subsection, 'fields_changed', u=field_values['u'], v=field_values['v'],
                           w=field_values['w'], p=field_values['p'],
                           T=field_values['T'], concentration=field_values['C'], filename=field_file_name)
         else:
-            ET.SubElement(self.xml_root, 'fields_changed', u=field_values['u'], v=field_values['v'],
+            ET.SubElement(subsection, 'fields_changed', u=field_values['u'], v=field_values['v'],
                           w=field_values['w'], p=field_values['p'],
                           T=field_values['T'], concentration=field_values['C'])
 
@@ -235,16 +261,16 @@ class FieldReader:
 
     @staticmethod
     @retry(delay=1, tries=6)
-    def get_t_current(path: str = '.') -> float:
-        with open(os.path.join(path, '.vis/meta'), 'r') as inp:
+    def get_t_current(path: str = '.', dir_name='.vis') -> float:
+        with open(os.path.join(path, dir_name, 'meta'), 'r') as inp:
             t = float([x for x in inp.readlines() if x.startswith('t:')][0][2:])
         return t
 
     @staticmethod
     @retry(delay=1, tries=6)
-    def get_all_time_steps(path: str = '.') -> List[float]:
+    def get_all_time_steps(path: str = '.', dir_name='.vis') -> List[float]:
         pattern = re.compile('[0-9]+\.[0-9]{5}e[+|-][0-9]+')
-        f = os.listdir(os.path.join(path, '.vis'))
+        f = os.listdir(os.path.join(path, dir_name))
         files = []
         for p in f:
             if pattern.match(p):
@@ -254,8 +280,19 @@ class FieldReader:
         return files
 
     @staticmethod
-    def get_xml_file_name(path: str = '.') -> str:
-        fpath = os.path.join(path, '.vis/meta')
+    def get_time_step_artss(t_sensor: float, artss_data_path: str, dt: float, time_back: float = 10) -> [float, float]:
+        files = FieldReader.get_all_time_steps(path=artss_data_path)
+        times = list(filter(lambda x: x >= t_sensor, files))
+        while len(times) == 0:
+            time.sleep(1)
+            files = FieldReader.get_all_time_steps(path=artss_data_path)
+            times = list(filter(lambda x: x >= t_sensor, files))
+        t_revert = ([dt] + list(filter(lambda x: x <= max(0., t_sensor - time_back), files)))[-1]
+        return times[0], t_revert
+
+    @staticmethod
+    def get_xml_file_name(path: str = '.', dir_name='.vis') -> str:
+        fpath = os.path.join(path, dir_name, 'meta')
         with open(fpath, 'r') as inp:
             xml_file_name = [x for x in inp.readlines() if x.startswith('xml_name:')][0][len('xml_name:'):]
         return xml_file_name.strip()
@@ -283,8 +320,10 @@ class FieldReader:
             return fields
 
     @staticmethod
-    def write_field_data_keys(file_name: str, data: Dict[str, np.ndarray], field_keys: List[str]):
-        with h5py.File(file_name, 'w') as out:
+    def write_field_data_keys(file_name: str, data: Dict[str, np.ndarray], field_keys: List[str], path: str = './'):
+        file = os.path.join(path, file_name)
+        print(f"write file {file}")
+        with h5py.File(file, 'w') as out:
             for key in field_keys:
                 if key not in data.keys():
                     continue
@@ -293,5 +332,5 @@ class FieldReader:
                 dset = out.create_dataset(key, (len(field),), dtype='d')
                 dset[:] = field
 
-    def write_field_data(self, file_name: str, data: Dict[str, np.ndarray]):
-        FieldReader.write_field_data_keys(file_name=file_name, data=data, field_keys=self.fields)
+    def write_field_data(self, file_name: str, data: Dict[str, np.ndarray], path: str = './'):
+        FieldReader.write_field_data_keys(file_name=file_name, data=data, field_keys=self.fields, path=path)

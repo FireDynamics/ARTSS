@@ -423,8 +423,8 @@ TEST(SettingsTest, requiredObstaclesParameters) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::obstacles_parameters obstacles_parameters = Settings::parse_obstacles_parameters(doc.RootElement());
-    EXPECT_FALSE(obstacles_parameters.enabled);
+    Settings::obstacles_parameters obstacle_parameters = Settings::parse_obstacles_parameters(doc.RootElement());
+    EXPECT_FALSE(obstacle_parameters.enabled);
 }
 
 TEST(SettingsTest, obstacles) {
@@ -445,12 +445,13 @@ TEST(SettingsTest, obstacles) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::obstacles_parameters obstacles_parameters = Settings::parse_obstacles_parameters(doc.RootElement());
-    EXPECT_TRUE(obstacles_parameters.enabled);
-    EXPECT_EQ(obstacles_parameters.obstacles.size(), 2);
+    Settings::obstacles_parameters obstacle_parameters = Settings::parse_obstacles_parameters(doc.RootElement());
+    EXPECT_TRUE(obstacle_parameters.enabled);
+    EXPECT_EQ(obstacle_parameters.obstacles.size(), 2);
 
-    const auto &obstacle1 = obstacles_parameters.obstacles[0];
+    const auto &obstacle1 = obstacle_parameters.obstacles[0];
     EXPECT_EQ(obstacle1.name, "ceiling");
+    EXPECT_EQ(obstacle1.state, State::XML);
     EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::X], 0);
     EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::Y], 2.18);
     EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::Z], -1.4);
@@ -474,7 +475,7 @@ TEST(SettingsTest, obstacles) {
                         o1_b1.field_type.end(),
                         FieldType::W),
               o1_b1.field_type.end());
-    for (Patch patch : {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
         EXPECT_NE(std::find(o1_b1.patch.begin(),
                             o1_b1.patch.end(),
                             patch),
@@ -491,15 +492,16 @@ TEST(SettingsTest, obstacles) {
                         o1_b2.field_type.end(),
                         FieldType::T),
               o1_b2.field_type.end());
-    for (Patch patch : {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
         EXPECT_NE(std::find(o1_b2.patch.begin(),
                             o1_b2.patch.end(),
                             patch),
                   o1_b2.patch.end());
     }
 
-    const auto &obstacle2 = obstacles_parameters.obstacles[1];
+    const auto &obstacle2 = obstacle_parameters.obstacles[1];
     EXPECT_EQ(obstacle2.name, "right wall left from door");
+    EXPECT_EQ(obstacle2.state, State::XML);
     EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::X], 2.8);
     EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::Y], 0);
     EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::Z], -1.4);
@@ -522,7 +524,7 @@ TEST(SettingsTest, obstacles) {
                         o2_b1.field_type.end(),
                         FieldType::P),
               o2_b1.field_type.end());
-    for (Patch patch : {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
         EXPECT_NE(std::find(o2_b1.patch.begin(),
                             o2_b1.patch.end(),
                             patch),
@@ -539,12 +541,79 @@ TEST(SettingsTest, obstacles) {
                         o2_b2.field_type.end(),
                         FieldType::T),
               o2_b2.field_type.end());
-    for (Patch patch : {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
         EXPECT_NE(std::find(o2_b2.patch.begin(),
                             o2_b2.patch.end(),
                             patch),
                   o2_b2.patch.end());
     }
+}
+TEST(SettingsTest, obstacles2) {
+    std::string xml = R"(
+<ARTSS>
+   <obstacles enabled="Yes">
+     <obstacle name="left wall"> <!-- left wall -->
+       <geometry ox1="-1.6625" ox2="-1.4" oy1="0." oy2="2.13" oz1="-1.4" oz2="1.4"/>
+       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
+     </obstacle>
+     <obstacle name="ceiling"> <!-- ceiling -->
+       <geometry ox1="-1.6625" ox2="1.6625" oy1="2.13" oy2="2.3296875" oz1="-1.6625" oz2="1.6625"/>
+       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
+     </obstacle>
+     <obstacle name="back wall"> <!-- back wall -->
+       <geometry ox1="-1.6625" ox2="1.6625" oy1="0." oy2="2.13" oz1="1.4" oz2="1.6625"/>
+       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
+     </obstacle>
+     <obstacle name="front wall"> <!-- front wall -->
+       <geometry ox1="-1.6625" ox2="1.6625" oy1="0." oy2="2.13" oz1="-1.6625" oz2="-1.4"/>
+       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
+     </obstacle>
+     <obstacle name="right wall left from door"> <!-- right wall -->
+       <geometry ox1="1.4" ox2="1.6625" oy1="0." oy2="2.13" oz1="-1.4" oz2="-0.4375"/>
+       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
+     </obstacle>
+     <obstacle name="right wall above door"> <!-- right wall -->
+       <geometry ox1="1.4" ox2="1.6625" oy1="1.83" oy2="2.13" oz1="-0.4375" oz2="0.4375"/>
+       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
+     </obstacle>
+     <obstacle name="right wall right from door"> <!-- right wall -->
+       <geometry ox1="1.4" ox2="1.6625" oy1="0." oy2="2.13" oz1="0.4375" oz2="1.4"/>
+       <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="0.0" />
+       <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="0.0" />
+     </obstacle>
+   </obstacles>
+</ARTSS>)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    Settings::obstacles_parameters obstacle_parameters = Settings::parse_obstacles_parameters(doc.RootElement());
+    EXPECT_TRUE(obstacle_parameters.enabled);
+    EXPECT_EQ(obstacle_parameters.obstacles.size(), 7);
+
+    const auto &obstacle1 = obstacle_parameters.obstacles[1];
+    EXPECT_EQ(obstacle1.name, "ceiling");
+    EXPECT_EQ(obstacle1.state, State::XML);
+    EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::X], -1.6625);
+    EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::Y], 2.13);
+    EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::Z], -1.6625);
+    EXPECT_DOUBLE_EQ(obstacle1.end_coords[CoordinateAxis::X], 1.6625);
+    EXPECT_DOUBLE_EQ(obstacle1.end_coords[CoordinateAxis::Y], 2.3296875);
+    EXPECT_DOUBLE_EQ(obstacle1.end_coords[CoordinateAxis::Z], 1.6625);
+
+    const auto &obstacle2 = obstacle_parameters.obstacles[4];
+    EXPECT_EQ(obstacle2.name, "right wall left from door");
+    EXPECT_EQ(obstacle2.state, State::XML);
+    EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::X], 1.4);
+    EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::Y], 0);
+    EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::Z], -1.4);
+    EXPECT_DOUBLE_EQ(obstacle2.end_coords[CoordinateAxis::X], 1.6625);
+    EXPECT_DOUBLE_EQ(obstacle2.end_coords[CoordinateAxis::Y], 2.13);
+    EXPECT_DOUBLE_EQ(obstacle2.end_coords[CoordinateAxis::Z], -0.4375);
 }
 
 TEST(SettingsTest, requiredSurfacesParameters) {
@@ -689,7 +758,7 @@ TEST(SettingsTest, boundaries) {
                             patch),
                   boundaries_parameters.boundaries[1].patch.end());
     }
-    for (Patch patch : {Patch::LEFT, Patch::RIGHT, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::TOP, Patch::FRONT, Patch::BACK}) {
         EXPECT_NE(std::find(boundaries_parameters.boundaries[2].patch.begin(),
                             boundaries_parameters.boundaries[2].patch.end(),
                             patch),
@@ -1766,13 +1835,12 @@ TEST(SettingsTest, assimilation) {
 TEST(SettingsTest, assimilation2) {
     std::string xml = R"(
 <ARTSS>
-    <data_assimilation enabled="Yes" class_name="TemperatureSource"/>
+    <data_assimilation enabled="Yes" />
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
     Settings::data_assimilation_parameters da = Settings::parse_assimilation_parameters(doc.RootElement());
     EXPECT_TRUE(da.enabled);
-    EXPECT_EQ("TemperatureSource", da.class_name);
     EXPECT_FALSE(da.load_data);
     EXPECT_EQ(da.output_dir, ".vis");
 }
@@ -1780,7 +1848,7 @@ TEST(SettingsTest, assimilation2) {
 TEST(SettingsTest, assimilation3) {
     std::string xml = R"(
 <ARTSS>
-  <data_assimilation enabled="Yes" class_name="TemperatureSourceChanger" load_data="Yes" file="1.10000e+01">
+  <data_assimilation enabled="Yes" load_data="Yes" file="1.10000e+01">
     <write_output> 1 </write_output>
     <time> 11 </time>
     <port> 10 </port>
@@ -1790,29 +1858,6 @@ TEST(SettingsTest, assimilation3) {
     doc.Parse(xml.c_str());
     Settings::data_assimilation_parameters da = Settings::parse_assimilation_parameters(doc.RootElement());
     EXPECT_TRUE(da.enabled);
-    EXPECT_EQ("TemperatureSourceChanger", da.class_name);
-    EXPECT_TRUE(da.load_data);
-    EXPECT_EQ(da.file, "1.10000e+01");
-    EXPECT_EQ(da.output_dir, ".vis");
-    EXPECT_EQ(da.output_time_interval, 1);
-    EXPECT_EQ(da.time, 11);
-    EXPECT_EQ(da.port, 10);
-}
-
-TEST(SettingsTest, assimilation4) {
-    std::string xml = R"(
-<ARTSS>
-  <data_assimilation enabled="Yes" class_name="ObstacleChanger" load_data="Yes" file="1.10000e+01">
-    <write_output> 1 </write_output>
-    <time> 11 </time>
-    <port> 10 </port>
-  </data_assimilation>
-</ARTSS>)";
-    tinyxml2::XMLDocument doc;
-    doc.Parse(xml.c_str());
-    Settings::data_assimilation_parameters da = Settings::parse_assimilation_parameters(doc.RootElement());
-    EXPECT_TRUE(da.enabled);
-    EXPECT_EQ("ObstacleChanger", da.class_name);
     EXPECT_TRUE(da.load_data);
     EXPECT_EQ(da.file, "1.10000e+01");
     EXPECT_EQ(da.output_dir, ".vis");
@@ -1839,7 +1884,7 @@ TEST(SettingsTest, assimilationHeatSourceChanges) {
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::data_assimilation::field_changes field_changes = Settings::parse_field_changes(doc.RootElement(), "temperature_source");
+    Settings::data_assimilation::field_changes field_changes = Settings::parse_field_changes(doc.RootElement());
     EXPECT_FALSE(field_changes.u_changed);
     EXPECT_FALSE(field_changes.v_changed);
     EXPECT_FALSE(field_changes.w_changed);
@@ -1868,15 +1913,273 @@ TEST(SettingsTest, assimilationHeatSourceChanges) {
 TEST(SettingsTest, assimilationFieldChanges) {
     std::string xml = R"(
 <ARTSS>
-    <fields_changed u="No" v="No" w="No" p="No" T="No" concentration="No"/>
+    <data_assimilation>
+        <class name="FieldChanger" tag="field_changer"/>
+    </data_assimilation>
+    <field_changer>
+        <fields_changed u="No" v="No" w="No" p="No" T="No" concentration="No"/>
+    </field_changer>
 </ARTSS>)";
     tinyxml2::XMLDocument doc;
     doc.Parse(xml.c_str());
-    Settings::data_assimilation::field_changes field_changes = Settings::parse_field_changes(doc.RootElement(), "temperature");
+    auto methods = Settings::parse_data_assimilation_methods(doc.RootElement());
+    EXPECT_EQ(std::get<0>(methods[0]), "FieldChanger");
+    std::string tag = std::get<1>(methods[0]);
+    EXPECT_EQ(tag, "field_changer");
+    auto subsection = Settings::get_subsection(tag, doc.RootElement());
+    Settings::data_assimilation::field_changes field_changes = Settings::parse_field_changes(subsection);
     EXPECT_FALSE(field_changes.u_changed);
     EXPECT_FALSE(field_changes.v_changed);
     EXPECT_FALSE(field_changes.w_changed);
     EXPECT_FALSE(field_changes.p_changed);
     EXPECT_FALSE(field_changes.T_changed);
     EXPECT_FALSE(field_changes.C_changed);
+}
+
+TEST(SettingsTest, assimilationChanges) {
+    std::string xml = R"(
+<ARTSS>
+    <data_assimilation>
+        <class name="ObstacleChanger" tag="obstacle_changer"/>
+        <class name="TemperatureSourceChanger" tag="temperature_changer"/>
+    </data_assimilation>
+    <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No" filename="4.05000e+00"/>
+</ARTSS>
+)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    auto methods = Settings::parse_data_assimilation_methods(doc.RootElement());
+    EXPECT_EQ(std::get<0>(methods[0]), "ObstacleChanger");
+    EXPECT_EQ(std::get<1>(methods[0]), "obstacle_changer");
+    EXPECT_EQ(std::get<0>(methods[1]), "TemperatureSourceChanger");
+    EXPECT_EQ(std::get<1>(methods[1]), "temperature_changer");
+}
+
+TEST(SettingsTest, assimilationChanges2) {
+    std::string xml = R"(
+<ARTSS>
+    <data_assimilation>
+        <class name="ObstacleChanger" tag="obstacle_changer"/>
+        <class name="TemperatureSourceChanger" tag="temperature_changer"/>
+    </data_assimilation>
+    <fields_changed u="No" v="No" w="No" p="No" T="Yes" concentration="No" filename="4.05000e+00"/>
+    <temperature_changer>
+        <source type="ExplicitEuler" dir="y" temp_fct="Gauss" dissipation="No" random="No">
+            <HRR> 50.3 </HRR>      <!-- Total heat release rate (in kW) -->
+            <cp> 1. </cp>  <!-- specific heat capacity (in kJ/kgK)-->
+            <x0> 1.4 </x0>
+            <y0> 0.02 </y0>
+            <z0> 0. </z0>
+            <sigma_x> 0.15 </sigma_x>
+            <sigma_y> 0.6 </sigma_y>
+            <sigma_z> 0.1 </sigma_z>
+            <tau> 5. </tau>
+        </source>
+    </temperature_changer>
+    <obstacle_changer>
+        <obstacle name="ceiling" state="modified">
+            <geometry ox1="0" ox2="2.8" oy1="2.18" oy2="2.38" oz1="-1.4" oz2="1.4"/>
+            <boundary field="u,v,w" patch="front,back,left,right,top,bottom" type="dirichlet" value="-1.0" />
+            <boundary field="p,T" patch="front,back,left,right,top,bottom" type="neumann" value="-0.0" />
+        </obstacle>
+        <obstacle name="right wall left from door" state="new">
+            <geometry ox1="2.8" ox2="3.2" oy1="0." oy2="2.38" oz1="-1.4" oz2="-0.43"/>
+            <boundary field="u,v,p" patch="front,back,left,right,top,bottom" type="periodic" />
+            <boundary field="w,T" patch="front,back,left,right,top,bottom" type="dirichlet" value="10.0" />
+        </obstacle>
+        <obstacle name="test of behaviour" state="XML">
+            <geometry ox1="2.8" ox2="3.2" oy1="0." oy2="2.38" oz1="-1.4" oz2="-0.43"/>
+            <boundary field="u,v,p" patch="front,back,left,right,top,bottom" type="periodic" />
+            <boundary field="w,T" patch="front,back,left,right,top,bottom" type="dirichlet" value="10.0" />
+        </obstacle>
+        <obstacle name="deleted" state="deleted" />
+        <obstacle name="deleted1" state="deleted" />
+        <obstacle name="deleted2" state="deleted" />
+        <obstacle name="deleted3" state="deleted" />
+    </obstacle_changer>
+</ARTSS>
+)";
+    tinyxml2::XMLDocument doc;
+    doc.Parse(xml.c_str());
+    auto field_changes = Settings::parse_field_changes(doc.RootElement());
+    auto da_methods = Settings::parse_data_assimilation_methods(doc.RootElement());
+    Settings::solver::temperature_source temperature_source;
+    Settings::obstacles_parameters obstacle_parameters{ };
+    std::vector<std::string> names_of_deleted_obstacles;
+    for (std::tuple<std::string, std::string> tuple: da_methods) {
+        std::string name = std::get<0>(tuple);
+        std::string tag = std::get<1>(tuple);
+        if (name == "TemperatureSourceChanger") {
+            auto subsection = Settings::get_subsection(tag, doc.RootElement());
+            temperature_source = Settings::solver::parse_temperature_source(subsection, tag);
+        } else if (name == "ObstacleChanger") {
+            auto subsection = Settings::get_subsection(tag, doc.RootElement());
+            for (const auto *i = subsection->FirstChildElement(); i; i = i->NextSiblingElement()) {
+                Settings::obstacle o = Settings::parse_obstacle(i, tag);
+                if (o.state != State::DELETED) {
+                    obstacle_parameters.obstacles.push_back(o);
+                } else {
+                    names_of_deleted_obstacles.push_back(o.name);
+                }
+            }
+            int counter_unmodified = 0;
+            int counter_deleted = 0;
+            int counter_new = 0;
+            int counter_modified = 0;
+            int counter_xml = 0;
+            for (const auto &obstacle: obstacle_parameters.obstacles) {
+                if (obstacle.state == State::UNMODIFIED) {
+                    counter_unmodified++;
+                } else if (obstacle.state == State::DELETED) {
+                    counter_deleted++;
+                } else if (obstacle.state == State::MODIFIED) {
+                    counter_modified++;
+                } else if (obstacle.state == State::NEW) {
+                    counter_new++;
+                } else if (obstacle.state == State::XML) {
+                    counter_xml++;
+                }
+            }
+            bool parameter_changes = counter_deleted + counter_new + counter_modified > 0;
+            EXPECT_EQ(counter_new, 1);
+            EXPECT_EQ(counter_modified, 1);
+            EXPECT_EQ(counter_unmodified, 0);
+            EXPECT_EQ(counter_deleted, 0);
+            EXPECT_EQ(counter_xml, 1);
+            EXPECT_TRUE(parameter_changes);
+            obstacle_parameters.enabled = counter_new + counter_modified + counter_unmodified + counter_xml > 0;
+        }
+    }
+    auto methods = Settings::parse_data_assimilation_methods(doc.RootElement());
+    EXPECT_EQ(std::get<0>(methods[0]), "ObstacleChanger");
+    EXPECT_EQ(std::get<1>(methods[0]), "obstacle_changer");
+    EXPECT_EQ(std::get<0>(methods[1]), "TemperatureSourceChanger");
+    EXPECT_EQ(std::get<1>(methods[1]), "temperature_changer");
+
+    // temperature source
+    EXPECT_FALSE(temperature_source.dissipation);
+    EXPECT_EQ(temperature_source.temp_fct, SourceMethods::Gauss);
+    const auto &gauss_temp = std::get<Settings::solver::sources::gauss>(temperature_source.temp_function);
+    EXPECT_DOUBLE_EQ(gauss_temp.tau, 5);
+    EXPECT_DOUBLE_EQ(gauss_temp.heat_release_rate, 50.3);
+    EXPECT_DOUBLE_EQ(gauss_temp.heat_capacity, 1);
+    EXPECT_DOUBLE_EQ(gauss_temp.position[CoordinateAxis::X], 1.4);
+    EXPECT_DOUBLE_EQ(gauss_temp.position[CoordinateAxis::Y], 0.02);
+    EXPECT_DOUBLE_EQ(gauss_temp.position[CoordinateAxis::Z], 0);
+    EXPECT_DOUBLE_EQ(gauss_temp.dimension[CoordinateAxis::X], 0.15);
+    EXPECT_DOUBLE_EQ(gauss_temp.dimension[CoordinateAxis::Y], 0.6);
+    EXPECT_DOUBLE_EQ(gauss_temp.dimension[CoordinateAxis::Z], 0.1);
+
+    // obstacle
+    EXPECT_TRUE(obstacle_parameters.enabled);
+    EXPECT_EQ(obstacle_parameters.obstacles.size(), 3);
+
+    const auto &obstacle1 = obstacle_parameters.obstacles[0];
+    EXPECT_EQ(obstacle1.name, "ceiling");
+    EXPECT_EQ(obstacle1.state, State::MODIFIED);
+    EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::X], 0);
+    EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::Y], 2.18);
+    EXPECT_DOUBLE_EQ(obstacle1.start_coords[CoordinateAxis::Z], -1.4);
+    EXPECT_DOUBLE_EQ(obstacle1.end_coords[CoordinateAxis::X], 2.8);
+    EXPECT_DOUBLE_EQ(obstacle1.end_coords[CoordinateAxis::Y], 2.38);
+    EXPECT_DOUBLE_EQ(obstacle1.end_coords[CoordinateAxis::Z], 1.4);
+
+    EXPECT_EQ(obstacle1.boundaries.size(), 2);
+    const auto &o1_b1 = obstacle1.boundaries[0];
+    EXPECT_DOUBLE_EQ(o1_b1.value.value(), -1);
+    EXPECT_EQ(o1_b1.boundary_condition, BoundaryCondition::DIRICHLET);
+    EXPECT_NE(std::find(o1_b1.field_type.begin(),
+                        o1_b1.field_type.end(),
+                        FieldType::U),
+              o1_b1.field_type.end());
+    EXPECT_NE(std::find(o1_b1.field_type.begin(),
+                        o1_b1.field_type.end(),
+                        FieldType::V),
+              o1_b1.field_type.end());
+    EXPECT_NE(std::find(o1_b1.field_type.begin(),
+                        o1_b1.field_type.end(),
+                        FieldType::W),
+              o1_b1.field_type.end());
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+        EXPECT_NE(std::find(o1_b1.patch.begin(),
+                            o1_b1.patch.end(),
+                            patch),
+                  o1_b1.patch.end());
+    }
+    const auto &o1_b2 = obstacle1.boundaries[1];
+    EXPECT_DOUBLE_EQ(o1_b2.value.value(), 0);
+    EXPECT_EQ(o1_b2.boundary_condition, BoundaryCondition::NEUMANN);
+    EXPECT_NE(std::find(o1_b2.field_type.begin(),
+                        o1_b2.field_type.end(),
+                        FieldType::P),
+              o1_b2.field_type.end());
+    EXPECT_NE(std::find(o1_b2.field_type.begin(),
+                        o1_b2.field_type.end(),
+                        FieldType::T),
+              o1_b2.field_type.end());
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+        EXPECT_NE(std::find(o1_b2.patch.begin(),
+                            o1_b2.patch.end(),
+                            patch),
+                  o1_b2.patch.end());
+    }
+
+    const auto &obstacle2 = obstacle_parameters.obstacles[1];
+    EXPECT_EQ(obstacle2.name, "right wall left from door");
+    EXPECT_EQ(obstacle2.state, State::NEW);
+    EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::X], 2.8);
+    EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::Y], 0);
+    EXPECT_DOUBLE_EQ(obstacle2.start_coords[CoordinateAxis::Z], -1.4);
+    EXPECT_DOUBLE_EQ(obstacle2.end_coords[CoordinateAxis::X], 3.2);
+    EXPECT_DOUBLE_EQ(obstacle2.end_coords[CoordinateAxis::Y], 2.38);
+    EXPECT_DOUBLE_EQ(obstacle2.end_coords[CoordinateAxis::Z], -0.43);
+
+    EXPECT_EQ(obstacle2.boundaries.size(), 2);
+    const auto &o2_b1 = obstacle2.boundaries[0];
+    EXPECT_EQ(o2_b1.boundary_condition, BoundaryCondition::PERIODIC);
+    EXPECT_NE(std::find(o2_b1.field_type.begin(),
+                        o2_b1.field_type.end(),
+                        FieldType::U),
+              o2_b1.field_type.end());
+    EXPECT_NE(std::find(o2_b1.field_type.begin(),
+                        o2_b1.field_type.end(),
+                        FieldType::V),
+              o2_b1.field_type.end());
+    EXPECT_NE(std::find(o2_b1.field_type.begin(),
+                        o2_b1.field_type.end(),
+                        FieldType::P),
+              o2_b1.field_type.end());
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+        EXPECT_NE(std::find(o2_b1.patch.begin(),
+                            o2_b1.patch.end(),
+                            patch),
+                  o2_b1.patch.end());
+    }
+    const auto &o2_b2 = obstacle2.boundaries[1];
+    EXPECT_DOUBLE_EQ(o2_b2.value.value(), 10);
+    EXPECT_EQ(o2_b2.boundary_condition, BoundaryCondition::DIRICHLET);
+    EXPECT_NE(std::find(o2_b2.field_type.begin(),
+                        o2_b2.field_type.end(),
+                        FieldType::W),
+              o2_b2.field_type.end());
+    EXPECT_NE(std::find(o2_b2.field_type.begin(),
+                        o2_b2.field_type.end(),
+                        FieldType::T),
+              o2_b2.field_type.end());
+    for (Patch patch: {Patch::LEFT, Patch::RIGHT, Patch::BOTTOM, Patch::TOP, Patch::FRONT, Patch::BACK}) {
+        EXPECT_NE(std::find(o2_b2.patch.begin(),
+                            o2_b2.patch.end(),
+                            patch),
+                  o2_b2.patch.end());
+    }
+
+    const auto &obstacle3 = obstacle_parameters.obstacles[2];
+    EXPECT_EQ(obstacle3.name, "test of behaviour");
+    EXPECT_EQ(obstacle3.state, State::XML);
+    EXPECT_DOUBLE_EQ(obstacle3.start_coords[CoordinateAxis::X], 2.8);
+    EXPECT_DOUBLE_EQ(obstacle3.start_coords[CoordinateAxis::Y], 0);
+    EXPECT_DOUBLE_EQ(obstacle3.start_coords[CoordinateAxis::Z], -1.4);
+    EXPECT_DOUBLE_EQ(obstacle3.end_coords[CoordinateAxis::X], 3.2);
+    EXPECT_DOUBLE_EQ(obstacle3.end_coords[CoordinateAxis::Y], 2.38);
+    EXPECT_DOUBLE_EQ(obstacle3.end_coords[CoordinateAxis::Z], -0.43);
 }

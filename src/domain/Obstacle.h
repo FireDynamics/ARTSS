@@ -66,7 +66,7 @@ class Obstacle {
     [[nodiscard]] const Coordinate<size_t> &get_end_coordinates() const { return m_end; }
     [[nodiscard]] const Coordinate<size_t> &get_strides() const { return m_strides; }
 
-    std::string get_name() { return m_name; }
+    std::string get_name() const { return m_name; }
 
     void replace_patch(size_t *indices, size_t size, Patch p);
     void control();

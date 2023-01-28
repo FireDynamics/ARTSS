@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from typing import List, Dict
+from typing import List, Dict, Set
 
 STATE: Dict[str, int] = {'XML': 0, 'unmodified': 1, 'modified': 2, 'new': 3, 'deleted': 4}
 FIELD_TYPES: Dict[str, int] = {'u': 0, 'v': 1, 'w': 2, 'p': 3, 'T': 4, 'C': 5}
@@ -28,6 +28,8 @@ class Obstacle:
         self.geometry: Dict[str, float] = {}
         self.boundary: List[BoundaryData] = [BoundaryData(f) for f in FIELD_TYPES.keys()]
         self.state = state
+        self.index: Dict[str, int] = {}
+        self.cells: Dict[str, Set[int]] = {}
 
     def add_boundary(self, fields: List[str], patches: List[str], boundary_condition: str, value: float):
         for f in fields:
@@ -36,7 +38,8 @@ class Obstacle:
     def add_boundary_line(self, boundary: Dict[str, str]):
         fields = boundary['field'].split(",")
         patches = boundary['patch'].split(",")
-        self.add_boundary(fields=fields, patches=patches, boundary_condition=boundary['type'], value=float(boundary['value']))
+        self.add_boundary(fields=fields, patches=patches, boundary_condition=boundary['type'],
+                          value=float(boundary['value']))
 
     def add_geometry(self, geometry: List[float]):
         keys = ['ox1', 'ox2', 'oy1', 'oy2', 'oz1', 'oz2']

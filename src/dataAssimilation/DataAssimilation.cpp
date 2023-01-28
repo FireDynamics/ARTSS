@@ -6,17 +6,14 @@
 
 #include "DataAssimilation.h"
 #include "../domain/DomainData.h"
-#include "../TCP/TCPServer.h"
 #include "mpi.h"
-#include "TemperatureSourceChanger.h"
-#include "ObstacleChanger.h"
 #include "../domain/DomainController.h"
 
 DataAssimilation::DataAssimilation(const SolverController &solver_controller,
                                    FieldController *field_controller,
                                    const Settings::Settings &settings) :
         m_logger(Utility::create_logger(typeid(this).name())),
-        m_settings(settings),
+        m_settings(settings.assimilation_parameters),
         m_field_controller(field_controller),
         m_solver_controller(solver_controller),
         m_new_field_u(Field(FieldType::U)),
@@ -26,23 +23,13 @@ DataAssimilation::DataAssimilation(const SolverController &solver_controller,
         m_new_field_T(Field(FieldType::T)),
         m_new_field_C(Field(FieldType::RHO)) {
     m_time_interval_counter = 0;
-    m_output_time_interval = m_settings.assimilation_parameters.output_time_interval;
+    m_output_time_interval = m_settings.output_time_interval;
 
     m_field_IO_handler = new FieldIO(settings.filename,
-                                     m_settings.assimilation_parameters.output_dir);
+                                     m_settings.output_dir);
 
-    if (m_settings.assimilation_parameters.enabled) {
-        if (m_settings.assimilation_parameters.class_name == AssimilationMethods::standard) {
-            m_parameter_handler = new ParameterReader();
-        } else if (m_settings.assimilation_parameters.class_name == AssimilationMethods::temperature_source) {
-            m_parameter_handler = new TemperatureSourceChanger(m_solver_controller,
-                                                               m_settings.solver_parameters.temperature.source);
-        } else if (m_settings.assimilation_parameters.class_name == AssimilationMethods::obstacle_changer) {
-            m_parameter_handler = new ObstacleChanger(m_solver_controller, m_settings.obstacles_parameters);
-        } else {
-            m_logger->error("assimilation method {} not known", m_settings.assimilation_parameters.class_name);
-            std::exit(1);
-        }
+    if (m_settings.enabled) {
+        m_parameter_handler = new ParameterReader(m_solver_controller);
     }
 }
 
@@ -54,7 +41,7 @@ void DataAssimilation::initiate_time_skip(const real t_cur) {
 }
 
 void DataAssimilation::save_data(real t_cur) {
-    if (t_cur >= m_output_time_interval * m_time_interval_counter) {
+    if (t_cur >= m_output_time_interval * m_time_interval_counter - DomainData::getInstance()->get_physical_parameters().dt/2) {
         m_logger->debug("save data for {} with interval {} counter {}",
                         t_cur, m_output_time_interval,
                         m_time_interval_counter);
@@ -107,16 +94,30 @@ bool DataAssimilation::config_rollback(const char *msg) {
                                         m_new_field_u, m_new_field_v, m_new_field_w,
                                         m_new_field_p, m_new_field_T, m_new_field_C);
         auto domain_controller = DomainController::getInstance();
+        if (field_changes.u_changed) {
+            domain_controller->apply_boundary(m_new_field_u);
+        }
+        if (field_changes.v_changed) {
+            domain_controller->apply_boundary(m_new_field_v);
+        }
+        if (field_changes.w_changed) {
+            domain_controller->apply_boundary(m_new_field_w);
+        }
+        if (field_changes.p_changed) {
+            domain_controller->apply_boundary(m_new_field_p);
+        }
         if (field_changes.T_changed) {
             domain_controller->apply_boundary(m_new_field_T);
         }
-        //TODO
+        if (field_changes.C_changed) {
+            domain_controller->apply_boundary(m_new_field_C);
+        }
         return changes || field_changes.changed;
     }
 }
 
 bool DataAssimilation::requires_rollback(const real t_cur) {
-    if (!m_settings.assimilation_parameters.enabled) {
+    if (!m_settings.enabled) {
         return false;
     }
     m_t_cur = t_cur;
@@ -146,13 +147,13 @@ bool DataAssimilation::requires_rollback(const real t_cur) {
 }
 
 bool DataAssimilation::load_data() {
-    bool load_data = m_settings.assimilation_parameters.load_data;
+    bool load_data = m_settings.load_data;
     if (!load_data) {
         return load_data;
     }
-    m_t_cur = m_settings.assimilation_parameters.time;
+    m_t_cur = m_settings.time;
 
-    m_field_IO_handler->read_fields(m_settings.assimilation_parameters.file,
+    m_field_IO_handler->read_fields(m_settings.file,
                                     m_t_cur,
                                     m_new_field_u, m_new_field_v, m_new_field_w,
                                     m_new_field_p, m_new_field_T, m_new_field_C);

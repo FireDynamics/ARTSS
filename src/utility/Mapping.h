@@ -15,6 +15,22 @@
 
 inline static const std::vector<std::string> state_name = {"XML", "unmodified", "modified", "new", "deleted"};
 constexpr size_t number_of_states = 5;
+/// \brief 5 different states for obstacles, negligible if no data assimilation is used. State
+///        always refers to the difference between the current ARTSS state and the config file read in.
+/// \details
+///  XML: state of an obstacle from the original XML. (replaces current obstacle with the data from
+///       the XML, not meant for later usage)\n
+///  UNMODIFIED: obstacle already exist in ARTSS, no changes necessary. Usage especially for
+///              obstacles which were at least once modified/newly created\n
+///  MODIFIED: obstacle is to be changed\n
+///  NEW: obstacle doesn't exist in ARTSS and has to be newly created. This also counts for
+///       obstacles which were defined in the XML, got deleted and now need to be newly created\n
+///  DELETED: obstacle exists in ARTSS and has to be deleted\n
+/// \example At the start of ARTSS, obstacles have the state XML. The first obstacle changes happen:
+/// an obstacle is deleted (state: deleted) and another one changed (state: modified). With the
+/// second obstacle change the deleted obstacle is to be restored. The deleted obstacle has to be
+/// newly created (state:new) and and the previously changed obstacle gets the status unmodified
+/// because it is not changed any further.
 enum State : int {
     UNKNOWN_STATE = -1,
     XML = 0,

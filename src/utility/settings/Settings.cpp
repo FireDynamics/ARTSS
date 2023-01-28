@@ -15,6 +15,7 @@
 #include "../../solver/SolverSelection.h"
 #include <fmt/format.h>
 #include <iostream>
+#include <unordered_set>
 
 namespace Settings {
     static const std::string xml_true = "Yes";
@@ -412,17 +413,18 @@ namespace Settings {
         obstacle.name = get_required_string(values, "name", context);
         obstacle.state = Mapping::match_state(get_optional_string(values, "state", Mapping::get_state_name(State::XML)));
 
-        if (obstacle.state != State::UNMODIFIED) {
-            std::string context_geometry = create_context(context, fmt::format("geometry ({})", obstacle.name));
+        std::string sub_context = create_context(context, obstacle.name);
+        if (obstacle.state == State::NEW || obstacle.state == State::MODIFIED || obstacle.state == State::XML) {
+            std::string context_geometry = create_context(sub_context, fmt::format("geometry ({})", obstacle.name));
             auto [head_geometry, values_geometry] = map_parameter_section(head, "geometry");
             for (size_t a = 0; a < number_of_axes; a++) {
                 auto axis = CoordinateAxis(a);
                 std::string axis_name = Utility::to_lower(Mapping::get_axis_name(axis));
-                obstacle.start_coords[axis] = get_required_real(values_geometry, "o" + axis_name + "1", context);
-                obstacle.end_coords[axis] = get_required_real(values_geometry, "o" + axis_name + "2", context);
+                obstacle.start_coords[axis] = get_required_real(values_geometry, "o" + axis_name + "1", sub_context);
+                obstacle.end_coords[axis] = get_required_real(values_geometry, "o" + axis_name + "2", sub_context);
             }
 
-            std::string context_boundaries = create_context(context, fmt::format("boundaries ({})", obstacle.name));
+            std::string context_boundaries = create_context(sub_context, fmt::format("boundaries ({})", obstacle.name));
             for (const auto *i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
                 if (i->Name() == std::string("boundary")) {
                     obstacle.boundaries.emplace_back(parse_boundary(i, context_boundaries));
@@ -443,6 +445,17 @@ namespace Settings {
             }
         }
         op.obstacles.shrink_to_fit();
+        std::unordered_set<std::string> obstacle_names;
+        for (const obstacle &o: op.obstacles) {
+            if (obstacle_names.find(o.name) == obstacle_names.end()) {
+                obstacle_names.insert(o.name);
+            } else {
+                throw config_error(fmt::format("obstacle names have to be unique. Duplicate: {}", o.name));
+            }
+            if (o.state == State::UNKNOWN_STATE) {
+                throw config_error(fmt::format("obstacle state of {} is unknown", o.name));
+            }
+        }
         return op;
     }
 
@@ -976,7 +989,6 @@ namespace Settings {
 
         ap.output_dir = get_optional_string(values, "output_dir", ".vis");
         if (ap.enabled) {
-            ap.class_name = get_required_string(values, "class_name", context);
             ap.output_time_interval = get_optional_real(values, "write_output", 1);
             ap.load_data = get_optional_bool(values, "load_data", false);
             if (ap.load_data) {
@@ -1028,10 +1040,9 @@ namespace Settings {
         return settings;
     }
 
-    data_assimilation::field_changes parse_field_changes(const tinyxml2::XMLElement *head,
-                                                         const std::string &parent_context) {
+    data_assimilation::field_changes parse_field_changes(const tinyxml2::XMLElement *head) {
         std::string own_context = "fields_changed";
-        std::string context = create_context(parent_context, own_context);
+        std::string context = create_context("assimilation_changes", own_context);
         auto [subsection, values] = map_parameter_section(head, own_context);
         data_assimilation::field_changes field_changes{ };
         field_changes.u_changed = get_required_bool(values, "u", context);
@@ -1041,13 +1052,36 @@ namespace Settings {
         field_changes.T_changed = get_required_bool(values, "T", context);
         field_changes.C_changed = get_required_bool(values, "concentration", context);
         field_changes.changed = field_changes.u_changed || field_changes.v_changed
-                             || field_changes.w_changed || field_changes.p_changed
-                             || field_changes.T_changed || field_changes.C_changed;
+                                || field_changes.w_changed || field_changes.p_changed
+                                || field_changes.T_changed || field_changes.C_changed;
         if (field_changes.changed) {
             field_changes.file_name = get_required_string(values, "filename", context);
         }
         return field_changes;
     }
 
+    std::vector<std::tuple<std::string, std::string>> parse_data_assimilation_methods(const tinyxml2::XMLElement *head) {
+        std::vector<std::tuple<std::string, std::string>> methods;
+        std::string own_context = "data_assimilation";
+        std::string context = create_context("assimilation_changes", own_context);
+        auto [subsection, empty_values] = map_parameter_section(head, own_context);
 
+        for (auto i = subsection->FirstChildElement(); i; i = i->NextSiblingElement()) {
+            auto values = map_parameter_line(i);
+            std::string class_name = get_required_string(values, "name", context);
+            std::string tag_name = get_required_string(values, "tag", context);
+            methods.emplace_back(class_name, tag_name);
+        }
+        return methods;
+    }
+
+}
+
+const tinyxml2::XMLElement *Settings::get_subsection(const std::string &context, const tinyxml2::XMLElement *head) {
+    for (const auto *i = head->FirstChildElement(); i; i = i->NextSiblingElement()) {
+        if (i->Name() == context) {
+            return i;
+        }
+    }
+    throw config_error(fmt::format("No section named '{}' found", context));
 }

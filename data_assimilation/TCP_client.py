@@ -1,11 +1,14 @@
+import datetime
 import socket
+import struct
 
 
 class TCPClient:
     def __init__(self):
         # Create a TCP/IP socket
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+        timeval = struct.pack('ll', 20, 0)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDTIMEO, timeval)
         # Connect the socket to the port where the server is listening
         self.server_address = ('localhost', 7777)
 
@@ -23,7 +26,8 @@ class TCPClient:
         # Look for the response
         expected_response = "message was received: Rollback done"
         response = ''
-
+        self.socket.settimeout(30)
+        print('time', datetime.datetime.now())
         while len(response) < len(expected_response):
             try:
                 reply = self.socket.recv(16)

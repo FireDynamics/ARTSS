@@ -9,18 +9,27 @@
 
 #include <memory>
 
-#include "../interfaces/IParameterReader.h"
 #include "../utility/settings/Settings.h"
 #include "../utility/Utility.h"
+#include "../solver/SolverController.h"
 
-class ParameterReader : public IParameterReader {
- public:
-    ParameterReader() : m_logger(Utility::create_logger(typeid(this).name())) {}
+using return_parameter_reader = std::tuple<bool, Settings::data_assimilation::field_changes>;
+
+class ParameterReader {
+public:
+    explicit ParameterReader(const SolverController &solver_controller) : m_solver_controller(solver_controller), m_logger(Utility::create_logger(typeid(this).name())) { }
+
     ~ParameterReader() = default;
 
-    return_parameter_reader read_config(const std::string &file_name) override;
- private:
+    return_parameter_reader read_config(const std::string &file_name);
+
+private:
+    const SolverController &m_solver_controller;
     std::shared_ptr<spdlog::logger> m_logger;
+
+    bool temperature_source_changer(const tinyxml2::XMLElement *doc, const std::string &context) const;
+
+    bool obstacle_changer(const tinyxml2::XMLElement *head, const std::string &context) const;
 };
 
 #endif /* ARTSS_DATAASSIMILATION_PARAMETERREADER_H */
