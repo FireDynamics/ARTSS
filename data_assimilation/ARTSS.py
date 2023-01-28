@@ -14,7 +14,7 @@ def start_new_instance(output_file: str, directory: str, artss_exe_path: str,
     cwd = os.getcwd()
     os.chdir(directory)
     exe_command = f'mpirun --np 2 {os.path.join(artss_exe_path, artss_exe)} {output_file}'
-    print(exe_command)
+    print(os.getcwd(), exe_command)
     os.system(exe_command)
     os.chdir(cwd)
 

@@ -217,12 +217,12 @@ def opt_scipy(client: TCP_client,
 
     iterations = np.ones(len(sensor_times)) * n_iterations
     # iterations[0] = 15
-    for count, sensor_time in enumerate(sensor_times):
-        t_sensor = sensor_time - offset + artss.get_dt()
+    for count, t_sensor in enumerate(sensor_times):
+        t_projected = t_sensor - offset + artss.get_dt()
         pprint(cur)
 
-        wait_artss(t_sensor, artss_data_path)
-        t_artss, t_revert = FieldReader.get_time_step_artss(t_sensor,
+        wait_artss(t_projected, artss_data_path)
+        t_artss, t_revert = FieldReader.get_time_step_artss(t_projected,
                                                             artss_data_path,
                                                             dt=artss.get_dt(),
                                                             time_back=6)
@@ -230,13 +230,13 @@ def opt_scipy(client: TCP_client,
         if count == 0:
             t_revert = 0.2
         start_time = time.time()
-        log(f't_sensor: {t_sensor} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
+        log(f't_sensor: {t_sensor} sensor_time: {t_projected} t_artss: {t_artss} t_revert: {t_revert}', file_debug)
         field_reader = FieldReader(t_artss, path=artss_data_path)
-        file_da.write(f'original data;time_sensor:{t_sensor};time_artss:{t_artss}\n')
+        file_da.write(f'original data;time_sensor:{t_sensor};time_projected:{t_projected};time_artss:{t_artss}\n')
         write_da_data(file_da=file_da, parameters=cur)
         diff_orig, minima_x = comparison_sensor_simulation_data(devc_info, fds_data, field_reader, t_sensor, file_da)
 
-        file_da.write(f'original: t_artss:{t_artss};t_sensor:{t_sensor};differenceT:{diff_orig["T"]};HRR:{cur["HRR"]};x0:{cur["x0"]};z0:{cur["z0"]}\n')
+        file_da.write(f'original: t_artss:{t_artss};t_sensor:{t_sensor};time_projected:{t_projected};differenceT:{diff_orig["T"]};HRR:{cur["HRR"]};x0:{cur["x0"]};z0:{cur["z0"]}\n')
 
         log(f'org: {diff_orig["T"]}', file_debug)
         log(f't_revert: {t_revert}', file_debug)
@@ -283,7 +283,7 @@ def opt_scipy(client: TCP_client,
                                   fds_data=fds_data,
                                   devc_info=devc_info,
                                   file_da=file_da, file_debug=file_debug)
-        file_da.write(f'final: t_artss:{t_artss};t_sensor:{t_sensor};differenceT:{diff_cur["T"]};HRR:{cur["HRR"]};x0:{cur["x0"]};z0:{cur["z0"]}\n')
+        file_da.write(f'final: t_artss:{t_artss};t_sensor:{t_sensor};time_projected:{t_projected};differenceT:{diff_cur["T"]};HRR:{cur["HRR"]};x0:{cur["x0"]};z0:{cur["z0"]}\n')
         file_da.flush()
         file_debug.flush()
         end_time = time.time()
