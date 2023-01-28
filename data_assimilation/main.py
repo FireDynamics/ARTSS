@@ -13,8 +13,6 @@ import TCP_client
 import data_assimilation
 import downhill_simplex
 import fds_utility
-import gradient_based_optimisation
-import utility
 from ARTSS import XML, Domain
 from data_assimilation import FieldReader, DAFile
 from obstacle import Obstacle
@@ -176,10 +174,12 @@ def start_simulation(fds_data_path: str, fds_input_file_name: str, artss_data_pa
                      file_debug=file_debug)
     job = multiprocessing.Process(target=ARTSS.start_new_instance, args=(start_file_name, artss_data_path, os.path.join(artss_root_path, 'build', 'bin'), 'artss_data_assimilation_serial'))
     job.start()
+    time.sleep(2)  # wait for ARTSS to start
     client = set_up_client(port=port)
 
     keys = ['HRR', 'x0', 'z0']
 
+    log(f'sensor times: {sensor_times}', file_debug)
     log(f'cur: {cur}', file_debug)
     log(f'delta: {delta}', file_debug)
     log(f'keys: {keys}', file_debug)
