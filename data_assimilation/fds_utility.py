@@ -1,22 +1,26 @@
 import os
+from typing import Dict, List
 
 import fdsreader
+import pandas
 import pandas as pd
 
 from ARTSS import Domain
 
 
-def read_fds_data(input_path: str, input_file_name: str, artss: Domain) -> [dict, dict, pd.DataFrame]:
+def read_fds_data(input_path: str, input_file_name: str, artss: Domain) -> [Dict[str, Dict[str, any]], pd.DataFrame]:
     full_name = os.path.join(input_path, input_file_name)
     str_devc = read_devc_from_input_file(full_name + '.fds')
     dict_devc = parse_devc(str_devc)
     chid_file_name = get_chid_from_input_file(full_name + '.fds')
 
     fds_data = read_devc_from_csv_file(os.path.join(input_path, chid_file_name + '_devc.csv'))
-    # fds_data = read_fds_file(input_path, artss)
 
-    devc_temperature = {}
-    devc_thermocouple = {}
+    devices: Dict[str, Dict[str, any]] = {}
+    devc_temperature: Dict[str, any] = {}
+    devc_velocity: Dict[str, any] = {}
+    devc_pressure: Dict[str, any] = {}
+    devc_visibility: Dict[str, any] = {}
     for d in dict_devc:
         dict_devc[d]['type']: str = 'T'
 
@@ -25,10 +29,18 @@ def read_fds_data(input_path: str, input_file_name: str, artss: Domain) -> [dict
         d_lower = d.lower()
         if d_lower.startswith('temperatur'):
             devc_temperature[d] = dict_devc[d]
-        elif d_lower.startswith('thermocouple'):
-            devc_thermocouple[d] = dict_devc[d]
+        elif d_lower.startswith('velo'):
+            devc_velocity[d] = dict_devc[d]
+        elif d_lower.startswith('vis'):
+            devc_visibility[d] = dict_devc[d]
+        elif d_lower.startswith('pressure'):
+            devc_pressure[d] = dict_devc[d]
 
-    return devc_temperature, devc_thermocouple, fds_data
+    devices['temperature'] = devc_temperature
+    devices['velocity'] = devc_velocity
+    devices['pressure'] = devc_pressure
+    devices['visibility'] = devc_visibility
+    return devices, fds_data
 
 
 def read_devc_from_csv_file(file_name: str) -> pd.DataFrame:
@@ -128,3 +140,15 @@ def read_fds_file(data_path: str, artss: Domain) -> pd.DataFrame:
             else:
                 print(f'{key} is None, skipped')
     return return_val
+
+
+def get_starting_time(fds_data : pd.DataFrame, threshold: float, keys: List[str]):
+    columns = []
+    for i in fds_data:
+        for key in keys:
+            if key in i.lower():
+                columns.append(i)
+    data_extract = fds_data[columns]
+    for index, row in data_extract.iterrows():
+        if any(row > threshold):
+            return index

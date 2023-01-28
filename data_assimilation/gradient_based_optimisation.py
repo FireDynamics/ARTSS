@@ -18,7 +18,6 @@ import data_assimilation
 import fds_utility
 from ARTSS import Domain, XML
 from data_assimilation import FieldReader, create_message, DAFile
-from fds_utility import read_fds_data
 from utility import wait_artss, log, write_da_data, kelvin_to_celsius
 
 
@@ -64,43 +63,6 @@ def map_minima(client, artss_data_path, cur, sensor_times, devc_info_thermocoupl
             out.write(f'{hrr},{ret}\n')
 
     return
-
-
-def start_new_instance(output_file: str, directory: str, artss_exe_path: str,
-                       artss_exe: str = 'artss_data_assimilation_serial'):
-    cwd = os.getcwd()
-    os.chdir(directory)
-    exe_command = f'mpirun --np 2 {os.path.join(artss_exe_path, artss_exe)} {output_file}'
-    print(exe_command)
-    os.system(exe_command)
-    os.chdir(cwd)
-
-
-def create_start_xml(change: dict, input_file: str, output_file: str, t_revert: float, file: str, t_end: float,
-                     directory: str, artss_path: str, file_debug: TextIO, dir_name: str = '') -> [str, str]:
-    f = os.path.join('..', file)
-    f = f.replace("/", "\/")
-
-    command = ''
-    name = ''
-    for key in change:
-        command += f' --{key} {change[key]}'
-        name += f'{key}_'
-    name = name[:-1]
-
-    if not dir_name == '':
-        name = dir_name
-    output_dir = os.path.join(directory, '.vis', name)
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    out_file = os.path.join(output_dir, output_file)
-    log(f'out_file: {out_file}', file_debug)
-    log(f'out_dir: {output_dir}', file_debug)
-    command = f'{os.path.join(artss_path, "tools", "change_xml.sh")} -i {input_file} -o {out_file} --da {t_revert} "{f}" 7779 --tend {t_end} --loglevel off' + command
-    log(f'{command}', file_debug)
-    os.system(command)
-    return out_file, output_dir
 
 
 def calc_diff(t_artss: float, t_sensor: float,
@@ -202,15 +164,15 @@ def continuous_gradient_parallel(client: TCP_client,
         directories = {}
         counter = 1
         for p in keys:
-            output_file, output_dir = create_start_xml(change={p: cur[p] + delta[p]},
-                                                       input_file=xml_input_file, output_file=f'config_{p}.xml',
-                                                       t_revert=t_revert, t_end=t_artss,
-                                                       directory=artss_data_path,
-                                                       file=f'{t_revert:.5e}',
-                                                       artss_path=artss_path,
-                                                       file_debug=file_debug)
+            output_file, output_dir = ARTSS.create_start_xml(change={p: cur[p] + delta[p]},
+                                                             input_file=xml_input_file, output_file=f'config_{p}.xml',
+                                                             t_revert=t_revert, t_end=t_artss,
+                                                             directory=artss_data_path,
+                                                             file=f'{t_revert:.5e}',
+                                                             artss_path=artss_path,
+                                                             file_debug=file_debug)
             directories[p] = output_dir
-            job = multiprocessing.Process(target=start_new_instance, args=(
+            job = multiprocessing.Process(target=ARTSS.start_new_instance, args=(
                 output_file, output_dir, artss_exe_path, 'artss_data_assimilation_serial'))
             job.start()
             counter += 1
@@ -488,8 +450,8 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, ar
     domain.print_info()
     domain.print_debug()
 
-    devc_info_temperature, devc_info_thermocouple, fds_data = fds_utility.read_fds_data(fds_data_path,
-                                                                                        fds_input_file_name, domain)
+    devices, fds_data = fds_utility.read_fds_data(fds_data_path, fds_input_file_name, domain)
+    devc_info_temperature = devices['temperature']
     print(devc_info_temperature)
 
     sensor_times = fds_data.index[3:]
@@ -630,7 +592,8 @@ def plot_differences(fds_data_path: str, fds_input_file_name: str, artss_data_pa
     domain.print_info()
     domain.print_debug()
 
-    devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
+    devices, fds_data = fds_utility.read_fds_data(fds_data_path, fds_input_file_name, domain)
+    devc_info_temperature = devices['temperature']
     print(devc_info_temperature)
 
     sensor_times = fds_data.index
@@ -715,7 +678,8 @@ def plot_comparison_da(fds_data_path: str, fds_input_file_name: str, artss_data_
     domain.print_info()
     domain.print_debug()
 
-    devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
+    devices, fds_data = fds_utility.read_fds_data(fds_data_path, fds_input_file_name, domain)
+    devc_info_temperature = devices['temperature']
     print(devc_info_temperature)
 
     sensor_times = fds_data.index[:31]
@@ -761,7 +725,8 @@ def plot_sensor_data(fds_data_path: str, fds_input_file_name: str, artss_data_pa
     domain.print_info()
     domain.print_debug()
 
-    devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
+    devices, fds_data = fds_utility.read_fds_data(fds_data_path, fds_input_file_name, domain)
+    devc_info_temperature = devices['temperature']
     print(devc_info_temperature)
 
     sensor_times = fds_data.index[:13]
@@ -843,7 +808,8 @@ def compare_distance(fds_data_path: str, fds_input_file_name: str, a_data_path: 
     domain.print_info()
     domain.print_debug()
 
-    devc_info_temperature, devc_info_thermocouple, fds_data = read_fds_data(fds_data_path, fds_input_file_name, domain)
+    devices, fds_data = fds_utility.read_fds_data(fds_data_path, fds_input_file_name, domain)
+    devc_info_temperature = devices['temperature']
     log(f'devc info: {devc_info_temperature}', file_debug)
 
     x_pos_orig = 52.5

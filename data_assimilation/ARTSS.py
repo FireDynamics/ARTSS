@@ -1,11 +1,61 @@
 #!/usr/bin/env python3
 import os
 import xml.etree.ElementTree as ET
-from typing import List, Dict, Union, Set
+from typing import List, Dict, Union, Set, TextIO
 
 import numpy as np
 
 from obstacle import Obstacle, PATCHES, STATE
+from utility import log
+
+
+def start_new_instance(output_file: str, directory: str, artss_exe_path: str,
+                       artss_exe: str = 'artss_data_assimilation_serial'):
+    cwd = os.getcwd()
+    os.chdir(directory)
+    exe_command = f'mpirun --np 2 {os.path.join(artss_exe_path, artss_exe)} {output_file}'
+    print(exe_command)
+    os.system(exe_command)
+    os.chdir(cwd)
+
+
+def change_xml(change: Dict[str, float], input_file: str, output_file: str, artss_root_path: str, artss_data_path: str, file_debug: TextIO):
+    out_file = os.path.join(artss_data_path, output_file)
+    log(f'out_file: {out_file}', file_debug)
+
+    command = ''
+    for key in change:
+        command += f' --{key} {change[key]}'
+    command = f'{os.path.join(artss_root_path, "tools", "change_xml.sh")} -i {input_file} -o {out_file} --loglevel off' + command
+    log(f'{command}', file_debug)
+    os.system(command)
+
+
+def create_start_xml(change: dict, input_file: str, output_file: str, t_revert: float, file: str, t_end: float,
+                     directory: str, artss_path: str, file_debug: TextIO, dir_name: str = '') -> [str, str]:
+    f = os.path.join('..', file)
+    f = f.replace("/", "\/")
+
+    command = ''
+    name = ''
+    for key in change:
+        command += f' --{key} {change[key]}'
+        name += f'{key}_'
+    name = name[:-1]
+
+    if not dir_name == '':
+        name = dir_name
+    output_dir = os.path.join(directory, '.vis', name)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    out_file = os.path.join(output_dir, output_file)
+    log(f'out_file: {out_file}', file_debug)
+    log(f'out_dir: {output_dir}', file_debug)
+    command = f'{os.path.join(artss_path, "tools", "change_xml.sh")} -i {input_file} -o {out_file} --da {t_revert} "{f}" 7779 --tend {t_end} --loglevel off' + command
+    log(f'{command}', file_debug)
+    os.system(command)
+    return out_file, output_dir
 
 
 class XML:

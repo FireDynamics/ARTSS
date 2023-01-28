@@ -2,7 +2,7 @@ import math
 import os
 import time
 from pprint import pprint
-from typing import TextIO, Tuple, Dict
+from typing import TextIO, Tuple, Dict, List
 
 import numpy as np
 import pandas
@@ -176,12 +176,13 @@ def nelder_mead_special(client: TCP_client,
 
 def opt_scipy(client: TCP_client,
               file_da: TextIO, file_debug: TextIO,
-              sensor_times: pandas.Index, devc_info: dict,
+              sensor_times: List[float], devc_info: dict,
               cur: dict, delta: dict, keys: list,
               artss_data_path: str, artss: XML, domain: Domain,
               fds_data: pandas.DataFrame,
               heat_source: dict,
               n_iterations: int,
+              offset: float = 0,
               parallel=True):
     t_artss = 0.0
     t_revert = 0.0
@@ -216,7 +217,8 @@ def opt_scipy(client: TCP_client,
 
     iterations = np.ones(len(sensor_times)) * n_iterations
     # iterations[0] = 15
-    for count, t_sensor in enumerate(sensor_times):
+    for count, sensor_time in enumerate(sensor_times):
+        t_sensor = sensor_time - offset + artss.get_dt()
         pprint(cur)
 
         wait_artss(t_sensor, artss_data_path)
@@ -387,8 +389,8 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, pa
     domain.print_info()
     domain.print_debug()
 
-    devc_info_temperature, devc_info_thermocouple, fds_data = fds_utility.read_fds_data(fds_data_path,
-                                                                                        fds_input_file_name, domain)
+    devices, fds_data = fds_utility.read_fds_data(fds_data_path, fds_input_file_name, domain)
+    devc_info_temperature = devices['temperature']
     print('devices:')
     pprint(devc_info_temperature)
 
@@ -420,7 +422,7 @@ def start(fds_data_path: str, fds_input_file_name: str, artss_data_path: str, pa
     log(f'cur: {cur}', file_debug)
     log(f'delta: {delta}', file_debug)
     log(f'keys: {keys}', file_debug)
-    #nelder_mead_special(client=client, file_da=file_da, file_debug=file_debug,
+    # nelder_mead_special(client=client, file_da=file_da, file_debug=file_debug,
     #                    sensor_times=sensor_times,
     #                    devc_info=devc_info_temperature, fds_data=fds_data,
     #                    artss_data_path=artss_data_path,
