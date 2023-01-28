@@ -63,6 +63,11 @@ do
       shift
       shift
       ;;
+    --z0)
+      z0=$2
+      shift
+      shift
+      ;;
     *)
       echo "unknown parameter $1"
       shift
@@ -105,6 +110,13 @@ if [ ! -z $x0 ]
 then
   echo "change x0 to $x0"
   sed 's/<x0>\s*[0-9]*\.*[0-9]*\s*<\/x0>/<x0> '${x0}' <\/x0>/g' "${TMP}" > "${OUTPUT}"
+  cp $OUTPUT $TMP
+fi
+
+if [ ! -z $z0 ]
+then
+  echo "change z0 to $z0"
+  sed 's/<z0>\s*[0-9]*\.*[0-9]*\s*<\/z0>/<z0> '${z0}' <\/z0>/g' "${TMP}" > "${OUTPUT}"
   cp $OUTPUT $TMP
 fi
 
