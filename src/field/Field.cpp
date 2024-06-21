@@ -63,7 +63,8 @@ Field::Field(const Field &original):
                         Mapping::get_field_type_name(m_type), m_level,
                         static_cast<void *>(this), static_cast<void *>(data));
 #endif
-#pragma acc enter data copyin(this[:1]) create(data[:m_size])
+#pragma acc enter data copyin(this)
+#pragma acc enter data create(data[:m_size])
     this->copy_data(original);
 }
 

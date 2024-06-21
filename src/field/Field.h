@@ -42,17 +42,17 @@ class Field {
 
     // acc functions
     /// \brief update data array on CPU
-    void update_host() {
+    void update_host() const {
 #pragma acc update host(data[:m_size])
     }
 
     /// \brief update data array on GPU
-    void update_dev() {
+    void update_dev() const {
 #pragma acc update device(data[:m_size])
     }
 
     /// \brief copy data array to GPU
-    void copyin() {
+    void copyin() const {
 #pragma acc enter data copyin(data[:m_size])
 #ifndef BENCHMARKING
     m_logger->debug("{} level {} copyin with data pointer: {}", Mapping::get_field_type_name(m_type), m_level, static_cast<void *>(data));
@@ -97,40 +97,36 @@ class Field {
     static void swap(Field &a, Field &b) { std::swap(a.data, b.data); }
 
     Field &operator+=(const real x) {
-#pragma acc parallel loop independent present(this->data[:m_size]) async
+#pragma acc parallel loop
         for (size_t i = 0; i < m_size; ++i) {
             this->data[i] += x;
         }
-#pragma acc wait
         return *this;
     }
 
     Field &operator+=(const Field &rhs) {
         auto rhs_data = rhs.data;
-#pragma acc parallel loop independent present(this->data[:m_size], rhs_data[:m_size]) async
+#pragma acc parallel loop present(rhs_data[:m_size])
         for (size_t i = 0; i < m_size; ++i) {
             this->data[i] += rhs_data[i];
         }
-#pragma acc wait
         return *this;
     }
 
     Field &operator*=(const real x) {
-#pragma acc parallel loop independent present(this->data[:m_size]) async
+#pragma acc parallel loop
         for (size_t i = 0; i < m_size; ++i) {
             this->data[i] *= x;
         }
-#pragma acc wait
         return *this;
     }
 
     Field &operator*=(const Field &rhs) {
         auto rhs_data = rhs.data;
-#pragma acc parallel loop independent present(this->data[:m_size], rhs_data[:m_size]) async
+#pragma acc parallel loop present(rhs_data[:m_size])
         for (size_t i = 0; i < m_size; ++i) {
             this->data[i] *= rhs_data[i];
         }
-#pragma acc wait
         return *this;
     }
 
