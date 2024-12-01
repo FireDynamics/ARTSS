@@ -8,6 +8,7 @@
 #define ARTSS_DOMAIN_BOUNDARYDATA_H_
 
 #include <string>
+#include <optional>
 #include <vector>
 
 #include "../domain/PatchObject.h"

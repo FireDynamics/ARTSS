@@ -59,14 +59,6 @@ void SLAdvect::advect(Field &out, const Field &in,
         const real epsilon_y = 1e-6; //dy / dt;
         const real epsilon_z = 1e-6; //dz / dt;
 
-        // start indices for computational domain of inner cells
-        auto i_start = static_cast<long int> (domain_data->get_index_x1());
-        auto j_start = static_cast<long int> (domain_data->get_index_y1());
-        auto k_start = static_cast<long int> (domain_data->get_index_z1());
-        auto i_end = static_cast<long int> (domain_data->get_index_x2());
-        auto j_end = static_cast<long int> (domain_data->get_index_y2());
-        auto k_end = static_cast<long int> (domain_data->get_index_z2());
-
 #pragma acc loop independent
         for (size_t l = 0; l < bsize_i; ++l) {
             const size_t idx = d_inner_list[l];
@@ -81,49 +73,9 @@ void SLAdvect::advect(Field &out, const Field &in,
             real Ck = dtz * w_vel[idx];
 
             // Calculation of horizontal indices and interpolation weights
-            long int i0 = i;
-            long int i1 = i;
-            real r = 1;
-
-            if (Ci > epsilon_x) {
-                i0 = std::max(i_start, (i - static_cast<long int>(Ci)));
-                i1 = i0 - 1;
-                r = fmod(Ci, 1);  // closer to i1 if r is closer to 1
-            } else if (Ci < -epsilon_x) {
-                i0 = std::min(i_end, i - static_cast<long int>(Ci));
-                i1 = i0 + 1;
-                r = fmod(-Ci, 1);  // closer to i1 if r is closer to 1
-            }
-
-            // Calculation of vertical indices and interpolation weights
-            long int j0 = j;
-            long int j1 = j;
-            real s = 1;
-
-            if (Cj > epsilon_y) {
-                j0 = std::max(j_start, j - static_cast<long int>(Cj));
-                j1 = j0 - 1;
-                s = fmod(Cj, 1);
-            } else if (Cj < -epsilon_y){
-                j0 = std::min(j_end, j - static_cast<long int>(Cj));
-                j1 = j0 + 1;
-                s = fmod(-Cj, 1);
-            }
-
-            // Calculation of depth indices and interpolation weights
-            long int k0 = k;
-            long int k1 = k;
-            real t = 1;
-
-            if (Ck > epsilon_z) {
-                k0 = std::max(k_start, k - static_cast<long int>(Ck));
-                k1 = k0 - 1;
-                t = fmod(Ck, 1);
-            } else if (Ck < -epsilon_z) {
-                k0 = std::min(k_end, k - static_cast<long int>(Ck));
-                k1 = k0 + 1;
-                t = fmod(-Ck, 1);
-            }
+            auto [i0, i1, r] = calculate_backward_index(CoordinateAxis::X, i, epsilon_x, Ci);
+            auto [j0, j1, s] = calculate_backward_index(CoordinateAxis::Y, j, epsilon_y, Cj);
+            auto [k0, k1, t] = calculate_backward_index(CoordinateAxis::Z, k, epsilon_z, Ck);
 
             // Trilinear Interpolation
             size_t idx_000 = IX(i0, j0, k0, Nx, Ny);
@@ -167,5 +119,28 @@ void SLAdvect::advect(Field &out, const Field &in,
 #pragma acc wait
         }
     }
+}
+
+return_backtracking_parameters SLAdvect::calculate_backward_index(CoordinateAxis axis, size_t coordinate, real epsilon, real trace_back) {
+    size_t i0 = coordinate;
+    size_t i1 = coordinate;
+    real r = 1;
+
+    auto domain_data = DomainData::getInstance();
+    auto start = static_cast<long int>(domain_data->get_start_index_CD(axis));
+    auto end = static_cast<long int>(domain_data->get_end_index_CD(axis));
+
+    auto coord = static_cast<long int>(coordinate);
+
+    if (trace_back > epsilon) {
+        i0 = std::max(start, (coord - static_cast<long int>(trace_back)));
+        i1 = i0 - 1;
+        r = fmod(trace_back, 1);  // closer to i1 if r is closer to 1
+    } else if (trace_back < -epsilon) {
+        i0 = std::min(end, coord - static_cast<long int>(trace_back));
+        i1 = i0 + 1;
+        r = fmod(-trace_back, 1);  // closer to i1 if r is closer to 1
+    }
+    return {i0, i1, r};
 }
 

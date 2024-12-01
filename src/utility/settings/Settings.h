@@ -15,6 +15,7 @@
 #include <filesystem>
 #include <optional>
 #include <variant>
+#include <optional>
 
 #ifndef BENCHMARKING
 #include <spdlog/logger.h>

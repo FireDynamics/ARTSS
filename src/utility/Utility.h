@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <optional>
 
 #include "GlobalMacrosTypes.h"
 #include "settings/Settings.h"

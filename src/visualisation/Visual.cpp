@@ -23,6 +23,7 @@ Visual::Visual(const Settings::visualisation_parameters &settings, const Solutio
         m_has_analytical_solution(m_solution.has_analytical_solution()) {
 #ifndef BENCHMARKING
     m_logger = Utility::create_logger(typeid(this).name());
+    m_logger->debug("write out vtk files with the name {}", m_file_name);
 #endif
 }
 

@@ -13,13 +13,14 @@
 #include "../utility/GlobalMacrosTypes.h"
 #include "../utility/settings/Settings.h"
 
+using return_backtracking_parameters  = std::tuple<size_t, size_t, real>;
 class SLAdvect : public IAdvection {
  public:
     SLAdvect() = default;
     ~SLAdvect() override = default;
 
     void advect(Field &out, const Field &in, const Field &u_vel, const Field &v_vel, const Field &w_vel, bool sync) override;
-
+    static return_backtracking_parameters calculate_backward_index(CoordinateAxis axis, size_t coordinate, real epsilon, real trace_back);
  private:
 };
 
